@@ -22,3 +22,8 @@ node_modules/
 /.debug-runs/
 __pycache__/
 *.py[cod]
+# 签名密钥绝不入库
+*.jks
+*.keystore
+# 本机 agent 配置
+.claude/settings.local.json

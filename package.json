@@ -16,13 +16,13 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/gedoor/legado.git"
+    "url": "git+https://github.com/dasoops/legado-with-MD3.git"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/gedoor/legado/issues"
+    "url": "https://github.com/dasoops/legado-with-MD3/issues"
   },
-  "homepage": "https://github.com/gedoor/legado#readme"
+  "homepage": "https://github.com/dasoops/legado-with-MD3#readme"
 }
