@@ -29,7 +29,7 @@ object MainNavigator {
     ) {
         if (resetToHome) {
             backStack.clear()
-            backStack.add(MainRouteHome)
+            backStack.add(MainRouteBookshelf)
         }
         val currentRoute = backStack.lastOrNull()
         if (currentRoute == route) return
@@ -64,17 +64,17 @@ object MainNavigator {
             is MainRouteBookSourceDebug,
             is MainRouteRssSourceDebug -> backStack.add(route)
 
-            MainRouteHome -> {
+            MainRouteBookshelf -> {
                 backStack.clear()
-                backStack.add(MainRouteHome)
+                backStack.add(MainRouteBookshelf)
             }
 
             MainRouteSettings -> {
-                if (currentRoute == MainRouteHome) {
+                if (currentRoute == MainRouteBookshelf) {
                     backStack.add(MainRouteSettings)
                 } else {
                     backStack.clear()
-                    backStack.add(MainRouteHome)
+                    backStack.add(MainRouteBookshelf)
                     backStack.add(MainRouteSettings)
                 }
             }
@@ -88,7 +88,7 @@ object MainNavigator {
             MainRouteSettingsThemeManage,
             MainRouteSettingsDownloadCache -> {
                 backStack.clear()
-                backStack.add(MainRouteHome)
+                backStack.add(MainRouteBookshelf)
                 backStack.add(MainRouteSettings)
                 backStack.add(route)
             }
@@ -100,13 +100,13 @@ object MainNavigator {
             is MainRouteReadBook,
             is MainRouteReadManga -> {
                 if (
-                    currentRoute == MainRouteHome ||
+                    currentRoute == MainRouteBookshelf ||
                     currentRoute is MainRouteBookInfo
                 ) {
                     backStack.add(route)
                 } else {
                     backStack.clear()
-                    backStack.add(MainRouteHome)
+                    backStack.add(MainRouteBookshelf)
                     backStack.add(route)
                 }
             }
@@ -120,13 +120,13 @@ object MainNavigator {
                     }
                     backStack[existingAudioIndex] = route
                 } else if (
-                    currentRoute == MainRouteHome ||
+                    currentRoute == MainRouteBookshelf ||
                     currentRoute is MainRouteBookInfo
                 ) {
                     backStack.add(route)
                 } else {
                     backStack.clear()
-                    backStack.add(MainRouteHome)
+                    backStack.add(MainRouteBookshelf)
                     backStack.add(route)
                 }
             }
@@ -137,7 +137,7 @@ object MainNavigator {
 
             is MainRouteSearch -> {
                 if (
-                    currentRoute == MainRouteHome ||
+                    currentRoute == MainRouteBookshelf ||
                     currentRoute is MainRouteBookInfo ||
                     currentRoute is MainRouteExploreShow ||
                     currentRoute is MainRouteBookSourceManage ||
@@ -146,14 +146,14 @@ object MainNavigator {
                     backStack.add(route)
                 } else {
                     backStack.clear()
-                    backStack.add(MainRouteHome)
+                    backStack.add(MainRouteBookshelf)
                     backStack.add(route)
                 }
             }
 
             is MainRouteBookInfo -> {
                 if (
-                    currentRoute == MainRouteHome ||
+                    currentRoute == MainRouteBookshelf ||
                     currentRoute is MainRouteSearch ||
                     currentRoute is MainRouteExploreShow ||
                     currentRoute is MainRouteBookInfo ||
@@ -163,7 +163,7 @@ object MainNavigator {
                     backStack.add(route)
                 } else {
                     backStack.clear()
-                    backStack.add(MainRouteHome)
+                    backStack.add(MainRouteBookshelf)
                     backStack.add(route)
                 }
             }
@@ -182,14 +182,14 @@ object MainNavigator {
                     backStack.add(route)
                 } else {
                     backStack.clear()
-                    backStack.add(MainRouteHome)
+                    backStack.add(MainRouteBookshelf)
                     backStack.add(route)
                 }
             }
 
             is MainRouteExploreShow -> {
                 if (
-                    currentRoute == MainRouteHome ||
+                    currentRoute == MainRouteBookshelf ||
                     currentRoute is MainRouteBookInfo ||
                     currentRoute is MainRouteSearch ||
                     currentRoute is MainRouteExploreShow
@@ -197,77 +197,77 @@ object MainNavigator {
                     backStack.add(route)
                 } else {
                     backStack.clear()
-                    backStack.add(MainRouteHome)
+                    backStack.add(MainRouteBookshelf)
                     backStack.add(route)
                 }
             }
 
             is MainRouteRssSort -> {
                 if (
-                    currentRoute == MainRouteHome ||
+                    currentRoute == MainRouteBookshelf ||
                     currentRoute is MainRouteRssSort ||
                     currentRoute is MainRouteRssRead
                 ) {
                     backStack.add(route)
                 } else {
                     backStack.clear()
-                    backStack.add(MainRouteHome)
+                    backStack.add(MainRouteBookshelf)
                     backStack.add(route)
                 }
             }
 
             is MainRouteRssRead -> {
                 if (
-                    currentRoute == MainRouteHome ||
+                    currentRoute == MainRouteBookshelf ||
                     currentRoute is MainRouteRssSort ||
                     currentRoute is MainRouteRssRead
                 ) {
                     backStack.add(route)
                 } else {
                     backStack.clear()
-                    backStack.add(MainRouteHome)
+                    backStack.add(MainRouteBookshelf)
                     backStack.add(route)
                 }
             }
 
             MainRouteRssFavorites,
             MainRouteRuleSub -> {
-                if (currentRoute == MainRouteHome) {
+                if (currentRoute == MainRouteBookshelf) {
                     backStack.add(route)
                 } else {
                     backStack.clear()
-                    backStack.add(MainRouteHome)
+                    backStack.add(MainRouteBookshelf)
                     backStack.add(route)
                 }
             }
 
             MainRouteHighlightTagRule,
             MainRouteReadRecord -> {
-                if (currentRoute == MainRouteHome) {
+                if (currentRoute == MainRouteBookshelf) {
                     backStack.add(route)
                 } else {
                     backStack.clear()
-                    backStack.add(MainRouteHome)
+                    backStack.add(MainRouteBookshelf)
                     backStack.add(route)
                 }
             }
 
             MainRouteAbout -> {
-                if (currentRoute == MainRouteHome) {
+                if (currentRoute == MainRouteBookshelf) {
                     backStack.add(route)
                 } else {
                     backStack.clear()
-                    backStack.add(MainRouteHome)
+                    backStack.add(MainRouteBookshelf)
                     backStack.add(route)
                 }
             }
 
             MainRouteReadRecordOverview -> {
-                if (currentRoute == MainRouteHome || currentRoute == MainRouteReadRecord) {
+                if (currentRoute == MainRouteBookshelf || currentRoute == MainRouteReadRecord) {
                     backStack.add(route)
                 } else {
                     backStack.clear()
-                    backStack.add(MainRouteHome)
+                    backStack.add(MainRouteBookshelf)
                     backStack.add(route)
                 }
             }
@@ -339,7 +339,7 @@ object MainNavigator {
 
     private fun resolveStartRoute(route: String?, intent: Intent?): MainRoute {
         return when (route) {
-            MainRouteConst.ROUTE_MAIN -> MainRouteHome
+            MainRouteConst.ROUTE_MAIN -> MainRouteBookshelf
             MainRouteConst.ROUTE_SOURCE_LOGIN -> MainRouteSourceLogin(
                 type = intent?.getStringExtra(MainIntent.EXTRA_SOURCE_LOGIN_TYPE)
                     ?.let { runCatching { io.legado.app.ui.login.SourceLoginType.valueOf(it) }.getOrNull() }
@@ -367,7 +367,7 @@ object MainNavigator {
                         ),
                         html = intent.getStringExtra(MainIntent.EXTRA_WEB_VIEW_HTML),
                     )
-                } ?: MainRouteHome
+                } ?: MainRouteBookshelf
 
             MainRouteConst.ROUTE_BOOK_SOURCE_MANAGE -> MainRouteBookSourceManage(
                 intent?.getStringExtra(MainIntent.EXTRA_BOOK_SOURCE_IMPORT)
@@ -444,7 +444,7 @@ object MainNavigator {
                         origin = intent.getStringExtra(MainIntent.EXTRA_BOOK_ORIGIN),
                         coverPath = intent.getStringExtra(MainIntent.EXTRA_BOOK_COVER)
                     )
-                } ?: MainRouteHome
+                } ?: MainRouteBookshelf
 
             MainRouteConst.ROUTE_EXPLORE_SHOW -> intent?.getStringExtra(MainIntent.EXTRA_SOURCE_URL)
                 ?.takeIf { it.isNotBlank() }
@@ -454,11 +454,11 @@ object MainNavigator {
                         sourceUrl = sourceUrl,
                         exploreUrl = intent.getStringExtra(MainIntent.EXTRA_EXPLORE_URL),
                     )
-                } ?: MainRouteHome
+                } ?: MainRouteBookshelf
 
             MainRouteConst.ROUTE_ABOUT -> MainRouteAbout
 
-            else -> MainRouteHome
+            else -> MainRouteBookshelf
         }
     }
 }

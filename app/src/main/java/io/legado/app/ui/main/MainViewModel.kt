@@ -98,7 +98,6 @@ private fun buildMainUiState(
 ): MainUiState {
     val destinations = MainDestination.ordered(appShell.mainNavigationOrder).filter {
         when (it) {
-            MainDestination.Home -> appShell.showHome
             MainDestination.Explore -> appShell.showDiscovery
             MainDestination.Rss -> appShell.showRss
             else -> true
@@ -106,18 +105,19 @@ private fun buildMainUiState(
     }
     return MainUiState(
         destinations = destinations.toImmutableList(),
-        defaultHomePage = appShell.defaultHomePage,
+        // 旧版本可能把已下线的首页存为默认页, 这里回退到书架
+        defaultHomePage = appShell.defaultHomePage
+            .takeIf { it != "home" }
+            ?: MainDestination.Bookshelf.route,
         showBottomView = appShell.showBottomView,
         useFloatingBottomBar = appShell.useFloatingBottomBar,
         useFloatingBottomBarLiquidGlass = appShell.useFloatingBottomBarLiquidGlass,
         labelVisibilityMode = appShell.labelVisibilityMode,
         navExtended = appShell.navExtended,
-        navIconHome = appShell.navIconHome,
         navIconBookshelf = appShell.navIconBookshelf,
         navIconExplore = appShell.navIconExplore,
         navIconRss = appShell.navIconRss,
         navIconMy = appShell.navIconMy,
-        navIconHomeSelected = appShell.navIconHomeSelected,
         navIconBookshelfSelected = appShell.navIconBookshelfSelected,
         navIconExploreSelected = appShell.navIconExploreSelected,
         navIconRssSelected = appShell.navIconRssSelected,

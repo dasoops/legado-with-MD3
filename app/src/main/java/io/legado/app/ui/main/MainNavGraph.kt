@@ -325,7 +325,7 @@ fun MainActivity.mainEntryProvider(
         )
         RssSourceDebugRoute(route.sourceUrl, viewModel, onNavigateBack)
     }
-    entry<MainRouteHome> {
+    entry<MainRouteBookshelf> {
         val mainViewModel = koinViewModel<MainViewModel>()
         val mainUiState by mainViewModel.uiState.collectAsStateWithLifecycle()
         MainScreen(
@@ -371,9 +371,6 @@ fun MainActivity.mainEntryProvider(
                         )
                     )
                 }
-            },
-            onNavigateToBackupSettings = {
-                onNavigateToRoute(MainRouteSettingsBackup)
             },
             onNavigateToBookInfo = { name, author, bookUrl, origin, coverPath, sharedCoverKey ->
                 onNavigateToRoute(
@@ -439,9 +436,6 @@ fun MainActivity.mainEntryProvider(
             },
             onNavigateToReadRecord = {
                 onNavigateToRoute(MainRouteReadRecord)
-            },
-            onNavigateToReadRecordOverview = {
-                onNavigateToRoute(MainRouteReadRecordOverview)
             },
             onNavigateToHighlightTagRule = {
                 onNavigateToRoute(MainRouteHighlightTagRule)

@@ -247,8 +247,6 @@ import io.legado.app.ui.main.MainRouteSearchContent
 import io.legado.app.ui.main.MainViewModel
 import io.legado.app.ui.main.bookshelf.BookshelfViewModel
 import io.legado.app.ui.main.explore.ExploreViewModel
-import io.legado.app.ui.main.home.HomeViewModel
-import io.legado.app.ui.main.homepage.HomepageViewModel
 import io.legado.app.ui.main.my.MyViewModel
 import io.legado.app.ui.main.rss.RssViewModel
 import io.legado.app.ui.replace.ReplaceEditRoute
@@ -483,8 +481,6 @@ val appModule = module {
     viewModelOf(::MyViewModel)
     viewModelOf(::BookshelfViewModel)
     viewModelOf(::MainViewModel)
-    viewModelOf(::HomeViewModel)
-    viewModelOf(::HomepageViewModel)
     viewModelOf(::AboutViewModel)
     viewModelOf(::GroupViewModel)
     viewModelOf(::ReplaceRuleViewModel)

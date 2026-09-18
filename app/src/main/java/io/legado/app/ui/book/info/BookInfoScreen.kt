@@ -102,7 +102,7 @@ import io.legado.app.help.WebCacheManager
 import io.legado.app.help.coil.CoverExtras
 import io.legado.app.help.webView.WebJsExtensions
 import io.legado.app.ui.association.OnLineImportActivity
-import io.legado.app.ui.main.homepage.modules.BannerModule
+import io.legado.app.ui.main.bookCoverSharedElementKey
 import io.legado.app.ui.theme.LegadoTheme
 import io.legado.app.ui.theme.LocalHazeState
 import io.legado.app.ui.theme.LocalLegadoThemeColors
@@ -150,7 +150,6 @@ import io.legado.app.ui.widget.components.variable.VariableEditorSheet
 import io.legado.app.utils.HtmlFormatter
 import io.legado.app.utils.openUrl
 import kotlinx.collections.immutable.ImmutableList
-import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
@@ -1646,13 +1645,40 @@ private fun RelatedBooksBanner(
                 )
             }
         }
-        BannerModule(
-            books = books.map { io.legado.app.ui.main.homepage.HomepageBookItemUi(book = it) }
-                .toImmutableList(),
-            onClick = onBookClick,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 8.dp),
-        )
+        if (books.isNotEmpty()) {
+            val listState = rememberLazyListState()
+            LazyRow(
+                state = listState,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 8.dp)
+                    .fadingEdge(listState, gradientWidth = 16.dp),
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
+                itemsIndexed(books, key = { index, book -> "${book.bookUrl}:$index" }) { _, book ->
+                    val sharedCoverKey = bookCoverSharedElementKey(book.bookUrl)
+                    CoilBookCover(
+                        name = book.name,
+                        author = book.author,
+                        path = book.coverUrl,
+                        radius = 12.dp,
+                        sourceOrigin = book.origin,
+                        modifier = Modifier
+                            .width(96.dp)
+                            .clickable(role = Role.Button) {
+                                onBookClick(book, sharedCoverKey)
+                            }
+                            .semantics {
+                                contentDescription = if (book.author.isBlank()) {
+                                    book.name
+                                } else {
+                                    "${book.name}, ${book.author}"
+                                }
+                                role = Role.Button
+                            },
+                    )
+                }
+            }
+        }
     }
 }

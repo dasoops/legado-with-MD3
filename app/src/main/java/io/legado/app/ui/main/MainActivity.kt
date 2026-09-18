@@ -331,22 +331,22 @@ open class MainActivity : BaseComposeActivity(), AudioPlay.CallBack {
             val hasExplicitStartRoute = intent?.hasExplicitStartRoute() == true
             when {
                 MainIntent.shouldOpenRouteWithHomeParent(intent) -> {
-                    if (resolved == MainRouteHome) {
-                        arrayOf(MainRouteHome)
+                    if (resolved == MainRouteBookshelf) {
+                        arrayOf(MainRouteBookshelf)
                     } else {
-                        arrayOf(MainRouteHome, resolved)
+                        arrayOf(MainRouteBookshelf, resolved)
                     }
                 }
                 !hasExplicitStartRoute && restoredReadBookRoute != null -> {
-                    arrayOf(MainRouteHome, restoredReadBookRoute!!)
+                    arrayOf(MainRouteBookshelf, restoredReadBookRoute!!)
                 }
                 shouldApplyDefaultToRead &&
                         defaultToRead &&
-                        resolved == MainRouteHome -> {
-                    arrayOf(MainRouteHome, MainRouteReadBook())
+                        resolved == MainRouteBookshelf -> {
+                    arrayOf(MainRouteBookshelf, MainRouteReadBook())
                 }
                 resolved is MainRouteSourceLogin -> {
-                    arrayOf(MainRouteHome, resolved)
+                    arrayOf(MainRouteBookshelf, resolved)
                 }
                 else -> {
                     arrayOf(resolved)

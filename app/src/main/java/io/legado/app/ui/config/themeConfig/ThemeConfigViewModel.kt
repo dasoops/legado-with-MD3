@@ -289,12 +289,6 @@ class ThemeConfigViewModel(
 
     private fun setMainDestinationVisible(intent: ThemeConfigIntent.SetMainDestinationVisible) {
         val transform: (AppShellSettings) -> AppShellSettings = when (intent.route) {
-            MainDestination.Home.route -> { current ->
-                current.copy(
-                    showHome = intent.visible,
-                    defaultHomePage = current.fallbackHomePage(intent),
-                )
-            }
             MainDestination.Explore.route -> { current ->
                 current.copy(
                     showDiscovery = intent.visible,
@@ -331,9 +325,6 @@ class ThemeConfigViewModel(
         val current = appShellSettingsGateway.currentSettings
         val oldPath = current.navIconPath(intent.destination)
         val transform: (AppShellSettings) -> AppShellSettings = when (intent.destination) {
-            MainDestination.Home.route -> { settings ->
-                settings.copy(navIconHome = intent.path)
-            }
             MainDestination.Bookshelf.route -> { settings ->
                 settings.copy(navIconBookshelf = intent.path)
             }
@@ -346,10 +337,6 @@ class ThemeConfigViewModel(
             MainDestination.My.route -> { settings ->
                 settings.copy(navIconMy = intent.path)
             }
-            "${MainDestination.Home.route}:selected" -> { settings ->
-                settings.copy(navIconHomeSelected = intent.path)
-            }
-
             "${MainDestination.Bookshelf.route}:selected" -> { settings ->
                 settings.copy(navIconBookshelfSelected = intent.path)
             }
@@ -382,12 +369,10 @@ class ThemeConfigViewModel(
     }
 
     private fun AppShellSettings.navIconPath(destination: String): String = when (destination) {
-        MainDestination.Home.route -> navIconHome
         MainDestination.Bookshelf.route -> navIconBookshelf
         MainDestination.Explore.route -> navIconExplore
         MainDestination.Rss.route -> navIconRss
         MainDestination.My.route -> navIconMy
-        "${MainDestination.Home.route}:selected" -> navIconHomeSelected
         "${MainDestination.Bookshelf.route}:selected" -> navIconBookshelfSelected
         "${MainDestination.Explore.route}:selected" -> navIconExploreSelected
         "${MainDestination.Rss.route}:selected" -> navIconRssSelected

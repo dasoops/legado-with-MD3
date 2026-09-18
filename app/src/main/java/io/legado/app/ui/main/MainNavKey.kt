@@ -8,7 +8,7 @@ import kotlinx.serialization.Serializable
 sealed interface MainRoute : NavKey
 
 @Serializable
-data object MainRouteHome : MainRoute
+data object MainRouteBookshelf : MainRoute
 
 @Serializable
 data class MainRouteSourceLogin(

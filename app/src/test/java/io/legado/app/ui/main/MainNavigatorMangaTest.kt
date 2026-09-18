@@ -10,28 +10,28 @@ class MainNavigatorMangaTest {
     fun `opening manga from its book info reuses existing reader entry`() {
         val originalReader = MainRouteReadManga(bookUrl = "book-a")
         val backStack = mutableListOf<NavKey>(
-            MainRouteHome,
+            MainRouteBookshelf,
             originalReader,
             MainRouteBookInfo("Book A", "Author", "book-a"),
         )
 
         MainNavigator.navigateToRoute(backStack, originalReader)
 
-        assertEquals(listOf(MainRouteHome, originalReader), backStack)
+        assertEquals(listOf(MainRouteBookshelf, originalReader), backStack)
     }
 
     @Test
     fun `opening another manga replaces existing reader entry`() {
         val replacement = MainRouteReadManga(bookUrl = "book-b")
         val backStack = mutableListOf<NavKey>(
-            MainRouteHome,
+            MainRouteBookshelf,
             MainRouteReadManga(bookUrl = "book-a"),
             MainRouteBookInfo("Book B", "Author", "book-b"),
         )
 
         MainNavigator.navigateToRoute(backStack, replacement)
 
-        assertEquals(listOf(MainRouteHome, replacement), backStack)
+        assertEquals(listOf(MainRouteBookshelf, replacement), backStack)
     }
 
     @Test
@@ -43,13 +43,13 @@ class MainNavigatorMangaTest {
         )
         val newRequest = oldRequest.copy(openRequestId = 2L)
         val backStack = mutableListOf<NavKey>(
-            MainRouteHome,
+            MainRouteBookshelf,
             oldRequest,
             MainRouteBookInfo("Book A", "Author", "book-a"),
         )
 
         MainNavigator.navigateToRoute(backStack, newRequest)
 
-        assertEquals(listOf(MainRouteHome, newRequest), backStack)
+        assertEquals(listOf(MainRouteBookshelf, newRequest), backStack)
     }
 }
