@@ -48,21 +48,15 @@ import io.legado.app.help.book.isMobi
 import io.legado.app.help.book.removeType
 import io.legado.app.help.config.ReadBookConfig
 import io.legado.app.help.coroutine.Coroutine
-import io.legado.app.help.getSourceType
 import io.legado.app.model.ImageProvider
 import io.legado.app.model.ReadBook
 import io.legado.app.model.ReaderSession
 import io.legado.app.model.ReaderSessionEvent
-import io.legado.app.model.analyzeRule.AnalyzeRule
-import io.legado.app.model.analyzeRule.AnalyzeRule.Companion.setChapter
-import io.legado.app.model.analyzeRule.AnalyzeRule.Companion.setCoroutineContext
 import io.legado.app.ui.book.read.sheet.ReaderBookSheetTab
 import io.legado.app.ui.book.searchContent.SearchResult
 import io.legado.app.utils.GSON
 import io.legado.app.utils.ImageSaveUtils
 import io.legado.app.utils.NetworkUtils
-import io.legado.app.utils.isAbsUrl
-import io.legado.app.utils.isTrue
 import io.legado.app.utils.openUrl
 import io.legado.app.utils.toStringArray
 import kotlinx.collections.immutable.toImmutableList
@@ -2054,31 +2048,7 @@ class ReadBookViewModel(
     }
 
     private fun confirmPayAction() {
-        val book = ReadBook.book ?: return
-        if (book.isLocal) return
-        execute {
-            val source = ReadBook.bookSource ?: throw NoStackTraceException("no book source")
-            val chapter = currentChapter()
-                ?: throw NoStackTraceException(context.getString(R.string.no_chapter))
-            val payAction = source.getContentRule().payAction
-            if (payAction.isNullOrBlank()) {
-                throw NoStackTraceException("no pay action")
-            }
-            val analyzeRule = AnalyzeRule(book, source)
-            analyzeRule.setCoroutineContext(coroutineContext)
-            analyzeRule.setBaseUrl(chapter.url)
-            analyzeRule.setChapter(chapter)
-            analyzeRule.evalJS(payAction).toString() to chapter
-        }.onSuccess(IO) { (result, chapter) ->
-            if (result.isAbsUrl()) {
-                context.openUrl(result)
-            } else if (result.isTrue()) {
-                BookHelp.delContent(book, chapter)
-                loadChapterList(book)
-            }
-        }.onError {
-            AppLog.put("执行购买操作出错\n${it.localizedMessage}", it, true)
-        }
+        // 购买操作为书源 JS 规则，JS 求值已移除
     }
 
     private fun requestBooksDirPicker(reloadChapterList: Boolean) {

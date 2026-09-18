@@ -22,12 +22,9 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.lifecycleScope
-import com.script.rhino.runScriptWithContext
 import io.legado.app.R
 import io.legado.app.constant.AppLog
 import io.legado.app.data.entities.BookGroup
-import io.legado.app.help.webView.JsExtensionsBase
 import io.legado.app.ui.book.info.edit.BookInfoEditActivity
 import io.legado.app.ui.book.toc.TocActivityResult
 import io.legado.app.ui.widget.components.filePicker.FilePickerSheet
@@ -40,7 +37,6 @@ import io.legado.app.utils.sendToClip
 import io.legado.app.utils.takePersistablePermissionSafely
 import io.legado.app.utils.toastOnUi
 import kotlinx.collections.immutable.persistentListOf
-import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import splitties.init.appCtx
@@ -145,7 +141,7 @@ fun BookInfoRouteScreen(
                 }
 
                 is BookInfoEffect.RunIntroJs -> {
-                    runIntroJs(activity, effect)
+                    runIntroJs(effect)
                 }
 
 
@@ -203,21 +199,6 @@ private fun runSourceCallback(
     }
 }
 
-private fun runIntroJs(activity: AppCompatActivity, effect: BookInfoEffect.RunIntroJs) {
-    val source = effect.source ?: return
-    activity.lifecycleScope.launch(IO) {
-        try {
-            val java = JsExtensionsBase(activity, source)
-            runScriptWithContext {
-                source.evalJS(effect.click) {
-                    put("result", null)
-                    put("java", java)
-                    put("book", effect.book)
-                }
-            }
-        } catch (e: Throwable) {
-            AppLog.put("${source.bookSourceName}: ${e.localizedMessage}", e)
-            activity.toastOnUi("${effect.name} click error\n${e.localizedMessage}")
-        }
-    }
+private fun runIntroJs(effect: BookInfoEffect.RunIntroJs) {
+    AppLog.putDebug("${effect.name} click 已忽略: JS 规则求值已移除")
 }

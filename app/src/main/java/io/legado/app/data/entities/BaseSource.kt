@@ -1,33 +1,22 @@
 package io.legado.app.data.entities
 
 import android.webkit.JavascriptInterface
-import com.script.ScriptBindings
-import com.script.buildScriptBindings
-import com.script.rhino.RhinoScriptEngine
 import io.legado.app.constant.AppConst
 import io.legado.app.constant.AppLog
-import io.legado.app.data.entities.rule.RowUi
 import io.legado.app.help.CacheManager
 import io.legado.app.help.ConcurrentRateLimiter.Companion.updateConcurrentRate
-import io.legado.app.help.JsExtensions
 import io.legado.app.help.crypto.SymmetricCryptoAndroid
 import io.legado.app.help.http.CookieStore
-import io.legado.app.help.getShareScope
-import io.legado.app.model.SharedJsScope.remove
 import io.legado.app.utils.GSON
 import io.legado.app.utils.GSONStrict
-import io.legado.app.utils.fromJsonArray
 import io.legado.app.utils.fromJsonObject
 import io.legado.app.utils.has
-import io.legado.app.utils.isMainThread
-import kotlinx.coroutines.runBlocking
-import org.intellij.lang.annotations.Language
 
 /**
  * 可在js里调用,source.xxx()
  */
 @Suppress("unused")
-interface BaseSource : JsExtensions {
+interface BaseSource {
     /**
      * 并发率
      */
@@ -58,41 +47,12 @@ interface BaseSource : JsExtensions {
      */
     var jsLib: String?
 
-    override fun getTag(): String
+    fun getTag(): String
 
     fun getKey(): String
 
-    override fun getSource(): BaseSource? {
+    fun getSource(): BaseSource? {
         return this
-    }
-
-    fun getLoginJs(): String? {
-        val loginJs = loginUrl
-        return when {
-            loginJs == null -> null
-            loginJs.startsWith("@js:") -> loginJs.substring(4)
-            loginJs.startsWith("<js>") -> loginJs.substring(4, loginJs.lastIndexOf("<"))
-            else -> loginJs
-        }
-    }
-
-    /**
-     * 调用login函数 实现登录请求
-     */
-    @JavascriptInterface
-    fun login() {
-        val loginJs = getLoginJs()
-        if (!loginJs.isNullOrBlank()) {
-            @Language("js")
-            val js = """$loginJs
-                if(typeof login=='function'){
-                    login.apply(this);
-                } else {
-                    throw('Function login not implements!!!')
-                }
-            """.trimIndent()
-            evalJS(js)
-        }
     }
 
     /**
@@ -101,22 +61,14 @@ interface BaseSource : JsExtensions {
     fun getHeaderMap(userAgent: String, hasLoginHeader: Boolean = false) = HashMap<String, String>().apply {
         header?.let {
             try {
-                val json = when {
-                    it.startsWith("@js:", true) -> evalJS(it.substring(4)).toString()
-                    it.startsWith("<js>", true) -> evalJS(
-                        it.substring(4, it.lastIndexOf("<"))
-                    ).toString()
-
-                    else -> it
-                }
-                GSONStrict.fromJsonObject<Map<String, String>>(json).getOrNull()?.let { map ->
+                GSONStrict.fromJsonObject<Map<String, String>>(it).getOrNull()?.let { map ->
                     putAll(map)
-                } ?: GSON.fromJsonObject<Map<String, String>>(json).getOrNull()?.let { map ->
-                    log("请求头规则 JSON 格式不规范，请改为规范格式")
+                } ?: GSON.fromJsonObject<Map<String, String>>(it).getOrNull()?.let { map ->
+                    AppLog.putDebug("请求头规则 JSON 格式不规范，请改为规范格式")
                     putAll(map)
                 }
             } catch (e: Exception) {
-                AppLog.put("执行请求头规则出错\n$e", e)
+                AppLog.put("解析请求头规则出错\n$e", e)
             }
         }
         if (!has(AppConst.UA_NAME, true)) {
@@ -173,42 +125,6 @@ interface BaseSource : JsExtensions {
             AppLog.put("获取登陆信息出错", e)
             return null
         }
-    }
-
-    private fun configureScriptBindings(): ScriptBindings.() -> Unit = {
-        put("result", mutableMapOf<String, String>())
-        put("book", null)
-        put("chapter", null)
-    }
-
-    fun getLoginInfoMap(): MutableMap<String, String> {
-        val json = getLoginInfo() ?: if (loginUi.isNullOrBlank()) {
-            return mutableMapOf()
-        } else {
-            val loginUiJson = loginUi?.let {
-                when {
-                    it.startsWith("@js:") -> evalJS(
-                        "${getLoginJs() ?: ""}\n${it.substring(4)}",
-                        configureScriptBindings()
-                    ).toString()
-
-                    it.startsWith("<js>") -> evalJS(
-                        "${getLoginJs() ?: ""}\n${it.substring(4, it.lastIndexOf("<"))}",
-                        configureScriptBindings()
-                    ).toString()
-
-                    else -> it
-                }
-            }
-            val longinInfo = GSON.fromJsonArray<RowUi>(loginUiJson).getOrNull()
-                ?.filter { it.type != "button" }
-                ?.associate { it.name to (it.default ?: "") }
-                ?.takeIf { it.isNotEmpty() }?.also {
-                    putLoginInfo(GSON.toJson(it))
-                }
-            return longinInfo?.toMutableMap() ?: mutableMapOf()
-        }
-        return GSON.fromJsonObject<MutableMap<String, String>>(json).getOrNull() ?: mutableMapOf()
     }
 
     /**
@@ -293,45 +209,9 @@ interface BaseSource : JsExtensions {
     }
 
     /**
-     * 刷新JSLib
-     */
-    fun refreshJSLib() {
-        if (isMainThread) {
-            error("refreshJSLib must be called on a background thread")
-        }
-        runBlocking {
-            remove(jsLib)
-        }
-    }
-
-    /**
      * 设置并发率
      */
     fun putConcurrent(value: String) {
         updateConcurrentRate(getKey(), value)
-    }
-
-    /**
-     * 执行JS
-     */
-    @Throws(Exception::class)
-    fun evalJS(jsStr: String, bindingsConfig: ScriptBindings.() -> Unit = {}): Any? {
-        val bindings = buildScriptBindings { bindings ->
-            bindings["java"] = this
-            bindings["source"] = this
-            bindings["baseUrl"] = getKey()
-            bindings["cookie"] = CookieStore
-            bindings["cache"] = CacheManager
-            bindings.apply(bindingsConfig)
-        }
-        val sharedScope = getShareScope()
-        val scope = if (sharedScope == null) {
-            RhinoScriptEngine.getRuntimeScope(bindings)
-        } else {
-            bindings.apply {
-                prototype = sharedScope
-            }
-        }
-        return RhinoScriptEngine.eval(jsStr, scope)
     }
 }

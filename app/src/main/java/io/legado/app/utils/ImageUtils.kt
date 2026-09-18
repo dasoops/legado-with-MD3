@@ -1,10 +1,8 @@
 package io.legado.app.utils
 
-import io.legado.app.constant.AppLog
 import io.legado.app.data.entities.BaseSource
 import io.legado.app.data.entities.Book
 import io.legado.app.data.entities.BookSource
-import java.io.ByteArrayInputStream
 import java.io.InputStream
 
 /**
@@ -22,16 +20,8 @@ object ImageUtils {
     ): ByteArray? {
         val ruleJs = getRuleJs(source, isCover)
         if (ruleJs.isNullOrBlank()) return bytes
-        //解密库hutool.crypto ByteArray|InputStream -> ByteArray
-        return kotlin.runCatching {
-            source?.evalJS(ruleJs) {
-                put("book", book)
-                put("result", bytes)
-                put("src", src)
-            } as ByteArray
-        }.onFailure {
-            AppLog.putDebug("${src}解密错误", it)
-        }.getOrNull()
+        // 解密规则为 JS 脚本，JS 求值已移除，按未加密处理返回原始数据
+        return bytes
     }
 
     fun decode(
@@ -40,17 +30,7 @@ object ImageUtils {
     ): InputStream? {
         val ruleJs = getRuleJs(source, isCover)
         if (ruleJs.isNullOrBlank()) return inputStream
-        //解密库hutool.crypto ByteArray|InputStream -> ByteArray
-        return kotlin.runCatching {
-            val bytes = source?.evalJS(ruleJs) {
-                put("book", book)
-                put("result", inputStream)
-                put("src", src)
-            } as ByteArray
-            ByteArrayInputStream(bytes)
-        }.onFailure {
-            AppLog.putDebug("${src}解密错误", it)
-        }.getOrNull()
+        return inputStream
     }
 
     fun skipDecode(source: BaseSource?, isCover: Boolean): Boolean {

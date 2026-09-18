@@ -197,7 +197,7 @@ sealed interface BookInfoEffect {
         val origin: String?,
         val coverPath: String?,
     ) : BookInfoEffect
-    /** 简介按钮/图片触发的书源 JS 执行，由宿主（持有 Activity）用 JsExtensionsBase 运行。 */
+    /** 简介按钮/图片触发的书源 JS 执行，JS 规则求值已移除。 */
     data class RunIntroJs(
         val name: String,
         val click: String,

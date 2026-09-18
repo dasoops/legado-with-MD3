@@ -166,7 +166,6 @@ class ContentProcessor private constructor(
                 }
             }
             if (useReplace && book.getUseReplaceRule(otherGateway.currentSettings.replaceEnableDefault)) {
-                val replaceBook = book.toSearchBook()
                 //替换
                 effectiveReplaceRules = arrayListOf()
                 mContent = mContent.lines().joinToString("\n") { it.trim() }
@@ -179,9 +178,7 @@ class ContentProcessor private constructor(
                             mContent.replace(
                                 item.regex,
                                 item.replacement,
-                                item.getValidTimeoutMillisecond(),
-                                chapter,
-                                replaceBook
+                                item.getValidTimeoutMillisecond()
                             )
                         } else {
                             mContent.replace(item.pattern, item.replacement)

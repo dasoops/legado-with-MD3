@@ -4,7 +4,6 @@ import android.graphics.BitmapFactory
 import android.os.ParcelFileDescriptor
 import android.system.Os
 import androidx.documentfile.provider.DocumentFile
-import com.script.rhino.runScriptWithContext
 import io.legado.app.constant.AppLog
 import io.legado.app.constant.AppPattern
 import io.legado.app.constant.EventBus
@@ -367,11 +366,9 @@ object BookHelp {
                     try {
                         val bytes = analyzeUrl.getByteArrayAwait()
                         //某些图片被加密，需要进一步解密
-                        val decoded = runScriptWithContext {
-                            ImageUtils.decode(
-                                src, bytes, isCover = false, bookSource, book
-                            )
-                        }
+                        val decoded = ImageUtils.decode(
+                            src, bytes, isCover = false, bookSource, book
+                        )
                         if (decoded == null) {
                             AppLog.put("${book.name} ${chapter?.title} 图片 $src 下载失败 解码为空")
                             return false

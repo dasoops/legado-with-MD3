@@ -4,8 +4,6 @@ import android.net.Uri
 import android.util.Base64
 import androidx.core.net.toUri
 import androidx.documentfile.provider.DocumentFile
-import com.script.ScriptBindings
-import com.script.rhino.RhinoScriptEngine
 import io.legado.app.R
 import io.legado.app.constant.AppLog
 import io.legado.app.constant.AppPattern
@@ -18,7 +16,6 @@ import io.legado.app.exception.EmptyFileException
 import io.legado.app.exception.NoBooksDirException
 import io.legado.app.exception.NoStackTraceException
 import io.legado.app.exception.TocEmptyException
-import io.legado.app.domain.gateway.ImportBookSettingsGateway
 import io.legado.app.domain.gateway.OtherSettingsGateway
 import io.legado.app.domain.gateway.ReadSettingsGateway
 import io.legado.app.help.AppWebDav
@@ -46,10 +43,8 @@ import io.legado.app.model.analyzeRule.CustomUrl
 import io.legado.app.utils.ArchiveUtils
 import io.legado.app.utils.FileDoc
 import io.legado.app.utils.FileUtils
-import io.legado.app.utils.GSON
 import io.legado.app.utils.MD5Utils
 import io.legado.app.utils.externalFiles
-import io.legado.app.utils.fromJsonObject
 import io.legado.app.utils.getFile
 import io.legado.app.utils.inputStream
 import io.legado.app.utils.isAbsUrl
@@ -76,7 +71,6 @@ object LocalBook {
 
     private val otherSettingsGateway get() = GlobalContext.get().get<OtherSettingsGateway>()
     private val readSettingsGateway get() = GlobalContext.get().get<ReadSettingsGateway>()
-    private val importBookSettingsGateway get() = GlobalContext.get().get<ImportBookSettingsGateway>()
 
     private val nameAuthorPatterns = arrayOf(
         Regex("(.*?)《([^《》]+)》.*?作者：(.*)"),
@@ -389,41 +383,20 @@ object LocalBook {
      */
     private fun analyzeNameAuthor(fileName: String): Pair<String, String> {
         val tempFileName = fileName.substringBeforeLast(".")
-        var name = ""
-        var author = ""
-        if (!importBookSettingsGateway.currentSettings.bookImportFileName.isNullOrBlank()) {
-            try {
-                //在用户脚本后添加捕获author、name的代码，只要脚本中author、name有值就会被捕获
-                val js =
-                    importBookSettingsGateway.currentSettings.bookImportFileName + "\nJSON.stringify({author:author,name:name})"
-                //在脚本中定义如何分解文件名成书名、作者名
-                val jsonStr = RhinoScriptEngine.run {
-                    val bindings = ScriptBindings()
-                    bindings["src"] = tempFileName
-                    eval(js, bindings)
-                }.toString()
-                val bookMess = GSON.fromJsonObject<HashMap<String, String>>(jsonStr)
-                    .getOrThrow()
-                name = bookMess["name"] ?: ""
-                author = bookMess["author"]?.takeIf { it.length != tempFileName.length } ?: ""
-            } catch (e: Exception) {
-                AppLog.put("执行导入文件名规则出错\n${e.localizedMessage}", e)
+        var name: String
+        var author: String
+        for (pattern in nameAuthorPatterns) {
+            pattern.find(tempFileName)?.let { m ->
+                name = m.groupValues[2]
+                val group1 = m.groupValues[1]
+                val group3 = m.groupValues[3]
+                author = BookHelp.formatBookAuthor(group1 + group3)
+                return Pair(name, author)
             }
         }
-        if (name.isBlank()) {
-            for (pattern in nameAuthorPatterns) {
-                pattern.find(tempFileName)?.let { m ->
-                    name = m.groupValues[2]
-                    val group1 = m.groupValues[1]
-                    val group3 = m.groupValues[3]
-                    author = BookHelp.formatBookAuthor(group1 + group3)
-                    return Pair(name, author)
-                }
-            }
-            name = BookHelp.formatBookName(tempFileName)
-            author = BookHelp.formatBookAuthor(tempFileName.replace(name, ""))
-                .takeIf { it.length != tempFileName.length } ?: ""
-        }
+        name = BookHelp.formatBookName(tempFileName)
+        author = BookHelp.formatBookAuthor(tempFileName.replace(name, ""))
+            .takeIf { it.length != tempFileName.length } ?: ""
         return Pair(name, author)
     }
 

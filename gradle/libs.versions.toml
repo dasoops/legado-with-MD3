@@ -68,7 +68,6 @@ hutool = "5.8.22"
 room = "2.8.4"
 robolectric = "4.16.1"
 splitties = "3.0.0"
-rhino = "1.8.1"
 desugar = "2.1.5"
 
 activity = "1.13.0"
@@ -237,7 +236,6 @@ kotlin-stdlib = { module = "org.jetbrains.kotlin:kotlin-stdlib", version.ref = "
 liveeventbus = { module = "com.github.michaellee123:LiveEventBus", version.ref = "liveeventbus" }
 material = { module = "com.google.android.material:material", version.ref = "material" }
 
-mozilla-rhino = { module = "org.mozilla:rhino", version.ref = "rhino" }
 zxing-lite = { module = "com.github.jenly1314:zxing-lite", version.ref = "zxingLite" }
 
 reorderable = { module = "sh.calvin.reorderable:reorderable", version.ref = "reorderable" }

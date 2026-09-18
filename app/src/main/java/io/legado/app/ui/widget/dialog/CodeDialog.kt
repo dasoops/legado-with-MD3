@@ -8,7 +8,6 @@ import io.legado.app.base.BaseDialogFragment
 import io.legado.app.databinding.DialogCodeViewBinding
 import io.legado.app.help.IntentData
 //import io.legado.app.lib.theme.primaryColor
-import io.legado.app.ui.widget.code.addJsPattern
 import io.legado.app.ui.widget.code.addJsonPattern
 import io.legado.app.ui.widget.code.addLegadoPattern
 import io.legado.app.utils.applyTint
@@ -43,7 +42,6 @@ class CodeDialog() : BaseDialogFragment(R.layout.dialog_code_view) {
         }
         binding.codeView.addLegadoPattern()
         binding.codeView.addJsonPattern()
-        binding.codeView.addJsPattern()
         arguments?.getString("code")?.let {
             binding.codeView.text = IntentData.get(it)
         }

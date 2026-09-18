@@ -1,11 +1,6 @@
 package io.legado.app.utils
 
 import androidx.core.os.postDelayed
-import com.script.ScriptBindings
-import com.script.rhino.RhinoScriptEngine
-import io.legado.app.data.appDb
-import io.legado.app.data.entities.BookChapter
-import io.legado.app.data.entities.SearchBook
 import io.legado.app.exception.RegexTimeoutException
 import io.legado.app.help.CrashHandler
 import io.legado.app.help.coroutine.Coroutine
@@ -24,19 +19,12 @@ private val handler by lazy { buildMainHandler() }
 fun CharSequence.replace(
     regex: Regex,
     replacement: String,
-    timeout: Long,
-    chapter: BookChapter? = null,
-    book: SearchBook? = null
+    timeout: Long
 ): String {
     val charSequence = this@replace
-    val isJs = replacement.startsWith("@js:")
-    val replacement1 = if (isJs) replacement.substring(4) else replacement
-    val book = if (isJs) {
-        book ?: chapter?.bookUrl?.let {
-            appDb.searchBookDao.getSearchBook(it) ?: appDb.bookDao.getBook(it)?.toSearchBook()
-        }
-    } else {
-        null
+    // 规则原本是 JS 替换的已不再支持，保持原文避免把 JS 源码当作替换文本插入
+    if (replacement.startsWith("@js:") || replacement.startsWith("<js>")) {
+        return charSequence.toString()
     }
     return runBlocking {
         suspendCancellableCoroutine { block ->
@@ -46,19 +34,7 @@ fun CharSequence.replace(
                     val matcher = pattern.matcher(charSequence)
                     val stringBuffer = StringBuffer()
                     while (matcher.find()) {
-                        if (isJs) {
-                            val jsResult = RhinoScriptEngine.run {
-                                val bindings = ScriptBindings()
-                                bindings["result"] = matcher.group()
-                                bindings["chapter"] = chapter
-                                bindings["book"] = book
-                                eval(replacement1, bindings)
-                            }.toString()
-                            val quotedResult = jsResult.quoteReplacementJs()
-                            matcher.appendReplacement(stringBuffer, quotedResult)
-                        } else {
-                            matcher.appendReplacement(stringBuffer, replacement1)
-                        }
+                        matcher.appendReplacement(stringBuffer, replacement)
                     }
                     matcher.appendTail(stringBuffer)
                     block.resume(stringBuffer.toString())

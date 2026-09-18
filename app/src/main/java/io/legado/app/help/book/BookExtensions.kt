@@ -4,8 +4,6 @@ package io.legado.app.help.book
 
 import android.net.Uri
 import androidx.core.net.toUri
-import com.script.buildScriptBindings
-import com.script.rhino.RhinoScriptEngine
 import io.legado.app.constant.AppLog
 import io.legado.app.constant.AppPattern
 import io.legado.app.constant.BookSourceType
@@ -681,21 +679,11 @@ fun Book.getExportFileName(
     epubIndex: Int,
     jsStr: String? = exportGateway.currentSettings.episodeExportFileName
 ): String {
-    // 默认规则
     val default = "$name 作者：${getRealAuthor()} [${epubIndex}].$suffix"
     if (jsStr.isNullOrBlank()) {
         return default
     }
-    val bindings = buildScriptBindings { bindings ->
-        bindings["name"] = name
-        bindings["author"] = getRealAuthor()
-        bindings["epubIndex"] = epubIndex
-    }
-    return kotlin.runCatching {
-        RhinoScriptEngine.eval(jsStr, bindings).toString() + "." + suffix
-    }.onFailure {
-        AppLog.put("导出书名规则错误,使用默认规则\n${it.localizedMessage}", it)
-    }.getOrDefault(default).normalizeFileName()
+    return default.normalizeFileName()
 }
 
 // 根据当前日期计算章节总数
@@ -728,13 +716,5 @@ fun Book.readSimulating(): Boolean {
 }
 
 fun tryParesExportFileName(jsStr: String): Boolean {
-    val bindings = buildScriptBindings { bindings ->
-        bindings["name"] = "name"
-        bindings["author"] = "author"
-        bindings["epubIndex"] = "epubIndex"
-    }
-    return runCatching {
-        RhinoScriptEngine.eval(jsStr, bindings)
-        true
-    }.getOrDefault(false)
+    return false
 }

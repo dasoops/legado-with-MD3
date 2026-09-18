@@ -1,6 +1,5 @@
 package io.legado.app.ui.book.info
 
-import android.graphics.Bitmap
 import android.net.Uri
 import android.webkit.WebResourceRequest
 import android.webkit.WebView
@@ -91,13 +90,10 @@ import coil3.compose.AsyncImage
 import coil3.size.Size
 import io.legado.app.R
 import io.legado.app.constant.BookType
-import io.legado.app.data.entities.BaseSource
 import io.legado.app.data.entities.BookGroup
 import io.legado.app.data.entities.BookSource
 import io.legado.app.data.entities.SearchBook
-import io.legado.app.help.WebCacheManager
 import io.legado.app.help.coil.CoverExtras
-import io.legado.app.help.webView.WebJsExtensions
 import io.legado.app.ui.main.bookCoverSharedElementKey
 import io.legado.app.ui.theme.LegadoTheme
 import io.legado.app.ui.theme.LocalHazeState
@@ -1356,9 +1352,7 @@ private fun parseBookInfoIntro(intro: String?): BookInfoIntroContent? {
 }
 
 /**
- * `<useweb>` 简介：用 WebView 渲染，注入与上游一致的 JS 桥接
- * （WebCacheManager 缓存、书源对象、WebJsExtensions），
- * 非 http(s) scheme 交给外部应用处理。
+ * `<useweb>` 简介：用 WebView 渲染，非 http(s) scheme 交给外部应用处理。
  */
 @Composable
 private fun BookInfoWebIntro(
@@ -1396,25 +1390,12 @@ private fun BookInfoWebIntro(
                     return super.shouldOverrideUrlLoading(view, request)
                 }
 
-                override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
-                    super.onPageStarted(view, url, favicon)
-                    view?.evaluateJavascript(WebJsExtensions.getInjectionString, null)
-                }
-
                 override fun onPageFinished(view: WebView?, url: String?) {
                     super.onPageFinished(view, url)
                     view?.post {
                         contentHeight = view.contentHeight
                     }
                 }
-            }
-            addJavascriptInterface(WebCacheManager, WebJsExtensions.nameCache)
-            bookSource?.let { source ->
-                addJavascriptInterface(source as BaseSource, WebJsExtensions.nameSource)
-                addJavascriptInterface(
-                    WebJsExtensions(source, null, this),
-                    WebJsExtensions.nameJava
-                )
             }
         }
     }

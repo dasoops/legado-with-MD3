@@ -17,11 +17,10 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
 import androidx.lifecycle.lifecycleScope
-import com.script.rhino.runScriptWithContext
 import io.legado.app.R
 import io.legado.app.constant.AppLog
 import io.legado.app.constant.BookType
-import io.legado.app.data.appDb
+
 import io.legado.app.data.entities.BookProgress
 import io.legado.app.data.repository.HighlightRuleRepository
 import io.legado.app.feature.reader.core.gesture.ReaderTapAction
@@ -58,15 +57,10 @@ import io.legado.app.lib.dialogs.SelectItem
 import io.legado.app.model.ImageProvider
 import io.legado.app.model.ReadBook
 import io.legado.app.model.ReadSessionState
-import io.legado.app.model.analyzeRule.AnalyzeRule
-import io.legado.app.model.analyzeRule.AnalyzeRule.Companion.setChapter
-import io.legado.app.model.analyzeRule.AnalyzeRule.Companion.setCoroutineContext
-import io.legado.app.model.analyzeRule.AnalyzeUrl.Companion.paramPattern
 import io.legado.app.model.reader.ReaderChapterInput
 import io.legado.app.receiver.NetworkChangedListener
 import io.legado.app.receiver.TimeBatteryReceiver
 import io.legado.app.ui.book.read.page.entities.PageDirection
-import io.legado.app.help.webView.JsExtensionsBase
 import io.legado.app.ui.widget.PopupAction
 import io.legado.app.utils.ColorUtils
 import io.legado.app.utils.Debounce
@@ -1355,81 +1349,10 @@ class ReadBookController(
     }
 
     fun oldClickImg(src: String): Boolean {
-        val urlMatch = paramPattern.find(src)
-        if (urlMatch != null) {
-            val urlOptionStr = src.substring(urlMatch.range.last + 1)
-            val urlOptionMap = GSON.fromJsonObject<Map<String, String>>(urlOptionStr).getOrNull()
-            val click = urlOptionMap?.get("click")
-            if (click != null) {
-                activity.lifecycleScope.launch(IO) {
-                    try {
-                        val source = ReadBook.bookSource ?: return@launch
-                        val java = JsExtensionsBase(activity, source)
-                        val book = ReadBook.book ?: return@launch
-                        val chapter = appDb.bookChapterDao.getChapter(
-                            book.bookUrl,
-                            ReadBook.durChapterIndex
-                        ) ?: throw Exception("no find chapter")
-                        runScriptWithContext {
-                            source.evalJS(click) {
-                                put("java", java)
-                                put("book", book)
-                                put("chapter", chapter)
-                                put("result", src)
-                            }
-                        }
-                    } catch (e: Throwable) {
-                        AppLog.put("执行图片链接click键值出错\n${e.localizedMessage}", e, true)
-                    }
-                }
-                return true
-            }
-            val jsStr = urlOptionMap?.get("js") ?: return false
-            activity.lifecycleScope.launch(IO) {
-                try {
-                    val source = ReadBook.bookSource ?: return@launch
-                    val book = ReadBook.book ?: return@launch
-                    val chapter = appDb.bookChapterDao.getChapter(
-                        book.bookUrl,
-                        ReadBook.durChapterIndex
-                    ) ?: throw Exception("no find chapter")
-                    val urlNoOption = src.take(urlMatch.range.first)
-                    AnalyzeRule(book, source).apply {
-                        setCoroutineContext(coroutineContext)
-                        setBaseUrl(chapter.url)
-                        setChapter(chapter)
-                        evalJS(jsStr, urlNoOption)
-                    }
-                } catch (e: Throwable) {
-                    AppLog.put("执行图片链接js键值出错\n${e.localizedMessage}", e, true)
-                }
-            }
-            return true
-        }
         return false
     }
 
     fun clickImg(click: String, src: String) {
-        activity.lifecycleScope.launch(IO) {
-            try {
-                val source = ReadBook.bookSource ?: return@launch
-                val java = JsExtensionsBase(activity, source)
-                val book = ReadBook.book ?: return@launch
-                val chapter =
-                    appDb.bookChapterDao.getChapter(book.bookUrl, ReadBook.durChapterIndex)
-                        ?: throw Exception("no find chapter")
-                runScriptWithContext {
-                    source.evalJS(click) {
-                        put("java", java)
-                        put("book", book)
-                        put("chapter", chapter)
-                        put("result", src)
-                    }
-                }
-            } catch (e: Throwable) {
-                AppLog.put("执行图片链接click键值出错\n${e.localizedMessage}", e, true)
-            }
-        }
     }
 
 

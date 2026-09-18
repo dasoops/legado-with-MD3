@@ -4,19 +4,15 @@ import android.annotation.SuppressLint
 import android.util.Base64
 import androidx.annotation.Keep
 import com.bumptech.glide.load.model.GlideUrl
-import com.script.buildScriptBindings
-import com.script.rhino.RhinoScriptEngine
-import com.script.rhino.runScriptWithContext
 import io.legado.app.constant.AppConst.UA_NAME
+import io.legado.app.constant.AppLog
 import io.legado.app.constant.AppPattern
 import io.legado.app.data.entities.BaseSource
-import io.legado.app.data.entities.Book
 import io.legado.app.data.entities.BookChapter
 import io.legado.app.domain.gateway.DownloadCacheSettingsGateway
 import io.legado.app.exception.NoStackTraceException
 import io.legado.app.help.CacheManager
 import io.legado.app.help.ConcurrentRateLimiter
-import io.legado.app.help.JsExtensions
 import io.legado.app.help.crypto.toHexString
 import io.legado.app.help.glide.GlideHeaders
 import io.legado.app.help.http.BackstageWebView
@@ -33,7 +29,6 @@ import io.legado.app.help.http.newCallStrResponse
 import io.legado.app.help.http.postForm
 import io.legado.app.help.http.postJson
 import io.legado.app.help.http.postMultipart
-import io.legado.app.help.getShareScope
 import io.legado.app.utils.EncoderUtils
 import io.legado.app.utils.GSON
 import io.legado.app.utils.GSONStrict
@@ -90,7 +85,7 @@ class AnalyzeUrl(
     headerMapF: Map<String, String>? = null,
     hasLoginHeader: Boolean = true,
     private val infoMap: MutableMap<String, String>? = null
-) : JsExtensions {
+) {
     constructor(mUrl: String) : this(mUrl, null)
 
     var ruleUrl = ""
@@ -111,7 +106,6 @@ class AnalyzeUrl(
     private var retry: Int = 0
     private var useWebView: Boolean = false
     private var webJs: String? = null
-    private var bodyJs: String? = null
     private var dnsIp: String? = null
     private val enabledCookieJar = source?.enabledCookieJar == true
     private val domain: String
@@ -127,9 +121,10 @@ class AnalyzeUrl(
         coroutineContext = coroutineContext.minusKey(ContinuationInterceptor)
         val urlMatch = paramPattern.find(baseUrl)
         if (urlMatch != null) baseUrl = baseUrl.substring(0, urlMatch.range.first)
-        (headerMapF ?: runScriptWithContext(coroutineContext) {
-            source?.getHeaderMap(cacheSettingsGateway.currentSettings.userAgent, hasLoginHeader)
-        })?.let {
+        (headerMapF ?: source?.getHeaderMap(
+            cacheSettingsGateway.currentSettings.userAgent,
+            hasLoginHeader
+        ))?.let {
             headerMap.putAll(it)
             if (it.containsKey("proxy")) {
                 proxy = it["proxy"]
@@ -145,8 +140,6 @@ class AnalyzeUrl(
      */
     fun initUrl() {
         ruleUrl = mUrl
-        //执行@js,<js></js>
-        analyzeJs()
         //替换参数
         replaceKeyPageJs()
         //处理URL
@@ -154,50 +147,9 @@ class AnalyzeUrl(
     }
 
     /**
-     * 执行@js,<js></js>
+     * 替换关键字,页数
      */
-    private fun analyzeJs() {
-        var start = 0
-        var result = ruleUrl
-        for (m in AppPattern.JS_PATTERN.findAll(ruleUrl)) {
-            if (m.range.first > start) {
-                ruleUrl.substring(start, m.range.first).trim().let {
-                    if (it.isNotEmpty()) {
-                        result = it.replace("@result", result)
-                    }
-                }
-            }
-            result = evalJS(m.groupValues[2].ifEmpty { m.groupValues[1] }, result).toString()
-            start = m.range.last + 1
-        }
-        if (ruleUrl.length > start) {
-            ruleUrl.substring(start).trim().let {
-                if (it.isNotEmpty()) {
-                    result = it.replace("@result", result)
-                }
-            }
-        }
-        ruleUrl = result
-    }
-
-    /**
-     * 替换关键字,页数,JS
-     */
-    private fun replaceKeyPageJs() { //先替换内嵌规则再替换页数规则，避免内嵌规则中存在大于小于号时，规则被切错
-        //js
-        if (ruleUrl.contains("{{") && ruleUrl.contains("}}")) {
-            val analyze = RuleAnalyzer(ruleUrl) //创建解析
-            //替换所有内嵌{{js}}
-            val url = analyze.innerRule("{{", "}}") {
-                val jsEval = evalJS(it) ?: ""
-                when (jsEval) {
-                    is String -> jsEval
-                    is Double if jsEval % 1.0 == 0.0 -> String.format("%.0f", jsEval)
-                    else -> jsEval.toString()
-                }
-            }
-            if (url.isNotEmpty()) ruleUrl = url
-        }
+    private fun replaceKeyPageJs() {
         //page
         page?.let {
             for (m in pagePattern.findAll(ruleUrl)) {
@@ -229,7 +181,7 @@ class AnalyzeUrl(
             if (urlOption == null) {
                 urlOption = GSON.fromJsonObject<UrlOption>(urlOptionStr).getOrNull()
                 if (urlOption != null) {
-                    log("链接参数 JSON 格式不规范，请改为规范格式")
+                    AppLog.putDebug("链接参数 JSON 格式不规范，请改为规范格式")
                 }
             }
             urlOption?.let { option ->
@@ -251,13 +203,7 @@ class AnalyzeUrl(
                 retry = option.getRetry()
                 useWebView = option.useWebView()
                 webJs = option.getWebJs()
-                bodyJs = option.getBodyJs()
                 dnsIp = option.getDnsIp()
-                option.getJs()?.let { jsStr ->
-                    evalJS(jsStr, url)?.toString()?.let {
-                        url = it
-                    }
-                }
                 serverID = option.getServerID()
                 webViewDelayTime = max(0, option.getWebViewDelayTime() ?: 0)
             }
@@ -356,56 +302,6 @@ class AnalyzeUrl(
 
 
     /**
-     * 执行JS
-     */
-    fun evalJS(jsStr: String, result: Any? = null): Any? {
-        val bindings = buildScriptBindings { bindings ->
-            bindings["java"] = this
-            bindings["baseUrl"] = baseUrl
-            bindings["cookie"] = CookieStore
-            bindings["cache"] = CacheManager
-            bindings["page"] = page
-            bindings["key"] = key
-            bindings["speakText"] = speakText
-            bindings["speakSpeed"] = speakSpeed
-            bindings["book"] = ruleData as? Book
-            bindings["source"] = source
-            bindings["result"] = result
-            bindings["infoMap"] = infoMap
-        }
-        val sharedScope = source?.getShareScope(coroutineContext)
-        val scope = if (sharedScope == null) {
-            RhinoScriptEngine.getRuntimeScope(bindings)
-        } else {
-            bindings.apply {
-                prototype = sharedScope
-            }
-        }
-        return RhinoScriptEngine.eval(jsStr, scope, coroutineContext)
-    }
-
-    fun put(key: String, value: String): String {
-        chapter?.putVariable(key, value)
-            ?: ruleData?.putVariable(key, value)
-        return value
-    }
-
-    fun get(key: String): String {
-        when (key) {
-            "bookName" -> (ruleData as? Book)?.let {
-                return it.name
-            }
-
-            "title" -> chapter?.let {
-                return it.title
-            }
-        }
-        return chapter?.getVariable(key)?.takeIf { it.isNotEmpty() }
-            ?: ruleData?.getVariable(key)?.takeIf { it.isNotEmpty() }
-            ?: ""
-    }
-
-    /**
      * 访问网站,返回StrResponse
      */
     suspend fun getStrResponseAwait(
@@ -498,9 +394,6 @@ class AnalyzeUrl(
                         ?.matches(AppPattern.xmlContentTypeRegex) == true
                     if (isXml && it.body?.trim()?.startsWith("<?xml", true) == false) {
                         StrResponse(it.raw, "<?xml version=\"1.0\"?>" + it.body)
-                    } else if (bodyJs != null) {
-                        val body = evalJS(bodyJs!!, it.body).toString()
-                        StrResponse(it.raw, body)
                     } else it
                 }
             }
@@ -762,14 +655,6 @@ class AnalyzeUrl(
         return method == RequestMethod.POST
     }
 
-    override fun getSource(): BaseSource? {
-        return source
-    }
-
-    override fun getTag(): String? {
-        return source?.getTag()
-    }
-
     companion object {
         val paramPattern: Regex = Regex("\\s*,\\s*(?=\\{)")
         private val pagePattern = Regex("<(.*?)>")
@@ -832,16 +717,6 @@ class AnalyzeUrl(
          * 自定义的域名ip
          **/
         private var dnsIp: String? = null,
-        /**
-         * 解析完url参数时执行的js
-         * 执行结果会赋值给url
-         */
-        private var js: String? = null,
-        /**
-         * 得到访问结果后执行的js,对结果进行二次处理
-         * 执行结果返回为body
-         */
-        private var bodyJs: String? = null,
         /**
          * 服务器id
          */
@@ -946,22 +821,6 @@ class AnalyzeUrl(
 
         fun getDnsIp(): String? {
             return dnsIp
-        }
-
-        fun setJs(value: String?) {
-            js = if (value.isNullOrBlank()) null else value
-        }
-
-        fun getJs(): String? {
-            return js
-        }
-
-        fun setBodyJs(value: String?) {
-            bodyJs = if (value.isNullOrBlank()) null else value
-        }
-
-        fun getBodyJs(): String? {
-            return bodyJs
         }
 
         fun setServerID(value: String?) {

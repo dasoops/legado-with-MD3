@@ -9,7 +9,6 @@ import com.bumptech.glide.load.Options
 import com.bumptech.glide.load.data.DataFetcher
 import com.bumptech.glide.load.model.GlideUrl
 import com.bumptech.glide.util.ContentLengthInputStream
-import com.script.rhino.runScriptWithContext
 import io.legado.app.data.entities.BaseSource
 import io.legado.app.exception.NoStackTraceException
 import io.legado.app.help.coroutine.Coroutine
@@ -123,12 +122,10 @@ class OkHttpStreamFetcher(
             return
         }
         Coroutine.async(coroutineScope, executeContext = IO) {
-            val decodeResult = runScriptWithContext(coroutineContext) {
-                ImageUtils.decode(
-                    analyzedUrl.toStringUrl(), responseBody!!.byteStream(),
-                    isCover = true, source
-                )
-            }
+            val decodeResult = ImageUtils.decode(
+                analyzedUrl.toStringUrl(), responseBody!!.byteStream(),
+                isCover = true, source
+            )
             onStreamReady(decodeResult)
         }
     }
