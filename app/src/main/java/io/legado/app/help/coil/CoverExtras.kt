@@ -21,12 +21,6 @@ object CoverExtras {
     /** 仅 WiFi 时加载。 */
     val LoadOnlyWifi = Extras.Key<Boolean?>(null)
 
-    /** 漫画模式。 */
-    val Manga = Extras.Key<Boolean?>(null)
-
-    /** 漫画图片所属书籍。图片解密必须显式携带，不能读取全局阅读会话。 */
-    val MangaBookUrl = Extras.Key<String?>(null)
-
     /**
      * CoverInterceptor 在把 request.data 改写为最终解析 URL 之前，把书架/详情页
      * 存下的原始封面地址放进来。CoverFetcher 回写持久文件缓存时用这个稳定键

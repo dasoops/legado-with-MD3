@@ -35,8 +35,6 @@ import androidx.navigation3.ui.LocalNavAnimatedContentScope
 import androidx.navigation3.ui.NavDisplay
 import coil3.ImageLoader
 import io.legado.app.R
-import io.legado.app.constant.BookType
-import io.legado.app.constant.Status
 import io.legado.app.domain.model.settings.AppUiConfiguration
 import io.legado.app.help.coil.CoverExtras
 import io.legado.app.model.Download
@@ -50,8 +48,6 @@ import io.legado.app.ui.book.import.remote.RemoteBookRouteScreen
 import io.legado.app.ui.book.info.BookInfoRouteScreen
 import io.legado.app.ui.book.info.BookInfoViewModel
 import io.legado.app.ui.book.manage.BookshelfManageRouteScreen
-import io.legado.app.ui.book.manga.MangaReaderRouteScreen
-import io.legado.app.ui.book.manga.MangaReaderViewModel
 import io.legado.app.ui.book.read.ReadBookController
 import io.legado.app.ui.book.read.ReadBookInitRequest
 import io.legado.app.ui.book.read.ReadBookIntent
@@ -101,7 +97,6 @@ import org.koin.core.parameter.parametersOf
 fun MainActivity.mainEntryProvider(
     backStack: MutableList<NavKey>,
     configuration: AppUiConfiguration,
-    showMangaUi: Boolean,
     useRail: Boolean,
     sharedTransitionScope: SharedTransitionScope,
     onNavigateToRoute: (NavKey) -> Unit,
@@ -173,8 +168,6 @@ fun MainActivity.mainEntryProvider(
             onOpenBookshelfBook = { book, sharedCoverKey ->
                 if (book.isAudio) {
                     this@mainEntryProvider.startActivityForBook(book)
-                } else if (!book.isLocal && book.isImage && showMangaUi) {
-                    onNavigateToRoute(MainRouteReadManga(bookUrl = book.bookUrl))
                 } else {
                     onNavigateToRoute(
                         MainRouteReadBook(
@@ -441,27 +434,6 @@ fun MainActivity.mainEntryProvider(
         }
     }
 
-    entry<MainRouteReadManga> { route ->
-        val mangaViewModel = koinViewModel<MangaReaderViewModel>(
-            key = "ReadManga:${route.bookUrl ?: "last-read"}",
-        )
-        MangaReaderRouteScreen(
-            bookUrl = route.bookUrl,
-            inBookshelf = route.inBookshelf,
-            chapterChanged = route.chapterChanged,
-            openRequestId = route.openRequestId,
-            viewModel = mangaViewModel,
-            restoreSystemBarsVisible = configuration.appShell.showStatusBar,
-            onFinish = { onNavigateBack() },
-            onOpenBookInfo = { name, author, bookUrl ->
-                onNavigateToRoute(MainRouteBookInfo(name, author, bookUrl))
-            },
-            onOpenSourceEdit = { sourceUrl ->
-                onNavigateToRoute(MainRouteBookSourceEdit(sourceUrl))
-            },
-        )
-    }
-
     entry<MainRouteSearchContent> { route ->
         val viewModel = koinViewModel<SearchContentViewModel>(
             key = "SearchContent:${route.bookUrl}",
@@ -543,16 +515,6 @@ fun MainActivity.mainEntryProvider(
                         inBookshelf = inBookshelf,
                         chapterChanged = chapterChanged,
                         sharedCoverKey = route.sharedCoverKey ?: bookCoverSharedElementKey(route.bookUrl),
-                    )
-                )
-            },
-            onOpenMangaReader = { bookUrl, inBookshelf, chapterChanged ->
-                onNavigateToRoute(
-                    MainRouteReadManga(
-                        bookUrl = bookUrl,
-                        inBookshelf = inBookshelf,
-                        chapterChanged = chapterChanged,
-                        openRequestId = System.nanoTime(),
                     )
                 )
             },

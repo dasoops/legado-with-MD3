@@ -13,7 +13,6 @@ data class OtherSettings(
     val replaceEnableDefault: Boolean = true,
     val autoClearExpired: Boolean = true,
     val showAddToShelfAlert: Boolean = true,
-    val showMangaUi: Boolean = true,
     val sourceEditMaxLine: Int = Int.MAX_VALUE,
     val processText: Boolean = true,
     val recordLog: Boolean = false,

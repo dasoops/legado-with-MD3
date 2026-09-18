@@ -47,11 +47,10 @@ class CoverInterceptor : Interceptor {
             //     不解析规则、不跑脚本、不联网；
             //   ③ 详情页不设 PreferCache：在线时仍走慢速路径拉新链接，成功后同时刷新
             //     精确键与别名键 → 下次书架展示的就是新封面。
-            // 漫画模式走独立缓存目录不在此列；data: 内联图无需缓存。
-            val isManga = request.extras[CoverExtras.Manga] == true
+            // data: 内联图无需缓存。
             val bookUrl = request.extras[CoverExtras.BookUrl]
             val preferCache = request.extras[CoverExtras.PreferCache] == true
-            if (!isManga && !data.startsWith("data:", true)) {
+            if (!data.startsWith("data:", true)) {
                 val exactFile = CoverFileCache.read(data)
                 val cachedFile = exactFile
                     ?: bookUrl?.takeIf { preferCache }?.let { CoverFileCache.readByBookUrl(it) }
@@ -103,7 +102,7 @@ class CoverInterceptor : Interceptor {
                     // 这里只对“确实会写持久缓存”的请求（带 bookUrl）关闭，保证字节一定经过
                     // CoverFetcher 落到 filesDir；无 bookUrl 的临时封面（发现页/搜索页）不写持久缓存，
                     // 保留 Coil 磁盘缓存，避免它们退化成只能重新联网。
-                    if (!isManga && bookUrl != null) {
+                    if (bookUrl != null) {
                         diskCachePolicy(CachePolicy.DISABLED)
                     }
                 }

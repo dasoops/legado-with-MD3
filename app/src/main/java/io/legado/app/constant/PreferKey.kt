@@ -175,7 +175,6 @@ object PreferKey {
     const val optimizeRender = "optimizeRender"
     const val updateToVariant = "updateToVariant"
     const val autoCheckUpdateOnStart = "autoCheckUpdateOnStart"
-    const val showMangaUi = "showMangaUi"
     const val disableMangaScale = "disableMangaScale"
     const val firebaseEnable = "firebaseEnable"
     const val cPrimary = "colorPrimary"

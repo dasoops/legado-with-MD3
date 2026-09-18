@@ -58,7 +58,6 @@ object BackupConfig {
     private const val themeConfigKey = "themeConfig"
     private const val coverConfigKey = "coverConfig"
     private const val localBookKey = "localBook"
-    private const val mangaKey = "mangaConfig"
 
     //数据库忽略key
     private const val dbKeyBookmark = "bookmark"
@@ -129,8 +128,7 @@ object BackupConfig {
         coverConfigKey,
         PreferKey.bookshelfLayout,
         PreferKey.threadCount,
-        localBookKey,
-        mangaKey
+        localBookKey
     )
 
     //配置忽略标题
@@ -141,8 +139,7 @@ object BackupConfig {
         appCtx.getString(R.string.cover_config),
         appCtx.getString(R.string.bookshelf_layout),
         appCtx.getString(R.string.thread_count),
-        appCtx.getString(R.string.local_book),
-        appCtx.getString(R.string.manga_config)
+        appCtx.getString(R.string.local_book)
     )
 
     //备份忽略key
@@ -153,8 +150,7 @@ object BackupConfig {
         coverConfigKey,
         PreferKey.bookshelfLayout,
         PreferKey.threadCount,
-        localBookKey,
-        mangaKey
+        localBookKey
     )
 
     //备份忽略标题
@@ -165,8 +161,7 @@ object BackupConfig {
         appCtx.getString(R.string.cover_config),
         appCtx.getString(R.string.bookshelf_layout),
         appCtx.getString(R.string.thread_count),
-        appCtx.getString(R.string.local_book),
-        appCtx.getString(R.string.manga_config)
+        appCtx.getString(R.string.local_book)
     )
 
     //阅读配置
@@ -327,41 +322,6 @@ object BackupConfig {
         PreferKey.bookshelfIntroMaxLines
     )
 
-    private val mangaPrefKeys = arrayOf(
-        PreferKey.showMangaUi,
-        PreferKey.mangaScrollMode,
-        PreferKey.webtoonSidePaddingDp,
-        PreferKey.mangaPreDownloadNum,
-        PreferKey.mangaChapterPrefetchCount,
-        PreferKey.mangaAutoOfflineCache,
-        PreferKey.mangaAutoPageSpeed,
-        PreferKey.mangaFooterConfig,
-        PreferKey.disableClickScroll,
-        PreferKey.hideMangaTitle,
-        PreferKey.mangaColorFilter,
-        PreferKey.enableMangaEInk,
-        PreferKey.mangaEInkThreshold,
-        PreferKey.enableMangaGray,
-        PreferKey.doublePageHorizontal,
-        PreferKey.mouseWheelPage,
-        PreferKey.disableMangaScale,
-        PreferKey.disableMangaScrollAnimation,
-        PreferKey.disableMangaCrossFade,
-        PreferKey.mangaVolumeKeyPage,
-        PreferKey.reverseVolumeKeyPage,
-        PreferKey.mangaLongClick,
-        PreferKey.mangaBackground,
-        PreferKey.mangaClickActionTL,
-        PreferKey.mangaClickActionTC,
-        PreferKey.mangaClickActionTR,
-        PreferKey.mangaClickActionML,
-        PreferKey.mangaClickActionMC,
-        PreferKey.mangaClickActionMR,
-        PreferKey.mangaClickActionBL,
-        PreferKey.mangaClickActionBC,
-        PreferKey.mangaClickActionBR
-    )
-
     private val coverPrefKeys = arrayOf(
         PreferKey.useDefaultCover,
         PreferKey.loadCoverOnlyWifi,
@@ -387,7 +347,6 @@ object BackupConfig {
                 backupIgnoreThemeConfig && themePrefKeys.contains(key) -> false
                 backupIgnoreCoverConfig && coverPrefKeys.contains(key) -> false
                 backupIgnoreBookshelfLayout && bookshelfPrefKeys.contains(key) -> false
-                backupIgnoreManga && mangaPrefKeys.contains(key) -> false
                 PreferKey.themeMode == key && backupIgnoreThemeMode -> false
                 PreferKey.threadCount == key && backupIgnoreThreadCount -> false
                 else -> true
@@ -398,7 +357,6 @@ object BackupConfig {
             ignoreThemeConfig && themePrefKeys.contains(key) -> false
             ignoreCoverConfig && coverPrefKeys.contains(key) -> false
             ignoreBookshelfLayout && bookshelfPrefKeys.contains(key) -> false
-            ignoreManga && mangaPrefKeys.contains(key) -> false
             PreferKey.themeMode == key && ignoreThemeMode -> false
             PreferKey.threadCount == key && ignoreThreadCount -> false
             else -> true
@@ -419,8 +377,6 @@ object BackupConfig {
         get() = ignoreConfig[PreferKey.threadCount] == true
     val ignoreLocalBook: Boolean
         get() = ignoreConfig[localBookKey] == true
-    val ignoreManga: Boolean
-        get() = ignoreConfig[mangaKey] == true
 
     val backupIgnoreReadConfig: Boolean
         get() = backupIgnoreConfig[readConfigKey] == true
@@ -436,8 +392,6 @@ object BackupConfig {
         get() = backupIgnoreConfig[PreferKey.threadCount] == true
     val backupIgnoreLocalBook: Boolean
         get() = backupIgnoreConfig[localBookKey] == true
-    val backupIgnoreManga: Boolean
-        get() = backupIgnoreConfig[mangaKey] == true
 
     fun saveIgnoreConfig() {
         val json = GSON.toJson(ignoreConfig)

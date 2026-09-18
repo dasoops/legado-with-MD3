@@ -18,7 +18,6 @@ data class OtherConfigUiState(
     val replaceEnableDefault: Boolean = true,
     val autoClearExpired: Boolean = true,
     val showAddToShelfAlert: Boolean = true,
-    val showMangaUi: Boolean = true,
     val sourceEditMaxLine: Int = Int.MAX_VALUE,
     val processText: Boolean = true,
     val recordLog: Boolean = false,
@@ -81,7 +80,6 @@ sealed interface OtherConfigIntent {
     data class ReplaceEnableDefaultChanged(val value: Boolean) : OtherConfigIntent
     data class AutoClearExpiredChanged(val value: Boolean) : OtherConfigIntent
     data class ShowAddToShelfAlertChanged(val value: Boolean) : OtherConfigIntent
-    data class ShowMangaUiChanged(val value: Boolean) : OtherConfigIntent
     data class SourceEditMaxLineChanged(val value: Int) : OtherConfigIntent
     data class ProcessTextChanged(val value: Boolean) : OtherConfigIntent
     data class RecordLogChanged(val value: Boolean) : OtherConfigIntent

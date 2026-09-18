@@ -32,17 +32,6 @@ object MainNavigator {
         val currentRoute = backStack.lastOrNull()
         if (currentRoute == route) return
 
-        if (route is MainRouteReadManga) {
-            val existingReaderIndex = backStack.indexOfLast { it is MainRouteReadManga }
-            if (existingReaderIndex >= 0) {
-                while (backStack.lastIndex > existingReaderIndex) {
-                    backStack.removeAt(backStack.lastIndex)
-                }
-                backStack[existingReaderIndex] = route
-                return
-            }
-        }
-
         // 导航动画和阅读页组合要花几百毫秒, 这段时间足够把正文读出来并排版好
         if (route is MainRouteReadBook && !route.chapterChanged) {
             route.bookUrl?.let { ReadBook.prefetchForOpen(it) }
@@ -86,8 +75,7 @@ object MainNavigator {
             MainRouteImportRemote,
             is MainRouteCache,
             MainRouteBookCacheManage,
-            is MainRouteReadBook,
-            is MainRouteReadManga -> {
+            is MainRouteReadBook -> {
                 if (
                     currentRoute == MainRouteBookshelf ||
                     currentRoute is MainRouteBookInfo
@@ -108,8 +96,7 @@ object MainNavigator {
                 if (
                     currentRoute == MainRouteBookshelf ||
                     currentRoute is MainRouteBookInfo ||
-                    currentRoute is MainRouteCache ||
-                    currentRoute is MainRouteReadManga
+                    currentRoute is MainRouteCache
                 ) {
                     backStack.add(route)
                 } else {
@@ -217,15 +204,6 @@ object MainNavigator {
                     MainIntent.EXTRA_CHAPTER_CHANGED,
                     false
                 ) == true,
-            )
-            MainRouteConst.ROUTE_READ_MANGA -> MainRouteReadManga(
-                bookUrl = intent?.getStringExtra(MainIntent.EXTRA_BOOK_URL),
-                inBookshelf = intent?.getBooleanExtra(MainIntent.EXTRA_IN_BOOKSHELF, true) != false,
-                chapterChanged = intent?.getBooleanExtra(
-                    MainIntent.EXTRA_CHAPTER_CHANGED,
-                    false,
-                ) == true,
-                openRequestId = System.nanoTime(),
             )
             MainRouteConst.ROUTE_BOOK_INFO -> intent?.getStringExtra(MainIntent.EXTRA_BOOK_URL)
                 ?.takeIf { it.isNotBlank() }

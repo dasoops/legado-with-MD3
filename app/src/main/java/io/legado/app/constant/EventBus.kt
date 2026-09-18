@@ -17,7 +17,6 @@ object EventBus {
     const val UPDATE_READ_ACTION_BAR = "updateReadActionBar"
     const val UP_SEEK_BAR = "upSeekBar"
     const val EXPORT_BOOK = "exportBook"
-    const val UP_MANGA_CONFIG = "upMangaConfig"
     const val REFRESH_BOOK_INFO = "refreshBookInfo"
     const val REFRESH_BOOK_TOC = "refreshBookToc"
     const val REFRESH_BOOK_CONTENT = "refreshBookContent"

@@ -80,15 +80,6 @@ data class MainRouteReadBook(
 ) : MainRoute
 
 @Serializable
-data class MainRouteReadManga(
-    val bookUrl: String? = null,
-    val inBookshelf: Boolean = true,
-    val chapterChanged: Boolean = false,
-    /** Distinguishes repeated open requests for the same book after an external TOC selection. */
-    val openRequestId: Long = 0L,
-) : MainRoute
-
-@Serializable
 data class MainRouteBookInfo(
     val name: String?,
     val author: String?,
@@ -132,7 +123,6 @@ object MainRouteConst {
     const val ROUTE_CACHE = "cache"
     const val ROUTE_BOOK_CACHE_MANAGE = "book/cache/manage"
     const val ROUTE_READ_BOOK = "book/read"
-    const val ROUTE_READ_MANGA = "book/read/manga"
     const val ROUTE_SEARCH_CONTENT = "book/searchContent"
     const val ROUTE_BOOK_INFO = "book/info"
     const val ROUTE_READ_RECORD = "read_record"

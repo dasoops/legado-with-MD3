@@ -31,7 +31,6 @@ import io.legado.app.domain.gateway.CoverSettingsGateway
 import io.legado.app.domain.gateway.OtherSettingsGateway
 import io.legado.app.domain.gateway.ThemeSettingsGateway
 import io.legado.app.domain.model.settings.CoverSettings
-import io.legado.app.domain.model.settings.OtherSettings
 import io.legado.app.domain.model.settings.ThemeSettings
 import io.legado.app.domain.usecase.ChangeBookSourceUseCase
 import io.legado.app.domain.usecase.ChangeSourceMigrationOptions
@@ -120,16 +119,14 @@ class BookInfoViewModel(
         _screenState,
         themeSettingsGateway.settings,
         coverSettingsGateway.settings,
-        otherSettingsGateway.settings,
-    ) { screen, theme, cover, other ->
-        screen.withSettings(theme, cover, other)
+    ) { screen, theme, cover ->
+        screen.withSettings(theme, cover)
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5_000),
         initialValue = BookInfoUiState().withSettings(
             themeSettingsGateway.currentSettings,
             coverSettingsGateway.currentSettings,
-            otherSettingsGateway.currentSettings,
         ),
     )
 
@@ -1591,7 +1588,6 @@ class BookInfoViewModel(
 internal fun BookInfoUiState.withSettings(
     theme: ThemeSettings,
     cover: CoverSettings,
-    other: OtherSettings,
 ): BookInfoUiState = copy(
     bookInfoFollowCoverColor = theme.bookInfoFollowCoverColor,
     bookInfoNetworkCoverBackground = theme.bookInfoNetworkCoverBackground,
@@ -1599,7 +1595,6 @@ internal fun BookInfoUiState.withSettings(
     loadCoverOnlyOnWifi = cover.loadOnlyOnWifi,
     defaultCover = cover.defaultCover,
     defaultCoverDark = cover.defaultCoverDark,
-    showMangaUi = other.showMangaUi,
 )
 
 private val BookInfoWebFile.suffix: String
