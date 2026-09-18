@@ -18,17 +18,6 @@ class MainNavigatorBackStackTest {
     }
 
     @Test
-    fun `opening search from book source manage keeps manage in back stack`() {
-        val manage = MainRouteBookSourceManage()
-        val search = MainRouteSearch(key = null, scopeRaw = "scope")
-        val backStack = mutableListOf<NavKey>(MainRouteBookshelf, manage)
-
-        MainNavigator.navigateToRoute(backStack, search)
-
-        assertEquals(listOf(MainRouteBookshelf, manage, search), backStack)
-    }
-
-    @Test
     fun `media reader replaces stale route with home parent`() {
         val bookInfo = MainRouteBookInfo("Book", "Author", "book-url")
         val reader = MainRouteReadBook(readAloud = true)

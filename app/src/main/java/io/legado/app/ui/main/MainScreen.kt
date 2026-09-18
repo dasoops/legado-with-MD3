@@ -117,7 +117,6 @@ fun MainScreen(
     effects: kotlinx.coroutines.flow.Flow<MainEffect>,
     useRail: Boolean,
     onOpenSettings: () -> Unit,
-    onNavigateToSearch: (String?) -> Unit,
     onNavigateToRemoteImport: () -> Unit,
     onNavigateToLocalImport: () -> Unit,
     onNavigateToCache: (Long) -> Unit,
@@ -242,20 +241,6 @@ fun MainScreen(
                 }
                 MiuixNavigationRail(
                     state = miuixNavState,
-                    header = {
-                        FloatingActionButton(
-                            modifier = Modifier
-                                .align(Alignment.Start)
-                                .padding(start = NavigationRailDefaults.ExpandedItemHorizontalMargin),
-                            onClick = { onNavigateToSearch(null) },
-                        ) {
-                            AppIcon(
-                                Icons.Default.Search,
-                                contentDescription = null,
-                                tint = Color.White
-                            )
-                        }
-                    }
                 ) {
                     destinations.forEachIndexed { index, destination ->
                         val selected = pagerState.targetPage == index
@@ -332,16 +317,6 @@ fun MainScreen(
                                 )
                             )
                         }
-
-                        Spacer(modifier = Modifier.height(8.dp))
-
-                        ExtendedFloatingActionButton(
-                            modifier = Modifier.padding(start = 20.dp),
-                            onClick = { onNavigateToSearch(null) },
-                            expanded = expanded,
-                            icon = { AppIcon(Icons.Default.Search, contentDescription = null) },
-                            text = { AppText(stringResource(R.string.search)) }
-                        )
                     }
                 }
             ) {
@@ -503,7 +478,6 @@ fun MainScreen(
                                         sharedCoverKey
                                     )
                                 },
-                                onNavigateToSearch = { query -> onNavigateToSearch(query) },
                                 onNavigateToRemoteImport = onNavigateToRemoteImport,
                                 onNavigateToLocalImport = onNavigateToLocalImport,
                                 onNavigateToCache = onNavigateToCache,

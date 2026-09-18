@@ -130,25 +130,9 @@ object MainNavigator {
                 backStack.add(route)
             }
 
-            is MainRouteSearch -> {
-                if (
-                    currentRoute == MainRouteBookshelf ||
-                    currentRoute is MainRouteBookInfo ||
-                    currentRoute is MainRouteBookSourceManage ||
-                    currentRoute is MainRouteSearch
-                ) {
-                    backStack.add(route)
-                } else {
-                    backStack.clear()
-                    backStack.add(MainRouteBookshelf)
-                    backStack.add(route)
-                }
-            }
-
             is MainRouteBookInfo -> {
                 if (
                     currentRoute == MainRouteBookshelf ||
-                    currentRoute is MainRouteSearch ||
                     currentRoute is MainRouteBookInfo ||
                     currentRoute is MainRouteCache ||
                     currentRoute is MainRouteReadManga
@@ -322,11 +306,6 @@ object MainNavigator {
                 bookUrl = intent?.getStringExtra(MainIntent.EXTRA_BOOK_URL),
                 inBookshelf = intent?.getBooleanExtra(MainIntent.EXTRA_IN_BOOKSHELF, true) != false,
             )
-            MainRouteConst.ROUTE_SEARCH -> MainRouteSearch(
-                key = intent?.getStringExtra(MainIntent.EXTRA_SEARCH_KEY),
-                scopeRaw = intent?.getStringExtra(MainIntent.EXTRA_SEARCH_SCOPE)
-            )
-
             MainRouteConst.ROUTE_BOOK_INFO -> intent?.getStringExtra(MainIntent.EXTRA_BOOK_URL)
                 ?.takeIf { it.isNotBlank() }
                 ?.let { bookUrl ->

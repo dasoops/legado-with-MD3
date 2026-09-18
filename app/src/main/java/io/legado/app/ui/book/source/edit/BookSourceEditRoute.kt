@@ -10,11 +10,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.legado.app.R
-import io.legado.app.data.entities.BookSource
-import io.legado.app.ui.book.search.SearchScope
 import io.legado.app.ui.widget.components.alert.AppAlertDialog
-import io.legado.app.utils.GSON
-import io.legado.app.utils.fromJsonObject
 import io.legado.app.utils.getClipText
 import io.legado.app.utils.sendToClip
 import io.legado.app.utils.share
@@ -28,7 +24,6 @@ fun BookSourceEditRoute(
     onBack: (savedSourceUrl: String?) -> Unit,
     onLogin: (String) -> Unit,
     onDebug: (String) -> Unit,
-    onSearch: (SearchScope) -> Unit,
 ) {
     val context = LocalContext.current
     val state by viewModel.uiState.collectAsStateWithLifecycle()
@@ -43,11 +38,6 @@ fun BookSourceEditRoute(
 
                 is BookSourceEditEffect.OpenDebug -> onDebug(effect.sourceUrl)
                 is BookSourceEditEffect.OpenLogin -> onLogin(effect.sourceUrl)
-                is BookSourceEditEffect.OpenSearch ->
-                    GSON.fromJsonObject<BookSource>(effect.sourceJson).getOrNull()?.let { source ->
-                        onSearch(SearchScope(source))
-                    }
-
                 is BookSourceEditEffect.CopyText -> context.sendToClip(effect.text)
                 is BookSourceEditEffect.ShareText -> context.share(effect.text)
                 BookSourceEditEffect.ReadClipboard -> {

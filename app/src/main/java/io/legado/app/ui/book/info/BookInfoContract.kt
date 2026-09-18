@@ -232,7 +232,6 @@ sealed interface BookInfoEffect {
 }
 
 sealed interface BookInfoCallbackAction {
-    data class Search(val keyword: String) : BookInfoCallbackAction
     data class ShareText(val chooserTitle: String, val text: String) : BookInfoCallbackAction
     data class CopyText(val text: String) : BookInfoCallbackAction
     data object ClearCache : BookInfoCallbackAction

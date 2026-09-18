@@ -8,8 +8,6 @@ object MainIntent {
     const val EXTRA_START_ROUTE = "startRoute"
     internal const val EXTRA_ROUTE_HOME_AS_PARENT = "routeHomeAsParent"
     const val EXTRA_CACHE_GROUP_ID = "extra_cache_group_id"
-    const val EXTRA_SEARCH_KEY = "extra_search_key"
-    const val EXTRA_SEARCH_SCOPE = "extra_search_scope"
     const val EXTRA_BOOK_NAME = "name"
     const val EXTRA_BOOK_AUTHOR = "author"
     const val EXTRA_BOOK_URL = "bookUrl"
@@ -190,20 +188,6 @@ object MainIntent {
         putExtra(EXTRA_START_ROUTE, MainRouteConst.ROUTE_AUDIO_PLAY)
         bookUrl?.let { putExtra(EXTRA_BOOK_URL, it) }
         putExtra(EXTRA_IN_BOOKSHELF, inBookshelf)
-    }
-
-    fun createSearchIntent(
-        context: Context,
-        key: String? = null,
-        scopeRaw: String? = null
-    ): Intent {
-        return createLauncherIntent(context).apply {
-            putExtra(EXTRA_START_ROUTE, MainRouteConst.ROUTE_SEARCH)
-            putExtra(EXTRA_SEARCH_KEY, key)
-            scopeRaw?.takeIf { it.isNotBlank() }?.let {
-                putExtra(EXTRA_SEARCH_SCOPE, it)
-            }
-        }
     }
 
     fun createBookInfoIntent(

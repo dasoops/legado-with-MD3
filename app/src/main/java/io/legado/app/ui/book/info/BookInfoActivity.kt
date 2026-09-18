@@ -26,9 +26,6 @@ class BookInfoActivity : BaseComposeActivity() {
                 resultCode?.let { setResult(it) }
                 if (afterTransition) finishAfterTransition() else finish()
             },
-            onOpenSearch = { keyword ->
-                startActivity(MainActivity.createSearchIntent(this, key = keyword))
-            },
             onOpenBookSourceEdit = { sourceUrl ->
                 startActivity(MainActivity.createBookSourceEditIntent(this, sourceUrl))
             },

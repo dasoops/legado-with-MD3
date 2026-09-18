@@ -143,7 +143,6 @@ import io.legado.app.domain.usecase.BuildSpeechPlanUseCase
 import io.legado.app.domain.usecase.CacheBookChaptersUseCase
 import io.legado.app.domain.usecase.ChangeBookSourceUseCase
 import io.legado.app.domain.usecase.ChangeSourceSearchUseCase
-import io.legado.app.domain.usecase.CheckBookContentQualityUseCase
 import io.legado.app.domain.usecase.ClearBookCacheUseCase
 import io.legado.app.domain.usecase.CoverAlbumUseCase
 import io.legado.app.domain.usecase.DeleteBooksUseCase
@@ -163,8 +162,6 @@ import io.legado.app.domain.usecase.ResolveBookShelfStateUseCase
 import io.legado.app.domain.usecase.ResolveLocalSpeakersUseCase
 import io.legado.app.domain.usecase.SaveBookContentProcessUseCase
 import io.legado.app.domain.usecase.SaveMarkingUseCase
-import io.legado.app.domain.usecase.SaveSearchBooksUseCase
-import io.legado.app.domain.usecase.SearchBooksUseCase
 import io.legado.app.domain.usecase.ShrinkDatabaseUseCase
 import io.legado.app.domain.usecase.StartBookSourceCheckUseCase
 import io.legado.app.domain.usecase.SyncReadAloudVoicesUseCase
@@ -211,7 +208,6 @@ import io.legado.app.ui.book.readaloud.casting.BookVoiceCastingViewModel
 import io.legado.app.ui.book.readaloud.cloudtts.CloudTtsViewModel
 import io.legado.app.ui.book.readaloud.player.ReadAloudPlayerCoordinator
 import io.legado.app.ui.book.readaloud.player.ReadAloudPlayerViewModel
-import io.legado.app.ui.book.search.SearchViewModel
 import io.legado.app.ui.book.searchContent.SearchContentViewModel
 import io.legado.app.ui.book.source.debug.BookSourceDebugViewModel
 import io.legado.app.ui.book.source.edit.BookSourceEditViewModel
@@ -341,7 +337,6 @@ val appModule = module {
     }
     singleOf(::ExploreBooksUseCase)
     singleOf(::ExploreKindUiUseCase)
-    singleOf(::SaveSearchBooksUseCase)
     singleOf(::AppStartupMaintenanceUseCase)
     singleOf(::BackupRestoreUseCase)
     singleOf(::BatchCacheDownloadUseCase)
@@ -404,10 +399,8 @@ val appModule = module {
     }
     single<SearchRepository> { get<SearchRepositoryImpl>() }
     single<BookSearchGateway> { get<SearchRepositoryImpl>() }
-    singleOf(::SearchBooksUseCase)
     singleOf(::ChangeSourceSearchUseCase)
     singleOf(::GetChapterContentUseCase)
-    singleOf(::CheckBookContentQualityUseCase)
     singleOf(::SaveBookContentProcessUseCase)
     singleOf(::SaveMarkingUseCase)
     singleOf(::VerifyBookmarkTargetUseCase)
@@ -567,7 +560,6 @@ val appModule = module {
     viewModelOf(::ChangeCoverViewModel)
     viewModelOf(::ChangeBookSourceComposeViewModel)
     viewModelOf(::ChangeChapterSourceViewModel)
-    viewModelOf(::SearchViewModel)
     viewModelOf(::BookCacheManageViewModel)
     viewModel {
         BookshelfManageScreenViewModel(

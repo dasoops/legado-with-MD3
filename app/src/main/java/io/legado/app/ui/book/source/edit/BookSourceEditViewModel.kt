@@ -67,13 +67,6 @@ class BookSourceEditViewModel(
             BookSourceEditIntent.Save -> save(BookSourceEditEffect::Finish)
             BookSourceEditIntent.SaveAndDebug -> save { BookSourceEditEffect.OpenDebug(it) }
             BookSourceEditIntent.SaveAndLogin -> save { BookSourceEditEffect.OpenLogin(it) }
-            BookSourceEditIntent.SaveAndSearch -> save {
-                BookSourceEditEffect.OpenSearch(
-                    GSON.toJson(
-                        currentSource()
-                    )
-                )
-            }
 
             BookSourceEditIntent.Copy -> _effects.tryEmit(
                 BookSourceEditEffect.CopyText(

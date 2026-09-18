@@ -196,12 +196,6 @@ open class MainActivity : BaseComposeActivity(), AudioPlay.CallBack {
             inBookshelf = inBookshelf,
         )
 
-        fun createSearchIntent(
-            context: Context,
-            key: String? = null,
-            scopeRaw: String? = null
-        ): Intent = MainIntent.createSearchIntent(context, key, scopeRaw)
-
         fun createBookInfoIntent(
             context: Context,
             name: String? = null,

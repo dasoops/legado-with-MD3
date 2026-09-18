@@ -50,7 +50,6 @@ object BookshelfConfig {
     val bookshelfGroupCoverCount get() = settings.bookshelfGroupCoverCount
     val bookshelfListCoverWidth get() = settings.bookshelfListCoverWidth
     val bookshelfGridCoverWidth get() = settings.bookshelfGridCoverWidth
-    val bookshelfSearchActionDirectToSearch get() = settings.bookshelfSearchActionDirectToSearch
     val autoRefreshBook get() = settings.autoRefreshBook
     val saveTabPosition get() = settings.saveTabPosition
 }

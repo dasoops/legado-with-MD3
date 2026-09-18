@@ -92,7 +92,6 @@ fun BookSourceRouteScreen(
     onAddSource: () -> Unit,
     onEditSource: (String) -> Unit,
     onLoginSource: (String) -> Unit,
-    onSearchSource: (String, String) -> Unit,
     onDebugSource: (String) -> Unit,
 ) {
     LaunchedEffect(initialImportUrl) {
@@ -141,7 +140,6 @@ fun BookSourceRouteScreen(
         onAddSource = onAddSource,
         onEditSource = onEditSource,
         onLoginSource = onLoginSource,
-        onSearchSource = onSearchSource,
         onDebugSource = onDebugSource,
     )
 }
@@ -157,7 +155,6 @@ fun BookSourceScreen(
     onAddSource: () -> Unit,
     onEditSource: (String) -> Unit,
     onLoginSource: (String) -> Unit,
-    onSearchSource: (String, String) -> Unit,
     onDebugSource: (String) -> Unit,
 ) {
     val context = LocalContext.current
@@ -694,7 +691,6 @@ fun BookSourceScreen(
                                         onIntent(BookSourceIntent.MoveToEdge(setOf(item.id), toTop))
                                     },
                                     onLogin = { onLoginSource(item.id) },
-                                    onSearch = { onSearchSource(item.name, item.id) },
                                     onDebug = { onDebugSource(item.id) },
                                     onDelete = { deleteIds = setOf(item.id) },
                                     onSetExploreEnabled = { enabled ->
@@ -812,7 +808,6 @@ private fun BookSourceItemMenu(
     canMoveToEdge: Boolean,
     onMoveToEdge: (Boolean) -> Unit,
     onLogin: () -> Unit,
-    onSearch: () -> Unit,
     onDebug: () -> Unit,
     onDelete: () -> Unit,
     onSetExploreEnabled: (Boolean) -> Unit,
@@ -841,9 +836,6 @@ private fun BookSourceItemMenu(
                     dismiss(); onLogin()
                 })
             }
-            RoundDropdownMenuItem(stringResource(R.string.search), onClick = {
-                dismiss(); onSearch()
-            })
             RoundDropdownMenuItem(stringResource(R.string.debug), onClick = {
                 dismiss(); onDebug()
             })

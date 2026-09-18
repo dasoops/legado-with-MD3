@@ -159,7 +159,6 @@ fun BookshelfRouteScreen(
     onScrollToTopRequestHandled: (Long) -> Unit = {},
     onBookClick: (BookShelfItem, String?) -> Unit,
     onBookLongClick: (book: BookShelfItem, sharedCoverKey: String?) -> Unit,
-    onNavigateToSearch: (String) -> Unit,
     onNavigateToRemoteImport: () -> Unit,
     onNavigateToLocalImport: () -> Unit,
     onNavigateToCache: (Long) -> Unit,
@@ -177,7 +176,6 @@ fun BookshelfRouteScreen(
         onScrollToTopRequestHandled = onScrollToTopRequestHandled,
         onBookClick = onBookClick,
         onBookLongClick = onBookLongClick,
-        onNavigateToSearch = onNavigateToSearch,
         onNavigateToRemoteImport = onNavigateToRemoteImport,
         onNavigateToLocalImport = onNavigateToLocalImport,
         onNavigateToCache = onNavigateToCache,
@@ -201,7 +199,6 @@ fun BookshelfScreen(
     onScrollToTopRequestHandled: (Long) -> Unit = {},
     onBookClick: (BookShelfItem, String?) -> Unit,
     onBookLongClick: (book: BookShelfItem, sharedCoverKey: String?) -> Unit,
-    onNavigateToSearch: (String) -> Unit,
     onNavigateToRemoteImport: () -> Unit,
     onNavigateToLocalImport: () -> Unit,
     onNavigateToCache: (Long) -> Unit,
@@ -444,14 +441,10 @@ fun BookshelfScreen(
     val scrollBehavior = GlassTopAppBarDefaults.defaultScrollBehavior()
     var showTopBarMenu by remember { mutableStateOf(false) }
     val onSearchClick = {
-        if (uiState.settings.bookshelfSearchActionDirectToSearch) {
-            onNavigateToSearch(uiState.searchKey.trim())
-        } else {
-            val active = !uiState.isSearch
-            onIntent(BookshelfIntent.SetSearchMode(active))
-            if (!active && uiState.selectedGroupId != currentTabGroupId) {
-                onIntent(BookshelfIntent.ChangeGroup(currentTabGroupId))
-            }
+        val active = !uiState.isSearch
+        onIntent(BookshelfIntent.SetSearchMode(active))
+        if (!active && uiState.selectedGroupId != currentTabGroupId) {
+            onIntent(BookshelfIntent.ChangeGroup(currentTabGroupId))
         }
     }
 
@@ -475,11 +468,6 @@ fun BookshelfScreen(
                 scrollBehavior = scrollBehavior,
                 onSearchClick = onSearchClick,
                 onSearchQueryChange = { onIntent(BookshelfIntent.SetSearchKey(it)) },
-                onSearchSubmit = { rawQuery ->
-                    rawQuery.trim()
-                        .takeIf { it.isNotEmpty() }
-                        ?.let(onNavigateToSearch)
-                },
                 onClearSearch = { onIntent(BookshelfIntent.SetSearchKey("")) },
                 actions = {
                     AnimatedVisibility(visible = isEditMode) {
@@ -912,7 +900,6 @@ fun BookshelfScreen(
                             onDragStarted = {},
                             onMoveBook = { _, _, _ -> },
                             onDragFinished = {},
-                            onGlobalSearch = { onNavigateToSearch(uiState.searchKey.trim()) },
                             onBookClick = onBookClick,
                             onBookLongClick = onBookLongClick,
                             isCurrentPage = true,
@@ -972,7 +959,6 @@ fun BookshelfScreen(
                                     onDragFinished = {
                                         if (isSelectedGroup) onIntent(BookshelfIntent.FinishDragging)
                                     },
-                                    onGlobalSearch = { onNavigateToSearch(uiState.searchKey.trim()) },
                                     onBookClick = onBookClick,
                                     onBookLongClick = onBookLongClick,
                                     isCurrentPage = isSelectedGroup,
@@ -1117,7 +1103,6 @@ private fun BookshelfTopBar(
     scrollBehavior: GlassTopAppBarScrollBehavior,
     onSearchClick: () -> Unit,
     onSearchQueryChange: (String) -> Unit,
-    onSearchSubmit: (String) -> Unit,
     onClearSearch: () -> Unit,
     actions: @Composable RowScope.() -> Unit = {},
     bottomContent: @Composable ColumnScope.() -> Unit = {}
@@ -1151,7 +1136,6 @@ private fun BookshelfTopBar(
                 SearchBar(
                     query = uiState.searchKey,
                     onQueryChange = onSearchQueryChange,
-                    onSearch = onSearchSubmit,
                     trailingIcon = {
                         if (uiState.searchKey.isNotEmpty()) {
                             SmallPlainButton(
@@ -1332,7 +1316,6 @@ fun BookshelfPage(
     onDragStarted: (ImmutableList<BookUiItem>) -> Unit,
     onMoveBook: (fromIndex: Int, toIndex: Int, currentBooks: ImmutableList<BookUiItem>) -> Unit,
     onDragFinished: () -> Unit,
-    onGlobalSearch: () -> Unit,
     onBookClick: (BookShelfItem, String?) -> Unit,
     onBookLongClick: (BookShelfItem, String?) -> Unit,
     isCurrentPage: Boolean = true,
@@ -1342,19 +1325,7 @@ fun BookshelfPage(
 ) {
     if (books.isEmpty()) {
         if (!isCurrentPage) return
-        if (uiState.isSearch) {
-            EmptyMessage(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(
-                        top = paddingValues.calculateTopPadding(),
-                        bottom = 120.dp
-                    ),
-                message = stringResource(R.string.bookshelf_empty_global_search),
-                buttonText = stringResource(R.string.global_search),
-                onButtonClick = onGlobalSearch
-            )
-        } else if (!uiState.isInitialLoading) {
+        if (uiState.isSearch || !uiState.isInitialLoading) {
             EmptyMessage(
                 modifier = Modifier
                     .fillMaxSize()

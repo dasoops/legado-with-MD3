@@ -46,18 +46,6 @@ open class JsExtensionsBase(activity: AppCompatActivity?, source: BaseSource?) :
     }
 
     @JavascriptInterface
-    fun searchBook(key: String) {
-        searchBook(key, null)
-    }
-
-    @JavascriptInterface
-    fun searchBook(key: String, searchScope: String?) {
-        activityRef.get()?.let {
-            it.startActivity(MainActivity.createSearchIntent(it, key, searchScope))
-        }
-    }
-
-    @JavascriptInterface
     fun addBook(bookUrl: String) {
         activityRef.get()?.showDialogFragment(AddToBookshelfDialog(bookUrl))
     }
@@ -100,19 +88,6 @@ open class JsExtensionsBase(activity: AppCompatActivity?, source: BaseSource?) :
                                     toSource.bookSourceUrl
                                 )
                             )
-                        }
-                    }
-                }
-
-                "search" -> {
-                    title?.let {
-                        val searchScope = origin?.let { o ->
-                            appDb.bookSourceDao.getBookSource(o)?.let { s ->
-                                "${s.bookSourceName.replace(":", "")}::${o}"
-                            }
-                        }
-                        withContext(Main) {
-                            searchBook(it, searchScope)
                         }
                     }
                 }

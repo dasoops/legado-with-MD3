@@ -22,7 +22,6 @@ import io.legado.app.model.localBook.LocalBook
 import io.legado.app.service.WebService
 import io.legado.app.utils.LogUtils
 import io.legado.app.utils.stackTraceStr
-import io.legado.app.web.socket.BookSearchWebSocket
 import io.legado.app.web.socket.BookSourceDebugWebSocket
 import io.legado.app.web.utils.AssetsWeb
 import kotlinx.coroutines.Dispatchers
@@ -149,9 +148,6 @@ class KtorServer(private val port: Int) {
             routing {
                 webSocket("/bookSourceDebug") {
                     BookSourceDebugWebSocket(this).handle()
-                }
-                webSocket("/searchBook") {
-                    BookSearchWebSocket(this).handle()
                 }
             }
         }.start(wait = false)

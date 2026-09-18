@@ -15,9 +15,6 @@ val Context.localDataStore: DataStore<Preferences> by preferencesDataStore(name 
 object LocalPreferencesKeys {
     val MIGRATED_TO_SETTINGS = booleanPreferencesKey("__local_ui_status_migrated_to_settings")
     val SHOW_THEME_REFACTOR_TIP = booleanPreferencesKey("show_theme_refactor_tip")
-    val SEARCH_LAYOUT_MODE = intPreferencesKey("search_layout_mode")
-    val SEARCH_SCOPE = stringPreferencesKey("search_scope")
-    val MATCH_MODE = intPreferencesKey("match_mode")
     val READ_URL_IN_BROWSER = booleanPreferencesKey("read_url_in_browser")
     val LAST_BACKUP = longPreferencesKey("last_backup")
     val PASSWORD = stringPreferencesKey("password")

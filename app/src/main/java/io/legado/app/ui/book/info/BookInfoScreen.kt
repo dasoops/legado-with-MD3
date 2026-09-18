@@ -1007,13 +1007,6 @@ private fun BookInfoHeader(
                             onDismissRequest = { showTitleMenu = false }
                         ) {
                             RoundDropdownMenuItem(
-                                text = stringResource(R.string.search),
-                                onClick = {
-                                    showTitleMenu = false
-                                    onBookNameClick(true)
-                                }
-                            )
-                            RoundDropdownMenuItem(
                                 text = stringResource(if (isTitleExpanded) R.string.collapse else R.string.expand),
                                 onClick = {
                                     showTitleMenu = false

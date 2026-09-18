@@ -595,15 +595,6 @@ fun BookshelfConfigSheet(
             PillHeaderDivider(title = stringResource(R.string.other))
 
             CompactSwitchSettingItem(
-                title = stringResource(R.string.search_filter_first),
-                checked = settings.bookshelfSearchActionDirectToSearch,
-                color = LegadoTheme.colorScheme.surface,
-                onCheckedChange = { value ->
-                    onUpdate { it.copy(bookshelfSearchActionDirectToSearch = value) }
-                }
-            )
-
-            CompactSwitchSettingItem(
                 title = stringResource(R.string.show_bookshelf_fast_scroller),
                 checked = settings.showBookshelfFastScroller,
                 color = LegadoTheme.colorScheme.surface,

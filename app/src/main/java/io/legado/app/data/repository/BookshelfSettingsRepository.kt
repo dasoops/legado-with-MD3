@@ -77,7 +77,6 @@ internal fun Preferences.toBookshelfSettings() = BookshelfSettings(
     bookshelfGroupCoverCount = compatDsInt(PreferKey.bookshelfGroupCoverCount) ?: 4,
     bookshelfListCoverWidth = compatDsInt(PreferKey.bookshelfListCoverWidth) ?: 84,
     bookshelfGridCoverWidth = compatDsInt(PreferKey.bookshelfGridCoverWidth) ?: 120,
-    bookshelfSearchActionDirectToSearch = compatDsBoolean(PreferKey.bookshelfSearchActionDirectToSearch) ?: true,
     autoRefreshBook = compatDsBoolean(PreferKey.autoRefresh) ?: false,
     saveTabPosition = compatDsLong(PreferKey.saveTabPosition) ?: BookGroup.IdAll,
 )
@@ -128,7 +127,6 @@ internal fun BookshelfSettings.toPrefMap(): Map<String, Any?> = mapOf(
     PreferKey.bookshelfGroupCoverCount to bookshelfGroupCoverCount,
     PreferKey.bookshelfListCoverWidth to bookshelfListCoverWidth,
     PreferKey.bookshelfGridCoverWidth to bookshelfGridCoverWidth,
-    PreferKey.bookshelfSearchActionDirectToSearch to bookshelfSearchActionDirectToSearch,
     PreferKey.autoRefresh to autoRefreshBook,
     PreferKey.saveTabPosition to saveTabPosition,
 )

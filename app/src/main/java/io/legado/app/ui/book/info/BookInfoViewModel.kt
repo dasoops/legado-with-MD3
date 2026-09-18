@@ -1252,7 +1252,7 @@ class BookInfoViewModel(
                 event = if (longClick) SourceCallBack.LONG_CLICK_AUTHOR else SourceCallBack.CLICK_AUTHOR,
                 source = bookSource,
                 book = book.uiCopy(),
-                action = BookInfoCallbackAction.Search(book.author),
+                action = BookInfoCallbackAction.None,
             )
         )
     }
@@ -1264,7 +1264,7 @@ class BookInfoViewModel(
                 event = if (longClick) SourceCallBack.LONG_CLICK_BOOK_NAME else SourceCallBack.CLICK_BOOK_NAME,
                 source = bookSource,
                 book = book.uiCopy(),
-                action = BookInfoCallbackAction.Search(book.name),
+                action = BookInfoCallbackAction.None,
             )
         )
     }

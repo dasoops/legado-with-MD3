@@ -8,8 +8,8 @@ import org.junit.Test
 class BookshelfSettingsMappingTest {
 
     @Test
-    fun `Bookshelf 48 键写读映射逐字段对应`() {
-        assertEquals(48, BookshelfSettings().toPrefMap().size)
+    fun `Bookshelf 47 键写读映射逐字段对应`() {
+        assertEquals(47, BookshelfSettings().toPrefMap().size)
         bookshelfMappingSamples().forEach { expected ->
             assertEquals(expected.expectedPrefMap(), expected.toPrefMap())
             assertEquals(
@@ -79,7 +79,6 @@ private fun bookshelfMappingSamples(): List<BookshelfSettings> {
         bookshelfGroupCoverCount = 123,
         bookshelfListCoverWidth = 124,
         bookshelfGridCoverWidth = 125,
-        bookshelfSearchActionDirectToSearch = false,
         autoRefreshBook = false,
         saveTabPosition = 987654321L,
     )
@@ -105,7 +104,6 @@ private fun bookshelfMappingSamples(): List<BookshelfSettings> {
         base.copy(bookshelfTitleSmallFont = true),
         base.copy(bookshelfTitleCenter = true),
         base.copy(bookshelfCoverShadow = true),
-        base.copy(bookshelfSearchActionDirectToSearch = true),
         base.copy(autoRefreshBook = true),
     )
 }
@@ -156,7 +154,6 @@ private fun BookshelfSettings.expectedPrefMap(): Map<String, Any?> = mapOf(
     PreferKey.bookshelfGroupCoverCount to bookshelfGroupCoverCount,
     PreferKey.bookshelfListCoverWidth to bookshelfListCoverWidth,
     PreferKey.bookshelfGridCoverWidth to bookshelfGridCoverWidth,
-    PreferKey.bookshelfSearchActionDirectToSearch to bookshelfSearchActionDirectToSearch,
     PreferKey.autoRefresh to autoRefreshBook,
     PreferKey.saveTabPosition to saveTabPosition,
 )

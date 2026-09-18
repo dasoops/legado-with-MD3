@@ -61,7 +61,6 @@ fun BookInfoRouteScreen(
     viewModel: BookInfoViewModel,
     onBack: () -> Unit,
     onFinish: (resultCode: Int?, afterTransition: Boolean) -> Unit,
-    onOpenSearch: (String) -> Unit,
     onOpenBookSourceEdit: (String) -> Unit,
     onOpenSourceLogin: (String) -> Unit,
     onOpenReader: (bookUrl: String, inBookshelf: Boolean, chapterChanged: Boolean) -> Unit = { _, _, _ -> },
@@ -175,7 +174,7 @@ fun BookInfoRouteScreen(
 
                 is BookInfoEffect.OpenFile -> activity.openFileUri(effect.uri, effect.mimeType)
                 is BookInfoEffect.RunSourceCallback -> {
-                    runSourceCallback(activity, effect, viewModel, onOpenSearch)
+                    runSourceCallback(activity, effect, viewModel)
                 }
 
                 is BookInfoEffect.RunIntroJs -> {
@@ -215,7 +214,6 @@ private fun runSourceCallback(
     activity: AppCompatActivity,
     effect: BookInfoEffect.RunSourceCallback,
     viewModel: BookInfoViewModel,
-    onOpenSearch: (String) -> Unit,
 ) {
     SourceCallBack.callBackBtn(
         activity,
@@ -225,10 +223,6 @@ private fun runSourceCallback(
         null,
     ) {
         when (val action = effect.action) {
-            is BookInfoCallbackAction.Search -> {
-                onOpenSearch(action.keyword)
-            }
-
             is BookInfoCallbackAction.ShareText -> {
                 val intent = Intent(Intent.ACTION_SEND).apply {
                     putExtra(Intent.EXTRA_TEXT, action.text)

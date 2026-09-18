@@ -37,7 +37,6 @@ import coil3.ImageLoader
 import io.legado.app.R
 import io.legado.app.constant.BookType
 import io.legado.app.constant.Status
-import io.legado.app.domain.model.BookSearchScope
 import io.legado.app.domain.model.settings.AppUiConfiguration
 import io.legado.app.help.coil.CoverExtras
 import io.legado.app.model.AudioPlay
@@ -74,9 +73,6 @@ import io.legado.app.ui.book.readaloud.cloudtts.CloudTtsEffect
 import io.legado.app.ui.book.readaloud.cloudtts.CloudTtsIntent
 import io.legado.app.ui.book.readaloud.cloudtts.CloudTtsScreen
 import io.legado.app.ui.book.readaloud.cloudtts.CloudTtsViewModel
-import io.legado.app.ui.book.search.SearchIntent
-import io.legado.app.ui.book.search.SearchRouteScreen
-import io.legado.app.ui.book.search.SearchViewModel
 import io.legado.app.ui.book.searchContent.SearchContentRouteScreen
 import io.legado.app.ui.book.searchContent.SearchContentViewModel
 import io.legado.app.ui.book.source.debug.BookSourceDebugRoute
@@ -234,10 +230,6 @@ fun MainActivity.mainEntryProvider(
             onLoginSource = {
                 onNavigateToRoute(MainRouteSourceLogin(SourceLoginType.BookSource, it))
             },
-            onSearchSource = { sourceName, sourceUrl ->
-                val scopeRaw = BookSearchScope.encodeSource(sourceName, sourceUrl)
-                onNavigateToRoute(MainRouteSearch(null, scopeRaw))
-            },
             onDebugSource = { sourceUrl ->
                 onNavigateToRoute(MainRouteBookSourceDebug(sourceUrl))
             },
@@ -265,7 +257,6 @@ fun MainActivity.mainEntryProvider(
                 onNavigateToRoute(MainRouteSourceLogin(SourceLoginType.BookSource, it))
             },
             onDebug = { onNavigateToRoute(MainRouteBookSourceDebug(it)) },
-            onSearch = { onNavigateToRoute(MainRouteSearch(null, it.toString())) },
         )
     }
     entry<MainRouteBookSourceDebug> { route ->
@@ -284,13 +275,6 @@ fun MainActivity.mainEntryProvider(
             useRail = useRail,
             onOpenSettings = {
                 onNavigateToRoute(MainRouteSettings)
-            },
-            onNavigateToSearch = { key ->
-                onNavigateToRoute(
-                    MainRouteSearch(
-                        key = key?.trim()?.takeIf { it.isNotEmpty() }
-                    )
-                )
             },
             onNavigateToRemoteImport = {
                 onNavigateToRoute(MainRouteImportRemote)
@@ -765,43 +749,6 @@ fun MainActivity.mainEntryProvider(
         )
     }
 
-    entry<MainRouteSearch> { route ->
-        val searchViewModel = koinViewModel<SearchViewModel>()
-
-        LaunchedEffect(route.key, route.scopeRaw, searchViewModel) {
-            searchViewModel.onIntent(
-                SearchIntent.Initialize(
-                    key = route.key,
-                    scopeRaw = route.scopeRaw
-                )
-            )
-        }
-
-        SearchRouteScreen(
-            viewModel = searchViewModel,
-            onBack = {
-                onNavigateBack()
-            },
-            onOpenBookInfo = { name, author, bookUrl, origin, coverPath, sharedCoverKey ->
-                onNavigateToRoute(
-                    MainRouteBookInfo(
-                        name = name,
-                        author = author,
-                        bookUrl = bookUrl,
-                        origin = origin,
-                        coverPath = coverPath,
-                        sharedCoverKey = sharedCoverKey
-                    )
-                )
-            },
-            onOpenSourceManage = {
-                onNavigateToRoute(MainRouteBookSourceManage())
-            },
-            sharedTransitionScope = sharedTransitionScope,
-            animatedVisibilityScope = LocalNavAnimatedContentScope.current,
-        )
-    }
-
     entry<MainRouteReadRecord> {
         ReadRecordRouteScreen(
             onBackClick = { onNavigateBack() },
@@ -811,9 +758,6 @@ fun MainActivity.mainEntryProvider(
                         io.legado.app.data.appDb.bookDao.getBook(name, author)
                     }
                     if (book != null) this@mainEntryProvider.startActivityForBook(book)
-                    else {
-                        onNavigateToRoute(MainRouteSearch(key = name))
-                    }
                 }
             },
             onSummaryClick = {
@@ -831,9 +775,6 @@ fun MainActivity.mainEntryProvider(
                         io.legado.app.data.appDb.bookDao.getBook(name, author)
                     }
                     if (book != null) this@mainEntryProvider.startActivityForBook(book)
-                    else {
-                        onNavigateToRoute(MainRouteSearch(key = name))
-                    }
                 }
             }
         )
@@ -867,9 +808,6 @@ fun MainActivity.mainEntryProvider(
             viewModel = bookInfoViewModel,
             onBack = { onNavigateBack() },
             onFinish = { _, _ -> onNavigateBack() },
-            onOpenSearch = { keyword ->
-                onNavigateToRoute(MainRouteSearch(key = keyword))
-            },
             onOpenBookSourceEdit = { sourceUrl ->
                 onNavigateToRoute(MainRouteBookSourceEdit(sourceUrl))
             },
