@@ -1,4 +1,4 @@
-package io.legado.app.ui.rss.read
+package io.legado.app.ui.widget.web
 
 import android.annotation.SuppressLint
 import android.content.Context

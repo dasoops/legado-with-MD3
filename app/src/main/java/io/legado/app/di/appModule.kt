@@ -67,12 +67,6 @@ import io.legado.app.data.repository.ReadStyleConfigStore
 import io.legado.app.data.repository.ReadStyleRepository
 import io.legado.app.data.repository.RemoteBookRepository
 import io.legado.app.data.repository.ReplaceRuleRepository
-import io.legado.app.data.repository.RssArticleRepository
-import io.legado.app.data.repository.RssFavoriteRepository
-import io.legado.app.data.repository.RssReadRecordRepository
-import io.legado.app.data.repository.RssRepository
-import io.legado.app.data.repository.RssSourceEditRepository
-import io.legado.app.data.repository.RuleSubscriptionRepository
 import io.legado.app.data.repository.SearchContentRepository
 import io.legado.app.data.repository.SearchRepository
 import io.legado.app.data.repository.SearchRepositoryImpl
@@ -191,7 +185,6 @@ import io.legado.app.model.ReaderSession
 import io.legado.app.ui.about.AboutViewModel
 import io.legado.app.ui.association.ImportHttpTtsViewModel
 import io.legado.app.ui.association.ImportReplaceRuleViewModel
-import io.legado.app.ui.association.ImportRssSourceViewModel
 import io.legado.app.ui.association.ImportTxtTocRuleViewModel
 import io.legado.app.ui.book.audio.AudioPlayCoordinator
 import io.legado.app.ui.book.audio.AudioPlayViewModel
@@ -245,18 +238,9 @@ import io.legado.app.ui.main.MainRouteSearchContent
 import io.legado.app.ui.main.MainViewModel
 import io.legado.app.ui.main.bookshelf.BookshelfViewModel
 import io.legado.app.ui.main.my.MyViewModel
-import io.legado.app.ui.main.rss.RssViewModel
 import io.legado.app.ui.replace.ReplaceEditRoute
 import io.legado.app.ui.replace.ReplaceRuleViewModel
 import io.legado.app.ui.replace.edit.ReplaceEditViewModel
-import io.legado.app.ui.rss.article.RssArticlesViewModel
-import io.legado.app.ui.rss.article.RssSortViewModel
-import io.legado.app.ui.rss.favorites.RssFavoritesViewModel
-import io.legado.app.ui.rss.read.ReadRssViewModel
-import io.legado.app.ui.rss.source.debug.RssSourceDebugViewModel
-import io.legado.app.ui.rss.source.edit.RssSourceEditViewModel
-import io.legado.app.ui.rss.source.manage.RssSourceViewModel
-import io.legado.app.ui.rss.subscription.RuleSubViewModel
 import io.legado.app.ui.tagGroupRule.TagGroupRuleViewModel
 import io.legado.app.utils.isNightMode
 import io.legado.app.utils.sysConfiguration
@@ -276,8 +260,6 @@ val appModule = module {
     single { get<AppDatabase>().bookGroupDao }
     single { get<AppDatabase>().bookSourceDao }
     single { get<AppDatabase>().searchContentHistoryDao }
-    single { get<AppDatabase>().rssStarDao }
-    single { get<AppDatabase>().ruleSubDao }
 
     singleOf(::ReadRecordRepository)
     single<HomeDashboardGateway> { HomeDashboardRepository(get(), get()) }
@@ -417,12 +399,6 @@ val appModule = module {
     single<ChapterSpeechGateway> { ChapterSpeechRepository(get()) }
     single { ExploreRepositoryImpl(get()) }
     single<ExploreBooksGateway> { get<ExploreRepositoryImpl>() }
-    singleOf(::RssRepository)
-    singleOf(::RssFavoriteRepository)
-    singleOf(::RssArticleRepository)
-    singleOf(::RssReadRecordRepository)
-    singleOf(::RssSourceEditRepository)
-    singleOf(::RuleSubscriptionRepository)
     single {
         SearchRepositoryImpl(get())
     }
@@ -456,21 +432,12 @@ val appModule = module {
 
     viewModelOf(::ImportHttpTtsViewModel)
     viewModelOf(::ImportReplaceRuleViewModel)
-    viewModelOf(::ImportRssSourceViewModel)
     viewModelOf(::ImportTxtTocRuleViewModel)
     viewModelOf(::HighlightTagRuleViewModel)
     viewModelOf(::TagGroupRuleViewModel)
-    viewModelOf(::RssSourceViewModel)
     viewModelOf(::BookSourceViewModel)
     viewModelOf(::BookSourceEditViewModel)
     viewModelOf(::BookSourceDebugViewModel)
-    viewModelOf(::RssSourceEditViewModel)
-    viewModelOf(::RssSourceDebugViewModel)
-    viewModelOf(::RssSortViewModel)
-    viewModelOf(::RssArticlesViewModel)
-    viewModelOf(::ReadRssViewModel)
-    viewModelOf(::RssFavoritesViewModel)
-    viewModelOf(::RuleSubViewModel)
     viewModelOf(::ReadRecordViewModel)
     viewModelOf(::ReadRecordOverviewViewModel)
     viewModelOf(::MyViewModel)
@@ -543,7 +510,6 @@ val appModule = module {
             application = get(),
             bookRepository = get(),
             bookSourceRepository = get(),
-            rssRepository = get(),
             httpTtsRepository = get(),
             searchRepository = get(),
             downloadCacheSettingsGateway = get(),
@@ -601,7 +567,6 @@ val appModule = module {
     viewModelOf(::ChangeCoverViewModel)
     viewModelOf(::ChangeBookSourceComposeViewModel)
     viewModelOf(::ChangeChapterSourceViewModel)
-    viewModelOf(::RssViewModel)
     viewModelOf(::SearchViewModel)
     viewModelOf(::BookCacheManageViewModel)
     viewModel {

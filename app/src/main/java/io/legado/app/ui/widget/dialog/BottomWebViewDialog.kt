@@ -649,9 +649,6 @@ class BottomWebViewDialog() : BottomSheetDialogFragment(R.layout.dialog_web_view
         }
     }
 
-    override fun onNavigateToArticles(sortUrl: String?, origin: String?) {
-    }
-
     @Suppress("unused")
     private class JSInterface(dialog: BottomWebViewDialog) {
         private val dialogRef: WeakReference<BottomWebViewDialog> = WeakReference(dialog)

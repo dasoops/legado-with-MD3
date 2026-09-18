@@ -70,12 +70,9 @@
     <string name="home">首页</string>
     <string name="homepage_modules">首页模块 (JSON)</string>
     <string name="favorites">收藏夹</string>
-    <string name="favorite">收藏</string>
     <string name="in_favorites">已收藏</string>
     <string name="out_favorites">未收藏</string>
-    <string name="rss">订阅</string>
     <string name="all">全部</string>
-    <string name="rss_feed_management">订阅源管理</string>
     <string name="recent_reading">最近阅读</string>
     <string name="last_read">最后阅读</string>
     <string name="update_log">更新日志</string>
@@ -251,7 +248,6 @@
     <string name="edit_book_source">编辑书源</string>
     <string name="disable_book_source">禁用书源</string>
     <string name="add_book_source">新建书源</string>
-    <string name="add_rss_source">新建订阅源</string>
     <string name="book_file_selector">添加书籍</string>
     <string name="scan_book_source">扫描</string>
     <string name="copy_source">拷贝源</string>
@@ -402,7 +398,6 @@
     <string name="bookshelf_management">书架管理</string>
     <string name="clear_bookshelf_s">这将会删除所有书籍，请谨慎操作。</string>
     <string name="search_book_source">搜索书源</string>
-    <string name="search_rss_source">搜索订阅源</string>
     <string name="search_book_source_num">搜索（共 %d 个书源）</string>
     <string name="chapter_list_size">目录（%d）</string>
     <string name="text_bold">加粗</string>
@@ -564,7 +559,6 @@
     <string name="diy_source_group">自定义源分组</string>
     <string name="diy_edit_source_group">输入自定义源分组名称</string>
     <string name="concurrent_rate">并发率（concurrentRate）</string>
-    <string name="sort_url">分类 URL（sortUrl）</string>
     <string name="login_url">登录 URL(loginUrl)</string>
     <string name="login_ui">登录 UI（loginUi）</string>
     <string name="login_check_js">登录检查 JS（loginCheckJs）</string>
@@ -602,18 +596,8 @@
     <string name="rule_pay_action">购买操作（payAction）</string>
 
     <string name="source_icon">图标（sourceIcon）</string>
-    <string name="r_articles">列表规则（ruleArticles）</string>
-    <string name="r_next">列表下一页规则（ruleNextArticles）</string>
-    <string name="r_title">标题规则（ruleTitle）</string>
     <string name="r_guid">GUID 规则（ruleGuid）</string>
-    <string name="r_date">时间规则（rulePubDate）</string>
     <string name="r_categories">类别规则（ruleCategories）</string>
-    <string name="r_description">描述规则（ruleDescription）</string>
-    <string name="r_image">图片 URL 规则（ruleImage）</string>
-    <string name="r_content">内容规则（ruleContent）</string>
-    <string name="r_style">样式（style）</string>
-    <string name="r_inject_js">注入Js (injectJs)</string>
-    <string name="r_link">链接规则（ruleLink）</string>
     <string name="check_key_word">校验关键字（checkKeyWord）</string>
     <string name="rule_actions">操作（actions）</string>
     <string name="rule_is_pay">购买标识（isPay）</string>
@@ -780,8 +764,6 @@
     <string name="web_dav_url">WebDav 服务器地址</string>
     <string name="web_dav_account">WebDav 账号</string>
     <string name="web_dav_account_d">输入你的 WebDav 账号</string>
-    <string name="rss_source">订阅源</string>
-    <string name="rss_source_edit">编辑订阅源</string>
     <string name="screen">筛选</string>
     <string name="screen_find">筛选发现</string>
     <string name="dur_pos">当前位置：</string>
@@ -807,14 +789,12 @@
     <string name="next_sentence">下一句</string>
     <string name="other_folder">其它目录</string>
     <string name="text_too_long_qr_error">文字太多，生成二维码失败</string>
-    <string name="share_rss_source">分享 RSS 源</string>
     <string name="share_book_source">分享书源</string>
     <string name="auto_dark_mode">自动切换夜间模式</string>
     <string name="auto_dark_mode_s">夜间模式跟随系统</string>
     <string name="go_back">上级</string>
     <string name="tone_colour">在线朗读音色</string>
     <string name="select_count">已选 %1$d / %2$d</string>
-    <string name="show_rss">显示订阅</string>
     <string name="service_stop">服务已停止</string>
     <string name="service_start">正在启动服务\n具体信息请查看通知栏</string>
     <string name="default_path">默认路径</string>
@@ -1031,7 +1011,6 @@
     <string name="brightness_bar_right">右侧</string>
     <string name="brightness_follow_system">跟随系统</string>
     <string name="language">语言</string>
-    <string name="import_rss_source">导入订阅源</string>
     <string name="donate_summary">您的支持是我更新的动力</string>
     <string name="about_summary">公众号【开源阅读软件】</string>
     <string name="read_record">阅读记录</string>
@@ -1053,7 +1032,6 @@
     <string name="search_content">全文搜索</string>
     <string name="search_content_size">搜索结果</string>
     <string name="search_content_empty">搜索内容为空，请检查净化或简繁设置</string>
-    <string name="rss_source_empty">RSS 源目前为空！</string>
     <string name="page_key_set_help">将焦点放到输入框按下物理按键会自动录入键值，多个按键会自动用英文逗号隔开。</string>
     <string name="theme_name">主题名称</string>
     <string name="auto_clear_expired">自动清除过期搜索数据</string>
@@ -1076,8 +1054,6 @@
     <string name="title_position">标题位置</string>
     <string name="show_hide">显示/隐藏</string>
     <string name="header_footer">信息</string>
-    <string name="rule_subscription">规则</string>
-    <string name="rule_sub_empty_msg">还没有规则订阅！</string>
     <string name="get_book_progress">拉取云端进度</string>
     <string name="cover_book_progress">覆盖云端进度</string>
     <string name="current_progress_exceeds_cloud">当前进度超过云端进度，是否同步？</string>
@@ -1345,7 +1321,6 @@
     <string name="async_load_image">异步加载图片</string>
     <string name="ignore_audio_focus_title">忽略音频焦点</string>
     <string name="ignore_audio_focus_summary">允许与其他应用同时播放音频</string>
-    <string name="refresh_sort">刷新分类</string>
     <string name="cover_decode_js">封面解密（coverDecodeJs）</string>
     <string name="net_no_group">网络未分组</string>
     <string name="local_no_group">本地未分组</string>
@@ -1406,7 +1381,6 @@
     <string name="database_ignore_summary">选择忽略的数据库表</string>
     <string name="source_sub">书源订阅</string>
     <string name="book_group">书架分组</string>
-    <string name="rss_star">RSS 收藏</string>
     <string name="search_history">搜索历史</string>
     <string name="keyboard_assists">键盘辅助</string>
     <string name="homepage_custom_sets">首页自定义</string>
@@ -1812,7 +1786,6 @@
     <string name="refresh_limit_books">%1$d 本</string>
     <string name="reading_behavior">阅读行为</string>
     <string name="page_control">翻页控制</string>
-    <string name="redirect_policy">网页重定向策略</string>
     <string name="redirect_allow_all">允许所有重定向</string>
     <string name="redirect_ask_always">总是询问</string>
     <string name="redirect_ask_cross_origin">域名不同时询问</string>
@@ -1997,10 +1970,6 @@
     <string name="dashed_border">虚线</string>
     <string name="apply_header_style">应用页眉字体样式</string>
     <string name="source_tab_start">启动</string>
-    <string name="r_startHtml">启动页html文本</string>
-    <string name="r_startStyle">启动页style文本</string>
-    <string name="r_startJs">启动页Js（startJs）</string>
-    <string name="r_preloadJs">预注入Js（preloadJs）</string>
     <string name="enable_preload">预加载</string>
     <string name="load_with_web_log">显示WebView日志</string>
     <string name="cache_first">优先缓存</string>
@@ -2304,7 +2273,6 @@
     <string name="select_or_search_category">选择或搜索分类</string>
     <string name="multi_select_items">多选项目</string>
     <string name="recently_read">最近阅读：</string>
-    <string name="no_favorites_rss">还没有收藏订阅！</string>
     <string name="suggestion_label">建议:</string>
     <string name="weekday_mon">一</string>
     <string name="weekday_tue">二</string>

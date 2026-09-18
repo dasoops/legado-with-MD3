@@ -24,8 +24,6 @@ import io.legado.app.data.entities.HomepageModule
 import io.legado.app.data.entities.HttpTTS
 import io.legado.app.data.entities.KeyboardAssist
 import io.legado.app.data.entities.ReplaceRule
-import io.legado.app.data.entities.RssSource
-import io.legado.app.data.entities.RssStar
 import io.legado.app.data.entities.RuleSub
 import io.legado.app.data.entities.SearchKeyword
 import io.legado.app.data.entities.Server
@@ -179,22 +177,6 @@ object Restore : KoinComponent {
                 if (bookSourceFile.exists()) {
                     val json = bookSourceFile.readText()
                     ImportOldData.importOldSource(json)
-                }
-            }
-        }
-        if (BackupConfig.dbIsNotIgnored("rssSource")) {
-            fileToListT<RssSource>(path, "rssSources.json")?.let {
-                try {
-                    appDb.rssSourceDao.insert(*it.toTypedArray())
-                } catch (_: SQLiteConstraintException) {
-                }
-            }
-        }
-        if (BackupConfig.dbIsNotIgnored("rssStar")) {
-            fileToListT<RssStar>(path, "rssStar.json")?.let {
-                try {
-                    appDb.rssStarDao.insert(*it.toTypedArray())
-                } catch (_: SQLiteConstraintException) {
                 }
             }
         }

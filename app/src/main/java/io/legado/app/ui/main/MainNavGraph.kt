@@ -102,17 +102,6 @@ import io.legado.app.ui.login.SourceLoginIntent
 import io.legado.app.ui.login.SourceLoginRoute
 import io.legado.app.ui.login.SourceLoginType
 import io.legado.app.ui.login.SourceLoginViewModel
-import io.legado.app.ui.rss.article.MainRouteRssSort
-import io.legado.app.ui.rss.article.RssSortRouteScreen
-import io.legado.app.ui.rss.favorites.RssFavoritesRouteScreen
-import io.legado.app.ui.rss.read.MainRouteRssRead
-import io.legado.app.ui.rss.read.RssReadRouteScreen
-import io.legado.app.ui.rss.source.debug.RssSourceDebugRoute
-import io.legado.app.ui.rss.source.debug.RssSourceDebugViewModel
-import io.legado.app.ui.rss.source.edit.RssSourceEditRoute
-import io.legado.app.ui.rss.source.edit.RssSourceEditViewModel
-import io.legado.app.ui.rss.source.manage.RssSourceRouteScreen
-import io.legado.app.ui.rss.subscription.RuleSubRouteScreen
 import io.legado.app.ui.theme.ProvideThemeOverride
 import io.legado.app.ui.theme.rememberImageSeedColor
 import io.legado.app.ui.theme.rememberThemeOverride
@@ -132,7 +121,7 @@ import org.koin.compose.koinInject
 import org.koin.core.parameter.parametersOf
 
 /**
- * WebView 类页面（内置浏览器、订阅阅读）只做位移转场。
+ * WebView 类页面（内置浏览器）只做位移转场。
  *
  * WebView 是 AndroidView interop view：所在子树一旦被加上 graphicsLayer（fade 的 alpha、
  * scaleOut 的缩放），Compose 会把网页一并画进离屏 RenderNode
@@ -187,7 +176,7 @@ fun MainActivity.mainEntryProvider(
     sharedTransitionScope: SharedTransitionScope,
     onNavigateToRoute: (NavKey) -> Unit,
     onNavigateBack: () -> Unit,
-) = entryProvider {
+) = entryProvider<NavKey> {
     entry<MainRouteWebView>(
         metadata = webViewEntryMetadata(configuration.appShell.predictiveBackEnabled)
     ) { route ->
@@ -279,48 +268,11 @@ fun MainActivity.mainEntryProvider(
             onSearch = { onNavigateToRoute(MainRouteSearch(null, it.toString())) },
         )
     }
-    entry<MainRouteRssSourceManage> {
-        RssSourceRouteScreen(
-            onBackClick = onNavigateBack,
-            onEditSource = { onNavigateToRoute(MainRouteRssSourceEdit(it.sourceUrl)) },
-            onAddSource = { onNavigateToRoute(MainRouteRssSourceEdit()) },
-        )
-    }
-    entry<MainRouteRssSourceEdit> { route ->
-        val viewModel = koinViewModel<RssSourceEditViewModel>(
-            key = "RssSourceEdit:${route.sourceUrl.orEmpty()}",
-        )
-        RssSourceEditRoute(
-            sourceUrl = route.sourceUrl,
-            viewModel = viewModel,
-            onBack = { savedSourceUrl ->
-                if (backStack.size == 1) {
-                    savedSourceUrl?.let {
-                        this@mainEntryProvider.setResult(
-                            android.app.Activity.RESULT_OK,
-                            Intent().putExtra("origin", it),
-                        )
-                    }
-                    this@mainEntryProvider.finish()
-                } else onNavigateBack()
-            },
-            onLogin = {
-                onNavigateToRoute(MainRouteSourceLogin(SourceLoginType.RssSource, it))
-            },
-            onDebug = { onNavigateToRoute(MainRouteRssSourceDebug(it)) },
-        )
-    }
     entry<MainRouteBookSourceDebug> { route ->
         val viewModel = koinViewModel<BookSourceDebugViewModel>(
             key = "BookSourceDebug:${route.sourceUrl.orEmpty()}",
         )
         BookSourceDebugRoute(route.sourceUrl, viewModel, onNavigateBack)
-    }
-    entry<MainRouteRssSourceDebug> { route ->
-        val viewModel = koinViewModel<RssSourceDebugViewModel>(
-            key = "RssSourceDebug:${route.sourceUrl.orEmpty()}",
-        )
-        RssSourceDebugRoute(route.sourceUrl, viewModel, onNavigateBack)
     }
     entry<MainRouteBookshelf> {
         val mainViewModel = koinViewModel<MainViewModel>()
@@ -378,43 +330,8 @@ fun MainActivity.mainEntryProvider(
                     )
                 )
             },
-            onNavigateToSourceLogin = { type, sourceUrl ->
-                onNavigateToRoute(MainRouteSourceLogin(type, sourceUrl))
-            },
             onNavigateToBookSourceManage = {
                 onNavigateToRoute(MainRouteBookSourceManage())
-            },
-            onNavigateToRssSourceManage = {
-                onNavigateToRoute(MainRouteRssSourceManage)
-            },
-            onNavigateToRssSourceEdit = {
-                onNavigateToRoute(MainRouteRssSourceEdit(it))
-            },
-            onNavigateToRssSort = { sourceUrl, sortUrl, key ->
-                onNavigateToRoute(
-                    MainRouteRssSort(
-                        sourceUrl = sourceUrl,
-                        sortUrl = sortUrl,
-                        key = key
-                    )
-                )
-            },
-            onNavigateToRssRead = { title, origin, link, openUrl, startPage ->
-                onNavigateToRoute(
-                    MainRouteRssRead(
-                        title = title,
-                        origin = origin,
-                        link = link,
-                        openUrl = openUrl,
-                        startPage = startPage
-                    )
-                )
-            },
-            onNavigateToRssFavorites = {
-                onNavigateToRoute(MainRouteRssFavorites)
-            },
-            onNavigateToRuleSub = {
-                onNavigateToRoute(MainRouteRuleSub)
             },
             onNavigateToReadRecord = {
                 onNavigateToRoute(MainRouteReadRecord)
@@ -882,92 +799,6 @@ fun MainActivity.mainEntryProvider(
             },
             sharedTransitionScope = sharedTransitionScope,
             animatedVisibilityScope = LocalNavAnimatedContentScope.current,
-        )
-    }
-
-    entry<MainRouteRssSort> { route ->
-        RssSortRouteScreen(
-            sourceUrl = route.sourceUrl,
-            initialSortUrl = route.sortUrl,
-            initialSearchKey = route.key,
-            onBackClick = { onNavigateBack() },
-            onSearch = { key ->
-                onNavigateToRoute(
-                    MainRouteRssSort(
-                        sourceUrl = route.sourceUrl,
-                        key = key
-                    )
-                )
-            },
-            onOpenRead = { title, origin, link, openUrl ->
-                if (link?.contains("@js:") == true) {
-                    onNavigateToRoute(
-                        MainRouteRssSort(
-                            sourceUrl = origin,
-                            sortUrl = link
-                        )
-                    )
-                } else {
-                    onNavigateToRoute(
-                        MainRouteRssRead(
-                            title = title,
-                            origin = origin,
-                            link = link,
-                            openUrl = openUrl
-                        )
-                    )
-                }
-            },
-            onEditSource = { onNavigateToRoute(MainRouteRssSourceEdit(it)) },
-            onLogin = {
-                onNavigateToRoute(MainRouteSourceLogin(SourceLoginType.RssSource, it))
-            },
-        )
-    }
-
-    entry<MainRouteRssRead>(
-        metadata = webViewEntryMetadata(configuration.appShell.predictiveBackEnabled)
-    ) { route ->
-        RssReadRouteScreen(
-            title = route.title,
-            origin = route.origin,
-            link = route.link,
-            openUrl = route.openUrl,
-            startPage = route.startPage,
-            onBackClick = { onNavigateBack() },
-            onOpenArticles = { sortUrl, targetOrigin ->
-                onNavigateToRoute(
-                    MainRouteRssSort(
-                        sourceUrl = targetOrigin ?: route.origin,
-                        sortUrl = sortUrl
-                    )
-                )
-            }
-        )
-    }
-
-    entry<MainRouteRssFavorites> {
-        RssFavoritesRouteScreen(
-            onBackClick = { onNavigateBack() },
-            onOpenRead = { title, origin, link, openUrl ->
-                onNavigateToRoute(
-                    MainRouteRssRead(
-                        title = title,
-                        origin = origin,
-                        link = link,
-                        openUrl = openUrl
-                    )
-                )
-            }
-        )
-    }
-
-    entry<MainRouteRuleSub> {
-        RuleSubRouteScreen(
-            onBackClick = { onNavigateBack() },
-            onImportBookSource = {
-                onNavigateToRoute(MainRouteBookSourceManage(it))
-            },
         )
     }
 

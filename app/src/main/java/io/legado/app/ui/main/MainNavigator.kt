@@ -4,8 +4,6 @@ import android.app.Activity
 import android.content.Intent
 import androidx.navigation3.runtime.NavKey
 import io.legado.app.model.ReadBook
-import io.legado.app.ui.rss.article.MainRouteRssSort
-import io.legado.app.ui.rss.read.MainRouteRssRead
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -59,10 +57,7 @@ object MainNavigator {
 
             is MainRouteBookSourceManage,
             is MainRouteBookSourceEdit,
-            MainRouteRssSourceManage,
-            is MainRouteRssSourceEdit,
-            is MainRouteBookSourceDebug,
-            is MainRouteRssSourceDebug -> backStack.add(route)
+            is MainRouteBookSourceDebug -> backStack.add(route)
 
             MainRouteBookshelf -> {
                 backStack.clear()
@@ -185,45 +180,6 @@ object MainNavigator {
                 }
             }
 
-            is MainRouteRssSort -> {
-                if (
-                    currentRoute == MainRouteBookshelf ||
-                    currentRoute is MainRouteRssSort ||
-                    currentRoute is MainRouteRssRead
-                ) {
-                    backStack.add(route)
-                } else {
-                    backStack.clear()
-                    backStack.add(MainRouteBookshelf)
-                    backStack.add(route)
-                }
-            }
-
-            is MainRouteRssRead -> {
-                if (
-                    currentRoute == MainRouteBookshelf ||
-                    currentRoute is MainRouteRssSort ||
-                    currentRoute is MainRouteRssRead
-                ) {
-                    backStack.add(route)
-                } else {
-                    backStack.clear()
-                    backStack.add(MainRouteBookshelf)
-                    backStack.add(route)
-                }
-            }
-
-            MainRouteRssFavorites,
-            MainRouteRuleSub -> {
-                if (currentRoute == MainRouteBookshelf) {
-                    backStack.add(route)
-                } else {
-                    backStack.clear()
-                    backStack.add(MainRouteBookshelf)
-                    backStack.add(route)
-                }
-            }
-
             MainRouteHighlightTagRule,
             MainRouteReadRecord -> {
                 if (currentRoute == MainRouteBookshelf) {
@@ -279,45 +235,7 @@ object MainNavigator {
 
     fun resolveStartRoute(intent: Intent?): NavKey {
         val route = intent?.getStringExtra(MainIntent.EXTRA_START_ROUTE)
-        resolveRssStartRoute(route, intent)?.let { return it }
         return resolveStartRoute(route, intent)
-    }
-
-    private fun resolveRssStartRoute(route: String?, intent: Intent?): NavKey? {
-        return when (route) {
-            MainRouteConst.ROUTE_RSS_SORT -> {
-                val sourceUrl = intent?.getStringExtra(MainIntent.EXTRA_RSS_SOURCE_URL)
-                if (sourceUrl.isNullOrBlank()) {
-                    null
-                } else {
-                    MainRouteRssSort(
-                        sourceUrl = sourceUrl,
-                        sortUrl = intent.getStringExtra(MainIntent.EXTRA_RSS_SORT_URL),
-                        key = intent.getStringExtra(MainIntent.EXTRA_RSS_KEY)
-                    )
-                }
-            }
-
-            MainRouteConst.ROUTE_RSS_READ -> {
-                val origin = intent?.getStringExtra(MainIntent.EXTRA_RSS_READ_ORIGIN)
-                if (origin.isNullOrBlank()) {
-                    null
-                } else {
-                    MainRouteRssRead(
-                        title = intent.getStringExtra(MainIntent.EXTRA_RSS_READ_TITLE),
-                        origin = origin,
-                        link = intent.getStringExtra(MainIntent.EXTRA_RSS_READ_LINK),
-                        openUrl = intent.getStringExtra(MainIntent.EXTRA_RSS_READ_OPEN_URL)
-                    )
-                }
-            }
-
-            MainRouteConst.ROUTE_RSS_FAVORITES -> MainRouteRssFavorites
-
-            MainRouteConst.ROUTE_RULE_SUB -> MainRouteRuleSub
-
-            else -> null
-        }
     }
 
     private fun resolveStartRoute(route: String?, intent: Intent?): MainRoute {
@@ -359,18 +277,10 @@ object MainNavigator {
                 intent?.getStringExtra(MainIntent.EXTRA_SOURCE_URL)
             )
 
-            MainRouteConst.ROUTE_RSS_SOURCE_MANAGE -> MainRouteRssSourceManage
-            MainRouteConst.ROUTE_RSS_SOURCE_EDIT -> MainRouteRssSourceEdit(
-                intent?.getStringExtra(MainIntent.EXTRA_SOURCE_URL)
-            )
-
             MainRouteConst.ROUTE_BOOK_SOURCE_DEBUG -> MainRouteBookSourceDebug(
                 intent?.getStringExtra(MainIntent.EXTRA_SOURCE_URL)
             )
 
-            MainRouteConst.ROUTE_RSS_SOURCE_DEBUG -> MainRouteRssSourceDebug(
-                intent?.getStringExtra(MainIntent.EXTRA_SOURCE_URL)
-            )
             MainRouteConst.ROUTE_SETTINGS -> MainRouteSettings
             MainRouteConst.ROUTE_SETTINGS_OTHER -> MainRouteSettingsOther
             MainRouteConst.ROUTE_SETTINGS_READ -> MainRouteSettingsRead

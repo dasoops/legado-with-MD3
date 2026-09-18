@@ -184,11 +184,6 @@ fun EditThemeSheet(
             // Interface layout
             SectionTitle(stringResource(R.string.theme_manage_section_layout))
             CompactSwitchSettingItem(
-                title = "RSS",
-                checked = data.showRss,
-                onCheckedChange = { data = data.copy(showRss = it) }
-            )
-            CompactSwitchSettingItem(
                 title = stringResource(R.string.show_bottom_nav),
                 checked = data.showBottomView,
                 onCheckedChange = { data = data.copy(showBottomView = it) }

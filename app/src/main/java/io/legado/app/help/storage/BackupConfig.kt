@@ -67,8 +67,6 @@ object BackupConfig {
     private const val dbKeyBookmark = "bookmark"
     private const val dbKeyBookGroup = "bookGroup"
     private const val dbKeyBookSource = "bookSource"
-    private const val dbKeyRssSource = "rssSource"
-    private const val dbKeyRssStar = "rssStar"
     private const val dbKeyReplaceRule = "replaceRule"
     private const val dbKeyReadRecord = "readRecord"
     private const val dbKeySearchHistory = "searchHistory"
@@ -84,8 +82,8 @@ object BackupConfig {
     private const val dbKeyServer = "server"
 
     val dbIgnoreKeys = arrayOf(
-        dbKeyBookmark, dbKeyBookGroup, dbKeyBookSource, dbKeyRssSource,
-        dbKeyRssStar, dbKeyReplaceRule, dbKeyReadRecord, dbKeySearchHistory,
+        dbKeyBookmark, dbKeyBookGroup, dbKeyBookSource,
+        dbKeyReplaceRule, dbKeyReadRecord, dbKeySearchHistory,
         dbKeySourceSub, dbKeyTxtTocRule, dbKeyHttpTts, dbKeyKeyboardAssists,
         dbKeyHomepageModules, dbKeyHomepageCustomSets,
         dbKeyHighlightRule, dbKeyHighlightTagRule, dbKeyTagGroupRule, dbKeyServer
@@ -95,8 +93,6 @@ object BackupConfig {
         appCtx.getString(R.string.bookmark),
         appCtx.getString(R.string.book_group),
         appCtx.getString(R.string.book_source),
-        appCtx.getString(R.string.rss_source),
-        appCtx.getString(R.string.rss_star),
         appCtx.getString(R.string.replace_rule),
         appCtx.getString(R.string.read_record),
         appCtx.getString(R.string.search_history),
@@ -137,7 +133,6 @@ object BackupConfig {
         themeConfigKey,
         coverConfigKey,
         PreferKey.bookshelfLayout,
-        PreferKey.showRss,
         PreferKey.threadCount,
         localBookKey,
         mangaKey
@@ -150,7 +145,6 @@ object BackupConfig {
         appCtx.getString(R.string.theme_config),
         appCtx.getString(R.string.cover_config),
         appCtx.getString(R.string.bookshelf_layout),
-        appCtx.getString(R.string.show_rss),
         appCtx.getString(R.string.thread_count),
         appCtx.getString(R.string.local_book),
         appCtx.getString(R.string.manga_config)
@@ -163,7 +157,6 @@ object BackupConfig {
         themeConfigKey,
         coverConfigKey,
         PreferKey.bookshelfLayout,
-        PreferKey.showRss,
         PreferKey.threadCount,
         localBookKey,
         mangaKey
@@ -176,7 +169,6 @@ object BackupConfig {
         appCtx.getString(R.string.theme_config),
         appCtx.getString(R.string.cover_config),
         appCtx.getString(R.string.bookshelf_layout),
-        appCtx.getString(R.string.show_rss),
         appCtx.getString(R.string.thread_count),
         appCtx.getString(R.string.local_book),
         appCtx.getString(R.string.manga_config)
@@ -403,7 +395,6 @@ object BackupConfig {
                 backupIgnoreBookshelfLayout && bookshelfPrefKeys.contains(key) -> false
                 backupIgnoreManga && mangaPrefKeys.contains(key) -> false
                 PreferKey.themeMode == key && backupIgnoreThemeMode -> false
-                PreferKey.showRss == key && backupIgnoreShowRss -> false
                 PreferKey.threadCount == key && backupIgnoreThreadCount -> false
                 else -> true
             }
@@ -415,7 +406,6 @@ object BackupConfig {
             ignoreBookshelfLayout && bookshelfPrefKeys.contains(key) -> false
             ignoreManga && mangaPrefKeys.contains(key) -> false
             PreferKey.themeMode == key && ignoreThemeMode -> false
-            PreferKey.showRss == key && ignoreShowRss -> false
             PreferKey.threadCount == key && ignoreThreadCount -> false
             else -> true
         }
@@ -431,8 +421,6 @@ object BackupConfig {
         get() = ignoreConfig[coverConfigKey] == true
     val ignoreBookshelfLayout: Boolean
         get() = ignoreConfig[PreferKey.bookshelfLayout] == true
-    val ignoreShowRss: Boolean
-        get() = ignoreConfig[PreferKey.showRss] == true
     val ignoreThreadCount: Boolean
         get() = ignoreConfig[PreferKey.threadCount] == true
     val ignoreLocalBook: Boolean
@@ -450,8 +438,6 @@ object BackupConfig {
         get() = backupIgnoreConfig[coverConfigKey] == true
     val backupIgnoreBookshelfLayout: Boolean
         get() = backupIgnoreConfig[PreferKey.bookshelfLayout] == true
-    val backupIgnoreShowRss: Boolean
-        get() = backupIgnoreConfig[PreferKey.showRss] == true
     val backupIgnoreThreadCount: Boolean
         get() = backupIgnoreConfig[PreferKey.threadCount] == true
     val backupIgnoreLocalBook: Boolean

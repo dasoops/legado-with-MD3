@@ -288,24 +288,7 @@ class ThemeConfigViewModel(
     }
 
     private fun setMainDestinationVisible(intent: ThemeConfigIntent.SetMainDestinationVisible) {
-        val transform: (AppShellSettings) -> AppShellSettings = when (intent.route) {
-            MainDestination.Rss.route -> { current ->
-                current.copy(
-                    showRss = intent.visible,
-                    defaultHomePage = current.fallbackHomePage(intent),
-                )
-            }
-            else -> return
-        }
-        updateAppShell(transform = transform)
-    }
-
-    private fun AppShellSettings.fallbackHomePage(
-        intent: ThemeConfigIntent.SetMainDestinationVisible,
-    ): String = if (!intent.visible && defaultHomePage == intent.route) {
-        MainDestination.Bookshelf.route
-    } else {
-        defaultHomePage
+        // 移除 RSS 后剩余主导航项均固定显示, 不再支持隐藏
     }
 
     private fun selectLauncherIcon(value: String) {
@@ -322,18 +305,11 @@ class ThemeConfigViewModel(
             MainDestination.Bookshelf.route -> { settings ->
                 settings.copy(navIconBookshelf = intent.path)
             }
-            MainDestination.Rss.route -> { settings ->
-                settings.copy(navIconRss = intent.path)
-            }
             MainDestination.My.route -> { settings ->
                 settings.copy(navIconMy = intent.path)
             }
             "${MainDestination.Bookshelf.route}:selected" -> { settings ->
                 settings.copy(navIconBookshelfSelected = intent.path)
-            }
-
-            "${MainDestination.Rss.route}:selected" -> { settings ->
-                settings.copy(navIconRssSelected = intent.path)
             }
 
             "${MainDestination.My.route}:selected" -> { settings ->
@@ -357,10 +333,8 @@ class ThemeConfigViewModel(
 
     private fun AppShellSettings.navIconPath(destination: String): String = when (destination) {
         MainDestination.Bookshelf.route -> navIconBookshelf
-        MainDestination.Rss.route -> navIconRss
         MainDestination.My.route -> navIconMy
         "${MainDestination.Bookshelf.route}:selected" -> navIconBookshelfSelected
-        "${MainDestination.Rss.route}:selected" -> navIconRssSelected
         "${MainDestination.My.route}:selected" -> navIconMySelected
         else -> ""
     }

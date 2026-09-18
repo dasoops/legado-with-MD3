@@ -20,12 +20,6 @@
 		<item>Three Columns</item>
 	</string-array>
 
-	<string-array name="rss_type">
-		<item>Web Page</item>
-		<item>Image</item>
-		<item>Video</item>
-	</string-array>
-
 	<string-array name="group_style">
 		<item>Tab</item>
 		<item>Hide Tab</item>
@@ -271,14 +265,12 @@
 
 	<string-array name="rule_type">
 		<item>BookSource</item>
-		<item>RssSource</item>
 		<item>ReplaceRule</item>
 		<item>Auto Detect</item>
 	</string-array>
 
 	<string-array name="default_home_page">
 		<item>@string/bookshelf</item>
-		<item>@string/rss</item>
 		<item>@string/my</item>
 	</string-array>
 
@@ -292,7 +284,6 @@
 
 	<string-array name="default_home_page_value">
 		<item>bookshelf</item>
-		<item>rss</item>
 		<item>my</item>
 	</string-array>
 

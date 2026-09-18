@@ -61,7 +61,6 @@ fun MainNavigationSettingsSheet(
     }
 
     fun isRouteVisible(route: String): Boolean = when (route) {
-        MainDestination.Rss.route -> settings.showRss
         else -> true
     }
 
@@ -109,10 +108,8 @@ fun MainNavigationSettingsSheet(
             Spacer(modifier = Modifier.padding(bottom = 4.dp))
             val customIconCount = listOf(
                 settings.navIconBookshelf,
-                settings.navIconRss,
                 settings.navIconMy,
                 settings.navIconBookshelfSelected,
-                settings.navIconRssSelected,
                 settings.navIconMySelected,
             ).count { it.isNotEmpty() }
             CompactClickableSettingItem(

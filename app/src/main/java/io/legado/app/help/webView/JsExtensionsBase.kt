@@ -1,4 +1,4 @@
-package io.legado.app.ui.rss.read
+package io.legado.app.help.webView
 
 import android.webkit.JavascriptInterface
 import androidx.appcompat.app.AppCompatActivity
@@ -6,27 +6,22 @@ import androidx.lifecycle.lifecycleScope
 import io.legado.app.data.appDb
 import io.legado.app.data.entities.BaseSource
 import io.legado.app.data.entities.BookSource
-import io.legado.app.data.entities.RssReadRecord
-import io.legado.app.data.entities.RssSource
 import io.legado.app.help.JsExtensions
 import io.legado.app.model.analyzeRule.AnalyzeRule
 import io.legado.app.ui.association.AddToBookshelfDialog
 import io.legado.app.ui.login.SourceLoginType
 import io.legado.app.ui.main.MainActivity
 import io.legado.app.ui.widget.dialog.PhotoDialog
-import io.legado.app.utils.isJsonObject
 import io.legado.app.utils.showDialogFragment
 import io.legado.app.utils.toastOnUi
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.Dispatchers.Main
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.json.JSONObject
 import java.lang.ref.WeakReference
 
-
 @Suppress("unused")
-open class RssJsExtensions(activity: AppCompatActivity?, source: BaseSource?) : JsExtensions {
+open class JsExtensionsBase(activity: AppCompatActivity?, source: BaseSource?) : JsExtensions {
 
     val activityRef: WeakReference<AppCompatActivity> = WeakReference(activity)
     val sourceRef: WeakReference<BaseSource?> = WeakReference(source)
@@ -96,81 +91,16 @@ open class RssJsExtensions(activity: AppCompatActivity?, source: BaseSource?) : 
                         activity.toastOnUi("源未配置登录")
                         return@launch
                     }
-                    when (toSource) {
-                        is BookSource -> {
-                            withContext(Main) {
-                                activity.startActivity(
-                                    MainActivity.createSourceLoginIntent(
-                                        activity,
-                                        SourceLoginType.BookSource,
-                                        toSource.bookSourceUrl
-                                    )
+                    if (toSource is BookSource) {
+                        withContext(Main) {
+                            activity.startActivity(
+                                MainActivity.createSourceLoginIntent(
+                                    activity,
+                                    SourceLoginType.BookSource,
+                                    toSource.bookSourceUrl
                                 )
-                            }
-                        }
-
-                        is RssSource -> {
-                            withContext(Main) {
-                                activity.startActivity(
-                                    MainActivity.createSourceLoginIntent(
-                                        activity,
-                                        SourceLoginType.RssSource,
-                                        toSource.sourceUrl
-                                    )
-                                )
-                            }
-                        }
-                    }
-                }
-
-                "sort" -> {
-                    val toSource = origin?.let { o ->
-                        appDb.rssSourceDao.getByKey(o)
-                    } ?: (source as? RssSource) ?: return@launch
-                    val sortUrl = if (url.isJsonObject()) {
-                        url
-                    } else {
-                        title?.let {
-                            JSONObject().put(title, url).toString()
-                        } ?: url
-                    }
-                    val sourceUrl = toSource.sourceUrl
-                    withContext(Main) {
-                        activity.startActivity(
-                            MainActivity.createRssSortIntent(
-                                context = activity,
-                                sourceUrl = sourceUrl,
-                                sortUrl = sortUrl
                             )
-                        )
-                    }
-                }
-
-                "rss" -> {
-                    val toSource = origin?.let { o ->
-                        appDb.rssSourceDao.getByKey(o)
-                    } ?: (source as? RssSource) ?: return@launch
-                    val title = title ?: toSource.sourceName
-                    val sourceUrl = toSource.sourceUrl
-                    val link = url ?: return@launch
-                    val rss = appDb.rssStarDao.get(sourceUrl, link)?.toRecord()
-                        ?: appDb.rssArticleDao.getByLink(sourceUrl, link)?.toRecord()
-                    val rssReadRecord = rss ?: RssReadRecord(
-                        record = link,
-                        title = title,
-                        origin = sourceUrl,
-                        readTime = System.currentTimeMillis()
-                    )
-                    appDb.rssReadRecordDao.insertRecord(rssReadRecord)
-                    withContext(Main) {
-                        activity.startActivity(
-                            MainActivity.createRssReadIntent(
-                                context = activity,
-                                title = title,
-                                origin = sourceUrl,
-                                openUrl = link
-                            )
-                        )
+                        }
                     }
                 }
 

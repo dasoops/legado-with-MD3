@@ -25,9 +25,6 @@ class OnLineImportActivity :
         viewModel.successLive.observe(this) {
             when (it.first) {
                 "bookSource" -> openComposeBookSourceImport(it.second)
-                "rssSource" -> showDialogFragment(
-                    ImportRssSourceDialog(it.second, true)
-                )
                 "replaceRule" -> showDialogFragment(
                     ImportReplaceRuleDialog(it.second, true)
                 )
@@ -54,10 +51,6 @@ class OnLineImportActivity :
             when (it.path) {
                 "/bookSource" -> openComposeBookSourceImport(url)
 
-                "/rssSource" -> showDialogFragment(
-                    ImportRssSourceDialog(url, true)
-                )
-
                 "/replaceRule" -> showDialogFragment(
                     ImportReplaceRuleDialog(url, true)
                 )
@@ -78,9 +71,6 @@ class OnLineImportActivity :
                 )
                 "/importonline" -> when (it.host) {
                     "booksource" -> openComposeBookSourceImport(url)
-                    "rsssource" -> showDialogFragment(
-                        ImportRssSourceDialog(url, true)
-                    )
                     "replace" -> showDialogFragment(
                         ImportReplaceRuleDialog(url, true)
                     )

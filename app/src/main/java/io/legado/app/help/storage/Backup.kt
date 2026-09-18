@@ -70,8 +70,6 @@ object Backup {
             "bookMarking.json",
             "bookGroup.json",
             "bookSource.json",
-            "rssSources.json",
-            "rssStar.json",
             "replaceRule.json",
             "readRecord.json",
             "readRecordDetail.json",
@@ -159,12 +157,6 @@ object Backup {
         }
         if (BackupConfig.dbIsNotIgnored("bookSource", true)) {
             writeListToJson(appDb.bookSourceDao.all, "bookSource.json", backupPath)
-        }
-        if (BackupConfig.dbIsNotIgnored("rssSource", true)) {
-            writeListToJson(appDb.rssSourceDao.all, "rssSources.json", backupPath)
-        }
-        if (BackupConfig.dbIsNotIgnored("rssStar", true)) {
-            writeListToJson(appDb.rssStarDao.all, "rssStar.json", backupPath)
         }
         if (BackupConfig.dbIsNotIgnored("replaceRule", true)) {
             writeListToJson(appDb.replaceRuleDao.all, "replaceRule.json", backupPath)

@@ -130,7 +130,6 @@
 
     <string-array name="rule_type">
         <item>書源</item>
-        <item>訂閱源</item>
         <item>取代規則</item>
         <item>自動識別</item>
     </string-array>

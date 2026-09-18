@@ -71,12 +71,9 @@
     <string name="home">Home</string>
     <string name="homepage_modules">Homepage Modules (JSON)</string>
     <string name="favorites">Favorites</string>
-    <string name="favorite">Favorite</string>
     <string name="in_favorites">in Favorites</string>
     <string name="out_favorites">Not in Favorites</string>
-    <string name="rss">RSS Feeds</string>
     <string name="all">All</string>
-    <string name="rss_feed_management">RSS Feed Management</string>
     <string name="recent_reading">Recent reading</string>
     <string name="last_read">Last reading</string>
     <string name="update_log">What\'s new</string>
@@ -281,7 +278,6 @@
     <string name="edit_book_source">Edit Book source</string>
     <string name="disable_book_source">Disable Book source</string>
     <string name="add_book_source">Add Book Source</string>
-    <string name="add_rss_source">Add RSS source</string>
     <string name="book_file_selector">Add books</string>
     <string name="scan_book_source">Scan</string>
     <string name="copy_source">Copy source</string>
@@ -432,7 +428,6 @@
     <string name="bookshelf_management">Bookshelf Management</string>
     <string name="clear_bookshelf_s">It will delete all books. Be careful,please.</string>
     <string name="search_book_source">Search book sources</string>
-    <string name="search_rss_source">Search RSS sources</string>
     <string name="search_book_source_num">Search( %d sources in total)</string>
     <string name="chapter_list_size">Chapters(%d)</string>
     <string name="text_bold">Bold</string>
@@ -594,7 +589,6 @@
     <string name="diy_source_group">Custom source grouping</string>
     <string name="diy_edit_source_group">Enter the custom source group name</string>
     <string name="concurrent_rate">Concurrency rate(concurrentRate)</string>
-    <string name="sort_url">Sort URL(sortUrl)</string>
     <string name="login_url">Log in URL(loginUrl)</string>
     <string name="login_ui">Login UI(loginUi)</string>
     <string name="login_check_js">Login check js(loginCheckJs)</string>
@@ -632,18 +626,8 @@
     <string name="rule_pay_action">Pay action(payAction)</string>
 
     <string name="source_icon">Source icon(sourceIcon)</string>
-    <string name="r_articles">Rule articles(ruleArticles)</string>
-    <string name="r_next">Rule next articles(ruleNextArticles)</string>
-    <string name="r_title">Rule title(ruleTitle)</string>
     <string name="r_guid">Rule guid(ruleGuid)</string>
-    <string name="r_date">Rule pub date(rulePubDate)</string>
     <string name="r_categories">Rule categories(ruleCategories)</string>
-    <string name="r_description">Rule description(ruleDescription)</string>
-    <string name="r_image">Rule image(ruleImage)</string>
-    <string name="r_content">Rule content(ruleContent)</string>
-    <string name="r_style">Style(style)</string>
-    <string name="r_link">Rule link(ruleLink)</string>
-    <string name="r_inject_js">Inject js(injectJs)</string>
     <string name="check_key_word">Check key word(checkKeyWord)</string>
     <string name="rule_actions">Actions(actions)</string>
     <string name="rule_is_pay">Is pay(isPay)</string>
@@ -811,8 +795,6 @@
     <string name="web_dav_url_s">Input your WebDAV server address</string>
     <string name="web_dav_account">WebDAV Account</string>
     <string name="web_dav_account_d">Input your WebDAV account</string>
-    <string name="rss_source">RSS source</string>
-    <string name="rss_source_edit">Edit RSS source</string>
     <string name="screen">Filter</string>
     <string name="screen_find">Search Discovery sources</string>
     <string name="dur_pos">Current location：</string>
@@ -838,14 +820,12 @@
     <string name="next_sentence">Next sentence</string>
     <string name="other_folder">Other folder</string>
     <string name="text_too_long_qr_error">There are too many words to create a QR code</string>
-    <string name="share_rss_source">RSS sources sharing</string>
     <string name="share_book_source">Book sources sharing</string>
     <string name="auto_dark_mode">Automatic switching dark mode</string>
     <string name="auto_dark_mode_s">Following system dark mode</string>
     <string name="go_back">Go back</string>
     <string name="tone_colour">Online Speech tone</string>
     <string name="select_count">(%1$d/%2$d)</string>
-    <string name="show_rss">Show RSS Feeds</string>
     <string name="service_stop">Service stopped</string>
     <string name="service_start">Starting service\nChecking notification bar for details</string>
     <string name="default_path">Default path</string>
@@ -1062,7 +1042,6 @@
     <string name="brightness_bar_right">Right</string>
     <string name="brightness_follow_system">Follow System</string>
     <string name="language">Language</string>
-    <string name="import_rss_source">Import rss source</string>
     <string name="donate_summary">Your donation makes this app better</string>
     <string name="about_summary">WeChat official account [Open Source Reading]</string>
     <string name="read_record">Read Record</string>
@@ -1083,7 +1062,6 @@
     <string name="sort_by_lastUpdateTime">Sort by update time</string>
     <string name="sort_by_respondTime">Sort by respond time</string>
     <string name="search_content">Search content</string>
-    <string name="rss_source_empty">Empty now!</string>
     <string name="page_key_set_help">Focusing on the input box and pressing a physical key will automatically enter the value of the key, and multiple keys will be automatically separated by commas.</string>
     <string name="theme_name">Theme name</string>
     <string name="auto_clear_expired">"Clear Expired Search Histories Automatically "</string>
@@ -1104,8 +1082,6 @@
     <string name="title_position">Title Position</string>
     <string name="show_hide">Show/Hide</string>
     <string name="header_footer">Footer <![CDATA[&]]> Header</string>
-    <string name="rule_subscription">Rule Subscription</string>
-    <string name="rule_sub_empty_msg">Add the rule import address provided by the bosses\nClick to import rules after adding</string>
     <string name="get_book_progress">Pull the cloud  progress</string>
     <string name="cover_book_progress">Overlay Cloud Progress</string>
     <string name="current_progress_exceeds_cloud">The current progress exceeds the cloud progress. Do you want to synchronize?</string>
@@ -1402,7 +1378,6 @@
     <string name="async_load_image">Load pictures asynchronously</string>
     <string name="ignore_audio_focus_title">Ignore Audio Focus</string>
     <string name="ignore_audio_focus_summary">Allow audio to be played at the same time as other applications</string>
-    <string name="refresh_sort">Refresh sort</string>
     <string name="cover_decode_js">Decode Cover Js(coverDecodeJs)</string>
     <string name="net_no_group">Network ungrouped</string>
     <string name="local_no_group">Local ungrouped</string>
@@ -1452,10 +1427,6 @@
     <string name="source_tab_list">List</string>
     <string name="source_tab_web_view">Web view</string>
     <string name="source_tab_start">Startup</string>
-    <string name="r_startHtml">Startup page HTML text</string>
-    <string name="r_startStyle">Startup page style text</string>
-    <string name="r_startJs">Startup page JS (startJs)</string>
-    <string name="r_preloadJs">Pre-injected JS (preloadJs)</string>
     <string name="enable_preload">Preload</string>
     <string name="load_with_web_log">Show WebView Logs</string>
     <string name="cache_first">Cache First</string>
@@ -1471,7 +1442,6 @@
     <string name="database_ignore_summary">Select database tables to ignore</string>
     <string name="source_sub">Source Subscriptions</string>
     <string name="book_group">Book Groups</string>
-    <string name="rss_star">RSS Favorites</string>
     <string name="search_history">Search History</string>
     <string name="keyboard_assists">Keyboard Assists</string>
     <string name="homepage_custom_sets">Homepage Custom Sets</string>
@@ -1869,7 +1839,6 @@
 
     <string name="reading_behavior">Reading Behavior</string>
     <string name="page_control">Page Turn Controls</string>
-    <string name="redirect_policy">Web Redirect Policy</string>
     <string name="redirect_allow_all">Allow All Redirects</string>
     <string name="redirect_ask_always">Always Ask</string>
     <string name="redirect_ask_cross_origin">Ask When Domain Changes</string>
@@ -2328,7 +2297,6 @@
     <string name="select_or_search_category">Select or search category</string>
     <string name="multi_select_items">Multi-select Items</string>
     <string name="recently_read">Recently Read: </string>
-    <string name="no_favorites_rss">No favorite subscriptions yet!</string>
     <string name="suggestion_label">Suggestion:</string>
     <string name="weekday_mon">Mon</string>
     <string name="weekday_tue">Tue</string>

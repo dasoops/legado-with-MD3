@@ -96,12 +96,7 @@ private fun buildMainUiState(
     appShell: AppShellSettings,
     theme: ThemeSettings,
 ): MainUiState {
-    val destinations = MainDestination.ordered(appShell.mainNavigationOrder).filter {
-        when (it) {
-            MainDestination.Rss -> appShell.showRss
-            else -> true
-        }
-    }
+    val destinations = MainDestination.ordered(appShell.mainNavigationOrder)
     return MainUiState(
         destinations = destinations.toImmutableList(),
         // 旧版本可能把已下线的首页存为默认页, 这里回退到书架
@@ -114,10 +109,8 @@ private fun buildMainUiState(
         labelVisibilityMode = appShell.labelVisibilityMode,
         navExtended = appShell.navExtended,
         navIconBookshelf = appShell.navIconBookshelf,
-        navIconRss = appShell.navIconRss,
         navIconMy = appShell.navIconMy,
         navIconBookshelfSelected = appShell.navIconBookshelfSelected,
-        navIconRssSelected = appShell.navIconRssSelected,
         navIconMySelected = appShell.navIconMySelected,
         deepPersonalizationActive = theme.appTheme == "12" && theme.enableDeepPersonalization,
         secondaryThemeColor = theme.secondaryThemeColor,

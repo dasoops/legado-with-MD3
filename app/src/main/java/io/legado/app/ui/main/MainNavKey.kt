@@ -38,16 +38,7 @@ data class MainRouteBookSourceManage(
 data class MainRouteBookSourceEdit(val sourceUrl: String? = null) : MainRoute
 
 @Serializable
-data object MainRouteRssSourceManage : MainRoute
-
-@Serializable
-data class MainRouteRssSourceEdit(val sourceUrl: String? = null) : MainRoute
-
-@Serializable
 data class MainRouteBookSourceDebug(val sourceUrl: String? = null) : MainRoute
-
-@Serializable
-data class MainRouteRssSourceDebug(val sourceUrl: String? = null) : MainRoute
 
 @Serializable
 data object MainRouteSettings : MainRoute
@@ -152,12 +143,6 @@ data class MainRouteCloudTtsEngines(val bookUrl: String? = null) : MainRoute
 data object MainRouteTtsCache : MainRoute
 
 @Serializable
-data object MainRouteRssFavorites : MainRoute
-
-@Serializable
-data object MainRouteRuleSub : MainRoute
-
-@Serializable
 data class MainRouteSearchContent(
     val bookUrl: String,
     val searchWord: String? = null,
@@ -177,10 +162,7 @@ object MainRouteConst {
     const val ROUTE_WEB_VIEW = "web/view"
     const val ROUTE_BOOK_SOURCE_MANAGE = "source/book/manage"
     const val ROUTE_BOOK_SOURCE_EDIT = "source/book/edit"
-    const val ROUTE_RSS_SOURCE_MANAGE = "source/rss/manage"
-    const val ROUTE_RSS_SOURCE_EDIT = "source/rss/edit"
     const val ROUTE_BOOK_SOURCE_DEBUG = "source/book/debug"
-    const val ROUTE_RSS_SOURCE_DEBUG = "source/rss/debug"
     const val ROUTE_SETTINGS = "settings"
     const val ROUTE_SETTINGS_OTHER = "settings/other"
     const val ROUTE_SETTINGS_READ = "settings/read"
@@ -201,10 +183,6 @@ object MainRouteConst {
     const val ROUTE_SEARCH = "search"
     const val ROUTE_SEARCH_CONTENT = "book/searchContent"
     const val ROUTE_BOOK_INFO = "book/info"
-    const val ROUTE_RSS_SORT = "rss/sort"
-    const val ROUTE_RSS_READ = "rss/read"
-    const val ROUTE_RSS_FAVORITES = "rss/favorites"
-    const val ROUTE_RULE_SUB = "rss/rule_sub"
     const val ROUTE_READ_RECORD = "read_record"
     const val ROUTE_READ_RECORD_OVERVIEW = "read_record_overview"
     const val ROUTE_ABOUT = "about"

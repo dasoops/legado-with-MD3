@@ -17,11 +17,9 @@ import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.MyLocation
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Replay
-import androidx.compose.material.icons.filled.RssFeed
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.outlined.Person
-import androidx.compose.material.icons.outlined.RssFeed
 import androidx.compose.material.icons.outlined.Sell
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -34,7 +32,6 @@ import top.yukonga.miuix.kmp.icon.extended.Close
 import top.yukonga.miuix.kmp.icon.extended.ContactsBook
 import top.yukonga.miuix.kmp.icon.extended.Delete
 import top.yukonga.miuix.kmp.icon.extended.Edit
-import top.yukonga.miuix.kmp.icon.extended.Favorites
 import top.yukonga.miuix.kmp.icon.extended.Filter
 import top.yukonga.miuix.kmp.icon.extended.More
 import top.yukonga.miuix.kmp.icon.extended.MoreCircle
@@ -125,12 +122,6 @@ object AppIcons {
                 if (selected) MiuixIcons.Regular.Notes else MiuixIcons.Regular.Notes
             } else {
                 if (selected) Icons.AutoMirrored.Filled.LibraryBooks else Icons.AutoMirrored.Outlined.LibraryBooks
-            }
-
-            MainDestination.Rss -> if (isMiuix) {
-                if (selected) MiuixIcons.Regular.Favorites else MiuixIcons.Regular.Favorites
-            } else {
-                if (selected) Icons.Default.RssFeed else Icons.Outlined.RssFeed
             }
 
             MainDestination.My -> if (isMiuix) {

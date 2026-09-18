@@ -9,22 +9,16 @@ import io.legado.app.data.appDb
 import io.legado.app.data.entities.BaseSource
 import io.legado.app.data.entities.Book
 import io.legado.app.data.entities.BookChapter
-import io.legado.app.data.entities.RssSource
 import io.legado.app.exception.NoStackTraceException
 import io.legado.app.help.CacheManager
 import io.legado.app.help.coroutine.Coroutine
 import io.legado.app.model.AudioPlay
-import io.legado.app.model.Debug
 import io.legado.app.model.ReadBook
 import io.legado.app.model.analyzeRule.AnalyzeRule
 import io.legado.app.model.analyzeRule.AnalyzeRule.Companion.setChapter
 import io.legado.app.model.analyzeRule.AnalyzeRule.Companion.setCoroutineContext
-import io.legado.app.ui.rss.read.RssJsExtensions
 import io.legado.app.utils.GSON
 import io.legado.app.utils.fromJsonObject
-import io.legado.app.utils.isJsonObject
-import io.legado.app.utils.toastOnUi
-import org.json.JSONObject
 import java.lang.ref.WeakReference
 import kotlin.uuid.Uuid
 
@@ -35,28 +29,17 @@ class WebJsExtensions(
     webView: WebView,
     bookType: Int = 0,
     callback: Callback? = null
-) : RssJsExtensions(activity, source) {
+) : JsExtensionsBase(activity, source) {
     private val callbackRef: WeakReference<Callback> = WeakReference(callback)
     private val webViewRef: WeakReference<WebView?> = WeakReference(webView)
 
     interface Callback {
         fun upConfig(config: String)
-        fun onNavigateToArticles(sortUrl: String? = null, origin: String? = null)
     }
 
     @JavascriptInterface
     fun upConfig(config: String) {
         callbackRef.get()?.upConfig(config)
-    }
-
-    @JavascriptInterface
-    fun navigateToArticles() {
-        callbackRef.get()?.onNavigateToArticles(null)
-    }
-
-    @JavascriptInterface
-    fun navigateToArticles(sortUrl: String?) {
-        callbackRef.get()?.onNavigateToArticles(sortUrl)
     }
 
     private val bookAndChapter by lazy {
@@ -216,47 +199,6 @@ class WebJsExtensions(
     @JavascriptInterface
     fun longToast(msg: String?) {
         super.longToast(msg)
-    }
-
-    @JavascriptInterface
-    override fun open(name: String, url: String?, title: String?, origin: String?) {
-        when (name) {
-            "sort" -> {
-                val sortUrl = if (url.isJsonObject()) {
-                    url
-                } else {
-                    title?.let { JSONObject().put(title, url).toString() } ?: url
-                }
-                val originKey = origin?.takeIf { it.isNotBlank() }
-                val targetSourceUrl = if (originKey != null) {
-                    appDb.rssSourceDao.getByKey(originKey)?.sourceUrl
-                } else {
-                    (getSource() as? RssSource)?.sourceUrl
-                }
-                if (targetSourceUrl == null) {
-                    // origin 指定的订阅源未安装时不能回退到当前源, 否则会用当前源的规则解析跨站 HTML
-                    if (originKey != null) {
-                        val missing = if (title.isNullOrBlank()) {
-                            originKey
-                        } else {
-                            "$title($originKey)"
-                        }
-                        Debug.log(
-                            getSource()?.getKey(),
-                            "WebView open(sort): 未找到订阅源 $missing url=$url"
-                        )
-                        activityRef.get()?.toastOnUi("未找到订阅源:$missing")
-                    }
-                    return
-                }
-                Debug.log(
-                    getSource()?.getKey(),
-                    "WebView open(sort): url=$url, title=$title, origin=$origin, target=$targetSourceUrl"
-                )
-                callbackRef.get()?.onNavigateToArticles(sortUrl, targetSourceUrl)
-            }
-            else -> super.open(name, url, title, origin)
-        }
     }
 
     @JavascriptInterface
