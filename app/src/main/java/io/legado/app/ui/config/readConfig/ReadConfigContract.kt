@@ -13,7 +13,6 @@ data class ReadConfigUiState(
     val titleBarMode: String = "1",
     val readMenuBlurAlpha: Int = 85,
     val readBodyToLh: Boolean = true,
-    val defaultSourceChangeAll: Boolean = true,
     val textFullJustify: Boolean = true,
     val textBottomJustify: Boolean = true,
     val adaptSpecialStyle: Boolean = true,
@@ -34,7 +33,6 @@ data class ReadConfigUiState(
     val useNewTocSheet: Boolean = true,
     val maxLengthWithNoToc: Int = 3000,
     val selectVibrator: Boolean = false,
-    val autoChangeSource: Boolean = true,
     val autoSuggestDayNight: Boolean = false,
     val readingAnchorEnabled: Boolean = true,
     val selectText: Boolean = true,
@@ -70,7 +68,6 @@ sealed interface ReadConfigIntent {
     data class TitleBarModeChanged(val value: String) : ReadConfigIntent
     data class ReadMenuBlurAlphaChanged(val value: Int) : ReadConfigIntent
     data class ReadBodyToLhChanged(val value: Boolean) : ReadConfigIntent
-    data class DefaultSourceChangeAllChanged(val value: Boolean) : ReadConfigIntent
     data class TextFullJustifyChanged(val value: Boolean) : ReadConfigIntent
     data class TextBottomJustifyChanged(val value: Boolean) : ReadConfigIntent
     data class AdaptSpecialStyleChanged(val value: Boolean) : ReadConfigIntent
@@ -96,7 +93,6 @@ sealed interface ReadConfigIntent {
     data class UseNewTocSheetChanged(val value: Boolean) : ReadConfigIntent
     data class MaxLengthWithNoTocChanged(val value: Int) : ReadConfigIntent
     data class SelectVibratorChanged(val value: Boolean) : ReadConfigIntent
-    data class AutoChangeSourceChanged(val value: Boolean) : ReadConfigIntent
     data class SelectTextChanged(val value: Boolean) : ReadConfigIntent
     data class NoAnimScrollPageChanged(val value: Boolean) : ReadConfigIntent
     data class ClickImgWayChanged(val value: String) : ReadConfigIntent

@@ -27,12 +27,9 @@ import io.legado.app.domain.gateway.AppShellSettingsGateway
 import io.legado.app.domain.gateway.AppUiConfigurationGateway
 import io.legado.app.domain.gateway.BackupSettingsGateway
 import io.legado.app.domain.gateway.BookContentProcessGateway
-import io.legado.app.domain.gateway.ChangeSourceSettingsGateway
-import io.legado.app.domain.gateway.DownloadCacheSettingsGateway
 import io.legado.app.domain.gateway.OtherSettingsGateway
 import io.legado.app.domain.gateway.ReadStyleGateway
 import io.legado.app.domain.gateway.ThemeSettingsGateway
-import io.legado.app.domain.usecase.ChangeBookSourceUseCase
 import io.legado.app.domain.usecase.GetReadingProgressUseCase
 import io.legado.app.domain.usecase.RelocateMarkingTargetUseCase
 import io.legado.app.domain.usecase.SaveBookContentProcessUseCase
@@ -105,18 +102,15 @@ class ReadBookViewModel(
     private val localPreferencesRepository: SettingsRepository,
     private val highlightRuleRepository: HighlightRuleRepository,
     private val uploadRepository: UploadRepository,
-    private val changeBookSourceUseCase: ChangeBookSourceUseCase,
     private val saveBookContentProcessUseCase: SaveBookContentProcessUseCase,
     private val saveMarkingUseCase: SaveMarkingUseCase,
     private val verifyBookmarkTargetUseCase: VerifyBookmarkTargetUseCase,
     private val relocateMarkingTargetUseCase: RelocateMarkingTargetUseCase,
     private val bookContentProcessGateway: BookContentProcessGateway,
     private val replaceRuleRepository: ReplaceRuleRepository,
-    private val changeSourceSettingsGateway: ChangeSourceSettingsGateway,
     private val appShellSettingsGateway: AppShellSettingsGateway,
     private val appUiConfigurationGateway: AppUiConfigurationGateway,
     private val otherSettingsGateway: OtherSettingsGateway,
-    private val downloadCacheSettingsGateway: DownloadCacheSettingsGateway,
     private val backupSettingsGateway: BackupSettingsGateway,
     private val themeSettingsGateway: ThemeSettingsGateway,
     private val bookSourceRepository: BookSourceRepository,
@@ -337,7 +331,7 @@ class ReadBookViewModel(
         { book, time -> _uiState.update { it.copy(activeDialog = ReadBookDialog.ReadRecordAliasConflict(book.name, book.author, time)) } },
         { _uiState.update { it.copy(activeDialog = null) } },
     ) }
-    // --- 开书 / 目录 / 换源 / 进度同步域（无自持状态，isInitFinish 仍在 UiState）---
+    // --- 开书 / 目录 / 进度同步域（无自持状态，isInitFinish 仍在 UiState）---
 
     private val loadDelegate: ReadBookLoadDelegate = ReadBookLoadDelegate(
         context = context,
@@ -380,12 +374,7 @@ class ReadBookViewModel(
             override suspend fun checkReadRecordAlias(book: Book) = readRecordAliasDelegate.check(book)
         },
         bookRepository = bookRepository,
-        bookSourceRepository = bookSourceRepository,
-        readSettingsRepository = readSettingsRepository,
         backupSettingsGateway = backupSettingsGateway,
-        changeSourceSettingsGateway = changeSourceSettingsGateway,
-        downloadCacheSettingsGateway = downloadCacheSettingsGateway,
-        changeBookSourceUseCase = changeBookSourceUseCase,
         getReadingProgressUseCase = getReadingProgressUseCase,
         uploadReadingProgressUseCase = uploadReadingProgressUseCase,
     )
@@ -763,9 +752,6 @@ class ReadBookViewModel(
                 contentProcessDelegate.requestDelete(intent.item)
             is ReadBookIntent.ConfirmDeleteContentProcess -> contentProcessDelegate.confirmDelete()
             is ReadBookIntent.DismissDeleteContentProcess -> contentProcessDelegate.dismissDelete()
-            is ReadBookIntent.ChangeSourceBook -> changeTo(intent.book)
-            is ReadBookIntent.ChangeSource -> changeTo(intent.book, intent.toc)
-            is ReadBookIntent.AddSourceAsNewBook -> addToBookshelf(intent.book, intent.toc)
             is ReadBookIntent.OpenChapterResult -> {
                 ReadBook.saveReadingAnchorBeforeChapterJump(intent.index, intent.chapterPos)
                 openChapter(intent.index, intent.chapterPos)
@@ -939,11 +925,6 @@ class ReadBookViewModel(
                 }
             }
 
-            is ReadBookIntent.MenuChangeSource -> handleChangeSource()
-            is ReadBookIntent.MenuBookChangeSource -> {
-                _uiState.update { it.copy(activeSheet = ReadBookSheet.ChangeBookSource) }
-            }
-            is ReadBookIntent.MenuChapterChangeSource -> handleChapterChangeSource()
             is ReadBookIntent.MenuSettingReplace -> {
                 closeReadMenu()
                 _effects.tryEmit(ReadBookEffect.MenuSettingReplace)
@@ -1383,36 +1364,6 @@ class ReadBookViewModel(
 
     private var backupJob: Job? = null
 
-    private fun handleChangeSource() {
-        viewModelScope.launch {
-            if (readSettingsRepository.currentSettings.defaultSourceChangeAll) {
-                _uiState.update { it.copy(activeSheet = ReadBookSheet.ChangeBookSource) }
-            } else {
-                val chapter = currentChapter() ?: return@launch
-                _uiState.update {
-                    it.copy(
-                        activeSheet = ReadBookSheet.ChangeChapterSource(
-                            chapter.index, chapter.title
-                        )
-                    )
-                }
-            }
-        }
-    }
-
-    private fun handleChapterChangeSource() {
-        viewModelScope.launch {
-            val chapter = currentChapter() ?: return@launch
-            _uiState.update {
-                it.copy(
-                    activeSheet = ReadBookSheet.ChangeChapterSource(
-                        chapter.index, chapter.title
-                    )
-                )
-            }
-        }
-    }
-
     // --- ReadBook 回调（已全部离开本 ViewModel）---
     //
     // Track B2：渲染子集（upContent/upContentAwait/pageChanged/contentLoadFinish/
@@ -1784,7 +1735,7 @@ class ReadBookViewModel(
         return bookRepository.getChapter(book.bookUrl, ReadBook.durChapterIndex)
     }
 
-    // 开书 / 目录 / 换源 / 进度同步已迁入 [ReadBookLoadDelegate]，这里只留外部入口的转发。
+    // 开书 / 目录 / 进度同步已迁入 [ReadBookLoadDelegate]，这里只留外部入口的转发。
 
     suspend fun initReadBookConfig(request: ReadBookInitRequest) =
         loadDelegate.initReadBookConfig(request)
@@ -1798,10 +1749,6 @@ class ReadBookViewModel(
     fun markJustInitData() {
         justInitData = true
     }
-
-    fun changeTo(book: Book, toc: List<BookChapter>) = loadDelegate.changeTo(book, toc)
-
-    fun changeTo(book: Book) = loadDelegate.changeTo(book)
 
     fun isReadingProgressSyncConfigured(): Boolean = loadDelegate.isReadingProgressSyncConfigured()
 
@@ -2200,22 +2147,6 @@ class ReadBookViewModel(
     override fun onCleared() {
         super.onCleared()
         readerSession.detach()
-    }
-
-    fun addToBookshelf(book: Book, toc: List<BookChapter>, success: (() -> Unit)? = null) {
-        execute {
-            book.removeType(BookType.notShelf)
-            if (book.order == 0) {
-                book.order = bookRepository.getMinOrder() - 1
-            }
-            bookRepository.insert(book)
-            bookRepository.insertChapters(*toc.toTypedArray())
-        }.onSuccess {
-            success?.invoke()
-        }.onError {
-            AppLog.put("添加书籍到书架失败", it)
-            _effects.tryEmit(ReadBookEffect.ShowToast("添加书籍失败"))
-        }
     }
 
 }

@@ -18,38 +18,6 @@ interface SearchBookDao {
     fun getFirstByNameAuthor(name: String, author: String): SearchBook?
 
     @Query(
-        """select t1.name, t1.author, t1.origin, t1.originName, t1.coverUrl, t1.bookUrl, 
-        t1.type, t1.time, t1.intro, t1.kind, t1.latestChapterTitle, t1.tocUrl, t1.variable, 
-        t1.wordCount, t2.customOrder as originOrder, t1.chapterWordCountText, t1.respondTime, t1.chapterWordCount
-        from searchBooks as t1 inner join book_sources as t2 
-        on t1.origin = t2.bookSourceUrl 
-        where t1.name = :name and t1.author like '%'||:author||'%' 
-        and t2.enabled = 1
-        and (:sourceGroup = "" or t2.bookSourceGroup like '%'||:sourceGroup||'%')
-        order by t2.customOrder"""
-    )
-    fun changeSourceByGroup(name: String, author: String, sourceGroup: String): List<SearchBook>
-
-    @Query(
-        """select t1.name, t1.author, t1.origin, t1.originName, t1.coverUrl, t1.bookUrl, 
-        t1.type, t1.time, t1.intro, t1.kind, t1.latestChapterTitle, t1.tocUrl, t1.variable, 
-        t1.wordCount, t2.customOrder as originOrder, t1.chapterWordCountText, t1.respondTime, t1.chapterWordCount
-        from searchBooks as t1 inner join book_sources as t2 
-        on t1.origin = t2.bookSourceUrl 
-        where t1.name = :name and t1.author like '%'||:author||'%'
-        and (:sourceGroup = "" or t2.bookSourceGroup like '%'||:sourceGroup||'%')
-        and (originName like '%'||:key||'%' or t1.latestChapterTitle like '%'||:key||'%')
-        and t2.enabled = 1 
-        order by t2.customOrder"""
-    )
-    fun changeSourceSearch(
-        name: String,
-        author: String,
-        key: String,
-        sourceGroup: String
-    ): List<SearchBook>
-
-    @Query(
         """
         select t1.name, t1.author, t1.origin, t1.originName, t1.coverUrl, t1.bookUrl, 
         t1.type, t1.time, t1.intro, t1.kind, t1.latestChapterTitle, t1.tocUrl, t1.variable, 

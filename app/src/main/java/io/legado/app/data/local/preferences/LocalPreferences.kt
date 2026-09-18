@@ -32,13 +32,6 @@ object LocalPreferencesKeys {
     val SELECTED_LIGHT_COVER_ALBUM_ID = stringPreferencesKey("selected_light_cover_album_id")
     val SELECTED_DARK_COVER_ALBUM_ID = stringPreferencesKey("selected_dark_cover_album_id")
 
-    // Change source options
-    val CHANGE_SOURCE_CHECK_AUTHOR = booleanPreferencesKey("changeSourceCheckAuthor")
-    val CHANGE_SOURCE_LOAD_INFO = booleanPreferencesKey("changeSourceLoadInfo")
-    val CHANGE_SOURCE_LOAD_TOC = booleanPreferencesKey("changeSourceLoadToc")
-    val CHANGE_SOURCE_LOAD_WORD_COUNT = booleanPreferencesKey("changeSourceLoadWordCount")
-    val CHANGE_SOURCE_SEARCH_SCOPE = stringPreferencesKey("changeSourceSearchScope")
-
     // Book source check options
     val CHECK_SOURCE_TIMEOUT = longPreferencesKey("checkSourceTimeout")
     val CHECK_SOURCE_SEARCH = booleanPreferencesKey("checkSearch")

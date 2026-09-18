@@ -129,15 +129,6 @@ fun ReadConfigScreen(
                 )
 
                 SwitchSettingItem(
-                    title = stringResource(R.string.read_change_all),
-                    description = stringResource(R.string.read_change_all_s),
-                    checked = settings.defaultSourceChangeAll,
-                    onCheckedChange = {
-                        onIntent(ReadConfigIntent.DefaultSourceChangeAllChanged(it))
-                    }
-                )
-
-                SwitchSettingItem(
                     title = stringResource(R.string.text_full_justify),
                     checked = settings.textFullJustify,
                     onCheckedChange = {
@@ -316,14 +307,6 @@ fun ReadConfigScreen(
                     checked = settings.selectVibrator,
                     onCheckedChange = {
                         onIntent(ReadConfigIntent.SelectVibratorChanged(it))
-                    }
-                )
-
-                SwitchSettingItem(
-                    title = stringResource(R.string.auto_change_source),
-                    checked = settings.autoChangeSource,
-                    onCheckedChange = {
-                        onIntent(ReadConfigIntent.AutoChangeSourceChanged(it))
                     }
                 )
 

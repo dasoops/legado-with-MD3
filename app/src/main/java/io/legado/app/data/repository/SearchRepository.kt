@@ -18,12 +18,6 @@ interface SearchRepository {
     suspend fun getSearchBook(bookUrl: String): SearchBook?
     suspend fun saveSearchBooks(books: List<SearchBook>)
     suspend fun saveSearchBook(book: SearchBook)
-    suspend fun findChangeSourceBooks(
-        name: String,
-        author: String,
-        screenKey: String = "",
-        group: String = "",
-    ): List<SearchBook>
     suspend fun deleteSearchBooks(books: List<SearchBook>)
     suspend fun getBookSourcePart(sourceUrl: String): BookSourcePart?
     suspend fun getBookSource(sourceUrl: String): BookSource?
@@ -80,19 +74,6 @@ class SearchRepositoryImpl(
 
     override suspend fun saveSearchBook(book: SearchBook): Unit = withContext(Dispatchers.IO) {
         appDb.searchBookDao.insert(book)
-    }
-
-    override suspend fun findChangeSourceBooks(
-        name: String,
-        author: String,
-        screenKey: String,
-        group: String,
-    ): List<SearchBook> = withContext(Dispatchers.IO) {
-        if (screenKey.isEmpty()) {
-            appDb.searchBookDao.changeSourceByGroup(name, author, group)
-        } else {
-            appDb.searchBookDao.changeSourceSearch(name, author, screenKey, group)
-        }
     }
 
     override suspend fun deleteSearchBooks(books: List<SearchBook>): Unit =

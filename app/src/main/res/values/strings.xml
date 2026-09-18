@@ -154,7 +154,6 @@
     <string name="is_loading">Loading…</string>
     <string name="retry">Retry</string>
     <string name="web_edit_source">Edit book sources on the web</string>
-    <string name="change_origin">Change Origin</string>
     <string name="about_description">
         \u3000\u3000 This is an open source reading software newly developed by Kotlin, welcome to join us.
     </string>
@@ -525,8 +524,6 @@
     <string name="page_anim_simulation">Simulation</string>
     <string name="page_anim_scroll">Scroll</string>
     <string name="page_anim_none">None</string>
-    <string name="up_change_source_last_chapter_t">Update the latest chapter after changed origin in the background</string>
-    <string name="up_change_source_last_chapter_s">If enabled,the update will start 1 minute later when the software is run</string>
     <string name="behavior_main_t">Auto Hide Toolbar</string>
     <string name="behavior_main_s">The toolbar will be hidden automatically when scroll the Bookshelf</string>
     <string name="success">Success</string>
@@ -659,7 +656,6 @@
     <string name="set_download_per">Custom cache path requires Storage permission</string>
     <string name="black">Black</string>
     <string name="content_empty">No content</string>
-    <string name="on_change_source">Changing source, wait please</string>
     <string name="chapter_list_empty">Chapters is empty</string>
     <string name="text_letter_spacing">Word spacing</string>
 
@@ -876,7 +872,6 @@
     <string name="wechat">WeChat</string>
     <string name="thanks">Supporting me will be appreciated</string>
     <string name="about_official_account">Official Account [Open Source Reading]</string>
-    <string name="source_auto_changing">Changing source</string>
     <string name="click_to_apply">Tap to join</string>
     <string name="middle">Middle</string>
     <string name="information">Information</string>
@@ -899,7 +894,6 @@
     <string name="night_accent">Night,Accent</string>
     <string name="night_background_color">Night,Background color</string>
     <string name="night_navbar_color">Night,NavBar color</string>
-    <string name="auto_change_source">Change Source Automatically</string>
     <string name="text_full_justify">Text Justified</string>
     <string name="text_bottom_justify">Text Align Bottom</string>
     <string name="text_alignment">Alignment</string>
@@ -1185,8 +1179,6 @@
     <string name="menu_refresh_after">Refresh the chapter after</string>
     <string name="menu_refresh_all">Refresh all chapters</string>
     <string name="edit_content">Edit Content</string>
-    <string name="chapter_change_source">Single chapter source switching</string>
-    <string name="book_change_source">Change the source of the whole book</string>
     <string name="sort_by_time">Sort by time</string>
     <string name="enable_record">Enable record</string>
     <string name="copy_all">Copy all</string>
@@ -1232,9 +1224,7 @@
     <string name="scroll_to_dur_source">Navigate to the current book source</string>
     <string name="cannot_timed_non_playback">When the non-playback state is not legal</string>
     <string name="all_bookmark">All bookmarks</string>
-    <string name="change_source_batch">Batch source switching</string>
     <string name="book_type_different">Different types of books</string>
-    <string name="soure_change_source">Whether to confirm the source change</string>
     <string name="timeout_millisecond">Timed out milliseconds</string>
     <string name="file_not_supported">Continue to open although %1$s is not supported ?</string>
     <string name="import_theme">Import theme</string>
@@ -1394,8 +1384,6 @@
     <string name="export_book">Export Book</string>
     <string name="export_book_notification_content">Exporting (%1$s), with %2$d to be exported.</string>
     <string name="export_md">Export(MD)</string>
-    <string name="change_source_delay">Change source delay</string>
-    <string name="change_source_progress">Result %1$d</string>
     <string name="open_book_info_by_click_title">Click on the book title to open details</string>
     <string name="export_wait">Waiting for export</string>
     <string name="show_bookshelf_fast_scroller">Show Quick Scroll Bar</string>
@@ -1665,11 +1653,6 @@
     <string name="author_read">%1$s • %2$d Not read</string>
     <string name="menu_alpha_sum">Current %d%%</string>
     <string name="menu_alpha">Menu opacity</string>
-    <string name="change_source_option_title">Choose an Action</string>
-    <string name="replace_current_book">Replace This Book</string>
-    <string name="add_as_new_book">Add as New Book</string>
-    <string name="bookshelf_book_conflict_title">Book Already on Bookshelf</string>
-    <string name="bookshelf_book_conflict_message">A book with the same title and author already exists. Replace it while keeping its reading data, or add another copy.</string>
     <string name="existing_book_source">Existing source: %1$s</string>
     <string name="new_book_source">New source: %1$s</string>
     <string name="latest_chapter_info">Latest chapter: %1$s</string>
@@ -1738,8 +1721,6 @@
     <string name="page_anim_fade">Fade</string>
     <string name="show_bookshelf_tab_menu">Show More Bookshelf Tab</string>
     <string name="show_unread_new">Show New Chapter Flag</string>
-    <string name="read_change_all">Source Change Default Applies to Entire Book</string>
-    <string name="read_change_all_s">Otherwise, Only Applies to Single Chapter.</string>
     <string name="show_tip">Show Book Type</string>
     <string name="show_book_count">Show Book Count</string>
     <string name="is_reading">Reading</string>
@@ -2139,7 +2120,6 @@
     <string name="clear_cache_error">Error clearing cache</string>
     <string name="upload_success">Upload successful</string>
     <string name="save_error">Save error</string>
-    <string name="auto_change_source_failed">Auto source change failed</string>
     <string name="group_name_empty">Group name cannot be empty</string>
     <string name="cover_reset">Cover reset</string>
     <string name="rule_copied_to_clipboard">Rule copied to clipboard</string>

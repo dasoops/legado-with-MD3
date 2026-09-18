@@ -40,7 +40,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.FormatListBulleted
 import androidx.compose.material.icons.filled.Book
 import androidx.compose.material.icons.filled.BookmarkAdd
-import androidx.compose.material.icons.filled.Code
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Group
 import androidx.compose.material.icons.filled.Person
@@ -118,7 +117,6 @@ import io.legado.app.ui.widget.components.alert.AppAlertDialog
 import io.legado.app.ui.widget.components.card.GlassCard
 import io.legado.app.ui.widget.components.card.HighlightTagRow
 import io.legado.app.ui.widget.components.card.TextCard
-import io.legado.app.ui.widget.components.changeSource.ChangeSourceSheet
 import io.legado.app.ui.widget.components.icon.AppIcon
 import io.legado.app.ui.widget.components.icon.AppIcons
 import io.legado.app.ui.widget.components.image.cover.BookCoverImage
@@ -356,7 +354,6 @@ private fun BookInfoScreenContent(
                                     onShelfClick = { onIntent(BookInfoIntent.ShelfClick) },
                                     onTocClick = { onIntent(BookInfoIntent.TocClick) },
                                     onGroupClick = { onIntent(BookInfoIntent.GroupClick) },
-                                    onSourceClick = { onIntent(BookInfoIntent.ChangeSourceClick) },
                                     onReadRecordClick = { onIntent(BookInfoIntent.ReadRecordClick) },
                                 )
                                 state.relatedBooks.forEach { module ->
@@ -420,30 +417,6 @@ private fun BookInfoScreenContent(
                 currentGroupId = state.book?.group ?: 0L,
                 onDismissRequest = { onIntent(BookInfoIntent.DismissSheet) },
                 onConfirm = { onIntent(BookInfoIntent.SelectGroup(it)) },
-            )
-        }
-        is BookInfoSheet.SourcePicker -> {
-            ChangeSourceSheet(
-                show = currentSheet is BookInfoSheet.SourcePicker,
-                oldBook = sheet.oldBook,
-                onDismissRequest = { onIntent(BookInfoIntent.DismissSheet) },
-                onReplace = { source, newBook, toc, options ->
-                    onIntent(BookInfoIntent.ReplaceWithSource(source, newBook, toc, options))
-                },
-                onAddAsNew = { newBook, toc ->
-                    onIntent(BookInfoIntent.AddSourceAsNewBook(newBook, toc))
-                },
-                onReplaceConflict = { oldBook, source, newBook, toc, options ->
-                    onIntent(
-                        BookInfoIntent.ReplaceConflictingBook(
-                            oldBook = oldBook,
-                            source = source,
-                            book = newBook,
-                            toc = toc,
-                            options = options,
-                        )
-                    )
-                },
             )
         }
         BookInfoSheet.ReadRecord -> BookReadRecordSheet(
@@ -1069,7 +1042,6 @@ private fun BookInfoActions(
     onShelfClick: () -> Unit,
     onTocClick: () -> Unit,
     onGroupClick: () -> Unit,
-    onSourceClick: () -> Unit,
     onReadRecordClick: () -> Unit,
 ) {
     var awaitingShelfAddition by rememberSaveable { mutableStateOf(false) }
@@ -1127,12 +1099,6 @@ private fun BookInfoActions(
             icon = Icons.AutoMirrored.Outlined.FormatListBulleted,
             label = stringResource(R.string.view_toc),
             onClick = onTocClick
-        )
-        BookInfoActionCard(
-            modifier = Modifier.weight(1f),
-            icon = Icons.Default.Code,
-            label = stringResource(R.string.change_origin),
-            onClick = onSourceClick
         )
         BookInfoActionCard(
             modifier = Modifier.weight(1f),

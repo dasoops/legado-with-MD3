@@ -112,7 +112,6 @@ private fun ReadConfigIntent.toSettingsTransform(): (ReadSettings) -> ReadSettin
     is ReadConfigIntent.TitleBarModeChanged -> { settings -> settings.copy(titleBarMode = value) }
     is ReadConfigIntent.ReadMenuBlurAlphaChanged -> { settings -> settings.copy(readMenuBlurAlpha = value) }
     is ReadConfigIntent.ReadBodyToLhChanged -> { settings -> settings.copy(readBodyToLh = value) }
-    is ReadConfigIntent.DefaultSourceChangeAllChanged -> { settings -> settings.copy(defaultSourceChangeAll = value) }
     is ReadConfigIntent.TextFullJustifyChanged -> { settings -> settings.copy(textFullJustify = value) }
     is ReadConfigIntent.TextBottomJustifyChanged -> { settings -> settings.copy(textBottomJustify = value) }
     is ReadConfigIntent.AdaptSpecialStyleChanged -> { settings -> settings.copy(adaptSpecialStyle = value) }
@@ -133,7 +132,6 @@ private fun ReadConfigIntent.toSettingsTransform(): (ReadSettings) -> ReadSettin
         settings -> settings.copy(maxLengthWithNoToc = value.coerceIn(3000, 100000))
     }
     is ReadConfigIntent.SelectVibratorChanged -> { settings -> settings.copy(selectVibrator = value) }
-    is ReadConfigIntent.AutoChangeSourceChanged -> { settings -> settings.copy(autoChangeSource = value) }
     is ReadConfigIntent.AutoSuggestDayNightChanged -> { settings -> settings.copy(autoSuggestDayNight = value) }
     is ReadConfigIntent.ReadingAnchorChanged -> { settings -> settings.copy(readingAnchorEnabled = value) }
     is ReadConfigIntent.SelectTextChanged -> { settings -> settings.copy(selectText = value) }
@@ -181,7 +179,6 @@ private fun ReadSettings.toUiState(
         titleBarMode = titleBarMode,
         readMenuBlurAlpha = readMenuBlurAlpha,
         readBodyToLh = readBodyToLh,
-        defaultSourceChangeAll = defaultSourceChangeAll,
         textFullJustify = textFullJustify,
         textBottomJustify = textBottomJustify,
         adaptSpecialStyle = adaptSpecialStyle,
@@ -202,7 +199,6 @@ private fun ReadSettings.toUiState(
         useNewTocSheet = useNewTocSheet,
         maxLengthWithNoToc = maxLengthWithNoToc,
         selectVibrator = selectVibrator,
-        autoChangeSource = autoChangeSource,
         autoSuggestDayNight = autoSuggestDayNight,
         readingAnchorEnabled = readingAnchorEnabled,
         selectText = selectText,

@@ -89,7 +89,6 @@
     <string name="is_loading">載入中…</string>
     <string name="retry">重試</string>
     <string name="web_edit_source">web編輯書源</string>
-    <string name="change_origin">換源</string>
     <string name="about_description">
         \u3000\u3000這是一款使用Kotlin全新開發的開源的閱讀軟體，歡迎您的加入。
     </string>
@@ -437,8 +436,6 @@
     <string name="page_anim_simulation">模擬</string>
     <string name="page_anim_scroll">滾動</string>
     <string name="page_anim_none">無動畫</string>
-    <string name="up_change_source_last_chapter_t">後台更新換源最新章節</string>
-    <string name="up_change_source_last_chapter_s">開啟則會在軟體打開1分鐘後開始更新</string>
     <string name="behavior_main_t">書架ToolBar自動隱藏</string>
     <string name="behavior_main_s">滾動書架時ToolBar自動隱藏與顯示</string>
     <string name="success">成功</string>
@@ -570,7 +567,6 @@
     <string name="set_download_per">自訂快取路徑需要儲存權限</string>
     <string name="black">黑色</string>
     <string name="content_empty">文章內容為空</string>
-    <string name="on_change_source">正在換源請等待…</string>
     <string name="chapter_list_empty">目錄列表為空</string>
     <string name="text_letter_spacing">字距</string>
 
@@ -727,7 +723,6 @@
     <string name="wechat">微信</string>
     <string name="thanks">您的支援是我更新的動力</string>
     <string name="about_official_account">公眾號[开源阅读]</string>
-    <string name="source_auto_changing">正在自動換源</string>
     <string name="click_to_apply">點擊加入</string>
     <string name="middle">中</string>
     <string name="information">訊息</string>
@@ -752,7 +747,6 @@
     <string name="night_accent">夜間，強調色</string>
     <string name="night_background_color">夜間，背景色</string>
     <string name="night_navbar_color">夜間，底欄色</string>
-    <string name="auto_change_source">自動換源</string>
     <string name="text_full_justify">文字兩端對齊</string>
     <string name="text_bottom_justify">文字底部對齊</string>
     <string name="auto_page_speed">自動翻頁速度</string>
@@ -980,8 +974,6 @@
     <string name="menu_refresh_after">重新整理之後章節</string>
     <string name="menu_refresh_all">重新整理全部章節</string>
     <string name="edit_content">編輯內容</string>
-    <string name="chapter_change_source">單章換源</string>
-    <string name="book_change_source">整書換源</string>
     <string name="sort_by_time">時間排序</string>
     <string name="enable_record">開啟記錄</string>
     <string name="copy_all">複製所有</string>
@@ -1007,9 +999,7 @@
     <string name="scroll_to_dur_source">定位到目前書源</string>
     <string name="cannot_timed_non_playback">非播放狀態無法定時</string>
     <string name="all_bookmark">所有書籤</string>
-    <string name="change_source_batch">批次換源</string>
     <string name="book_type_different">書籍類型不一樣</string>
-    <string name="soure_change_source">是否確認換源</string>
     <string name="timeout_millisecond">超時毫秒數</string>
     <string name="file_not_supported">文件%1$s 不受支援，是否繼續打開？</string>
     <string name="import_theme">匯入主題</string>
@@ -1161,8 +1151,6 @@
     <string name="export_book">导出书籍</string>
     <string name="export_book_notification_content">正在导出(%1$s),还有%2$d本待导出</string>
     <string name="export_md">导出(MD)</string>
-    <string name="change_source_delay">换源间隔</string>
-    <string name="change_source_progress">結果 %1$d</string>
     <string name="open_book_info_by_click_title">点击书名打开详情</string>
     <string name="export_wait">等待导出</string>
     <string name="sync_book_progress_success">進度同步成功</string>
@@ -1741,11 +1729,6 @@
     <string name="author_read">%1$s • %2$d 未讀</string>
     <string name="menu_alpha_sum">目前 %d%%</string>
     <string name="menu_alpha">選單不透明度</string>
-    <string name="change_source_option_title">選擇操作</string>
-    <string name="replace_current_book">取代此書</string>
-    <string name="add_as_new_book">新增為新書</string>
-    <string name="bookshelf_book_conflict_title">書架中已有同名書籍</string>
-    <string name="bookshelf_book_conflict_message">偵測到書名和作者相同的書籍。可取代現有書並保留閱讀資料，或仍然新增一本。</string>
     <string name="existing_book_source">現有書源：%1$s</string>
     <string name="new_book_source">將加入書源：%1$s</string>
     <string name="latest_chapter_info">最新章節：%1$s</string>
@@ -1809,8 +1792,6 @@
     <string name="page_anim_fade">淡入淡出</string>
     <string name="show_bookshelf_tab_menu">顯示更多書架分頁</string>
     <string name="show_unread_new">顯示新章節標記</string>
-    <string name="read_change_all">換源預設套用到整本書</string>
-    <string name="read_change_all_s">否則僅套用於單一章節。</string>
     <string name="show_tip">顯示書籍類型</string>
     <string name="is_reading">閱讀中</string>
     <string name="is_unread">未讀</string>
@@ -2068,7 +2049,6 @@
     <string name="clear_cache_error">清除快取出錯</string>
     <string name="upload_success">上傳成功</string>
     <string name="save_error">儲存失敗</string>
-    <string name="auto_change_source_failed">自動換源失敗</string>
     <string name="group_name_empty">分組名稱不能為空</string>
     <string name="cover_reset">重設封面</string>
     <string name="rule_copied_to_clipboard">規則已複製到剪貼簿</string>

@@ -374,7 +374,7 @@ internal val ReadBookButtonIds = listOf(
 )
 
 internal val MoreActionIds = listOf(
-    "source_custom_button", "change_source", "refresh", "download", "edit_content", "add_bookmark",
+    "source_custom_button", "refresh", "download", "edit_content", "add_bookmark",
     "text_processing", "reverse_content", "re_segment",
     "del_ruby", "del_h", "toc_rule", "charset", "image_style", "page_anim",
     "simulated_reading", "get_progress", "cover_progress", "highlight_rule", "read_style",
@@ -445,11 +445,6 @@ sealed interface ReadBookIntent {
     data class RequestDeleteContentProcess(val item: ContentProcessItemUi) : ReadBookIntent
     data object ConfirmDeleteContentProcess : ReadBookIntent
     data object DismissDeleteContentProcess : ReadBookIntent
-
-    // Change source
-    data class ChangeSourceBook(val book: Book) : ReadBookIntent
-    data class ChangeSource(val book: Book, val toc: List<BookChapter>) : ReadBookIntent
-    data class AddSourceAsNewBook(val book: Book, val toc: List<BookChapter>) : ReadBookIntent
 
     // Activity result intents
     data class OpenChapterResult(val index: Int, val chapterPos: Int) : ReadBookIntent
@@ -526,9 +521,6 @@ sealed interface ReadBookIntent {
     data object MenuSameTitleRemoved : ReadBookIntent
     data class MenuImageStyle(val style: String) : ReadBookIntent
     data object MenuGetProgress : ReadBookIntent
-    data object MenuChangeSource : ReadBookIntent
-    data object MenuBookChangeSource : ReadBookIntent
-    data object MenuChapterChangeSource : ReadBookIntent
     data object MenuSettingReplace : ReadBookIntent
     data object MenuTocRegex : ReadBookIntent
     data class TocRegexResult(val tocRegex: String) : ReadBookIntent
@@ -744,9 +736,6 @@ sealed interface ReadBookEffect {
     ) : ReadBookEffect
 
     // Menu actions that need Activity
-    data object MenuChangeSource : ReadBookEffect
-    data object MenuBookChangeSource : ReadBookEffect
-    data object MenuChapterChangeSource : ReadBookEffect
     data object MenuSettingReplace : ReadBookEffect
     data class MenuTocRegex(val bookUrl: String, val tocRegex: String?) : ReadBookEffect
     data class MenuImageStyleChanged(val style: String) : ReadBookEffect
@@ -813,8 +802,6 @@ sealed interface ReadBookSheet {
     data object TextProcessing : ReadBookSheet
     data object ContentEdit : ReadBookSheet
     data object AppLog : ReadBookSheet
-    data class ChangeChapterSource(val chapterIndex: Int, val chapterTitle: String) : ReadBookSheet
-    data object ChangeBookSource : ReadBookSheet
     data object ShadowSet : ReadBookSheet
     data object UnderlineConfig : ReadBookSheet
     data object FontSelect : ReadBookSheet
@@ -1422,9 +1409,6 @@ sealed interface ConfigUpdate {
     data class ReadBodyToLh(val value: Boolean) : ConfigUpdate {
         override val actions = setOf(ConfigUpdateAction.RebuildWholeBookPageIndex, ConfigUpdateAction.ReloadContent)
     }
-    data class DefaultSourceChangeAll(val value: Boolean) : ConfigUpdate {
-        override val actions = emptySet<ConfigUpdateAction>()
-    }
     data class TextFullJustify(val value: Boolean) : ConfigUpdate {
         override val actions = setOf(ConfigUpdateAction.RebuildWholeBookPageIndex, ConfigUpdateAction.ReloadContent)
     }
@@ -1489,9 +1473,6 @@ sealed interface ConfigUpdate {
         override val actions = emptySet<ConfigUpdateAction>()
     }
     data class SelectVibrator(val value: Boolean) : ConfigUpdate {
-        override val actions = emptySet<ConfigUpdateAction>()
-    }
-    data class AutoChangeSource(val value: Boolean) : ConfigUpdate {
         override val actions = emptySet<ConfigUpdateAction>()
     }
     data class AutoSuggestDayNight(val value: Boolean) : ConfigUpdate {

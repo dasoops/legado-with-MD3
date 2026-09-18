@@ -65,9 +65,6 @@ class ReadSettingsRepository(
     suspend fun setReadBodyToLh(value: Boolean) =
         settingsRepository.putBoolean(PreferKey.readBodyToLh, value)
 
-    suspend fun setDefaultSourceChangeAll(value: Boolean) =
-        settingsRepository.putBoolean(PreferKey.defaultSourceChangeAll, value)
-
     suspend fun setTextFullJustify(value: Boolean) =
         settingsRepository.putBoolean(PreferKey.textFullJustify, value)
 
@@ -127,9 +124,6 @@ class ReadSettingsRepository(
 
     suspend fun setSelectVibrator(value: Boolean) =
         settingsRepository.putBoolean(PreferKey.selectVibrator, value)
-
-    suspend fun setAutoChangeSource(value: Boolean) =
-        settingsRepository.putBoolean(PreferKey.autoChangeSource, value)
 
     suspend fun setAutoSuggestDayNight(value: Boolean) =
         settingsRepository.putBoolean(PreferKey.autoSuggestDayNight, value)
@@ -348,7 +342,6 @@ class ReadSettingsRepository(
             titleBarMode = compatDsValue(Keys.TitleBarMode, "1"),
             menuAlpha = compatDsValue(Keys.MenuAlpha, 100),
             readBodyToLh = compatDsValue(Keys.ReadBodyToLh, true),
-            defaultSourceChangeAll = compatDsValue(Keys.DefaultSourceChangeAll, true),
             textFullJustify = compatDsValue(Keys.TextFullJustify, true),
             textBottomJustify = compatDsValue(Keys.TextBottomJustify, true),
             adaptSpecialStyle = compatDsValue(Keys.AdaptSpecialStyle, true),
@@ -372,7 +365,6 @@ class ReadSettingsRepository(
             useNewTocSheet = compatDsValue(Keys.UseNewTocSheet, true),
             maxLengthWithNoToc = compatDsValue(Keys.MaxLengthWithNoToc, 3000),
             selectVibrator = compatDsValue(Keys.SelectVibrator, false),
-            autoChangeSource = compatDsValue(Keys.AutoChangeSource, true),
             autoSuggestDayNight = compatDsValue(Keys.AutoSuggestDayNight, false),
             readingAnchorEnabled = compatDsValue(Keys.ReadingAnchorEnabled, true),
             selectText = compatDsValue(Keys.SelectText, true),
@@ -468,7 +460,6 @@ class ReadSettingsRepository(
         val TitleBarMode = stringPreferencesKey(PreferKey.titleBarMode)
         val MenuAlpha = intPreferencesKey(PreferKey.menuAlpha)
         val ReadBodyToLh = booleanPreferencesKey(PreferKey.readBodyToLh)
-        val DefaultSourceChangeAll = booleanPreferencesKey(PreferKey.defaultSourceChangeAll)
         val TextFullJustify = booleanPreferencesKey(PreferKey.textFullJustify)
         val TextBottomJustify = booleanPreferencesKey(PreferKey.textBottomJustify)
         val AdaptSpecialStyle = booleanPreferencesKey(PreferKey.adaptSpecialStyle)
@@ -492,7 +483,6 @@ class ReadSettingsRepository(
         val UseNewTocSheet = booleanPreferencesKey(PreferKey.useNewTocSheet)
         val MaxLengthWithNoToc = intPreferencesKey(PreferKey.maxLengthWithNoToc)
         val SelectVibrator = booleanPreferencesKey(PreferKey.selectVibrator)
-        val AutoChangeSource = booleanPreferencesKey(PreferKey.autoChangeSource)
         val AutoSuggestDayNight = booleanPreferencesKey(PreferKey.autoSuggestDayNight)
         val ReadingAnchorEnabled = booleanPreferencesKey(PreferKey.readingAnchorEnabled)
         val SelectText = booleanPreferencesKey(PreferKey.selectText)
@@ -598,7 +588,6 @@ internal fun ReadSettings.toGatewayPrefMap(): Map<String, Any?> = mapOf(
     PreferKey.titleBarMode to titleBarMode,
     PreferKey.menuAlpha to menuAlpha,
     PreferKey.readBodyToLh to readBodyToLh,
-    PreferKey.defaultSourceChangeAll to defaultSourceChangeAll,
     PreferKey.textFullJustify to textFullJustify,
     PreferKey.textBottomJustify to textBottomJustify,
     PreferKey.adaptSpecialStyle to adaptSpecialStyle,
@@ -622,7 +611,6 @@ internal fun ReadSettings.toGatewayPrefMap(): Map<String, Any?> = mapOf(
     PreferKey.useNewTocSheet to useNewTocSheet,
     PreferKey.maxLengthWithNoToc to maxLengthWithNoToc,
     PreferKey.selectVibrator to selectVibrator,
-    PreferKey.autoChangeSource to autoChangeSource,
     PreferKey.autoSuggestDayNight to autoSuggestDayNight,
     PreferKey.readingAnchorEnabled to readingAnchorEnabled,
     PreferKey.selectText to selectText,

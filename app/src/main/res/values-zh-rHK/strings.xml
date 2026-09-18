@@ -87,7 +87,6 @@
     <string name="is_loading">載入中…</string>
     <string name="retry">重試</string>
     <string name="web_edit_source">web 編輯書源</string>
-    <string name="change_origin">換源</string>
     <string name="about_description">
         \u3000\u3000這是一款使用 Kotlin 全新開發的開源的閲讀應用程式，歡迎你的加入。
     </string>
@@ -434,8 +433,6 @@
     <string name="page_anim_simulation">仿真</string>
     <string name="page_anim_scroll">滾動</string>
     <string name="page_anim_none">無動畫</string>
-    <string name="up_change_source_last_chapter_t">後台更新換源最新章節</string>
-    <string name="up_change_source_last_chapter_s">開啟則會在軟件打開 1 分鐘後開始更新</string>
     <string name="behavior_main_t">書架 ToolBar 自動隱藏</string>
     <string name="behavior_main_s">滾動書架時 ToolBar 自動隱藏與顯示</string>
     <string name="success">成功</string>
@@ -561,7 +558,6 @@
     <string name="set_download_per">自定義緩存路徑需要存儲權限</string>
     <string name="black">黑色</string>
     <string name="content_empty">文章內容為空</string>
-    <string name="on_change_source">正在換源請等待…</string>
     <string name="chapter_list_empty">目錄列表為空</string>
     <string name="text_letter_spacing">字距</string>
 
@@ -716,7 +712,6 @@
     <string name="wechat">WeChat</string>
     <string name="thanks">你的支持是我更新的動力</string>
     <string name="about_official_account">公眾號[开源阅读]</string>
-    <string name="source_auto_changing">正在自動換源</string>
     <string name="click_to_apply">點擊加入</string>
     <string name="middle">中</string>
     <string name="information">信息</string>
@@ -740,7 +735,6 @@
     <string name="night_accent">夜間，強調色</string>
     <string name="night_background_color">夜間，背景色</string>
     <string name="night_navbar_color">夜間，導航欄顏色</string>
-    <string name="auto_change_source">自動換源</string>
     <string name="text_full_justify">文字兩端對齊</string>
     <string name="auto_page_speed">自動翻頁速度</string>
     <string name="sort_by_url">地址排序</string>
@@ -977,8 +971,6 @@
     <string name="menu_refresh_after">刷新之后章节</string>
     <string name="menu_refresh_all">刷新全部章节</string>
     <string name="edit_content">编辑内容</string>
-    <string name="chapter_change_source">单章换源</string>
-    <string name="book_change_source">整书换源</string>
     <string name="sort_by_time">按时间排序</string>
     <string name="enable_record">开启记录</string>
     <string name="copy_all">拷贝所有</string>
@@ -1004,9 +996,7 @@
     <string name="scroll_to_dur_source">定位到当前书源</string>
     <string name="cannot_timed_non_playback">非播放状态无法定时</string>
     <string name="all_bookmark">所有书签</string>
-    <string name="change_source_batch">批量换源</string>
     <string name="book_type_different">书籍类型不一样</string>
-    <string name="soure_change_source">是否确认换源</string>
     <string name="timeout_millisecond">超时毫秒数</string>
     <string name="file_not_supported">文件%1$s 不受支持，是否继续打开？</string>
     <string name="import_theme">导入主题</string>
@@ -1158,8 +1148,6 @@
     <string name="export_book">导出书籍</string>
     <string name="export_book_notification_content">正在导出(%1$s),还有%2$d本待导出</string>
     <string name="export_md">导出(MD)</string>
-    <string name="change_source_delay">换源间隔</string>
-    <string name="change_source_progress">結果 %1$d</string>
     <string name="open_book_info_by_click_title">点击书名打开详情</string>
     <string name="export_wait">等待导出</string>
     <string name="sync_book_progress_success">進度同步成功</string>
@@ -1386,7 +1374,6 @@
     <string name="about_update_action">下載更新</string>
     <string name="about_update_channel">發佈渠道</string>
     <string name="adapt_special_style">適配特殊樣式</string>
-    <string name="add_as_new_book">添加為新書</string>
     <string name="add_book_failed">添加書籍失敗</string>
     <string name="add_regex_rule">添加正則規則</string>
     <string name="add_tag">添加標籤</string>
@@ -1400,7 +1387,6 @@
     <string name="already_in_download_list">已在下載列表中</string>
     <string name="ascending_order">升序</string>
     <string name="author_read">%1$s • %2$d 未讀</string>
-    <string name="auto_change_source_failed">自動換源失敗</string>
     <string name="autobackup_fail">自動備份失敗
 %s</string>
     <string name="background_permission">背景權限</string>
@@ -1443,7 +1429,6 @@
     <string name="cancel_select">取消選擇</string>
     <string name="cannot_open_url">無法直接打開此 URL</string>
     <string name="change_icon_success">圖標已更新</string>
-    <string name="change_source_option_title">選擇操作</string>
     <string name="check_timeout">校驗超時</string>
     <string name="checking_update">正在檢查更新…</string>
     <string name="clear_all">清除全部</string>
@@ -1738,8 +1723,6 @@
     <string name="quick_jump">快速跳轉</string>
     <string name="re_sync_webdav">重新同步遠端書籍</string>
     <string name="read">閲讀</string>
-    <string name="read_change_all">換源預設應用於整本書</string>
-    <string name="read_change_all_s">否則僅應用於單章。</string>
     <string name="read_chapter_index">已讀 %d 章</string>
     <string name="read_chapter_total">共 %d 章</string>
     <string name="read_color">顏色</string>
@@ -1815,9 +1798,6 @@
     <string name="related_books">相關書籍（relatedBooks）</string>
     <string name="release_to_refresh">釋放刷新</string>
     <string name="reload">重新載入</string>
-    <string name="replace_current_book">替換此書</string>
-    <string name="bookshelf_book_conflict_title">書架中已有同名書籍</string>
-    <string name="bookshelf_book_conflict_message">偵測到書名和作者相同的書籍。可替換現有書並保留閱讀資料，或仍然新增一本。</string>
     <string name="existing_book_source">現有書源：%1$s</string>
     <string name="new_book_source">將加入書源：%1$s</string>
     <string name="latest_chapter_info">最新章節：%1$s</string>

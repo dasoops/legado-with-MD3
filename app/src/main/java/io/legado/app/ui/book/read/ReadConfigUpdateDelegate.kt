@@ -538,11 +538,6 @@ class ReadConfigUpdateDelegate(
                     readSettingsRepository.setReadBodyToLh(update.value)
                 }
             }
-            is ConfigUpdate.DefaultSourceChangeAll -> {
-                scope.launch {
-                    readSettingsRepository.setDefaultSourceChangeAll(update.value)
-                }
-            }
             is ConfigUpdate.TextFullJustify -> {
                 scope.launch {
                     readSettingsRepository.setTextFullJustify(update.value)
@@ -667,11 +662,6 @@ class ReadConfigUpdateDelegate(
             is ConfigUpdate.SelectVibrator -> {
                 scope.launch {
                     readSettingsRepository.setSelectVibrator(update.value)
-                }
-            }
-            is ConfigUpdate.AutoChangeSource -> {
-                scope.launch {
-                    readSettingsRepository.setAutoChangeSource(update.value)
                 }
             }
             is ConfigUpdate.AutoSuggestDayNight -> {

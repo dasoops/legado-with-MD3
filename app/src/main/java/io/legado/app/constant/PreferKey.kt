@@ -99,7 +99,6 @@ object PreferKey {
     const val highlightRuleBracketNote = "highlightRuleBracketNote"
     const val adaptSpecialStyle = "adaptSpecialStyle"
     const val autoClearExpired = "autoClearExpired"
-    const val autoChangeSource = "autoChangeSource"
     const val autoSuggestDayNight = "autoSuggestDayNight"
     const val readingAnchorEnabled = "readingAnchorEnabled"
     const val importKeepName = "importKeepName"
@@ -157,7 +156,6 @@ object PreferKey {
     const val brightnessVwPos = "brightnessVwPos"
     const val brightnessAuto = "brightnessAuto"
     const val shrinkDatabase = "shrinkDatabase"
-    const val batchChangeSourceDelay = "batchChangeSourceDelay"
     const val openBookInfoByClickTitle = "openBookInfoByClickTitle"
     const val defaultHomePage = "defaultHomePage"
     const val showBookshelfFastScroller = "showBookshelfFastScroller"
@@ -371,8 +369,6 @@ object PreferKey {
 
     const val exploreFilterState = "explore_filter_state"
 
-
-    const val defaultSourceChangeAll = "defaultSourceChangeAll"
 
     const val showTip = "showTip"
     const val showBookCount = "showBookCount"

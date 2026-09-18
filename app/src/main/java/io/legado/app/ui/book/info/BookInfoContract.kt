@@ -7,7 +7,6 @@ import io.legado.app.data.entities.BookChapter
 import io.legado.app.data.entities.BookSource
 import io.legado.app.data.entities.SearchBook
 import io.legado.app.data.entities.readRecord.ReadRecordTimelineDay
-import io.legado.app.domain.usecase.ChangeSourceMigrationOptions
 import io.legado.app.ui.widget.components.variable.VariableEditorUiState
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
@@ -83,7 +82,6 @@ sealed interface BookInfoSheet {
     data object None : BookInfoSheet
     data object CoverPicker : BookInfoSheet
     data object GroupPicker : BookInfoSheet
-    data class SourcePicker(val oldBook: Book) : BookInfoSheet
     data object ReadRecord : BookInfoSheet
     data class WebFiles(val openAfterImport: Boolean) : BookInfoSheet
     data class ArchiveEntries(
@@ -135,7 +133,6 @@ sealed interface BookInfoIntent {
     data object CoverClick : BookInfoIntent
     data object CoverLongClick : BookInfoIntent
     data object GroupClick : BookInfoIntent
-    data object ChangeSourceClick : BookInfoIntent
     data object ReadRecordClick : BookInfoIntent
     data object RemarkClick : BookInfoIntent
     data class SaveCover(val path: String) : BookInfoIntent
@@ -143,24 +140,6 @@ sealed interface BookInfoIntent {
     data class UpdateRemark(val remark: String) : BookInfoIntent
     data class SelectGroup(val groupId: Long) : BookInfoIntent
     data class SelectCover(val coverUrl: String) : BookInfoIntent
-    data class ReplaceWithSource(
-        val source: BookSource,
-        val book: Book,
-        val toc: List<BookChapter>,
-        val options: ChangeSourceMigrationOptions,
-    ) : BookInfoIntent
-    data class AddSourceAsNewBook(
-        val book: Book,
-        val toc: List<BookChapter>,
-    ) : BookInfoIntent
-
-    data class ReplaceConflictingBook(
-        val oldBook: Book,
-        val source: BookSource,
-        val book: Book,
-        val toc: List<BookChapter>,
-        val options: ChangeSourceMigrationOptions,
-    ) : BookInfoIntent
 
     data class SelectWebFile(
         val webFile: BookInfoWebFile,

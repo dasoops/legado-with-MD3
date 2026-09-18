@@ -50,7 +50,6 @@ import io.legado.app.data.entities.BookChapter
 import io.legado.app.data.entities.BookGroup
 import io.legado.app.data.entities.BookSource
 import io.legado.app.data.entities.SearchBook
-import io.legado.app.domain.usecase.ChangeSourceMigrationOptions
 import io.legado.app.ui.book.changecover.ChangeCoverViewModel
 import io.legado.app.ui.book.group.GroupEditSheet
 import io.legado.app.ui.theme.LegadoTheme
@@ -58,7 +57,6 @@ import io.legado.app.ui.widget.components.button.series.MediumTonalButton
 import io.legado.app.ui.widget.components.button.series.SmallPlainButton
 import io.legado.app.ui.widget.components.card.GlassCard
 import io.legado.app.ui.widget.components.card.SelectionItemCard
-import io.legado.app.ui.widget.components.changeSource.ChangeSourceSheet
 import io.legado.app.ui.widget.components.checkBox.AppCheckbox
 import io.legado.app.ui.widget.components.image.cover.CoilBookCover
 import io.legado.app.ui.widget.components.modalBottomSheet.AppModalBottomSheet
@@ -268,30 +266,5 @@ fun ChangeCoverSheet(
             }
         }
         Spacer(modifier = Modifier.height(16.dp))
-    }
-}
-
-@Composable
-fun ChangeSourceSheet(
-    data: Book?,
-    onDismissRequest: () -> Unit,
-    onReplace: (BookSource, Book, List<BookChapter>, ChangeSourceMigrationOptions) -> Unit,
-    onAddAsNew: (Book, List<BookChapter>) -> Unit,
-) {
-    var cachedData by remember { mutableStateOf(data) }
-
-    if (data != null) {
-        cachedData = data
-    }
-
-    val currentData = cachedData
-    if (currentData != null) {
-        ChangeSourceSheet(
-            show = data != null,
-            oldBook = currentData,
-            onDismissRequest = onDismissRequest,
-            onReplace = onReplace,
-            onAddAsNew = onAddAsNew,
-        )
     }
 }

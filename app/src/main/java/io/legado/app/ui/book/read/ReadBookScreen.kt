@@ -21,7 +21,6 @@ import io.legado.app.domain.gateway.CoverSettingsGateway
 import io.legado.app.domain.usecase.BookmarkTargetVerdict
 import io.legado.app.help.coil.CoverExtras
 import io.legado.app.ui.book.read.sheet.BgTextConfigSheet
-import io.legado.app.ui.book.read.sheet.ChangeChapterSourceSheet
 import io.legado.app.ui.book.read.sheet.CharsetConfigSheet
 import io.legado.app.ui.book.read.sheet.ClickActionConfigSheet
 import io.legado.app.ui.book.read.sheet.ContentEditSheet
@@ -46,12 +45,9 @@ import io.legado.app.ui.widget.components.FontFolderState
 import io.legado.app.ui.widget.components.FontSelectSheet
 import io.legado.app.ui.widget.components.alert.AppAlertDialog
 import io.legado.app.ui.widget.components.bookmark.BookmarkEditSheet
-import io.legado.app.ui.widget.components.changeSource.ChangeSourceSheet
 import io.legado.app.ui.widget.components.image.cover.usesDefaultBookCover
 import io.legado.app.ui.widget.components.log.AppLogSheet
 import io.legado.app.ui.widget.components.text.AppText
-import io.legado.app.utils.toastOnUi
-import kotlinx.coroutines.flow.collectLatest
 import org.koin.compose.koinInject
 import io.legado.app.model.BookCover as BookCoverModel
 
@@ -471,102 +467,6 @@ fun ReadBookScreen(
             // Integrated into TypographyPage
             LaunchedEffect(state.activeSheet) {
                 onIntent(ReadBookIntent.DismissSheet)
-            }
-        }
-
-        is ReadBookSheet.ChangeChapterSource -> {
-            val sheet = state.activeSheet
-            val book = state.book
-            if (book != null) {
-                var showSheet by remember { mutableStateOf(true) }
-                LaunchedEffect(showSheet) {
-                    if (!showSheet) {
-                        kotlinx.coroutines.delay(300)
-                        onIntent(ReadBookIntent.SetActiveSheet(null))
-                    }
-                }
-                val viewModel = androidx.compose.runtime.key(
-                    "chapter-source-${book.bookUrl}-${sheet.chapterIndex}"
-                ) {
-                    org.koin.androidx.compose.koinViewModel<io.legado.app.ui.book.changesource.ChangeChapterSourceViewModel>()
-                }
-                androidx.compose.runtime.DisposableEffect(viewModel) {
-                    onDispose { viewModel.dispose() }
-                }
-                LaunchedEffect(book.bookUrl, sheet.chapterIndex) {
-                    viewModel.initData(
-                        book,
-                        sheet.chapterIndex,
-                        sheet.chapterTitle
-                    )
-                }
-                val context = androidx.compose.ui.platform.LocalContext.current
-                ChangeChapterSourceSheet(
-                    state = viewModel.uiState.collectAsStateWithLifecycle().value,
-                    onIntent = viewModel::onIntent,
-                    show = showSheet,
-                    onDismissRequest = { showSheet = false },
-                    onAnimationFinish = { onIntent(ReadBookIntent.SetActiveSheet(null)) },
-                    bookScoreFlow = viewModel::bookScoreFlow,
-                    onBookScoreClick = viewModel::onBookScoreClick,
-                    onEditSource = { sourceUrl ->
-                        onIntent(ReadBookIntent.OpenSourceEditByUrl(sourceUrl))
-                    },
-                )
-                // Handle ReplaceContent effect
-                LaunchedEffect(viewModel) {
-                    viewModel.effects.collectLatest { effect ->
-                        when (effect) {
-                            is io.legado.app.ui.book.changesource.ChangeChapterSourceEffect.ReplaceContent -> {
-                                showSheet = false
-                                onIntent(ReadBookIntent.SaveChapterContent(effect.content, sheet.chapterIndex))
-                            }
-
-                            is io.legado.app.ui.book.changesource.ChangeChapterSourceEffect.ShowToast -> {
-                                context.toastOnUi(effect.message)
-                            }
-
-                            is io.legado.app.ui.book.changesource.ChangeChapterSourceEffect.Dismiss -> {
-                                // Handled by showSheet animation — no-op
-                            }
-                        }
-                    }
-                }
-            } else {
-                LaunchedEffect(sheet) {
-                    onIntent(ReadBookIntent.DismissSheet)
-                }
-            }
-        }
-
-        is ReadBookSheet.ChangeBookSource -> {
-            val changeSourceSheet = state.activeSheet
-            val changeSourceBook = state.book
-            if (changeSourceBook == null) {
-                LaunchedEffect(changeSourceSheet) {
-                    onIntent(ReadBookIntent.DismissSheet)
-                }
-            }
-            if (changeSourceBook != null) {
-                ChangeSourceSheet(
-                    show = true,
-                    oldBook = changeSourceBook,
-                    fromReadBookActivity = true,
-                    allowAddAsNew = false,
-                    dismissOnReplaceStart = true,
-                    onDismissRequest = { onIntent(ReadBookIntent.DismissSheet) },
-                    onReplace = { _, newBook, toc, _ ->
-                        onIntent(ReadBookIntent.DismissSheet)
-                        onIntent(ReadBookIntent.ChangeSource(newBook, toc))
-                    },
-                    onReplaceBook = { newBook ->
-                        onIntent(ReadBookIntent.ChangeSourceBook(newBook))
-                    },
-                    onAddAsNew = { newBook, toc ->
-                        onIntent(ReadBookIntent.DismissSheet)
-                        onIntent(ReadBookIntent.AddSourceAsNewBook(newBook, toc))
-                    },
-                )
             }
         }
 

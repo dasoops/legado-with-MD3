@@ -149,8 +149,6 @@ class ConfigUpdateActionsInvariantTest {
             "ShowSelectMenuIcon",
             // 其它纯业务/纯菜单项
             "StyleName",
-            "DefaultSourceChangeAll",
-            "AutoChangeSource",
             "AutoSuggestDayNight",
             "ShowReadTitleAddition",
             "AutoReadSpeed",

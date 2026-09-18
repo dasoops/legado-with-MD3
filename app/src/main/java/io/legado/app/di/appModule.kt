@@ -31,7 +31,6 @@ import io.legado.app.data.repository.BookSourceRepository
 import io.legado.app.data.repository.BookmarkRepository
 import io.legado.app.data.repository.BookshelfRepository
 import io.legado.app.data.repository.BookshelfSettingsRepository
-import io.legado.app.data.repository.ChangeSourceSettingsRepository
 import io.legado.app.data.repository.CheckSourceSettingsRepository
 import io.legado.app.data.repository.CoverAlbumRepository
 import io.legado.app.data.repository.CoverSettingsRepository
@@ -87,7 +86,6 @@ import io.legado.app.domain.gateway.BookSearchGateway
 import io.legado.app.domain.gateway.BookSourceCallbackGateway
 import io.legado.app.domain.gateway.BookSourceCheckGateway
 import io.legado.app.domain.gateway.BookshelfSettingsGateway
-import io.legado.app.domain.gateway.ChangeSourceSettingsGateway
 import io.legado.app.domain.gateway.CheckSourceSettingsGateway
 import io.legado.app.domain.gateway.CoverAlbumGateway
 import io.legado.app.domain.gateway.CoverSettingsGateway
@@ -115,8 +113,6 @@ import io.legado.app.domain.usecase.AddBookUseCase
 import io.legado.app.domain.usecase.AddToBookshelfUseCase
 import io.legado.app.domain.usecase.AppStartupMaintenanceUseCase
 import io.legado.app.domain.usecase.BackupRestoreUseCase
-import io.legado.app.domain.usecase.ChangeBookSourceUseCase
-import io.legado.app.domain.usecase.ChangeSourceSearchUseCase
 import io.legado.app.domain.usecase.ClearBookCacheUseCase
 import io.legado.app.domain.usecase.CoverAlbumUseCase
 import io.legado.app.domain.usecase.DeleteBooksUseCase
@@ -152,8 +148,6 @@ import io.legado.app.ui.association.ImportReplaceRuleViewModel
 import io.legado.app.ui.association.ImportTxtTocRuleViewModel
 import io.legado.app.ui.book.bookmark.AllBookmarkViewModel
 import io.legado.app.ui.book.changecover.ChangeCoverViewModel
-import io.legado.app.ui.book.changesource.ChangeBookSourceComposeViewModel
-import io.legado.app.ui.book.changesource.ChangeChapterSourceViewModel
 import io.legado.app.ui.book.group.GroupViewModel
 import io.legado.app.ui.book.import.local.ImportBookViewModel
 import io.legado.app.ui.book.import.remote.RemoteBookViewModel
@@ -255,7 +249,6 @@ val appModule = module {
     single<CoverSettingsGateway> { CoverSettingsRepository() }
     single<BackupSettingsGateway> { BackupSettingsRepository() }
     single<LabSettingsGateway> { LabSettingsRepository() }
-    single<ChangeSourceSettingsGateway> { ChangeSourceSettingsRepository() }
     single<ImportBookSettingsGateway> { ImportBookSettingsRepository() }
     single<BookshelfSettingsGateway> { BookshelfSettingsRepository() }
     single { ReadSettingsRepository(settingsRepository = get()) }
@@ -275,7 +268,6 @@ val appModule = module {
     singleOf(::ExploreKindUiUseCase)
     singleOf(::AppStartupMaintenanceUseCase)
     singleOf(::BackupRestoreUseCase)
-    singleOf(::ChangeBookSourceUseCase)
     singleOf(::ClearBookCacheUseCase)
     singleOf(::CoverAlbumUseCase)
     singleOf(::DeleteBooksUseCase)
@@ -322,7 +314,6 @@ val appModule = module {
     }
     single<SearchRepository> { get<SearchRepositoryImpl>() }
     single<BookSearchGateway> { get<SearchRepositoryImpl>() }
-    singleOf(::ChangeSourceSearchUseCase)
     singleOf(::GetChapterContentUseCase)
     singleOf(::SaveBookContentProcessUseCase)
     singleOf(::SaveMarkingUseCase)
@@ -412,18 +403,15 @@ val appModule = module {
             localPreferencesRepository = get(),
             highlightRuleRepository = get(),
             uploadRepository = get(),
-            changeBookSourceUseCase = get(),
             saveBookContentProcessUseCase = get(),
             saveMarkingUseCase = get(),
             verifyBookmarkTargetUseCase = get(),
             relocateMarkingTargetUseCase = get(),
             bookContentProcessGateway = get(),
             replaceRuleRepository = get(),
-            changeSourceSettingsGateway = get(),
             appShellSettingsGateway = get(),
             appUiConfigurationGateway = get(),
             otherSettingsGateway = get(),
-            downloadCacheSettingsGateway = get(),
             backupSettingsGateway = get(),
             themeSettingsGateway = get(),
             bookSourceRepository = get(),
@@ -434,21 +422,16 @@ val appModule = module {
         )
     }
     viewModelOf(::ChangeCoverViewModel)
-    viewModelOf(::ChangeBookSourceComposeViewModel)
-    viewModelOf(::ChangeChapterSourceViewModel)
     viewModel {
         BookshelfManageScreenViewModel(
             application = get(),
             bookRepository = get(),
-            bookSourceRepository = get(),
             bookGroupRepository = get(),
             searchRepository = get(),
             bookshelfManageScreenConfig = get(),
             bookExportSettingsGateway = get(),
-            changeBookSourceUseCase = get(),
             deleteBooksUseCase = get(),
             updateBooksGroupUseCase = get(),
-            downloadCacheSettingsGateway = get()
         )
     }
 

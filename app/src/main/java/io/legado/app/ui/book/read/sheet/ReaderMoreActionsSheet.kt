@@ -25,7 +25,6 @@ import androidx.compose.material.icons.filled.FindReplace
 import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.filled.SwapHoriz
 import androidx.compose.material.icons.filled.SwapVert
 import androidx.compose.material.icons.filled.Sync
 import androidx.compose.material.icons.filled.Translate
@@ -185,8 +184,7 @@ private fun ActionSquareHost(
     modifier: Modifier = Modifier,
 ) {
     var expanded by remember(action.id) { mutableStateOf(false) }
-    val hasMore = action.id == "change_source" || action.id == "refresh" ||
-            action.id == "source_custom_button"
+    val hasMore = action.id == "refresh" || action.id == "source_custom_button"
     Box(modifier = modifier) {
         ReaderMenuActionSquare(
             icon = action.icon,
@@ -211,20 +209,6 @@ private fun ActionSquareHost(
                         dismiss()
                         dispatch(ReadBookIntent.SourceCustomButton(true))
                     },
-                )
-            }
-
-            "change_source" -> RoundDropdownMenu(
-                expanded = expanded,
-                onDismissRequest = { expanded = false },
-            ) { dismiss ->
-                RoundDropdownMenuItem(
-                    text = stringResource(R.string.change_origin),
-                    onClick = { dismiss(); dispatch(ReadBookIntent.MenuBookChangeSource) },
-                )
-                RoundDropdownMenuItem(
-                    text = stringResource(R.string.chapter_change_source),
-                    onClick = { dismiss(); dispatch(ReadBookIntent.MenuChapterChangeSource) },
                 )
             }
 
@@ -296,9 +280,6 @@ private fun moreActionSpecs(
         applicable = state.bookSource?.customButton == true,
         onClick = { dispatch(ReadBookIntent.SourceCustomButton(false)) },
     ),
-    MoreActionSpec(
-        "change_source", stringResource(R.string.change_origin), Icons.Default.SwapHoriz,
-        applicable = !state.isLocalBook, onClick = { dispatch(ReadBookIntent.MenuChangeSource) }),
     MoreActionSpec(
         "refresh", stringResource(R.string.menu_refresh), Icons.Default.Refresh,
         applicable = !state.isLocalBook, onClick = { dispatch(ReadBookIntent.MenuRefreshDur) }),

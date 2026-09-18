@@ -81,9 +81,7 @@ object ReadConfig {
 
     val syncBookProgress get() = backup.syncBookProgress
     val syncBookProgressPlus get() = backup.syncBookProgressPlus
-    val autoChangeSource get() = read.autoChangeSource
     val autoSuggestDayNight get() = read.autoSuggestDayNight
-    val defaultSourceChangeAll get() = read.defaultSourceChangeAll
     val readUrlInBrowser get() = read.readUrlInBrowser
     val tocUiUseReplace get() = read.tocUiUseReplace
     val tocCountWords get() = read.tocCountWords

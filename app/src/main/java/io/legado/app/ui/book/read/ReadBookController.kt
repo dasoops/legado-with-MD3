@@ -1918,9 +1918,6 @@ class ReadBookController(
             is ReadBookEffect.OpenHighlightRuleExportPicker,
             is ReadBookEffect.ExportJson,
             // DB query + bookmark effects — handled by ViewModel, ignored here
-            is ReadBookEffect.MenuChangeSource,
-            is ReadBookEffect.MenuBookChangeSource,
-            is ReadBookEffect.MenuChapterChangeSource,
             is ReadBookEffect.AddBookmark -> {
                 // Handled by route/ViewModel — no-op here
             }

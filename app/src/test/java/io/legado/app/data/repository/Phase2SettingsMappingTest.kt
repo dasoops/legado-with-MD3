@@ -3,7 +3,6 @@ package io.legado.app.data.repository
 import androidx.datastore.preferences.core.Preferences
 import io.legado.app.constant.PreferKey
 import io.legado.app.domain.model.settings.BookExportSettings
-import io.legado.app.domain.model.settings.ChangeSourceSettings
 import io.legado.app.domain.model.settings.CoverSettings
 import io.legado.app.domain.model.settings.DownloadCacheSettings
 import io.legado.app.domain.model.settings.ImportBookSettings
@@ -11,30 +10,6 @@ import org.junit.Assert.assertEquals
 import org.junit.Test
 
 class Phase2SettingsMappingTest {
-
-    @Test
-    fun `换源设置写读映射覆盖每个布尔字段`() {
-        val base = ChangeSourceSettings(searchScope = "group-a")
-        assertRoundTrips(
-            samples = listOf(
-                base,
-                base.copy(checkAuthor = true),
-                base.copy(loadInfo = true),
-                base.copy(loadToc = true),
-                base.copy(loadWordCount = true),
-                base.copy(migrateChapters = false),
-                base.copy(migrateReadingProgress = false),
-                base.copy(migrateGroup = false),
-                base.copy(migrateCover = false),
-                base.copy(migrateCategory = false),
-                base.copy(migrateRemark = false),
-                base.copy(migrateReadConfig = false),
-                base.copy(deleteDownloadedChapters = true),
-            ),
-            toPrefMap = ChangeSourceSettings::toPrefMap,
-            fromPreferences = Preferences::toChangeSourceSettings,
-        )
-    }
 
     @Test
     fun `导入书籍设置写读映射往返恒等并支持删除 nullable 键`() {

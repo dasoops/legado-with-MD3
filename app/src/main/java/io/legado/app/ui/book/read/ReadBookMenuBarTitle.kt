@@ -36,7 +36,6 @@ import androidx.compose.material.icons.filled.Extension
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Payment
 import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material.icons.filled.SwapHoriz
 import androidx.compose.material.icons.automirrored.filled.Toc
 import androidx.compose.material.icons.filled.Translate
 import androidx.compose.material3.Icon
@@ -250,12 +249,6 @@ internal fun MenuTitleBar(
                             )
                         }
                         if (!compact) {
-                            SourceActionButton(
-                                state = state,
-                                colors = colors,
-                                onIntent = onIntent,
-                                backdrop = backdrop,
-                            )
                             RefreshActionButton(
                                 state = state,
                                 colors = colors,
@@ -686,22 +679,6 @@ private fun MergedGlassDivider(tint: Color) {
 }
 
 @Composable
-private fun ChangeSourceMenuItems(
-    dismiss: () -> Unit,
-    onBookChange: () -> Unit,
-    onChapterChange: () -> Unit,
-) {
-    RoundDropdownMenuItem(
-        text = stringResource(R.string.change_origin),
-        onClick = { dismiss(); onBookChange() },
-    )
-    RoundDropdownMenuItem(
-        text = stringResource(R.string.chapter_change_source),
-        onClick = { dismiss(); onChapterChange() },
-    )
-}
-
-@Composable
 private fun RefreshMenuItems(
     dismiss: () -> Unit,
     onRefreshDur: () -> Unit,
@@ -726,7 +703,6 @@ private fun MenuTitleBarMergedGlassButton(
     backdrop: Backdrop?,
     glassEnabled: Boolean,
 ) {
-    var sourceExpanded by remember { mutableStateOf(false) }
     var refreshExpanded by remember { mutableStateOf(false) }
 
     val pillShape = RoundedCornerShape(50)
@@ -781,7 +757,6 @@ private fun MenuTitleBarMergedGlassButton(
                 ),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            // SwapHoriz - change source
             if (!state.isLocalBook && !compact) {
                 if (state.bookSource?.customButton == true) {
                     MergedGlassIconButton(
@@ -793,15 +768,6 @@ private fun MenuTitleBarMergedGlassButton(
                     )
                     MergedGlassDivider(tint)
                 }
-
-                MergedGlassIconButton(
-                    icon = Icons.Default.SwapHoriz,
-                    tint = tint,
-                    contentDescription = stringResource(R.string.change_origin),
-                    onClick = { onIntent(ReadBookIntent.MenuChangeSource) },
-                    onLongClick = { sourceExpanded = true },
-                )
-                MergedGlassDivider(tint)
 
                 // Refresh
                 MergedGlassIconButton(
@@ -847,17 +813,6 @@ private fun MenuTitleBarMergedGlassButton(
         // Dropdown menus
         if (!state.isLocalBook) {
             RoundDropdownMenu(
-                expanded = sourceExpanded,
-                onDismissRequest = { sourceExpanded = false },
-            ) { dismiss ->
-                ChangeSourceMenuItems(
-                    dismiss = dismiss,
-                    onBookChange = { onIntent(ReadBookIntent.MenuBookChangeSource) },
-                    onChapterChange = { onIntent(ReadBookIntent.MenuChapterChangeSource) },
-                )
-            }
-
-            RoundDropdownMenu(
                 expanded = refreshExpanded,
                 onDismissRequest = { refreshExpanded = false },
             ) { dismiss ->
@@ -888,39 +843,6 @@ private fun SourceCustomActionButton(
         colors = colors,
         backdrop = backdrop,
     )
-}
-
-@Composable
-private fun SourceActionButton(
-    state: ReadBookUiState,
-    colors: ReadMenuColors,
-    onIntent: (ReadBookIntent) -> Unit,
-    backdrop: Backdrop?,
-) {
-    var expanded by remember { mutableStateOf(false) }
-
-    Box {
-        MenuTitleGlassButton(
-            onClick = { onIntent(ReadBookIntent.MenuChangeSource) },
-            onLongClick = { expanded = true },
-            icon = Icons.Default.SwapHoriz,
-            contentDescription = stringResource(R.string.change_origin),
-            state = state,
-            colors = colors,
-            backdrop = backdrop,
-        )
-
-        RoundDropdownMenu(
-            expanded = expanded,
-            onDismissRequest = { expanded = false },
-        ) { dismiss ->
-            ChangeSourceMenuItems(
-                dismiss = dismiss,
-                onBookChange = { onIntent(ReadBookIntent.MenuBookChangeSource) },
-                onChapterChange = { onIntent(ReadBookIntent.MenuChapterChangeSource) },
-            )
-        }
-    }
 }
 
 @Composable

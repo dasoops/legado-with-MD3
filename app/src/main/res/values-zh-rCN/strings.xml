@@ -126,7 +126,6 @@
     <string name="is_loading">加载中…</string>
     <string name="retry">重试</string>
     <string name="web_edit_source">Web 编辑书源</string>
-    <string name="change_origin">换源</string>
     <string name="about_description">全新设计的阅读 3.0</string>
     <string name="app_share_description">
         阅读 3.0 下载地址：\nhttps://github.com/gedoor/legado/releases
@@ -495,8 +494,6 @@
     <string name="page_anim_simulation">仿真</string>
     <string name="page_anim_scroll">滚动</string>
     <string name="page_anim_none">无动画</string>
-    <string name="up_change_source_last_chapter_t">后台更新换源最新章节</string>
-    <string name="up_change_source_last_chapter_s">开启则会在软件打开 1 分钟后开始更新</string>
     <string name="behavior_main_t">书架工具栏自动隐藏</string>
     <string name="behavior_main_s">滚动书架时工具栏自动隐藏与显示</string>
     <string name="success">成功</string>
@@ -629,7 +626,6 @@
     <string name="set_download_per">自定义缓存路径需要存储权限</string>
     <string name="black">黑色</string>
     <string name="content_empty">文章内容为空</string>
-    <string name="on_change_source">正在换源请等待…</string>
     <string name="chapter_list_empty">目录列表为空</string>
     <string name="text_letter_spacing">字距</string>
 
@@ -844,7 +840,6 @@
     <string name="wechat">微信</string>
     <string name="thanks">您的支持是我更新的动力</string>
     <string name="about_official_account">公众号【开源阅读】</string>
-    <string name="source_auto_changing">正在自动换源</string>
     <string name="click_to_apply">点击加入</string>
     <string name="middle">中</string>
     <string name="information">信息</string>
@@ -869,7 +864,6 @@
     <string name="night_accent">夜间，强调色</string>
     <string name="night_background_color">夜间，背景色</string>
     <string name="night_navbar_color">夜间，底栏色</string>
-    <string name="auto_change_source">自动换源</string>
     <string name="text_full_justify">文字两端对齐</string>
     <string name="text_bottom_justify">文字底部对齐</string>
     <string name="text_alignment">对齐</string>
@@ -1144,8 +1138,6 @@
     <string name="menu_refresh_after">刷新之后章节</string>
     <string name="menu_refresh_all">刷新全部章节</string>
     <string name="edit_content">编辑内容</string>
-    <string name="chapter_change_source">单章换源</string>
-    <string name="book_change_source">整书换源</string>
     <string name="sort_by_time">时间排序</string>
     <string name="enable_record">开启记录</string>
     <string name="copy_all">拷贝所有</string>
@@ -1174,9 +1166,7 @@
     <string name="scroll_to_dur_source">定位到当前书源</string>
     <string name="cannot_timed_non_playback">非播放状态无法定时</string>
     <string name="all_bookmark">所有书签</string>
-    <string name="change_source_batch">批量换源</string>
     <string name="book_type_different">书籍类型不一样</string>
-    <string name="soure_change_source">是否确认换源</string>
     <string name="timeout_millisecond">超时毫秒数</string>
     <string name="file_not_supported">文件 %1$s 不受支持，是否继续打开？</string>
     <string name="import_theme">导入主题</string>
@@ -1332,8 +1322,6 @@
     <string name="export_book">导出书籍</string>
     <string name="export_book_notification_content">正在导出 (%1$s) ,还有 %2$d 本待导出</string>
     <string name="export_md">导出(MD)</string>
-    <string name="change_source_delay">换源间隔</string>
-    <string name="change_source_progress">结果 %1$d</string>
     <string name="open_book_info_by_click_title">点击书名打开详情</string>
     <string name="export_wait">等待导出</string>
     <string name="sync_book_progress_success">进度同步成功</string>
@@ -1614,11 +1602,6 @@
     <string name="author_read">%1$s • %2$d章未读</string>
     <string name="menu_alpha_sum">当前 %d%%</string>
     <string name="menu_alpha">菜单不透明度</string>
-    <string name="change_source_option_title">请选择操作</string>
-    <string name="replace_current_book">替换本书</string>
-    <string name="add_as_new_book">新增书籍</string>
-    <string name="bookshelf_book_conflict_title">书架中已有同名书籍</string>
-    <string name="bookshelf_book_conflict_message">检测到书名和作者相同的书籍。可替换现有书并保留阅读数据，或仍然新增一本。</string>
     <string name="existing_book_source">现有书源：%1$s</string>
     <string name="new_book_source">将添加书源：%1$s</string>
     <string name="latest_chapter_info">最新章节：%1$s</string>
@@ -1685,8 +1668,6 @@
     <string name="page_anim_fade">渐变</string>
     <string name="show_bookshelf_tab_menu">显示更多分组按钮</string>
     <string name="show_unread_new">显示新章节更新标志</string>
-    <string name="read_change_all">换源按钮默认弹出整书换源</string>
-    <string name="read_change_all_s">反之则默认弹出单章换源</string>
     <string name="show_tip">显示书籍类型</string>
     <string name="show_book_count">显示分组书籍数量</string>
     <string name="is_reading">在读</string>
@@ -2115,7 +2096,6 @@
     <string name="clear_cache_error">清理缓存出错</string>
     <string name="upload_success">上传成功</string>
     <string name="save_error">保存出错</string>
-    <string name="auto_change_source_failed">自动换源失败</string>
     <string name="group_name_empty">分组名称不能为空</string>
     <string name="cover_reset">封面已重置</string>
     <string name="rule_copied_to_clipboard">规则已复制到剪贴板</string>

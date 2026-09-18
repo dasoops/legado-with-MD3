@@ -32,8 +32,6 @@ import io.legado.app.domain.gateway.OtherSettingsGateway
 import io.legado.app.domain.gateway.ThemeSettingsGateway
 import io.legado.app.domain.model.settings.CoverSettings
 import io.legado.app.domain.model.settings.ThemeSettings
-import io.legado.app.domain.usecase.ChangeBookSourceUseCase
-import io.legado.app.domain.usecase.ChangeSourceMigrationOptions
 import io.legado.app.domain.usecase.ClearBookCacheUseCase
 import io.legado.app.exception.NoBooksDirException
 import io.legado.app.exception.NoStackTraceException
@@ -50,7 +48,6 @@ import io.legado.app.help.book.removeType
 import io.legado.app.help.book.upKind
 import io.legado.app.help.book.updateTo
 import io.legado.app.help.config.LocalConfig
-import io.legado.app.help.coroutine.Coroutine
 import io.legado.app.lib.webdav.ObjectNotFoundException
 import io.legado.app.model.BookCover
 import io.legado.app.model.ReadBook
@@ -65,7 +62,6 @@ import io.legado.app.utils.GSON
 import io.legado.app.utils.ImageSaveUtils
 import io.legado.app.utils.UrlUtil
 import io.legado.app.utils.fromJsonArray
-import io.legado.app.utils.postEvent
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
@@ -96,7 +92,6 @@ class BookInfoViewModel(
     application: Application,
     private val remoteBookRepository: RemoteBookRepository,
     private val readRecordRepository: ReadRecordRepository,
-    private val changeBookSourceUseCase: ChangeBookSourceUseCase,
     private val clearBookCacheUseCase: ClearBookCacheUseCase,
     private val bookGroupRepository: BookGroupRepository,
     private val bookRepository: BookRepository,
@@ -185,7 +180,6 @@ class BookInfoViewModel(
     var bookSource: BookSource? = null
         private set
 
-    private var changeSourceCoroutine: Coroutine<*>? = null
     private var readRecordObserveJob: Job? = null
     private var relatedBooksLoadJob: Job? = null
 
@@ -277,8 +271,6 @@ class BookInfoViewModel(
                 ?.let { showDialog(BookInfoDialog.PhotoPreview(it)) }
 
             BookInfoIntent.GroupClick -> setSheet(BookInfoSheet.GroupPicker)
-            BookInfoIntent.ChangeSourceClick -> currentBook?.uiCopy()
-                ?.let { setSheet(BookInfoSheet.SourcePicker(it)) }
             BookInfoIntent.ReadRecordClick -> setSheet(BookInfoSheet.ReadRecord)
             BookInfoIntent.RemarkClick -> showDialog(BookInfoDialog.EditRemark(currentBook?.remark))
             is BookInfoIntent.SaveCover -> {
@@ -302,28 +294,6 @@ class BookInfoViewModel(
             is BookInfoIntent.SelectCover -> {
                 dismissSheet()
                 updateCover(intent.coverUrl)
-            }
-
-            is BookInfoIntent.ReplaceWithSource -> {
-                dismissSheet()
-                changeTo(intent.source, intent.book, intent.toc, intent.options)
-            }
-
-            is BookInfoIntent.AddSourceAsNewBook -> {
-                addToBookshelf(intent.book, intent.toc) {
-                    showMessage("已添加到书架")
-                }
-            }
-
-            is BookInfoIntent.ReplaceConflictingBook -> {
-                dismissSheet()
-                changeTo(
-                    source = intent.source,
-                    book = intent.book,
-                    toc = intent.toc,
-                    options = intent.options,
-                    replacedBook = intent.oldBook,
-                )
             }
 
             is BookInfoIntent.SelectWebFile -> handleWebFileSelection(
@@ -720,29 +690,6 @@ class BookInfoViewModel(
         }
     }
 
-    fun addToBookshelf(book: Book, toc: List<BookChapter>, success: (() -> Unit)? = null) {
-        execute {
-            book.removeType(BookType.notShelf)
-            if (book.order == 0) {
-                book.order = bookRepository.getMinOrder() - 1
-            }
-            bookRepository.insert(book)
-            bookRepository.insertChapters(*toc.toTypedArray())
-            book
-        }.onSuccess {
-            if (currentBook?.bookUrl == it.bookUrl) {
-                currentBook = it
-                currentChapterList = toc
-                inBookshelf = true
-                syncUiState(isTocLoading = false)
-            }
-            success?.invoke()
-        }.onError {
-            AppLog.put("添加书籍到书架失败", it)
-            showMessage("添加书籍失败")
-        }
-    }
-
     fun delBook(deleteOriginal: Boolean = false, success: (() -> Unit)? = null) {
         val book = currentBook ?: return
         execute {
@@ -832,40 +779,6 @@ class BookInfoViewModel(
                 }
         }
     }
-    fun changeTo(
-        source: BookSource,
-        book: Book,
-        toc: List<BookChapter>,
-        options: ChangeSourceMigrationOptions,
-        replacedBook: Book? = null,
-    ) {
-        val shouldPersist = replacedBook != null || inBookshelf
-        changeSourceCoroutine?.cancel()
-        changeSourceCoroutine = execute {
-            val oldBook = replacedBook ?: currentBook ?: return@execute book
-            if (shouldPersist) {
-                changeBookSourceUseCase.changeTo(oldBook, book, toc, options)
-            } else {
-                changeBookSourceUseCase.applyMigration(oldBook, book, toc, options)
-            }
-            book
-        }.onSuccess {
-            bookSource = source
-            currentBook = it
-            if (shouldPersist) {
-                inBookshelf = true
-            }
-            currentChapterList = toc
-            currentRelatedBooks = emptyList()
-            currentGroupNames = null
-            currentHasCustomGroup = false
-            currentKindLabels = emptyList()
-            syncUiState(isTocLoading = false)
-            refreshMeta(it)
-            postEvent(EventBus.SOURCE_CHANGED, book.bookUrl)
-        }
-    }
-
     private fun upBook(book: Book, source: BookSource?) {
         currentBook = book
         currentChapterList = emptyList()

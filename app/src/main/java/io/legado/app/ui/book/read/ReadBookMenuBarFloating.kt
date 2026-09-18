@@ -25,7 +25,6 @@ import androidx.compose.material.icons.filled.FindReplace
 import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Replay
-import androidx.compose.material.icons.filled.SwapHoriz
 import androidx.compose.material.icons.filled.SwapVert
 import androidx.compose.material.icons.filled.Sync
 import androidx.compose.material.icons.automirrored.filled.Toc
@@ -164,11 +163,6 @@ private fun OverflowDropdownMenu(
         // Compact mode: moved from top bar buttons
         if (state.menuConfig.titleBarCompact) {
             if (!state.isLocalBook) {
-                RoundDropdownMenuItem(
-                    text = stringResource(R.string.change_origin),
-                    leadingIcon = menuIcon(Icons.Default.SwapHoriz),
-                    onClick = { dismiss(); onIntent(ReadBookIntent.MenuChangeSource) },
-                )
                 RoundDropdownMenuItem(
                     text = stringResource(R.string.menu_refresh_dur),
                     leadingIcon = menuIcon(Icons.Default.Refresh),

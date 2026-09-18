@@ -3,21 +3,13 @@ package io.legado.app.ui.book.read
 import android.content.Context
 import io.legado.app.R
 import io.legado.app.constant.AppLog
-import io.legado.app.constant.EventBus
 import io.legado.app.data.entities.Book
-import io.legado.app.data.entities.BookChapter
 import io.legado.app.data.entities.BookProgress
 import io.legado.app.data.repository.BookRepository
-import io.legado.app.data.repository.BookSourceRepository
-import io.legado.app.data.repository.ReadSettingsRepository
 import io.legado.app.domain.gateway.BackupSettingsGateway
-import io.legado.app.domain.gateway.ChangeSourceSettingsGateway
-import io.legado.app.domain.gateway.DownloadCacheSettingsGateway
 import io.legado.app.domain.model.ReadingProgress
-import io.legado.app.domain.usecase.ChangeBookSourceUseCase
 import io.legado.app.domain.usecase.GetReadingProgressUseCase
 import io.legado.app.domain.usecase.UploadReadingProgressUseCase
-import io.legado.app.exception.NoStackTraceException
 import io.legado.app.feature.reader.platform.ReaderPerfTrace
 import io.legado.app.help.book.BookHelp
 import io.legado.app.help.book.isLocal
@@ -28,27 +20,17 @@ import io.legado.app.model.ReadBook
 import io.legado.app.model.SourceCallBack
 import io.legado.app.model.localBook.LocalBook
 import io.legado.app.model.webBook.WebBook
-import io.legado.app.utils.mapParallelSafe
-import io.legado.app.utils.postEvent
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ensureActive
-import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.onCompletion
-import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.flow.onEmpty
-import kotlinx.coroutines.flow.onStart
-import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.withContext
 import java.io.FileNotFoundException
 import kotlin.coroutines.coroutineContext
 
 /**
- * 开书 / 目录加载 / 换源 / 进度同步域（R2.2 续批）。
+ * 开书 / 目录加载 / 进度同步域（R2.2 续批）。
  *
- * 从导航请求解析出书，装载目录与正文，处理本地文件缺失、换源（手动与自动）、
+ * 从导航请求解析出书，装载目录与正文，处理本地文件缺失，
  * 以及与云端阅读进度的双向同步。
  *
  * **无自持状态**：唯一的状态是 `isInitFinish`（Compose 阅读路由用它表达开书初始化完成），
@@ -60,12 +42,7 @@ class ReadBookLoadDelegate(
     private val scope: CoroutineScope,
     private val host: Host,
     private val bookRepository: BookRepository,
-    private val bookSourceRepository: BookSourceRepository,
-    private val readSettingsRepository: ReadSettingsRepository,
     private val backupSettingsGateway: BackupSettingsGateway,
-    private val changeSourceSettingsGateway: ChangeSourceSettingsGateway,
-    private val downloadCacheSettingsGateway: DownloadCacheSettingsGateway,
-    private val changeBookSourceUseCase: ChangeBookSourceUseCase,
     private val getReadingProgressUseCase: GetReadingProgressUseCase,
     private val uploadReadingProgressUseCase: UploadReadingProgressUseCase,
 ) {
@@ -91,8 +68,6 @@ class ReadBookLoadDelegate(
 
         suspend fun checkReadRecordAlias(book: Book)
     }
-
-    private var changeSourceCoroutine: Coroutine<*>? = null
 
     suspend fun initReadBookConfig(request: ReadBookInitRequest): Book? = withContext(Dispatchers.IO) {
         val bookUrl = request.bookUrl
@@ -196,10 +171,6 @@ class ReadBookLoadDelegate(
             } else {
                 syncBookProgress(book)
             }
-        }
-        if (!book.isLocal && ReadBook.bookSource == null) {
-            autoChangeSource(book.name, book.author)
-            return@suspendSection
         }
     }
 
@@ -333,97 +304,5 @@ class ReadBookLoadDelegate(
         durChapterTime = durChapterTime,
         durChapterTitle = durChapterTitle
     )
-
-    fun changeTo(book: Book, toc: List<BookChapter>) {
-        changeSourceCoroutine?.cancel()
-        changeSourceCoroutine = Coroutine.async(scope, Dispatchers.IO) {
-            ReadBook.upMsg(context.getString(R.string.loading))
-            applyChangeSource(book, toc)
-        }.onSuccess {
-            postEvent(EventBus.SOURCE_CHANGED, book.bookUrl)
-        }.onError {
-            AppLog.put("换源失败\n$it", it, true)
-            ReadBook.upMsg(null)
-        }
-    }
-
-    fun changeTo(book: Book) {
-        changeSourceCoroutine?.cancel()
-        changeSourceCoroutine = Coroutine.async(scope, Dispatchers.IO) {
-            ReadBook.upMsg(context.getString(R.string.loading))
-            val source = bookSourceRepository.getBookSource(book.origin)
-                ?: throw NoStackTraceException("书源不存在")
-            if (book.tocUrl.isEmpty()) {
-                WebBook.getBookInfoAwait(source, book)
-            }
-            val toc = WebBook.getChapterListAwait(source, book).getOrThrow()
-            applyChangeSource(book, toc)
-        }.onSuccess {
-            postEvent(EventBus.SOURCE_CHANGED, book.bookUrl)
-        }.onError {
-            AppLog.put("换源失败\n$it", it, true)
-            ReadBook.upMsg(null)
-        }
-    }
-
-    private suspend fun applyChangeSource(book: Book, toc: List<BookChapter>) {
-        if (toc.isEmpty()) {
-            throw NoStackTraceException("换源目录为空")
-        }
-        val oldBook = ReadBook.book ?: throw NoStackTraceException("书籍不存在")
-        changeBookSourceUseCase.changeTo(
-            oldBook = oldBook,
-            newBook = book,
-            chapters = toc,
-            options = changeSourceSettingsGateway.currentSettings.migrationOptions(),
-        )
-        ReadBook.resetData(book)
-        ReadBook.upMsg(null)
-        ReadBook.loadContent(resetPageOffset = true)
-    }
-
-    private fun autoChangeSource(name: String, author: String) {
-        if (!readSettingsRepository.currentSettings.autoChangeSource) return
-        Coroutine.async(scope, Dispatchers.IO) {
-            val sources = bookSourceRepository.getAllTextEnabledPart()
-            flow {
-                for (source in sources) {
-                    source.getBookSource()?.let {
-                        emit(it)
-                    }
-                }
-            }.onStart {
-                ReadBook.upMsg(context.getString(R.string.source_auto_changing))
-            }.mapParallelSafe(downloadCacheSettingsGateway.currentSettings.threadCount) { source ->
-                val book = WebBook.preciseSearchAwait(source, name, author).getOrThrow()
-                if (book.tocUrl.isEmpty()) {
-                    WebBook.getBookInfoAwait(source, book)
-                }
-                val toc = WebBook.getChapterListAwait(source, book).getOrThrow()
-                val chapter = toc.getOrElse(book.durChapterIndex) {
-                    toc.last()
-                }
-                val nextChapter = toc.getOrElse(chapter.index) {
-                    toc.first()
-                }
-                WebBook.getContentAwait(
-                    bookSource = source,
-                    book = book,
-                    bookChapter = chapter,
-                    nextChapterUrl = nextChapter.url
-                )
-                book to toc
-            }.take(1).onEach { (book, toc) ->
-                changeTo(book, toc)
-            }.onEmpty {
-                throw NoStackTraceException("没有合适书源")
-            }.onCompletion {
-                ReadBook.upMsg(null)
-            }.catch {
-                AppLog.put("自动换源失败\n${it.localizedMessage}", it)
-                host.emitEffect(ReadBookEffect.ShowToast("自动换源失败\n${it.localizedMessage}"))
-            }.collect()
-        }
-    }
 
 }
