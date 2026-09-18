@@ -408,7 +408,7 @@ class RefineSpeechWithAiUseCase(
  * The caller's level wins because the preset/model default (MEDIUM) would otherwise force thinking
  * on for every analysis: models that think by default (Zhipu GLM, DeepSeek) then spend the answer on
  * `reasoning_content` and the strict JSON contract of this task fails. AUTO keeps the presets in
- * charge, mirroring [io.legado.app.domain.usecase.IdentifyBookCharactersUseCase.identifyStream].
+ * charge.
  */
 internal fun speechAnalysisParams(
     preset: AiTaskPresetConfig,

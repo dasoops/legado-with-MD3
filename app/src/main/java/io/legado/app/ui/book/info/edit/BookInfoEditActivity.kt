@@ -21,18 +21,6 @@ class BookInfoEditActivity : BaseComposeActivity() {
                     finish()
                 }
             },
-            onOpenCharacterList = { bookUrl ->
-                startActivity(MainActivity.createBookCharacterListIntent(this, bookUrl))
-            },
-            onOpenCharacterNetwork = { bookUrl ->
-                startActivity(MainActivity.createBookCharacterNetworkIntent(this, bookUrl))
-            },
-            onOpenKnowledgeList = { bookUrl ->
-                startActivity(MainActivity.createBookKnowledgeListIntent(this, bookUrl))
-            },
-            onOpenEventList = { bookUrl ->
-                startActivity(MainActivity.createBookEventListIntent(this, bookUrl))
-            },
         )
     }
 
