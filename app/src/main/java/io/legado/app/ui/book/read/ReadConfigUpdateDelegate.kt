@@ -629,11 +629,6 @@ class ReadConfigUpdateDelegate(
                     readSettingsRepository.setVolumeKeyPage(update.value)
                 }
             }
-            is ConfigUpdate.VolumeKeyPageOnPlay -> {
-                scope.launch {
-                    readSettingsRepository.setVolumeKeyPageOnPlay(update.value)
-                }
-            }
             is ConfigUpdate.KeyPageOnLongPress -> {
                 scope.launch {
                     readSettingsRepository.setKeyPageOnLongPress(update.value)
@@ -690,11 +685,6 @@ class ReadConfigUpdateDelegate(
             is ConfigUpdate.ReadingAnchorEnabled -> {
                 scope.launch {
                     readSettingsRepository.setReadingAnchorEnabled(update.value)
-                }
-            }
-            is ConfigUpdate.ReadAloudDetachReminderEnabled -> {
-                scope.launch {
-                    readSettingsRepository.setReadAloudDetachReminderEnabled(update.value)
                 }
             }
             is ConfigUpdate.SelectText -> {

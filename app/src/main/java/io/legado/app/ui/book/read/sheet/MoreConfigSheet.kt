@@ -103,9 +103,6 @@ fun MoreConfigSheet(
                 onVolumeKeyPageChange = {
                     onIntent(ReadBookIntent.UpdateConfig(ConfigUpdate.VolumeKeyPage(it)))
                 },
-                onVolumeKeyPageOnPlayChange = {
-                    onIntent(ReadBookIntent.UpdateConfig(ConfigUpdate.VolumeKeyPageOnPlay(it)))
-                },
                 onKeyPageOnLongPressChange = {
                     onIntent(ReadBookIntent.UpdateConfig(ConfigUpdate.KeyPageOnLongPress(it)))
                 },
@@ -146,9 +143,6 @@ fun MoreConfigSheet(
                 },
                 onReadingAnchorEnabledChange = {
                     onIntent(ReadBookIntent.UpdateConfig(ConfigUpdate.ReadingAnchorEnabled(it)))
-                },
-                onReadAloudDetachReminderEnabledChange = {
-                    onIntent(ReadBookIntent.UpdateConfig(ConfigUpdate.ReadAloudDetachReminderEnabled(it)))
                 },
                 onSelectTextChange = {
                     onIntent(ReadBookIntent.UpdateConfig(ConfigUpdate.SelectText(it)))
@@ -254,7 +248,6 @@ private fun PageControlSettings(
     onProgressBarBehaviorChange: (String) -> Unit,
     onMouseWheelPageChange: (Boolean) -> Unit,
     onVolumeKeyPageChange: (Boolean) -> Unit,
-    onVolumeKeyPageOnPlayChange: (Boolean) -> Unit,
     onKeyPageOnLongPressChange: (Boolean) -> Unit,
     onSwipeToAddBookmarkChange: (Boolean) -> Unit,
     onPickBookmarkBadgeImage: () -> Unit,
@@ -289,11 +282,6 @@ private fun PageControlSettings(
         title = stringResource(R.string.volume_key_page),
         checked = preferences.volumeKeyPage,
         onCheckedChange = onVolumeKeyPageChange,
-    )
-    TinySwitchSettingItem(
-        title = stringResource(R.string.volume_key_page_on_play),
-        checked = preferences.volumeKeyPageOnPlay,
-        onCheckedChange = onVolumeKeyPageOnPlayChange,
     )
     TinySwitchSettingItem(
         title = stringResource(R.string.key_page_on_long_press),
@@ -340,7 +328,6 @@ private fun OtherSettings(
     onDefaultSourceChangeAllChange: (Boolean) -> Unit,
     onAutoSuggestDayNightChange: (Boolean) -> Unit,
     onReadingAnchorEnabledChange: (Boolean) -> Unit,
-    onReadAloudDetachReminderEnabledChange: (Boolean) -> Unit,
     onSelectTextChange: (Boolean) -> Unit,
     onNoAnimScrollPageChange: (Boolean) -> Unit,
     onOptimizeRenderChange: (Boolean) -> Unit,
@@ -407,12 +394,6 @@ private fun OtherSettings(
         description = stringResource(R.string.reading_anchor_summary),
         checked = preferences.readingAnchorEnabled,
         onCheckedChange = onReadingAnchorEnabledChange,
-    )
-    TinySwitchSettingItem(
-        title = stringResource(R.string.read_aloud_detach_reminder),
-        description = stringResource(R.string.read_aloud_detach_reminder_summary),
-        checked = preferences.readAloudDetachReminderEnabled,
-        onCheckedChange = onReadAloudDetachReminderEnabledChange,
     )
     TinySwitchSettingItem(
         title = stringResource(R.string.selectText),

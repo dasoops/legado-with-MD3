@@ -125,7 +125,6 @@ private fun ReadConfigIntent.toSettingsTransform(): (ReadSettings) -> ReadSettin
     is ReadConfigIntent.ProgressBarBehaviorChanged -> { settings -> settings.copy(progressBarBehavior = value) }
     is ReadConfigIntent.MouseWheelPageChanged -> { settings -> settings.copy(mouseWheelPage = value) }
     is ReadConfigIntent.VolumeKeyPageChanged -> { settings -> settings.copy(volumeKeyPage = value) }
-    is ReadConfigIntent.VolumeKeyPageOnPlayChanged -> { settings -> settings.copy(volumeKeyPageOnPlay = value) }
     is ReadConfigIntent.KeyPageOnLongPressChanged -> { settings -> settings.copy(keyPageOnLongPress = value) }
     is ReadConfigIntent.PageTouchSlopChanged -> { settings -> settings.copy(pageTouchSlop = value) }
     is ReadConfigIntent.SliderVibratorChanged -> { settings -> settings.copy(sliderVibrator = value) }
@@ -137,7 +136,6 @@ private fun ReadConfigIntent.toSettingsTransform(): (ReadSettings) -> ReadSettin
     is ReadConfigIntent.AutoChangeSourceChanged -> { settings -> settings.copy(autoChangeSource = value) }
     is ReadConfigIntent.AutoSuggestDayNightChanged -> { settings -> settings.copy(autoSuggestDayNight = value) }
     is ReadConfigIntent.ReadingAnchorChanged -> { settings -> settings.copy(readingAnchorEnabled = value) }
-    is ReadConfigIntent.ReadAloudDetachReminderChanged -> { settings -> settings.copy(readAloudDetachReminderEnabled = value) }
     is ReadConfigIntent.SelectTextChanged -> { settings -> settings.copy(selectText = value) }
     is ReadConfigIntent.NoAnimScrollPageChanged -> { settings -> settings.copy(noAnimScrollPage = value) }
     is ReadConfigIntent.ClickImgWayChanged -> { settings -> settings.copy(clickImgWay = value) }
@@ -198,7 +196,6 @@ private fun ReadSettings.toUiState(
         progressBarBehavior = progressBarBehavior,
         mouseWheelPage = mouseWheelPage,
         volumeKeyPage = volumeKeyPage,
-        volumeKeyPageOnPlay = volumeKeyPageOnPlay,
         keyPageOnLongPress = keyPageOnLongPress,
         pageTouchSlop = pageTouchSlop,
         sliderVibrator = sliderVibrator,
@@ -208,7 +205,6 @@ private fun ReadSettings.toUiState(
         autoChangeSource = autoChangeSource,
         autoSuggestDayNight = autoSuggestDayNight,
         readingAnchorEnabled = readingAnchorEnabled,
-        readAloudDetachReminderEnabled = readAloudDetachReminderEnabled,
         selectText = selectText,
         noAnimScrollPage = noAnimScrollPage,
         clickImgWay = clickImgWay,

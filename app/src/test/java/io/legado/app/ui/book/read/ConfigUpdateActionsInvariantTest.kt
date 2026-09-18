@@ -135,8 +135,6 @@ class ConfigUpdateActionsInvariantTest {
             // 手势 / 按键
             "MouseWheelPage",
             "VolumeKeyPage",
-            "VolumeKeyPageOnPlay",
-            "ReadAloudDetachReminderEnabled",
             "KeyPageOnLongPress",
             "SwipeToAddBookmark",
             "BookmarkBadgeSize",

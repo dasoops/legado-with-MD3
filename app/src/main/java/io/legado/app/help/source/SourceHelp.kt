@@ -8,7 +8,6 @@ import io.legado.app.data.entities.BookSourcePart
 import io.legado.app.help.AppCacheManager
 import io.legado.app.help.config.SourceConfig
 import io.legado.app.help.coroutine.Coroutine
-import io.legado.app.model.AudioPlay
 import io.legado.app.model.ReadBook
 import io.legado.app.utils.EncoderUtils
 import io.legado.app.utils.NetworkUtils
@@ -33,8 +32,6 @@ object SourceHelp {
         key ?: return null
         if (ReadBook.bookSource?.bookSourceUrl == key) {
             return ReadBook.bookSource
-        } else if (AudioPlay.bookSource?.bookSourceUrl == key) {
-            return AudioPlay.bookSource
         }
         return appDb.bookSourceDao.getBookSource(key)
     }

@@ -6,6 +6,9 @@ import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
+private const val ACCENT = 0xff22aa44.toInt()
+private const val TEXT_COLOR = 0xff123456.toInt()
+
 class ReaderPageTest {
     @Test fun hitTestingUsesImmutableElementBounds() {
         val text = ReaderElement.Text(
@@ -25,41 +28,36 @@ class ReaderPageTest {
     }
 
     @Test fun htmlLinkUsesAccentColorAndUnderlineWithLegacyPriority() {
-        val link = text(link = "https://example", readAloud = true)
+        val link = text(link = "https://example")
 
-        assertEquals(0xff22aa44.toInt(), link.resolvedColorArgb(0xff22aa44.toInt()))
+        assertEquals(ACCENT, link.resolvedColorArgb(ACCENT))
         assertTrue(link.drawsLinkUnderline)
     }
 
-    @Test fun readAloudUsesAccentButOrdinaryTextKeepsItsConfiguredColor() {
+    @Test fun ordinaryTextKeepsItsConfiguredColor() {
         val ordinary = text()
-        val readAloud = text(readAloud = true)
 
-        assertEquals(0xff123456.toInt(), ordinary.resolvedColorArgb(0xff22aa44.toInt()))
+        assertEquals(TEXT_COLOR, ordinary.resolvedColorArgb(ACCENT))
         assertFalse(ordinary.drawsLinkUnderline)
-        assertEquals(0xff22aa44.toInt(), readAloud.resolvedColorArgb(0xff22aa44.toInt()))
-        assertFalse(readAloud.drawsLinkUnderline)
     }
 
     @Test fun searchResultUsesAccentWithoutPretendingToBeAnHtmlLink() {
         val result = text(searchResult = true)
 
-        assertEquals(0xff22aa44.toInt(), result.resolvedColorArgb(0xff22aa44.toInt()))
+        assertEquals(ACCENT, result.resolvedColorArgb(ACCENT))
         assertFalse(result.drawsLinkUnderline)
     }
 
     private fun text(
         link: String? = null,
-        readAloud: Boolean = false,
         searchResult: Boolean = false,
     ) = ReaderElement.Text(
         bounds = ReaderRect(0f, 0f, 10f, 20f),
         baselinePx = 15f,
         value = "字",
-        style = ReaderTextStyle(colorArgb = 0xff123456.toInt(), fontSizePx = 20f),
+        style = ReaderTextStyle(colorArgb = TEXT_COLOR, fontSizePx = 20f),
         selected = false,
         emphasized = false,
-        readAloud = readAloud,
         searchResult = searchResult,
         link = link,
         chapterPosition = 0,

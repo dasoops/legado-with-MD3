@@ -73,7 +73,6 @@ import io.legado.app.feature.reader.ReaderCanvasSurface
 import io.legado.app.feature.reader.core.gesture.ReaderTapActionGrid
 import io.legado.app.feature.reader.core.model.readerBackgroundAlpha
 import io.legado.app.feature.reader.core.transition.ReaderTransitionMode
-import io.legado.app.help.IntentHelp
 import io.legado.app.model.ReadBook
 import io.legado.app.model.SourceCallBack
 import io.legado.app.ui.book.info.BookInfoActivity
@@ -149,9 +148,6 @@ fun ReadBookRouteScreen(
     sharedCoverKey: String? = null,
     onEffectsReady: () -> Unit = {},
     onOpenSearch: (word: String?, bookUrl: String, autoFocus: Boolean) -> Unit = { _, _, _ -> },
-    onOpenVoiceCasting: (bookUrl: String) -> Unit = {},
-    onOpenTtsEnginesAndVoices: () -> Unit = {},
-    onOpenTtsCache: () -> Unit = {},
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val readPreferences by viewModel.readPreferences.collectAsStateWithLifecycle()
@@ -200,7 +196,7 @@ fun ReadBookRouteScreen(
             state.isShowingSearchResult -> viewModel.onIntent(ReadBookIntent.ExitSearch)
             state.isAutoPage -> viewModel.onIntent(ReadBookIntent.StopAutoPage)
             state.menuState.canNavigateBack -> viewModel.onIntent(ReadBookIntent.ReadMenuBack)
-            else -> viewModel.onIntent(ReadBookIntent.CloseReadBook())
+            else -> viewModel.onIntent(ReadBookIntent.CloseReadBook)
         }
     }
     DisposableEffect(controller) {
@@ -208,14 +204,6 @@ fun ReadBookRouteScreen(
         onDispose {
             controller.onComposeRendererDetached()
             controller.clearAppThemeOverride()
-        }
-    }
-
-    LaunchedEffect(viewModel, controller, lifecycleOwner) {
-        lifecycleOwner.lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
-            viewModel.readAloudProgress.collect { chapterStart ->
-                chapterStart?.let(controller::updateReadAloudProgress)
-            }
         }
     }
 
@@ -412,11 +400,6 @@ fun ReadBookRouteScreen(
                             is ReadBookEffect.OpenSearch -> {
                                 onOpenSearch(effect.word, effect.bookUrl, effect.autoFocus)
                             }
-                            is ReadBookEffect.OpenBookVoiceCasting -> {
-                                onOpenVoiceCasting(effect.bookUrl)
-                            }
-                            ReadBookEffect.OpenTtsEnginesAndVoices -> onOpenTtsEnginesAndVoices()
-                            ReadBookEffect.OpenTtsCache -> onOpenTtsCache()
                             is ReadBookEffect.MenuSettingReplace -> {
                                 replaceLauncher.launch(
                                     ReplaceRuleActivity.startIntent(
@@ -478,12 +461,6 @@ fun ReadBookRouteScreen(
                             is ReadBookEffect.OpenTitleBarCustomIconPicker -> {
                                 pendingTitleBarCustomIconId = effect.id
                                 titleBarCustomIconPicker.launch("image/*")
-                            }
-                            is ReadBookEffect.OpenSystemTtsSettings -> {
-                                IntentHelp.openTTSSetting()
-                            }
-                            is ReadBookEffect.TtsCacheCleared -> {
-                                context.toastOnUi(effect.message)
                             }
                             is ReadBookEffect.OpenHighlightRuleImportPicker -> {
                                 importHighlightRulePicker.launch(
@@ -758,7 +735,6 @@ fun ReadBookRouteScreen(
                 noAnimationScrollPage = readPreferences.noAnimScrollPage,
                 externalPageTurns = controller.composePageTurns,
                 externalSelectionCancels = controller.composeSelectionCancels,
-                    onVisibleBodyTextPositionProvider = controller::setComposeVisibleBodyTextPositionProvider,
                 )
             }
             AnimatedVisibility(
@@ -819,31 +795,6 @@ fun ReadBookRouteScreen(
             )
             ReadBookSearchBar(state = state, onIntent = viewModel::onIntent)
             ReadBookFloatingActionBar(state = state, onIntent = viewModel::onIntent)
-            AnimatedVisibility(
-                visible = state.isReadAloudRunning &&
-                    state.showReadAloudCapsule &&
-                        !state.menuVisible,
-                enter = fadeIn(tween(180)) + scaleIn(tween(220), initialScale = 0.88f),
-                exit = fadeOut(tween(140)) + scaleOut(tween(180), targetScale = 0.88f),
-            ) {
-                ReadAloudCapsule(
-                    book = state.book,
-                    isPaused = state.isReadAloudPaused,
-                    offsetXDp = state.readAloudCapsuleOffsetX,
-                    offsetYDp = state.readAloudCapsuleOffsetY,
-                    progress = state.readAloudChapterPosition.toFloat() /
-                        state.readAloudChapterLength.coerceAtLeast(1),
-                    autoCollapse = state.capsuleAutoCollapse,
-                    onPositionChanged = { x, y ->
-                        viewModel.onIntent(ReadBookIntent.SetReadAloudCapsulePosition(x, y))
-                    },
-                    onTogglePause = {
-                        viewModel.onIntent(ReadBookIntent.ReadAloudTogglePause)
-                    },
-                    onStop = { viewModel.onIntent(ReadBookIntent.ReadAloudStop) },
-                    onOpenPlayer = { viewModel.onIntent(ReadBookIntent.OpenReadAloudPlayer) },
-                )
-            }
             if (featureOverlaysInitialized) {
                 ReadBookOverlayRoute(
                     viewModel = viewModel,

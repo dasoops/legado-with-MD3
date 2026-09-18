@@ -92,7 +92,6 @@ sealed interface ReaderElement {
         val style: ReaderTextStyle,
         val selected: Boolean,
         val emphasized: Boolean,
-        val readAloud: Boolean = false,
         val searchResult: Boolean = false,
         val emphasisUnderline: ReaderEmphasisUnderline? = null,
         val link: String? = null,
@@ -104,9 +103,9 @@ sealed interface ReaderElement {
         /** 同一行内紧随同背景图元素之后（对照旧 View TextLine 的行内连续绘制）。 */
         val continuesBackgroundRun: Boolean = false,
     ) : ReaderElement {
-        /** HTML links keep the legacy reader's accent priority, including during read-aloud. */
+        /** HTML links and search hits keep the legacy reader's accent priority. */
         fun resolvedColorArgb(accentColorArgb: Int): Int =
-            if (link != null || readAloud || searchResult) accentColorArgb else style.colorArgb
+            if (link != null || searchResult) accentColorArgb else style.colorArgb
 
         val drawsLinkUnderline: Boolean
             get() = link != null
@@ -177,8 +176,6 @@ data class ReaderPage(
     val searchEndInclusive: Int? = null,
     /** Whether the dynamic search range is in the independent title coordinate space. */
     val searchIsTitle: Boolean = false,
-    /** Dynamic read-aloud paragraph, likewise independent of the pagination layout. */
-    val readAloudParagraphIndex: Int? = null,
     /** 邻章未装载时预置的"加载中"占位页，分页批次落地后被同 id 真实页替换。 */
     val isPlaceholder: Boolean = false,
 ) {

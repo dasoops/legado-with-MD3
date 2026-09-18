@@ -106,26 +106,6 @@ object MainNavigator {
                 }
             }
 
-            is MainRouteAudioPlay -> {
-                // 播放器为单例语义：已在栈上（如通知栏再次进入）则替换，避免叠加多个播放界面
-                val existingAudioIndex = backStack.indexOfLast { it is MainRouteAudioPlay }
-                if (existingAudioIndex >= 0) {
-                    while (backStack.lastIndex > existingAudioIndex) {
-                        backStack.removeAt(backStack.lastIndex)
-                    }
-                    backStack[existingAudioIndex] = route
-                } else if (
-                    currentRoute == MainRouteBookshelf ||
-                    currentRoute is MainRouteBookInfo
-                ) {
-                    backStack.add(route)
-                } else {
-                    backStack.clear()
-                    backStack.add(MainRouteBookshelf)
-                    backStack.add(route)
-                }
-            }
-
             is MainRouteSearchContent -> {
                 backStack.add(route)
             }
@@ -135,25 +115,6 @@ object MainNavigator {
                     currentRoute == MainRouteBookshelf ||
                     currentRoute is MainRouteBookInfo ||
                     currentRoute is MainRouteCache ||
-                    currentRoute is MainRouteReadManga
-                ) {
-                    backStack.add(route)
-                } else {
-                    backStack.clear()
-                    backStack.add(MainRouteBookshelf)
-                    backStack.add(route)
-                }
-            }
-
-            is MainRouteBookVoiceCasting,
-            is MainRouteCloudTtsEngines,
-            MainRouteTtsCache -> {
-                if (
-                    currentRoute is MainRouteBookInfo ||
-                    currentRoute is MainRouteBookVoiceCasting ||
-                    currentRoute is MainRouteCloudTtsEngines ||
-                    currentRoute == MainRouteTtsCache ||
-                    currentRoute is MainRouteReadBook ||
                     currentRoute is MainRouteReadManga
                 ) {
                     backStack.add(route)
@@ -286,7 +247,6 @@ object MainNavigator {
             MainRouteConst.ROUTE_BOOK_CACHE_MANAGE -> MainRouteBookCacheManage
             MainRouteConst.ROUTE_READ_BOOK -> MainRouteReadBook(
                 bookUrl = intent?.getStringExtra(MainIntent.EXTRA_BOOK_URL),
-                readAloud = intent?.getBooleanExtra(MainIntent.EXTRA_READ_ALOUD, false) == true,
                 inBookshelf = intent?.getBooleanExtra(MainIntent.EXTRA_IN_BOOKSHELF, true) != false,
                 chapterChanged = intent?.getBooleanExtra(
                     MainIntent.EXTRA_CHAPTER_CHANGED,
@@ -301,10 +261,6 @@ object MainNavigator {
                     false,
                 ) == true,
                 openRequestId = System.nanoTime(),
-            )
-            MainRouteConst.ROUTE_AUDIO_PLAY -> MainRouteAudioPlay(
-                bookUrl = intent?.getStringExtra(MainIntent.EXTRA_BOOK_URL),
-                inBookshelf = intent?.getBooleanExtra(MainIntent.EXTRA_IN_BOOKSHELF, true) != false,
             )
             MainRouteConst.ROUTE_BOOK_INFO -> intent?.getStringExtra(MainIntent.EXTRA_BOOK_URL)
                 ?.takeIf { it.isNotBlank() }

@@ -110,9 +110,6 @@ class ReadSettingsRepository(
     suspend fun setVolumeKeyPage(value: Boolean) =
         settingsRepository.putBoolean(PreferKey.volumeKeyPage, value)
 
-    suspend fun setVolumeKeyPageOnPlay(value: Boolean) =
-        settingsRepository.putBoolean(PreferKey.volumeKeyPageOnPlay, value)
-
     suspend fun setKeyPageOnLongPress(value: Boolean) =
         settingsRepository.putBoolean(PreferKey.keyPageOnLongPress, value)
 
@@ -139,9 +136,6 @@ class ReadSettingsRepository(
 
     suspend fun setReadingAnchorEnabled(value: Boolean) =
         settingsRepository.putBoolean(PreferKey.readingAnchorEnabled, value)
-
-    suspend fun setReadAloudDetachReminderEnabled(value: Boolean) =
-        settingsRepository.putBoolean(PreferKey.readAloudDetachReminderEnabled, value)
 
     suspend fun setSelectText(value: Boolean) =
         settingsRepository.putBoolean(PreferKey.selectText, value)
@@ -369,7 +363,6 @@ class ReadSettingsRepository(
             progressBarBehavior = compatDsValue(Keys.ProgressBarBehavior, "page"),
             mouseWheelPage = compatDsValue(Keys.MouseWheelPage, true),
             volumeKeyPage = compatDsValue(Keys.VolumeKeyPage, true),
-            volumeKeyPageOnPlay = compatDsValue(Keys.VolumeKeyPageOnPlay, true),
             keyPageOnLongPress = compatDsValue(Keys.KeyPageOnLongPress, false),
             swipeToAddBookmark = compatDsValue(Keys.SwipeToAddBookmark, false),
             bookmarkBadgeImage = compatDsValue(Keys.BookmarkBadgeImage, ""),
@@ -382,7 +375,6 @@ class ReadSettingsRepository(
             autoChangeSource = compatDsValue(Keys.AutoChangeSource, true),
             autoSuggestDayNight = compatDsValue(Keys.AutoSuggestDayNight, false),
             readingAnchorEnabled = compatDsValue(Keys.ReadingAnchorEnabled, true),
-            readAloudDetachReminderEnabled = compatDsValue(Keys.ReadAloudDetachReminderEnabled, false),
             selectText = compatDsValue(Keys.SelectText, true),
             noAnimScrollPage = compatDsValue(Keys.NoAnimScrollPage, false),
             clickImgWay = compatDsValue(Keys.ClickImgWay, "2"),
@@ -491,7 +483,6 @@ class ReadSettingsRepository(
         val ProgressBarBehavior = stringPreferencesKey(PreferKey.progressBarBehavior)
         val MouseWheelPage = booleanPreferencesKey(PreferKey.mouseWheelPage)
         val VolumeKeyPage = booleanPreferencesKey(PreferKey.volumeKeyPage)
-        val VolumeKeyPageOnPlay = booleanPreferencesKey(PreferKey.volumeKeyPageOnPlay)
         val KeyPageOnLongPress = booleanPreferencesKey(PreferKey.keyPageOnLongPress)
         val SwipeToAddBookmark = booleanPreferencesKey(PreferKey.swipeToAddBookmark)
         val BookmarkBadgeImage = stringPreferencesKey(PreferKey.bookmarkBadgeImage)
@@ -504,7 +495,6 @@ class ReadSettingsRepository(
         val AutoChangeSource = booleanPreferencesKey(PreferKey.autoChangeSource)
         val AutoSuggestDayNight = booleanPreferencesKey(PreferKey.autoSuggestDayNight)
         val ReadingAnchorEnabled = booleanPreferencesKey(PreferKey.readingAnchorEnabled)
-        val ReadAloudDetachReminderEnabled = booleanPreferencesKey(PreferKey.readAloudDetachReminderEnabled)
         val SelectText = booleanPreferencesKey(PreferKey.selectText)
         val NoAnimScrollPage = booleanPreferencesKey(PreferKey.noAnimScrollPage)
         val ClickImgWay = stringPreferencesKey(PreferKey.clickImgWay)
@@ -623,7 +613,6 @@ internal fun ReadSettings.toGatewayPrefMap(): Map<String, Any?> = mapOf(
     PreferKey.progressBarBehavior to progressBarBehavior,
     PreferKey.mouseWheelPage to mouseWheelPage,
     PreferKey.volumeKeyPage to volumeKeyPage,
-    PreferKey.volumeKeyPageOnPlay to volumeKeyPageOnPlay,
     PreferKey.keyPageOnLongPress to keyPageOnLongPress,
     PreferKey.swipeToAddBookmark to swipeToAddBookmark,
     PreferKey.bookmarkBadgeImage to bookmarkBadgeImage,
@@ -636,7 +625,6 @@ internal fun ReadSettings.toGatewayPrefMap(): Map<String, Any?> = mapOf(
     PreferKey.autoChangeSource to autoChangeSource,
     PreferKey.autoSuggestDayNight to autoSuggestDayNight,
     PreferKey.readingAnchorEnabled to readingAnchorEnabled,
-    PreferKey.readAloudDetachReminderEnabled to readAloudDetachReminderEnabled,
     PreferKey.selectText to selectText,
     PreferKey.noAnimScrollPage to noAnimScrollPage,
     PreferKey.clickImgWay to clickImgWay,

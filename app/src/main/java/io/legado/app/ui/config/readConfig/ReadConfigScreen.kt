@@ -258,14 +258,6 @@ fun ReadConfigScreen(
                 )
 
                 SwitchSettingItem(
-                    title = stringResource(R.string.volume_key_page_on_play),
-                    checked = settings.volumeKeyPageOnPlay,
-                    onCheckedChange = {
-                        onIntent(ReadConfigIntent.VolumeKeyPageOnPlayChanged(it))
-                    }
-                )
-
-                SwitchSettingItem(
                     title = stringResource(R.string.key_page_on_long_press),
                     checked = settings.keyPageOnLongPress,
                     onCheckedChange = {
@@ -350,15 +342,6 @@ fun ReadConfigScreen(
                     checked = settings.readingAnchorEnabled,
                     onCheckedChange = {
                         onIntent(ReadConfigIntent.ReadingAnchorChanged(it))
-                    }
-                )
-
-                SwitchSettingItem(
-                    title = stringResource(R.string.read_aloud_detach_reminder),
-                    description = stringResource(R.string.read_aloud_detach_reminder_summary),
-                    checked = settings.readAloudDetachReminderEnabled,
-                    onCheckedChange = {
-                        onIntent(ReadConfigIntent.ReadAloudDetachReminderChanged(it))
                     }
                 )
 

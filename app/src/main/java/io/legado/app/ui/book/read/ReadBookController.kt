@@ -36,7 +36,6 @@ import io.legado.app.feature.reader.core.model.remapThemeColors
 import io.legado.app.feature.reader.core.navigation.ReaderChapterPaginationSnapshot
 import io.legado.app.feature.reader.core.navigation.ReaderPageContext
 import io.legado.app.feature.reader.core.navigation.ReaderPageNavigator
-import io.legado.app.feature.reader.core.readaloud.ReaderVisibleTextPosition
 import io.legado.app.feature.reader.core.selection.ReaderSearchMatcher
 import io.legado.app.feature.reader.core.selection.ReaderSearchRequest
 import io.legado.app.feature.reader.core.selection.ReaderSelection
@@ -52,14 +51,12 @@ import io.legado.app.feature.reader.legacy.failureReasonFor
 import io.legado.app.feature.reader.legacy.paginateLegacyReaderChapterSafely
 import io.legado.app.feature.reader.platform.ReaderAndroidPaginationStyle
 import io.legado.app.feature.reader.platform.ReaderPerfTrace
-import io.legado.app.help.TTS
 import io.legado.app.help.book.isOnLineTxt
 import io.legado.app.help.config.ReadBookConfig
 import io.legado.app.help.storage.Backup
 import io.legado.app.lib.dialogs.SelectItem
 import io.legado.app.model.CacheBook
 import io.legado.app.model.ImageProvider
-import io.legado.app.model.ReadAloud
 import io.legado.app.model.ReadBook
 import io.legado.app.model.ReadSessionState
 import io.legado.app.model.analyzeRule.AnalyzeRule
@@ -69,7 +66,6 @@ import io.legado.app.model.analyzeRule.AnalyzeUrl.Companion.paramPattern
 import io.legado.app.model.reader.ReaderChapterInput
 import io.legado.app.receiver.NetworkChangedListener
 import io.legado.app.receiver.TimeBatteryReceiver
-import io.legado.app.service.BaseReadAloudService
 import io.legado.app.ui.association.OpenUrlConfirmActivity
 import io.legado.app.ui.book.read.page.entities.PageDirection
 import io.legado.app.ui.login.SourceLoginJsExtensions
@@ -122,7 +118,6 @@ class ReadBookController(
     ReadBook.ReaderRenderCallback {
 
     private val readSettingsGateway get() = org.koin.core.context.GlobalContext.get().get<io.legado.app.domain.gateway.ReadSettingsGateway>()
-    private val aloudSettingsGateway get() = org.koin.core.context.GlobalContext.get().get<io.legado.app.domain.gateway.ReadAloudSettingsGateway>()
 
     internal val layoutController = ReaderLayoutCoordinator(
         updateLayoutSize = { _, _ -> },
@@ -307,11 +302,9 @@ class ReadBookController(
     var onStartContentLoadFinish: (() -> Unit)? = null
 
     // Phase 4: callbacks for Activity-dependent effects
-    var onToggleReadAloud: (() -> Unit)? = null
     var onToggleAutoPage: (() -> Unit)? = null
     var onStopAutoPage: (() -> Unit)? = null
 
-    private var tts: TTS? = null
     private val timeBatteryReceiver = TimeBatteryReceiver()
     private var timeBatteryReceiverRegistered = false
     private val networkChangedListener by lazy { NetworkChangedListener(activity) }
@@ -341,8 +334,6 @@ class ReadBookController(
     private var composeSelection: ReaderSelection? = null
     private var searchSelection: ReaderSelection? = null
     private var pendingSearchNavigation: ReadBookEffect.NavigateToSearchResult? = null
-    private var readAloudPosition: Pair<Int, Int>? = null
-    private var composeVisibleBodyTextPositionProvider: (() -> ReaderVisibleTextPosition?)? = null
     private var composeImageClickAt = 0L
     private var composeImageDoubleClick = false
     private var directReaderLayoutJob: Job? = null
@@ -397,14 +388,7 @@ class ReadBookController(
 
     val isAutoPage: Boolean get() = viewModel.uiState.value.isAutoPage
 
-    private fun speak(text: String) {
-        if (tts == null) {
-            tts = TTS()
-        }
-        tts?.speak(text)
-    }
-
-    fun clearTts() {
+    fun releaseReader() {
         ReadBook.unregisterRender(this)
         directReaderLayoutJob?.cancel()
         directReaderLayoutJob = null
@@ -413,8 +397,6 @@ class ReadBookController(
         readerImageLoads.values.forEach { it.cancel() }
         readerImageLoads.clear()
         readerImageCache.evictAll()
-        tts?.clearTts()
-        tts = null
         dismissTextActionMenu()
         popupAction.dismiss()
         networkChangedListener.unRegister()
@@ -544,7 +526,6 @@ class ReadBookController(
     fun showComposeActionMenu() {
         val state = viewModel.uiState.value
         when {
-            BaseReadAloudService.isRun -> viewModel.onIntent(ReadBookIntent.ReadAloudAction)
             isAutoPage -> viewModel.onIntent(ReadBookIntent.OpenReadMenuRoute(ReadBookMenuRoute.AutoRead))
             state.isShowingSearchResult -> viewModel.onIntent(ReadBookIntent.ShowSearchMenu)
             else -> viewModel.onIntent(ReadBookIntent.ShowMenu)
@@ -559,10 +540,9 @@ class ReadBookController(
             ReaderTapAction.PREVIOUS_PAGE -> Unit
             ReaderTapAction.NEXT_CHAPTER -> viewModel.onIntent(ReadBookIntent.NextChapter)
             ReaderTapAction.PREVIOUS_CHAPTER -> viewModel.onIntent(ReadBookIntent.PrevChapter)
-            ReaderTapAction.READ_ALOUD_PREVIOUS_PARAGRAPH ->
-                viewModel.onIntent(ReadBookIntent.ReadAloudPrevParagraph)
-            ReaderTapAction.READ_ALOUD_NEXT_PARAGRAPH ->
-                viewModel.onIntent(ReadBookIntent.ReadAloudNextParagraph)
+            ReaderTapAction.READ_ALOUD_PREVIOUS_PARAGRAPH,
+            ReaderTapAction.READ_ALOUD_NEXT_PARAGRAPH,
+            ReaderTapAction.TOGGLE_READ_ALOUD_PAUSE -> Unit
             ReaderTapAction.ADD_BOOKMARK -> viewModel.onIntent(ReadBookIntent.AddBookmark)
             ReaderTapAction.OPEN_CONTENT_EDIT -> viewModel.onIntent(ReadBookIntent.OpenContentEdit)
             ReaderTapAction.TOGGLE_REPLACE -> viewModel.onIntent(ReadBookIntent.MenuEnableReplace)
@@ -581,11 +561,6 @@ class ReadBookController(
                     activity.longToastOnUi(activity.getString(R.string.sync_book_progress_success))
                 },
             )
-            ReaderTapAction.TOGGLE_READ_ALOUD_PAUSE -> if (BaseReadAloudService.isPlay()) {
-                ReadAloud.pause(activity)
-            } else {
-                ReadAloud.resume(activity)
-            }
         }
     }
 
@@ -700,10 +675,6 @@ class ReadBookController(
     private fun directReaderWindow(index: Int): ReaderPageWindow {
         val window = ReaderPageNavigator.window(directReaderPages, index)
         val selection = searchSelection
-        val aloudPosition = readAloudPosition
-        val aloudParagraphIndex = aloudPosition?.let { (chapterIndex, chapterPosition) ->
-            ReaderPageNavigator.bodyParagraphAt(directReaderPages, chapterIndex, chapterPosition)
-        }
         fun highlight(page: io.legado.app.feature.reader.core.model.ReaderPage?, pageIndex: Int) = page?.let { source ->
             val chapterPageCount = directReaderChapterPageCounts[source.id.chapterIndex] ?: 0
             val dynamicState = viewModel.uiState.value
@@ -723,18 +694,14 @@ class ReadBookController(
                 revision = source.revision xor dynamicState.time.hashCode().toLong() xor dynamicState.battery.toLong(),
             )
             val pageHasSearchSelection = selection?.chapterIndex == source.id.chapterIndex
-            val pageHasAloudParagraph = aloudPosition?.first == source.id.chapterIndex &&
-                aloudParagraphIndex != null
             decorated.copy(
-                // Search/read-aloud state must not clone every glyph in the visible window:
+                // Search state must not clone every glyph in the visible window:
                 // scroll draw data is keyed by the immutable layout element list.  The Canvas
-                // resolves these compact dynamic ranges while drawing.
+                // resolves the compact dynamic range while drawing.
                 searchStart = selection?.anchor?.takeIf { pageHasSearchSelection },
                 searchEndInclusive = selection?.focus?.takeIf { pageHasSearchSelection },
                 searchIsTitle = selection?.anchorIsTitle == true,
-                readAloudParagraphIndex = aloudParagraphIndex.takeIf { pageHasAloudParagraph },
-                revision = decorated.revision xor (selection?.hashCode()?.toLong() ?: 0L) xor
-                        (aloudPosition?.hashCode()?.toLong() ?: 0L),
+                revision = decorated.revision xor (selection?.hashCode()?.toLong() ?: 0L),
             )
         }
         return ReaderPageWindow(
@@ -815,9 +782,6 @@ class ReadBookController(
         val chapterPosition = ReaderPageNavigator.pageStart(page)
         // 热路径安静更新：不发布快照（否则每次跨页触发一次全量 UiState 重建落在动画帧上）。
         ReadBook.updateReadingPosition(chapterPosition, publish = false)
-        if (BaseReadAloudService.isRun && ReadBook.onComposeManualPageTurn()) {
-            readAloudPosition = page.id.chapterIndex to chapterPosition
-        }
     }
 
     fun seekComposeChapterPage(chapterPageIndex: Int): Boolean {
@@ -1494,16 +1458,6 @@ class ReadBookController(
 
     fun onMenuItemSelected(itemId: Int): Boolean {
         when (itemId) {
-            R.id.menu_aloud -> {
-                viewModel.onIntent(
-                    ReadBookIntent.TextActionAloud(
-                        selectedText,
-                        composeSelection?.bodyStart,
-                    )
-                )
-                return true
-            }
-
             R.id.menu_bookmark -> {
                 composeSelectionBookmark()?.let {
                     viewModel.onIntent(ReadBookIntent.TextActionBookmark(it))
@@ -1551,7 +1505,6 @@ class ReadBookController(
             items.add(ActionMenuItem(R.id.menu_copy, activity.getString(android.R.string.copy)))
             items.add(ActionMenuItem(R.id.menu_share_str, activity.getString(R.string.share)))
             items.add(ActionMenuItem(R.id.menu_browser, activity.getString(R.string.browser)))
-            items.add(ActionMenuItem(R.id.menu_aloud, activity.getString(R.string.read_aloud)))
             items.add(ActionMenuItem(R.id.menu_bookmark, activity.getString(R.string.bookmark)))
             items.add(ActionMenuItem(R.id.menu_mark, activity.getString(R.string.menu_mark)))
             items.add(ActionMenuItem(R.id.menu_replace, activity.getString(R.string.replace)))
@@ -1716,7 +1669,6 @@ class ReadBookController(
     override fun contentLoadFinish() {
         viewModel.markInitFinished()
         handler.post {
-            viewModel.readAloudProgress.value?.let(::updateReadAloudProgress)
             onStartContentLoadFinish?.invoke()
         }
     }
@@ -1855,11 +1807,6 @@ class ReadBookController(
 
             is ReadBookEffect.UpTextSelectAble -> Unit
 
-            is ReadBookEffect.UpAloudState -> {
-                readAloudPosition = null
-                directReaderPageIndex?.let(::publishDirectReaderWindow)
-            }
-
             is ReadBookEffect.RefreshBookContent -> {
                 ReadBook.clearTextChapter()
                 ReadBook.book?.let { viewModel.refreshContentDur(it) }
@@ -1880,15 +1827,8 @@ class ReadBookController(
             }
 
             // ── Phase 4: Activity-dependent effects ──
-            is ReadBookEffect.ToggleReadAloud -> onToggleReadAloud?.invoke() ?: toggleReadAloud()
             is ReadBookEffect.ToggleAutoPage -> onToggleAutoPage?.invoke() ?: toggleAutoPage()
             is ReadBookEffect.StopAutoPage -> onStopAutoPage?.invoke() ?: stopAutoPage()
-            is ReadBookEffect.TextActionAloudPosition -> {
-                ReadBook.updateReadingPosition(effect.chapterPosition)
-                ReadBook.readAloud(chapterPosition = effect.chapterPosition)
-            }
-
-            is ReadBookEffect.TextActionSpeak -> speak(effect.text)
             is ReadBookEffect.NavigateToSearchResult -> {
                 pendingSearchNavigation = effect
                 val result = effect.result
@@ -1985,13 +1925,8 @@ class ReadBookController(
             is ReadBookEffect.OpenReadStyleExport,
             is ReadBookEffect.OpenMenuCustomIconPicker,
             is ReadBookEffect.OpenTitleBarCustomIconPicker,
-            is ReadBookEffect.OpenSystemTtsSettings,
-            ReadBookEffect.OpenTtsEnginesAndVoices,
-            ReadBookEffect.OpenTtsCache,
-            is ReadBookEffect.OpenBookVoiceCasting,
             is ReadBookEffect.OpenHighlightRuleImportPicker,
             is ReadBookEffect.OpenHighlightRuleExportPicker,
-            is ReadBookEffect.TtsCacheCleared,
             is ReadBookEffect.ExportJson,
             // DB query + bookmark effects — handled by ViewModel, ignored here
             is ReadBookEffect.MenuChangeSource,
@@ -2005,59 +1940,9 @@ class ReadBookController(
         }
     }
 
-    fun updateReadAloudProgress(chapterStart: Int) {
-        if (!BaseReadAloudService.isPlay()) return
-        // 只更新朗读高亮锚点。可见页的移动由朗读服务驱动（moveToReadAloudPage →
-        // moveToNextPage → upContent）与用户导航负责；这里若再按朗读位置 locate
-        // 回迁可见页，进入阅读器时会把页面先拉回朗读所在的上一段（跨页段落的
-        // locate 落在段落起始页），随后 curPageChanged 的跟随重启又跳回当前页。
-        val anchor = BaseReadAloudService.currentChapterIndex to chapterStart
-        if (readAloudPosition == anchor) return
-        readAloudPosition = anchor
-        // 高亮在窗口发布时才计算绘制（directReaderWindow），锚点变化后必须重发布
-        directReaderPageIndex?.let(::publishDirectReaderWindow)
-    }
-
-    fun setComposeVisibleBodyTextPositionProvider(
-        provider: (() -> ReaderVisibleTextPosition?)?,
-    ) {
-        composeVisibleBodyTextPositionProvider = provider
-    }
-
-    private fun readAloudFromComposeVisibleStart(): Boolean {
-        val position = composeVisibleBodyTextPositionProvider?.invoke() ?: return false
-        // The Canvas window is normally kept on the logical current page. A crossing may
-        // briefly expose a neighbor before its chapter becomes the active ReadBook chapter;
-        // let the existing chapter-transition path handle that case rather than speaking
-        // with mismatched chapter coordinates.
-        if (position.chapterIndex != ReadBook.durChapterIndex) return false
-        ReadBook.updateReadingPosition(position.chapterPosition)
-        ReadBook.readAloud(chapterPosition = position.chapterPosition)
-        return true
-    }
-
     // ── Key handling ──
 
-    private fun toggleReadAloud() {
-        viewModel.onIntent(ReadBookIntent.StopAutoPage)
-        when {
-            !BaseReadAloudService.isRun -> {
-                ReadAloud.upReadAloudClass()
-                if (!readAloudFromComposeVisibleStart()) ReadBook.readAloud()
-            }
-
-            BaseReadAloudService.pause -> {
-                val restartFromVisibleStart = pageChanged && readAloudFromComposeVisibleStart()
-                pageChanged = false
-                if (!restartFromVisibleStart) ReadAloud.resume(activity)
-            }
-
-            else -> ReadAloud.pause(activity)
-        }
-    }
-
     private fun toggleAutoPage() {
-        ReadAloud.stop(activity)
         if (isAutoPage) {
             stopAutoPage()
         } else {
@@ -2165,9 +2050,6 @@ class ReadBookController(
 
     private fun volumeKeyPage(direction: PageDirection, longPress: Boolean): Boolean {
         if (!readSettingsGateway.currentSettings.volumeKeyPage) {
-            return false
-        }
-        if (!readSettingsGateway.currentSettings.volumeKeyPageOnPlay && BaseReadAloudService.isPlay()) {
             return false
         }
         handleKeyPage(direction, longPress)
@@ -2576,7 +2458,6 @@ data class ActionMenuItem(
                 R.id.menu_copy -> "menu_copy"
                 R.id.menu_share_str -> "menu_share_str"
                 R.id.menu_browser -> "menu_browser"
-                R.id.menu_aloud -> "menu_aloud"
                 R.id.menu_bookmark -> "menu_bookmark"
                 R.id.menu_mark -> "menu_mark"
                 R.id.menu_replace -> "menu_replace"

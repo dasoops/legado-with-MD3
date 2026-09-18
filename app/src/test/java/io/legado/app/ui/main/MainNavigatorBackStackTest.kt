@@ -18,9 +18,9 @@ class MainNavigatorBackStackTest {
     }
 
     @Test
-    fun `media reader replaces stale route with home parent`() {
+    fun `reader with reset to home replaces stale route with home parent`() {
         val bookInfo = MainRouteBookInfo("Book", "Author", "book-url")
-        val reader = MainRouteReadBook(readAloud = true)
+        val reader = MainRouteReadBook(bookUrl = "book-url")
         val backStack = mutableListOf<NavKey>(MainRouteBookshelf, bookInfo)
 
         MainNavigator.navigateToRoute(backStack, reader, resetToHome = true)

@@ -114,8 +114,6 @@ import io.legado.app.feature.reader.core.model.contentClipPadPx
 import io.legado.app.feature.reader.core.model.emphasisUnderlineRunsFor
 import io.legado.app.feature.reader.core.model.textBackgroundRuns
 import io.legado.app.feature.reader.core.navigation.ReaderPageNavigator
-import io.legado.app.feature.reader.core.readaloud.ReaderVisibleTextPosition
-import io.legado.app.feature.reader.core.readaloud.ReaderVisibleTextPositionPolicy
 import io.legado.app.feature.reader.core.selection.ReaderPageChangeOrigin
 import io.legado.app.feature.reader.core.selection.ReaderSelection
 import io.legado.app.feature.reader.core.selection.ReaderSelectionEndpoint
@@ -221,7 +219,6 @@ fun ReaderCanvasSurface(
     noAnimationScrollPage: Boolean,
     externalPageTurns: Flow<ReaderTurnDirection>,
     externalSelectionCancels: Flow<Unit>,
-    onVisibleBodyTextPositionProvider: ((() -> ReaderVisibleTextPosition?)?) -> Unit,
 ) {
     // 滚动跨页同步换窗：跨页帧内宿主回调直接返回新窗口，先写入 pending 供绘制与
     // 手势立即使用；宿主 StateFlow 回声（同一实例）或外部窗口变化会将其清除。
@@ -324,17 +321,6 @@ fun ReaderCanvasSurface(
     // 零重组零重绘（对照 shutiao 的 contentOffset 语义）。
     val scrollOffsetState = remember { mutableFloatStateOf(0f) }
     var scrollOffset by scrollOffsetState
-    val latestVisibleBodyTextPosition by rememberUpdatedState {
-        if (transitionMode == ReaderTransitionMode.SCROLL) {
-            ReaderVisibleTextPositionPolicy.firstVisibleBodyText(currentPageWindow(), scrollOffset)
-        } else {
-            null
-        }
-    }
-    DisposableEffect(onVisibleBodyTextPositionProvider) {
-        onVisibleBodyTextPositionProvider { latestVisibleBodyTextPosition() }
-        onDispose { onVisibleBodyTextPositionProvider(null) }
-    }
     // 滚动跨页折算标志：applyScrollResult 完成一次同步换窗后置位，由 current.id
     // 效应消费——据此区分"自己跨页"与"外部换窗"，后者才把滚动偏移归零。
     var scrollOwnCrossing by remember { mutableStateOf(false) }
@@ -1434,7 +1420,7 @@ fun ReaderCanvasSurface(
                     windowProvider = { currentPageWindow() },
                     offsetYState = scrollOffsetState,
                     selection = selectionColor,
-                    readAloud = textAccentColor,
+                    accentColor = textAccentColor,
                     selectionProvider = { textSelection },
                     selectionPreviewStyle = selectionPreviewStyle,
                     cachedImage = cachedImage,
@@ -1706,7 +1692,7 @@ private fun ScrollPageStack(
     windowProvider: () -> ReaderPageWindow,
     offsetYState: androidx.compose.runtime.MutableFloatState,
     selection: Color,
-    readAloud: Color,
+    accentColor: Color,
     selectionProvider: () -> ReaderSelection?,
     selectionPreviewStyle: TextProcessStyle?,
     cachedImage: (ReaderElement.Image) -> Bitmap?,
@@ -1774,7 +1760,7 @@ private fun ScrollPageStack(
                     page,
                     data,
                     selection,
-                    readAloud,
+                    accentColor,
                     activeSelection,
                     selectedBounds,
                     selectionPreviewStyle,
@@ -1797,7 +1783,7 @@ private fun androidx.compose.ui.graphics.drawscope.DrawScope.drawScrollPageConte
     page: ReaderPage,
     data: ScrollPageDrawData,
     selection: Color,
-    readAloud: Color,
+    accentColor: Color,
     activeSelection: ReaderSelection?,
     selectedBounds: List<ReaderRect>,
     selectionPreviewStyle: TextProcessStyle?,
@@ -1840,7 +1826,7 @@ private fun androidx.compose.ui.graphics.drawscope.DrawScope.drawScrollPageConte
             val paint = data.paints.getValue(e.style)
             paint.color = if (previewing && activeSelection.contains(e, page.id.chapterIndex)) {
                 selectionPreviewStyle.textColor ?: page.previewBaseTextColor(e)
-            } else page.resolvedColorArgb(e, readAloud.toArgb())
+            } else page.resolvedColorArgb(e, accentColor.toArgb())
             paint.isUnderlineText = e.style.nativeUnderline || e.drawsLinkUnderline
             native.drawText(e.value, e.bounds.left, e.baselinePx, paint)
         }
@@ -1900,7 +1886,7 @@ private fun SimulationPageStack(
     backgroundImage: Drawable?,
     backgroundImageAlpha: Float,
     selection: Color,
-    readAloud: Color,
+    accentColor: Color,
     activeSelection: ReaderSelection?,
     selectionPreviewStyle: TextProcessStyle?,
     cachedImage: (ReaderElement.Image) -> Bitmap?,
@@ -1932,7 +1918,7 @@ private fun SimulationPageStack(
                 backgroundImage,
                 backgroundImageAlpha,
                 selection,
-                readAloud,
+                accentColor,
                 Modifier.fillMaxSize(),
                 activeSelection,
                 selectionPreviewStyle,
@@ -1949,7 +1935,7 @@ private fun SimulationPageStack(
                 backgroundImage,
                 backgroundImageAlpha,
                 selection,
-                readAloud,
+                accentColor,
                 Modifier
                     .fillMaxSize()
                     .graphicsLayer { translationX = baseTranslation },
@@ -1977,7 +1963,7 @@ private fun SimulationPageStack(
                 backgroundImage,
                 backgroundImageAlpha,
                 selection,
-                readAloud,
+                accentColor,
                 Modifier.fillMaxSize(),
                 activeSelection,
                 selectionPreviewStyle,
@@ -2001,7 +1987,7 @@ private fun SimulationPageStack(
                 backgroundImage,
                 backgroundImageAlpha,
                 selection,
-                readAloud,
+                accentColor,
                 Modifier.fillMaxSize(),
                 activeSelection,
                 selectionPreviewStyle,
@@ -2138,7 +2124,7 @@ private fun ReaderPageCanvas(
     backgroundImage: Drawable?,
     backgroundImageAlpha: Float,
     selection: Color,
-    readAloud: Color,
+    accentColor: Color,
     modifier: Modifier,
     activeSelection: ReaderSelection?,
     selectionPreviewStyle: TextProcessStyle?,
@@ -2269,7 +2255,7 @@ private fun ReaderPageCanvas(
                 val paint = paints.getValue(e.style)
                 paint.color = if (previewing && activeSelection.contains(e, page.id.chapterIndex)) {
                     selectionPreviewStyle.textColor ?: page.previewBaseTextColor(e)
-                } else page.resolvedColorArgb(e, readAloud.toArgb())
+                } else page.resolvedColorArgb(e, accentColor.toArgb())
                 paint.isUnderlineText = e.style.nativeUnderline || e.drawsLinkUnderline
                 native.drawText(e.value, e.bounds.left, e.baselinePx, paint)
             }
@@ -2436,16 +2422,13 @@ private fun ReaderPage.isSearchResult(text: ReaderElement.Text): Boolean {
     return text.chapterPosition <= maxOf(start, end) && textEnd >= minOf(start, end)
 }
 
-private fun ReaderPage.isReadAloud(text: ReaderElement.Text): Boolean =
-    !text.emphasized && readAloudParagraphIndex != null && text.paragraphIndex == readAloudParagraphIndex
-
 private fun ReaderPage.resolvedColorArgb(text: ReaderElement.Text, accentColorArgb: Int): Int =
-    if (text.link != null || isSearchResult(text) || isReadAloud(text)) accentColorArgb else text.style.colorArgb
+    if (text.link != null || isSearchResult(text)) accentColorArgb else text.style.colorArgb
 
 private fun ReaderPage.dynamicEmphasisUnderlineRuns(): List<ReaderEmphasisUnderlineRun> {
     val style = emphasisUnderlineStyle ?: return emptyList()
     // 命中位置只决定哪一行划线，线仍是整行（对照旧 View TextLine.drawTextLine）。
-    return emphasisUnderlineRunsFor(style) { isSearchResult(it) || isReadAloud(it) }
+    return emphasisUnderlineRunsFor(style) { isSearchResult(it) }
 }
 
 @Composable

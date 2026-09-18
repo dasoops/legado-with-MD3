@@ -13,7 +13,7 @@ data class ReaderEmphasisUnderlineRun(
     val style: ReaderEmphasisUnderline,
 )
 
-/** Restores the legacy whole-line underline used for search hits and read-aloud paragraphs. */
+/** Restores the legacy whole-line underline used for search hits. */
 fun ReaderPage.emphasisUnderlineRuns(): List<ReaderEmphasisUnderlineRun> =
     underlineRuns(
         styleSelector = { line -> line.firstNotNullOfOrNull(ReaderElement.Text::emphasisUnderline) },
@@ -21,9 +21,9 @@ fun ReaderPage.emphasisUnderlineRuns(): List<ReaderEmphasisUnderlineRun> =
     )
 
 /**
- * 运行期命中（搜索结果、朗读段落）的整行下划线，命中判定由调用方提供。
+ * 运行期命中（搜索结果）的整行下划线，命中判定由调用方提供。
  *
- * 对照旧 View `TextLine.drawTextLine`：`if (useUnderline && (isReadAloud || searchResultColumnCount > 0))`
+ * 对照旧 View `TextLine.drawTextLine`：`if (useUnderline && searchResultColumnCount > 0)`
  * 时执行 `drawLine(lineStart + indentWidth, lineY, lineEnd, lineY)` —— 命中位置只决定
  * 「哪一行要划线」，线的范围始终是整行（首行缩进之后到行尾）。取命中元素自身的边界会把线缩成
  * 命中词的宽度，与旧版不一致。

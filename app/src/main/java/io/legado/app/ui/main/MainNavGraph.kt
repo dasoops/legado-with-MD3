@@ -39,17 +39,11 @@ import io.legado.app.constant.BookType
 import io.legado.app.constant.Status
 import io.legado.app.domain.model.settings.AppUiConfiguration
 import io.legado.app.help.coil.CoverExtras
-import io.legado.app.model.AudioPlay
 import io.legado.app.model.Download
 import io.legado.app.model.SourceCallBack
-import io.legado.app.service.AudioPlayService
 import io.legado.app.ui.about.AboutEffect
 import io.legado.app.ui.about.AboutScreen
 import io.legado.app.ui.about.AboutViewModel
-import io.legado.app.ui.book.audio.AudioPlayEffect
-import io.legado.app.ui.book.audio.AudioPlayIntent
-import io.legado.app.ui.book.audio.AudioPlayScreenContent
-import io.legado.app.ui.book.audio.AudioPlayViewModel
 import io.legado.app.ui.book.cache.manage.BookCacheManageRouteScreen
 import io.legado.app.ui.book.import.local.ImportBookRouteScreen
 import io.legado.app.ui.book.import.remote.RemoteBookRouteScreen
@@ -66,13 +60,6 @@ import io.legado.app.ui.book.read.ReadBookViewModel
 import io.legado.app.ui.book.read.ReaderSessionViewModel
 import io.legado.app.ui.book.readRecord.ReadRecordOverviewRouteScreen
 import io.legado.app.ui.book.readRecord.ReadRecordRouteScreen
-import io.legado.app.ui.book.readaloud.cache.TtsCacheRouteScreen
-import io.legado.app.ui.book.readaloud.casting.BookVoiceCastingScreen
-import io.legado.app.ui.book.readaloud.casting.BookVoiceCastingViewModel
-import io.legado.app.ui.book.readaloud.cloudtts.CloudTtsEffect
-import io.legado.app.ui.book.readaloud.cloudtts.CloudTtsIntent
-import io.legado.app.ui.book.readaloud.cloudtts.CloudTtsScreen
-import io.legado.app.ui.book.readaloud.cloudtts.CloudTtsViewModel
 import io.legado.app.ui.book.searchContent.SearchContentRouteScreen
 import io.legado.app.ui.book.searchContent.SearchContentViewModel
 import io.legado.app.ui.book.source.debug.BookSourceDebugRoute
@@ -509,27 +496,13 @@ fun MainActivity.mainEntryProvider(
                     )
                 )
             },
-            onOpenVoiceCasting = { bookUrl ->
-                onNavigateToRoute(MainRouteBookVoiceCasting(bookUrl))
-            },
-            onOpenTtsEnginesAndVoices = {
-                onNavigateToRoute(MainRouteCloudTtsEngines(route.bookUrl))
-            },
-            onOpenTtsCache = {
-                onNavigateToRoute(MainRouteTtsCache)
-            },
         )
 
-        DisposableEffect(controller, lifecycleOwner, route.readAloud) {
+        DisposableEffect(controller, lifecycleOwner) {
             activeReadBookInputHandler = controller
             activeReadBookRoute = route
             MainActivity.hasActiveReadBookRoute = true
             controller.onClose = { onNavigateBack() }
-            controller.onStartContentLoadFinish = {
-                if (route.readAloud) {
-                    io.legado.app.model.ReadBook.readAloud()
-                }
-            }
 
             val lifecycleObserver = LifecycleEventObserver { _, event ->
                 when (event) {
@@ -552,7 +525,7 @@ fun MainActivity.mainEntryProvider(
                     activeReadBookRoute = null
                 }
                 MainActivity.hasActiveReadBookRoute = false
-                controller.clearTts()
+                controller.releaseReader()
                 this@mainEntryProvider.toggleSystemBar(configuration.appShell.showStatusBar)
             }
         }
@@ -600,141 +573,6 @@ fun MainActivity.mainEntryProvider(
                 )
             },
         )
-    }
-
-    entry<MainRouteAudioPlay> { route ->
-        val audioPlayViewModel = koinViewModel<AudioPlayViewModel>(
-            key = "AudioPlay:${route.bookUrl}",
-        )
-        val lifecycleOwner = LocalLifecycleOwner.current
-        val uiState by audioPlayViewModel.uiState.collectAsStateWithLifecycle()
-        var showAudioChangeSource by remember { mutableStateOf(false) }
-        val imageLoader: ImageLoader = koinInject()
-        val sourceEditResult = rememberLauncherForActivityResult(
-            ActivityResultContracts.StartActivityForResult()
-        ) {
-            if (it.resultCode == Activity.RESULT_OK) {
-                audioPlayViewModel.onIntent(AudioPlayIntent.SourceEdited)
-            }
-        }
-
-        fun copyAudioPlayUrl() {
-            AudioPlay.book?.let {
-                SourceCallBack.callBackBtn(
-                    this@mainEntryProvider,
-                    SourceCallBack.CLICK_COPY_PLAY_URL,
-                    AudioPlay.bookSource,
-                    it,
-                    AudioPlay.durChapter,
-                    BookType.audio,
-                ) {
-                    sendToClip(AudioPlayService.url)
-                }
-            }
-        }
-
-        fun finishAudioPlay() {
-            if (AudioPlay.inBookshelf) {
-                SourceCallBack.callBackBook(
-                    SourceCallBack.END_READ,
-                    AudioPlay.bookSource,
-                    AudioPlay.book,
-                    AudioPlay.durChapter
-                )
-            }
-            onNavigateBack()
-        }
-
-        LaunchedEffect(route, audioPlayViewModel) {
-            audioPlayViewModel.onIntent(
-                AudioPlayIntent.Init(route.bookUrl.orEmpty(), route.inBookshelf)
-            )
-        }
-        DisposableEffect(audioPlayViewModel, lifecycleOwner) {
-            MainActivity.hasActiveAudioPlayRoute = true
-            this@mainEntryProvider.activeAudioPlayViewModel = audioPlayViewModel
-            AudioPlay.register(this@mainEntryProvider)
-            onDispose {
-                if (AudioPlay.status != Status.PLAY) {
-                    AudioPlay.stop()
-                }
-                AudioPlay.unregister(this@mainEntryProvider)
-                if (this@mainEntryProvider.activeAudioPlayViewModel === audioPlayViewModel) {
-                    this@mainEntryProvider.activeAudioPlayViewModel = null
-                }
-                MainActivity.hasActiveAudioPlayRoute = false
-            }
-        }
-        LaunchedEffect(audioPlayViewModel) {
-            audioPlayViewModel.effects.collectLatest { effect ->
-                when (effect) {
-                    is AudioPlayEffect.OpenChangeSource -> showAudioChangeSource = true
-
-                    is AudioPlayEffect.OpenLogin -> startActivity(
-                        MainActivity.createSourceLoginIntent(
-                            this@mainEntryProvider,
-                            SourceLoginType.BookSource,
-                            effect.sourceUrl
-                        )
-                    )
-
-                    AudioPlayEffect.CopyPlayUrl -> copyAudioPlayUrl()
-                    is AudioPlayEffect.OpenEditSource -> sourceEditResult.launch(
-                        MainActivity.createBookSourceEditIntent(
-                            this@mainEntryProvider,
-                            effect.sourceUrl
-                        )
-                    )
-
-                    is AudioPlayEffect.ShowToast -> toastOnUi(effect.message)
-                    is AudioPlayEffect.OpenBookReader -> {
-                        startActivity(
-                            MainActivity.createReadBookIntent(
-                                this@mainEntryProvider,
-                                effect.bookUrl
-                            )
-                        )
-                        onNavigateBack()
-                    }
-
-                    AudioPlayEffect.Finish -> finishAudioPlay()
-                }
-            }
-        }
-        BackHandler {
-            audioPlayViewModel.onIntent(AudioPlayIntent.BackPressed)
-        }
-
-        // 封面动态取色：从封面提取主色作为本界面主题
-        val seedColor = rememberImageSeedColor(
-            imageLoader = imageLoader,
-            data = uiState.coverPath,
-            requestKey = listOf(uiState.coverPath, uiState.sourceOrigin),
-        ) {
-            extras[CoverExtras.SourceOrigin] = uiState.sourceOrigin
-        }
-        val themeOverride = rememberThemeOverride(seedColor)
-        ProvideThemeOverride(themeOverride) {
-            AudioPlayScreenContent(
-                state = uiState,
-                onIntent = audioPlayViewModel::onIntent,
-                onBack = { audioPlayViewModel.onIntent(AudioPlayIntent.BackPressed) },
-            )
-        }
-        val audioBook = AudioPlay.book
-        if (showAudioChangeSource && audioBook != null) {
-            ChangeSourceSheet(
-                show = true,
-                oldBook = audioBook,
-                onDismissRequest = { showAudioChangeSource = false },
-                onReplace = { source, book, toc, _ ->
-                    audioPlayViewModel.changeTo(source, book, toc)
-                },
-                onAddAsNew = { book, toc ->
-                    audioPlayViewModel.addToBookshelf(book, toc)
-                },
-            )
-        }
     }
 
     entry<MainRouteSearchContent> { route ->
@@ -831,14 +669,6 @@ fun MainActivity.mainEntryProvider(
                         inBookshelf = inBookshelf,
                         chapterChanged = chapterChanged,
                         openRequestId = System.nanoTime(),
-                    )
-                )
-            },
-            onOpenAudioPlay = { bookUrl, inBookshelf ->
-                onNavigateToRoute(
-                    MainRouteAudioPlay(
-                        bookUrl = bookUrl,
-                        inBookshelf = inBookshelf,
                     )
                 )
             },
