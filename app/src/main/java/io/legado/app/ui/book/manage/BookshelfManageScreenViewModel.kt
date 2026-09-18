@@ -15,21 +15,15 @@ import io.legado.app.data.repository.BookSourceRepository
 import io.legado.app.data.repository.SearchRepository
 import io.legado.app.domain.gateway.BookExportSettingsGateway
 import io.legado.app.domain.model.settings.BookExportSettings
-import io.legado.app.domain.usecase.BatchCacheDownloadUseCase
 import io.legado.app.domain.usecase.BatchChangeSourceCandidate
 import io.legado.app.domain.usecase.BatchChangeSourcePreviewItem
 import io.legado.app.domain.usecase.BatchChangeSourcePreviewStatus
-import io.legado.app.domain.usecase.CacheBookChaptersUseCase
 import io.legado.app.domain.usecase.ChangeBookSourceUseCase
 import io.legado.app.domain.usecase.ChangeSourceMigrationOptions
-import io.legado.app.domain.usecase.ClearBookCacheUseCase
 import io.legado.app.domain.usecase.DeleteBooksUseCase
 import io.legado.app.domain.usecase.UpdateBooksGroupUseCase
-import io.legado.app.help.book.BookHelp
-import io.legado.app.help.book.isLocal
 import io.legado.app.help.book.removeType
 import io.legado.app.help.config.LocalConfig
-import io.legado.app.model.CacheBook
 import io.legado.app.service.ExportBookService
 import io.legado.app.domain.gateway.BookshelfSettingsGateway
 import io.legado.app.domain.gateway.DownloadCacheSettingsGateway
@@ -41,7 +35,6 @@ import io.legado.app.utils.move
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -51,11 +44,8 @@ import kotlinx.coroutines.flow.update
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
-import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
-import java.util.concurrent.ConcurrentHashMap
 import kotlin.math.max
-import kotlin.math.min
 
 private val bookshelfSettingsGateway get() = GlobalContext.get().get<BookshelfSettingsGateway>()
 
@@ -82,7 +72,6 @@ data class BookshelfManageScreenUiState(
     val books: List<Book> = emptyList(),
     val bookSort: Int = bookshelfSettingsGateway.currentSettings.bookshelfSort,
     val bookSortOrder: Int = bookshelfSettingsGateway.currentSettings.bookshelfSortOrder,
-    val isDownloadRunning: Boolean = false,
     val isChangingSource: Boolean = false,
     val changeSourceProgress: String? = null,
     val changeSourceMessage: String? = null,
@@ -98,19 +87,9 @@ data class BookshelfManageScreenUiState(
 sealed interface BookshelfManageScreenIntent {
     data class Initialize(val groupId: Long) : BookshelfManageScreenIntent
     data class ChangeGroup(val groupId: Long) : BookshelfManageScreenIntent
-    data class StartDownloadForVisibleBooks(
-        val books: List<Book>,
-        val downloadAllChapters: Boolean
-    ) : BookshelfManageScreenIntent
-    data object StopDownload : BookshelfManageScreenIntent
-    data class ToggleBookDownload(val book: Book) : BookshelfManageScreenIntent
-    data class DeleteBookDownload(val bookUrl: String) : BookshelfManageScreenIntent
-    data class ClearBookCache(val book: Book) : BookshelfManageScreenIntent
     data class MoveBooksToGroup(val bookUrls: Set<String>, val groupId: Long) : BookshelfManageScreenIntent
     data class DeleteBooks(val bookUrls: Set<String>, val deleteOriginal: Boolean) : BookshelfManageScreenIntent
-    data class ClearCachesForBooks(val bookUrls: Set<String>) : BookshelfManageScreenIntent
     data class MoveBookOrder(val fromIndex: Int, val toIndex: Int) : BookshelfManageScreenIntent
-    data class DownloadBooks(val bookUrls: Set<String>, val downloadAllChapters: Boolean) : BookshelfManageScreenIntent
     data class ChangeBookSource(
         val oldBookUrl: String,
         val source: BookSource,
@@ -164,18 +143,11 @@ class BookshelfManageScreenViewModel(
     private val searchRepository: SearchRepository,
     val bookshelfManageScreenConfig: BookshelfManageScreenConfig,
     private val bookExportSettingsGateway: BookExportSettingsGateway,
-    private val batchCacheDownloadUseCase: BatchCacheDownloadUseCase,
-    private val cacheBookChaptersUseCase: CacheBookChaptersUseCase,
     private val changeBookSourceUseCase: ChangeBookSourceUseCase,
-    private val clearBookCacheUseCase: ClearBookCacheUseCase,
     private val deleteBooksUseCase: DeleteBooksUseCase,
     private val updateBooksGroupUseCase: UpdateBooksGroupUseCase,
     private val downloadCacheSettingsGateway: DownloadCacheSettingsGateway,
 ) : BaseViewModel(application) {
-
-    private companion object {
-        const val DOWNLOAD_STATUS_REFRESH_INTERVAL_MILLIS = 2_000L
-    }
 
     private val _uiState = MutableStateFlow(BookshelfManageScreenUiState())
     val uiState = _uiState.asStateFlow()
@@ -183,15 +155,8 @@ class BookshelfManageScreenViewModel(
     private val _effects = MutableSharedFlow<BookshelfManageScreenEffect>(extraBufferCapacity = 32)
     val effects = _effects.asSharedFlow()
 
-    private val cacheCounts = ConcurrentHashMap<String, Int>()
-    private val pendingDownloadBookUrls = ConcurrentHashMap.newKeySet<String>()
-    private val downloadFailureMessages = ConcurrentHashMap<String, String>()
     private var booksJob: Job? = null
     private var groupsJob: Job? = null
-    private var cacheLoadJob: Job? = null
-    private var observersStarted = false
-    private val pendingDownloadStatusBookUrls = ConcurrentHashMap.newKeySet<String>()
-    private val pendingCacheCountRefreshBookUrls = ConcurrentHashMap.newKeySet<String>()
 
     init {
         viewModelScope.launch {
@@ -203,27 +168,14 @@ class BookshelfManageScreenViewModel(
             }
         }
     }
-    @Volatile
-    private var pendingDownloadRunningRefresh = false
 
     fun dispatch(intent: BookshelfManageScreenIntent) {
         when (intent) {
             is BookshelfManageScreenIntent.Initialize -> initialize(intent.groupId)
             is BookshelfManageScreenIntent.ChangeGroup -> changeGroup(intent.groupId)
-            is BookshelfManageScreenIntent.StartDownloadForVisibleBooks -> startDownloadForVisibleBooks(
-                intent.books,
-                intent.downloadAllChapters
-            )
-
-            BookshelfManageScreenIntent.StopDownload -> CacheBook.stop(context)
-            is BookshelfManageScreenIntent.ToggleBookDownload -> toggleBookDownload(intent.book)
-            is BookshelfManageScreenIntent.DeleteBookDownload -> CacheBook.remove(context, intent.bookUrl)
-            is BookshelfManageScreenIntent.ClearBookCache -> clearCacheForBook(intent.book)
             is BookshelfManageScreenIntent.MoveBooksToGroup -> moveBooksToGroup(intent.bookUrls, intent.groupId)
             is BookshelfManageScreenIntent.DeleteBooks -> deleteBooks(intent.bookUrls, intent.deleteOriginal)
-            is BookshelfManageScreenIntent.ClearCachesForBooks -> clearCachesForBooks(intent.bookUrls)
             is BookshelfManageScreenIntent.MoveBookOrder -> moveBookOrder(intent.fromIndex, intent.toIndex)
-            is BookshelfManageScreenIntent.DownloadBooks -> downloadBooks(intent.bookUrls, intent.downloadAllChapters)
             is BookshelfManageScreenIntent.ChangeBookSource -> changeBookSource(
                 intent.oldBookUrl,
                 intent.source,
@@ -320,28 +272,12 @@ class BookshelfManageScreenViewModel(
         }
     }
 
-    fun getCacheCount(bookUrl: String): Int? = cacheCounts[bookUrl]
-
-    fun isBookDownloading(bookUrl: String): Boolean {
-        if (CacheBook.pendingAdmissionFlow.value[bookUrl].orZero() > 0) return true
-        val bookState = CacheBook.downloadStateFlow.value.books[bookUrl] ?: return false
-        return bookState.waitingCount > 0 || bookState.runningIndices.isNotEmpty()
-    }
-
-    fun getDownloadFailureMessage(bookUrl: String): String? {
-        return downloadFailureMessages[bookUrl]
-    }
-
-    fun isBookPreparingDownload(bookUrl: String): Boolean {
-        return pendingDownloadBookUrls.contains(bookUrl)
-    }
-
     private fun initialize(groupId: Long) {
         _uiState.update { it.copy(groupId = groupId) }
         syncExportConfig(bookExportSettingsGateway.currentSettings)
         observeGroups()
         observeBooks(groupId)
-        observeDownloadAndExportChanges()
+        observeExportChanges()
         refreshGroupName(groupId)
     }
 
@@ -397,67 +333,11 @@ class BookshelfManageScreenViewModel(
                         bookSortOrder = bookshelfManageScreenConfig.bookshelfSortOrder
                     )
                 }
-                loadCacheCounts(books)
             }
         }
     }
 
-    private fun observeDownloadAndExportChanges() {
-        if (observersStarted) return
-        observersStarted = true
-        viewModelScope.launch {
-            CacheBook.cacheSuccessFlow.collect { chapter ->
-                scheduleCacheCountRefresh(chapter.bookUrl)
-            }
-        }
-        viewModelScope.launch {
-            CacheBook.downloadStateFlow.collect { downloadState ->
-                val successfulBookUrls = downloadState.books
-                    .filterValues {
-                        it.successCount > 0 &&
-                                it.failedIndices.isEmpty() &&
-                                it.failureMessage == null
-                    }
-                    .keys
-                val failureMsgs = downloadState.books.mapNotNull { (bookUrl, bookState) ->
-                    val message = bookState.failureMessage ?: if (bookState.failedIndices.isNotEmpty()) {
-                        "${bookState.failedIndices.size} 章"
-                    } else {
-                        null
-                    }
-                    message?.let { bookUrl to it }
-                }.toMap()
-                pendingDownloadBookUrls.removeAll(downloadState.books.keys)
-                successfulBookUrls.forEach { downloadFailureMessages.remove(it) }
-                downloadFailureMessages.putAll(failureMsgs)
-                _uiState.update {
-                    it.copy(isDownloadRunning = downloadState.isRunning || CacheBook.pendingAdmissionFlow.value.isNotEmpty())
-                }
-                downloadState.books.keys.forEach { bookUrl ->
-                    scheduleDownloadStatusRefresh(bookUrl)
-                }
-                scheduleDownloadStatusRefresh()
-            }
-        }
-        viewModelScope.launch {
-            CacheBook.pendingAdmissionFlow.collect { pending ->
-                pending.keys.forEach { bookUrl ->
-                    scheduleDownloadStatusRefresh(bookUrl)
-                }
-                scheduleDownloadStatusRefresh()
-            }
-        }
-        viewModelScope.launch {
-            CacheBook.queueChangedFlow.collect { bookUrl ->
-                scheduleDownloadStatusRefresh(bookUrl)
-            }
-        }
-        viewModelScope.launch(Dispatchers.IO) {
-            while (isActive) {
-                delay(DOWNLOAD_STATUS_REFRESH_INTERVAL_MILLIS)
-                flushDownloadStatusRefresh()
-            }
-        }
+    private fun observeExportChanges() {
         viewModelScope.launch {
             ExportBookService.exportBookUpdateFlow.collect { bookUrl ->
                 emitBookChanged(bookUrl)
@@ -490,140 +370,12 @@ class BookshelfManageScreenViewModel(
         }
     }
 
-    private fun syncDownloadRunning() {
-        _uiState.update {
-            it.copy(isDownloadRunning = CacheBook.isRun || CacheBook.pendingAdmissionFlow.value.isNotEmpty())
-        }
-    }
-
     private fun refreshGroupName(groupId: Long) {
         execute {
             val title = bookGroupRepository.getByID(groupId)?.groupName
             title ?: context.getString(io.legado.app.R.string.no_group)
         }.onSuccess { groupName ->
             _uiState.update { it.copy(groupName = groupName) }
-        }
-    }
-
-    private fun loadCacheCounts(books: List<Book>) {
-        cacheLoadJob?.cancel()
-        cacheLoadJob = viewModelScope.launch(Dispatchers.IO) {
-            val visibleBookUrls = books.mapTo(hashSetOf()) { it.bookUrl }
-            cacheCounts.keys.toList().forEach { bookUrl ->
-                if (!visibleBookUrls.contains(bookUrl)) {
-                    cacheCounts.remove(bookUrl)
-                }
-            }
-            val changedBookUrls = linkedSetOf<String>()
-            books.forEach { book ->
-                if (!book.isLocal && !cacheCounts.containsKey(book.bookUrl)) {
-                    cacheCounts[book.bookUrl] = calculateCacheCount(book)
-                    changedBookUrls.add(book.bookUrl)
-                }
-                ensureActive()
-            }
-            if (changedBookUrls.isNotEmpty()) {
-                _uiState.update { it.copy(cacheVersion = it.cacheVersion + 1) }
-            }
-        }
-    }
-
-    private fun scheduleCacheCountRefresh(bookUrl: String) {
-        if (bookUrl.isNotBlank()) {
-            pendingCacheCountRefreshBookUrls.add(bookUrl)
-        }
-        pendingDownloadRunningRefresh = true
-    }
-
-    private fun scheduleDownloadStatusRefresh(bookUrl: String = "") {
-        if (bookUrl.isNotBlank()) {
-            pendingDownloadStatusBookUrls.add(bookUrl)
-        }
-        pendingDownloadRunningRefresh = true
-    }
-
-    private suspend fun flushDownloadStatusRefresh() {
-        val cacheRefreshBookUrls = pendingCacheCountRefreshBookUrls.toList()
-        cacheRefreshBookUrls.forEach { pendingCacheCountRefreshBookUrls.remove(it) }
-        val statusBookUrls = pendingDownloadStatusBookUrls.toList()
-        statusBookUrls.forEach { pendingDownloadStatusBookUrls.remove(it) }
-        val shouldSyncDownloadRunning = pendingDownloadRunningRefresh ||
-            cacheRefreshBookUrls.isNotEmpty() ||
-            statusBookUrls.isNotEmpty()
-        pendingDownloadRunningRefresh = false
-        val changedBookUrls = linkedSetOf<String>()
-        val visibleBookUrls = uiState.value.books.mapTo(hashSetOf()) { it.bookUrl }
-        cacheRefreshBookUrls.forEach { bookUrl ->
-            if (visibleBookUrls.contains(bookUrl)) {
-                bookRepository.getBook(bookUrl)?.let { book ->
-                    cacheCounts[bookUrl] = calculateCacheCount(book)
-                    changedBookUrls.add(bookUrl)
-                }
-            }
-        }
-        statusBookUrls.forEach { bookUrl ->
-            if (visibleBookUrls.contains(bookUrl)) {
-                changedBookUrls.add(bookUrl)
-            }
-        }
-        if (shouldSyncDownloadRunning) {
-            syncDownloadRunning()
-        }
-        emitBooksChanged(changedBookUrls)
-    }
-
-    private suspend fun calculateCacheCount(book: Book): Int {
-        val cacheNames = BookHelp.getChapterFiles(book)
-        if (cacheNames.isEmpty()) return 0
-        val totalCount = bookRepository.getChapterCount(book.bookUrl)
-        val cachedFileCount = cacheNames.count { it.endsWith(".nb") }
-        return min(cachedFileCount + bookRepository.getVolumeCount(book.bookUrl), totalCount)
-    }
-
-    private fun Int?.orZero(): Int = this ?: 0
-
-    private fun startDownloadForVisibleBooks(books: List<Book>, downloadAllChapters: Boolean) {
-        val bookUrls = books.mapTo(hashSetOf()) { it.bookUrl }
-        bookUrls.forEach { downloadFailureMessages.remove(it) }
-        execute {
-            batchCacheDownloadUseCase.execute(
-                bookUrls = bookUrls,
-                downloadAllChapters = downloadAllChapters,
-                skipAudioBooks = true
-            )
-        }.onFinally {
-            syncDownloadRunning()
-        }
-    }
-
-    private fun toggleBookDownload(book: Book) {
-        if (book.isLocal) return
-        if (isBookDownloading(book.bookUrl) || pendingDownloadBookUrls.contains(book.bookUrl)) {
-            CacheBook.remove(context, book.bookUrl)
-            pendingDownloadBookUrls.remove(book.bookUrl)
-            emitBookChanged(book.bookUrl)
-            syncDownloadRunning()
-        } else {
-            pendingDownloadBookUrls.add(book.bookUrl)
-            downloadFailureMessages.remove(book.bookUrl)
-            emitBookChanged(book.bookUrl)
-            execute {
-                cacheBookChaptersUseCase.executeRange(book.bookUrl, 0, book.lastChapterIndex)
-            }.onSuccess { count ->
-                if (count <= 0) {
-                    pendingDownloadBookUrls.remove(book.bookUrl)
-                    downloadFailureMessages[book.bookUrl] = "没有可缓存的章节"
-                    emitBookChanged(book.bookUrl)
-                    _effects.tryEmit(BookshelfManageScreenEffect.ShowMessage("没有可缓存的章节"))
-                }
-            }.onError { error ->
-                pendingDownloadBookUrls.remove(book.bookUrl)
-                downloadFailureMessages[book.bookUrl] = error.localizedMessage ?: "未知错误"
-                emitBookChanged(book.bookUrl)
-                _effects.tryEmit(BookshelfManageScreenEffect.ShowMessage("缓存失败\n${error.localizedMessage}"))
-            }.onFinally {
-                syncDownloadRunning()
-            }
         }
     }
 
@@ -644,25 +396,9 @@ class BookshelfManageScreenViewModel(
             deleteBooksUseCase.execute(bookUrls, deleteOriginal)
         }.onSuccess { deletedBookUrls ->
             _uiState.update { it.copy(deleteBookOriginal = deleteOriginal) }
-            deletedBookUrls.forEach { cacheCounts.remove(it) }
             _effects.tryEmit(BookshelfManageScreenEffect.ShowMessage("删除成功"))
         }.onError {
             _effects.tryEmit(BookshelfManageScreenEffect.ShowMessage("删除失败\n${it.localizedMessage}"))
-        }
-    }
-
-    private fun clearCachesForBooks(bookUrls: Set<String>) {
-        if (bookUrls.isEmpty()) return
-        execute {
-            clearBookCacheUseCase.execute(bookUrls)
-        }.onSuccess { clearedBookUrls ->
-            clearedBookUrls.forEach { bookUrl ->
-                cacheCounts[bookUrl] = 0
-                emitBookChanged(bookUrl)
-            }
-            _effects.tryEmit(BookshelfManageScreenEffect.ShowMessage("缓存已清理"))
-        }.onError {
-            _effects.tryEmit(BookshelfManageScreenEffect.ShowMessage("清理缓存失败\n${it.localizedMessage}"))
         }
     }
 
@@ -690,27 +426,6 @@ class BookshelfManageScreenViewModel(
         }
     }
 
-    private fun downloadBooks(bookUrls: Set<String>, downloadAllChapters: Boolean) {
-        if (bookUrls.isEmpty()) return
-        bookUrls.forEach { downloadFailureMessages.remove(it) }
-        execute {
-            batchCacheDownloadUseCase.execute(
-                bookUrls = bookUrls,
-                downloadAllChapters = downloadAllChapters,
-                skipAudioBooks = true
-            )
-        }.onSuccess { count ->
-            if (count > 0) {
-                _effects.tryEmit(BookshelfManageScreenEffect.ShowMessage("已加入缓存队列: $count 本"))
-            } else {
-                _effects.tryEmit(BookshelfManageScreenEffect.ShowMessage("没有可缓存的书籍"))
-            }
-            syncDownloadRunning()
-        }.onError {
-            _effects.tryEmit(BookshelfManageScreenEffect.ShowMessage("批量缓存失败\n${it.localizedMessage}"))
-        }
-    }
-
     private fun changeBookSource(
         oldBookUrl: String,
         source: BookSource,
@@ -723,8 +438,6 @@ class BookshelfManageScreenViewModel(
             changeBookSourceUseCase.changeTo(oldBook, book, chapters, options)
         }.onSuccess { result ->
             result ?: return@onSuccess
-            cacheCounts.remove(result.oldBookUrl)
-            cacheCounts[result.book.bookUrl] = 0
             emitBookChanged(result.book.bookUrl)
             _effects.tryEmit(BookshelfManageScreenEffect.ShowMessage("换源完成"))
         }.onError {
@@ -821,8 +534,6 @@ class BookshelfManageScreenViewModel(
                 options = uiState.value.batchChangeOptions,
             )
         }.onSuccess { result ->
-            cacheCounts.remove(result.oldBookUrl)
-            cacheCounts[result.book.bookUrl] = 0
             removePreviewItem(oldBookUrl)
             emitBookChanged(result.book.bookUrl)
             _effects.tryEmit(BookshelfManageScreenEffect.ShowMessage("迁移完成"))
@@ -967,7 +678,6 @@ class BookshelfManageScreenViewModel(
                 )
             }
         }.onSuccess {
-            cacheCounts.clear()
             _uiState.update { it.copy(batchChangePreviewItems = emptyList()) }
             _effects.tryEmit(BookshelfManageScreenEffect.ShowMessage("批量迁移完成"))
         }.onError {
@@ -1022,24 +732,9 @@ class BookshelfManageScreenViewModel(
         }
     }
 
-    private fun clearCacheForBook(book: Book) {
-        execute {
-            clearBookCacheUseCase.execute(book.bookUrl)
-        }.onSuccess { bookUrl ->
-            bookUrl ?: return@onSuccess
-            cacheCounts[bookUrl] = 0
-            emitBookChanged(bookUrl)
-        }
-    }
-
     private fun emitBookChanged(bookUrl: String) {
         _uiState.update { it.copy(cacheVersion = it.cacheVersion + 1) }
         _effects.tryEmit(BookshelfManageScreenEffect.NotifyBookChanged(bookUrl))
-    }
-
-    private fun emitBooksChanged(bookUrls: Set<String>) {
-        if (bookUrls.isEmpty()) return
-        _uiState.update { it.copy(cacheVersion = it.cacheVersion + 1) }
     }
 
 }

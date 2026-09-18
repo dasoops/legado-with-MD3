@@ -77,12 +77,6 @@ object MainIntent {
         groupId: Long = -1L
     ): Intent = createBookshelfManageScreenIntent(context, groupId)
 
-    fun createBookCacheManageIntent(context: Context): Intent {
-        return createLauncherIntent(context).apply {
-            putExtra(EXTRA_START_ROUTE, MainRouteConst.ROUTE_BOOK_CACHE_MANAGE)
-        }
-    }
-
     fun createReadBookIntent(
         context: Context,
         bookUrl: String? = null,

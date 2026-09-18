@@ -46,7 +46,6 @@ import io.legado.app.model.localBook.TextFile
 import io.legado.app.model.reader.ReaderChapterInput
 import io.legado.app.model.reader.ReaderChapterInputWindow
 import io.legado.app.model.webBook.WebBook
-import io.legado.app.service.CacheBookService
 import io.legado.app.ui.book.read.ConfigUpdateAction
 import io.legado.app.ui.book.read.ReadConfigUpdateBus
 import io.legado.app.ui.book.read.pageestimate.ChapterContentHasher
@@ -1277,39 +1276,20 @@ object ReadBook : CoroutineScope by MainScope(), KoinComponent {
         success: (() -> Unit)? = null
     ) {
         val book = book ?: return removeLoading(chapter.index)
-        val bookSource = bookSource
-        if (bookSource != null) {
-            val started =
-                CacheBook.getOrCreate(bookSource, book).download(
-                    scope = scope,
-                    chapter = chapter,
-                    semaphore = semaphore,
-                    resetPageOffset = resetPageOffset,
-                )
-            if (!started) {
-                removeLoading(chapter.index)
-            }
-        } else {
-            val msg = if (book.isLocal) "无内容" else "没有书源"
-            contentLoadFinish(
-                book,
-                chapter,
-                "加载正文失败\n$msg",
-                resetPageOffset = resetPageOffset,
-                success = success
-            )
-        }
+        val msg = if (book.isLocal) "无内容" else "没有书源"
+        contentLoadFinish(
+            book,
+            chapter,
+            "加载正文失败\n$msg",
+            resetPageOffset = resetPageOffset,
+            success = success
+        )
     }
 
     private suspend fun downloadAwait(chapter: BookChapter): String {
-        val book = book!!
-        val bookSource = bookSource
-        if (bookSource != null) {
-            return CacheBook.getOrCreate(bookSource, book).downloadAwait(chapter)
-        } else {
-            val msg = if (book.isLocal) "无内容" else "没有书源"
-            return "加载正文失败\n$msg"
-        }
+        val book = book ?: return "加载正文失败"
+        val msg = if (book.isLocal) "无内容" else "没有书源"
+        return "加载正文失败\n$msg"
     }
 
     @Synchronized
@@ -1720,9 +1700,6 @@ object ReadBook : CoroutineScope by MainScope(), KoinComponent {
         // Move expensive cleanup off the main thread
         CoroutineScope(SupervisorJob() + IO).launch {
             ImageProvider.clear()
-            if (!CacheBookService.isRun) {
-                CacheBook.close()
-            }
         }
     }
 

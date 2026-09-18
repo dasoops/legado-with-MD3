@@ -370,9 +370,6 @@
         </activity>
 
         <service
-            android:name=".service.CacheBookService"
-            android:foregroundServiceType="dataSync" />
-        <service
             android:name=".service.BookSourceCheckService"
             android:foregroundServiceType="dataSync" />
         <service

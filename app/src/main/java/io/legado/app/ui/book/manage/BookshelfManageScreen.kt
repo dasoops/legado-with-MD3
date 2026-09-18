@@ -35,7 +35,6 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Bookmarks
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.PlayArrow
@@ -162,8 +161,6 @@ private fun BookshelfManageScreen(
     val context = LocalContext.current
     var showGroupMenu by remember { mutableStateOf(false) }
     var showFilePickerSheet by remember { mutableStateOf(false) }
-    var showDownloadAllConfirmDialog by remember { mutableStateOf(false) }
-    var showBatchDownloadConfirmDialog by remember { mutableStateOf(false) }
     var showExportSheet by remember { mutableStateOf(false) }
     var showExportSettings by remember { mutableStateOf(false) }
     var showExportFileNameDialog by remember { mutableStateOf(false) }
@@ -397,14 +394,6 @@ private fun BookshelfManageScreen(
             selectedBookUrls = (selectedBookUrls - filteredUrls) + (filteredUrls - selectedBookUrls)
         },
         FabMenuItem(
-            Icons.Default.Download,
-            "缓存选中"
-        ) {
-            if (selectedBookUrls.isNotEmpty()) {
-                showBatchDownloadConfirmDialog = true
-            }
-        },
-        FabMenuItem(
             Icons.Default.Refresh,
             "批量换源"
         ) {
@@ -427,13 +416,6 @@ private fun BookshelfManageScreen(
             "导出选中"
         ) {
             exportSelected()
-        },
-        FabMenuItem(
-            Icons.Default.Delete,
-            stringResource(R.string.clear_cache)
-        ) {
-            viewModel.dispatch(BookshelfManageScreenIntent.ClearCachesForBooks(selectedBookUrls))
-            clearSelection()
         },
         FabMenuItem(
             Icons.Default.Delete,
@@ -462,7 +444,7 @@ private fun BookshelfManageScreen(
         title = if (inSelectionMode) {
             "已选 ${selectedBookUrls.size}/${filteredBooks.size}"
         } else {
-            state.groupName ?: stringResource(R.string.offline_cache)
+            state.groupName ?: stringResource(R.string.manage)
         },
         state = listUiState,
         onBackClick = onBackClick,
@@ -501,17 +483,6 @@ private fun BookshelfManageScreen(
         },
         dropDownMenuContent = { dismiss ->
             RoundDropdownMenuItem(
-                text = stringResource(R.string.download_all),
-                onClick = {
-                    dismiss()
-                    if (state.isDownloadRunning) {
-                        viewModel.dispatch(BookshelfManageScreenIntent.StopDownload)
-                    } else {
-                        showDownloadAllConfirmDialog = true
-                    }
-                }
-            )
-            RoundDropdownMenuItem(
                 text = stringResource(R.string.export_all),
                 onClick = { dismiss(); exportAll() }
             )
@@ -546,15 +517,6 @@ private fun BookshelfManageScreen(
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             itemsIndexed(filteredBooks, key = { _, item -> item.bookUrl }) { index, book ->
-                val cacheCount = remember(renderVersion, book.bookUrl) {
-                    viewModel.getCacheCount(book.bookUrl) ?: 0
-                }
-                val isPreparingDownload = viewModel.isBookPreparingDownload(book.bookUrl)
-                val isDownloadingInCacheModel = viewModel.isBookDownloading(book.bookUrl)
-                val isDownloading = isPreparingDownload || isDownloadingInCacheModel
-                val downloadFailureText = viewModel.getDownloadFailureMessage(book.bookUrl)?.let {
-                    stringResource(R.string.cache_download_failed, it)
-                }
                 val isSelected = selectedBookUrls.contains(book.bookUrl)
                 val isMiuix = ThemeResolver.isMiuixEngine(composeEngine)
                 val animatedContainerColor by animateColorAsState(
@@ -642,17 +604,9 @@ private fun BookshelfManageScreen(
                                         AppText(text = exportMsg, modifier = Modifier.padding(top = 2.dp))
                                     }
                                 }
-                                TextCard(
-                                    text = if (book.isLocal) {
-                                        stringResource(R.string.local_book)
-                                    } else {
-                                        stringResource(
-                                            R.string.download_count,
-                                            cacheCount,
-                                            book.totalChapterNum
-                                        )
-                                    }
-                                )
+                                if (book.isLocal) {
+                                    TextCard(text = stringResource(R.string.local_book))
+                                }
                             }
                             Column(
                                 modifier = Modifier
@@ -664,25 +618,6 @@ private fun BookshelfManageScreen(
                                     modifier = Modifier.fillMaxWidth(),
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
-                                    SmallTonalButton(
-                                        onClick = {
-                                            if (!book.isLocal) {
-                                                viewModel.dispatch(BookshelfManageScreenIntent.ToggleBookDownload(book))
-                                            }
-                                        },
-                                        modifier = Modifier.weight(1f),
-                                        icon = if (isDownloading) Icons.Default.Stop else Icons.Default.Download,
-                                        text = if (isDownloading) "停止" else "下载",
-                                        contentColor = LegadoTheme.colorScheme.onSurfaceVariant.copy(
-                                            alpha = 0.8f
-                                        )
-                                    )
-                                    VerticalDivider(
-                                        modifier = Modifier
-                                            .height(16.dp)
-                                            .padding(horizontal = 4.dp),
-                                        color = LegadoTheme.colorScheme.outlineVariant
-                                    )
                                     SmallTonalButton(
                                         onClick = { showExportSheetFor(listOf(book)) },
                                         modifier = Modifier.weight(1f),
@@ -737,17 +672,6 @@ private fun BookshelfManageScreen(
                                                 dismiss()
                                             }
                                         )
-                                        RoundDropdownMenuItem(
-                                            text = "删除缓存",
-                                            onClick = {
-                                                viewModel.dispatch(
-                                                    BookshelfManageScreenIntent.ClearCachesForBooks(
-                                                        setOf(book.bookUrl)
-                                                    )
-                                                )
-                                                dismiss()
-                                            }
-                                        )
                                     }
                                     SmallTonalButton(
                                         onClick = { moreMenuBookUrl = book.bookUrl },
@@ -757,14 +681,6 @@ private fun BookshelfManageScreen(
                                         contentColor = LegadoTheme.colorScheme.onSurfaceVariant.copy(
                                             alpha = 0.8f
                                         )
-                                    )
-                                }
-                                if (downloadFailureText != null) {
-                                    AppText(
-                                        text = downloadFailureText,
-                                        style = LegadoTheme.typography.labelSmall,
-                                        color = LegadoTheme.colorScheme.error,
-                                        maxLines = 1
                                     )
                                 }
                             }
@@ -919,25 +835,6 @@ private fun BookshelfManageScreen(
     )
 
     AppAlertDialog(
-        show = showBatchDownloadConfirmDialog,
-        onDismissRequest = { showBatchDownloadConfirmDialog = false },
-        title = stringResource(R.string.draw),
-        text = stringResource(R.string.sure_cache_book),
-        confirmText = stringResource(android.R.string.ok),
-        onConfirm = {
-            showBatchDownloadConfirmDialog = false
-            viewModel.dispatch(
-                BookshelfManageScreenIntent.DownloadBooks(
-                    bookUrls = selectedBookUrls,
-                    downloadAllChapters = false
-                )
-            )
-        },
-        dismissText = stringResource(android.R.string.cancel),
-        onDismiss = { showBatchDownloadConfirmDialog = false }
-    )
-
-    AppAlertDialog(
         show = showDeleteBookConfirmDialog,
         onDismissRequest = { showDeleteBookConfirmDialog = false },
         title = stringResource(R.string.draw),
@@ -998,25 +895,6 @@ private fun BookshelfManageScreen(
             showGroupSelectSheet = false
             clearSelection()
         }
-    )
-
-    AppAlertDialog(
-        show = showDownloadAllConfirmDialog,
-        onDismissRequest = { showDownloadAllConfirmDialog = false },
-        title = stringResource(R.string.draw),
-        text = stringResource(R.string.sure_cache_book),
-        confirmText = stringResource(android.R.string.ok),
-        onConfirm = {
-            showDownloadAllConfirmDialog = false
-            viewModel.dispatch(
-                BookshelfManageScreenIntent.StartDownloadForVisibleBooks(
-                    books = state.books,
-                    downloadAllChapters = true
-                )
-            )
-        },
-        dismissText = stringResource(android.R.string.cancel),
-        onDismiss = { showDownloadAllConfirmDialog = false }
     )
 
     AppModalBottomSheet(

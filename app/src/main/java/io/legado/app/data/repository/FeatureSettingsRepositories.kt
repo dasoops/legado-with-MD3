@@ -134,7 +134,6 @@ internal fun Preferences.toDownloadCacheSettings(): DownloadCacheSettings =
         imageRetainNum = compatDsInt(PreferKey.imageRetainNum) ?: 0,
         preDownloadNum = compatDsInt(PreferKey.preDownloadNum) ?: 10,
         threadCount = compatDsInt(PreferKey.threadCount) ?: 16,
-        cacheBookThreadCount = compatDsInt(PreferKey.cacheBookThreadCount) ?: 16,
         userAgent = compatDsString(PreferKey.userAgent).orEmpty().ifBlank {
             "Mozilla/5.0 (Windows NT 10.0; Win64; x64) " +
                 "AppleWebKit/537.36 (KHTML, like Gecko) " +
@@ -148,7 +147,6 @@ internal fun DownloadCacheSettings.toPrefMap(): Map<String, Any?> = mapOf(
     PreferKey.imageRetainNum to imageRetainNum,
     PreferKey.preDownloadNum to preDownloadNum,
     PreferKey.threadCount to threadCount,
-    PreferKey.cacheBookThreadCount to cacheBookThreadCount,
     PreferKey.userAgent to userAgent,
     PreferKey.cronet to cronetEnabled,
 )

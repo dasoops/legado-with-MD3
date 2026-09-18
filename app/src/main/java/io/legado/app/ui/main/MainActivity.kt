@@ -119,9 +119,6 @@ open class MainActivity : BaseComposeActivity() {
         fun createCacheIntent(context: Context, groupId: Long = -1L): Intent =
             MainIntent.createCacheIntent(context, groupId)
 
-        fun createBookCacheManageIntent(context: Context): Intent =
-            MainIntent.createBookCacheManageIntent(context)
-
         fun createReadBookIntent(
             context: Context,
             bookUrl: String? = null,

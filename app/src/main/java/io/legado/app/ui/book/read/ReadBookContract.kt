@@ -672,9 +672,6 @@ sealed interface ReadBookIntent {
     // Page anim changed (reload content + update view)
     data object PageAnimChanged : ReadBookIntent
 
-    // Download chapters
-    data class DownloadChapters(val start: Int, val end: Int) : ReadBookIntent
-
     // Save chapter content (from chapter source change)
     data class SaveChapterContent(val content: String, val chapterIndex: Int) : ReadBookIntent
 
@@ -788,9 +785,6 @@ sealed interface ReadBookEffect {
     data class InvalidateReaderImage(val source: String) : ReadBookEffect
     data class InvalidateReaderImages(val sources: Set<String>) : ReadBookEffect
 
-    // Download chapters — Activity calls CacheBook.start()
-    data class DownloadChapters(val start: Int, val end: Int) : ReadBookEffect
-
     // Lifecycle — route-level Activity operations
     data object RegisterTimeBatteryReceiver : ReadBookEffect
     data object UnregisterTimeBatteryReceiver : ReadBookEffect
@@ -809,7 +803,6 @@ sealed interface ReadBookSheet {
     data object MoreActions : ReadBookSheet
     data class BookNavigation(val initialTab: ReaderBookSheetTab) : ReadBookSheet
     data object PageAnim : ReadBookSheet
-    data object Download : ReadBookSheet
     data object Charset : ReadBookSheet
     data object SimulatedReading : ReadBookSheet
     data object ToolButtonConfig : ReadBookSheet

@@ -31,7 +31,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Block
-import androidx.compose.material.icons.filled.CloudDownload
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Extension
 import androidx.compose.material.icons.filled.MoreVert
@@ -258,12 +257,6 @@ internal fun MenuTitleBar(
                                 backdrop = backdrop,
                             )
                             RefreshActionButton(
-                                state = state,
-                                colors = colors,
-                                onIntent = onIntent,
-                                backdrop = backdrop,
-                            )
-                            DownloadActionButton(
                                 state = state,
                                 colors = colors,
                                 onIntent = onIntent,
@@ -820,14 +813,6 @@ private fun MenuTitleBarMergedGlassButton(
                 )
                 MergedGlassDivider(tint)
 
-                // Download
-                MergedGlassIconButton(
-                    icon = Icons.Default.CloudDownload,
-                    tint = tint,
-                    contentDescription = stringResource(R.string.offline_cache),
-                    onClick = { onIntent(ReadBookIntent.ShowSheet(ReadBookSheet.Download)) },
-                )
-                MergedGlassDivider(tint)
             } else if (state.isLocalBook && !compact) {
                 // TXT directory rule
                 if (state.isLocalTxt) {
@@ -969,23 +954,6 @@ private fun RefreshActionButton(
             )
         }
     }
-}
-
-@Composable
-private fun DownloadActionButton(
-    state: ReadBookUiState,
-    colors: ReadMenuColors,
-    onIntent: (ReadBookIntent) -> Unit,
-    backdrop: Backdrop?,
-) {
-    MenuTitleGlassButton(
-        onClick = { onIntent(ReadBookIntent.ShowSheet(ReadBookSheet.Download)) },
-        icon = Icons.Default.CloudDownload,
-        contentDescription = stringResource(R.string.offline_cache),
-        state = state,
-        colors = colors,
-        backdrop = backdrop,
-    )
 }
 
 @Composable

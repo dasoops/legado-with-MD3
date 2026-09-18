@@ -25,7 +25,6 @@ import io.legado.app.ui.book.read.sheet.ChangeChapterSourceSheet
 import io.legado.app.ui.book.read.sheet.CharsetConfigSheet
 import io.legado.app.ui.book.read.sheet.ClickActionConfigSheet
 import io.legado.app.ui.book.read.sheet.ContentEditSheet
-import io.legado.app.ui.book.read.sheet.DownloadSheet
 import io.legado.app.ui.book.read.sheet.EyeProtectionConfigSheet
 import io.legado.app.ui.book.read.sheet.FloatingBarIconConfigSheet
 import io.legado.app.ui.book.read.sheet.HighlightRuleConfigSheet
@@ -446,16 +445,6 @@ fun ReadBookScreen(
             PageAnimConfigSheet(
                 onDismissRequest = dismissSheet,
                 onAnimChanged = { onIntent(ReadBookIntent.PageAnimChanged) },
-            )
-        }
-
-        is ReadBookSheet.Download -> {
-            DownloadSheet(
-                onDismissRequest = dismissSheet,
-                onDownload = { start, end ->
-                    onIntent(ReadBookIntent.DismissSheet)
-                    onIntent(ReadBookIntent.DownloadChapters(start, end))
-                },
             )
         }
 

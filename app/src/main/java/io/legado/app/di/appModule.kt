@@ -16,7 +16,6 @@ import io.legado.app.data.repository.AppUiConfigurationRepository
 import io.legado.app.data.repository.BackupRestoreRepository
 import io.legado.app.data.repository.BackupSettingsRepository
 import io.legado.app.data.repository.BookCacheCleanupRepository
-import io.legado.app.data.repository.BookCacheManageRepository
 import io.legado.app.data.repository.BookContentProcessRepository
 import io.legado.app.data.repository.BookDomainRepositoryImpl
 import io.legado.app.data.repository.BookExportSettingsRepository
@@ -32,7 +31,6 @@ import io.legado.app.data.repository.BookSourceRepository
 import io.legado.app.data.repository.BookmarkRepository
 import io.legado.app.data.repository.BookshelfRepository
 import io.legado.app.data.repository.BookshelfSettingsRepository
-import io.legado.app.data.repository.CacheBookDownloadRepository
 import io.legado.app.data.repository.ChangeSourceSettingsRepository
 import io.legado.app.data.repository.CheckSourceSettingsRepository
 import io.legado.app.data.repository.CoverAlbumRepository
@@ -80,7 +78,6 @@ import io.legado.app.domain.gateway.AppUiConfigurationGateway
 import io.legado.app.domain.gateway.BackupRestoreGateway
 import io.legado.app.domain.gateway.BackupSettingsGateway
 import io.legado.app.domain.gateway.BookCacheCleanupGateway
-import io.legado.app.domain.gateway.BookCacheDownloadGateway
 import io.legado.app.domain.gateway.BookContentProcessGateway
 import io.legado.app.domain.gateway.BookExportSettingsGateway
 import io.legado.app.domain.gateway.BookGroupMutationGateway
@@ -118,8 +115,6 @@ import io.legado.app.domain.usecase.AddBookUseCase
 import io.legado.app.domain.usecase.AddToBookshelfUseCase
 import io.legado.app.domain.usecase.AppStartupMaintenanceUseCase
 import io.legado.app.domain.usecase.BackupRestoreUseCase
-import io.legado.app.domain.usecase.BatchCacheDownloadUseCase
-import io.legado.app.domain.usecase.CacheBookChaptersUseCase
 import io.legado.app.domain.usecase.ChangeBookSourceUseCase
 import io.legado.app.domain.usecase.ChangeSourceSearchUseCase
 import io.legado.app.domain.usecase.ClearBookCacheUseCase
@@ -156,7 +151,6 @@ import io.legado.app.ui.about.AboutViewModel
 import io.legado.app.ui.association.ImportReplaceRuleViewModel
 import io.legado.app.ui.association.ImportTxtTocRuleViewModel
 import io.legado.app.ui.book.bookmark.AllBookmarkViewModel
-import io.legado.app.ui.book.cache.manage.BookCacheManageViewModel
 import io.legado.app.ui.book.changecover.ChangeCoverViewModel
 import io.legado.app.ui.book.changesource.ChangeBookSourceComposeViewModel
 import io.legado.app.ui.book.changesource.ChangeChapterSourceViewModel
@@ -224,7 +218,6 @@ val appModule = module {
     singleOf(::BookImportRepository)
     singleOf(::BookGroupRepository)
     singleOf(::BookmarkRepository)
-    singleOf(::BookCacheManageRepository)
     singleOf(::TagGroupRuleApplier)
     single<BookGroupMutationGateway> { BookGroupMutationRepository(get(), get()) }
     singleOf(::BookSourceRepository)
@@ -282,8 +275,6 @@ val appModule = module {
     singleOf(::ExploreKindUiUseCase)
     singleOf(::AppStartupMaintenanceUseCase)
     singleOf(::BackupRestoreUseCase)
-    singleOf(::BatchCacheDownloadUseCase)
-    singleOf(::CacheBookChaptersUseCase)
     singleOf(::ChangeBookSourceUseCase)
     singleOf(::ClearBookCacheUseCase)
     singleOf(::CoverAlbumUseCase)
@@ -310,7 +301,6 @@ val appModule = module {
     single<AiTextGateway> { AiTextRepositoryImpl() }
     single<AppStartupGateway> { AppStartupRepository(get()) }
     single<BackupRestoreGateway> { BackupRestoreRepository() }
-    single<BookCacheDownloadGateway> { CacheBookDownloadRepository(get()) }
     single<BookCacheCleanupGateway> { BookCacheCleanupRepository(get()) }
     single<BookExportSettingsGateway> { BookExportSettingsRepository() }
     single<HomepageSettingsGateway> { HomepageSettingsRepository() }
@@ -446,7 +436,6 @@ val appModule = module {
     viewModelOf(::ChangeCoverViewModel)
     viewModelOf(::ChangeBookSourceComposeViewModel)
     viewModelOf(::ChangeChapterSourceViewModel)
-    viewModelOf(::BookCacheManageViewModel)
     viewModel {
         BookshelfManageScreenViewModel(
             application = get(),
@@ -456,10 +445,7 @@ val appModule = module {
             searchRepository = get(),
             bookshelfManageScreenConfig = get(),
             bookExportSettingsGateway = get(),
-            batchCacheDownloadUseCase = get(),
-            cacheBookChaptersUseCase = get(),
             changeBookSourceUseCase = get(),
-            clearBookCacheUseCase = get(),
             deleteBooksUseCase = get(),
             updateBooksGroupUseCase = get(),
             downloadCacheSettingsGateway = get()

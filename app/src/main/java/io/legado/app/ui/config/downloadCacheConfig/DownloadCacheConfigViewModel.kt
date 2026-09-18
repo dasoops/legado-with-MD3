@@ -9,7 +9,6 @@ import io.legado.app.domain.usecase.ShrinkDatabaseUseCase
 import io.legado.app.help.http.HttpCacheType
 import io.legado.app.help.http.clearHttpCache
 import io.legado.app.help.http.getHttpCacheSize
-import io.legado.app.model.CacheBook
 import io.legado.app.model.ImageProvider
 import io.legado.app.utils.FileUtils
 import kotlinx.coroutines.Dispatchers
@@ -43,10 +42,6 @@ class DownloadCacheConfigViewModel(
         when (intent) {
             is DownloadCacheConfigIntent.SetThreadCount ->
                 update { it.copy(threadCount = intent.value) }
-            is DownloadCacheConfigIntent.SetCacheBookThreadCount -> {
-                val value = intent.value.coerceIn(1, CacheBook.maxDownloadConcurrency)
-                update { it.copy(cacheBookThreadCount = value) }
-            }
             is DownloadCacheConfigIntent.SetPreDownloadNum ->
                 update { it.copy(preDownloadNum = intent.value) }
             is DownloadCacheConfigIntent.SetBitmapCacheSize -> {

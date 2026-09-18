@@ -19,7 +19,6 @@ import androidx.compose.material.icons.filled.AutoStories
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.BugReport
 import androidx.compose.material.icons.filled.CleanHands
-import androidx.compose.material.icons.filled.CloudDownload
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Extension
 import androidx.compose.material.icons.filled.FindReplace
@@ -179,11 +178,6 @@ private fun OverflowDropdownMenu(
                     text = stringResource(R.string.menu_refresh_after),
                     leadingIcon = menuIcon(Icons.Default.Refresh),
                     onClick = { dismiss(); onIntent(ReadBookIntent.MenuRefreshAfter) },
-                )
-                RoundDropdownMenuItem(
-                    text = stringResource(R.string.offline_cache),
-                    leadingIcon = menuIcon(Icons.Default.CloudDownload),
-                    onClick = { dismiss(); onIntent(ReadBookIntent.ShowSheet(ReadBookSheet.Download)) },
                 )
             } else {
                 if (state.isLocalTxt) {

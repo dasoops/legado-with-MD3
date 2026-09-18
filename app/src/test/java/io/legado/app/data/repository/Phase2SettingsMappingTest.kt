@@ -70,7 +70,6 @@ class Phase2SettingsMappingTest {
                     imageRetainNum = 7,
                     preDownloadNum = 13,
                     threadCount = 5,
-                    cacheBookThreadCount = 6,
                     userAgent = "phase-2-agent",
                     cronetEnabled = true,
                 )

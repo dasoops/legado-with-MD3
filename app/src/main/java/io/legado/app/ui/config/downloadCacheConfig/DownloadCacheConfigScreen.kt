@@ -9,7 +9,6 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import io.legado.app.R
-import io.legado.app.model.CacheBook
 import io.legado.app.ui.theme.adaptiveContentPadding
 import io.legado.app.ui.widget.components.AppScaffold
 import io.legado.app.ui.widget.components.SplicedColumnGroup
@@ -92,21 +91,6 @@ fun DownloadCacheConfigScreen(
                         valueRange = 1f..256f,
                         onValueChange = {
                             onIntent(DownloadCacheConfigIntent.SetThreadCount(it.toInt()))
-                        }
-                    )
-
-                    SliderSettingItem(
-                        title = stringResource(R.string.cache_book_threads_num_title),
-                        description = stringResource(R.string.cache_book_threads_num_summary),
-                        value = settings.cacheBookThreadCount
-                            .coerceIn(1, CacheBook.maxDownloadConcurrency)
-                            .toFloat(),
-                        defaultValue = CacheBook.maxDownloadConcurrency.toFloat(),
-                        valueRange = 1f..CacheBook.maxDownloadConcurrency.toFloat(),
-                        onValueChange = {
-                            onIntent(
-                                DownloadCacheConfigIntent.SetCacheBookThreadCount(it.toInt())
-                            )
                         }
                     )
 

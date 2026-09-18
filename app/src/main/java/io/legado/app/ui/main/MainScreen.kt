@@ -118,7 +118,6 @@ fun MainScreen(
     onNavigateToRemoteImport: () -> Unit,
     onNavigateToLocalImport: () -> Unit,
     onNavigateToCache: (Long) -> Unit,
-    onNavigateToBookCacheManage: () -> Unit,
     onOpenBookshelfBook: (BookShelfItem, String?) -> Unit,
     onNavigateToBookInfo: (name: String, author: String, bookUrl: String, origin: String?, coverPath: String?, sharedCoverKey: String?) -> Unit,
     onNavigateToBookSourceManage: () -> Unit,
@@ -480,7 +479,6 @@ fun MainScreen(
                                 onOpenSettings = onOpenSettings,
                                 onNavigate = { event ->
                                     when (event) {
-                                        PrefClickEvent.OpenBookCacheManage -> onNavigateToBookCacheManage()
                                         PrefClickEvent.OpenBookSourceManage -> onNavigateToBookSourceManage()
                                         PrefClickEvent.OpenReadRecord -> onNavigateToReadRecord()
                                         else -> onIntent(MainUiIntent.HandlePreferenceClick(event))

@@ -31,7 +31,6 @@ sealed interface BookshelfOverlay {
     data object GroupMenu : BookshelfOverlay
     data object GroupSelectSheet : BookshelfOverlay
     data class GroupEditSheet(val groupId: Long) : BookshelfOverlay
-    data object BatchDownloadConfirmDialog : BookshelfOverlay
 }
 
 sealed interface BookshelfIntent {
@@ -48,7 +47,6 @@ sealed interface BookshelfIntent {
     data class ToggleBookSelection(val bookUrl: String) : BookshelfIntent
     data class SetInFolderRoot(val value: Boolean) : BookshelfIntent
     data class MoveBooksToGroup(val bookUrls: Set<String>, val groupId: Long) : BookshelfIntent
-    data class DownloadBooks(val bookUrls: Set<String>, val allChapters: Boolean = false) : BookshelfIntent
     data class RefreshBooks(val books: List<BookUiItem>) : BookshelfIntent
     data class StartDragging(val books: List<BookUiItem>) : BookshelfIntent
     data class MoveDragging(val from: Int, val to: Int, val books: List<BookUiItem>) : BookshelfIntent

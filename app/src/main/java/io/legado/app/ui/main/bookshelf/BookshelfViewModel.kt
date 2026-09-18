@@ -17,7 +17,6 @@ import io.legado.app.data.repository.BookSourceRepository
 import io.legado.app.data.repository.BookshelfRepository
 import io.legado.app.data.repository.UploadRepository
 import io.legado.app.domain.usecase.AddBookUseCase
-import io.legado.app.domain.usecase.BatchCacheDownloadUseCase
 import io.legado.app.domain.usecase.ExportBookshelfUseCase
 import io.legado.app.domain.usecase.ImportBookshelfUseCase
 import io.legado.app.domain.usecase.RefreshTocUseCase
@@ -28,9 +27,7 @@ import io.legado.app.domain.gateway.DownloadCacheSettingsGateway
 import io.legado.app.domain.gateway.ThemeSettingsGateway
 import io.legado.app.exception.NoStackTraceException
 import io.legado.app.help.coroutine.Coroutine
-import io.legado.app.model.CacheBook
 import io.legado.app.model.SourceCallBack
-import io.legado.app.service.CacheBookService
 import io.legado.app.ui.config.themeConfig.TagColorPair
 import io.legado.app.utils.eventBus.FlowEventBus
 import io.legado.app.utils.move
@@ -83,7 +80,6 @@ class BookshelfViewModel(
     private val bookSourceRepository: BookSourceRepository,
     private val bookshelfRepository: BookshelfRepository,
     private val uploadRepository: UploadRepository,
-    private val batchCacheDownloadUseCase: BatchCacheDownloadUseCase,
     private val updateBooksGroupUseCase: UpdateBooksGroupUseCase,
     private val refreshTocUseCase: RefreshTocUseCase,
     private val addBookUseCase: AddBookUseCase,
@@ -138,8 +134,6 @@ class BookshelfViewModel(
     private val updatingBooksFlow = MutableStateFlow<Set<String>>(emptySet())
     private val upBooksCountFlow = MutableStateFlow(0)
     private var upTocJob: Job? = null
-    private var cacheBookJob: Job? = null
-    private val eventListenerSource = ConcurrentHashMap<BookSource, Boolean>()
 
     private val _scrollTrigger = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
     val scrollTrigger = _scrollTrigger.asSharedFlow()
@@ -687,7 +681,6 @@ class BookshelfViewModel(
             is BookshelfIntent.ToggleBookSelection -> toggleBookSelection(intent.bookUrl)
             is BookshelfIntent.SetInFolderRoot -> setInFolderRoot(intent.value)
             is BookshelfIntent.MoveBooksToGroup -> moveBooksToGroup(intent.bookUrls, intent.groupId)
-            is BookshelfIntent.DownloadBooks -> downloadBooks(intent.bookUrls, intent.allChapters)
             is BookshelfIntent.RefreshBooks -> refreshBooks(intent.books)
             is BookshelfIntent.StartDragging -> startDraggingBooks(intent.books)
             is BookshelfIntent.MoveDragging -> moveDraggingBook(intent.from, intent.to, intent.books)
@@ -874,25 +867,6 @@ class BookshelfViewModel(
         }
     }
 
-    fun downloadBooks(bookUrls: Set<String>, downloadAllChapters: Boolean = false) {
-        if (bookUrls.isEmpty()) return
-        execute {
-            batchCacheDownloadUseCase.execute(
-                bookUrls = bookUrls,
-                downloadAllChapters = downloadAllChapters,
-                skipAudioBooks = true
-            )
-        }.onSuccess { count ->
-            if (count > 0) {
-                showMessage("已加入缓存队列: $count 本")
-            } else {
-                showMessage(R.string.no_download)
-            }
-        }.onError {
-            showMessage("批量缓存失败\n${it.localizedMessage}")
-        }
-    }
-
     fun refreshBooks(books: List<BookUiItem>) {
         if (isRefreshingFlow.value) return
         isRefreshingFlow.value = true
@@ -1050,9 +1024,6 @@ class BookshelfViewModel(
         if (!restarted) {
             completeRefreshIfIdle()
         }
-        if (!restarted && completedWithoutFlowError && cacheBookJob == null && !CacheBookService.isRun) {
-            cacheBook()
-        }
     }
 
     private fun completeRefreshIfIdle() {
@@ -1065,9 +1036,7 @@ class BookshelfViewModel(
     }
 
     private suspend fun updateToc(bookUrl: String) {
-        refreshTocUseCase.execute(bookUrl) { source, book ->
-            addDownload(source, book)
-        }
+        refreshTocUseCase.execute(bookUrl)
     }
 
     private fun postUpBooksCount() {
@@ -1079,43 +1048,6 @@ class BookshelfViewModel(
             0
         }
         upBooksCountFlow.value = count
-    }
-
-    private fun addDownload(source: BookSource, book: Book) {
-        if (downloadCacheSettingsGateway.currentSettings.preDownloadNum == 0) return
-        val endIndex =
-            min(
-                book.totalChapterNum - 1,
-                book.durChapterIndex + downloadCacheSettingsGateway.currentSettings.preDownloadNum
-            )
-        val cacheBook = CacheBook.getOrCreate(source, book)
-        cacheBook.addDownload(book.durChapterIndex, endIndex)
-    }
-
-    private fun cacheBook() {
-        eventListenerSource.toList().forEach {
-            SourceCallBack.callBackSource(
-                viewModelScope,
-                SourceCallBack.END_SHELF_REFRESH,
-                it.first
-            )
-        }
-        eventListenerSource.clear()
-        if (downloadCacheSettingsGateway.currentSettings.preDownloadNum == 0) return
-        cacheBookJob?.cancel()
-        cacheBookJob = viewModelScope.launch(updateDispatcher) {
-            launch {
-                while (isActive && CacheBook.isRun) {
-                    CacheBook.setWorkingState(isUpdateQueueIdle())
-                    delay(1000)
-                }
-            }
-            CacheBook.startProcessJob(updateDispatcher)
-        }
-    }
-
-    private fun isUpdateQueueIdle(): Boolean = synchronized(updateQueueLock) {
-        waitUpTocBooks.isEmpty() && onUpTocBooks.isEmpty()
     }
 
     fun addBookByUrl(bookUrls: String) {

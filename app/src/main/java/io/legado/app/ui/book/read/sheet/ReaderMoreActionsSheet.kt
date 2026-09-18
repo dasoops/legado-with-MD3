@@ -18,7 +18,6 @@ import androidx.compose.material.icons.filled.AutoStories
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.BugReport
 import androidx.compose.material.icons.filled.CleanHands
-import androidx.compose.material.icons.filled.CloudDownload
 import androidx.compose.material.icons.filled.DisplaySettings
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Extension
@@ -303,10 +302,6 @@ private fun moreActionSpecs(
     MoreActionSpec(
         "refresh", stringResource(R.string.menu_refresh), Icons.Default.Refresh,
         applicable = !state.isLocalBook, onClick = { dispatch(ReadBookIntent.MenuRefreshDur) }),
-    MoreActionSpec(
-        "download", stringResource(R.string.offline_cache), Icons.Default.CloudDownload,
-        applicable = !state.isLocalBook,
-        onClick = { onIntent(ReadBookIntent.ShowSheet(ReadBookSheet.Download)) }),
     MoreActionSpec(
         "toc_rule", stringResource(R.string.txt_toc_rule), Icons.AutoMirrored.Filled.Toc,
         applicable = state.isLocalTxt, onClick = { dispatch(ReadBookIntent.MenuTocRegex) }),

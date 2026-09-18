@@ -6,8 +6,6 @@ object EventBus {
     const val BATTERY_CHANGED = "batteryChanged"
     const val TIME_CHANGED = "timeChanged"
     const val NOTIFY_MAIN = "notifyMain"
-    const val UP_DOWNLOAD = "upDownload"
-    const val UP_DOWNLOAD_STATE = "upDownloadState"
     const val SAVE_CONTENT = "saveContent"
     const val CHECK_SOURCE = "checkSource"
     const val CHECK_SOURCE_DONE = "checkSourceDone"

@@ -55,7 +55,6 @@ import io.legado.app.help.book.isOnLineTxt
 import io.legado.app.help.config.ReadBookConfig
 import io.legado.app.help.storage.Backup
 import io.legado.app.lib.dialogs.SelectItem
-import io.legado.app.model.CacheBook
 import io.legado.app.model.ImageProvider
 import io.legado.app.model.ReadBook
 import io.legado.app.model.ReadSessionState
@@ -1869,14 +1868,6 @@ class ReadBookController(
             is ReadBookEffect.ToggleDayNight -> {
                 // Handled directly by ViewModel — effect not currently emitted
             }
-            is ReadBookEffect.DownloadChapters -> {
-                ReadBook.book?.let { book ->
-                    activity.lifecycleScope.launch {
-                        CacheBook.start(activity, book, effect.start, effect.end)
-                    }
-                }
-            }
-
             // ── Lifecycle — route/bridge Activity operations ──
             is ReadBookEffect.RegisterTimeBatteryReceiver -> {
                 registerTimeBatteryReceiver()

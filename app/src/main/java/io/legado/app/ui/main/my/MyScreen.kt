@@ -14,7 +14,6 @@ import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.automirrored.filled.HelpOutline
 import androidx.compose.material.icons.automirrored.filled.Rule
 import androidx.compose.material.icons.filled.Bookmark
-import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.FindReplace
 import androidx.compose.material.icons.filled.Folder
 import androidx.compose.material.icons.filled.History
@@ -144,13 +143,6 @@ fun MyScreen(
                     imageVector = Icons.Default.History,
                     onClick = {
                         onNavigate(PrefClickEvent.OpenReadRecord)
-                    }
-                )
-                ClickableSettingItem(
-                    title = stringResource(R.string.cache_management),
-                    imageVector = Icons.Default.Download,
-                    onClick = {
-                        onNavigate(PrefClickEvent.OpenBookCacheManage)
                     }
                 )
                 ClickableSettingItem(

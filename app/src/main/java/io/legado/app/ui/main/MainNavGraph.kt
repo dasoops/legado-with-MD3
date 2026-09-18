@@ -42,7 +42,6 @@ import io.legado.app.model.SourceCallBack
 import io.legado.app.ui.about.AboutEffect
 import io.legado.app.ui.about.AboutScreen
 import io.legado.app.ui.about.AboutViewModel
-import io.legado.app.ui.book.cache.manage.BookCacheManageRouteScreen
 import io.legado.app.ui.book.import.local.ImportBookRouteScreen
 import io.legado.app.ui.book.import.remote.RemoteBookRouteScreen
 import io.legado.app.ui.book.info.BookInfoRouteScreen
@@ -161,9 +160,6 @@ fun MainActivity.mainEntryProvider(
             },
             onNavigateToCache = { groupId ->
                 onNavigateToRoute(MainRouteCache(groupId))
-            },
-            onNavigateToBookCacheManage = {
-                onNavigateToRoute(MainRouteBookCacheManage)
             },
             onOpenBookshelfBook = { book, sharedCoverKey ->
                 if (book.isAudio) {
@@ -295,12 +291,6 @@ fun MainActivity.mainEntryProvider(
                     )
                 )
             }
-        )
-    }
-
-    entry<MainRouteBookCacheManage> {
-        BookCacheManageRouteScreen(
-            onBackClick = { onNavigateBack() }
         )
     }
 

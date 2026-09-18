@@ -9,7 +9,7 @@ class TocHierarchyTest {
     @Test
     fun collapse_hidesOnlyDescendantsOfTheCollapsedNode() {
         val items = chapters().map {
-            TocDomainItem(it, it.title, DownloadState.LOCAL)
+            TocDomainItem(it, it.title)
         }
 
         val visible = filterCollapsedToc(items, setOf(1))
@@ -20,7 +20,7 @@ class TocHierarchyTest {
     @Test
     fun nestedCollapse_keepsParentAndHidesNestedDescendants() {
         val items = chapters().map {
-            TocDomainItem(it, it.title, DownloadState.LOCAL)
+            TocDomainItem(it, it.title)
         }
 
         val visible = filterCollapsedToc(items, setOf(2))
@@ -36,7 +36,7 @@ class TocHierarchyTest {
             chapter(2, "第二章", level = 0),
             chapter(3, "第二卷", level = 0, isVolume = true),
             chapter(4, "第三章", level = 0),
-        ).map { TocDomainItem(it, it.title, DownloadState.LOCAL) }
+        ).map { TocDomainItem(it, it.title) }
 
         assertEquals(listOf(0, 3, 4), filterCollapsedToc(items, setOf(0)).map { it.chapter.index })
     }
@@ -49,7 +49,7 @@ class TocHierarchyTest {
             chapter(2, "第二章", level = 1),
             chapter(3, "第二卷", level = 0, isVolume = true),
             chapter(4, "第三章", level = 1),
-        ).map { TocDomainItem(it, it.title, DownloadState.LOCAL) }
+        ).map { TocDomainItem(it, it.title) }
 
         assertEquals(listOf(0, 3, 4), filterCollapsedToc(items, setOf(0)).map { it.chapter.index })
     }

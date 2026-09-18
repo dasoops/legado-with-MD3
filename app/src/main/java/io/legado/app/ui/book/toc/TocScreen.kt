@@ -39,16 +39,12 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.FormatListBulleted
 import androidx.compose.material.icons.filled.BookmarkAdd
-import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.Download
-import androidx.compose.material.icons.filled.DownloadForOffline
 import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.VerticalAlignBottom
 import androidx.compose.material.icons.filled.VerticalAlignTop
-import androidx.compose.material.icons.outlined.DownloadForOffline
 import androidx.compose.material.icons.rounded.LocationOn
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
@@ -230,7 +226,6 @@ fun TocScreen(
     val locateCurrentReadingText = stringResource(R.string.locate_current_reading)
     val moveToTopText = stringResource(R.string.move_to_top)
     val moveToBottomText = stringResource(R.string.move_to_bottom)
-    val downloadAllText = stringResource(R.string.download_all)
     val invertSelectionText = stringResource(R.string.invert_selection)
     val selectFollowingText = stringResource(R.string.select_following)
     val addBookmarkText = stringResource(R.string.bookmark_add)
@@ -301,8 +296,7 @@ fun TocScreen(
         state.items,
         locateCurrentReadingText,
         moveToTopText,
-        moveToBottomText,
-        downloadAllText
+        moveToBottomText
     ) {
         listOf(
             FabMenuItem(Icons.Default.LocationOn, locateCurrentReadingText) {
@@ -321,9 +315,6 @@ fun TocScreen(
             },
             FabMenuItem(Icons.Default.VerticalAlignBottom, moveToBottomText) {
                 scope.launch { listState.animateScrollToItem(state.items.size) }
-            },
-            FabMenuItem(Icons.Default.DownloadForOffline, downloadAllText) {
-                onIntent(TocIntent.DownloadAll)
             }
         )
     }
@@ -331,8 +322,7 @@ fun TocScreen(
     val selectionSecondaryActions = remember(
         state.selectedIds,
         invertSelectionText,
-        selectFollowingText,
-        addBookmarkText
+        selectFollowingText
     ) {
         listOf(
             ActionItem(
@@ -344,11 +334,6 @@ fun TocScreen(
                 text = selectFollowingText,
                 icon = Icons.Default.ExpandMore,
                 onClick = { onIntent(TocIntent.SelectFromLast) }
-            ),
-            ActionItem(
-                text = addBookmarkText,
-                icon = Icons.Default.BookmarkAdd,
-                onClick = { onIntent(TocIntent.AddBookmarksForSelected) }
             )
         )
     }
@@ -632,12 +617,9 @@ fun TocScreen(
                     onSelectAll = { onIntent(TocIntent.SelectAll) },
                     onSelectInvert = { onIntent(TocIntent.InvertSelection) },
                     primaryAction = ActionItem(
-                        text = stringResource(
-                            R.string.download_selected_count,
-                            state.selectedIds.size
-                        ),
-                        icon = Icons.Default.Download,
-                        onClick = { onIntent(TocIntent.DownloadSelected) }
+                        text = addBookmarkText,
+                        icon = Icons.Default.BookmarkAdd,
+                        onClick = { onIntent(TocIntent.AddBookmarksForSelected) }
                     ),
                     secondaryActions = selectionSecondaryActions
                 )
@@ -804,9 +786,6 @@ fun ChapterListContent(
                         },
                         onLongClick = {
                             onIntent(TocIntent.ToggleSelection(uiItem.id))
-                        },
-                        onDownloadClick = {
-                            onIntent(TocIntent.DownloadChapter(uiItem.id))
                         }
                     )
                 }
@@ -826,8 +805,7 @@ fun ChapterItem(
     item: TocItemUi,
     showWordCount: Boolean,
     onClick: () -> Unit,
-    onLongClick: () -> Unit,
-    onDownloadClick: () -> Unit
+    onLongClick: () -> Unit
 ) {
     val backgroundColor by animateColorAsState(
         targetValue = when {
@@ -854,19 +832,8 @@ fun ChapterItem(
     )
     val currentReadingDescription = stringResource(R.string.a11y_current_reading)
     val lockedDescription = stringResource(R.string.a11y_vip_locked)
-    val downloadedDescription = stringResource(R.string.a11y_downloaded)
-    val downloadingDescription = stringResource(R.string.a11y_downloading)
-    val downloadFailedDescription = stringResource(R.string.a11y_download_failed)
-    val notDownloadedDescription = stringResource(R.string.a11y_not_downloaded)
     val wordCountDescription = item.wordCount?.let {
         stringResource(R.string.a11y_word_count, it)
-    }
-    val downloadStateDescription = when (item.downloadState) {
-        DownloadState.SUCCESS -> downloadedDescription
-        DownloadState.DOWNLOADING -> downloadingDescription
-        DownloadState.ERROR -> downloadFailedDescription
-        DownloadState.NONE -> notDownloadedDescription
-        DownloadState.LOCAL -> null
     }
     val chapterContentDescription = buildList {
         add(item.title)
@@ -874,18 +841,7 @@ fun ChapterItem(
         if (item.isDur) add(currentReadingDescription)
         if (item.isVip && !item.isPay) add(lockedDescription)
         if (showWordCount) wordCountDescription?.let(::add)
-        downloadStateDescription?.let(::add)
     }.joinToString(", ")
-    val canDownload = item.downloadState == DownloadState.NONE ||
-            item.downloadState == DownloadState.ERROR
-    val downloadActionDescription = stringResource(
-        if (item.downloadState == DownloadState.ERROR) {
-            R.string.a11y_retry_chapter
-        } else {
-            R.string.download_chapter
-        },
-        item.title
-    )
 
     Surface(
         modifier = modifier
@@ -940,39 +896,18 @@ fun ChapterItem(
             }
 
             val showStatusIcon =
-                remember(item.isDur, item.downloadState, item.wordCount, showWordCount) {
-                    if (item.downloadState == DownloadState.LOCAL) {
-                        item.isDur || (showWordCount && !item.wordCount.isNullOrEmpty())
-                    } else {
-                        true
-                    }
-                }
+                item.isDur || (showWordCount && !item.wordCount.isNullOrEmpty())
 
             if (showStatusIcon) {
                 Box(
                     modifier = Modifier
                         .padding(start = 8.dp)
                         .wrapContentSize()
-                        .clip(MaterialTheme.shapes.medium)
-                        .then(
-                            if (canDownload) {
-                                Modifier
-                                    .combinedClickable(
-                                        role = Role.Button,
-                                        onClick = onDownloadClick
-                                    )
-                                    .semantics {
-                                        contentDescription = downloadActionDescription
-                                    }
-                            } else {
-                                Modifier.clearAndSetSemantics { }
-                            }
-                        ),
+                        .clip(MaterialTheme.shapes.medium),
                     contentAlignment = Alignment.Center
                 ) {
                     StatusIcon(
                         isDur = item.isDur,
-                        downloadState = item.downloadState,
                         wordCount = item.wordCount,
                         showWordCount = showWordCount
                     )
@@ -1148,19 +1083,14 @@ private fun MarkingListContent(
 @Composable
 private fun StatusIcon(
     isDur: Boolean,
-    downloadState: DownloadState,
     wordCount: String?,
     showWordCount: Boolean
 ) {
 
     val targetState = when {
-        showWordCount && !wordCount.isNullOrEmpty() && (downloadState == DownloadState.LOCAL || downloadState == DownloadState.SUCCESS) -> "SUCCESS_WORD_COUNT"
+        showWordCount && !wordCount.isNullOrEmpty() -> "SUCCESS_WORD_COUNT"
         isDur -> "DUR"
-        downloadState == DownloadState.DOWNLOADING -> "LOADING"
-        downloadState == DownloadState.SUCCESS -> "SUCCESS_ICON"
-        downloadState == DownloadState.ERROR -> "ERROR"
-        downloadState == DownloadState.LOCAL -> "EMPTY"
-        else -> "NONE"
+        else -> "EMPTY"
     }
 
     AnimatedContent(
@@ -1187,12 +1117,6 @@ private fun StatusIcon(
                 )
             }
 
-            "LOADING" -> {
-                AppContainedLoadingIndicator(
-                    modifier = Modifier.size(20.dp)
-                )
-            }
-
             "SUCCESS_WORD_COUNT" -> {
                 NormalCard(
                     cornerRadius = 12.dp,
@@ -1210,31 +1134,8 @@ private fun StatusIcon(
                 }
             }
 
-            "SUCCESS_ICON" -> {
-                Icon(
-                    imageVector = Icons.Default.CheckCircle,
-                    contentDescription = null,
-                    modifier = Modifier.size(24.dp),
-                    tint = LegadoTheme.colorScheme.secondary
-                )
-            }
-
-            "ERROR" -> {
-                Icon(
-                    imageVector = Icons.Default.Refresh,
-                    contentDescription = null,
-                    modifier = Modifier.size(24.dp),
-                    tint = LegadoTheme.colorScheme.error
-                )
-            }
-
             else -> {
-                Icon(
-                    imageVector = Icons.Outlined.DownloadForOffline,
-                    contentDescription = null,
-                    modifier = Modifier.size(24.dp),
-                    tint = LegadoTheme.colorScheme.outline.copy(alpha = 0.5f)
-                )
+                Box(modifier = Modifier.size(24.dp))
             }
         }
     }

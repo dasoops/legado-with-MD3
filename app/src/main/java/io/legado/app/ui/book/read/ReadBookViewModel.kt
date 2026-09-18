@@ -1260,10 +1260,6 @@ class ReadBookViewModel(
                 _effects.tryEmit(ReadBookEffect.PageAnimChanged)
             }
 
-            is ReadBookIntent.DownloadChapters -> {
-                _effects.tryEmit(ReadBookEffect.DownloadChapters(intent.start, intent.end))
-            }
-
             is ReadBookIntent.SaveChapterContent -> {
                 ReadBook.book?.let {
                     saveContent(it, intent.content, intent.chapterIndex)

@@ -34,9 +34,7 @@ import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Block
 import androidx.compose.material.icons.filled.BookmarkAdd
-import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Clear
-import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.LocationOn
@@ -48,7 +46,6 @@ import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.SelectAll
 import androidx.compose.material.icons.filled.SwapVert
-import androidx.compose.material.icons.outlined.DownloadForOffline
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
@@ -82,7 +79,6 @@ import io.legado.app.data.entities.BookSource
 import io.legado.app.data.entities.Bookmark
 import io.legado.app.help.book.isLocal
 import io.legado.app.help.book.isLocalTxt
-import io.legado.app.ui.book.toc.DownloadState
 import io.legado.app.ui.book.toc.TocActivity
 import io.legado.app.ui.book.toc.TocBookmarkItemUi
 import io.legado.app.ui.book.toc.TocEffect
@@ -105,7 +101,6 @@ import io.legado.app.ui.widget.components.menuItem.MenuItemIcon
 import io.legado.app.ui.widget.components.menuItem.RoundDropdownMenu
 import io.legado.app.ui.widget.components.menuItem.RoundDropdownMenuItem
 import io.legado.app.ui.widget.components.modalBottomSheet.AppModalBottomSheet
-import io.legado.app.ui.widget.components.progressIndicator.AppContainedLoadingIndicator
 import io.legado.app.ui.widget.components.tabRow.CardTabRow
 import io.legado.app.ui.widget.components.text.AppText
 import kotlinx.coroutines.flow.collectLatest
@@ -721,10 +716,6 @@ private fun ReaderBookTocPage(
     val selectAllText = stringResource(R.string.select_all)
     val invertText = stringResource(R.string.invert_selection)
     val bookmarkText = stringResource(R.string.bookmark_add)
-    val downloadSelectedText = stringResource(
-        R.string.download_selected_count,
-        action.selectedIds.size,
-    )
     val cancelText = stringResource(R.string.cancel)
     val fabItems = remember(
         selected,
@@ -732,7 +723,6 @@ private fun ReaderBookTocPage(
         selectAllText,
         invertText,
         bookmarkText,
-        downloadSelectedText,
         cancelText,
     ) {
         listOf(
@@ -744,9 +734,6 @@ private fun ReaderBookTocPage(
             },
             FabMenuItem(Icons.Default.BookmarkAdd, bookmarkText) {
                 onIntent(TocIntent.AddBookmarksForSelected)
-            },
-            FabMenuItem(Icons.Default.Download, downloadSelectedText) {
-                onIntent(TocIntent.DownloadSelected)
             },
             FabMenuItem(Icons.Default.Clear, cancelText) {
                 onIntent(TocIntent.ClearSelection)
@@ -878,7 +865,6 @@ private fun ReaderSheetChapterList(
                         }
                     },
                     onLongClick = { onIntent(TocIntent.ToggleSelection(item.id)) },
-                    onDownloadClick = { onIntent(TocIntent.DownloadChapter(item.id)) },
                     modifier = Modifier.animateItem(),
                 )
             }
@@ -931,7 +917,6 @@ private fun ReaderSheetChapterItem(
     selectionMode: Boolean,
     onClick: () -> Unit,
     onLongClick: () -> Unit,
-    onDownloadClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val containerColor = when {
@@ -994,8 +979,6 @@ private fun ReaderSheetChapterItem(
             ReaderSheetChapterStatus(
                 item = item,
                 showWordCount = showWordCount,
-                enabled = !selectionMode,
-                onDownloadClick = onDownloadClick,
             )
         }
     }
@@ -1005,12 +988,8 @@ private fun ReaderSheetChapterItem(
 private fun ReaderSheetChapterStatus(
     item: TocItemUi,
     showWordCount: Boolean,
-    enabled: Boolean,
-    onDownloadClick: () -> Unit,
 ) {
-    val showCount = showWordCount &&
-        !item.wordCount.isNullOrBlank() &&
-        (item.downloadState == DownloadState.LOCAL || item.downloadState == DownloadState.SUCCESS)
+    val showCount = showWordCount && !item.wordCount.isNullOrBlank()
     when {
         showCount -> NormalCard(
             cornerRadius = 8.dp,
@@ -1033,38 +1012,6 @@ private fun ReaderSheetChapterStatus(
             )
         }
         item.isDur -> ReaderSheetStatusIcon(Icons.Default.LocationOn)
-        item.downloadState == DownloadState.DOWNLOADING -> AppContainedLoadingIndicator(
-            modifier = Modifier
-                .padding(horizontal = 8.dp)
-                .size(16.dp),
-        )
-        item.downloadState == DownloadState.SUCCESS -> ReaderSheetStatusIcon(
-            imageVector = Icons.Default.CheckCircle,
-        )
-        item.downloadState == DownloadState.ERROR -> IconButton(
-            onClick = onDownloadClick,
-            enabled = enabled,
-            modifier = Modifier.size(32.dp),
-        ) {
-            Icon(
-                imageVector = Icons.Default.Refresh,
-                contentDescription = stringResource(R.string.a11y_retry_chapter, item.title),
-                tint = LegadoTheme.colorScheme.error,
-                modifier = Modifier.size(16.dp),
-            )
-        }
-        item.downloadState == DownloadState.NONE -> IconButton(
-            onClick = onDownloadClick,
-            enabled = enabled,
-            modifier = Modifier.size(32.dp),
-        ) {
-            Icon(
-                imageVector = Icons.Outlined.DownloadForOffline,
-                contentDescription = stringResource(R.string.download_chapter, item.title),
-                tint = LegadoTheme.colorScheme.outline,
-                modifier = Modifier.size(16.dp),
-            )
-        }
     }
 }
 
@@ -1094,10 +1041,6 @@ private fun ReaderBookTocMenu(
         onDismiss()
         onIntent(intent)
     }
-    RoundDropdownMenuItem(
-        text = stringResource(R.string.download_all),
-        onClick = { dispatch(TocIntent.DownloadAll) },
-    )
     if (state.action.items.any { it.isVolume }) {
         RoundDropdownMenuItem(
             text = stringResource(R.string.expand_volume),

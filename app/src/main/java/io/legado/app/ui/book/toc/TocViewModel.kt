@@ -21,16 +21,13 @@ import io.legado.app.data.repository.ReadSettingsRepository
 import io.legado.app.domain.gateway.BookMarkingGateway
 import io.legado.app.domain.gateway.OtherSettingsGateway
 import io.legado.app.domain.model.TextProcessAnchor
-import io.legado.app.domain.usecase.CacheBookChaptersUseCase
 import io.legado.app.help.book.BookHelp
 import io.legado.app.help.book.ContentProcessor
 import io.legado.app.help.book.isEpub
 import io.legado.app.help.book.isLocal
 import io.legado.app.help.book.isMobi
 import io.legado.app.help.bookmark.BookmarkExporter
-import io.legado.app.model.CacheBook
 import io.legado.app.model.ReadBook
-import io.legado.app.model.cache.CacheBookDownloadState
 import io.legado.app.model.localBook.EpubFile
 import io.legado.app.model.localBook.LocalBook
 import io.legado.app.model.localBook.MobiFile
@@ -82,7 +79,6 @@ data class TocItemUi(
     val isPay: Boolean,
     val isDur: Boolean,
     val isSelected: Boolean,
-    val downloadState: DownloadState,
     val wordCount: String?
 ) : SelectableItem<Int>
 
@@ -119,7 +115,6 @@ data class TocActionState(
     override val searchKey: String = "",
     override val isSearch: Boolean = false,
     override val isLoading: Boolean = false,
-    val downloadSummary: String = "",
     val useReplace: Boolean = false,
     val showWordCount: Boolean = true,
     val titleReplaceProgress: Float? = null,
@@ -146,9 +141,6 @@ sealed interface TocIntent {
     data class ExportBookmarks(val uri: Uri, val isMarkdown: Boolean) : TocIntent
     data class UpdateBookmark(val bookmark: Bookmark) : TocIntent
     data class DeleteBookmark(val bookmark: Bookmark) : TocIntent
-    data class DownloadChapter(val id: Int) : TocIntent
-    data object DownloadAll : TocIntent
-    data object DownloadSelected : TocIntent
     data object SelectAll : TocIntent
     data object InvertSelection : TocIntent
     data object ClearSelection : TocIntent
@@ -169,13 +161,7 @@ sealed interface TocEffect {
 
 data class TocDomainItem(
     val chapter: BookChapter,
-    val displayTitle: String,
-    val downloadState: DownloadState
-)
-
-private data class DownloadContext(
-    val downloadState: CacheBookDownloadState?,
-    val cachedChapterIndices: Set<Int>
+    val displayTitle: String
 )
 
 private data class TocUiConfig(
@@ -237,7 +223,6 @@ private data class TitleReplaceState(
 class TocViewModel(
     application: Application,
     savedStateHandle: SavedStateHandle,
-    private val cacheBookChaptersUseCase: CacheBookChaptersUseCase,
     private val bookRepository: BookRepository,
     private val bookSourceRepository: BookSourceRepository,
     private val bookmarkRepository: BookmarkRepository,
@@ -263,48 +248,6 @@ class TocViewModel(
     val collapsedVolumes = _collapsedVolumes.asStateFlow()
     private val _effects = MutableSharedFlow<TocEffect>(extraBufferCapacity = 16)
     val effects = _effects.asSharedFlow()
-
-    val downloadSummary: StateFlow<String> =
-        CacheBook.downloadSummaryFlow
-            .stateIn(
-                viewModelScope,
-                SharingStarted.WhileSubscribed(5000),
-                ""
-            )
-
-    private val _cachedChapterIndices: StateFlow<Set<Int>> = bookState.filterNotNull()
-        .flatMapLatest { book ->
-            flow {
-                var cached: Set<Int> = bookRepository.getChapters(book.bookUrl)
-                    .filter { chapter ->
-                        chapter.isVolume || withContext(Dispatchers.IO) {
-                            BookHelp.isChapterCacheComplete(book, chapter)
-                        }
-                    }
-                    .mapTo(mutableSetOf()) { it.index }
-                emit(cached)
-                CacheBook.cacheSuccessFlow
-                    .filter { it.bookUrl == book.bookUrl }
-                    .collect { chapter ->
-                        cached = if (chapter.isVolume ||
-                            withContext(Dispatchers.IO) {
-                                BookHelp.isChapterCacheComplete(book, chapter)
-                            }
-                        ) {
-                            cached + chapter.index
-                        } else {
-                            cached - chapter.index
-                        }
-                        emit(cached)
-                    }
-            }
-        }
-        .flowOn(Dispatchers.IO)
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.Eagerly,
-            initialValue = emptySet()
-        )
 
     val bookmarkUiList: StateFlow<List<TocBookmarkItemUi>> =
         combine(
@@ -429,14 +372,6 @@ class TocViewModel(
             initialValue = TocPreferences(useReplace = false, showWordCount = true)
         )
 
-    private val downloadContextFlow = combine(
-        bookState.filterNotNull().map { it.bookUrl }.distinctUntilChanged(),
-        CacheBook.downloadStateFlow,
-        _cachedChapterIndices
-    ) { bookUrl, state, cached ->
-        DownloadContext(state.books[bookUrl], cached)
-    }
-
     private val uiConfigFlow = combine(
         _collapsedVolumes,
         tocPreferences,
@@ -461,10 +396,9 @@ class TocViewModel(
     override val rawDataFlow: Flow<List<TocDomainItem>> = combine(
         bookState.filterNotNull().map { it.bookUrl }.distinctUntilChanged()
             .flatMapLatest { bookRepository.flowChapters(it) },
-        downloadContextFlow,
         uiConfigFlow,
         titleReplaceState
-    ) { originalChapters, downloadCtx, config, titleState ->
+    ) { originalChapters, config, titleState ->
         val book = bookState.value ?: return@combine emptyList()
 
         val processedChapters = if (config.isReverse) {
@@ -488,40 +422,14 @@ class TocViewModel(
             chineseConverterType = config.chineseConverterType,
         )
 
-        if (book.isLocal) {
-            return@combine processedChapters.map { chapter ->
-                val baseTitle = chapter.getDisplayTitle(
-                    useReplace = false,
-                    chineseConverterType = config.chineseConverterType,
-                )
-                TocDomainItem(
-                    chapter = chapter,
-                    displayTitle = titleState.titles[chapter.index] ?: baseTitle,
-                    downloadState = DownloadState.LOCAL
-                )
-            }
-        }
-
-        val runningIndices = downloadCtx.downloadState?.runningIndices.orEmpty()
-        val errorIndices = downloadCtx.downloadState?.failedIndices.orEmpty()
-        val cachedChapterIndices = downloadCtx.cachedChapterIndices
-
         processedChapters.map { chapter ->
-            val downloadState = when {
-                chapter.index in runningIndices -> DownloadState.DOWNLOADING
-                chapter.index in errorIndices -> DownloadState.ERROR
-                chapter.index in cachedChapterIndices -> DownloadState.SUCCESS
-                else -> DownloadState.NONE
-            }
-
             val baseTitle = chapter.getDisplayTitle(
                 useReplace = false,
                 chineseConverterType = config.chineseConverterType,
             )
             TocDomainItem(
-                chapter,
-                titleState.titles[chapter.index] ?: baseTitle,
-                downloadState
+                chapter = chapter,
+                displayTitle = titleState.titles[chapter.index] ?: baseTitle,
             )
         }
 
@@ -564,7 +472,6 @@ class TocViewModel(
             searchKey = _searchKey.value,
             isSearch = isSearch,
             isLoading = isUploading,
-            downloadSummary = downloadSummary.value,
             useReplace = tocPreferences.value.useReplace,
             showWordCount = tocPreferences.value.showWordCount,
             titleReplaceProgress = titleReplaceState.value
@@ -590,7 +497,6 @@ class TocViewModel(
             isPay = chapter.isPay,
             isDur = false,
             isSelected = false,
-            downloadState = downloadState,
             wordCount = wordCountText
         )
     }
@@ -622,9 +528,6 @@ class TocViewModel(
             is TocIntent.ExportBookmarks -> exportCurrentBookBookmarks(intent.uri, intent.isMarkdown)
             is TocIntent.UpdateBookmark -> updateBookmark(intent.bookmark)
             is TocIntent.DeleteBookmark -> deleteBookmark(intent.bookmark)
-            is TocIntent.DownloadChapter -> downloadChapter(intent.id)
-            TocIntent.DownloadAll -> downloadAll()
-            TocIntent.DownloadSelected -> downloadSelected()
             TocIntent.SelectAll -> selectAll()
             TocIntent.InvertSelection -> invertSelection()
             TocIntent.ClearSelection -> clearSelection()
@@ -845,45 +748,6 @@ class TocViewModel(
         showMessage(context.getString(R.string.bookmarks_added_count, bookmarks.size))
         withContext(Dispatchers.Main) {
             clearSelection()
-        }
-    }
-
-    fun downloadSelected() {
-        val book = bookState.value ?: return
-        val indices = uiState.value.selectedIds.toList()
-        if (indices.isEmpty()) return
-        execute {
-            cacheBookChaptersUseCase.execute(book.bookUrl, indices)
-        }.onSuccess { count ->
-            showMessage(context.getString(R.string.start_downloading_chapters, count))
-            clearSelection()
-        }
-    }
-
-    fun downloadChapter(index: Int) {
-        val book = bookState.value ?: return
-        execute {
-            cacheBookChaptersUseCase.execute(book.bookUrl, listOf(index))
-        }.onSuccess {
-            showMessage(R.string.start_downloading_chapter)
-        }
-    }
-
-    fun downloadAll() {
-        val book = bookState.value ?: return
-        val targetIndices = uiState.value.items
-            .filter { !it.isVolume && it.downloadState != DownloadState.SUCCESS }
-            .map { it.id }
-
-        if (targetIndices.isEmpty()) {
-            showMessage(R.string.all_chapters_cached)
-            return
-        }
-
-        execute {
-            cacheBookChaptersUseCase.execute(book.bookUrl, targetIndices)
-        }.onSuccess { count ->
-            showMessage(context.getString(R.string.start_downloading_remaining_chapters, count))
         }
     }
 

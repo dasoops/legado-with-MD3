@@ -67,7 +67,6 @@ object PreferKey {
     const val backupPath = "backupUri"
     const val restoreIgnore = "restoreIgnore"
     const val threadCount = "threadCount"
-    const val cacheBookThreadCount = "cacheBookThreadCount"
     const val keepLight = "keep_light"
     const val readSliderMode = "read_slider_mode"
     const val webDavUrl = "web_dav_url"

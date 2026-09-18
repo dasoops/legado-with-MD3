@@ -74,7 +74,6 @@ object MainNavigator {
             MainRouteImportLocal,
             MainRouteImportRemote,
             is MainRouteCache,
-            MainRouteBookCacheManage,
             is MainRouteReadBook -> {
                 if (
                     currentRoute == MainRouteBookshelf ||
@@ -196,7 +195,6 @@ object MainNavigator {
                 ) ?: -1L
             )
 
-            MainRouteConst.ROUTE_BOOK_CACHE_MANAGE -> MainRouteBookCacheManage
             MainRouteConst.ROUTE_READ_BOOK -> MainRouteReadBook(
                 bookUrl = intent?.getStringExtra(MainIntent.EXTRA_BOOK_URL),
                 inBookshelf = intent?.getBooleanExtra(MainIntent.EXTRA_IN_BOOKSHELF, true) != false,

@@ -29,7 +29,6 @@ object OtherConfig {
     val userAgent get() = cache.userAgent
     val cronetEnable get() = cache.cronetEnabled
     val threadCount get() = cache.threadCount
-    val cacheBookThreadCount get() = cache.cacheBookThreadCount
     val preDownloadNum get() = cache.preDownloadNum
     val bitmapCacheSize get() = cache.bitmapCacheSize
     val imageRetainNum get() = cache.imageRetainNum

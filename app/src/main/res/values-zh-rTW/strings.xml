@@ -89,9 +89,6 @@
     <string name="is_loading">載入中…</string>
     <string name="retry">重試</string>
     <string name="web_edit_source">web編輯書源</string>
-    <string name="offline_cache">離線快取</string>
-    <string name="offline_cache_t">離線快取</string>
-    <string name="offline_cache_s">快取選擇的章節到本機</string>
     <string name="change_origin">換源</string>
     <string name="about_description">
         \u3000\u3000這是一款使用Kotlin全新開發的開源的閱讀軟體，歡迎您的加入。
@@ -215,8 +212,6 @@
     <string name="welcome">啟動頁</string>
     <string name="download_start">開始下載</string>
     <string name="download_cancel">取消下載</string>
-    <string name="no_download">暫無任務</string>
-    <string name="download_count">已下載 %1$d/%2$d</string>
     <string name="import_select_book">匯入選擇書籍</string>
     <string name="threads_num_title">更新和搜尋執行緒數，太多會卡頓</string>
     <string name="change_icon">切換圖示</string>
@@ -255,7 +250,6 @@
     <string name="dark_status_icon">深色狀態欄圖示</string>
     <string name="content">內容</string>
     <string name="copy_text">複製內容</string>
-    <string name="download_all">一鍵快取</string>
     <string name="content_sl">這是一段測試文字\n\u3000\u3000只是讓你看看效果的</string>
     <string name="text_bg_style">文字顏色和背景(長按自訂)</string>
     <string name="immersion_status_bar">沉浸式狀態欄</string>
@@ -940,7 +934,6 @@
     <string name="wait_download">待下載</string>
     <string name="download_success">下載完成</string>
     <string name="download_error">下載失敗</string>
-    <string name="download_error_waiting_retry">下載失敗，等待重試</string>
     <string name="downloading">下載中</string>
     <string name="unknown_state">未知狀態</string>
     <string name="disable_source">禁用源</string>
@@ -1229,7 +1222,6 @@
     <string name="menu_download_all">下載全部章節</string>
     <string name="refresh_explore">刷新发现</string>
     <string name="padding_display_cutouts">填充刘海区域</string>
-    <string name="sure_cache_book">是否确认开始缓存？</string>
     <string name="auto_check_new_backup_t">自动检查新备份</string>
     <string name="auto_check_new_backup_s">打开软件时检查是否有新备份，有新备份时提示是否更新</string>
     <string name="welcome_book_folder_tip">设置本地书籍保存目录，后续也可在设置中修改。</string>
@@ -1273,7 +1265,6 @@
     <string name="title_spacing">間距</string>
     <string name="bookshelf_total_count">共%1$d本</string>
     <string name="bookshelf_selected_count">已選%1$d本</string>
-    <string name="cache_management">快取管理</string>
     <string name="appearance_setting">外观设置</string>
     <string name="personalization_setting">深度个性化设置</string>
     <string name="personalization_setting_s">字体等深度个性化设置</string>
@@ -1434,10 +1425,7 @@
     <string name="collapse">收合</string>
     <string name="select_color">選擇顏色</string>
     <string name="color_value">顏色值</string>
-    <string name="cache_download_failed">快取失敗：%1$s</string>
     <string name="threads_num_summary">控制並發下載任務。數值越大，OOM 風險越高</string>
-    <string name="cache_book_threads_num_title">快取下載執行緒數</string>
-    <string name="cache_book_threads_num_summary">控制離線快取書籍的並發章節下載數。數值越大，OOM 風險越高</string>
     <string name="rule_sub_content">副內容（subContent）</string>
     <string name="use_bg_image">使用背景圖片</string>
     <string name="group_add">新增分組</string>
@@ -1689,7 +1677,6 @@
     <string name="more_actions_config">設定更多選單</string>
     <string name="compact_grid">精簡網格</string>
     <string name="cover_grid">封面網格</string>
-    <string name="end_chapter">結束章節</string>
     <string name="webtoon">條漫</string>
     <string name="epi_3">第 3 期</string>
     <string name="photo">照片</string>
@@ -1715,7 +1702,6 @@
     <string name="export_bookmarks_markdown">匯出書籤為 Markdown</string>
     <string name="volume_management">卷管理</string>
     <string name="quick_jump">快速跳轉</string>
-    <string name="download_selected_count">下載所選（%1$d）</string>
     <string name="toc_rule_update_failed">章節規則更新失敗：%1$s</string>
     <string name="toc_rule_updated">章節規則已更新</string>
     <string name="setting_failed">設定失敗：%1$s</string>
@@ -1726,10 +1712,6 @@
     <string name="save_failed_with_error">儲存失敗：%1$s</string>
     <string name="select_chapters">選擇章節</string>
     <string name="bookmarks_added_count">已新增 %1$d 個書籤</string>
-    <string name="start_downloading_chapters">正在下載 %1$d 章</string>
-    <string name="start_downloading_chapter">下載章節中</string>
-    <string name="all_chapters_cached">所有章節已快取</string>
-    <string name="start_downloading_remaining_chapters">正在下載剩餘 %1$d 章</string>
     <string name="read_end">閱讀結束</string>
     <string name="system_engine">系統引擎</string>
     <string name="copy_from">從剪貼簿匯入</string>
@@ -2157,8 +2139,6 @@
     <string name="a11y_read_progress_chapter">第 %1$d 章，共 %2$d 章</string>
     <string name="a11y_server_list">伺服器清單</string>
     <string name="a11y_pin_source">置頂書源</string>
-    <string name="a11y_expanded">已展開</string>
-    <string name="a11y_collapsed">已收合</string>
     <string name="a11y_long_press_reorder">長按並拖曳可排序</string>
     <string name="a11y_rule_enabled_switch">%1$s 的啟用狀態</string>
     <string name="a11y_edit_named">編輯 %1$s</string>
@@ -2252,29 +2232,6 @@
     <string name="a11y_reading_calendar_day_empty">%1$s，沒有閱讀記錄</string>
     <string name="a11y_heatmap_day_count">%1$s，閱讀 %2$d 次</string>
     <string name="a11y_heatmap_day_duration">%1$s，閱讀時長 %2$s</string>
-    <string name="start_download">開始下載</string>
-    <string name="stop_download">停止下載</string>
-    <string name="cache_section_bookshelf">書架書籍</string>
-    <string name="cache_empty_bookshelf">沒有書架內書籍快取或下載任務</string>
-    <string name="cache_section_not_in_bookshelf">未在書架</string>
-    <string name="cache_empty_not_in_bookshelf">沒有未在書架的書籍下載狀態</string>
-    <string name="cache_download_status_summary">下載中 %1$d · 等待 %2$d · 暫停 %3$d · 失敗 %4$d</string>
-    <string name="cache_progress_description">已快取 %1$d/%2$d 章，進度 %3$d%%</string>
-    <string name="a11y_cache_book_item">%1$s，%2$s，%3$s，%4$s</string>
-    <string name="pause_book_download">暫停《%1$s》的下載</string>
-    <string name="resume_book_download">繼續《%1$s》的下載</string>
-    <string name="start_book_download">開始下載《%1$s》</string>
-    <string name="delete_book_cache">刪除《%1$s》的快取</string>
-    <string name="a11y_cache_chapter_item">%1$s，%2$s</string>
-    <string name="cache_chapter_progress_description">章節下載進度 %1$d%%</string>
-    <string name="pause_chapter_download">暫停章節下載：%1$s</string>
-    <string name="resume_chapter_download">繼續章節下載：%1$s</string>
-    <string name="download_chapter">下載章節：%1$s</string>
-    <string name="delete_chapter_cache">刪除章節快取：%1$s</string>
-    <string name="download_paused">已暫停</string>
-    <string name="not_cached">未快取</string>
-    <string name="delete_book_cache_message">刪除《%1$s》的全部快取，並從下載佇列移除？</string>
-    <string name="delete_chapter_cache_message">刪除章節快取：%1$s？</string>
     <string name="about_open_project_homepage">開啟專案首頁</string>
     <string name="about_open_github">開啟 GitHub</string>
     <string name="book_voice_casting">人物配音</string>
