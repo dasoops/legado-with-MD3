@@ -150,7 +150,6 @@ object PreferKey {
     const val webDavDeviceName = "webDavDeviceName"
     const val showLastUpdateTime = "showLastUpdateTime"
     const val showWaitUpCount = "showWaitUpCount"
-    const val clearWebViewData = "clearWebViewData"
     const val onlyLatestBackup = "onlyLatestBackup"
     const val brightnessVwPos = "brightnessVwPos"
     const val brightnessAuto = "brightnessAuto"

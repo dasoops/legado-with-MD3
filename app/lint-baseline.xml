@@ -538,17 +538,6 @@
     <issue
         id="TrimLambda"
         message="The lambda argument (`{ it &lt;= &apos; &apos; }`) is unnecessary"
-        errorLine1="                tmp = ruleStr.substring(start, webJsMatcher.start()).trim { it &lt;= &apos; &apos; }"
-        errorLine2="                                                                          ~~~~~~~~~~~~~">
-        <location
-            file="src/main/java/io/legado/app/model/analyzeRule/AnalyzeRule.kt"
-            line="560"
-            column="75"/>
-    </issue>
-
-    <issue
-        id="TrimLambda"
-        message="The lambda argument (`{ it &lt;= &apos; &apos; }`) is unnecessary"
         errorLine1="            tmp = ruleStr.substring(start).trim { it &lt;= &apos; &apos; }"
         errorLine2="                                                ~~~~~~~~~~~~~">
         <location
@@ -2655,17 +2644,6 @@
     <issue
         id="ObsoleteSdkInt"
         message="Unnecessary; `SDK_INT` is always >= 26"
-        errorLine1="            isRedirect = isRedirect || if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {"
-        errorLine2="                                           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/java/io/legado/app/help/http/BackstageWebView.kt"
-            line="188"
-            column="44"/>
-    </issue>
-
-    <issue
-        id="ObsoleteSdkInt"
-        message="Unnecessary; `SDK_INT` is always >= 26"
         errorLine1="    private val atLeastApi24 = Build.VERSION.SDK_INT >= Build.VERSION_CODES.N"
         errorLine2="                               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
@@ -4369,39 +4347,6 @@
             file="src/main/java/io/legado/app/lib/theme/ViewUtils.kt"
             line="35"
             column="19"/>
-    </issue>
-
-    <issue
-        id="UseKtx"
-        message="Use the KTX extension function `String.toUri` instead?"
-        errorLine1="                return shouldOverrideUrlLoading(Uri.parse(it))"
-        errorLine2="                                                ~~~~~~~~~~~~~">
-        <location
-            file="src/main/java/io/legado/app/ui/browser/WebViewActivity.kt"
-            line="257"
-            column="49"/>
-    </issue>
-
-    <issue
-        id="UseKtx"
-        message="Use the KTX extension function `String.toUri` instead?"
-        errorLine1="                return shouldOverrideUrlLoading(Uri.parse(url))"
-        errorLine2="                                                ~~~~~~~~~~~~~~">
-        <location
-            file="src/main/java/io/legado/app/ui/login/WebViewLoginFragment.kt"
-            line="107"
-            column="49"/>
-    </issue>
-
-    <issue
-        id="UseKtx"
-        message="Use the KTX extension function `String.toUri` instead?"
-        errorLine1="                return shouldOverrideUrlLoading(Uri.parse(url))"
-        errorLine2="                                                ~~~~~~~~~~~~~~">
-        <location
-            file="src/main/java/io/legado/app/ui/login/WebViewLoginFragment.kt"
-            line="107"
-            column="49"/>
     </issue>
 
     <issue

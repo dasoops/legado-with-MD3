@@ -528,7 +528,6 @@
     <string name="pre_update_js">Js before update(preUpdateJs)</string>
     <string name="rule_book_content">Content(content)</string>
     <string name="rule_next_content">Next content url(nextContentUrl)</string>
-    <string name="rule_web_js">Web view js(webJs)</string>
     <string name="rule_replace_regex">Replace regex(replaceRegex)</string>
     <string name="rule_sub_content">Sub content(subContent)</string>
     <string name="rule_image_style">Image style(imageStyle)</string>
@@ -1234,11 +1233,7 @@
     <string name="c_whitelist">Whitelist (contentWhitelist)</string>
     <string name="c_blacklist">Blacklist (contentBlacklist)</string>
     <string name="confirm">Confirm</string>
-    <string name="jump_to_another_app">Jump to another app</string>
-    <string name="clear_webview_data">Clear WebView Data</string>
-    <string name="clear_webview_data_summary">Clear all data in WebView</string>
     <string name="enable_preload">Preload</string>
-    <string name="load_with_web_log">Show WebView Logs</string>
     <string name="cache_first">Cache First</string>
     <string name="layout_type">Layout</string>
     <string name="create">Create</string>
@@ -1313,8 +1308,6 @@
     <string name="del_h_tag">Delete h tag</string>
     <string name="adjust_chapter_page">Adjust of chapter page</string>
     <string name="adjust_chapter_index">Adjust of chapter index</string>
-    <string name="clear_webview_data_success">Cleared successfully, automatically restarts the application after 3 seconds</string>
-    <string name="clear_webview_data_failed">Failed to clear WebView data</string>
     <string name="key_page_on_long_press">Press and Hold the Key to Turn Page</string>
     <string name="save_log">Save logs</string>
     <string name="create_heap_dump">Create Heap Dump</string>

@@ -3,8 +3,6 @@ package io.legado.app.ui.config.otherConfig
 import androidx.annotation.StringRes
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import io.legado.app.R
-import io.legado.app.constant.AppLog
 import io.legado.app.domain.gateway.AppLocaleGateway
 import io.legado.app.domain.gateway.DownloadCacheSettingsGateway
 import io.legado.app.domain.gateway.LocalPasswordGateway
@@ -12,7 +10,6 @@ import io.legado.app.domain.gateway.OtherConfigSystemGateway
 import io.legado.app.domain.gateway.OtherSettingsGateway
 import io.legado.app.domain.model.settings.OtherSettings
 import kotlinx.collections.immutable.toImmutableList
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -29,8 +26,6 @@ class OtherConfigViewModel(
     initialState: OtherConfigUiState = OtherConfigUiState(),
 ) : ViewModel() {
 
-    private var clearWebViewDataJob: Job? = null
-    private var restartRequested = false
     private var nextMessageId = 0L
 
     private val _uiState = MutableStateFlow(
@@ -94,10 +89,6 @@ class OtherConfigViewModel(
                 _effects.tryEmit(OtherConfigEffect.RequestBatteryPermission)
             OtherConfigIntent.RequestSystemDirectory ->
                 _effects.tryEmit(OtherConfigEffect.OpenSystemDirectory)
-            OtherConfigIntent.ConfirmClearWebViewData -> {
-                _uiState.update { it.copy(activeOverlay = null) }
-                clearWebViewData()
-            }
             is OtherConfigIntent.SaveLocalPassword -> saveLocalPassword(intent.password)
             is OtherConfigIntent.MessageShown -> {
                 _uiState.update { state ->
@@ -136,22 +127,6 @@ class OtherConfigViewModel(
                 }
                 showMessage(it.localizedMessage ?: "设置失败")
             }
-        }
-    }
-
-    private fun clearWebViewData() {
-        if (clearWebViewDataJob?.isActive == true || restartRequested) return
-
-        clearWebViewDataJob = viewModelScope.launch {
-            runCatching { systemGateway.clearWebViewData() }
-                .onSuccess {
-                    restartRequested = true
-                    showMessage(R.string.clear_webview_data_success)
-                    _effects.tryEmit(OtherConfigEffect.RestartApp)
-                }.onFailure {
-                    AppLog.put("清除 WebView 数据失败", it)
-                    showMessage(R.string.clear_webview_data_failed)
-                }
         }
     }
 

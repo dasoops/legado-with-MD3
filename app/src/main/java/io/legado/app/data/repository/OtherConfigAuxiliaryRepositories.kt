@@ -7,7 +7,6 @@ import io.legado.app.data.local.preferences.LocalPreferencesKeys
 import io.legado.app.domain.gateway.LocalPasswordGateway
 import io.legado.app.domain.gateway.OtherConfigSystemGateway
 import io.legado.app.help.config.AppConfigStore
-import io.legado.app.help.webView.WebViewDataCleaner
 import io.legado.app.receiver.SharedReceiverActivity
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -44,9 +43,5 @@ class OtherConfigSystemRepository(
             },
             PackageManager.DONT_KILL_APP,
         )
-    }
-
-    override suspend fun clearWebViewData() {
-        WebViewDataCleaner.clear(context)
     }
 }

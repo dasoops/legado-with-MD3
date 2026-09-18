@@ -46,7 +46,6 @@ data class OtherConfigMessage(
 
 sealed interface OtherConfigOverlay {
     data object FilePicker : OtherConfigOverlay
-    data object ClearWebViewConfirmation : OtherConfigOverlay
     data object Password : OtherConfigOverlay
 }
 
@@ -70,7 +69,6 @@ sealed interface OtherConfigIntent {
     data object RequestNotificationPermission : OtherConfigIntent
     data object RequestBatteryPermission : OtherConfigIntent
     data object RequestSystemDirectory : OtherConfigIntent
-    data object ConfirmClearWebViewData : OtherConfigIntent
     data class SaveLocalPassword(val password: String) : OtherConfigIntent
     data class MessageShown(val id: Long) : OtherConfigIntent
 }
@@ -79,5 +77,4 @@ sealed interface OtherConfigEffect {
     data object RequestNotificationPermission : OtherConfigEffect
     data object RequestBatteryPermission : OtherConfigEffect
     data object OpenSystemDirectory : OtherConfigEffect
-    data object RestartApp : OtherConfigEffect
 }

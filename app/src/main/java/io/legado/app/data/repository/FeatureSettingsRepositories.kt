@@ -1,6 +1,7 @@
 package io.legado.app.data.repository
 
 import androidx.datastore.preferences.core.Preferences
+import io.legado.app.constant.AppConst
 import io.legado.app.constant.PreferKey
 import io.legado.app.domain.gateway.AppShellSettingsGateway
 import io.legado.app.domain.gateway.BackupSettingsGateway
@@ -134,9 +135,7 @@ internal fun Preferences.toDownloadCacheSettings(): DownloadCacheSettings =
         preDownloadNum = compatDsInt(PreferKey.preDownloadNum) ?: 10,
         threadCount = compatDsInt(PreferKey.threadCount) ?: 16,
         userAgent = compatDsString(PreferKey.userAgent).orEmpty().ifBlank {
-            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) " +
-                "AppleWebKit/537.36 (KHTML, like Gecko) " +
-                "Chrome/128.0.0.0 Safari/537.36"
+            AppConst.DEFAULT_USER_AGENT
         },
     )
 

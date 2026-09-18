@@ -15,7 +15,6 @@ import io.legado.app.help.CacheManager
 import io.legado.app.help.ConcurrentRateLimiter
 import io.legado.app.help.crypto.toHexString
 import io.legado.app.help.glide.GlideHeaders
-import io.legado.app.help.http.BackstageWebView
 import io.legado.app.help.http.CookieManager
 import io.legado.app.help.http.CookieManager.mergeCookies
 import io.legado.app.help.http.CookieStore
@@ -103,12 +102,9 @@ class AnalyzeUrl(
     private var method = RequestMethod.GET
     private var proxy: String? = null
     private var retry: Int = 0
-    private var useWebView: Boolean = false
-    private var webJs: String? = null
     private var dnsIp: String? = null
     private val enabledCookieJar = source?.enabledCookieJar == true
     private val domain: String
-    private var webViewDelayTime: Long = 0
     private val concurrentRateLimiter = ConcurrentRateLimiter(source)
     private val cacheSettingsGateway get() = GlobalContext.get().get<DownloadCacheSettingsGateway>()
 
@@ -200,11 +196,8 @@ class AnalyzeUrl(
                 type = option.getType()
                 charset = option.getCharset()
                 retry = option.getRetry()
-                useWebView = option.useWebView()
-                webJs = option.getWebJs()
                 dnsIp = option.getDnsIp()
                 serverID = option.getServerID()
-                webViewDelayTime = max(0, option.getWebViewDelayTime() ?: 0)
             }
         }
         urlNoQuery = url
@@ -304,9 +297,6 @@ class AnalyzeUrl(
      * 访问网站,返回StrResponse
      */
     suspend fun getStrResponseAwait(
-        jsStr: String? = null,
-        sourceRegex: String? = null,
-        useWebView: Boolean = true,
         isTest: Boolean = false,
         skipRateLimit: Boolean = false
     ): StrResponse {
@@ -314,87 +304,50 @@ class AnalyzeUrl(
             return StrResponse(url, getByteArrayAwait().toHexString())
         }
         if (skipRateLimit) {
-            return executeStrRequest(jsStr, sourceRegex, useWebView, isTest)
+            return executeStrRequest(isTest)
         }
         concurrentRateLimiter.withLimit {
-            return executeStrRequest(jsStr, sourceRegex, useWebView, isTest)
+            return executeStrRequest(isTest)
         }
     }
 
     private suspend fun executeStrRequest(
-        jsStr: String? = null,
-        sourceRegex: String? = null,
-        useWebView: Boolean = true,
         isTest: Boolean = false
     ): StrResponse {
         setCookie()
         val startTime = System.currentTimeMillis()
         val strResponse: StrResponse
         try {
-            if (this.useWebView && useWebView) {
-                strResponse = when (method) {
+            strResponse = getClient().newCallStrResponse(retry) {
+                addHeaders(headerMap)
+                when (method) {
                     RequestMethod.POST -> {
-                        val res = getClient().newCallStrResponse(retry) {
-                            addHeaders(headerMap)
-                            url(urlNoQuery)
-                            if (!encodedForm.isNullOrEmpty() || body.isNullOrBlank()) {
-                                postForm(encodedForm ?: "")
-                            } else {
-                                postJson(body)
-                            }
+                        url(urlNoQuery)
+                        val contentType = headerMap["Content-Type"]
+                        val body = body
+                        if (!encodedForm.isNullOrEmpty() || body.isNullOrBlank()) {
+                            postForm(encodedForm ?: "")
+                        } else if (!contentType.isNullOrBlank()) {
+                            val requestBody = body.toRequestBody(contentType.toMediaType())
+                            post(requestBody)
+                        } else {
+                            postJson(body)
                         }
-                        BackstageWebView(
-                            url = res.url,
-                            html = res.body,
-                            tag = source?.getKey(),
-                            javaScript = webJs ?: jsStr,
-                            sourceRegex = sourceRegex,
-                            headerMap = headerMap,
-                            delayTime = webViewDelayTime
-                        ).getStrResponse()
                     }
 
-                    else -> BackstageWebView(
-                        url = url,
-                        tag = source?.getKey(),
-                        javaScript = webJs ?: jsStr,
-                        sourceRegex = sourceRegex,
-                        headerMap = headerMap,
-                        delayTime = webViewDelayTime
-                    ).getStrResponse()
-                }
-            } else {
-                strResponse = getClient().newCallStrResponse(retry) {
-                    addHeaders(headerMap)
-                    when (method) {
-                        RequestMethod.POST -> {
-                            url(urlNoQuery)
-                            val contentType = headerMap["Content-Type"]
-                            val body = body
-                            if (!encodedForm.isNullOrEmpty() || body.isNullOrBlank()) {
-                                postForm(encodedForm ?: "")
-                            } else if (!contentType.isNullOrBlank()) {
-                                val requestBody = body.toRequestBody(contentType.toMediaType())
-                                post(requestBody)
-                            } else {
-                                postJson(body)
-                            }
-                        }
-
-                        RequestMethod.HEAD -> {
-                            get(urlNoQuery, encodedQuery)
-                            head()
-                        }
-
-                        else -> get(urlNoQuery, encodedQuery)
+                    RequestMethod.HEAD -> {
+                        get(urlNoQuery, encodedQuery)
+                        head()
                     }
-                }.let {
-                    val isXml = it.raw.body.contentType()?.toString()
-                        ?.matches(AppPattern.xmlContentTypeRegex) == true
-                    if (isXml && it.body?.trim()?.startsWith("<?xml", true) == false) {
-                        StrResponse(it.raw, "<?xml version=\"1.0\"?>" + it.body)
-                    } else it
+
+                    else -> get(urlNoQuery, encodedQuery)
                 }
+            }.let {
+                val isXml = it.raw.body.contentType()?.toString()
+                    ?.matches(AppPattern.xmlContentTypeRegex) == true
+                if (isXml && it.body?.trim()?.startsWith("<?xml", true) == false) {
+                    StrResponse(it.raw, "<?xml version=\"1.0\"?>" + it.body)
+                } else it
             }
             val connectionTime = System.currentTimeMillis() - startTime
             strResponse.putCallTime(connectionTime.toInt())
@@ -423,14 +376,9 @@ class AnalyzeUrl(
         }
     }
 
-    @JvmOverloads
-    fun getStrResponse(
-        jsStr: String? = null,
-        sourceRegex: String? = null,
-        useWebView: Boolean = true,
-    ): StrResponse {
+    fun getStrResponse(): StrResponse {
         return runBlocking(coroutineContext) {
-            getStrResponseAwait(jsStr, sourceRegex, useWebView)
+            getStrResponseAwait()
         }
     }
 
@@ -700,14 +648,6 @@ class AnalyzeUrl(
          **/
         private var type: String? = null,
         /**
-         * 是否使用webView
-         **/
-        private var webView: Any? = null,
-        /**
-         * webView中执行的js
-         **/
-        private var webJs: String? = null,
-        /**
          * 自定义的域名ip
          **/
         private var dnsIp: String? = null,
@@ -715,10 +655,6 @@ class AnalyzeUrl(
          * 服务器id
          */
         private var serverID: Long? = null,
-        /**
-         * webview等待页面加载完毕的延迟时间（毫秒）
-         */
-        private var webViewDelayTime: Long? = null,
     ) {
         fun setMethod(value: String?) {
             method = if (value.isNullOrBlank()) null else value
@@ -760,17 +696,6 @@ class AnalyzeUrl(
             return type
         }
 
-        fun useWebView(): Boolean {
-            return when (webView) {
-                null, "", false, "false" -> false
-                else -> true
-            }
-        }
-
-        fun useWebView(boolean: Boolean) {
-            webView = if (boolean) true else null
-        }
-
         fun setHeaders(value: String?) {
             headers = if (value.isNullOrBlank()) {
                 null
@@ -802,13 +727,6 @@ class AnalyzeUrl(
             }
         }
 
-        fun setWebJs(value: String?) {
-            webJs = if (value.isNullOrBlank()) null else value
-        }
-
-        fun getWebJs(): String? {
-            return webJs
-        }
         fun setDnsIp(value: String?) {
             dnsIp = if (value.isNullOrBlank()) null else value
         }
@@ -823,14 +741,6 @@ class AnalyzeUrl(
 
         fun getServerID(): Long? {
             return serverID
-        }
-
-        fun setWebViewDelayTime(value: String?) {
-            webViewDelayTime = if (value.isNullOrBlank()) null else value.toLong()
-        }
-
-        fun getWebViewDelayTime(): Long? {
-            return webViewDelayTime
         }
     }
 

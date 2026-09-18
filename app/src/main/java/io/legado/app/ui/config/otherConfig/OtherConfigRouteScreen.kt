@@ -23,9 +23,7 @@ import io.legado.app.ui.widget.components.AppTextField
 import io.legado.app.ui.widget.components.alert.AppAlertDialog
 import io.legado.app.ui.widget.components.filePicker.FilePickerSheet
 import io.legado.app.utils.SystemUtils
-import io.legado.app.utils.restart
 import io.legado.app.utils.takePersistablePermissionSafely
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import org.koin.androidx.compose.koinViewModel
 
@@ -64,10 +62,6 @@ fun OtherConfigRouteScreen(
                     (context as? Activity)?.let(SystemUtils::ignoreBatteryOptimization)
                 }
                 OtherConfigEffect.OpenSystemDirectory -> selectDocTree.launch(null)
-                OtherConfigEffect.RestartApp -> {
-                    delay(RESTART_DELAY_MILLIS)
-                    context.restart()
-                }
             }
         }
     }
@@ -99,15 +93,6 @@ fun OtherConfigRouteScreen(
     )
 
     AppAlertDialog(
-        show = state.activeOverlay == OtherConfigOverlay.ClearWebViewConfirmation,
-        onDismissRequest = { viewModel.onIntent(OtherConfigIntent.DismissOverlay) },
-        title = stringResource(R.string.clear_webview_data),
-        text = stringResource(R.string.sure_del),
-        onConfirm = { viewModel.onIntent(OtherConfigIntent.ConfirmClearWebViewData) },
-        onDismiss = { viewModel.onIntent(OtherConfigIntent.DismissOverlay) },
-    )
-
-    AppAlertDialog(
         show = state.activeOverlay == OtherConfigOverlay.Password,
         onDismissRequest = { viewModel.onIntent(OtherConfigIntent.DismissOverlay) },
         title = stringResource(R.string.set_local_password),
@@ -128,5 +113,3 @@ fun OtherConfigRouteScreen(
         onDismiss = { viewModel.onIntent(OtherConfigIntent.DismissOverlay) },
     )
 }
-
-private const val RESTART_DELAY_MILLIS = 3_000L

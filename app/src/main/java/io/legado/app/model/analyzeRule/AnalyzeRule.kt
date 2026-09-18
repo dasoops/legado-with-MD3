@@ -3,13 +3,10 @@ package io.legado.app.model.analyzeRule
 import android.text.TextUtils
 import androidx.annotation.Keep
 import com.google.gson.internal.LinkedTreeMap
-import io.legado.app.constant.AppPattern.WebJS_PATTERN
 import io.legado.app.data.entities.BaseBook
 import io.legado.app.data.entities.BaseSource
 import io.legado.app.data.entities.Book
 import io.legado.app.data.entities.BookChapter
-import io.legado.app.domain.gateway.DownloadCacheSettingsGateway
-import io.legado.app.help.http.BackstageWebView
 import io.legado.app.model.Debug
 import io.legado.app.utils.GSON
 import io.legado.app.utils.GSONStrict
@@ -19,12 +16,9 @@ import io.legado.app.utils.fromJsonObject
 import io.legado.app.utils.getOrPutLimit
 import io.legado.app.utils.isDataUrl
 import io.legado.app.utils.isJson
-import io.legado.app.utils.isMainThread
 import io.legado.app.utils.splitNotBlank
-import kotlinx.coroutines.runBlocking
 import org.apache.commons.text.StringEscapeUtils
 import org.jsoup.nodes.Node
-import org.koin.core.context.GlobalContext
 import java.net.URL
 import kotlin.coroutines.ContinuationInterceptor
 import kotlin.coroutines.CoroutineContext
@@ -58,7 +52,6 @@ class AnalyzeRule(
 
     private val stringRuleCache = hashMapOf<String, List<SourceRule>>()
     private val regexCache = hashMapOf<String, Regex?>()
-    private val cacheSettingsGateway get() = GlobalContext.get().get<DownloadCacheSettingsGateway>()
 
     private var coroutineContext: CoroutineContext = EmptyCoroutineContext
 
@@ -146,22 +139,6 @@ class AnalyzeRule(
         }
     }
 
-    private fun getWebJsResult(jsStr: String, result: Any): String {
-        check(!isMainThread) { "webJs must be called on a background thread" }
-        return runBlocking {
-            BackstageWebView(
-                url = baseUrl,
-                html = content.toString(),
-                javaScript = jsStr,
-                headerMap = getSource()?.getHeaderMap(cacheSettingsGateway.currentSettings.userAgent, true),
-                tag = getSource()?.getKey(),
-                cacheFirst = true,
-                timeout = 10000,
-                isRule = true,
-            ).getStrResponse().body.orEmpty()
-        }
-    }
-
     /**
      * 获取文本列表
      */
@@ -192,9 +169,6 @@ class AnalyzeRule(
                     val rule = sourceRule.rule
                     if (rule.isNotEmpty()) {
                         result = when (sourceRule.mode) {
-                            Mode.WebJs -> getWebJsResult(rule, result).let {
-                                GSON.fromJsonArray<String>(it).getOrNull() ?: it
-                            }
                             Mode.Json -> getAnalyzeByJSonPath(result).getStringList(rule)
                             Mode.XPath -> getAnalyzeByXPath(result).getStringList(rule)
                             Mode.Default -> getAnalyzeByJSoup(result).getStringList(rule)
@@ -270,7 +244,6 @@ class AnalyzeRule(
                     val rule = sourceRule.rule
                     if (rule.isNotBlank() || sourceRule.replaceRegex.isEmpty()) {
                         result = when (sourceRule.mode) {
-                            Mode.WebJs -> getWebJsResult(rule, result)
                             Mode.Json -> getAnalyzeByJSonPath(result).getString(rule)
                             Mode.XPath -> getAnalyzeByXPath(result).getString(rule)
                             Mode.Default -> if (isUrl) {
@@ -326,10 +299,6 @@ class AnalyzeRule(
                         rule.splitNotBlank("&&")
                     )
 
-                    Mode.WebJs -> GSON.fromJsonObject<Map<String, Any?>>(
-                        getWebJsResult(rule, result)
-                    ).getOrNull()
-
                     Mode.Json -> getAnalyzeByJSonPath(result).getObject(rule)
                     Mode.XPath -> getAnalyzeByXPath(result).getElements(rule)
                     else -> getAnalyzeByJSoup(result).getElements(rule)
@@ -361,10 +330,6 @@ class AnalyzeRule(
                         result.toString(),
                         rule.splitNotBlank("&&")
                     )
-
-                    Mode.WebJs -> GSON.fromJsonArray<Map<String, Any?>>(
-                        getWebJsResult(rule, result)
-                    ).getOrNull()
 
                     Mode.Json -> getAnalyzeByJSonPath(result).getList(rule)
                     Mode.XPath -> getAnalyzeByXPath(result).getElements(rule)
@@ -478,20 +443,8 @@ class AnalyzeRule(
         } else if (isRegex) {
             mMode = Mode.Regex
         }
-        var tmp: String
-        for (webJsMatch in WebJS_PATTERN.findAll(ruleStr)) {
-            if (webJsMatch.range.first > start) {
-                tmp = ruleStr.substring(start, webJsMatch.range.first).trim { it <= ' ' }
-                if (tmp.isNotEmpty()) {
-                    ruleList.add(SourceRule(tmp, mMode))
-                }
-            }
-            ruleList.add(SourceRule(webJsMatch.groupValues[1], Mode.WebJs))
-            start = webJsMatch.range.last + 1
-        }
-
         if (ruleStr.length > start) {
-            tmp = ruleStr.substring(start).trim { it <= ' ' }
+            val tmp = ruleStr.substring(start).trim { it <= ' ' }
             if (tmp.isNotEmpty()) {
                 ruleList.add(SourceRule(tmp, mMode))
             }
@@ -667,7 +620,7 @@ class AnalyzeRule(
     }
 
     enum class Mode {
-        XPath, Json, Default, Regex, WebJs
+        XPath, Json, Default, Regex
     }
 
     /**

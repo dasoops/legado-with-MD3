@@ -5,7 +5,6 @@ package io.legado.app.utils
 import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Build
-import android.webkit.WebSettings
 import io.legado.app.BuildConfig
 import io.legado.app.constant.AppConst
 import io.legado.app.constant.AppLog
@@ -121,12 +120,7 @@ object LogUtils {
                     append("MODEL=").append(Build.MODEL).append("\n")
                     append("SDK_INT=").append(Build.VERSION.SDK_INT).append("\n")
                     append("RELEASE=").append(Build.VERSION.RELEASE).append("\n")
-                    val userAgent = try {
-                        WebSettings.getDefaultUserAgent(appCtx)
-                    } catch (e: Throwable) {
-                        e.toString()
-                    }
-                    append("WebViewUserAgent=").append(userAgent).append("\n")
+                    append("userAgent=").append(AppConst.DEFAULT_USER_AGENT).append("\n")
                     append("packageName=").append(appCtx.packageName).append("\n")
                     append("heapSize=").append(Runtime.getRuntime().maxMemory()).append("\n")
                     //获取app版本信息

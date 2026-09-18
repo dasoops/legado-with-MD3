@@ -161,12 +161,6 @@ fun OtherConfigScreen(
                     onConfirm = { onIntent(OtherConfigIntent.SourceEditMaxLineChanged(it.toIntOrNull() ?: 500)) }
                 )
 
-                ClickableSettingItem(
-                    title = stringResource(R.string.clear_webview_data),
-                    description = stringResource(R.string.clear_webview_data_summary),
-                    onClick = { onIntent(OtherConfigIntent.ShowOverlay(OtherConfigOverlay.ClearWebViewConfirmation)) }
-                )
-
                 SwitchSettingItem(
                     title = stringResource(R.string.add_to_text_context_menu_t),
                     description = stringResource(R.string.add_to_text_context_menu_s),

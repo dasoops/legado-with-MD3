@@ -2,7 +2,6 @@ package io.legado.app.ui.config.otherConfig
 
 import android.app.Application
 import android.os.Looper
-import io.legado.app.R
 import io.legado.app.domain.gateway.AppLocaleGateway
 import io.legado.app.domain.gateway.DownloadCacheSettingsGateway
 import io.legado.app.domain.gateway.LocalPasswordGateway
@@ -13,9 +12,6 @@ import io.legado.app.domain.model.settings.DownloadCacheSettings
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.async
-import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -76,23 +72,6 @@ class OtherConfigViewModelTest {
         viewModel.onIntent(OtherConfigIntent.MessageShown(message.id))
 
         assertEquals(1, viewModel.uiState.value.pendingMessages.size)
-    }
-
-    @Test
-    fun clearWebViewData_emitsRestartRequest() = runBlocking {
-        val viewModel = createViewModel()
-        val effect = async(start = CoroutineStart.UNDISPATCHED) {
-            viewModel.effects.first { it == OtherConfigEffect.RestartApp }
-        }
-
-        viewModel.onIntent(OtherConfigIntent.ConfirmClearWebViewData)
-        Shadows.shadowOf(Looper.getMainLooper()).idle()
-
-        assertEquals(OtherConfigEffect.RestartApp, effect.await())
-        assertEquals(
-            R.string.clear_webview_data_success,
-            viewModel.uiState.value.pendingMessages.firstOrNull()?.resId,
-        )
     }
 
     @Test
@@ -200,6 +179,5 @@ class OtherConfigViewModelTest {
         override suspend fun setProcessTextEnabled(enabled: Boolean) {
             this.enabled = enabled
         }
-        override suspend fun clearWebViewData() = Unit
     }
 }

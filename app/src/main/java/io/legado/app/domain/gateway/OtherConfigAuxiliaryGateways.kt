@@ -7,5 +7,4 @@ interface LocalPasswordGateway {
 interface OtherConfigSystemGateway {
     fun isProcessTextEnabled(): Boolean
     suspend fun setProcessTextEnabled(enabled: Boolean)
-    suspend fun clearWebViewData()
 }

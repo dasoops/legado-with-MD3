@@ -2,9 +2,6 @@ package io.legado.app.constant
 
 @Suppress("RegExpRedundantEscape", "unused")
 object AppPattern {
-    val WebJS_PATTERN: Regex =
-        Regex("@webjs:([\\w\\W]{5,})", RegexOption.IGNORE_CASE)
-
     //匹配格式化后的图片格式
     val imgPattern: Regex = Regex("<img[^>]*src=\"([^\"]*(?:\"[^>]+\\})?)\"[^>]*>")
 
