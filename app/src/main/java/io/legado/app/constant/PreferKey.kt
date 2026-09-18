@@ -173,7 +173,6 @@ object PreferKey {
     const val updateToVariant = "updateToVariant"
     const val autoCheckUpdateOnStart = "autoCheckUpdateOnStart"
     const val disableMangaScale = "disableMangaScale"
-    const val firebaseEnable = "firebaseEnable"
     const val cPrimary = "colorPrimary"
     const val customContrast = "customContrast"
     const val cAccent = "colorAccent"

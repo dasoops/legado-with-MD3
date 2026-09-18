@@ -109,7 +109,6 @@ object AppConfig {
     val bookshelfSort get() = bookshelf.bookshelfSort
     val bitmapCacheSize get() = cache.bitmapCacheSize
     val sourceEditMaxLine get() = other.sourceEditMaxLine
-    val firebaseEnable get() = other.firebaseEnable
     val pureBlack get() = theme.isPureBlack
     val isPredictiveBackEnabled get() = shell.predictiveBackEnabled
 }

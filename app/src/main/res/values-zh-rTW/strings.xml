@@ -1559,8 +1559,6 @@
     <string name="descending_order">降序</string>
     <string name="checking_update">正在檢查更新…</string>
     <string name="search_empty">無可用內容</string>
-    <string name="firebase_enable_title">匿名統計</string>
-    <string name="firebase_enable_summary">允許應用使用 Google Firebase 進行崩潰和效能報告</string>
     <string name="locate_current">定位目前位置</string>
     <string name="finish_current_chapter_after_timer">定時到點後讀完本章</string>
     <string name="finish_current_chapter_after_timer_summary">定時結束後繼續朗讀，讀完目前章節再停止</string>
