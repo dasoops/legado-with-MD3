@@ -24,8 +24,8 @@ Before editing, inspect the target View implementation if one exists, `MainActiv
    - For new screens, read `MainActivity`, nearby route screens, the relevant ViewModel/usecase/repository patterns, and shared UI components.
    - List UI state, user intents, one-shot effects, and external side effects.
    - Identify reusable Compose components under `ui/widget/components` before creating new components.
-   - Read `docs/dev/feature-first-structure.md`, identify the canonical Feature owner, and avoid
-     adding a second presentation package under legacy `ui/...`.
+   - Identify the canonical Feature owner and avoid adding a second presentation package under legacy
+     `ui/...`.
 
 3. Choose the minimal migration shape.
    - For new Compose-first screens, add a `MainActivity` navigation destination instead of creating a standalone Activity.

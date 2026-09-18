@@ -1,7 +1,9 @@
 # AGENTS.md
 
-本文件定义仓库级不变量。专项流程放在 `.agents/skills/`，长期方案放在 `docs/dev/`
-；不要把临时任务、讨论过程或一次性结论继续堆进本文件。
+本文件定义仓库级不变量。本仓库是 `dasoops/legado-with-MD3`, 基于 `HapeLee/legado-with-MD3`
+(其上游 `gedoor/legado`) 的 **本地阅读精简 fork**：只保留本地目录 / 文件阅读（TXT/EPUB/MOBI/PDF、阅读设置、替换规则、
+TXT 目录规则、书签、阅读记录、WebDAV 备份），不提供书源 / RSS / AI / 词典 / 在线朗读等在线功能。
+专项流程放在 `.agents/skills/`；不要把临时任务、讨论过程或一次性结论堆进本文件。
 
 ## 资料优先级
 
@@ -10,9 +12,8 @@
 1. 用户本次目标、范围与验收条件。
 2. 本文件的仓库级约束。
 3. 与任务匹配的 `.agents/skills/*/SKILL.md` 及其明确要求读取的 reference。
-4. `docs/dev/` 中的专项设计或迁移计划。
-5. 当前源码、测试、Gradle 配置和相邻实现；它们用于确认当前版本的真实 API 与行为。
-6. 外部资料只作为设计依据；涉及会变化的 Android、Kotlin、Compose 或库 API 时，以官方当前文档和本仓库版本为准。
+4. 当前源码、测试、Gradle 配置和相邻实现；它们用于确认当前版本的真实 API 与行为。
+5. 外部资料只作为设计依据；涉及会变化的 Android、Kotlin、Compose 或库 API 时，以官方当前文档和本仓库版本为准。
 
 文档与源码不一致时，先指出差异。不要为了让实现符合过期文档而静默改代码。
 
@@ -37,14 +38,15 @@
 
 当前工程是 Android-first 的渐进迁移仓库，不是已经完成的 KMP 工程：
 
-- Gradle 模块：`:app`、`:modules:book`、`:modules:rhino`、`:baselineprofile`；`modules/web` 是独立 Vue 3
-  工程。
+- 目标 Gradle 模块：`:app`、`:modules:book`、`:baselineprofile`。
+  - `:modules:rhino`（在线规则 JS 引擎）与 `modules/web`（在线服务 Vue 3 前端）当前仍在代码库中，
+    **目标: 待 P6 移除**，不要把它们当作要保留或继续扩展的模块。
 - `:app` 同时包含 Android UI、数据、领域、服务和大量遗留 View 代码；包目录只表达逻辑边界，尚无 Gradle
   编译隔离。
 - 新 UI 以 Jetpack Compose、Material 3、Navigation 3、Koin、StateFlow/SharedFlow 为默认；阅读器渲染核心等成熟
   View 代码可作为 Android 专业渲染岛保留。
 - `domain/` 是迁移目标边界，但当前仍存在 Android/JVM 类型渗透；不要把“目标纯净度”描述成已完成事实。
-- 长期目标是渐进演进为 KMP/CMP。详细目标结构、阶段和门禁见 `docs/dev/kmp-cmp-modernization.md`。
+- 长期目标是渐进演进为 KMP/CMP，但仅围绕本地阅读能力；在线相关的 Feature、规则引擎和网络附属不进入迁移范围。
 
 ### Feature-first 过渡结构
 
@@ -52,8 +54,8 @@
   path、Kotlin package 分别采用 `feature/book-info`、`:feature:book-info`、`feature.bookinfo`。
 - 在 `:app` 内先形成稳定 Feature 包，再提升为真实 `:feature:<name>` 模块；只有确有多宿主/多模块消费者时才拆
   `api/impl`，只有确有跨平台价值时才改为 KMP/CMP source sets。
-- Feature 内共置 Contract、ViewModel、Route、Screen 和私有 components/dialog/sheet/model；文件的详细归属与迁移步骤见
-  `docs/dev/feature-first-structure.md`，现有业务 owner 见 `docs/dev/feature-catalog.md`。
+- Feature 内共置 Contract、ViewModel、Route、Screen 和私有 components/dialog/sheet/model。文件归属跟随
+  canonical owner，不把领域、数据、平台能力塞进 Feature UI 包。
 - App host 聚合导航和 DI；Feature 不直接依赖其他 Feature 实现。领域、数据、平台能力不能为了目录整齐塞入
   Feature UI 包。
 - 旧 `ui/...` 是渐进迁移区，不做全量机械搬家；一个 Feature 的新 owner 建立后，禁止继续向旧包新增同职责文件。
@@ -75,8 +77,8 @@ platform implementations (Android/JVM/iOS/...)
 - 应用宿主负责组装 Feature 实现、DI、平台生命周期和导航运行时。
 - Feature 之间通过稳定契约或导航 API 协作，不直接依赖其他 Feature 的实现。
 - `commonMain` 只容纳经过依赖审计、能被至少一个非 Android 目标编译验证的代码；移动目录不等于完成跨平台迁移。
-- Android `Context`、Room 实体/DAO、Service、Broadcast、Activity Result、Cronet、文件
-  URI、通知、媒体会话、成熟阅读器渲染和现有 Rhino 集成默认留在平台侧，通过窄接口进入共享层。
+- Android `Context`、Room 实体/DAO、Service、Broadcast、Activity Result、文件
+  URI、通知、媒体会话和成熟阅读器渲染默认留在平台侧，通过窄接口进入共享层。
 - 平台能力不可用时必须显式建模为 capability/unsupported，不得用静默空实现伪造跨平台支持。
 
 ## Compose 屏幕约束
@@ -114,7 +116,7 @@ platform implementations (Android/JVM/iOS/...)
 ## KMP/CMP 迁移纪律
 
 - 先写行为/契约测试和依赖清单，再移动代码；一个 PR 只完成一个可说明的边界变化。
-- 优先抽取稳定模型、纯函数、规则解析契约和 UseCase；网络、数据库、JS 引擎、服务、阅读器渲染最后通过平台适配器处理。
+- 优先抽取稳定模型、纯函数、替换规则解析契约和 UseCase；数据库、服务、阅读器渲染最后通过平台适配器处理。
 - `expect/actual` 只用于真正的平台原语。可用普通接口 + DI 表达的能力，不使用 `expect/actual`。
 - 平台实现由 Koin 和应用 composition root 组装。
 - 不因 KMP 目标同时替换数据库、网络、DI、导航和 UI 框架。每次只改变一个主要风险维度。
@@ -140,7 +142,7 @@ platform implementations (Android/JVM/iOS/...)
 - 做了哪些验证，哪些真机、性能、外部服务或其他平台行为尚未验证？
 - CI 是否执行了受影响的共享测试、目标编译或 adapter contract test？
 
-减少历史违规时必须同步下调对应 baseline；门禁不接受“先放宽基线再迁移”。详细分级见 KMP/CMP 现代化计划。
+减少历史违规时必须同步下调对应 baseline；门禁不接受“先放宽基线再迁移”。
 
 ## 构建与验证
 
@@ -159,9 +161,6 @@ platform implementations (Android/JVM/iOS/...)
 # Release/R8 相关
 .\gradlew.bat assembleAppRelease
 .\gradlew.bat assembleAppNoR8
-
-# Web 前端
-pnpm --dir modules/web build
 ```
 
 KMP 任务名在模块实际创建后才存在；不要假装运行尚未定义的 `commonTest`、目标编译或 API
@@ -171,18 +170,16 @@ KMP 任务名在模块实际创建后才存在；不要假装运行尚未定义�
 
 ## 重要项目约束
 
-- 不将 jsoup 升级到 1.16.2 以上；新版行为会影响 `AnalyzeByJSoup.kt` 与 JsoupXpath。
-- 应用代码仅在两处依赖 Hutool：①作为书源 JS 的运行时加密库保留在 classpath（书源直接调用
-  `Packages.cn.hutool.*`）；②`help/crypto/CryptoUtils.kt` 的 base64 **解码**统一走
-  `cn.hutool.core.codec.Base64.decode`，以兼容缺 `=` 填充等宽松输入（Kotlin
-  `kotlin.io.encoding.Base64` 严格填充会导致部分书源取章名/正文回归）。版本固定 5.8.22 勿升级。
-  应用内部加密主体仍用现有 JCA（`javax.crypto`/`java.security`）与 `help/crypto` 路径，KMP 抽取时
-  再通过能力契约替换 JVM API。
-- 代码 namespace 为 `io.legado.app`，Android `applicationId` 为 `io.legato.kazusa`，不要混用。
+- 代码 namespace 为 `io.legado.app`，Android `applicationId` 为 `io.github.dasoops.reader`；两者本来就
+  不一致，不要混用。
 - 当前 minSdk 26、target/compile SDK 37；Release 启用 R8 与资源压缩，`noR8` 变体用于排障。
-- Rhino 书源/RSS/TTS 规则、Android 服务、Web 服务和阅读器渲染属于高行为风险平台能力，迁移前必须建立兼容测试或
-  capability 边界。
-- `modules/web` 必须连接应用内 Ktor WebService；开发环境通过 `VITE_API` 指向设备服务地址。
+- 应用内部加密主体使用现有 JCA（`javax.crypto`/`java.security`）与 `help/crypto` 路径。Hutool 目前仍被
+  在线书源 JS 与 `help/crypto/CryptoUtils.kt` 的 base64 宽松解码使用，**目标: 待 P6 随在线规则引擎一并评估
+  移除**，在此之前版本固定 5.8.22 勿升级。
+- 阅读器渲染属于高行为风险平台能力，迁移前必须建立兼容测试或 capability 边界。在线规则引擎（Rhino）、
+  内嵌 WebService、TTS / 音频等同样高风险，但**目标: 待 P5/P6 整体移除**，不要在这些方向新增投入。
+- 存在在线功能的过渡期，可参考源码与测试确认其当前行为；但任何改动都不应把在线能力带入本地阅读的
+  共享契约与 Feature UI。
 
 ## 交付说明
 

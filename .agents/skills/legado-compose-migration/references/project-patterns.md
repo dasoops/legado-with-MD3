@@ -6,8 +6,7 @@
 - Main source root: `app/src/main/java/io/legado/app`.
 - Legacy UI package: `ui/...`; it remains a migration zone, not the destination for new
   Compose-first Feature ownership.
-- Canonical new Feature package: `feature/<name>` as defined by
-  `docs/dev/feature-first-structure.md`.
+- Canonical new Feature package: `feature/<name>`.
 - Data package: `data/dao`, `data/entities`, `data/repository`.
 - Domain package: `domain/gateway`, `domain/model`, `domain/repository`, `domain/usecase`.
 - DI: `di/appModule.kt`, using Koin `singleOf`, `viewModelOf`, and parameterized `viewModel { ... }`.

@@ -11,8 +11,8 @@ Move one verified boundary toward KMP/CMP without weakening Android behavior. Tr
 platform-specific implementations as valid architecture, keep the Android app shippable after every
 slice, and use baselines as ratchets rather than waivers.
 
-Before acting, read repository `AGENTS.md` and `docs/dev/kmp-cmp-modernization.md`. For an
-implementation or review, also read [references/slice-checklist.md](references/slice-checklist.md).
+Before acting, read repository `AGENTS.md`. For an implementation or review, also read
+[references/slice-checklist.md](references/slice-checklist.md).
 
 ## Select the mode
 
@@ -37,15 +37,15 @@ implementation or review, also read [references/slice-checklist.md](references/s
     - Separate current facts from planned modules and task names.
     - Inspect Gradle files, version catalog, relevant tests, and imports rather than assuming an API
       is multiplatform.
-    - For Feature work, read `docs/dev/feature-first-structure.md` and distinguish package
-      colocation, Android module extraction, and KMP conversion as separate stages.
+    - For Feature work, distinguish package colocation, Android module extraction, and KMP conversion
+      as separate stages.
 
 2. Classify every dependency.
     - `common-ready`: Kotlin/common library API with a non-Android compile target.
     - `contract-needed`: behavior can be represented by a narrow interface and platform
       implementation.
-    - `platform-island`: lifecycle, service, reader rendering, Rhino/JVM or another capability that
-      should remain platform-specific.
+    - `platform-island`: lifecycle, service, reader rendering or another capability that should
+      remain platform-specific.
     - `unknown`: verify against primary documentation or a compile PoC before designing around it.
 
 3. Choose the smallest seam.
@@ -73,7 +73,7 @@ implementation or review, also read [references/slice-checklist.md](references/s
     - Always retain the repository G0 Android gates.
     - For common code, run the actual `commonTest`, metadata, and selected non-Android target
       compile tasks that exist in the changed project.
-    - For adapters, run contract and Android behavior tests. For reader/rule/service changes,
+    - For adapters, run contract and Android behavior tests. For reader/local-rule/service changes,
       include parity or performance evidence proportional to risk.
     - Report exact commands, dependency/baseline deltas, capability changes, rollback path, and
       unverified targets.
@@ -89,8 +89,8 @@ implementation or review, also read [references/slice-checklist.md](references/s
 - No generic dumping-ground module and no empty architecture-shaped modules.
 - Do not make Compose reader replacement a KMP prerequisite; share render models while allowing the
   Android renderer to remain specialized.
-- Preserve current rule-script, import/export, database, settings and reader semantics until
-  dedicated tests authorize a behavior change.
+- Preserve current local replace/TXT-chapter rule, import/export, database, settings and reader
+  semantics until dedicated tests authorize a behavior change.
 
 ## Relationship to Android Compose work
 

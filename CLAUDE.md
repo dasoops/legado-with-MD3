@@ -63,18 +63,20 @@ Transform tasks into verifiable goals:
 
 # Lint
 ./gradlew lint
-
-# Update Cronet (after changing CronetVersion in gradle.properties)
-./gradlew app:downloadCronet
 ```
 
-The project uses JDK 21 for development (set in `build.gradle.kts` via `jvmToolchain`). CI uses JDK 17 for building.
+The project uses JDK 21 for development and CI (set in `build.gradle.kts` via `jvmToolchain`).
 
 Gradle properties: 8 GB heap, configuration cache disabled (`gradle.properties:31`), non-transitive R classes, precise resource shrinking enabled.
 
 ## Architecture
 
-This is a Material Design 3 fork of [Legado](https://github.com/gedoor/legado). `app/src/main/java/io/legado/app/` uses **Clean Architecture** with three layers:
+This is a Material Design 3 **local-reading fork** of [Legado](https://github.com/gedoor/legado)
+(based on [HapeLee/legado-with-MD3](https://github.com/HapeLee/legado-with-MD3)). It keeps only
+offline reading of local TXT/EPUB/MOBI/PDF files, reading settings, replace rules, TXT chapter
+rules, bookmarks, reading history and WebDAV backup; online features (book sources, RSS, AI,
+dictionary, online read-aloud) are being removed and must not receive new investment.
+`app/src/main/java/io/legado/app/` uses **Clean Architecture** with three layers:
 
 | Layer | Package | Role |
 |---|---|---|
@@ -83,15 +85,16 @@ This is a Material Design 3 fork of [Legado](https://github.com/gedoor/legado). 
 | UI | `ui/` | Jetpack Compose screens, Navigation 3 routes, ViewModels |
 
 Additional top-level packages:
-- **`help/`** — Infrastructure "glue": HTTP (OkHttp + Cronet), book content processing, backup/WebDAV, JS engine, config
-- **`model/`** — Runtime state coordinators (not entities): `ReadBook`, `AudioPlay`, `CacheBook`, `BookCover`, etc.
-- **`service/`** — Android foreground/background services (audio playback, TTS, download, web server)
-- **`web/`** — Embedded HTTP server (Ktor) for remote bookshelf/source editing
-- **`lib/`** — Third-party library wrappers (MOBI parser, WebDAV client, legacy View theme system, cronet)
+- **`help/`** — Infrastructure "glue": book content processing, backup/WebDAV, config
+- **`model/`** — Runtime state coordinators (not entities): `ReadBook`, `BookCover`, etc.
+- **`service/`** — Android foreground/background services (download, maintenance)
+- **`lib/`** — Third-party library wrappers (MOBI parser, WebDAV client, legacy View theme system)
 - **`base/`** — Abstract Activity/Fragment/ViewModel base classes
 - **`utils/`** — Extension functions and utility classes (~70 files)
 
-Modules: `:app`, `:modules:book` (epub/TXT parsing, namespace `me.ag2s`), `:modules:rhino` (Rhino JS wrapper, namespace `com.script`). There is also a Vue 3 web frontend in `modules/web/` (pnpm, separate from the Android build).
+Modules: `:app`, `:modules:book` (epub/TXT parsing, namespace `me.ag2s`), `:baselineprofile`.
+`:modules:rhino` (Rhino JS wrapper) and `modules/web` (Vue 3 frontend) still exist in the tree but
+are **targets for removal in P6**; do not extend them.
 
 ## Dependency Injection (Koin)
 
@@ -121,7 +124,7 @@ private data object MainRouteHome : MainRoute
 private data class MainRouteCache(val groupId: Long) : MainRoute
 ```
 
-`MainActivity` holds a single `NavDisplay` with `entryProvider { ... }` defining all composable entries. `Launcher0` through `LauncherW` extend `MainActivity` to provide multiple launcher icon alias entries. Separate activities handle the reader (`ReadBookActivity` — still View-based), book info, source management, replace rules, file manager, QR scanner, etc.
+`MainActivity` holds a single `NavDisplay` with `entryProvider { ... }` defining all composable entries. `Launcher0` through `LauncherW` extend `MainActivity` to provide multiple launcher icon alias entries. Separate activities handle the reader (`ReadBookActivity` — still View-based), book info, replace rules, file manager, etc. Source-management, QR-scan and other online entry points are **targets for removal in P4/P5**.
 
 ## Theme System
 
@@ -136,7 +139,7 @@ Legacy View-based theme still exists in `lib/theme/` (used by non-migrated scree
 
 ## Hybrid Compose + View
 
-The app is mid-migration from Views to Compose. View-based screens (reader, book info, source management) coexist with Compose screens (main tabs, settings, search, RSS, cache management). XML layouts, `viewBinding`, and traditional Activities are still heavily used. The `viewBinding` build feature is enabled but Compose screens are the target.
+The app is mid-migration from Views to Compose. View-based screens (reader, book info) coexist with Compose screens (main tabs, settings, bookshelf, cache management). Online screens (search, RSS, source management) still exist in the tree but are **targets for removal in P4/P5**. XML layouts, `viewBinding`, and traditional Activities are still heavily used. The `viewBinding` build feature is enabled but Compose screens are the target.
 
 ## Jetpack Compose Requirements (new screens MUST follow)
 
@@ -359,35 +362,17 @@ if (ThemeResolver.isMiuixEngine(LegadoTheme.composeEngine)) {
 ```
 
 For detailed Compose review conventions and migration patterns, see
-`.claude/skills/legado-compose-review/`.
-
-## Rhino JavaScript Engine
-
-Book sources, RSS sources, and HTTP TTS use JavaScript rules. `initRhino()` in `App.kt` registers `NativeBaseSource` wrappers for `BookSource`, `RssSource`, `HttpTTS` (writable JS objects) and `ReadOnlyJavaObject` wrappers for rule entities. Rule parsing logic lives in `help/source/` and `model/analyzeRule/`.
+`.agents/skills/legado-compose-review/`.
 
 ## Important Constraints
 
-- **Do not update jsoup** beyond 1.16.2 — a breaking change in newer versions (see [jsoup#2017](https://github.com/jhy/jsoup/pull/2017)) affects `AnalyzeByJSoup.kt` and the JsoupXpath library
-- Hutool is back on the classpath at 5.8.22 (do not upgrade). Book-source JS calls it via
-  `Packages.cn.hutool.*`; app-internal **base64 decoding** in `help/crypto/CryptoUtils.kt` also
-  routes through `cn.hutool.core.codec.Base64.decode` for lenient input compatibility (Kotlin
-  `kotlin.io.encoding.Base64` is strict about `=` padding). App crypto otherwise uses JCA (
-  `javax.crypto`/`java.security`); new internal tools live in `help/crypto/CryptoUtils.kt`
-- Package name discrepancy: code namespace is `io.legado.app` but `applicationId` is `io.legato.kazusa`
+- Code namespace is `io.legado.app`; Android `applicationId` is `io.github.dasoops.reader` (they are
+  intentionally different — the fork installs alongside the original app without replacing it)
+- App crypto uses JCA (`javax.crypto`/`java.security`) under `help/crypto/`. Hutool 5.8.22 is still
+  on the classpath for the online rule JS engine and lenient base64 decoding in
+  `help/crypto/CryptoUtils.kt`; it is a **removal target for P6** — do not upgrade it meanwhile
 - Min SDK 26, target SDK 37, compile SDK 37
 - Release builds enable R8 minification + resource shrinking; `noR8` variant disables both for crash debugging
 - APK is split by ABI (`armeabi-v7a`, `arm64-v8a`, plus universal)
-- Firebase Analytics and Performance are included; `google-services` plugin applied
-
-## Web Frontend
-
-Located in `modules/web/` — a Vue 3 + TypeScript + Vite project for remote bookshelf and source editing. Must connect to the app's built-in HTTP server (started via `WebService` in the main activity settings). Commands:
-
-```bash
-cd modules/web
-pnpm install
-pnpm dev       # dev server
-pnpm build     # production build
-```
-
-Set `VITE_API` in `.env.development` to the app's web service IP.
+- Firebase Analytics and Performance are still wired in but are **removal targets for P6**; do not
+  add new telemetry

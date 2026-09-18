@@ -39,8 +39,8 @@ Read this reference for implementation plans, extraction work, scaffolding, or r
   behavior; it is not mislabeled as common.
 - Platform files are in the narrowest relevant source set.
 - Android services, Room/Context/URI/resources, notifications and renderer code stay Android-side.
-- Rhino/JS behavior stays behind a capability boundary until another target has a compatible
-  implementation.
+- Local replace/TXT-chapter rule evaluation stays behind a capability boundary until another target
+  has a compatible implementation.
 - Shared Compose code emits callbacks/effects; host navigation and platform launchers stay outside.
 
 ## Gates
@@ -51,7 +51,8 @@ Read this reference for implementation plans, extraction work, scaffolding, or r
   evidence.
 - Adapter contract tests cover success, failure and cancellation where relevant.
 - Serialization/database changes have forward/backward or migration evidence.
-- Reader/rule/service changes have parity and, when relevant, real-device performance evidence.
+- Reader/local-rule/service changes have parity and, when relevant, real-device performance
+  evidence.
 - Reduced historical violations lower their baseline in the same change.
 - `git diff --check` passes.
 
