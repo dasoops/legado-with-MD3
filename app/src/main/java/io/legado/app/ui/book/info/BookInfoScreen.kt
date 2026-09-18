@@ -38,7 +38,6 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.automirrored.outlined.FormatListBulleted
 import androidx.compose.material.icons.filled.Book
 import androidx.compose.material.icons.filled.BookmarkAdd
@@ -118,7 +117,6 @@ import io.legado.app.ui.widget.components.AppPullToRefresh
 import io.legado.app.ui.widget.components.AppScaffold
 import io.legado.app.ui.widget.components.AppTextField
 import io.legado.app.ui.widget.components.alert.AppAlertDialog
-import io.legado.app.ui.widget.components.button.series.SmallTonalButton
 import io.legado.app.ui.widget.components.card.GlassCard
 import io.legado.app.ui.widget.components.card.HighlightTagRow
 import io.legado.app.ui.widget.components.card.TextCard
@@ -369,9 +367,6 @@ private fun BookInfoScreenContent(
                                         books = module.books,
                                         onBookClick = { book, _ ->
                                             onIntent(BookInfoIntent.RelatedBookClick(book))
-                                        },
-                                        onMoreClick = {
-                                            onIntent(BookInfoIntent.RelatedBooksMore(module.title, module.resolvedUrl))
                                         },
                                     )
                                 }
@@ -1618,7 +1613,6 @@ private fun RelatedBooksBanner(
     title: String,
     books: ImmutableList<SearchBook>,
     onBookClick: (SearchBook, String?) -> Unit,
-    onMoreClick: () -> Unit,
 ) {
     Column(
         modifier = Modifier
@@ -1637,11 +1631,6 @@ private fun RelatedBooksBanner(
                     style = LegadoTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.weight(1f),
-                )
-                SmallTonalButton(
-                    onClick = onMoreClick,
-                    icon = Icons.AutoMirrored.Filled.ArrowForward,
-                    contentDescription = stringResource(R.string.a11y_related_books_more, title),
                 )
             }
         }

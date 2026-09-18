@@ -98,7 +98,6 @@ private fun buildMainUiState(
 ): MainUiState {
     val destinations = MainDestination.ordered(appShell.mainNavigationOrder).filter {
         when (it) {
-            MainDestination.Explore -> appShell.showDiscovery
             MainDestination.Rss -> appShell.showRss
             else -> true
         }
@@ -115,11 +114,9 @@ private fun buildMainUiState(
         labelVisibilityMode = appShell.labelVisibilityMode,
         navExtended = appShell.navExtended,
         navIconBookshelf = appShell.navIconBookshelf,
-        navIconExplore = appShell.navIconExplore,
         navIconRss = appShell.navIconRss,
         navIconMy = appShell.navIconMy,
         navIconBookshelfSelected = appShell.navIconBookshelfSelected,
-        navIconExploreSelected = appShell.navIconExploreSelected,
         navIconRssSelected = appShell.navIconRssSelected,
         navIconMySelected = appShell.navIconMySelected,
         deepPersonalizationActive = theme.appTheme == "12" && theme.enableDeepPersonalization,

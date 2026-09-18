@@ -14,11 +14,9 @@ data class MainUiState(
     val labelVisibilityMode: String = "auto",
     val navExtended: Boolean = false,
     val navIconBookshelf: String = "",
-    val navIconExplore: String = "",
     val navIconRss: String = "",
     val navIconMy: String = "",
     val navIconBookshelfSelected: String = "",
-    val navIconExploreSelected: String = "",
     val navIconRssSelected: String = "",
     val navIconMySelected: String = "",
     val deepPersonalizationActive: Boolean = false,
@@ -27,14 +25,12 @@ data class MainUiState(
 ) {
     fun customIconPath(destination: MainDestination): String = when (destination) {
         MainDestination.Bookshelf -> navIconBookshelf
-        MainDestination.Explore -> navIconExplore
         MainDestination.Rss -> navIconRss
         MainDestination.My -> navIconMy
     }
 
     fun selectedCustomIconPath(destination: MainDestination): String = when (destination) {
         MainDestination.Bookshelf -> navIconBookshelfSelected
-        MainDestination.Explore -> navIconExploreSelected
         MainDestination.Rss -> navIconRssSelected
         MainDestination.My -> navIconMySelected
     }

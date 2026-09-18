@@ -278,7 +278,6 @@
 
 	<string-array name="default_home_page">
 		<item>@string/bookshelf</item>
-        <item>@string/discovery</item>
 		<item>@string/rss</item>
 		<item>@string/my</item>
 	</string-array>
@@ -293,7 +292,6 @@
 
 	<string-array name="default_home_page_value">
 		<item>bookshelf</item>
-		<item>explore</item>
 		<item>rss</item>
 		<item>my</item>
 	</string-array>

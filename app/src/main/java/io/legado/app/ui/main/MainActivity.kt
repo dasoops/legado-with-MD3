@@ -234,13 +234,6 @@ open class MainActivity : BaseComposeActivity(), AudioPlay.CallBack {
             coverPath: String? = null
         ): Intent =
             MainIntent.createBookInfoIntent(context, name, author, bookUrl, origin, coverPath)
-
-        fun createExploreShowIntent(
-            context: Context,
-            exploreName: String? = null,
-            sourceUrl: String,
-            exploreUrl: String? = null,
-        ): Intent = MainIntent.createExploreShowIntent(context, exploreName, sourceUrl, exploreUrl)
     }
 
     private val viewModel by viewModel<MainViewModel>()

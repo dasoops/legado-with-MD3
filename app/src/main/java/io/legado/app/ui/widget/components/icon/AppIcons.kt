@@ -9,7 +9,6 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.Explore
 import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.LocationSearching
@@ -21,7 +20,6 @@ import androidx.compose.material.icons.filled.Replay
 import androidx.compose.material.icons.filled.RssFeed
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.outlined.Explore
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material.icons.outlined.RssFeed
 import androidx.compose.material.icons.outlined.Sell
@@ -31,7 +29,6 @@ import io.legado.app.ui.main.MainDestination
 import io.legado.app.ui.theme.LegadoTheme
 import io.legado.app.ui.theme.ThemeResolver
 import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icon.extended.Album
 import top.yukonga.miuix.kmp.icon.extended.Back
 import top.yukonga.miuix.kmp.icon.extended.Close
 import top.yukonga.miuix.kmp.icon.extended.ContactsBook
@@ -128,12 +125,6 @@ object AppIcons {
                 if (selected) MiuixIcons.Regular.Notes else MiuixIcons.Regular.Notes
             } else {
                 if (selected) Icons.AutoMirrored.Filled.LibraryBooks else Icons.AutoMirrored.Outlined.LibraryBooks
-            }
-
-            MainDestination.Explore -> if (isMiuix) {
-                if (selected) MiuixIcons.Regular.Album else MiuixIcons.Regular.Album
-            } else {
-                if (selected) Icons.Default.Explore else Icons.Outlined.Explore
             }
 
             MainDestination.Rss -> if (isMiuix) {

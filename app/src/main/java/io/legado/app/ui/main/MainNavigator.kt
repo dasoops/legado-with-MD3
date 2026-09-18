@@ -139,7 +139,6 @@ object MainNavigator {
                 if (
                     currentRoute == MainRouteBookshelf ||
                     currentRoute is MainRouteBookInfo ||
-                    currentRoute is MainRouteExploreShow ||
                     currentRoute is MainRouteBookSourceManage ||
                     currentRoute is MainRouteSearch
                 ) {
@@ -155,7 +154,6 @@ object MainNavigator {
                 if (
                     currentRoute == MainRouteBookshelf ||
                     currentRoute is MainRouteSearch ||
-                    currentRoute is MainRouteExploreShow ||
                     currentRoute is MainRouteBookInfo ||
                     currentRoute is MainRouteCache ||
                     currentRoute is MainRouteReadManga
@@ -178,21 +176,6 @@ object MainNavigator {
                     currentRoute == MainRouteTtsCache ||
                     currentRoute is MainRouteReadBook ||
                     currentRoute is MainRouteReadManga
-                ) {
-                    backStack.add(route)
-                } else {
-                    backStack.clear()
-                    backStack.add(MainRouteBookshelf)
-                    backStack.add(route)
-                }
-            }
-
-            is MainRouteExploreShow -> {
-                if (
-                    currentRoute == MainRouteBookshelf ||
-                    currentRoute is MainRouteBookInfo ||
-                    currentRoute is MainRouteSearch ||
-                    currentRoute is MainRouteExploreShow
                 ) {
                     backStack.add(route)
                 } else {
@@ -443,16 +426,6 @@ object MainNavigator {
                         bookUrl = bookUrl,
                         origin = intent.getStringExtra(MainIntent.EXTRA_BOOK_ORIGIN),
                         coverPath = intent.getStringExtra(MainIntent.EXTRA_BOOK_COVER)
-                    )
-                } ?: MainRouteBookshelf
-
-            MainRouteConst.ROUTE_EXPLORE_SHOW -> intent?.getStringExtra(MainIntent.EXTRA_SOURCE_URL)
-                ?.takeIf { it.isNotBlank() }
-                ?.let { sourceUrl ->
-                    MainRouteExploreShow(
-                        title = intent.getStringExtra(MainIntent.EXTRA_EXPLORE_NAME),
-                        sourceUrl = sourceUrl,
-                        exploreUrl = intent.getStringExtra(MainIntent.EXTRA_EXPLORE_URL),
                     )
                 } ?: MainRouteBookshelf
 

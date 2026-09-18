@@ -52,9 +52,6 @@ import io.legado.app.ui.book.audio.AudioPlayIntent
 import io.legado.app.ui.book.audio.AudioPlayScreenContent
 import io.legado.app.ui.book.audio.AudioPlayViewModel
 import io.legado.app.ui.book.cache.manage.BookCacheManageRouteScreen
-import io.legado.app.ui.book.explore.ExploreShowIntent
-import io.legado.app.ui.book.explore.ExploreShowRouteScreen
-import io.legado.app.ui.book.explore.ExploreShowViewModel
 import io.legado.app.ui.book.import.local.ImportBookRouteScreen
 import io.legado.app.ui.book.import.remote.RemoteBookRouteScreen
 import io.legado.app.ui.book.info.BookInfoRouteScreen
@@ -343,9 +340,6 @@ fun MainActivity.mainEntryProvider(
                     )
                 )
             },
-            onNavigateToScopedSearch = { scopeRaw ->
-                onNavigateToRoute(MainRouteSearch(key = null, scopeRaw = scopeRaw))
-            },
             onNavigateToRemoteImport = {
                 onNavigateToRoute(MainRouteImportRemote)
             },
@@ -384,23 +378,11 @@ fun MainActivity.mainEntryProvider(
                     )
                 )
             },
-            onNavigateToExploreShow = { title, sourceUrl, exploreUrl ->
-                onNavigateToRoute(
-                    MainRouteExploreShow(
-                        title = title,
-                        sourceUrl = sourceUrl,
-                        exploreUrl = exploreUrl
-                    )
-                )
-            },
             onNavigateToSourceLogin = { type, sourceUrl ->
                 onNavigateToRoute(MainRouteSourceLogin(type, sourceUrl))
             },
             onNavigateToBookSourceManage = {
                 onNavigateToRoute(MainRouteBookSourceManage())
-            },
-            onNavigateToBookSourceEdit = {
-                onNavigateToRoute(MainRouteBookSourceEdit(it))
             },
             onNavigateToRssSourceManage = {
                 onNavigateToRoute(MainRouteRssSourceManage)
@@ -1094,42 +1076,9 @@ fun MainActivity.mainEntryProvider(
             onNavigateToBookInfo = { name, author, bookUrl, origin, coverPath ->
                 onNavigateToRoute(MainRouteBookInfo(name, author, bookUrl, origin, coverPath))
             },
-            onNavigateToExploreShow = { title, sourceUrl, exploreUrl ->
-                onNavigateToRoute(MainRouteExploreShow(title, sourceUrl, exploreUrl))
-            },
             sharedTransitionScope = sharedTransitionScope,
             animatedVisibilityScope = LocalNavAnimatedContentScope.current,
             sharedCoverKey = route.sharedCoverKey ?: bookCoverSharedElementKey(route.bookUrl),
-        )
-    }
-
-    entry<MainRouteExploreShow> { route ->
-        val exploreViewModel = koinViewModel<ExploreShowViewModel>()
-
-        LaunchedEffect(route.sourceUrl, route.exploreUrl, exploreViewModel) {
-            exploreViewModel.onIntent(
-                ExploreShowIntent.InitData(route.sourceUrl, route.exploreUrl)
-            )
-        }
-
-        ExploreShowRouteScreen(
-            viewModel = exploreViewModel,
-            title = route.title ?: "探索",
-            onBack = { onNavigateBack() },
-            onBookClick = { book, sharedCoverKey ->
-                onNavigateToRoute(
-                    MainRouteBookInfo(
-                        name = book.name,
-                        author = book.author,
-                        bookUrl = book.bookUrl,
-                        origin = book.origin,
-                        coverPath = book.coverUrl,
-                        sharedCoverKey = sharedCoverKey
-                    )
-                )
-            },
-            sharedTransitionScope = sharedTransitionScope,
-            animatedVisibilityScope = LocalNavAnimatedContentScope.current,
         )
     }
 

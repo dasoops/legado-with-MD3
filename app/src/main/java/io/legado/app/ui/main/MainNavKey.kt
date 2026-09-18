@@ -158,13 +158,6 @@ data object MainRouteRssFavorites : MainRoute
 data object MainRouteRuleSub : MainRoute
 
 @Serializable
-data class MainRouteExploreShow(
-    val title: String?,
-    val sourceUrl: String,
-    val exploreUrl: String?,
-) : MainRoute
-
-@Serializable
 data class MainRouteSearchContent(
     val bookUrl: String,
     val searchWord: String? = null,
@@ -208,7 +201,6 @@ object MainRouteConst {
     const val ROUTE_SEARCH = "search"
     const val ROUTE_SEARCH_CONTENT = "book/searchContent"
     const val ROUTE_BOOK_INFO = "book/info"
-    const val ROUTE_EXPLORE_SHOW = "explore/show"
     const val ROUTE_RSS_SORT = "rss/sort"
     const val ROUTE_RSS_READ = "rss/read"
     const val ROUTE_RSS_FAVORITES = "rss/favorites"

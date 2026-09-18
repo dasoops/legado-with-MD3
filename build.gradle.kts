@@ -235,7 +235,6 @@ val verifyConfigArchitecture = tasks.register<VerifyConfigArchitectureTask>(
             "io/legado/app/receiver/MediaButtonReceiver.kt" to 2,
             "io/legado/app/service/WebService.kt" to 2,
             "io/legado/app/ui/association/ImportReplaceRuleDialog.kt" to 1,
-            "io/legado/app/ui/book/explore/ExploreShowViewModel.kt" to 2,
             "io/legado/app/ui/book/read/ReadBookViewModel.kt" to 2,
             "io/legado/app/ui/book/readRecord/ReadRecordViewModel.kt" to 1,
             "io/legado/app/ui/book/search/SearchViewModel.kt" to 3,
@@ -269,7 +268,7 @@ val verifyConfigArchitecture = tasks.register<VerifyConfigArchitectureTask>(
             "io/legado/app/ui/config/bookshelfConfig/BookshelfManageScreenConfig.kt" to 1,
             "io/legado/app/ui/main/MainNavGraph.kt" to 2,
             "io/legado/app/ui/rss/article/RssArticlesCompose.kt" to 1,
-            "io/legado/app/ui/rss/read/RssJsExtensions.kt" to 8,
+            "io/legado/app/ui/rss/read/RssJsExtensions.kt" to 7,
             "io/legado/app/ui/widget/dialog/BottomWebViewDialog.kt" to 1,
         )
     )

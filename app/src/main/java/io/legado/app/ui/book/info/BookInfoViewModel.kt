@@ -352,7 +352,6 @@ class BookInfoViewModel(
             }
 
             is BookInfoIntent.RelatedBookClick -> onRelatedBookClick(intent.book)
-            is BookInfoIntent.RelatedBooksMore -> onRelatedBooksMore(intent.title, intent.url)
             is BookInfoIntent.SetDefaultBookTreeUri -> viewModelScope.launch {
                 otherSettingsGateway.update { it.copy(defaultBookTreeUri = intent.value) }
             }
@@ -1450,17 +1449,6 @@ class BookInfoViewModel(
                 bookUrl = book.bookUrl,
                 origin = book.origin,
                 coverPath = book.coverUrl,
-            )
-        )
-    }
-
-    private fun onRelatedBooksMore(title: String, resolvedUrl: String) {
-        val source = bookSource ?: return
-        emitEffect(
-            BookInfoEffect.NavigateToExploreShow(
-                title = title,
-                sourceUrl = source.bookSourceUrl,
-                exploreUrl = resolvedUrl,
             )
         )
     }

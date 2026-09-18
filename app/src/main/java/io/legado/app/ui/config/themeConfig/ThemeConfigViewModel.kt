@@ -289,12 +289,6 @@ class ThemeConfigViewModel(
 
     private fun setMainDestinationVisible(intent: ThemeConfigIntent.SetMainDestinationVisible) {
         val transform: (AppShellSettings) -> AppShellSettings = when (intent.route) {
-            MainDestination.Explore.route -> { current ->
-                current.copy(
-                    showDiscovery = intent.visible,
-                    defaultHomePage = current.fallbackHomePage(intent),
-                )
-            }
             MainDestination.Rss.route -> { current ->
                 current.copy(
                     showRss = intent.visible,
@@ -328,9 +322,6 @@ class ThemeConfigViewModel(
             MainDestination.Bookshelf.route -> { settings ->
                 settings.copy(navIconBookshelf = intent.path)
             }
-            MainDestination.Explore.route -> { settings ->
-                settings.copy(navIconExplore = intent.path)
-            }
             MainDestination.Rss.route -> { settings ->
                 settings.copy(navIconRss = intent.path)
             }
@@ -339,10 +330,6 @@ class ThemeConfigViewModel(
             }
             "${MainDestination.Bookshelf.route}:selected" -> { settings ->
                 settings.copy(navIconBookshelfSelected = intent.path)
-            }
-
-            "${MainDestination.Explore.route}:selected" -> { settings ->
-                settings.copy(navIconExploreSelected = intent.path)
             }
 
             "${MainDestination.Rss.route}:selected" -> { settings ->
@@ -370,11 +357,9 @@ class ThemeConfigViewModel(
 
     private fun AppShellSettings.navIconPath(destination: String): String = when (destination) {
         MainDestination.Bookshelf.route -> navIconBookshelf
-        MainDestination.Explore.route -> navIconExplore
         MainDestination.Rss.route -> navIconRss
         MainDestination.My.route -> navIconMy
         "${MainDestination.Bookshelf.route}:selected" -> navIconBookshelfSelected
-        "${MainDestination.Explore.route}:selected" -> navIconExploreSelected
         "${MainDestination.Rss.route}:selected" -> navIconRssSelected
         "${MainDestination.My.route}:selected" -> navIconMySelected
         else -> ""

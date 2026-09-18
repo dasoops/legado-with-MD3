@@ -79,7 +79,6 @@ import io.legado.app.R
 import io.legado.app.ui.main.bookshelf.BookShelfItem
 import io.legado.app.ui.main.bookshelf.BookshelfRouteScreen
 import io.legado.app.ui.main.bookshelf.BookshelfViewModel
-import io.legado.app.ui.main.explore.ExploreRouteScreen
 import io.legado.app.ui.main.my.MyRouteScreen
 import io.legado.app.ui.main.my.PrefClickEvent
 import io.legado.app.ui.main.rss.RssRouteScreen
@@ -120,17 +119,14 @@ fun MainScreen(
     useRail: Boolean,
     onOpenSettings: () -> Unit,
     onNavigateToSearch: (String?) -> Unit,
-    onNavigateToScopedSearch: (String) -> Unit,
     onNavigateToRemoteImport: () -> Unit,
     onNavigateToLocalImport: () -> Unit,
     onNavigateToCache: (Long) -> Unit,
     onNavigateToBookCacheManage: () -> Unit,
     onOpenBookshelfBook: (BookShelfItem, String?) -> Unit,
     onNavigateToBookInfo: (name: String, author: String, bookUrl: String, origin: String?, coverPath: String?, sharedCoverKey: String?) -> Unit,
-    onNavigateToExploreShow: (title: String?, sourceUrl: String, exploreUrl: String?) -> Unit,
     onNavigateToSourceLogin: (type: io.legado.app.ui.login.SourceLoginType, sourceUrl: String) -> Unit,
     onNavigateToBookSourceManage: () -> Unit,
-    onNavigateToBookSourceEdit: (String?) -> Unit,
     onNavigateToRssSourceManage: () -> Unit,
     onNavigateToRssSourceEdit: (String?) -> Unit,
     onNavigateToRssSort: (sourceUrl: String, sortUrl: String?, key: String?) -> Unit,
@@ -529,17 +525,6 @@ fun MainScreen(
                                 animatedVisibilityScope = animatedVisibilityScope,
                             )
 
-                            MainDestination.Explore -> ExploreRouteScreen(
-                                onOpenExploreShow = onNavigateToExploreShow,
-                                onOpenLogin = { sourceUrl ->
-                                    onNavigateToSourceLogin(
-                                        io.legado.app.ui.login.SourceLoginType.BookSource,
-                                        sourceUrl,
-                                    )
-                                },
-                                onOpenEdit = onNavigateToBookSourceEdit,
-                                onOpenSearch = onNavigateToScopedSearch,
-                            )
                             MainDestination.Rss -> RssRouteScreen(
                                 onOpenSort = { sourceUrl, sortUrl, key ->
                                     onNavigateToRssSort(sourceUrl, sortUrl, key)

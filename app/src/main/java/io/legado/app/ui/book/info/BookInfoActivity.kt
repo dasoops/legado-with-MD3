@@ -70,11 +70,6 @@ class BookInfoActivity : BaseComposeActivity() {
                     putExtra("coverPath", coverPath)
                 }
             },
-            onNavigateToExploreShow = { title, sourceUrl, exploreUrl ->
-                startActivity(
-                    MainActivity.createExploreShowIntent(this, title, sourceUrl, exploreUrl)
-                )
-            },
         )
     }
 

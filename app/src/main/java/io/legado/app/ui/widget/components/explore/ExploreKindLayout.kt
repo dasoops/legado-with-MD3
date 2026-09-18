@@ -1,23 +1,6 @@
 package io.legado.app.ui.widget.components.explore
 
-import io.legado.app.data.entities.rule.ExploreKind
 import kotlin.math.roundToInt
-
-fun calculateExploreKindRows(
-    kinds: List<ExploreKind>,
-    maxSpan: Int
-): List<List<Pair<ExploreKind, Int>>> = calculateFlexRows(
-    items = kinds,
-    maxSpan = maxSpan,
-    layout = { kind ->
-        val style = kind.style()
-        FlexItemLayout(
-            flexGrow = style.layout_flexGrow,
-            basisPercent = style.layout_flexBasisPercent,
-            wrapBefore = style.layout_wrapBefore,
-        )
-    },
-)
 
 data class FlexItemLayout(
     val flexGrow: Float = 0f,

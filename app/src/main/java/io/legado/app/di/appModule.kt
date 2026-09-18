@@ -43,7 +43,6 @@ import io.legado.app.data.repository.DatabaseMaintenanceRepository
 import io.legado.app.data.repository.DirectLinkSettingsRepository
 import io.legado.app.data.repository.DirectLinkUploadRepository
 import io.legado.app.data.repository.DownloadCacheSettingsRepository
-import io.legado.app.data.repository.ExploreRepository
 import io.legado.app.data.repository.ExploreRepositoryImpl
 import io.legado.app.data.repository.HighlightRuleRepository
 import io.legado.app.data.repository.HighlightTagRuleRepository
@@ -201,7 +200,6 @@ import io.legado.app.ui.book.cache.manage.BookCacheManageViewModel
 import io.legado.app.ui.book.changecover.ChangeCoverViewModel
 import io.legado.app.ui.book.changesource.ChangeBookSourceComposeViewModel
 import io.legado.app.ui.book.changesource.ChangeChapterSourceViewModel
-import io.legado.app.ui.book.explore.ExploreShowViewModel
 import io.legado.app.ui.book.group.GroupViewModel
 import io.legado.app.ui.book.import.local.ImportBookViewModel
 import io.legado.app.ui.book.import.remote.RemoteBookViewModel
@@ -246,7 +244,6 @@ import io.legado.app.ui.login.SourceLoginViewModel
 import io.legado.app.ui.main.MainRouteSearchContent
 import io.legado.app.ui.main.MainViewModel
 import io.legado.app.ui.main.bookshelf.BookshelfViewModel
-import io.legado.app.ui.main.explore.ExploreViewModel
 import io.legado.app.ui.main.my.MyViewModel
 import io.legado.app.ui.main.rss.RssViewModel
 import io.legado.app.ui.replace.ReplaceEditRoute
@@ -419,7 +416,6 @@ val appModule = module {
     single<CloudTtsEngineGateway> { CloudTtsEngineRepository(get(), get()) }
     single<ChapterSpeechGateway> { ChapterSpeechRepository(get()) }
     single { ExploreRepositoryImpl(get()) }
-    single<ExploreRepository> { get<ExploreRepositoryImpl>() }
     single<ExploreBooksGateway> { get<ExploreRepositoryImpl>() }
     singleOf(::RssRepository)
     singleOf(::RssFavoriteRepository)
@@ -477,7 +473,6 @@ val appModule = module {
     viewModelOf(::RuleSubViewModel)
     viewModelOf(::ReadRecordViewModel)
     viewModelOf(::ReadRecordOverviewViewModel)
-    viewModelOf(::ExploreShowViewModel)
     viewModelOf(::MyViewModel)
     viewModelOf(::BookshelfViewModel)
     viewModelOf(::MainViewModel)
@@ -606,7 +601,6 @@ val appModule = module {
     viewModelOf(::ChangeCoverViewModel)
     viewModelOf(::ChangeBookSourceComposeViewModel)
     viewModelOf(::ChangeChapterSourceViewModel)
-    viewModelOf(::ExploreViewModel)
     viewModelOf(::RssViewModel)
     viewModelOf(::SearchViewModel)
     viewModelOf(::BookCacheManageViewModel)

@@ -903,7 +903,6 @@
     <string name="sort_by_lastUpdateTime">更新時間排序</string>
     <string name="search_content">全文搜索</string>
     <string name="rss_source_empty">Empty now!</string>
-    <string name="explore_empty">目前沒有發現源!</string>
     <string name="page_key_set_help">將焦點放到輸入框按下物理按鍵會自動輸入鍵值,多個按鍵會自動用英文逗號隔開.</string>
     <string name="theme_name">主題名</string>
     <string name="auto_clear_expired">自動清除過期搜尋資料</string>
@@ -980,7 +979,6 @@
     <string name="diy_source_group">自訂源分組</string>
     <string name="diy_edit_source_group">輸入自訂源分組名稱</string>
     <string name="reverse_toc">反轉目錄</string>
-    <string name="show_discovery">顯示發現</string>
     <string name="show_home">顯示首頁</string>
     <string name="main_navigation_settings">首頁與導覽</string>
     <string name="main_navigation_settings_summary">設定首頁、發現、訂閱、預設主頁和導航欄圖標</string>
@@ -2244,7 +2242,6 @@
     <string name="theme_manage_section_container">容器</string>
     <string name="theme_manage_section_layout">介面佈局</string>
     <string name="theme_manage_section_opacity">不透明度</string>
-    <string name="theme_manage_show_discovery">顯示發現</string>
     <string name="theme_manage_status_bar">狀態欄</string>
     <string name="theme_manage_top_bar_blur_opacity">頂欄模糊不透明度</string>
     <string name="theme_manage_top_bar_blur_radius">頂欄模糊半徑</string>

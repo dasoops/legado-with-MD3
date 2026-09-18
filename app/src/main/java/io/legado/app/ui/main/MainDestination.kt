@@ -13,11 +13,6 @@ sealed class MainDestination(
         labelId = R.string.bookshelf
     )
 
-    object Explore : MainDestination(
-        route = "explore",
-        labelId = R.string.discovery
-    )
-
     object Rss : MainDestination(
         route = "rss",
         labelId = R.string.rss
@@ -29,7 +24,7 @@ sealed class MainDestination(
     )
 
     companion object {
-        val mainDestinations = persistentListOf<MainDestination>(Bookshelf, Explore, Rss, My)
+        val mainDestinations = persistentListOf<MainDestination>(Bookshelf, Rss, My)
 
         fun ordered(order: String): List<MainDestination> {
             val byRoute = mainDestinations.associateBy { it.route }

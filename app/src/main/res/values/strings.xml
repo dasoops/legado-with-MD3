@@ -1084,7 +1084,6 @@
     <string name="sort_by_respondTime">Sort by respond time</string>
     <string name="search_content">Search content</string>
     <string name="rss_source_empty">Empty now!</string>
-    <string name="explore_empty">Empty now!</string>
     <string name="page_key_set_help">Focusing on the input box and pressing a physical key will automatically enter the value of the key, and multiple keys will be automatically separated by commas.</string>
     <string name="theme_name">Theme name</string>
     <string name="auto_clear_expired">"Clear Expired Search Histories Automatically "</string>
@@ -1171,7 +1170,6 @@
     <string name="hide">Hide</string>
     <string name="hide_when_status_bar_show">Hide when status bar show</string>
     <string name="reverse_toc">Reverse toc</string>
-    <string name="show_discovery">Show Discovery</string>
     <string name="show_home">Show Home</string>
     <string name="main_navigation_settings">Home and navigation</string>
     <string name="main_navigation_settings_summary">Configure Home, Discovery, Subscriptions, start page, and navigation icons</string>
@@ -1669,7 +1667,6 @@
     <string name="theme_manage_day_seed_color">Day Seed Color</string>
     <string name="theme_manage_night_seed_color">Night Seed Color</string>
     <string name="theme_manage_section_layout">Interface Layout</string>
-    <string name="theme_manage_show_discovery">Show Discovery</string>
     <string name="theme_manage_status_bar">Status Bar</string>
     <string name="theme_manage_page_turn_animation">Page Turn Animation</string>
     <string name="theme_manage_label_visibility">Label Visibility</string>
@@ -2438,7 +2435,6 @@
     <string name="a11y_slider_value">%1$s, %2$s</string>
     <string name="a11y_percent_value">%1$d percent</string>
     <string name="a11y_book_cover_actions">Cover for %1$s. Opens cover picker. Long press to preview.</string>
-    <string name="a11y_related_books_more">More related books: %1$s</string>
     <string name="a11y_current_reading">Current reading position</string>
     <string name="a11y_vip_locked">VIP or locked</string>
     <string name="a11y_downloaded">Downloaded</string>
