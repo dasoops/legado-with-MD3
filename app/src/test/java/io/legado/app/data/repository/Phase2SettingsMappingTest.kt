@@ -46,7 +46,6 @@ class Phase2SettingsMappingTest {
                     preDownloadNum = 13,
                     threadCount = 5,
                     userAgent = "phase-2-agent",
-                    cronetEnabled = true,
                 )
             ),
             toPrefMap = DownloadCacheSettings::toPrefMap,

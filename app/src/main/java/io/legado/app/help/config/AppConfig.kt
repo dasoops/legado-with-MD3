@@ -66,7 +66,6 @@ object AppConfig {
     private val importBook get() = importBookGateway.currentSettings
     private val export get() = exportGateway.currentSettings
 
-    val isCronet get() = cache.cronetEnabled
     val userAgent get() = cache.userAgent
     val isEInkMode get() = theme.appTheme == "4"
     val customMode get() = theme.customMode

@@ -59,7 +59,6 @@ navigationCompose = "2.10.0"
 okhttp = "5.5.0"
 palette = "1.0.0"
 preference = "1.2.1"
-protobufJavalite = "4.26.1"
 quickChineseTransfer = "0.2.17"
 # 书源 JS 通过 Packages.cn.hutool.* 直接调用，Hutool 作为书源运行时加密库保留在 classpath。
 # 应用代码不直接依赖它；加密走 JCA / help/crypto/CryptoUtils.kt。版本固定，勿升级（参考上游基线）。
@@ -183,7 +182,6 @@ ktor-server-websockets = { module = "io.ktor:ktor-server-websockets", version.re
 preference-ktx = { module = "androidx.preference:preference-ktx", version.ref = "preference" }
 
 okhttp = { module = "com.squareup.okhttp3:okhttp", version.ref = "okhttp" }
-protobuf-javalite = { module = "com.google.protobuf:protobuf-javalite", version.ref = "protobufJavalite" }
 
 quick-chinese-transfer-core = { module = "com.github.liuyueyi.quick-chinese-transfer:quick-transfer-core", version.ref = "quickChineseTransfer" }
 
@@ -267,5 +265,4 @@ kotlin-parcelize = { id = "org.jetbrains.kotlin.plugin.parcelize", version.ref =
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 room = { id = "androidx.room", version.ref = "room" }
 
-download = { id = "de.undercouch.download", version = "5.7.0" }
 baselineprofile = { id = "androidx.baselineprofile", version.ref = "baselineprofile" }

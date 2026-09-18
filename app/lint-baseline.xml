@@ -1010,17 +1010,6 @@
 
     <issue
         id="NewerVersionAvailable"
-        message="A newer version of com.google.protobuf:protobuf-javalite than 4.26.1 is available: 4.35.1"
-        errorLine1="protobufJavalite = &quot;4.26.1&quot;"
-        errorLine2="                   ~~~~~~~~">
-        <location
-            file="../gradle/libs.versions.toml"
-            line="65"
-            column="20"/>
-    </issue>
-
-    <issue
-        id="NewerVersionAvailable"
         message="A newer version of org.mozilla:rhino than 1.8.1 is available: 1.9.1"
         errorLine1="rhino = &quot;1.8.1&quot;"
         errorLine2="        ~~~~~~~">

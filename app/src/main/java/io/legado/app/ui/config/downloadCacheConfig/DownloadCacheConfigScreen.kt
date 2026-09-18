@@ -16,7 +16,6 @@ import io.legado.app.ui.widget.components.alert.AppAlertDialog
 import io.legado.app.ui.widget.components.settingItem.ClickableSettingItem
 import io.legado.app.ui.widget.components.settingItem.InputSettingItem
 import io.legado.app.ui.widget.components.settingItem.SliderSettingItem
-import io.legado.app.ui.widget.components.settingItem.SwitchSettingItem
 import io.legado.app.ui.widget.components.topbar.GlassMediumFlexibleTopAppBar
 import io.legado.app.ui.widget.components.topbar.GlassTopAppBarDefaults
 import io.legado.app.ui.widget.components.topbar.TopBarNavigationButton
@@ -144,15 +143,6 @@ fun DownloadCacheConfigScreen(
                         title = stringResource(R.string.user_agent),
                         value = settings.userAgent,
                         onConfirm = { onIntent(DownloadCacheConfigIntent.SetUserAgent(it)) }
-                    )
-
-                    SwitchSettingItem(
-                        title = "Cronet",
-                        description = stringResource(R.string.pref_cronet_summary),
-                        checked = settings.cronetEnabled,
-                        onCheckedChange = {
-                            onIntent(DownloadCacheConfigIntent.SetCronetEnabled(it))
-                        }
                     )
                 }
 

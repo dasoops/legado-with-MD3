@@ -54,8 +54,6 @@ class DownloadCacheConfigViewModel(
                 update { it.copy(imageRetainNum = intent.value) }
             is DownloadCacheConfigIntent.SetUserAgent ->
                 update { it.copy(userAgent = intent.value) }
-            is DownloadCacheConfigIntent.SetCronetEnabled ->
-                update { it.copy(cronetEnabled = intent.value) }
             is DownloadCacheConfigIntent.ShowDialog ->
                 _uiState.update { it.copy(dialog = intent.dialog) }
             DownloadCacheConfigIntent.DismissDialog ->

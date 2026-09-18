@@ -26,7 +26,6 @@ object OtherConfig {
     val recordLog get() = settings.recordLog
     val recordHeapDump get() = settings.recordHeapDump
     val userAgent get() = cache.userAgent
-    val cronetEnable get() = cache.cronetEnabled
     val threadCount get() = cache.threadCount
     val preDownloadNum get() = cache.preDownloadNum
     val bitmapCacheSize get() = cache.bitmapCacheSize

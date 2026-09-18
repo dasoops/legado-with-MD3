@@ -142,12 +142,6 @@
             android:key="sourceEditMaxLine"
             android:title="@string/source_edit_text_max_line" />
 
-        <io.legado.app.lib.prefs.SwitchPreference
-            android:defaultValue="false"
-            android:key="Cronet"
-            android:summary="@string/pref_cronet_summary"
-            android:title="Cronet" />
-
         <io.legado.app.lib.prefs.Preference
             android:key="cleanCache"
             android:summary="@string/clear_cache_summary"

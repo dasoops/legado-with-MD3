@@ -119,13 +119,6 @@ val okHttpClient: OkHttpClient by lazy {
             }
             networkResponse
         }
-    if (cacheSettingsGateway.currentSettings.cronetEnabled) {
-        if (Cronet.loader?.install() == true) {
-            Cronet.interceptor?.let {
-                builder.addInterceptor(it)
-            }
-        }
-    }
     builder.addInterceptor(DecompressInterceptor)
     builder.build().apply {
         val okHttpName =

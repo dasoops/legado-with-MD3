@@ -11,9 +11,6 @@ plugins {
     alias(libs.plugins.baselineprofile)
 }
 
-apply(from = "download.gradle")
-
-
 val versionPropsFile = file("version.properties")
 val versionProps = Properties().apply {
     if (versionPropsFile.exists()) {
@@ -57,13 +54,6 @@ android {
         versionName = System.getenv("APP_VERSION_NAME") ?: projectVersionName
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
-        buildConfigField("String", "Cronet_Version", "\"${project.findProperty("CronetVersion")}\"")
-        buildConfigField(
-            "String",
-            "Cronet_Main_Version",
-            "\"${project.findProperty("CronetMainVersion")}\""
-        )
-
         javaCompileOptions {
             annotationProcessorOptions {
                 arguments += mapOf(
@@ -91,8 +81,7 @@ android {
             isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro",
-                "cronet-proguard-rules.pro"
+                "proguard-rules.pro"
             )
         }
         create("noR8") {
@@ -112,8 +101,7 @@ android {
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro",
-                "cronet-proguard-rules.pro"
+                "proguard-rules.pro"
             )
         }
     }
@@ -229,8 +217,6 @@ dependencies {
     implementation(libs.intellij.markdown)
     implementation(project(":modules:book"))
     implementation(libs.okhttp)
-    implementation(fileTree(mapOf("dir" to "cronetlib", "include" to listOf("*.jar", "*.aar"))))
-    implementation(libs.protobuf.javalite)
     implementation(libs.glide.glide)
     implementation(libs.glide.okhttp)
     ksp(libs.glide.ksp)

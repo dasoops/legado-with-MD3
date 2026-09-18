@@ -42,7 +42,6 @@ import io.legado.app.help.config.ReadBookConfig
 import io.legado.app.help.config.ThemeConfigStore
 import io.legado.app.help.config.ThemeConfigStore.applyDayNightInit
 import io.legado.app.help.coroutine.Coroutine
-import io.legado.app.help.http.Cronet
 import io.legado.app.help.http.ObsoleteUrlFactory
 import io.legado.app.help.http.okHttpClient
 import io.legado.app.help.storage.Backup
@@ -52,13 +51,11 @@ import io.legado.app.utils.ChineseUtils
 import io.legado.app.utils.LogUtils
 import io.legado.app.utils.getPrefBoolean
 import io.legado.app.utils.getPrefString
-import io.legado.app.utils.isDebuggable
 import kotlinx.coroutines.Dispatchers.Main
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.chromium.base.ThreadUtils
 import org.koin.android.ext.android.get
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.context.GlobalContext.startKoin
@@ -151,9 +148,6 @@ class App : Application(), SingletonImageLoader.Factory {
         }
         super.onCreate()
         CrashHandler(this)
-        if (isDebuggable) {
-            ThreadUtils.setThreadAssertsDisabledForTesting(true)
-        }
         registerActivityLifecycleCallbacks(LifecycleHelp)
         Coroutine.async {
             get<BackupSettingsGateway>().settings
@@ -178,8 +172,6 @@ class App : Application(), SingletonImageLoader.Factory {
             LogUtils.init(this@App)
             LogUtils.d("App", "onCreate")
             LogUtils.logDeviceInfo()
-            //预下载Cronet so
-            Cronet.preDownload()
             createNotificationChannels()
             LiveEventBus.config()
                 .lifecycleObserverAlwaysActive(true)

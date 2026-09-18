@@ -55,7 +55,6 @@ import java.io.ByteArrayInputStream
 import java.io.InputStream
 import java.net.URLEncoder
 import java.nio.charset.Charset
-import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.TimeUnit
 import kotlin.coroutines.ContinuationInterceptor
 import kotlin.coroutines.CoroutineContext
@@ -492,9 +491,6 @@ class AnalyzeUrl(
         if (readTimeout == null && callTimeout == null && dnsIp == null) {
             return client
         }
-        if (cacheSettingsGateway.currentSettings.cronetEnabled && dnsIp != null) {
-            customIp[urlNoQuery] = dnsIp!!
-        }
         return client.newBuilder().run {
             if (readTimeout != null) {
                 readTimeout(readTimeout, TimeUnit.MILLISECONDS)
@@ -682,8 +678,6 @@ class AnalyzeUrl(
             }
             return builder.toString()
         }
-
-        val customIp by lazy { ConcurrentHashMap<String, String>() }
 
     }
 

@@ -1,7 +1,6 @@
 package io.legado.app.data.repository
 
 import androidx.datastore.preferences.core.Preferences
-import io.legado.app.BuildConfig
 import io.legado.app.constant.PreferKey
 import io.legado.app.domain.gateway.AppShellSettingsGateway
 import io.legado.app.domain.gateway.BackupSettingsGateway
@@ -137,9 +136,8 @@ internal fun Preferences.toDownloadCacheSettings(): DownloadCacheSettings =
         userAgent = compatDsString(PreferKey.userAgent).orEmpty().ifBlank {
             "Mozilla/5.0 (Windows NT 10.0; Win64; x64) " +
                 "AppleWebKit/537.36 (KHTML, like Gecko) " +
-                "Chrome/${BuildConfig.Cronet_Main_Version} Safari/537.36"
+                "Chrome/128.0.0.0 Safari/537.36"
         },
-        cronetEnabled = compatDsBoolean(PreferKey.cronet) ?: false,
     )
 
 internal fun DownloadCacheSettings.toPrefMap(): Map<String, Any?> = mapOf(
@@ -148,7 +146,6 @@ internal fun DownloadCacheSettings.toPrefMap(): Map<String, Any?> = mapOf(
     PreferKey.preDownloadNum to preDownloadNum,
     PreferKey.threadCount to threadCount,
     PreferKey.userAgent to userAgent,
-    PreferKey.cronet to cronetEnabled,
 )
 
 internal fun Preferences.toCoverSettings(): CoverSettings = CoverSettings(

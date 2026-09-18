@@ -11,5 +11,4 @@ object DownloadCacheConfig {
     val preDownloadNum get() = settings.preDownloadNum
     val threadCount get() = settings.threadCount
     val userAgent get() = settings.userAgent
-    val cronetEnable get() = settings.cronetEnabled
 }

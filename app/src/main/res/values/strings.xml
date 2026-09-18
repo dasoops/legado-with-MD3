@@ -1041,7 +1041,6 @@
     <string name="end">end</string>
     <string name="custom_group_summary">Turn off Replace Group / Turn on Add Group</string>
     <string name="need_login">Require Login</string>
-    <string name="pref_cronet_summary">use Cronet access network</string>
     <string name="anti_alias">Anti-Aliasing</string>
     <string name="pref_anti_alias_summary">Anti-Aliasing when draw picture</string>
     <string name="related_books">Related Books(relatedBooks)</string>

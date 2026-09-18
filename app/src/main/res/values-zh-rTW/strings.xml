@@ -848,7 +848,6 @@
     <string name="end">結束</string>
     <string name="custom_group_summary">關閉取代分組/開啟新增分組</string>
     <string name="need_login">需登入</string>
-    <string name="pref_cronet_summary">使用Cronet網路元件</string>
     <string name="anti_alias">抗鋸齒</string>
     <string name="pref_anti_alias_summary">繪製圖片時抗鋸齒</string>
     <string name="sort_by_respondTime">反應時間排序</string>

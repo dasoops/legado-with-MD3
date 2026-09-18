@@ -1000,7 +1000,6 @@
     <string name="end">结束</string>
     <string name="custom_group_summary">关闭替换分组/开启添加分组</string>
     <string name="need_login">需要登录</string>
-    <string name="pref_cronet_summary">使用 Cronet 网络组件</string>
     <string name="anti_alias">抗锯齿</string>
     <string name="pref_anti_alias_summary">绘制图片时抗锯齿</string>
     <string name="related_books">关联书籍（relatedBooks）</string>
