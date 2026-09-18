@@ -40,9 +40,6 @@ class OnLineImportActivity :
                 "txtRule" -> showDialogFragment(
                     ImportTxtTocRuleDialog(it.second, true)
                 )
-                "dictRule" -> showDialogFragment(
-                    ImportDictRuleDialog(it.second, true)
-                )
             }
         }
         viewModel.errorLive.observe(this) {
@@ -69,9 +66,6 @@ class OnLineImportActivity :
                 )
                 "/httpTTS" -> showDialogFragment(
                     ImportHttpTtsDialog(url, true)
-                )
-                "/dictRule" -> showDialogFragment(
-                    ImportDictRuleDialog(url, true)
                 )
                 "/theme" -> showDialogFragment(
                     ImportThemeDialog(url, true)

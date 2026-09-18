@@ -1150,7 +1150,6 @@
     <string name="export_file_name_template_help">可用变量：{name} 书名、{author} 作者、{group} 分组、{source} 书源、{remark} 备注。\n\n示例：{name} - {author}\n输出：三体 - 刘慈欣\n\n变量前后可以添加固定文字。</string>
     <string name="reset">重置</string>
     <string name="null_url">URL 为空</string>
-    <string name="dict">字典</string>
     <string name="unknown_error">未知错误</string>
     <string name="autobackup_fail">自动备份失败\n%s</string>
     <string name="end">结束</string>
@@ -1398,13 +1397,10 @@
     <string name="source_tab_list">列表</string>
     <string name="source_tab_web_view">网页</string>
     <string name="layout_type">布局</string>
-    <string name="dict_rule">字典规则</string>
-    <string name="config_dict_rule">配置字典规则</string>
     <string name="create">新建</string>
     <string name="url_rule">Url规则 (urlRule)</string>
     <string name="show_rule">显示规则 (showRule)</string>
     <string name="config_txt_toc_rule">配置 TXT 目录规则</string>
-    <string name="import_dict_rule">导入字典规则</string>
     <string name="keep_group">保留分组</string>
     <string name="server_config">服务器配置</string>
     <string name="config_ignore">配置忽略</string>
@@ -2092,39 +2088,6 @@
     <string name="homepage_status_blocked"> · 已被屏蔽</string>
     <string name="homepage_status_joined"> · 已加入</string>
 
-    <!-- Translation -->
-    <string name="translate">翻译</string>
-    <string name="translation_config">翻译设置</string>
-    <string name="llm_translate_enabled">启用章节翻译</string>
-    <string name="translation_provider">翻译提供商</string>
-    <string name="llm_provider">提供商</string>
-    <string name="llm_base_url">基础 URL</string>
-    <string name="llm_api_key">API 密钥</string>
-    <string name="llm_model">模型</string>
-    <string name="translation_options">翻译选项</string>
-    <string name="llm_target_language">目标语言</string>
-    <string name="llm_max_chars_per_chunk">每块最大字符数</string>
-    <string name="llm_concurrent_chunks">并发块数</string>
-    <string name="llm_retry_count">重试次数</string>
-    <string name="llm_temperature">温度</string>
-    <string name="llm_temperature_description">允许值：0-2。越靠近 0 越严谨，越靠近 2 越有创造力。</string>
-    <string name="translation_prompt">翻译提示词</string>
-    <string name="translate_chapter">翻译章节</string>
-    <string name="show_original">显示原文</string>
-    <string name="retranslate_chapter">重新翻译章节</string>
-    <string name="retranslate_confirm">这将删除现有翻译并重新翻译。是否继续？</string>
-    <string name="translation_in_progress">翻译中: %1$d/%2$d</string>
-    <string name="translation_failed">翻译失败: %1$s</string>
-    <string name="no_translation_cache">无翻译缓存</string>
-    <string name="delete_translation_cache">删除翻译缓存</string>
-    <string name="translation_cache_size">缓存大小: %1$s</string>
-    <string name="clear_translation_cache">清除缓存</string>
-    <string name="translation_cache">翻译缓存</string>
-    <string name="return_to_original">返回原文</string>
-    <string name="translation_progress">翻译中 %1$d%%</string>
-    <string name="translation_started">开始进行翻译，请耐心等待……</string>
-    <string name="translation_app_ai_provider">使用应用 AI 接口</string>
-    <string name="translation_app_ai_provider_summary">模型、API Key 和协议在 AI 设置中配置。</string>
 
     <string name="ai_text_clean">AI 净化</string>
     <string name="ai_text_clean_before">更改前</string>
@@ -2484,7 +2447,6 @@
     <string name="a11y_debug_example">调试示例：%1$s</string>
     <string name="a11y_book_source_action">书源：%1$s，长按打开书源操作</string>
     <string name="search_txt_toc_rule">搜索 TXT 目录规则</string>
-    <string name="search_dict_rule">搜索字典规则</string>
     <string name="search_highlight_tag_rule">搜索标签规则</string>
     <string name="export_started">开始导出…</string>
     <string name="previous">上一个</string>
@@ -2838,7 +2800,6 @@
     <string name="whole_book_page_format">全文 %1$d / %2$d</string>
     <string name="whole_book_page_estimated_format">全文 %1$s / %2$s</string>
     <string name="whole_book_page_unavailable">全文 - / -</string>
-    <string name="translation_model_thinking">模型思考中</string>
     <string name="manga_reader_auto_read">自动阅读</string>
     <string name="manga_reader_menu_layout">菜单布局</string>
     <string name="manga_reader_menu_top_bar_liquid_glass">顶栏液态玻璃</string>

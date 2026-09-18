@@ -19,7 +19,6 @@ import io.legado.app.domain.model.TextProcessStyle
 import io.legado.app.domain.model.readaloud.SpeechRoleType
 import io.legado.app.domain.model.settings.ReadStyleItem
 import io.legado.app.domain.usecase.BookmarkTargetVerdict
-import io.legado.app.model.translation.TranslationChapterStatus
 import io.legado.app.ui.book.read.sheet.ReaderBookSheetTab
 import io.legado.app.ui.book.searchContent.SearchResult
 import kotlinx.collections.immutable.ImmutableList
@@ -247,9 +246,6 @@ data class ReadBookUiState(
     val effectiveReplaceRules: ImmutableList<ReplaceRule> = persistentListOf(),
     val allReplaceRules: ImmutableList<ReplaceRuleItemUi> = persistentListOf(),
     val chineseConverterActive: Boolean = false,
-    // Translation
-    val translationMode: Boolean = false,
-    val translationStatus: TranslationChapterStatus = TranslationChapterStatus.Idle,
     // Time / battery (from EventBus)
     val time: String = "",
     val battery: Int = 0,
@@ -415,7 +411,6 @@ internal val ReadBookButtonIds = listOf(
     "next_chapter",
     "replace",
     "replace_badge",
-    "translate",
     "refresh_current",
 )
 
@@ -489,7 +484,6 @@ sealed interface ReadBookIntent {
     data class SetReplaceRuleEnabled(val id: Long, val enabled: Boolean) : ReadBookIntent
     data class MoveReplaceRule(val draggedId: Long, val anchorId: Long, val afterAnchor: Boolean) :
         ReadBookIntent
-    data object ToggleTranslation : ReadBookIntent
     data object LoadContentProcesses : ReadBookIntent
     data class ToggleContentProcess(val id: String, val enabled: Boolean) : ReadBookIntent
     data class RequestDeleteContentProcess(val item: ContentProcessItemUi) : ReadBookIntent
@@ -571,7 +565,6 @@ sealed interface ReadBookIntent {
     data class SaveImage(val src: String) : ReadBookIntent
     data object ReverseContent : ReadBookIntent
     data object ReverseRemoveSameTitle : ReadBookIntent
-    data object RetranslateCurrentChapter : ReadBookIntent
 
     // Menu actions (moved from Activity)
     data object MenuUpdateToc : ReadBookIntent
@@ -707,7 +700,6 @@ sealed interface ReadBookIntent {
     data object CancelBookmarkTargetJump : ReadBookIntent
     data class TextActionReplace(val text: String) : ReadBookIntent
     data class TextActionSearchContent(val text: String) : ReadBookIntent
-    data class TextActionDict(val text: String) : ReadBookIntent
 
     // Screen / selection config
     data class KeepLightChanged(val value: String) : ReadBookIntent
@@ -969,7 +961,6 @@ sealed interface ReadBookSheet {
     data object ClickActionConfig : ReadBookSheet
     data object PageKeyConfig : ReadBookSheet
     data object InfoConfig : ReadBookSheet
-    data class Dict(val word: String) : ReadBookSheet
     data class Bookmark(
         val bookmark: io.legado.app.data.entities.Bookmark,
         val editPos: Int = -1,

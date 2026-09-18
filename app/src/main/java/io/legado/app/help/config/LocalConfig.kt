@@ -104,9 +104,6 @@ by appCtx.getSharedPreferences("local", Context.MODE_PRIVATE) {
     val needUpRssSources: Boolean
         get() = !isLastVersion(6, "rssSourceVersion")
 
-    val needUpDictRule: Boolean
-        get() = !isLastVersion(2, "needUpDictRule")
-
     var versionCode
         get() = getLong(versionCodeKey, 0)
         set(value) {
