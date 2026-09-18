@@ -21,24 +21,20 @@ import io.legado.app.data.repository.BookDomainRepositoryImpl
 import io.legado.app.data.repository.BookExportSettingsRepository
 import io.legado.app.data.repository.BookGroupMutationRepository
 import io.legado.app.data.repository.BookGroupRepository
+import io.legado.app.data.repository.BookSourceRepository
 import io.legado.app.data.repository.BookImportRepository
 import io.legado.app.data.repository.BookKnowledgeRepository
 import io.legado.app.data.repository.BookMarkingRepository
 import io.legado.app.data.repository.BookRepository
-import io.legado.app.data.repository.BookSourceCallbackRepository
-import io.legado.app.data.repository.BookSourceCheckRepository
-import io.legado.app.data.repository.BookSourceRepository
 import io.legado.app.data.repository.BookmarkRepository
 import io.legado.app.data.repository.BookshelfRepository
 import io.legado.app.data.repository.BookshelfSettingsRepository
-import io.legado.app.data.repository.CheckSourceSettingsRepository
 import io.legado.app.data.repository.CoverAlbumRepository
 import io.legado.app.data.repository.CoverSettingsRepository
 import io.legado.app.data.repository.DatabaseMaintenanceRepository
 import io.legado.app.data.repository.DirectLinkSettingsRepository
 import io.legado.app.data.repository.DirectLinkUploadRepository
 import io.legado.app.data.repository.DownloadCacheSettingsRepository
-import io.legado.app.data.repository.ExploreRepositoryImpl
 import io.legado.app.data.repository.HighlightRuleRepository
 import io.legado.app.data.repository.HighlightTagRuleRepository
 import io.legado.app.data.repository.HomeDashboardRepository
@@ -83,16 +79,12 @@ import io.legado.app.domain.gateway.BookGroupMutationGateway
 import io.legado.app.domain.gateway.BookKnowledgeGateway
 import io.legado.app.domain.gateway.BookMarkingGateway
 import io.legado.app.domain.gateway.BookSearchGateway
-import io.legado.app.domain.gateway.BookSourceCallbackGateway
-import io.legado.app.domain.gateway.BookSourceCheckGateway
 import io.legado.app.domain.gateway.BookshelfSettingsGateway
-import io.legado.app.domain.gateway.CheckSourceSettingsGateway
 import io.legado.app.domain.gateway.CoverAlbumGateway
 import io.legado.app.domain.gateway.CoverSettingsGateway
 import io.legado.app.domain.gateway.DatabaseMaintenanceGateway
 import io.legado.app.domain.gateway.DirectLinkSettingsGateway
 import io.legado.app.domain.gateway.DownloadCacheSettingsGateway
-import io.legado.app.domain.gateway.ExploreBooksGateway
 import io.legado.app.domain.gateway.HomeDashboardGateway
 import io.legado.app.domain.gateway.HomepageModulesGateway
 import io.legado.app.domain.gateway.HomepageSettingsGateway
@@ -109,28 +101,20 @@ import io.legado.app.domain.gateway.ThemePackageSettingsGateway
 import io.legado.app.domain.gateway.ThemeSettingsGateway
 import io.legado.app.domain.gateway.WebDavBackupGateway
 import io.legado.app.domain.repository.BookDomainRepository
-import io.legado.app.domain.usecase.AddBookUseCase
-import io.legado.app.domain.usecase.AddToBookshelfUseCase
 import io.legado.app.domain.usecase.AppStartupMaintenanceUseCase
 import io.legado.app.domain.usecase.BackupRestoreUseCase
 import io.legado.app.domain.usecase.ClearBookCacheUseCase
 import io.legado.app.domain.usecase.CoverAlbumUseCase
 import io.legado.app.domain.usecase.DeleteBooksUseCase
-import io.legado.app.domain.usecase.ExploreBooksUseCase
-import io.legado.app.domain.usecase.ExploreKindUiUseCase
 import io.legado.app.domain.usecase.ExportBookshelfUseCase
-import io.legado.app.domain.usecase.GetChapterContentUseCase
 import io.legado.app.domain.usecase.GetReadingProgressUseCase
 import io.legado.app.domain.usecase.HomeDashboardUseCase
-import io.legado.app.domain.usecase.ImportBookshelfUseCase
-import io.legado.app.domain.usecase.RefreshTocUseCase
 import io.legado.app.domain.usecase.RelocateMarkingTargetUseCase
 import io.legado.app.domain.usecase.RemoveBookGroupAssignmentUseCase
 import io.legado.app.domain.usecase.ResolveBookShelfStateUseCase
 import io.legado.app.domain.usecase.SaveBookContentProcessUseCase
 import io.legado.app.domain.usecase.SaveMarkingUseCase
 import io.legado.app.domain.usecase.ShrinkDatabaseUseCase
-import io.legado.app.domain.usecase.StartBookSourceCheckUseCase
 import io.legado.app.domain.usecase.UpdateBooksGroupUseCase
 import io.legado.app.domain.usecase.UploadReadingProgressUseCase
 import io.legado.app.domain.usecase.VerifyBookmarkTargetUseCase
@@ -161,9 +145,6 @@ import io.legado.app.ui.book.read.ReaderSessionViewModel
 import io.legado.app.ui.book.readRecord.ReadRecordOverviewViewModel
 import io.legado.app.ui.book.readRecord.ReadRecordViewModel
 import io.legado.app.ui.book.searchContent.SearchContentViewModel
-import io.legado.app.ui.book.source.debug.BookSourceDebugViewModel
-import io.legado.app.ui.book.source.edit.BookSourceEditViewModel
-import io.legado.app.ui.book.source.manage.BookSourceViewModel
 import io.legado.app.ui.book.toc.TocViewModel
 import io.legado.app.ui.book.toc.rule.TxtTocRuleViewModel
 import io.legado.app.ui.book.toc.rule.preview.TxtTocRulePreviewViewModel
@@ -211,10 +192,10 @@ val appModule = module {
     singleOf(::BookRepository)
     singleOf(::BookImportRepository)
     singleOf(::BookGroupRepository)
+    singleOf(::BookSourceRepository)
     singleOf(::BookmarkRepository)
     singleOf(::TagGroupRuleApplier)
     single<BookGroupMutationGateway> { BookGroupMutationRepository(get(), get()) }
-    singleOf(::BookSourceRepository)
     singleOf(::BookshelfRepository)
     singleOf(::TxtTocRuleRepository)
     single {
@@ -238,10 +219,6 @@ val appModule = module {
         )
     }
     single<OtherSettingsGateway> { OtherSettingsRepository() }
-    single<CheckSourceSettingsGateway> { CheckSourceSettingsRepository() }
-    single { BookSourceCheckRepository(get(), get(), get()) }
-    single<BookSourceCheckGateway> { get<BookSourceCheckRepository>() }
-    singleOf(::StartBookSourceCheckUseCase)
     single<DirectLinkSettingsGateway> { DirectLinkSettingsRepository() }
     single<LocalPasswordGateway> { LocalPasswordRepository() }
     single<OtherConfigSystemGateway> { OtherConfigSystemRepository(get()) }
@@ -264,8 +241,6 @@ val appModule = module {
     singleOf(::ReadStyleConfigStore)
     singleOf(::ReadBookStyleConfigRepository)
     single<ReadStyleGateway> { get<ReadBookStyleConfigRepository>() }
-    singleOf(::ExploreBooksUseCase)
-    singleOf(::ExploreKindUiUseCase)
     singleOf(::AppStartupMaintenanceUseCase)
     singleOf(::BackupRestoreUseCase)
     singleOf(::ClearBookCacheUseCase)
@@ -277,10 +252,6 @@ val appModule = module {
     singleOf(::UpdateBooksGroupUseCase)
     singleOf(::UploadReadingProgressUseCase)
     singleOf(::ResolveBookShelfStateUseCase)
-    singleOf(::RefreshTocUseCase)
-    singleOf(::AddBookUseCase)
-    singleOf(::AddToBookshelfUseCase)
-    singleOf(::ImportBookshelfUseCase)
     singleOf(::ExportBookshelfUseCase)
     factory { GetReadRecordOverviewUseCase() }
     singleOf(::ShrinkDatabaseUseCase)
@@ -297,7 +268,6 @@ val appModule = module {
     single<BookExportSettingsGateway> { BookExportSettingsRepository() }
     single<HomepageSettingsGateway> { HomepageSettingsRepository() }
     single<CoverAlbumGateway> { CoverAlbumRepository(get(), get()) }
-    single<BookSourceCallbackGateway> { BookSourceCallbackRepository(get(), get()) }
     single<LocalBookGateway> { LocalBookRepository(get()) }
     single<DatabaseMaintenanceGateway> { DatabaseMaintenanceRepository(get()) }
     single<WebDavBackupGateway> { WebDavBackupRepository() }
@@ -307,14 +277,11 @@ val appModule = module {
     single<BookContentProcessGateway> { BookContentProcessRepository(get()) }
     single<BookMarkingGateway> { BookMarkingRepository(get()) }
     single<BookKnowledgeGateway> { BookKnowledgeRepository(get()) }
-    single { ExploreRepositoryImpl(get()) }
-    single<ExploreBooksGateway> { get<ExploreRepositoryImpl>() }
     single {
         SearchRepositoryImpl(get())
     }
     single<SearchRepository> { get<SearchRepositoryImpl>() }
     single<BookSearchGateway> { get<SearchRepositoryImpl>() }
-    singleOf(::GetChapterContentUseCase)
     singleOf(::SaveBookContentProcessUseCase)
     singleOf(::SaveMarkingUseCase)
     singleOf(::VerifyBookmarkTargetUseCase)
@@ -341,9 +308,6 @@ val appModule = module {
     viewModelOf(::ImportTxtTocRuleViewModel)
     viewModelOf(::HighlightTagRuleViewModel)
     viewModelOf(::TagGroupRuleViewModel)
-    viewModelOf(::BookSourceViewModel)
-    viewModelOf(::BookSourceEditViewModel)
-    viewModelOf(::BookSourceDebugViewModel)
     viewModelOf(::ReadRecordViewModel)
     viewModelOf(::ReadRecordOverviewViewModel)
     viewModelOf(::BookshelfViewModel)

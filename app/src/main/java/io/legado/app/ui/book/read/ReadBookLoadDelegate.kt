@@ -17,9 +17,7 @@ import io.legado.app.help.book.isLocalModified
 import io.legado.app.help.book.simulatedTotalChapterNum
 import io.legado.app.help.coroutine.Coroutine
 import io.legado.app.model.ReadBook
-import io.legado.app.model.SourceCallBack
 import io.legado.app.model.localBook.LocalBook
-import io.legado.app.model.webBook.WebBook
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ensureActive
@@ -128,9 +126,6 @@ class ReadBookLoadDelegate(
             ReadBook.resetData(book)
         }
         host.setInitFinish()
-        if (!book.isLocal && book.tocUrl.isEmpty() && !loadBookInfo(book)) {
-            return@suspendSection
-        }
         if (book.isLocal && !checkLocalBookFileExist(book)) {
             return@suspendSection
         }
@@ -141,27 +136,9 @@ class ReadBookLoadDelegate(
         host.checkReadRecordAlias(book)
 
         if (!isSameBook) {
-            ReadBook.loadInitialContent(resetPageOffset = true) {
-                ReadBook.bookSource?.let {
-                    SourceCallBack.callBackBook(
-                        SourceCallBack.START_READ,
-                        it,
-                        book,
-                        ReadBook.readerChapterInputWindow.current?.chapter
-                    )
-                }
-            }
+            ReadBook.loadInitialContent(resetPageOffset = true)
         } else {
-            ReadBook.loadOrUpContent {
-                ReadBook.bookSource?.let {
-                    SourceCallBack.callBackBook(
-                        SourceCallBack.START_READ,
-                        it,
-                        book,
-                        ReadBook.readerChapterInputWindow.current?.chapter
-                    )
-                }
-            }
+            ReadBook.loadOrUpContent()
         }
         if (ReadBook.chapterChanged) {
             ReadBook.chapterChanged = false
@@ -187,18 +164,6 @@ class ReadBookLoadDelegate(
         }
     }
 
-    private suspend fun loadBookInfo(book: Book): Boolean {
-        val source = ReadBook.bookSource ?: return true
-        try {
-            WebBook.getBookInfoAwait(source, book, canReName = false)
-            return true
-        } catch (e: Throwable) {
-            coroutineContext.ensureActive()
-            ReadBook.upMsg("详情页出错: ${e.localizedMessage}")
-            return false
-        }
-    }
-
     /** 重新拉目录。会话侧 `loadChapterList` 回调和 TOC 正则改动都走这里。 */
     fun doLoadChapterList(book: Book) {
         Coroutine.async(scope, Dispatchers.IO) {
@@ -209,46 +174,23 @@ class ReadBookLoadDelegate(
     }
 
     private suspend fun loadChapterListAwait(book: Book): Boolean {
-        if (book.isLocal) {
-            kotlin.runCatching {
-                LocalBook.getChapterList(book).let {
-                    bookRepository.replaceChaptersAndUpdateBook(book, it)
-                    ReadBook.onChapterListUpdated(book)
-                }
-                return true
-            }.onFailure {
-                when (it) {
-                    is SecurityException, is FileNotFoundException -> {
-                        host.requestBooksDirPicker(reloadChapterList = true)
-                    }
-                    else -> {
-                        AppLog.put("LoadTocError:${it.localizedMessage}", it)
-                        ReadBook.upMsg("LoadTocError:${it.localizedMessage}")
-                    }
-                }
-                return false
+        kotlin.runCatching {
+            LocalBook.getChapterList(book).let {
+                bookRepository.replaceChaptersAndUpdateBook(book, it)
+                ReadBook.onChapterListUpdated(book)
             }
-        } else {
-            ReadBook.bookSource?.let {
-                val oldBook = book.copy()
-                WebBook.getChapterListAwait(it, book, true)
-                    .onSuccess { cList ->
-                        if (oldBook.bookUrl == book.bookUrl) {
-                            bookRepository.update(book)
-                        } else {
-                            bookRepository.replace(oldBook, book)
-                            BookHelp.updateCacheFolder(oldBook, book)
-                        }
-                        bookRepository.deleteChaptersByBook(oldBook.bookUrl)
-                        bookRepository.insertChapters(*cList.toTypedArray())
-                        ReadBook.onChapterListUpdated(book)
-                        return true
-                    }.onFailure {
-                        coroutineContext.ensureActive()
-                        ReadBook.upMsg(context.getString(R.string.error_load_toc))
-                        return false
-                    }
+            return true
+        }.onFailure {
+            when (it) {
+                is SecurityException, is FileNotFoundException -> {
+                    host.requestBooksDirPicker(reloadChapterList = true)
+                }
+                else -> {
+                    AppLog.put("LoadTocError:${it.localizedMessage}", it)
+                    ReadBook.upMsg("LoadTocError:${it.localizedMessage}")
+                }
             }
+            return false
         }
         return true
     }

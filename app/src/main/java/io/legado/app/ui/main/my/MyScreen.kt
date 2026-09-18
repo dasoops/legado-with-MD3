@@ -20,7 +20,6 @@ import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Sell
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.filled.Source
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.runtime.Composable
@@ -86,16 +85,6 @@ fun MyScreen(
             SplicedColumnGroup(
                 title = stringResource(R.string.rule_segment),
             ) {
-                ClickableSettingItem(
-                    title = stringResource(R.string.book_source_manage),
-                    description = stringResource(R.string.book_source_manage_desc),
-                    imageVector = Icons.Default.Source,
-                    onClick = {
-                        onNavigate(
-                            PrefClickEvent.OpenBookSourceManage
-                        )
-                    }
-                )
                 ClickableSettingItem(
                     title = stringResource(R.string.replace_purify),
                     imageVector = Icons.Default.FindReplace,

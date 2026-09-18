@@ -15,7 +15,6 @@ import io.legado.app.data.entities.BookMarking
 import io.legado.app.data.entities.Bookmark
 import io.legado.app.data.entities.ReplaceRule
 import io.legado.app.data.repository.BookRepository
-import io.legado.app.data.repository.BookSourceRepository
 import io.legado.app.data.repository.BookmarkRepository
 import io.legado.app.data.repository.ReadSettingsRepository
 import io.legado.app.domain.gateway.BookMarkingGateway
@@ -31,7 +30,6 @@ import io.legado.app.model.ReadBook
 import io.legado.app.model.localBook.EpubFile
 import io.legado.app.model.localBook.LocalBook
 import io.legado.app.model.localBook.MobiFile
-import io.legado.app.model.webBook.WebBook
 import io.legado.app.ui.widget.components.importComponents.BaseImportUiState
 import io.legado.app.ui.widget.components.list.ListUiState
 import io.legado.app.ui.widget.components.list.SelectableItem
@@ -224,7 +222,6 @@ class TocViewModel(
     application: Application,
     savedStateHandle: SavedStateHandle,
     private val bookRepository: BookRepository,
-    private val bookSourceRepository: BookSourceRepository,
     private val bookmarkRepository: BookmarkRepository,
     private val bookMarkingGateway: BookMarkingGateway,
     private val readSettingsRepository: ReadSettingsRepository,
@@ -570,26 +567,6 @@ class TocViewModel(
             }.onFailure {
                 AppLog.put("LoadTocError:${it.localizedMessage}", it)
                 _effects.tryEmit(TocEffect.ShowMessage(it.localizedMessage ?: "Error"))
-            }
-        } else {
-            val source = bookSourceRepository.getBookSource(book.origin)
-            source?.let {
-                val oldBook = book.copy()
-                WebBook.getChapterListAwait(it, book, true)
-                    .onSuccess { cList ->
-                        if (oldBook.bookUrl == book.bookUrl) {
-                            bookRepository.update(book)
-                        } else {
-                            bookRepository.replace(oldBook, book)
-                            BookHelp.updateCacheFolder(oldBook, book)
-                        }
-                        bookRepository.deleteChaptersByBook(oldBook.bookUrl)
-                        bookRepository.insertChapters(*cList.toTypedArray())
-                        ReadBook.onChapterListUpdated(book)
-                    }.onFailure {
-                        AppLog.put("LoadTocError:${it.localizedMessage}", it)
-                        _effects.tryEmit(TocEffect.ShowMessage(it.localizedMessage ?: "Error"))
-                    }
             }
         }
     }

@@ -182,7 +182,6 @@ sealed interface BookInfoEffect {
         val inBookshelf: Boolean,
         val chapterChanged: Boolean,
     ) : BookInfoEffect
-    data class OpenBookSourceEdit(val sourceUrl: String) : BookInfoEffect
     data object OpenSelectBooksDir : BookInfoEffect
     data class OpenFile(val uri: Uri, val mimeType: String) : BookInfoEffect
     data class RunSourceCallback(

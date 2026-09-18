@@ -15,8 +15,6 @@ object MainIntent {
     const val EXTRA_BOOK_COVER = "coverPath"
     const val EXTRA_IN_BOOKSHELF = "inBookshelf"
     const val EXTRA_CHAPTER_CHANGED = "chapterChanged"
-    const val EXTRA_SOURCE_URL = "sourceUrl"
-    const val EXTRA_BOOK_SOURCE_IMPORT = "bookSourceImport"
 
     fun createLauncherIntent(context: Context): Intent {
         val launcherComponent =
@@ -33,28 +31,6 @@ object MainIntent {
             putExtra(EXTRA_START_ROUTE, MainRouteConst.ROUTE_MAIN)
         }
     }
-
-    fun createBookSourceManageIntent(
-        context: Context,
-        importSource: String? = null,
-    ): Intent =
-        createLauncherIntent(context).apply {
-            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP)
-            putExtra(EXTRA_START_ROUTE, MainRouteConst.ROUTE_BOOK_SOURCE_MANAGE)
-            putExtra(EXTRA_BOOK_SOURCE_IMPORT, importSource)
-        }
-
-    fun createBookSourceEditIntent(context: Context, sourceUrl: String? = null): Intent =
-        createLauncherIntent(context).apply {
-            putExtra(EXTRA_START_ROUTE, MainRouteConst.ROUTE_BOOK_SOURCE_EDIT)
-            putExtra(EXTRA_SOURCE_URL, sourceUrl)
-        }
-
-    fun createBookSourceDebugIntent(context: Context, sourceUrl: String?): Intent =
-        createLauncherIntent(context).apply {
-            putExtra(EXTRA_START_ROUTE, MainRouteConst.ROUTE_BOOK_SOURCE_DEBUG)
-            putExtra(EXTRA_SOURCE_URL, sourceUrl)
-        }
 
     fun createIntent(context: Context, configTag: String? = null): Intent {
         return createLauncherIntent(context).apply {

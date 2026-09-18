@@ -22,8 +22,6 @@ data class BookshelfGroupSelectorState(
 )
 
 sealed interface BookshelfOverlay {
-    data object AddUrlDialog : BookshelfOverlay
-    data object ImportSheet : BookshelfOverlay
     data object ExportSheet : BookshelfOverlay
     data object ConfigSheet : BookshelfOverlay
     data object GroupManageSheet : BookshelfOverlay
@@ -54,10 +52,8 @@ sealed interface BookshelfIntent {
     data object ScrollToTop : BookshelfIntent
     data object RefreshAll : BookshelfIntent
     data class RefreshToc(val books: List<BookUiItem>) : BookshelfIntent
-    data class AddBookByUrl(val urls: String) : BookshelfIntent
     data class ExportToUri(val uri: Uri, val books: List<BookUiItem>) : BookshelfIntent
     data class UploadBookshelf(val books: List<BookUiItem>) : BookshelfIntent
-    data class ImportFromUri(val uri: Uri, val groupId: Long) : BookshelfIntent
     data class UpdateSetting(
         val transform: (BookshelfSettings) -> BookshelfSettings,
     ) : BookshelfIntent

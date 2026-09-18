@@ -1,9 +1,10 @@
 package io.legado.app.help.coil
 
+import io.legado.app.data.appDb
+
 import coil3.intercept.Interceptor
 import coil3.request.CachePolicy
 import coil3.request.ImageResult
-import io.legado.app.help.source.SourceHelp
 import io.legado.app.model.analyzeRule.AnalyzeUrl
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -72,7 +73,7 @@ class CoverInterceptor : Interceptor {
             val sourceOrigin = request.extras[CoverExtras.SourceOrigin]
             val source = sourceOrigin?.let { origin ->
                 withContext(Dispatchers.IO) {
-                    SourceHelp.getSource(origin)
+                    appDb.bookSourceDao.getBookSource(origin)
                 }
             }
 

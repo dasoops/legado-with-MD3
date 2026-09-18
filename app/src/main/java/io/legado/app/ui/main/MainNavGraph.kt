@@ -38,7 +38,6 @@ import io.legado.app.R
 import io.legado.app.domain.model.settings.AppUiConfiguration
 import io.legado.app.help.coil.CoverExtras
 import io.legado.app.model.Download
-import io.legado.app.model.SourceCallBack
 import io.legado.app.ui.about.AboutEffect
 import io.legado.app.ui.about.AboutScreen
 import io.legado.app.ui.about.AboutViewModel
@@ -57,11 +56,6 @@ import io.legado.app.ui.book.readRecord.ReadRecordOverviewRouteScreen
 import io.legado.app.ui.book.readRecord.ReadRecordRouteScreen
 import io.legado.app.ui.book.searchContent.SearchContentRouteScreen
 import io.legado.app.ui.book.searchContent.SearchContentViewModel
-import io.legado.app.ui.book.source.debug.BookSourceDebugRoute
-import io.legado.app.ui.book.source.debug.BookSourceDebugViewModel
-import io.legado.app.ui.book.source.edit.BookSourceEditRoute
-import io.legado.app.ui.book.source.edit.BookSourceEditViewModel
-import io.legado.app.ui.book.source.manage.BookSourceRouteScreen
 import io.legado.app.ui.config.ConfigNavScreen
 import io.legado.app.ui.config.backupConfig.BackupConfigRouteScreen
 import io.legado.app.ui.config.coverConfig.CoverAlbumManageRouteScreen
@@ -100,46 +94,6 @@ fun MainActivity.mainEntryProvider(
     onNavigateToRoute: (NavKey) -> Unit,
     onNavigateBack: () -> Unit,
 ) = entryProvider<NavKey> {
-    entry<MainRouteBookSourceManage> { route ->
-        BookSourceRouteScreen(
-            initialImportUrl = route.importUrl,
-            closeAfterImport = route.importUrl != null,
-            onImportClosed = onNavigateBack,
-            onBackClick = onNavigateBack,
-            onAddSource = { onNavigateToRoute(MainRouteBookSourceEdit()) },
-            onEditSource = { onNavigateToRoute(MainRouteBookSourceEdit(it)) },
-            onDebugSource = { sourceUrl ->
-                onNavigateToRoute(MainRouteBookSourceDebug(sourceUrl))
-            },
-        )
-    }
-    entry<MainRouteBookSourceEdit> { route ->
-        val viewModel = koinViewModel<BookSourceEditViewModel>(
-            key = "BookSourceEdit:${route.sourceUrl.orEmpty()}",
-        )
-        BookSourceEditRoute(
-            sourceUrl = route.sourceUrl,
-            viewModel = viewModel,
-            onBack = { savedSourceUrl ->
-                if (backStack.size == 1) {
-                    savedSourceUrl?.let {
-                        this@mainEntryProvider.setResult(
-                            android.app.Activity.RESULT_OK,
-                            Intent().putExtra("origin", it),
-                        )
-                    }
-                    this@mainEntryProvider.finish()
-                } else onNavigateBack()
-            },
-            onDebug = { onNavigateToRoute(MainRouteBookSourceDebug(it)) },
-        )
-    }
-    entry<MainRouteBookSourceDebug> { route ->
-        val viewModel = koinViewModel<BookSourceDebugViewModel>(
-            key = "BookSourceDebug:${route.sourceUrl.orEmpty()}",
-        )
-        BookSourceDebugRoute(route.sourceUrl, viewModel, onNavigateBack)
-    }
     entry<MainRouteBookshelf> {
         val mainViewModel = koinViewModel<MainViewModel>()
         val mainUiState by mainViewModel.uiState.collectAsStateWithLifecycle()
@@ -183,9 +137,6 @@ fun MainActivity.mainEntryProvider(
                         sharedCoverKey = sharedCoverKey
                     )
                 )
-            },
-            onNavigateToBookSourceManage = {
-                onNavigateToRoute(MainRouteBookSourceManage())
             },
             onNavigateToReadRecord = {
                 onNavigateToRoute(MainRouteReadRecord)
@@ -494,9 +445,6 @@ fun MainActivity.mainEntryProvider(
             viewModel = bookInfoViewModel,
             onBack = { onNavigateBack() },
             onFinish = { _, _ -> onNavigateBack() },
-            onOpenBookSourceEdit = { sourceUrl ->
-                onNavigateToRoute(MainRouteBookSourceEdit(sourceUrl))
-            },
             onOpenReader = { bookUrl, inBookshelf, chapterChanged ->
                 onNavigateToRoute(
                     MainRouteReadBook(

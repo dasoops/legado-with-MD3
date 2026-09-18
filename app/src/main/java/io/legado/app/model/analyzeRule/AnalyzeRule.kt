@@ -19,9 +19,8 @@ import io.legado.app.help.CacheManager
 import io.legado.app.help.JsExtensions
 import io.legado.app.help.http.BackstageWebView
 import io.legado.app.help.http.CookieStore
-import io.legado.app.help.source.getShareScope
+import io.legado.app.help.getShareScope
 import io.legado.app.model.Debug
-import io.legado.app.model.webBook.WebBook
 import io.legado.app.utils.GSON
 import io.legado.app.utils.GSONStrict
 import io.legado.app.utils.NetworkUtils
@@ -892,50 +891,6 @@ class AnalyzeRule(
             it.printOnDebug()
         }.getOrElse {
             it.stackTraceStr
-        }
-    }
-
-    /**
-     * 重新获取book
-     */
-    fun reGetBook() {
-        if (!preUpdateJs) throw NoStackTraceException("只能在 preUpdateJs 中调用")
-        if (isFromBookInfo) {
-            log("重新获取book")
-        }
-        val bookSource = source as? BookSource
-        val book = book as? Book
-        if (bookSource == null || book == null) return
-        runBlocking(coroutineContext) {
-            withTimeout(1800000) {
-                WebBook.preciseSearchAwait(bookSource, book.name, book.author)
-                    .getOrThrow().let {
-                        book.bookUrl = it.bookUrl
-                        it.variableMap.forEach { entry ->
-                            book.putVariable(entry.key, entry.value)
-                        }
-                    }
-                WebBook.getBookInfoAwait(bookSource, book, false)
-            }
-        }
-    }
-
-    /**
-     * 更新tocUrl,有些书源目录url定期更新,可以在js调用更新
-     */
-    fun refreshTocUrl() {
-        if (!preUpdateJs) throw NoStackTraceException("只能在 preUpdateJs 中调用")
-        if (isFromBookInfo) {
-            log("已跳过重复加载详情页，请优化代码")
-            return
-        }
-        val bookSource = source as? BookSource
-        val book = book as? Book
-        if (bookSource == null || book == null) return
-        runBlocking(coroutineContext) {
-            withTimeout(1800000) {
-                WebBook.getBookInfoAwait(bookSource, book, false)
-            }
         }
     }
 

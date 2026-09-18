@@ -11,7 +11,6 @@ import android.database.MatrixCursor
 import android.net.Uri
 import com.google.gson.Gson
 import io.legado.app.api.controller.BookController
-import io.legado.app.api.controller.BookSourceController
 import kotlinx.coroutines.runBlocking
 
 /**
@@ -19,7 +18,6 @@ import kotlinx.coroutines.runBlocking
  */
 class ReaderProvider : ContentProvider() {
     private enum class RequestCode {
-        SaveBookSource, SaveBookSources, DeleteBookSources, GetBookSource, GetBookSources,
         SaveBook, GetBookshelf, RefreshToc, GetChapterList, GetBookContent, GetBookCover,
         SaveBookProgress
     }
@@ -28,11 +26,6 @@ class ReaderProvider : ContentProvider() {
     private val sMatcher by lazy {
         UriMatcher(UriMatcher.NO_MATCH).apply {
             "${context?.applicationInfo?.packageName}.readerProvider".also { authority ->
-                addURI(authority, "bookSource/insert", RequestCode.SaveBookSource.ordinal)
-                addURI(authority, "bookSources/insert", RequestCode.SaveBookSources.ordinal)
-                addURI(authority, "bookSources/delete", RequestCode.DeleteBookSources.ordinal)
-                addURI(authority, "bookSource/query", RequestCode.GetBookSource.ordinal)
-                addURI(authority, "bookSources/query", RequestCode.GetBookSources.ordinal)
                 addURI(authority, "book/insert", RequestCode.SaveBook.ordinal)
                 addURI(authority, "books/query", RequestCode.GetBookshelf.ordinal)
                 addURI(authority, "book/refreshToc/query", RequestCode.RefreshToc.ordinal)
@@ -50,35 +43,20 @@ class ReaderProvider : ContentProvider() {
         return false
     }
 
+    override fun getType(uri: Uri) = throw UnsupportedOperationException("Not yet implemented")
+
     override fun delete(
         uri: Uri,
         selection: String?,
         selectionArgs: Array<String>?
     ): Int {
-        if (sMatcher.match(uri) < 0) return -1
-        when (RequestCode.entries[sMatcher.match(uri)]) {
-            RequestCode.DeleteBookSources -> BookSourceController.deleteSources(selection)
-            else -> throw IllegalStateException(
-                "Unexpected value: " + RequestCode.entries[sMatcher.match(uri)].name
-            )
-        }
         return 0
     }
-
-    override fun getType(uri: Uri) = throw UnsupportedOperationException("Not yet implemented")
 
     override fun insert(uri: Uri, values: ContentValues?): Uri? {
         if (sMatcher.match(uri) < 0) return null
         runBlocking {
             when (RequestCode.entries[sMatcher.match(uri)]) {
-                RequestCode.SaveBookSource -> values?.let {
-                    BookSourceController.saveSource(values.getAsString(postBodyKey))
-                }
-
-                RequestCode.SaveBookSources -> values?.let {
-                    BookSourceController.saveSources(values.getAsString(postBodyKey))
-                }
-
                 RequestCode.SaveBook -> values?.let {
                     BookController.saveBook(values.getAsString(postBodyKey))
                 }
@@ -110,8 +88,6 @@ class ReaderProvider : ContentProvider() {
             map["path"] = arrayListOf(it)
         }
         return if (sMatcher.match(uri) < 0) null else when (RequestCode.entries[sMatcher.match(uri)]) {
-            RequestCode.GetBookSource -> SimpleCursor(BookSourceController.getSource(map))
-            RequestCode.GetBookSources -> SimpleCursor(BookSourceController.sources)
             RequestCode.GetBookshelf -> SimpleCursor(BookController.bookshelf)
             RequestCode.GetBookContent -> SimpleCursor(BookController.getBookContent(map))
             RequestCode.RefreshToc -> SimpleCursor(BookController.refreshToc(map))

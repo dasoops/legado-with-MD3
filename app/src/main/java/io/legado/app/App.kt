@@ -19,13 +19,11 @@ import com.jeremyliao.liveeventbus.logger.DefaultLogger
 import com.script.rhino.ReadOnlyJavaObject
 import com.script.rhino.RhinoScriptEngine
 import com.script.rhino.RhinoWrapFactory
-import io.legado.app.constant.AppConst.channelIdBookSourceCheck
 import io.legado.app.constant.AppConst.channelIdDownload
 import io.legado.app.constant.PreferKey
 import io.legado.app.data.appDb
 import io.legado.app.data.entities.Book
 import io.legado.app.data.entities.BookChapter
-import io.legado.app.data.entities.BookSource
 import io.legado.app.data.entities.rule.BookInfoRule
 import io.legado.app.data.entities.rule.ContentRule
 import io.legado.app.data.entities.rule.ExploreRule
@@ -45,7 +43,6 @@ import io.legado.app.help.CrashHandler
 import io.legado.app.help.DefaultData
 import io.legado.app.help.DispatchersMonitor
 import io.legado.app.help.LifecycleHelp
-import io.legado.app.help.RuleBigDataHelp
 import io.legado.app.help.book.BookHelp
 import io.legado.app.help.config.AppConfigStore
 import io.legado.app.help.config.AppConfig
@@ -57,8 +54,6 @@ import io.legado.app.help.coroutine.Coroutine
 import io.legado.app.help.http.Cronet
 import io.legado.app.help.http.ObsoleteUrlFactory
 import io.legado.app.help.http.okHttpClient
-import io.legado.app.help.rhino.NativeBaseSource
-import io.legado.app.help.source.SourceHelp
 import io.legado.app.help.storage.Backup
 import io.legado.app.lib.theme.primaryColor
 import io.legado.app.model.BookCover
@@ -222,7 +217,6 @@ class App : Application(), SingletonImageLoader.Factory {
                 val clearTime = System.currentTimeMillis() - TimeUnit.DAYS.toMillis(1)
                 appDb.searchBookDao.clearExpired(clearTime)
             }
-            RuleBigDataHelp.clearInvalid()
             BookHelp.clearInvalidCache()
             Backup.clearCache()
             get<ReadStyleGateway>().clearUnusedBackgrounds()
@@ -236,8 +230,6 @@ class App : Application(), SingletonImageLoader.Factory {
 
                 2 -> ChineseUtils.preLoad(true, TransType.SIMPLE_TO_TRADITIONAL)
             }
-            //调整排序序号
-            SourceHelp.adjustSortNumber()
             //同步阅读记录
             if (backupGateway.currentSettings.syncBookProgress) {
                 AppWebDav.upConfig()
@@ -294,22 +286,10 @@ class App : Application(), SingletonImageLoader.Factory {
             lockscreenVisibility = Notification.VISIBILITY_PUBLIC
         }
 
-        val bookSourceCheckChannel = NotificationChannel(
-            channelIdBookSourceCheck,
-            getString(R.string.check_book_source),
-            NotificationManager.IMPORTANCE_DEFAULT
-        ).apply {
-            enableLights(false)
-            enableVibration(false)
-            setSound(null, null)
-            lockscreenVisibility = Notification.VISIBILITY_PUBLIC
-        }
-
         //向notification manager 提交channel
         notificationManager.createNotificationChannels(
             listOf(
-                downloadChannel,
-                bookSourceCheckChannel
+                downloadChannel
             )
         )
     }
@@ -317,7 +297,6 @@ class App : Application(), SingletonImageLoader.Factory {
     private fun initRhino() {
         @Suppress("UNUSED_EXPRESSION")
         RhinoScriptEngine
-        RhinoWrapFactory.register(BookSource::class.java, NativeBaseSource.factory)
         RhinoWrapFactory.register(ExploreRule::class.java, ReadOnlyJavaObject.factory)
         RhinoWrapFactory.register(SearchRule::class.java, ReadOnlyJavaObject.factory)
         RhinoWrapFactory.register(BookInfoRule::class.java, ReadOnlyJavaObject.factory)

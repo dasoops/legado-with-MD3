@@ -9,7 +9,6 @@ import io.legado.app.help.book.isLocal
 import io.legado.app.help.book.isLocalTxt
 import io.legado.app.help.coroutine.Coroutine
 import io.legado.app.model.ReadBook
-import io.legado.app.model.webBook.WebBook
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -116,11 +115,6 @@ class ReadContentEditDelegate(
             val chapter = host.findChapter(book.bookUrl, ReadBook.durChapterIndex)
                 ?: return@async
             BookHelp.delContent(book, chapter)
-            if (!book.isLocal) {
-                ReadBook.bookSource?.let { bookSource ->
-                    WebBook.getContentAwait(bookSource, book, chapter)
-                }
-            }
             val contentProcessor = ContentProcessor.get(book.name, book.origin)
             val rawContent = BookHelp.getContent(book, chapter)
             val text = if (rawContent != null) {

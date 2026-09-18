@@ -33,7 +33,7 @@ import io.legado.app.help.http.newCallStrResponse
 import io.legado.app.help.http.postForm
 import io.legado.app.help.http.postJson
 import io.legado.app.help.http.postMultipart
-import io.legado.app.help.source.getShareScope
+import io.legado.app.help.getShareScope
 import io.legado.app.utils.EncoderUtils
 import io.legado.app.utils.GSON
 import io.legado.app.utils.GSONStrict

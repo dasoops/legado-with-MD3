@@ -10,17 +10,6 @@ sealed interface MainRoute : NavKey
 data object MainRouteBookshelf : MainRoute
 
 @Serializable
-data class MainRouteBookSourceManage(
-    val importUrl: String? = null,
-) : MainRoute
-
-@Serializable
-data class MainRouteBookSourceEdit(val sourceUrl: String? = null) : MainRoute
-
-@Serializable
-data class MainRouteBookSourceDebug(val sourceUrl: String? = null) : MainRoute
-
-@Serializable
 data object MainRouteSettings : MainRoute
 
 @Serializable
@@ -102,9 +91,6 @@ data object MainRouteAbout : MainRoute
 
 object MainRouteConst {
     const val ROUTE_MAIN = "main"
-    const val ROUTE_BOOK_SOURCE_MANAGE = "source/book/manage"
-    const val ROUTE_BOOK_SOURCE_EDIT = "source/book/edit"
-    const val ROUTE_BOOK_SOURCE_DEBUG = "source/book/debug"
     const val ROUTE_SETTINGS = "settings"
     const val ROUTE_SETTINGS_OTHER = "settings/other"
     const val ROUTE_SETTINGS_READ = "settings/read"

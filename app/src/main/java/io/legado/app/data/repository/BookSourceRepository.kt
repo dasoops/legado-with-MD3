@@ -3,7 +3,6 @@ package io.legado.app.data.repository
 import io.legado.app.data.dao.BookSourceDao
 import io.legado.app.data.entities.BookSource
 import io.legado.app.data.entities.BookSourcePart
-import io.legado.app.help.source.SourceHelp
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.withContext
@@ -111,14 +110,6 @@ class BookSourceRepository(private val bookSourceDao: BookSourceDao) {
             source.copy(customOrder = maxOrder + index)
         }
         bookSourceDao.upOrder(reorderedSources)
-    }
-
-    suspend fun deleteSourceParts(sources: List<BookSourcePart>) = withContext(Dispatchers.IO) {
-        SourceHelp.deleteBookSourceParts(sources)
-    }
-
-    suspend fun deleteSource(sourceUrl: String) = withContext(Dispatchers.IO) {
-        SourceHelp.deleteBookSource(sourceUrl)
     }
 
     suspend fun disableSource(sourceUrl: String) = withContext(Dispatchers.IO) {

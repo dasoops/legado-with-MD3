@@ -1,13 +1,11 @@
 package io.legado.app.domain.usecase
 
-import io.legado.app.domain.gateway.BookSourceCallbackGateway
 import io.legado.app.domain.gateway.LocalBookGateway
 import io.legado.app.domain.repository.BookDomainRepository
 
 class DeleteBooksUseCase(
     private val bookRepository: BookDomainRepository,
-    private val localBookGateway: LocalBookGateway,
-    private val bookSourceCallbackGateway: BookSourceCallbackGateway
+    private val localBookGateway: LocalBookGateway
 ) {
 
     suspend fun execute(bookUrls: Set<String>, deleteOriginal: Boolean): List<String> {
@@ -16,8 +14,6 @@ class DeleteBooksUseCase(
         books.forEach { book ->
             if (book.isLocal) {
                 localBookGateway.deleteBook(book.bookUrl, deleteOriginal)
-            } else {
-                bookSourceCallbackGateway.onDeleteFromShelf(book.bookUrl)
             }
             bookRepository.deleteChaptersByBook(book.bookUrl)
         }

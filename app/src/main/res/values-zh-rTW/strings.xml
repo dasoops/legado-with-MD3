@@ -61,8 +61,6 @@
     <string name="book_library">書城</string>
     <string name="book_local">新增本機</string>
     <string name="book_source">書源</string>
-    <string name="book_source_manage">書源管理</string>
-    <string name="book_source_manage_desc">建立/匯入/編輯/管理書源</string>
     <string name="setting">設定</string>
     <string name="theme_setting">主題設定</string>
     <string name="theme_setting_s">與介面/顏色相關的一些設定</string>
@@ -88,7 +86,6 @@
     <string name="import_books_count">共%s個Text文件</string>
     <string name="is_loading">載入中…</string>
     <string name="retry">重試</string>
-    <string name="web_edit_source">web編輯書源</string>
     <string name="about_description">
         \u3000\u3000這是一款使用Kotlin全新開發的開源的閱讀軟體，歡迎您的加入。
     </string>
@@ -166,13 +163,7 @@
     <string name="clear_cache_success">成功清理快取</string>
     <string name="action_save">儲存</string>
     <string name="edit_source">編輯源</string>
-    <string name="edit_book_source">編輯書源</string>
-    <string name="disable_book_source">禁用書源</string>
-    <string name="add_book_source">建立書源</string>
     <string name="book_file_selector">新增書籍</string>
-    <string name="copy_source">複製源</string>
-    <string name="paste_source">貼上源</string>
-    <string name="source_rule_s">源規則說明</string>
     <string name="check_update">檢查更新</string>
     <string name="rule_summary">規則說明</string>
     <string name="share">分享</string>
@@ -180,7 +171,6 @@
     <string name="flow_sys">跟隨系統</string>
     <string name="add">新增</string>
     <string name="minus">減少</string>
-    <string name="import_book_source">匯入書源</string>
     <string name="import_local">本機匯入</string>
     <string name="import_on_line">網路匯入</string>
     <string name="replace_rule_title">取代淨化</string>
@@ -200,7 +190,6 @@
     <string name="adjust">調節</string>
     <string name="scroll_bar">滾動條</string>
     <string name="clear_all_content">清除快取會刪除所有已儲存章節，是否確認刪除？</string>
-    <string name="book_source_share_url">書源共享</string>
     <string name="replace_rule_summary">取代規則名稱</string>
     <string name="replace_rule_invalid">取代規則為空或者不滿足正規表示式要求</string>
     <string name="select_action">選擇操作</string>
@@ -237,7 +226,6 @@
     <string name="del_msg">是否確認刪除？</string>
     <string name="clear_font">預設字體</string>
     <string name="find_on_www">發現</string>
-    <string name="find_source_manage">發現管理</string>
     <string name="find_empty">沒有內容，去書源裡自訂吧！</string>
     <string name="del_all">刪除所有</string>
     <string name="clear">清除</string>
@@ -307,7 +295,6 @@
     <string name="bookshelf_management">書架管理</string>
     <string name="clear_bookshelf_s">這將會刪除所有書籍，請謹慎操作。</string>
     <string name="search_book_source">搜尋書源</string>
-    <string name="search_book_source_num">搜尋(共%d個書源)</string>
     <string name="chapter_list_size">目錄(%d)</string>
     <string name="text_bold">加粗</string>
     <string name="text_font">字體</string>
@@ -323,26 +310,6 @@
     <string name="padding_left">左邊距</string>
     <string name="padding_right">右邊距</string>
     <string name="padding_format">上: %1$d  下: %2$d  左: %3$d  右: %4$d</string>
-    <string name="check_book_source">校驗書源</string>
-    <string name="book_source_check_completed">校驗完成：成功 %1$d，失敗 %2$d</string>
-    <string name="book_source_check_cancelled">校驗已停止：成功 %1$d，失敗 %2$d，取消 %3$d</string>
-    <string name="book_source_check_waiting">等待校驗</string>
-    <string name="book_source_check_running">正在校驗</string>
-    <string name="book_source_check_succeeded">校驗成功</string>
-    <string name="book_source_check_failed">校驗失敗：%1$s</string>
-    <string name="book_source_check_source_missing">校驗失敗：書源不存在</string>
-    <string name="book_source_check_save_failed">校驗失敗：無法儲存結果，%1$s</string>
-    <string name="book_source_check_incomplete">校驗失敗：工作未完成</string>
-    <string name="book_source_check_item_cancelled">校驗已取消</string>
-    <string name="book_source_check_default_keyword">我的</string>
-    <string name="book_source_import_success">匯入完成</string>
-    <string name="book_source_import_failed">匯入失敗</string>
-    <string name="book_source_invalid_source">不是書源</string>
-    <string name="book_source_export_open_failed">無法開啟匯出檔案</string>
-    <string name="book_source_export_failed">匯出失敗：%1$s</string>
-    <string name="book_source_upload_success">上傳成功：%1$s</string>
-    <string name="book_source_upload_failed">上傳失敗：%1$s</string>
-    <string name="check_select_source">校驗所選</string>
     <string name="progress_show">%1$s      進度 %2$d/%3$d</string>
     <string name="jf_convert">簡繁轉換</string>
     <string name="jf_convert_o">關閉</string>
@@ -439,13 +406,10 @@
     <string name="behavior_main_t">書架ToolBar自動隱藏</string>
     <string name="behavior_main_s">滾動書架時ToolBar自動隱藏與顯示</string>
     <string name="success">成功</string>
-    <string name="source_no_login">目前源沒有配置登入地址</string>
     <string name="no_prev_page">沒有上一頁</string>
     <string name="no_next_page">沒有下一頁</string>
 
     <!-- source start-->
-    <string name="source_name">源名稱(sourceName)</string>
-    <string name="source_url">源URL(sourceUrl)</string>
     <string name="source_group">源分組(sourceGroup)</string>
     <string name="diy_source_group">自訂源分組</string>
     <string name="diy_edit_source_group">輸入自訂源分組名稱</string>
@@ -479,10 +443,8 @@
     <string name="rule_web_js">WebViewJs(webJs)</string>
     <string name="rule_image_style">圖片樣式(imageStyle)</string>
     <string name="rule_replace_regex">取代規則(replaceRegex)</string>
-    <string name="rule_source_regex">資源正則(sourceRegex)</string>
     <string name="rule_pay_action">購買操作(payAction)</string>
 
-    <string name="source_icon">圖示(sourceIcon)</string>
     <string name="r_guid">guid規則(ruleGuid)</string>
     <string name="r_categories">類別規則(ruleCategories)</string>
     <string name="check_key_word">校驗關鍵字(checkKeyWord)</string>
@@ -505,8 +467,6 @@
     <string name="net_error_10003">資料解析失敗</string>
     <!--error string end-->
 
-    <string name="source_http_header">請求頭(header)</string>
-    <string name="debug_source">除錯源</string>
     <string name="share_selected_source">分享選取源</string>
     <string name="click_on_selected_show_menu">選中時點擊可彈出選單</string>
     <string name="theme">主題</string>
@@ -514,7 +474,6 @@
     <string name="theme_mode_desc">選擇主題模式</string>
     <string name="join_qq_group">加入QQ群</string>
     <string name="bg_image_per">獲取背景圖片需儲存權限</string>
-    <string name="input_book_source_url">輸入書源網址</string>
     <string name="del_file">刪除文件</string>
     <string name="del_file_success">刪除文件成功</string>
     <string name="sure_del_file">確定刪除文件嗎？</string>
@@ -570,13 +529,6 @@
     <string name="chapter_list_empty">目錄列表為空</string>
     <string name="text_letter_spacing">字距</string>
 
-    <string name="source_tab_base">基本</string>
-    <string name="source_tab_search">搜尋</string>
-    <string name="source_tab_find">發現</string>
-    <string name="source_tab_homepage">主頁</string>
-    <string name="source_tab_info">詳情</string>
-    <string name="source_tab_toc">目錄</string>
-    <string name="source_tab_content">正文</string>
 
     <string name="e_ink_mode">E-Ink 模式</string>
     <string name="e_ink_mode_detail">去除動畫，最佳化電紙書使用體驗</string>
@@ -592,7 +544,6 @@
     <string name="is_enable">啟用</string>
     <string name="enable_js">啟用JS</string>
     <string name="load_with_base_url">載入BaseUrl</string>
-    <string name="all_source">全部書源</string>
     <string name="cannot_empty">輸入不能為空</string>
     <string name="clear_find_cache">清空發現快取</string>
     <string name="edit_find">編輯發現</string>
@@ -609,8 +560,6 @@
     <string name="select_image">選擇圖片</string>
     <string name="group_manage">分組管理</string>
     <string name="group_select">分組選擇</string>
-    <string name="book_source_default_groups">預設分組</string>
-    <string name="book_source_other_groups">其他分組</string>
     <string name="group_edit">編輯分組</string>
     <string name="move_to_group">移入分組</string>
     <string name="add_group">新增分組</string>
@@ -657,7 +606,6 @@
     <string name="next_sentence">下一句</string>
     <string name="other_folder">其它目錄</string>
     <string name="text_too_long_qr_error">文字太多，生成二維碼失敗</string>
-    <string name="share_book_source">分享書源</string>
     <string name="auto_dark_mode">自動切換夜間模式</string>
     <string name="auto_dark_mode_s">夜間模式跟隨系統</string>
     <string name="go_back">上級</string>
@@ -900,8 +848,6 @@
     <string name="autobackup_fail">自動備份失敗\n%s</string>
     <string name="end">結束</string>
     <string name="custom_group_summary">關閉取代分組/開啟新增分組</string>
-    <string name="check_source_show_debug_message">校驗書源顯示詳細資訊</string>
-    <string name="check_source_show_debug_message_summary">書源校驗時顯示網路請求步驟和時間</string>
     <string name="need_login">需登入</string>
     <string name="pref_cronet_summary">使用Cronet網路元件</string>
     <string name="anti_alias">抗鋸齒</string>
@@ -931,7 +877,6 @@
     <string name="downloading">下載中</string>
     <string name="unknown_state">未知狀態</string>
     <string name="disable_source">禁用源</string>
-    <string name="delete_source">刪除源</string>
     <string name="chapter_pay">購買</string>
     <string name="double_page_horizontal">平板/橫屏雙頁</string>
     <string name="copy_url">複製url</string>
@@ -954,13 +899,9 @@
     <string name="bg_alpha">背景透明度</string>
 
     <!-- check source config string -->
-    <string name="check_source_config">校驗設定</string>
-    <string name="check_source_item">校驗項目</string>
-    <string name="check_source_timeout">單個書源校驗超時(秒)</string>
     <string name="timeout">超時</string>
     <string name="seconds">秒</string>
     <string name="less_than">小於</string>
-    <string name="check_source_config_summary">校驗超時：%1$s秒\n校驗項目：%2$s</string>
     <string name="record_debug_log">記錄除錯日誌</string>
     <string name="sub_dir">子資料夾</string>
     <string name="general">全域</string>
@@ -996,7 +937,6 @@
     <string name="search_via_url">搜索URL</string>
 	<string name="cover_rule_edit">封面规则</string>
     <string name="cover_rule_summary">進入詳情頁時使用封面規則重新獲取封面</string>
-    <string name="scroll_to_dur_source">定位到目前書源</string>
     <string name="cannot_timed_non_playback">非播放狀態無法定時</string>
     <string name="all_bookmark">所有書籤</string>
     <string name="book_type_different">書籍類型不一樣</string>
@@ -1050,8 +990,6 @@
     <string name="show_read_title_addition">展示頂部工具列附加區域</string>
     <string name="read_bar_style_follow_page">工具列樣式跟隨頁面</string>
     <string name="rule_image_decode">圖片解密（imageDecode）</string>
-    <string name="like_source">讚</string>
-    <string name="not_like_source">踩</string>
     <string name="async_load_image">非同步載入圖片</string>
     <string name="cover_decode_js">封面解密（coverDecodeJs）</string>
     <string name="net_no_group">網路未分組</string>
@@ -1059,7 +997,6 @@
     <string name="parallel_export_book">多執行緒匯出</string>
     <string name="progress_bar_behavior">進度條行為</string>
     <string name="source_edit_text_max_line">源編輯框最大行數</string>
-    <string name="source_edit_max_line_summary">%s，設定行數小於螢幕可顯示的最大行數可以更方便的滑動到其他的欄位進行編輯</string>
     <string name="restore_last_book_process">是否復原到跳轉前的閱讀進度？</string>
     <string name="return_reading_position">返回原閱讀位置</string>
     <string name="dismiss_reading_anchor">關閉</string>
@@ -1071,7 +1008,6 @@
     <string name="change_search_scope">切換搜尋範圍</string>
     <string name="copy_rule">複製規則</string>
     <string name="paste_rule">貼上規則</string>
-    <string name="groups_or_source">多分組/書源</string>
     <string name="replace_state_change">取代(啟用/禁用)</string>
     <string name="show_last_update_time">顯示上次更新時間</string>
     <string name="refresh_list">刷新列表</string>
@@ -1087,8 +1023,6 @@
     <string name="jump_to_another_app">跳转其它应用</string>
     <string name="clear_webview_data">清除 WebView 数据</string>
     <string name="clear_webview_data_summary">清除内置浏览器所有数据</string>
-    <string name="source_tab_list">列表</string>
-    <string name="source_tab_web_view">網頁</string>
     <string name="layout_type">布局</string>
     <string name="create">新建</string>
     <string name="url_rule">url规则(urlRule)</string>
@@ -1156,7 +1090,6 @@
     <string name="sync_book_progress_success">進度同步成功</string>
     <string name="default_home_page">默认主页</string>
     <string name="show_bookshelf_fast_scroller">显示快速滚动条</string>
-    <string name="export_all_use_book_source">导出所有书的书源</string>
     <string name="cloud_progress_exceeds_current">雲端進度超過目前進度，是否同步？</string>
     <string name="test_sync_t">測試 WebDav 配置</string>
     <string name="test_sync_d">測試 WebDav 服務工作狀態</string>
@@ -1201,7 +1134,6 @@
     <string name="official_version">正式版</string>
     <string name="beta_release_version">测试版</string>
     <string name="beta_releaseA_version">共存版</string>
-    <string name="group_sources_by_domain">按域名分组显示</string>
     <string name="theme_config">主题配置</string>
     <string name="enable_auto_page_scroll">开启自动翻页</string>
     <string name="enable_auto_scroll">开启滚动</string>
@@ -1279,7 +1211,6 @@
     <string name="border_style">边框样式</string>
     <string name="solid_border">实线</string>
     <string name="dashed_border">虚线</string>
-    <string name="source_tab_start">启动</string>
     <string name="enable_preload">预加载</string>
     <string name="load_with_web_log">显示WebView日志</string>
     <string name="cache_first">优先缓存</string>
@@ -1290,22 +1221,18 @@
     <string name="homepage_quick_actions">快捷操作</string>
     <string name="homepage_add_module">添加模組</string>
     <string name="homepage_module_list">模組列表</string>
-    <string name="homepage_browse_source_modules">瀏覽書源模組</string>
     <string name="homepage_set_detail">集詳情</string>
     <string name="homepage_module_manage">首頁模組管理</string>
     <string name="homepage_all_groups">全部分組</string>
     <string name="homepage_tab_joined">已加入</string>
-    <string name="homepage_tab_source_modules">書源模組</string>
     <string name="homepage_tab_discover">發現</string>
     <string name="homepage_no_joined_modules">暫無已加入的模組</string>
     <string name="homepage_standard_modules_sortable">標準模組 (可拖拽排序)</string>
     <string name="homepage_infinite_module_bottom">底欄無限模組</string>
     <string name="homepage_in_effect">當前生效</string>
     <string name="homepage_blocked">已被屏蔽</string>
-    <string name="homepage_source_json_empty">該書源的 homepageModules JSON 為空</string>
     <string name="homepage_already_joined">已加入</string>
     <string name="homepage_module_type">模組類型</string>
-    <string name="homepage_source_no_discover">該書源暫無發現項</string>
     <string name="homepage_select_items">選擇項</string>
     <string name="homepage_manual_add">+ 手動添加</string>
     <string name="homepage_n_modules">%1$d 個模組</string>
@@ -1350,7 +1277,6 @@
     <string name="home_webdav_backup_load_error">無法取得備份資訊</string>
     <string name="home_webdav_backup_confirmation">立即將目前資料備份到 WebDAV？</string>
     <string name="home_webdav_restore_confirmation">還原 WebDAV 備份 %1$s？目前資料可能被覆蓋。</string>
-    <string name="homepage_no_source_sets_selected">未選擇任何書源集</string>
     <string name="homepage_add_module_definition">請在書源中添加首頁模組定義</string>
     <string name="homepage_collapse">收起</string>
     <string name="homepage_show_all">顯示全部</string>
@@ -1729,8 +1655,6 @@
     <string name="author_read">%1$s • %2$d 未讀</string>
     <string name="menu_alpha_sum">目前 %d%%</string>
     <string name="menu_alpha">選單不透明度</string>
-    <string name="existing_book_source">現有書源：%1$s</string>
-    <string name="new_book_source">將加入書源：%1$s</string>
     <string name="latest_chapter_info">最新章節：%1$s</string>
     <string name="quick_add_to_shelf">快速放入書架</string>
     <string name="book_added_to_shelf">已放入書架</string>
@@ -2040,11 +1964,9 @@
     <string name="add_book_failed">新增書籍失敗</string>
     <string name="data_empty">資料不能為空</string>
     <string name="data_must_be_json">資料必須為 JSON 格式</string>
-    <string name="source_conversion_failed">源轉換失敗</string>
     <string name="debug_finished">除錯完成</string>
     <string name="save_failed">儲存失敗</string>
     <string name="book_not_found">找不到書籍</string>
-    <string name="source_not_exist">源不存在</string>
     <string name="sync_complete">同步完成</string>
     <string name="clear_cache_error">清除快取出錯</string>
     <string name="upload_success">上傳成功</string>
@@ -2053,7 +1975,6 @@
     <string name="cover_reset">重設封面</string>
     <string name="rule_copied_to_clipboard">規則已複製到剪貼簿</string>
     <string name="login_error">登入失敗</string>
-    <string name="source_already_checking">正在校驗書源，請稍候</string>
     <string name="check_timeout">校驗超時</string>
     <string name="js_disabled">JS 已停用</string>
     <string name="website_disabled">網站已停用</string>
@@ -2118,7 +2039,6 @@
     <string name="a11y_read_progress_page">第 %1$d 頁，共 %2$d 頁</string>
     <string name="a11y_read_progress_chapter">第 %1$d 章，共 %2$d 章</string>
     <string name="a11y_server_list">伺服器清單</string>
-    <string name="a11y_pin_source">置頂書源</string>
     <string name="a11y_long_press_reorder">長按並拖曳可排序</string>
     <string name="a11y_rule_enabled_switch">%1$s 的啟用狀態</string>
     <string name="a11y_edit_named">編輯 %1$s</string>

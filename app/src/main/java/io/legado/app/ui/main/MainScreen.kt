@@ -120,7 +120,6 @@ fun MainScreen(
     onNavigateToCache: (Long) -> Unit,
     onOpenBookshelfBook: (BookShelfItem, String?) -> Unit,
     onNavigateToBookInfo: (name: String, author: String, bookUrl: String, origin: String?, coverPath: String?, sharedCoverKey: String?) -> Unit,
-    onNavigateToBookSourceManage: () -> Unit,
     onNavigateToReadRecord: () -> Unit,
     onNavigateToHighlightTagRule: () -> Unit,
     onNavigateToAbout: () -> Unit,
@@ -479,7 +478,6 @@ fun MainScreen(
                                 onOpenSettings = onOpenSettings,
                                 onNavigate = { event ->
                                     when (event) {
-                                        PrefClickEvent.OpenBookSourceManage -> onNavigateToBookSourceManage()
                                         PrefClickEvent.OpenReadRecord -> onNavigateToReadRecord()
                                         else -> onIntent(MainUiIntent.HandlePreferenceClick(event))
                                     }

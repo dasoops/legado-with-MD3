@@ -56,9 +56,6 @@ class DebugScenarioActivity : AppCompatActivity() {
                         AppConfigStore.putLong(PreferKey.saveTabPosition, BookGroup.IdAll)
                         MainIntent.createHomeIntent(this@DebugScenarioActivity)
                     }
-                    ENTRY_SOURCE_MANAGE -> MainIntent.createBookSourceManageIntent(
-                        this@DebugScenarioActivity
-                    )
                     ENTRY_THEME_CONFIG -> MainIntent.createIntent(
                         this@DebugScenarioActivity,
                         ConfigTag.THEME_CONFIG,
@@ -229,12 +226,10 @@ class DebugScenarioActivity : AppCompatActivity() {
         const val DEBUG_ORIGIN = "legado-debug://fixture-source"
         const val ENTRY_READER = "reader"
         const val ENTRY_BOOKSHELF = "bookshelf"
-        const val ENTRY_SOURCE_MANAGE = "source_manage"
         const val ENTRY_THEME_CONFIG = "theme_config"
         val SUPPORTED_ENTRIES = setOf(
             ENTRY_READER,
             ENTRY_BOOKSHELF,
-            ENTRY_SOURCE_MANAGE,
             ENTRY_THEME_CONFIG,
         )
         val FIXTURE_ID = Regex("[a-z0-9][a-z0-9-]*")

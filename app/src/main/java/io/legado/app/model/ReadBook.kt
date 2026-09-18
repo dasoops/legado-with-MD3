@@ -45,7 +45,6 @@ import io.legado.app.model.localBook.LocalBook
 import io.legado.app.model.localBook.TextFile
 import io.legado.app.model.reader.ReaderChapterInput
 import io.legado.app.model.reader.ReaderChapterInputWindow
-import io.legado.app.model.webBook.WebBook
 import io.legado.app.ui.book.read.ConfigUpdateAction
 import io.legado.app.ui.book.read.ReadConfigUpdateBus
 import io.legado.app.ui.book.read.pageestimate.ChapterContentHasher
@@ -603,27 +602,9 @@ object ReadBook : CoroutineScope by MainScope(), KoinComponent {
     }
 
     fun upWebBook(book: Book) {
-        if (book.isLocal) {
-            bookSource = null
-            if (book.getImageStyle().isNullOrBlank() && (book.isImage || book.isPdf)) {
-                book.setImageStyle(Book.imgStyleFull)
-            }
-        } else {
-            appDb.bookSourceDao.getBookSource(book.origin)?.let {
-                bookSource = it
-                if (book.getImageStyle().isNullOrBlank()) {
-                    var imageStyle = it.getContentRule().imageStyle
-                    if (imageStyle.isNullOrBlank() && (book.isImage || book.isPdf)) {
-                        imageStyle = Book.imgStyleFull
-                    }
-                    book.setImageStyle(imageStyle)
-                    if (imageStyle.equals(Book.imgStyleSingle, true)) {
-                        book.setPageAnim(0)
-                    }
-                }
-            } ?: let {
-                bookSource = null
-            }
+        bookSource = null
+        if (book.getImageStyle().isNullOrBlank() && (book.isImage || book.isPdf)) {
+            book.setImageStyle(Book.imgStyleFull)
         }
     }
 
@@ -1434,24 +1415,7 @@ object ReadBook : CoroutineScope by MainScope(), KoinComponent {
 
     @Synchronized
     fun upToc() {
-        val bookSource = bookSource ?: return
-        val book = book ?: return
-        if (!book.canUpdate) return
-        if (System.currentTimeMillis() - book.lastCheckTime < 600000) return
-        book.lastCheckTime = System.currentTimeMillis()
-        WebBook.getChapterList(this, bookSource, book).onSuccess(IO) { cList ->
-            if (book.bookUrl == ReadBook.book?.bookUrl
-                && cList.size > chapterSize
-            ) {
-                appDb.bookChapterDao.delByBook(book.bookUrl)
-                appDb.bookChapterDao.insert(*cList.toTypedArray())
-                saveRead()
-                chapterSize = cList.size
-                simulatedChapterSize = book.simulatedTotalChapterNum()
-                publishSnapshot()
-                if (readerChapterInputWindow.next == null) loadContent(durChapterIndex + 1)
-            }
-        }
+        // 在线目录更新已移除, 本地目录由本地解析路径负责
     }
 
     fun pageAnim(): Int {
@@ -1512,7 +1476,6 @@ object ReadBook : CoroutineScope by MainScope(), KoinComponent {
                             book.getUseReplaceRule(otherSettingsGateway.currentSettings.replaceEnableDefault),
                             chineseConverterType = readSettingsGateway.currentSettings.chineseConverterType,
                         )
-                        SourceCallBack.callBackBook(SourceCallBack.SAVE_READ, bookSource, book, it)
                     }
                     book.update()
                     lastProgressSaveAt = book.durChapterTime

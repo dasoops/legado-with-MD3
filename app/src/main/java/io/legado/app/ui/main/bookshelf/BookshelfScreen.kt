@@ -122,7 +122,6 @@ import io.legado.app.ui.widget.components.card.TextCard
 import io.legado.app.ui.widget.components.divider.PillHeaderDivider
 import io.legado.app.ui.widget.components.filePicker.FilePickerSheet
 import io.legado.app.ui.widget.components.icon.AppIcons
-import io.legado.app.ui.widget.components.importComponents.SourceInputDialog
 import io.legado.app.ui.widget.components.lazylist.FastScrollLazyVerticalGrid
 import io.legado.app.ui.widget.components.list.TopFloatingStickyItem
 import io.legado.app.ui.widget.components.log.AppLogSheet
@@ -249,16 +248,6 @@ fun BookshelfScreen(
         }
         onIntent(BookshelfIntent.UploadResultConsumed)
     }
-
-    val importLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.OpenDocument(),
-        onResult = { uri ->
-            uri?.let {
-                val groupId = uiState.groups.getOrNull(uiState.selectedGroupIndex)?.groupId ?: -1L
-                onIntent(BookshelfIntent.ImportFromUri(it, groupId))
-            }
-        }
-    )
 
     val exportLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.CreateDocument("application/json"),
@@ -541,14 +530,6 @@ fun BookshelfScreen(
                                     leadingIcon = { Icon(Icons.Outlined.ViewCarousel, null) }
                                 )
                                 RoundDropdownMenuItem(
-                                    text = stringResource(R.string.add_url),
-                                    onClick = {
-                                        onIntent(BookshelfIntent.ShowOverlay(BookshelfOverlay.AddUrlDialog))
-                                        dismiss()
-                                    },
-                                    leadingIcon = { Icon(Icons.Default.Link, null) }
-                                )
-                                RoundDropdownMenuItem(
                                     text = stringResource(R.string.selection_mode),
                                     onClick = {
                                         toggleEditMode()
@@ -574,14 +555,6 @@ fun BookshelfScreen(
                                         dismiss()
                                     },
                                     leadingIcon = { Icon(Icons.Default.UploadFile, null) }
-                                )
-                                RoundDropdownMenuItem(
-                                    text = stringResource(R.string.import_bookshelf),
-                                    onClick = {
-                                        onIntent(BookshelfIntent.ShowOverlay(BookshelfOverlay.ImportSheet))
-                                        dismiss()
-                                    },
-                                    leadingIcon = { Icon(Icons.Default.CloudDownload, null) }
                                 )
                                 RoundDropdownMenuItem(
                                     text = stringResource(R.string.log),
@@ -1079,7 +1052,6 @@ fun BookshelfScreen(
         onIntent = onIntent,
         allGroups = allGroups,
         selectedBookUrls = selectedBookUrls,
-        importLauncher = importLauncher,
         exportLauncher = exportLauncher,
         clearSelection = clearSelection
     )
@@ -1148,7 +1120,6 @@ private fun BookshelfOverlays(
     onIntent: (BookshelfIntent) -> Unit,
     allGroups: List<BookGroup>,
     selectedBookUrls: Set<String>,
-    importLauncher: ManagedActivityResultLauncher<Array<String>, Uri?>,
     exportLauncher: ManagedActivityResultLauncher<String, Uri?>,
     clearSelection: () -> Unit
 ) {
@@ -1194,30 +1165,6 @@ private fun BookshelfOverlays(
             onIntent(BookshelfIntent.DismissOverlay)
             clearSelection()
         }
-    )
-
-    SourceInputDialog(
-        show = activeOverlay == BookshelfOverlay.AddUrlDialog,
-        title = stringResource(R.string.add_book_url),
-        onDismissRequest = { onIntent(BookshelfIntent.DismissOverlay) },
-        onConfirm = { url ->
-            onIntent(BookshelfIntent.AddBookByUrl(url))
-            onIntent(BookshelfIntent.DismissOverlay)
-        }
-    )
-
-    FilePickerSheet(
-        show = activeOverlay == BookshelfOverlay.ImportSheet,
-        onDismissRequest = { onIntent(BookshelfIntent.DismissOverlay) },
-        title = stringResource(R.string.import_bookshelf),
-        onSelectSysFile = { types ->
-            importLauncher.launch(types)
-            onIntent(BookshelfIntent.DismissOverlay)
-        },
-        onManualInput = {
-            onIntent(BookshelfIntent.ShowOverlay(BookshelfOverlay.AddUrlDialog))
-        },
-        allowExtensions = arrayOf("json", "txt")
     )
 
     FilePickerSheet(

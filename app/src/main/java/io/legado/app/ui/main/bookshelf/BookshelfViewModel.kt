@@ -10,24 +10,17 @@ import io.legado.app.constant.AppLog
 import io.legado.app.constant.EventBus
 import io.legado.app.data.entities.Book
 import io.legado.app.data.entities.BookGroup
-import io.legado.app.data.entities.BookSource
 import io.legado.app.data.repository.BookGroupRepository
 import io.legado.app.data.repository.BookRepository
-import io.legado.app.data.repository.BookSourceRepository
 import io.legado.app.data.repository.BookshelfRepository
 import io.legado.app.data.repository.UploadRepository
-import io.legado.app.domain.usecase.AddBookUseCase
 import io.legado.app.domain.usecase.ExportBookshelfUseCase
-import io.legado.app.domain.usecase.ImportBookshelfUseCase
-import io.legado.app.domain.usecase.RefreshTocUseCase
 import io.legado.app.domain.usecase.UpdateBooksGroupUseCase
 import io.legado.app.domain.gateway.BookshelfSettingsGateway
 import io.legado.app.domain.gateway.AppShellSettingsGateway
 import io.legado.app.domain.gateway.DownloadCacheSettingsGateway
 import io.legado.app.domain.gateway.ThemeSettingsGateway
 import io.legado.app.exception.NoStackTraceException
-import io.legado.app.help.coroutine.Coroutine
-import io.legado.app.model.SourceCallBack
 import io.legado.app.ui.config.themeConfig.TagColorPair
 import io.legado.app.utils.eventBus.FlowEventBus
 import io.legado.app.utils.move
@@ -77,21 +70,15 @@ class BookshelfViewModel(
     application: Application,
     private val bookRepository: BookRepository,
     private val bookGroupRepository: BookGroupRepository,
-    private val bookSourceRepository: BookSourceRepository,
     private val bookshelfRepository: BookshelfRepository,
     private val uploadRepository: UploadRepository,
     private val updateBooksGroupUseCase: UpdateBooksGroupUseCase,
-    private val refreshTocUseCase: RefreshTocUseCase,
-    private val addBookUseCase: AddBookUseCase,
-    private val importBookshelfUseCase: ImportBookshelfUseCase,
     private val exportBookshelfUseCase: ExportBookshelfUseCase,
     private val bookshelfSettingsGateway: BookshelfSettingsGateway,
     private val appShellSettingsGateway: AppShellSettingsGateway,
     private val themeSettingsGateway: ThemeSettingsGateway,
     private val downloadCacheSettingsGateway: DownloadCacheSettingsGateway,
 ) : BaseViewModel(application) {
-    private var addBookJob: Coroutine<*>? = null
-
     private val initialSettings = bookshelfSettingsGateway.currentSettings
     private val groupIdFlow = MutableStateFlow(initialSettings.saveTabPosition)
     private val searchKeyFlow = MutableStateFlow("")
@@ -688,10 +675,8 @@ class BookshelfViewModel(
             BookshelfIntent.ScrollToTop -> gotoTop()
             BookshelfIntent.RefreshAll -> upAllBookToc()
             is BookshelfIntent.RefreshToc -> upToc(intent.books)
-            is BookshelfIntent.AddBookByUrl -> addBookByUrl(intent.urls)
             is BookshelfIntent.ExportToUri -> exportToUri(intent.uri, intent.books)
             is BookshelfIntent.UploadBookshelf -> uploadBookshelf(intent.books)
-            is BookshelfIntent.ImportFromUri -> importBookshelf(intent.uri, intent.groupId)
             is BookshelfIntent.UpdateSetting -> viewModelScope.launch {
                 bookshelfSettingsGateway.update(intent.transform)
             }
@@ -1036,7 +1021,7 @@ class BookshelfViewModel(
     }
 
     private suspend fun updateToc(bookUrl: String) {
-        refreshTocUseCase.execute(bookUrl)
+        // 在线目录更新已移除
     }
 
     private fun postUpBooksCount() {
@@ -1048,24 +1033,6 @@ class BookshelfViewModel(
             0
         }
         upBooksCountFlow.value = count
-    }
-
-    fun addBookByUrl(bookUrls: String) {
-        loadingTextFlow.value = "添加中..."
-        addBookJob = execute {
-            val successCount = addBookUseCase.execute(bookUrls) {
-                loadingTextFlow.value = "添加中... ($it)"
-            }
-            if (successCount > 0) {
-                showMessage(R.string.success)
-            } else {
-                showMessage("添加网址失败")
-            }
-        }.onError {
-            AppLog.put("添加网址出错\n${it.localizedMessage}", it, true)
-        }.onFinally {
-            loadingTextFlow.value = null
-        }
     }
 
     fun exportToUri(uri: Uri, items: List<BookUiItem>) {
@@ -1105,34 +1072,6 @@ class BookshelfViewModel(
             success(it)
         }.onError {
             showMessage("导出书籍出错\n${it.localizedMessage}")
-        }
-    }
-
-    fun importBookshelf(str: String, groupId: Long) {
-        execute {
-            importBookshelfUseCase.import(str, groupId) {
-                loadingTextFlow.value = it
-            }.getOrThrow()
-        }.onSuccess {
-            showMessage(R.string.success)
-        }.onError {
-            showMessage(it.localizedMessage ?: "ERROR")
-        }.onFinally {
-            loadingTextFlow.value = null
-        }
-    }
-
-    fun importBookshelf(uri: Uri, groupId: Long) {
-        execute {
-            importBookshelfUseCase.import(uri, groupId) {
-                loadingTextFlow.value = it
-            }.getOrThrow()
-        }.onSuccess {
-            showMessage(R.string.success)
-        }.onError {
-            showMessage(it.localizedMessage ?: "ERROR")
-        }.onFinally {
-            loadingTextFlow.value = null
         }
     }
 

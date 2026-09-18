@@ -38,10 +38,6 @@ object MainNavigator {
         }
 
         when (route) {
-            is MainRouteBookSourceManage,
-            is MainRouteBookSourceEdit,
-            is MainRouteBookSourceDebug -> backStack.add(route)
-
             MainRouteBookshelf -> {
                 backStack.clear()
                 backStack.add(MainRouteBookshelf)
@@ -166,17 +162,6 @@ object MainNavigator {
     private fun resolveStartRoute(route: String?, intent: Intent?): MainRoute {
         return when (route) {
             MainRouteConst.ROUTE_MAIN -> MainRouteBookshelf
-            MainRouteConst.ROUTE_BOOK_SOURCE_MANAGE -> MainRouteBookSourceManage(
-                intent?.getStringExtra(MainIntent.EXTRA_BOOK_SOURCE_IMPORT)
-            )
-            MainRouteConst.ROUTE_BOOK_SOURCE_EDIT -> MainRouteBookSourceEdit(
-                intent?.getStringExtra(MainIntent.EXTRA_SOURCE_URL)
-            )
-
-            MainRouteConst.ROUTE_BOOK_SOURCE_DEBUG -> MainRouteBookSourceDebug(
-                intent?.getStringExtra(MainIntent.EXTRA_SOURCE_URL)
-            )
-
             MainRouteConst.ROUTE_SETTINGS -> MainRouteSettings
             MainRouteConst.ROUTE_SETTINGS_OTHER -> MainRouteSettingsOther
             MainRouteConst.ROUTE_SETTINGS_READ -> MainRouteSettingsRead

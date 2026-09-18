@@ -252,7 +252,6 @@ val verifyConfigArchitecture = tasks.register<VerifyConfigArchitectureTask>(
     // 清理时逐条下调/删除。护栏会自动要求"减少了就下调基线"，防止回退。
     legacyUiDaoAccessBaseline.set(
         mapOf(
-            "io/legado/app/ui/association/AddToBookshelfDialog.kt" to 5,
             "io/legado/app/ui/association/ImportReplaceRuleDialog.kt" to 1,
             "io/legado/app/ui/book/read/ReadBookController.kt" to 3,
             // 护栏缺席期间 main 新增（整书页码估算），随合并冻结

@@ -24,7 +24,6 @@ import io.legado.app.exception.InvalidBooksDirException
 import io.legado.app.lib.dialogs.alert
 import io.legado.app.lib.permission.Permissions
 import io.legado.app.lib.permission.PermissionsCompat
-import io.legado.app.ui.main.MainActivity
 import io.legado.app.ui.widget.components.filePicker.FilePickerSheet
 import io.legado.app.ui.widget.components.progressIndicator.AppCircularProgressIndicator
 import io.legado.app.utils.FileUtils
@@ -98,10 +97,6 @@ class FileAssociationActivity : BaseComposeActivity(transparent = true) {
         }
         viewModel.successLive.observe(this) {
             when (it.first) {
-                "bookSource" -> {
-                    startActivity(MainActivity.createBookSourceManageIntent(this, it.second))
-                    finish()
-                }
                 "replaceRule" -> showDialogFragment(ImportReplaceRuleDialog(it.second, true))
                 "theme" -> showDialogFragment(ImportThemeDialog(it.second, true))
                 "txtRule" -> showDialogFragment(ImportTxtTocRuleDialog(it.second, true))

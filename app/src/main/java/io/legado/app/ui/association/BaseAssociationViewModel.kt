@@ -21,9 +21,6 @@ abstract class BaseAssociationViewModel(application: Application) : BaseViewMode
             jsonPath.parse(it).read("$")
         }
         when {
-            map.containsKey("bookSourceUrl") ->
-                successLive.postValue("bookSource" to uri.toString())
-
             map.containsKey("pattern") ->
                 successLive.postValue("replaceRule" to uri.toString())
 

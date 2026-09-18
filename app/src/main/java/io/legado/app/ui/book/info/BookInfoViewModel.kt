@@ -51,10 +51,8 @@ import io.legado.app.help.config.LocalConfig
 import io.legado.app.lib.webdav.ObjectNotFoundException
 import io.legado.app.model.BookCover
 import io.legado.app.model.ReadBook
-import io.legado.app.model.SourceCallBack
 import io.legado.app.model.analyzeRule.AnalyzeUrl
 import io.legado.app.model.localBook.LocalBook
-import io.legado.app.model.webBook.WebBook
 import io.legado.app.ui.main.MainIntent
 import io.legado.app.ui.widget.components.image.cover.buildCoverImageRequest
 import io.legado.app.utils.ArchiveUtils
@@ -679,7 +677,6 @@ class BookInfoViewModel(
                 ReadBook.replaceCurrentBook(book)
             }
             book.save()
-            SourceCallBack.callBackBook(SourceCallBack.ADD_BOOK_SHELF, bookSource, book)
             bookRepository.insertChapters(*currentChapterList.toTypedArray())
             book
         }.onSuccess {
@@ -745,38 +742,9 @@ class BookInfoViewModel(
             syncUiState(isTocLoading = showLoading)
             loadChapter(book, showLoading = showLoading)
         } else {
-            val source = bookSource ?: run {
-                currentChapterList = emptyList()
-                syncUiState(isTocLoading = false)
-                showMessage(R.string.error_no_source)
-                return
-            }
-            WebBook.getBookInfo(scope, source, book, canReName = canReName)
-                .onSuccess(IO) { loadedBook ->
-                    val dbBook = bookRepository.getBook(loadedBook.name, loadedBook.author)
-                    if (!inBookshelf && dbBook != null && !dbBook.isNotShelf && dbBook.origin == loadedBook.origin) {
-                        dbBook.updateTo(loadedBook)
-                        inBookshelf = true
-                    }
-                    currentBook = loadedBook
-                    if (inBookshelf) {
-                        loadedBook.save()
-                    }
-                    syncUiState(isTocLoading = showLoading)
-                    refreshMeta(loadedBook)
-                    if (loadedBook.isWebFile) {
-                        loadWebFile(loadedBook)
-                        currentChapterList = emptyList()
-                        syncUiState(isTocLoading = false)
-                    } else {
-                        loadChapter(loadedBook, runPreUpdateJs, showLoading = showLoading)
-                    }
-                    scheduleRelatedBooksLoad(loadedBook, source)
-                }.onError {
-                    AppLog.put("获取书籍信息失败\n${it.localizedMessage}", it)
-                    showMessage(R.string.error_get_book_info)
-                    syncUiState(isTocLoading = false)
-                }
+            currentChapterList = emptyList()
+            syncUiState(isTocLoading = false)
+            showMessage(R.string.error_no_source)
         }
     }
     private fun upBook(book: Book, source: BookSource?) {
@@ -886,33 +854,10 @@ class BookInfoViewModel(
                 syncUiState(isTocLoading = false)
             }
         } else {
-            val source = bookSource ?: run {
-                currentChapterList = emptyList()
-                syncUiState(isTocLoading = false)
-                showMessage(R.string.error_no_source)
-                return
-            }
-            val oldBook = book.copy()
-            WebBook.getChapterList(scope, source, book, runPreUpdateJs)
-                .onSuccess(IO) { chapters ->
-                    if (inBookshelf) {
-                        bookRepository.replace(oldBook, book)
-                        if (oldBook.bookUrl != book.bookUrl) {
-                            BookHelp.updateCacheFolder(oldBook, book)
-                        }
-                        bookRepository.deleteChaptersByBook(oldBook.bookUrl)
-                        bookRepository.insertChapters(*chapters.toTypedArray())
-                        ReadBook.onChapterListUpdated(book)
-                    }
-                    currentBook = book
-                    currentChapterList = chapters
-                    syncUiState(isTocLoading = false)
-                }.onError {
-                    currentChapterList = emptyList()
-                    tocLoadFailed = true
-                    syncUiState(isTocLoading = false)
-                    AppLog.put("获取目录失败\n${it.localizedMessage}", it)
-                }
+            currentChapterList = emptyList()
+            tocLoadFailed = true
+            syncUiState(isTocLoading = false)
+            showMessage(R.string.error_no_source)
         }
     }
 
@@ -1011,7 +956,6 @@ class BookInfoViewModel(
         currentBook?.let { book ->
             LocalConfig.deleteBookOriginal = deleteOriginal
             _screenState.update { it.copy(deleteOriginal = deleteOriginal) }
-            SourceCallBack.callBackBook(SourceCallBack.DEL_BOOK_SHELF, bookSource, book)
             delBook(deleteOriginal) {
                 emitEffect(BookInfoEffect.Finish(resultCode = RESULT_OK))
             }
@@ -1081,7 +1025,7 @@ class BookInfoViewModel(
         when (action) {
             BookInfoMenuAction.CustomButton -> emitEffect(
                 BookInfoEffect.RunSourceCallback(
-                    event = SourceCallBack.CLICK_CUSTOM_BUTTON,
+                    event = "clickCustomButton",
                     source = bookSource,
                     book = book.uiCopy(),
                     action = BookInfoCallbackAction.None,
@@ -1092,7 +1036,7 @@ class BookInfoViewModel(
                 val bookJson = GSON.toJson(book)
                 emitEffect(
                     BookInfoEffect.RunSourceCallback(
-                        event = SourceCallBack.CLICK_SHARE_BOOK,
+                        event = "clickShareBook",
                         source = bookSource,
                         book = book.uiCopy(),
                         action = BookInfoCallbackAction.ShareText(
@@ -1114,7 +1058,7 @@ class BookInfoViewModel(
             BookInfoMenuAction.SetBookVariable -> requestBookVariableSheet()
             BookInfoMenuAction.CopyBookUrl -> emitEffect(
                 BookInfoEffect.RunSourceCallback(
-                    event = SourceCallBack.CLICK_COPY_BOOK_URL,
+                    event = "clickCopyBookUrl",
                     source = bookSource,
                     book = book.uiCopy(),
                     action = BookInfoCallbackAction.CopyText(book.bookUrl),
@@ -1123,7 +1067,7 @@ class BookInfoViewModel(
 
             BookInfoMenuAction.CopyTocUrl -> emitEffect(
                 BookInfoEffect.RunSourceCallback(
-                    event = SourceCallBack.CLICK_COPY_TOC_URL,
+                    event = "clickCopyTocUrl",
                     source = bookSource,
                     book = book.uiCopy(),
                     action = BookInfoCallbackAction.CopyText(book.tocUrl),
@@ -1135,7 +1079,7 @@ class BookInfoViewModel(
             BookInfoMenuAction.ToggleDeleteAlert -> toggleDeleteAlert()
             BookInfoMenuAction.ClearCache -> emitEffect(
                 BookInfoEffect.RunSourceCallback(
-                    event = SourceCallBack.CLICK_CLEAR_CACHE,
+                    event = "clickClearCache",
                     source = bookSource,
                     book = book.uiCopy(),
                     action = BookInfoCallbackAction.ClearCache,
@@ -1150,7 +1094,7 @@ class BookInfoViewModel(
         val book = currentBook ?: return
         emitEffect(
             BookInfoEffect.RunSourceCallback(
-                event = if (longClick) SourceCallBack.LONG_CLICK_AUTHOR else SourceCallBack.CLICK_AUTHOR,
+                event = if (longClick) "longClickAuthor" else "clickAuthor",
                 source = bookSource,
                 book = book.uiCopy(),
                 action = BookInfoCallbackAction.None,
@@ -1162,7 +1106,7 @@ class BookInfoViewModel(
         val book = currentBook ?: return
         emitEffect(
             BookInfoEffect.RunSourceCallback(
-                event = if (longClick) SourceCallBack.LONG_CLICK_BOOK_NAME else SourceCallBack.CLICK_BOOK_NAME,
+                event = if (longClick) "longClickBookName" else "clickBookName",
                 source = bookSource,
                 book = book.uiCopy(),
                 action = BookInfoCallbackAction.None,
@@ -1173,11 +1117,7 @@ class BookInfoViewModel(
     private fun onOriginClick() {
         val book = currentBook ?: return
         if (book.isLocal) return
-        if (!bookSourceRepository.has(book.origin)) {
-            showMessage(R.string.error_no_source)
-            return
-        }
-        emitEffect(BookInfoEffect.OpenBookSourceEdit(book.origin))
+        showMessage(R.string.error_no_source)
     }
 
     fun getArchiveFilesName(archiveFileUri: Uri, onSuccess: (List<String>) -> Unit) {
@@ -1441,7 +1381,7 @@ class BookInfoViewModel(
         url: String,
         book: Book,
     ): Pair<String, List<SearchBook>> {
-        return WebBook.exploreBookWithResolvedUrl(source, url, 1, book)
+        return url to emptyList()
     }
 
     private fun showMessage(resId: Int) = showMessage(context.getString(resId))

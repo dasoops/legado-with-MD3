@@ -28,7 +28,6 @@ import io.legado.app.R
 import io.legado.app.constant.AppLog
 import io.legado.app.data.entities.BookGroup
 import io.legado.app.help.webView.JsExtensionsBase
-import io.legado.app.model.SourceCallBack
 import io.legado.app.ui.book.info.edit.BookInfoEditActivity
 import io.legado.app.ui.book.toc.TocActivityResult
 import io.legado.app.ui.widget.components.filePicker.FilePickerSheet
@@ -57,7 +56,6 @@ fun BookInfoRouteScreen(
     viewModel: BookInfoViewModel,
     onBack: () -> Unit,
     onFinish: (resultCode: Int?, afterTransition: Boolean) -> Unit,
-    onOpenBookSourceEdit: (String) -> Unit,
     onOpenReader: (bookUrl: String, inBookshelf: Boolean, chapterChanged: Boolean) -> Unit = { _, _, _ -> },
     onNavigateToBookInfo: (name: String?, author: String?, bookUrl: String, origin: String?, coverPath: String?) -> Unit = { _, _, _, _, _ -> },
     sharedTransitionScope: SharedTransitionScope? = null,
@@ -138,9 +136,6 @@ fun BookInfoRouteScreen(
                 }
 
                 is BookInfoEffect.OpenToc -> tocActivityResult.launch(effect.bookUrl)
-                is BookInfoEffect.OpenBookSourceEdit -> {
-                    onOpenBookSourceEdit(effect.sourceUrl)
-                }
 
                 BookInfoEffect.OpenSelectBooksDir -> showSelectBooksDirSheet = true
 
@@ -187,32 +182,24 @@ private fun runSourceCallback(
     effect: BookInfoEffect.RunSourceCallback,
     viewModel: BookInfoViewModel,
 ) {
-    SourceCallBack.callBackBtn(
-        activity,
-        effect.event,
-        effect.source,
-        effect.book,
-        null,
-    ) {
-        when (val action = effect.action) {
-            is BookInfoCallbackAction.ShareText -> {
-                val intent = Intent(Intent.ACTION_SEND).apply {
-                    putExtra(Intent.EXTRA_TEXT, action.text)
-                    type = "text/plain"
-                }
-                activity.startActivity(Intent.createChooser(intent, action.chooserTitle))
+    when (val action = effect.action) {
+        is BookInfoCallbackAction.ShareText -> {
+            val intent = Intent(Intent.ACTION_SEND).apply {
+                putExtra(Intent.EXTRA_TEXT, action.text)
+                type = "text/plain"
             }
-
-            is BookInfoCallbackAction.CopyText -> {
-                activity.sendToClip(action.text)
-            }
-
-            BookInfoCallbackAction.ClearCache -> {
-                viewModel.clearCache()
-            }
-
-            BookInfoCallbackAction.None -> Unit
+            activity.startActivity(Intent.createChooser(intent, action.chooserTitle))
         }
+
+        is BookInfoCallbackAction.CopyText -> {
+            activity.sendToClip(action.text)
+        }
+
+        BookInfoCallbackAction.ClearCache -> {
+            viewModel.clearCache()
+        }
+
+        BookInfoCallbackAction.None -> Unit
     }
 }
 

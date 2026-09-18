@@ -12,8 +12,7 @@ import io.legado.app.help.ConcurrentRateLimiter.Companion.updateConcurrentRate
 import io.legado.app.help.JsExtensions
 import io.legado.app.help.crypto.SymmetricCryptoAndroid
 import io.legado.app.help.http.CookieStore
-import io.legado.app.help.source.clearExploreKindsCache
-import io.legado.app.help.source.getShareScope
+import io.legado.app.help.getShareScope
 import io.legado.app.model.SharedJsScope.remove
 import io.legado.app.utils.GSON
 import io.legado.app.utils.GSONStrict
@@ -291,20 +290,6 @@ interface BaseSource : JsExtensions {
     @JavascriptInterface
     fun get(key: String): String {
         return CacheManager.get("v_${getKey()}_${key}") ?: ""
-    }
-
-    /**
-     * 刷新发现
-     */
-    fun refreshExplore() {
-        if (isMainThread) {
-            error("refreshExplore must be called on a background thread")
-        }
-        runBlocking {
-            if (this@BaseSource is BookSource) {
-                this@BaseSource.clearExploreKindsCache()
-            }
-        }
     }
 
     /**

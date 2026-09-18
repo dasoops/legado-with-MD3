@@ -1,5 +1,7 @@
 package io.legado.app.help.glide
 
+import io.legado.app.data.appDb
+
 import com.bumptech.glide.Priority
 import com.bumptech.glide.load.DataSource
 import com.bumptech.glide.load.HttpException
@@ -13,7 +15,6 @@ import io.legado.app.exception.NoStackTraceException
 import io.legado.app.help.coroutine.Coroutine
 import io.legado.app.help.http.addHeaders
 import io.legado.app.help.http.okHttpClient
-import io.legado.app.help.source.SourceHelp
 import io.legado.app.model.analyzeRule.AnalyzeUrl
 import io.legado.app.utils.ImageUtils
 import io.legado.app.utils.isWifiConnect
@@ -63,7 +64,7 @@ class OkHttpStreamFetcher(
         }
 
         options.get(OkHttpModelLoader.sourceOriginOption)?.let { sourceUrl ->
-            source = SourceHelp.getSource(sourceUrl)
+            source = appDb.bookSourceDao.getBookSource(sourceUrl)
         }
 
         this.callback = callback

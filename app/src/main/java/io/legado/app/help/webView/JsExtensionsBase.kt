@@ -5,7 +5,6 @@ import androidx.appcompat.app.AppCompatActivity
 import io.legado.app.data.entities.BaseSource
 import io.legado.app.help.JsExtensions
 import io.legado.app.model.analyzeRule.AnalyzeRule
-import io.legado.app.ui.association.AddToBookshelfDialog
 import io.legado.app.ui.widget.dialog.PhotoDialog
 import io.legado.app.utils.showDialogFragment
 import java.lang.ref.WeakReference
@@ -33,11 +32,6 @@ open class JsExtensionsBase(activity: AppCompatActivity?, source: BaseSource?) :
     @JavascriptInterface
     fun get(key: String): String {
         return getSource()?.get(key) ?: ""
-    }
-
-    @JavascriptInterface
-    fun addBook(bookUrl: String) {
-        activityRef.get()?.showDialogFragment(AddToBookshelfDialog(bookUrl))
     }
 
     fun showPhoto(src: String) {

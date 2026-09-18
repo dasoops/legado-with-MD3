@@ -48,12 +48,11 @@ import io.legado.app.help.book.isMobi
 import io.legado.app.help.book.removeType
 import io.legado.app.help.config.ReadBookConfig
 import io.legado.app.help.coroutine.Coroutine
-import io.legado.app.help.source.getSourceType
+import io.legado.app.help.getSourceType
 import io.legado.app.model.ImageProvider
 import io.legado.app.model.ReadBook
 import io.legado.app.model.ReaderSession
 import io.legado.app.model.ReaderSessionEvent
-import io.legado.app.model.SourceCallBack
 import io.legado.app.model.analyzeRule.AnalyzeRule
 import io.legado.app.model.analyzeRule.AnalyzeRule.Companion.setChapter
 import io.legado.app.model.analyzeRule.AnalyzeRule.Companion.setCoroutineContext
@@ -2036,23 +2035,7 @@ class ReadBookViewModel(
     }
 
     private fun runSourceCustomButton(longClick: Boolean) {
-        val source = ReadBook.bookSource?.takeIf { it.customButton } ?: return
-        val book = ReadBook.book ?: return
-        viewModelScope.launch {
-            val chapter = currentChapter()
-            _effects.tryEmit(
-                ReadBookEffect.RunSourceCustomButton(
-                    event = if (longClick) {
-                        SourceCallBack.LONG_CLICK_CUSTOM_BUTTON
-                    } else {
-                        SourceCallBack.CLICK_CUSTOM_BUTTON
-                    },
-                    source = source,
-                    book = book,
-                    chapter = chapter,
-                )
-            )
-        }
+        // 在线书源自定义按钮已移除
     }
 
     private fun showPayDialog() {

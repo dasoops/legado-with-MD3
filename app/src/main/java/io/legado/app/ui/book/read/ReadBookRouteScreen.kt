@@ -74,7 +74,6 @@ import io.legado.app.feature.reader.core.gesture.ReaderTapActionGrid
 import io.legado.app.feature.reader.core.model.readerBackgroundAlpha
 import io.legado.app.feature.reader.core.transition.ReaderTransitionMode
 import io.legado.app.model.ReadBook
-import io.legado.app.model.SourceCallBack
 import io.legado.app.ui.book.info.BookInfoActivity
 import io.legado.app.ui.book.read.page.entities.PageDirection
 import io.legado.app.ui.book.read.sheet.ReaderBookSheetRoute
@@ -83,7 +82,6 @@ import io.legado.app.ui.book.read.sheet.TextSelectMenuConfigSheet
 import io.legado.app.ui.book.searchContent.SearchContentResult
 import io.legado.app.ui.book.toc.TocActivityResult
 import io.legado.app.ui.main.AndroidPlatformCapabilities
-import io.legado.app.ui.main.MainActivity
 import io.legado.app.ui.replace.ReplaceEditRoute
 import io.legado.app.ui.replace.ReplaceRuleActivity
 import io.legado.app.ui.theme.LegadoTheme
@@ -208,13 +206,6 @@ fun ReadBookRouteScreen(
 
     // ── ActivityResult Launchers ──────────────────────────────────────
 
-    val sourceEditLauncher = rememberLauncherForActivityResult(
-        ActivityResultContracts.StartActivityForResult()
-    ) { result ->
-        if (result.resultCode == android.app.Activity.RESULT_OK) {
-            viewModel.onIntent(ReadBookIntent.SourceEditResult)
-        }
-    }
     val tocLauncher = rememberLauncherForActivityResult(TocActivityResult()) { result ->
         result?.let { (index, chapterPos, _) ->
             viewModel.onIntent(ReadBookIntent.OpenChapterResult(index, chapterPos))
@@ -350,14 +341,6 @@ fun ReadBookRouteScreen(
                     try {
                         when (effect) {
                             // Launcher-dependent effects — handled directly by route
-                            is ReadBookEffect.OpenSourceEdit -> {
-                                sourceEditLauncher.launch(
-                                    MainActivity.createBookSourceEditIntent(
-                                        context,
-                                        effect.sourceUrl
-                                    )
-                                )
-                            }
                             is ReadBookEffect.OpenChapterList -> {
                                 tocLauncher.launch(effect.bookUrl)
                             }
@@ -366,18 +349,6 @@ fun ReadBookRouteScreen(
                                     putExtra("name", effect.name)
                                     putExtra("author", effect.author)
                                     putExtra("bookUrl", effect.bookUrl)
-                                }
-                            }
-                            is ReadBookEffect.RunSourceCustomButton -> {
-                                (context as? AppCompatActivity)?.let { activity ->
-                                    SourceCallBack.callBackBtn(
-                                        activity,
-                                        effect.event,
-                                        effect.source,
-                                        effect.book,
-                                        effect.chapter,
-                                        BookType.text,
-                                    )
                                 }
                             }
                             is ReadBookEffect.OpenSearch -> {

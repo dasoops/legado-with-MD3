@@ -101,15 +101,6 @@ open class MainActivity : BaseComposeActivity() {
 
         fun createHomeIntent(context: Context): Intent = MainIntent.createHomeIntent(context)
 
-        fun createBookSourceManageIntent(context: Context, importSource: String? = null) =
-            MainIntent.createBookSourceManageIntent(context, importSource)
-
-        fun createBookSourceEditIntent(context: Context, sourceUrl: String? = null) =
-            MainIntent.createBookSourceEditIntent(context, sourceUrl)
-
-        fun createBookSourceDebugIntent(context: Context, sourceUrl: String?) =
-            MainIntent.createBookSourceDebugIntent(context, sourceUrl)
-
         fun createIntent(context: Context, configTag: String? = null): Intent =
             MainIntent.createIntent(context, configTag)
 
