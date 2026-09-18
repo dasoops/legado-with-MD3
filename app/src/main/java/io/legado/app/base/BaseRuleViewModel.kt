@@ -5,7 +5,6 @@ import android.net.Uri
 import androidx.core.net.toUri
 import androidx.lifecycle.viewModelScope
 import io.legado.app.constant.AppConst
-import io.legado.app.data.repository.UploadRepository
 import io.legado.app.help.http.decompressed
 import io.legado.app.help.http.newCallResponseBody
 import io.legado.app.help.http.okHttpClient
@@ -45,14 +44,12 @@ sealed interface BaseRuleEvent {
 abstract class BaseRuleViewModel<T : SelectableItem<ID>, Entity, ID, S : ListUiState<T>>(
     application: Application,
     protected val initialState: S,
-    private val uploadRepository: UploadRepository? = null // 设为可空，提高灵活性
 ) : BaseViewModel(application) {
 
     protected val _searchKey = MutableStateFlow("")
     protected val _groupFilter = MutableStateFlow("")
     protected val _selectedIds = MutableStateFlow<Set<ID>>(emptySet())
     protected val _isSearchMode = MutableStateFlow(false)
-    protected val _isUploading = MutableStateFlow(false)
     protected val _localItems = MutableStateFlow<List<T>?>(null)
     protected val _importState = MutableStateFlow<BaseImportUiState<Entity>>(BaseImportUiState.Idle)
     val importState = _importState.asStateFlow()
@@ -93,10 +90,9 @@ abstract class BaseRuleViewModel<T : SelectableItem<ID>, Entity, ID, S : ListUiS
             itemsFlow,
             _selectedIds,
             _isSearchMode,
-            _isUploading,
             _importState
-        ) { items, selectedIds, isSearch, isUploading, importState ->
-            composeUiState(items, selectedIds, isSearch, isUploading, importState)
+        ) { items, selectedIds, isSearch, importState ->
+            composeUiState(items, selectedIds, isSearch, importState)
         }.stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
@@ -108,7 +104,6 @@ abstract class BaseRuleViewModel<T : SelectableItem<ID>, Entity, ID, S : ListUiS
         items: List<T>,
         selectedIds: Set<ID>,
         isSearch: Boolean,
-        isUploading: Boolean,
         importState: BaseImportUiState<Entity>
     ): S
 
@@ -190,45 +185,6 @@ abstract class BaseRuleViewModel<T : SelectableItem<ID>, Entity, ID, S : ListUiS
     }
 
     abstract fun ruleItemToEntity(item: T): Entity
-
-    fun uploadSelectedRules(selectedIds: Set<ID>, rules: List<T>) {
-        val repo = uploadRepository ?: return
-        viewModelScope.launch {
-            if (selectedIds.isEmpty()) return@launch
-
-            _isUploading.value = true
-            try {
-                val json = withContext(Dispatchers.Default) {
-                    val rulesToExport = rules
-                        .filter { selectedIds.contains(it.id) }
-                        .map { ruleItemToEntity(it) }
-                    generateJson(rulesToExport)
-                }
-
-                val url = repo.upload(
-                    fileName = "export_rules.json",
-                    file = json,
-                    contentType = "application/json"
-                )
-
-                _eventChannel.send(
-                    BaseRuleEvent.ShowSnackbar(
-                        message = "上传成功: $url",
-                        actionLabel = "复制链接",
-                        url = url
-                    )
-                )
-            } catch (e: Exception) {
-                _eventChannel.send(
-                    BaseRuleEvent.ShowSnackbar(
-                        message = "上传失败: ${e.localizedMessage}"
-                    )
-                )
-            } finally {
-                _isUploading.value = false
-            }
-        }
-    }
 
     fun importSource(text: String) {
         _importState.value = BaseImportUiState.Loading

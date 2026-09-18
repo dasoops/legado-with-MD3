@@ -49,7 +49,6 @@ import io.legado.app.help.book.upKind
 import io.legado.app.help.book.updateTo
 import io.legado.app.help.config.LocalConfig
 import io.legado.app.lib.webdav.ObjectNotFoundException
-import io.legado.app.model.BookCover
 import io.legado.app.model.ReadBook
 import io.legado.app.model.analyzeRule.AnalyzeUrl
 import io.legado.app.model.localBook.LocalBook
@@ -319,23 +318,10 @@ class BookInfoViewModel(
             is BookInfoIntent.SetDefaultBookTreeUri -> viewModelScope.launch {
                 otherSettingsGateway.update { it.copy(defaultBookTreeUri = intent.value) }
             }
-            is BookInfoIntent.IntroButtonClick -> runIntroJs(
-                "info button ${intent.name}",
-                intent.click
-            )
-
-            is BookInfoIntent.IntroImageClick -> runIntroJs("info image", intent.click)
             is BookInfoIntent.IntroImageLongClick -> showDialog(
                 BookInfoDialog.PhotoPreview(intent.source)
             )
         }
-    }
-
-    /** 简介交互（按钮/图片）触发的书源 JS 执行，宿主通过 [BookInfoEffect.RunIntroJs] 运行。 */
-    private fun runIntroJs(name: String, click: String) {
-        val source = bookSource ?: return
-        val book = currentBook?.uiCopy() ?: return
-        emitEffect(BookInfoEffect.RunIntroJs(name, click, source, book))
     }
 
     fun openEdit() {
@@ -759,7 +745,6 @@ class BookInfoViewModel(
         bookSource = source
         syncUiState(isTocLoading = false)
         refreshMeta(book)
-        upCoverByRule(book)
         if (book.tocUrl.isEmpty() && !book.isLocal) {
             loadBookInfo(book, runPreUpdateJs = inBookshelf, showLoading = false)
         } else {
@@ -775,26 +760,6 @@ class BookInfoViewModel(
                 }
             }.onError {
                 loadChapter(book, showLoading = false)
-            }
-        }
-    }
-
-    private fun upCoverByRule(book: Book) {
-        execute {
-            if (book.coverUrl.isNullOrBlank() && book.customCoverUrl.isNullOrBlank()) {
-                val coverUrl = BookCover.searchCover(book)
-                if (!coverUrl.isNullOrBlank()) {
-                    book.customCoverUrl = coverUrl
-                    if (inBookshelf) {
-                        saveBook(book)
-                    }
-                }
-            }
-            book
-        }.onSuccess {
-            if (currentBook?.bookUrl == it.bookUrl) {
-                currentBook = it
-                syncUiState()
             }
         }
     }

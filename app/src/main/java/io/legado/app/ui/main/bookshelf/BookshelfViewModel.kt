@@ -13,7 +13,6 @@ import io.legado.app.data.entities.BookGroup
 import io.legado.app.data.repository.BookGroupRepository
 import io.legado.app.data.repository.BookRepository
 import io.legado.app.data.repository.BookshelfRepository
-import io.legado.app.data.repository.UploadRepository
 import io.legado.app.domain.usecase.ExportBookshelfUseCase
 import io.legado.app.domain.usecase.UpdateBooksGroupUseCase
 import io.legado.app.domain.gateway.BookshelfSettingsGateway
@@ -71,7 +70,6 @@ class BookshelfViewModel(
     private val bookRepository: BookRepository,
     private val bookGroupRepository: BookGroupRepository,
     private val bookshelfRepository: BookshelfRepository,
-    private val uploadRepository: UploadRepository,
     private val updateBooksGroupUseCase: UpdateBooksGroupUseCase,
     private val exportBookshelfUseCase: ExportBookshelfUseCase,
     private val bookshelfSettingsGateway: BookshelfSettingsGateway,
@@ -93,7 +91,6 @@ class BookshelfViewModel(
     private val draggingBooksFlow = MutableStateFlow<List<BookUiItem>?>(null)
     private val pendingSavedBooksFlow = MutableStateFlow<List<BookUiItem>?>(null)
     private val isInitialLoadingFlow = MutableStateFlow(true)
-    private val pendingUploadUrlFlow = MutableStateFlow<String?>(null)
 
     private data class BookshelfSortConfig(
         val sort: Int,
@@ -579,15 +576,13 @@ class BookshelfViewModel(
         bookshelfSettings,
         appShellSettingsGateway.settings,
         themeSettingsGateway.settings,
-        pendingUploadUrlFlow,
-    ) { state, settings, appShellSettings, themeSettings, pendingUploadUrl ->
+    ) { state, settings, appShellSettings, themeSettings ->
         state.copy(
             settings = settings,
             useRaisedBottomInset = appShellSettings.useFloatingBottomBar || themeSettings.enableBlur,
             enableCustomTagColors = themeSettings.enableCustomTagColors,
             customTagColors = parseTagColors(themeSettings.customTagColorsJson),
             themeColor = themeSettings.themeColor,
-            pendingUploadUrl = pendingUploadUrl,
         )
     }.stateIn(
         viewModelScope,
@@ -676,7 +671,6 @@ class BookshelfViewModel(
             BookshelfIntent.RefreshAll -> upAllBookToc()
             is BookshelfIntent.RefreshToc -> upToc(intent.books)
             is BookshelfIntent.ExportToUri -> exportToUri(intent.uri, intent.books)
-            is BookshelfIntent.UploadBookshelf -> uploadBookshelf(intent.books)
             is BookshelfIntent.UpdateSetting -> viewModelScope.launch {
                 bookshelfSettingsGateway.update(intent.transform)
             }
@@ -690,7 +684,6 @@ class BookshelfViewModel(
                     it.copy(customTagColorsJson = GSON.toJson(intent.colors))
                 }
             }
-            BookshelfIntent.UploadResultConsumed -> pendingUploadUrlFlow.value = null
         }
     }
 
@@ -1042,25 +1035,6 @@ class BookshelfViewModel(
             _effects.tryEmit(BookshelfEffect.ShowSnackbar("导出成功"))
         }.onError {
             _effects.tryEmit(BookshelfEffect.ShowSnackbar("导出失败\n${it.localizedMessage}"))
-        }
-    }
-
-    fun uploadBookshelf(items: List<BookUiItem>) {
-        execute {
-            val json = exportBookshelfUseCase.exportToJson(items).getOrThrow()
-            uploadRepository.upload(
-                fileName = "bookshelf.json",
-                file = json,
-                contentType = "application/json"
-            )
-        }.onSuccess { url ->
-            pendingUploadUrlFlow.value = url
-        }.onError {
-            _effects.tryEmit(
-                BookshelfEffect.ShowSnackbar(
-                    message = "上传失败: ${it.localizedMessage}"
-                )
-            )
         }
     }
 

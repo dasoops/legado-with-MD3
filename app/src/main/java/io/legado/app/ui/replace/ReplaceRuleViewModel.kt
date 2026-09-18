@@ -10,7 +10,6 @@ import io.legado.app.data.entities.BookContentProcess
 import io.legado.app.data.entities.ReplaceRule
 import io.legado.app.data.repository.ReadSettingsRepository
 import io.legado.app.data.repository.ReplaceRuleRepository
-import io.legado.app.data.repository.UploadRepository
 import io.legado.app.domain.gateway.BookContentProcessGateway
 import io.legado.app.domain.gateway.OtherSettingsGateway
 import io.legado.app.domain.model.TextProcessAction
@@ -51,7 +50,6 @@ import kotlinx.coroutines.withContext
 
 class ReplaceRuleViewModel(
     application: Application,
-    uploadRepository: UploadRepository,
     private val bookContentProcessGateway: BookContentProcessGateway,
     private val readSettingsRepository: ReadSettingsRepository,
     private val repository: ReplaceRuleRepository,
@@ -59,7 +57,6 @@ class ReplaceRuleViewModel(
 ) : BaseRuleViewModel<ReplaceRuleItemUi, ReplaceRule, Long, ReplaceRuleUiState>(
     application,
     ReplaceRuleUiState(interaction = InteractionState(isLoading = true)),
-    uploadRepository
 ) {
     private val _sortMode = MutableStateFlow(context.getPrefString(PreferKey.replaceSortMode, "desc") ?: "desc")
     val sortMode = _sortMode.asStateFlow()
@@ -133,10 +130,6 @@ class ReplaceRuleViewModel(
             ReplaceRuleIntent.DeleteSelection -> {
                 delSelectionByIds(uiState.value.selectedIds)
                 setSelection(emptySet())
-            }
-            ReplaceRuleIntent.UploadSelection -> {
-                val state = uiState.value
-                uploadSelectedRules(state.selectedIds, state.items)
             }
             is ReplaceRuleIntent.ExportSelection -> {
                 val state = uiState.value
@@ -251,7 +244,6 @@ class ReplaceRuleViewModel(
         items: List<ReplaceRuleItemUi>,
         selectedIds: Set<Long>,
         isSearch: Boolean,
-        isUploading: Boolean,
         importState: BaseImportUiState<ReplaceRule>
     ): ReplaceRuleUiState {
         return ReplaceRuleUiState(
@@ -262,7 +254,7 @@ class ReplaceRuleViewModel(
             selectedGroup = _group.value,
             interaction = InteractionState(
                 isSearchMode = isSearch,
-                isUploading = isUploading || (importState is BaseImportUiState.Loading),
+                isUploading = importState is BaseImportUiState.Loading,
                 isLoading = false
             )
         )

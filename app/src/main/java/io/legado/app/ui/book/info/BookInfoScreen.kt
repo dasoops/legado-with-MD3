@@ -367,12 +367,6 @@ private fun BookInfoScreenContent(
                                     onRemarkClick = { onIntent(BookInfoIntent.RemarkClick) },
                                     bookSource = state.bookSource,
                                     onJumpToAnotherApp = jumpToAnotherApp,
-                                    onIntroButtonClick = { name, click ->
-                                        onIntent(BookInfoIntent.IntroButtonClick(name, click))
-                                    },
-                                    onIntroImageClick = { click ->
-                                        onIntent(BookInfoIntent.IntroImageClick(click))
-                                    },
                                     onIntroImageLongClick = { source ->
                                         onIntent(BookInfoIntent.IntroImageLongClick(source))
                                     },
@@ -1147,8 +1141,6 @@ private fun BookInfoSummary(
     onRemarkClick: () -> Unit,
     bookSource: BookSource?,
     onJumpToAnotherApp: (Uri) -> Unit,
-    onIntroButtonClick: (name: String, click: String) -> Unit,
-    onIntroImageClick: (click: String) -> Unit,
     onIntroImageLongClick: (source: String) -> Unit,
 ) {
     Column(
@@ -1227,8 +1219,6 @@ private fun BookInfoSummary(
                 ?.substringBefore(","),
             bookSource = bookSource,
             onJumpToAnotherApp = onJumpToAnotherApp,
-            onButtonClick = onIntroButtonClick,
-            onImageClick = onIntroImageClick,
             onImageLongClick = onIntroImageLongClick,
         )
     }
@@ -1247,8 +1237,6 @@ private fun BookInfoIntro(
     baseUrl: String?,
     bookSource: BookSource?,
     onJumpToAnotherApp: (Uri) -> Unit,
-    onButtonClick: (name: String, click: String) -> Unit,
-    onImageClick: (click: String) -> Unit,
     onImageLongClick: (source: String) -> Unit,
 ) {
     val context = LocalContext.current
@@ -1271,8 +1259,6 @@ private fun BookInfoIntro(
         is BookInfoIntroContent.Html -> HtmlContent(
             html = c.html,
             interactive = true,
-            onButtonClick = onButtonClick,
-            onImageClick = onImageClick,
             onImageLongClick = onImageLongClick,
             imageModel = { imageUrl ->
                 buildCoverImageRequest(
@@ -1294,7 +1280,6 @@ private fun BookInfoIntro(
                     loadOnlyWifi = false,
                 )
             },
-            onImageClick = onImageClick,
             onImageLongClick = onImageLongClick,
         )
 

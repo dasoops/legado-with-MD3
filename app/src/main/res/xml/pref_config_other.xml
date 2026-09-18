@@ -148,11 +148,6 @@
             android:key="sourceEditMaxLine"
             android:title="@string/source_edit_text_max_line" />
 
-        <io.legado.app.lib.prefs.Preference
-            android:key="uploadRule"
-            android:summary="@string/direct_link_upload_rule_summary"
-            android:title="@string/direct_link_upload_rule" />
-
         <io.legado.app.lib.prefs.SwitchPreference
             android:defaultValue="false"
             android:key="Cronet"

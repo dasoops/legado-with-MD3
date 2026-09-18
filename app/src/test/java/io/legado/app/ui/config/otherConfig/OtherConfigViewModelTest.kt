@@ -4,8 +4,6 @@ import android.app.Application
 import android.os.Looper
 import io.legado.app.R
 import io.legado.app.domain.gateway.AppLocaleGateway
-import io.legado.app.domain.gateway.DirectLinkRule
-import io.legado.app.domain.gateway.DirectLinkSettingsGateway
 import io.legado.app.domain.gateway.DownloadCacheSettingsGateway
 import io.legado.app.domain.gateway.LocalPasswordGateway
 import io.legado.app.domain.gateway.OtherConfigSystemGateway
@@ -47,7 +45,6 @@ class OtherConfigViewModelTest {
             appLocaleGateway = appLocaleGateway,
             otherSettingsGateway = otherSettingsGateway,
             downloadCacheSettingsGateway = FakeDownloadCacheSettingsGateway(),
-            directLinkSettingsGateway = FakeDirectLinkSettingsGateway(),
             localPasswordGateway = FakeLocalPasswordGateway(),
             systemGateway = FakeOtherConfigSystemGateway(),
             initialState = OtherConfigUiState(),
@@ -99,20 +96,16 @@ class OtherConfigViewModelTest {
     }
 
     @Test
-    fun directRuleAndPassword_writeThroughGateways() = runBlocking {
-        val directLinkGateway = FakeDirectLinkSettingsGateway()
+    fun localPassword_writesThroughGateway() = runBlocking {
         val localPasswordGateway = FakeLocalPasswordGateway()
         val viewModel = createViewModel(
-            directLinkSettingsGateway = directLinkGateway,
             localPasswordGateway = localPasswordGateway,
         )
         Shadows.shadowOf(Looper.getMainLooper()).idle()
 
-        viewModel.onIntent(OtherConfigIntent.ConfirmDirectLinkRule)
         viewModel.onIntent(OtherConfigIntent.SaveLocalPassword("secret"))
         Shadows.shadowOf(Looper.getMainLooper()).idle()
 
-        assertEquals("Example", directLinkGateway.savedRule?.summary)
         assertEquals("secret", localPasswordGateway.savedPassword)
     }
 
@@ -135,15 +128,12 @@ class OtherConfigViewModelTest {
 
     private fun createViewModel(
         otherSettingsGateway: FakeOtherSettingsGateway = FakeOtherSettingsGateway(),
-        directLinkSettingsGateway: FakeDirectLinkSettingsGateway =
-            FakeDirectLinkSettingsGateway(),
         localPasswordGateway: FakeLocalPasswordGateway = FakeLocalPasswordGateway(),
         systemGateway: FakeOtherConfigSystemGateway = FakeOtherConfigSystemGateway(),
     ) = OtherConfigViewModel(
         appLocaleGateway = FakeAppLocaleGateway(),
         otherSettingsGateway = otherSettingsGateway,
         downloadCacheSettingsGateway = FakeDownloadCacheSettingsGateway(),
-        directLinkSettingsGateway = directLinkSettingsGateway,
         localPasswordGateway = localPasswordGateway,
         systemGateway = systemGateway,
         initialState = OtherConfigUiState(),
@@ -193,22 +183,6 @@ class OtherConfigViewModelTest {
         ) {
             state.value = transform(state.value)
         }
-    }
-
-    private class FakeDirectLinkSettingsGateway : DirectLinkSettingsGateway {
-        private val rule = DirectLinkRule(
-            uploadUrl = "https://example.com",
-            downloadUrlRule = "$.url",
-            summary = "Example",
-        )
-        var savedRule: DirectLinkRule? = null
-
-        override suspend fun loadRule(): DirectLinkRule = rule
-        override suspend fun loadDefaultRules(): List<DirectLinkRule> = listOf(rule)
-        override suspend fun saveRule(rule: DirectLinkRule) {
-            savedRule = rule
-        }
-        override suspend fun testRule(rule: DirectLinkRule): String = "ok"
     }
 
     private class FakeLocalPasswordGateway : LocalPasswordGateway {

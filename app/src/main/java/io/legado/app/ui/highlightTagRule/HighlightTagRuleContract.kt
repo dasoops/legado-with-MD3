@@ -42,7 +42,6 @@ sealed interface HighlightTagRuleIntent {
     data object EnableSelection : HighlightTagRuleIntent
     data object DisableSelection : HighlightTagRuleIntent
     data object DeleteSelection : HighlightTagRuleIntent
-    data object UploadSelection : HighlightTagRuleIntent
     data class ExportSelection(val uri: android.net.Uri) : HighlightTagRuleIntent
     data class MoveItem(val from: Int, val to: Int) : HighlightTagRuleIntent
     data object SaveSortOrder : HighlightTagRuleIntent

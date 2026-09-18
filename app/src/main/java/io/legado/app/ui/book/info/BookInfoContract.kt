@@ -157,12 +157,6 @@ sealed interface BookInfoIntent {
     data class RelatedBookClick(val book: SearchBook) : BookInfoIntent
     data class SetDefaultBookTreeUri(val value: String) : BookInfoIntent
 
-    /** 简介 HTML 中 `<button>名称@onclick:脚本</button>` 的点击。 */
-    data class IntroButtonClick(val name: String, val click: String) : BookInfoIntent
-
-    /** 简介 HTML 图片携带 {"click":"脚本"} 参数时的点击。 */
-    data class IntroImageClick(val click: String) : BookInfoIntent
-
     /** 简介 HTML 图片长按。 */
     data class IntroImageLongClick(val source: String) : BookInfoIntent
 }
@@ -196,13 +190,6 @@ sealed interface BookInfoEffect {
         val bookUrl: String,
         val origin: String?,
         val coverPath: String?,
-    ) : BookInfoEffect
-    /** 简介按钮/图片触发的书源 JS 执行，JS 规则求值已移除。 */
-    data class RunIntroJs(
-        val name: String,
-        val click: String,
-        val source: BookSource?,
-        val book: Book,
     ) : BookInfoEffect
 }
 

@@ -2,17 +2,12 @@ package io.legado.app.ui.config.coverConfig
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import io.legado.app.R
 import io.legado.app.domain.gateway.CoverSettingsGateway
 import io.legado.app.domain.model.settings.CoverSettings
 import io.legado.app.domain.usecase.CoverAlbumUseCase
-import io.legado.app.help.DefaultData
-import io.legado.app.model.BookCover
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.update
@@ -27,9 +22,6 @@ class CoverConfigViewModel(
         CoverConfigUiState(settings = settingsGateway.currentSettings)
     )
     val uiState = _uiState.asStateFlow()
-
-    private val _effects = MutableSharedFlow<CoverConfigEffect>(extraBufferCapacity = 16)
-    val effects = _effects.asSharedFlow()
 
     init {
         viewModelScope.launch {
@@ -84,56 +76,17 @@ class CoverConfigViewModel(
                 updateSettings { it.copy(shadowColorDark = intent.value) }
             is CoverConfigIntent.ShowSheet -> {
                 _uiState.update { it.copy(activeSheet = intent.sheet) }
-                if (intent.sheet == CoverConfigSheet.Rule) loadRule()
             }
             CoverConfigIntent.DismissSheet ->
                 _uiState.update { it.copy(activeSheet = null) }
             is CoverConfigIntent.SelectAlbum -> viewModelScope.launch(Dispatchers.IO) {
                 coverAlbumUseCase.selectAlbum(intent.id)
             }
-            is CoverConfigIntent.SetRuleEnabled ->
-                _uiState.update { it.copy(rule = it.rule.copy(enabled = intent.value)) }
-            is CoverConfigIntent.SetRuleSearchUrl ->
-                _uiState.update { it.copy(rule = it.rule.copy(searchUrl = intent.value)) }
-            is CoverConfigIntent.SetRuleExpression ->
-                _uiState.update { it.copy(rule = it.rule.copy(coverRule = intent.value)) }
-            CoverConfigIntent.RestoreDefaultRule -> {
-                val rule = DefaultData.coverRule
-                _uiState.update {
-                    it.copy(
-                        rule = CoverRuleUiState(rule.enable, rule.searchUrl, rule.coverRule)
-                    )
-                }
-                _effects.tryEmit(CoverConfigEffect.ShowToast(R.string.restore_default))
-            }
-            CoverConfigIntent.SaveRule -> saveRule()
         }
     }
 
     private fun updateSettings(transform: (CoverSettings) -> CoverSettings) {
         viewModelScope.launch { settingsGateway.update(transform) }
-    }
-
-    private fun loadRule() {
-        viewModelScope.launch(Dispatchers.IO) {
-            val rule = BookCover.getCoverRule()
-            _uiState.update {
-                it.copy(rule = CoverRuleUiState(rule.enable, rule.searchUrl, rule.coverRule))
-            }
-        }
-    }
-
-    private fun saveRule() {
-        val state = _uiState.value.rule
-        if (state.searchUrl.isBlank() || state.coverRule.isBlank()) {
-            _effects.tryEmit(CoverConfigEffect.ShowToast(R.string.cover_rule_fields_required))
-            return
-        }
-        viewModelScope.launch(Dispatchers.IO) {
-            val rule = BookCover.CoverRule(state.enabled, state.searchUrl, state.coverRule)
-            if (rule == DefaultData.coverRule) BookCover.delCoverRule() else BookCover.saveCoverRule(rule)
-            _uiState.update { it.copy(activeSheet = null) }
-        }
     }
 }
 

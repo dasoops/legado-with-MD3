@@ -11,14 +11,11 @@ import com.bumptech.glide.load.model.GlideUrl
 import com.bumptech.glide.util.ContentLengthInputStream
 import io.legado.app.data.entities.BaseSource
 import io.legado.app.exception.NoStackTraceException
-import io.legado.app.help.coroutine.Coroutine
 import io.legado.app.help.http.addHeaders
 import io.legado.app.help.http.okHttpClient
 import io.legado.app.model.analyzeRule.AnalyzeUrl
-import io.legado.app.utils.ImageUtils
 import io.legado.app.utils.isWifiConnect
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.SupervisorJob
 import okhttp3.Call
 import okhttp3.Request
@@ -117,17 +114,7 @@ class OkHttpStreamFetcher(
             callback?.onLoadFailed(HttpException(response.message, response.code))
             return
         }
-        if (ImageUtils.skipDecode(source, true)) {
-            onStreamReady(responseBody!!.byteStream())
-            return
-        }
-        Coroutine.async(coroutineScope, executeContext = IO) {
-            val decodeResult = ImageUtils.decode(
-                analyzedUrl.toStringUrl(), responseBody!!.byteStream(),
-                isCover = true, source
-            )
-            onStreamReady(decodeResult)
-        }
+        onStreamReady(responseBody!!.byteStream())
     }
 
     private fun onStreamReady(inputStream: InputStream?) {

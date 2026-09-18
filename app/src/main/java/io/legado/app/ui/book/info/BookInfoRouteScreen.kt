@@ -23,7 +23,6 @@ import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.legado.app.R
-import io.legado.app.constant.AppLog
 import io.legado.app.data.entities.BookGroup
 import io.legado.app.ui.book.info.edit.BookInfoEditActivity
 import io.legado.app.ui.book.toc.TocActivityResult
@@ -140,11 +139,6 @@ fun BookInfoRouteScreen(
                     runSourceCallback(activity, effect, viewModel)
                 }
 
-                is BookInfoEffect.RunIntroJs -> {
-                    runIntroJs(effect)
-                }
-
-
                 is BookInfoEffect.NavigateToBookInfo -> {
                     onNavigateToBookInfo(effect.name, effect.author, effect.bookUrl, effect.origin, effect.coverPath)
                 }
@@ -197,8 +191,4 @@ private fun runSourceCallback(
 
         BookInfoCallbackAction.None -> Unit
     }
-}
-
-private fun runIntroJs(effect: BookInfoEffect.RunIntroJs) {
-    AppLog.putDebug("${effect.name} click 已忽略: JS 规则求值已移除")
 }

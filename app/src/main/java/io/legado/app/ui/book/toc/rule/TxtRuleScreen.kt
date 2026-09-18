@@ -190,10 +190,6 @@ fun TxtRuleScreen(
             showExportSheet = false
             exportDoc.launch("exportDictRule.json")
         },
-        onUpload = {
-            showExportSheet = false
-            onIntent(TxtTocRuleIntent.UploadSelection)
-        },
         allowExtensions = arrayOf("json")
     )
 

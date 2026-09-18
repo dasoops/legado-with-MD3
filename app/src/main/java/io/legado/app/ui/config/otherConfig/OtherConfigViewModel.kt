@@ -6,8 +6,6 @@ import androidx.lifecycle.viewModelScope
 import io.legado.app.R
 import io.legado.app.constant.AppLog
 import io.legado.app.domain.gateway.AppLocaleGateway
-import io.legado.app.domain.gateway.DirectLinkRule
-import io.legado.app.domain.gateway.DirectLinkSettingsGateway
 import io.legado.app.domain.gateway.DownloadCacheSettingsGateway
 import io.legado.app.domain.gateway.LocalPasswordGateway
 import io.legado.app.domain.gateway.OtherConfigSystemGateway
@@ -26,7 +24,6 @@ class OtherConfigViewModel(
     private val appLocaleGateway: AppLocaleGateway,
     private val otherSettingsGateway: OtherSettingsGateway,
     private val downloadCacheSettingsGateway: DownloadCacheSettingsGateway,
-    private val directLinkSettingsGateway: DirectLinkSettingsGateway,
     private val localPasswordGateway: LocalPasswordGateway,
     private val systemGateway: OtherConfigSystemGateway,
     initialState: OtherConfigUiState = OtherConfigUiState(),
@@ -56,7 +53,6 @@ class OtherConfigViewModel(
                 _uiState.update { settings.toUiState(it) }
             }
         }
-        loadDirectLinkConfiguration()
     }
 
     fun onIntent(intent: OtherConfigIntent) {
@@ -89,33 +85,8 @@ class OtherConfigViewModel(
                 updateOtherSetting { it.copy(recordLog = intent.value) }
             is OtherConfigIntent.RecordHeapDumpChanged ->
                 updateOtherSetting { it.copy(recordHeapDump = intent.value) }
-            is OtherConfigIntent.DirectUploadUrlChanged ->
-                _uiState.update { it.copy(directUploadUrl = intent.value) }
-            is OtherConfigIntent.DirectDownloadUrlRuleChanged ->
-                _uiState.update { it.copy(directDownloadUrlRule = intent.value) }
-            is OtherConfigIntent.DirectSummaryChanged ->
-                _uiState.update { it.copy(directSummary = intent.value) }
-            is OtherConfigIntent.DirectCompressChanged ->
-                _uiState.update { it.copy(directCompress = intent.value) }
-            is OtherConfigIntent.DirectRuleChanged -> _uiState.update {
-                it.copy(
-                    directUploadUrl = intent.uploadUrl,
-                    directDownloadUrlRule = intent.downloadUrlRule,
-                    directSummary = intent.summary,
-                    directCompress = intent.compress,
-                )
-            }
-            OtherConfigIntent.ConfirmDirectLinkRule -> {
-                saveDirectLinkRule()
-            }
-            OtherConfigIntent.TestDirectLinkRule -> testRule()
-            OtherConfigIntent.DismissDirectTestResult ->
-                _uiState.update { it.copy(directTestResult = null) }
             is OtherConfigIntent.ShowOverlay -> {
                 _uiState.update { it.copy(activeOverlay = intent.overlay) }
-                if (intent.overlay == OtherConfigOverlay.DirectLinkUpload) {
-                    loadDirectLinkConfiguration()
-                }
             }
             OtherConfigIntent.DismissOverlay ->
                 _uiState.update { it.copy(activeOverlay = null) }
@@ -206,76 +177,6 @@ class OtherConfigViewModel(
         updateOtherSetting { it.copy(defaultBookTreeUri = path) }
     }
 
-    private fun updateDirectLinkRule(rule: DirectLinkRule) {
-        _uiState.update {
-            it.copy(
-                directUploadUrl = rule.uploadUrl,
-                directDownloadUrlRule = rule.downloadUrlRule,
-                directSummary = rule.summary,
-                directCompress = rule.compress,
-            )
-        }
-    }
-
-    private fun loadDirectLinkConfiguration() {
-        viewModelScope.launch {
-            runCatching {
-                directLinkSettingsGateway.loadRule() to
-                    directLinkSettingsGateway.loadDefaultRules()
-            }.onSuccess { (rule, presets) ->
-                updateDirectLinkRule(rule)
-                _uiState.update { state ->
-                    state.copy(
-                        directRulePresets = presets.map(DirectLinkRule::toUi).toImmutableList()
-                    )
-                }
-            }.onFailure {
-                showMessage(it.localizedMessage ?: "设置失败")
-            }
-        }
-    }
-
-    private fun saveDirectLinkRule() {
-        val state = _uiState.value
-        if (state.directUploadUrl.isBlank() ||
-            state.directDownloadUrlRule.isBlank() ||
-            state.directSummary.isBlank()
-        ) {
-            showMessage(R.string.complete_required_information)
-            return
-        }
-        val rule = DirectLinkRule(
-            state.directUploadUrl,
-            state.directDownloadUrlRule,
-            state.directSummary,
-            state.directCompress,
-        )
-        viewModelScope.launch {
-            runCatching { directLinkSettingsGateway.saveRule(rule) }
-                .onSuccess { _uiState.update { it.copy(activeOverlay = null) } }
-                .onFailure { showMessage(it.localizedMessage ?: "设置失败") }
-        }
-    }
-
-    private fun testRule() {
-        val state = _uiState.value
-        viewModelScope.launch {
-            val rule = DirectLinkRule(
-                state.directUploadUrl,
-                state.directDownloadUrlRule,
-                state.directSummary,
-                state.directCompress,
-            )
-            runCatching { directLinkSettingsGateway.testRule(rule) }.onSuccess {
-                _uiState.update { state -> state.copy(directTestResult = it) }
-            }.onFailure {
-                _uiState.update { state ->
-                    state.copy(directTestResult = it.localizedMessage ?: "ERROR")
-                }
-            }
-        }
-    }
-
     private fun showMessage(@StringRes resId: Int) {
         _uiState.update {
             it.copy(
@@ -296,13 +197,6 @@ class OtherConfigViewModel(
         }
     }
 }
-
-private fun DirectLinkRule.toUi() = DirectLinkRuleUi(
-    uploadUrl = uploadUrl,
-    downloadUrlRule = downloadUrlRule,
-    summary = summary,
-    compress = compress,
-)
 
 private fun OtherSettings.toUiState(current: OtherConfigUiState): OtherConfigUiState =
     current.copy(

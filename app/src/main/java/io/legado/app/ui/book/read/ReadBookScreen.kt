@@ -214,7 +214,6 @@ fun ReadBookScreen(
         confirmText = stringResource(R.string.ok),
         onConfirm = {
             onIntent(ReadBookIntent.DismissDialog)
-            onIntent(ReadBookIntent.ConfirmPayAction)
         },
         dismissText = stringResource(R.string.cancel),
         onDismiss = { onIntent(ReadBookIntent.DismissDialog) },

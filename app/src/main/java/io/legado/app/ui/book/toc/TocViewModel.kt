@@ -241,6 +241,19 @@ class TocViewModel(
 
     val isSplitLongChapter: Boolean get() = bookState.value?.getSplitLongChapter() ?: false
 
+    // 目录更新（重新解析章节）期间的忙碌态，独立于导入状态。
+    private val _isTocUpdating = MutableStateFlow(false)
+
+    override val uiState: StateFlow<TocActionState> by lazy {
+        combine(super.uiState, _isTocUpdating) { state, updating ->
+            state.copy(isLoading = updating)
+        }.stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = initialState,
+        )
+    }
+
     private val _collapsedVolumes = MutableStateFlow<Set<Int>>(emptySet())
     val collapsedVolumes = _collapsedVolumes.asStateFlow()
     private val _effects = MutableSharedFlow<TocEffect>(extraBufferCapacity = 16)
@@ -450,7 +463,6 @@ class TocViewModel(
         items: List<TocItemUi>,
         selectedIds: Set<Int>,
         isSearch: Boolean,
-        isUploading: Boolean,
         importState: BaseImportUiState<TocDomainItem>
     ): TocActionState {
 
@@ -468,7 +480,7 @@ class TocViewModel(
             selectedIds = selectedIds.toImmutableSet(),
             searchKey = _searchKey.value,
             isSearch = isSearch,
-            isLoading = isUploading,
+            isLoading = false,
             useReplace = tocPreferences.value.useReplace,
             showWordCount = tocPreferences.value.showWordCount,
             titleReplaceProgress = titleReplaceState.value
@@ -653,7 +665,7 @@ class TocViewModel(
     }
 
     private fun upBookTocRule(book: Book, complete: (Throwable?) -> Unit) {
-        _isUploading.value = true
+        _isTocUpdating.value = true
         execute {
             bookRepository.update(book)
             LocalBook.getChapterList(book).let { chapters ->
@@ -662,10 +674,10 @@ class TocViewModel(
                 //bookState.value = book
             }
         }.onSuccess {
-            _isUploading.value = false
+            _isTocUpdating.value = false
             complete.invoke(null)
         }.onError {
-            _isUploading.value = false
+            _isTocUpdating.value = false
             complete.invoke(it)
         }
     }

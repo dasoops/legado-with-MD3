@@ -38,7 +38,6 @@ sealed interface TxtTocRuleIntent {
     data object EnableSelection : TxtTocRuleIntent
     data object DisableSelection : TxtTocRuleIntent
     data object DeleteSelection : TxtTocRuleIntent
-    data object UploadSelection : TxtTocRuleIntent
     data class ExportSelection(val uri: Uri) : TxtTocRuleIntent
     data class MoveItem(val from: Int, val to: Int) : TxtTocRuleIntent
     data object SaveSortOrder : TxtTocRuleIntent

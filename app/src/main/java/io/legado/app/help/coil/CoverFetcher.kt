@@ -8,7 +8,6 @@ import coil3.fetch.FetchResult
 import coil3.fetch.Fetcher
 import coil3.fetch.SourceFetchResult
 import coil3.request.Options
-import io.legado.app.utils.ImageUtils
 import io.legado.app.utils.isWifiConnect
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
@@ -183,27 +182,19 @@ class CoverFetcher(
 
         // 到这里必定已拿到字节（本地缓存/OkHttp 缓存/网络三选一，否则已抛出）。
         // rawBytes 在 lambda 内赋值，Kotlin 无法智能转换为非空，这里显式收敛。
+        // 封面解密规则为 JS，JS 求值已移除，直接使用原始数据。
         val fetchedBytes = rawBytes ?: throw IOException("封面数据为空: $url")
 
-        // Decrypt if needed (applies to both cached and network bytes)
-        val decodedBytes = if (ImageUtils.skipDecode(source, true)) {
-            fetchedBytes
-        } else {
-            withContext(Dispatchers.IO) {
-                ImageUtils.decode(url, fetchedBytes, true, source)
-            } ?: throw IOException("图片解密失败")
-        }
-
         clearFailure(url)
-        // 网络/OkHttp 缓存/解密完成后，按原始 URL 精确键 + bookUrl 别名键双写持久缓存：
+        // 网络/OkHttp 缓存拉取完成后，按原始 URL 精确键 + bookUrl 别名键双写持久缓存：
         // 下次冷启动由 CoverInterceptor 快速路径直接命中；书源刷新换了带 token 的新链接时，
         // 书架靠别名键也能秒出旧图。仅书维度请求（bookUrl 非空）写入。
         if (bookUrl != null) {
-            withContext(Dispatchers.IO) { CoverFileCache.write(originalUrl, decodedBytes, bookUrl) }
+            withContext(Dispatchers.IO) { CoverFileCache.write(originalUrl, fetchedBytes, bookUrl) }
         }
         return SourceFetchResult(
             source = ImageSource(
-                source = Buffer().write(decodedBytes),
+                source = Buffer().write(fetchedBytes),
                 fileSystem = options.fileSystem
             ),
             mimeType = null,

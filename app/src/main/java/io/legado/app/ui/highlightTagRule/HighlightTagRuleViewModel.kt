@@ -5,7 +5,6 @@ import androidx.lifecycle.viewModelScope
 import io.legado.app.base.BaseRuleViewModel
 import io.legado.app.data.entities.HighlightTagRule
 import io.legado.app.data.repository.HighlightTagRuleRepository
-import io.legado.app.data.repository.UploadRepository
 import io.legado.app.ui.widget.components.importComponents.BaseImportUiState
 import io.legado.app.ui.widget.components.list.InteractionState
 import io.legado.app.utils.GSON
@@ -27,11 +26,9 @@ import kotlinx.coroutines.withContext
 
 class HighlightTagRuleViewModel(
     application: Application,
-    uploadRepository: UploadRepository
 ) : BaseRuleViewModel<HighlightTagRuleItemUi, HighlightTagRule, Long, HighlightTagRuleUiState>(
     application,
     HighlightTagRuleUiState(interaction = InteractionState(isLoading = true)),
-    uploadRepository
 ) {
     private val repository = HighlightTagRuleRepository()
     private val _effects = MutableSharedFlow<HighlightTagRuleEffect>(extraBufferCapacity = 16)
@@ -59,10 +56,6 @@ class HighlightTagRuleViewModel(
             HighlightTagRuleIntent.DeleteSelection -> {
                 delSelectionByIds(uiState.value.selectedIds)
                 setSelection(emptySet())
-            }
-            HighlightTagRuleIntent.UploadSelection -> {
-                val state = uiState.value
-                uploadSelectedRules(state.selectedIds, state.items)
             }
             is HighlightTagRuleIntent.ExportSelection -> {
                 val state = uiState.value
@@ -108,7 +101,6 @@ class HighlightTagRuleViewModel(
         items: List<HighlightTagRuleItemUi>,
         selectedIds: Set<Long>,
         isSearch: Boolean,
-        isUploading: Boolean,
         importState: BaseImportUiState<HighlightTagRule>
     ): HighlightTagRuleUiState {
         return HighlightTagRuleUiState(
@@ -117,7 +109,7 @@ class HighlightTagRuleViewModel(
             searchKey = _searchKey.value,
             interaction = InteractionState(
                 isSearchMode = isSearch,
-                isUploading = isUploading || (importState is BaseImportUiState.Loading),
+                isUploading = importState is BaseImportUiState.Loading,
                 isLoading = false
             )
         )

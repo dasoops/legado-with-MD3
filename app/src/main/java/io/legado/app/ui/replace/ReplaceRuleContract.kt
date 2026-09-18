@@ -80,7 +80,6 @@ sealed interface ReplaceRuleIntent {
     data object EnableSelection : ReplaceRuleIntent
     data object DisableSelection : ReplaceRuleIntent
     data object DeleteSelection : ReplaceRuleIntent
-    data object UploadSelection : ReplaceRuleIntent
     data class ExportSelection(val uri: Uri) : ReplaceRuleIntent
     data class MoveItem(val from: Int, val to: Int) : ReplaceRuleIntent
     data object SaveSortOrder : ReplaceRuleIntent

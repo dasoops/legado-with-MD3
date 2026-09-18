@@ -633,7 +633,6 @@
     <string name="select_start">文字選擇開始位置</string>
     <string name="share_layout">共用布局</string>
     <string name="browser">瀏覽器</string>
-    <string name="import_default_rule">匯入預設規則</string>
     <string name="name">名稱</string>
     <string name="regex">正則</string>
     <string name="more_menu">更多選單</string>
@@ -852,15 +851,10 @@
     <string name="pref_cronet_summary">使用Cronet網路元件</string>
     <string name="anti_alias">抗鋸齒</string>
     <string name="pref_anti_alias_summary">繪製圖片時抗鋸齒</string>
-    <string name="upload_url">上傳URL</string>
-    <string name="download_url_rule">下载URL规则(downloadUrls)</string>
     <string name="sort_by_respondTime">反應時間排序</string>
     <string name="respondTime">反應時間：%1$d ms</string>
     <string name="export_success">匯出成功</string>
     <string name="path">路徑</string>
-    <string name="direct_link_upload_rule">直鏈上傳規則</string>
-    <string name="direct_link_upload_rule_summary">用於匯出書源書單時生成直鏈url</string>
-    <string name="direct_link_upload_config">直鏈上傳配置</string>
     <string name="copy_play_url">複製播放Url</string>
     <string name="set_source_variable">設定源變數</string>
     <string name="set_book_variable">設定書籍變數</string>
@@ -879,7 +873,6 @@
     <string name="disable_source">禁用源</string>
     <string name="chapter_pay">購買</string>
     <string name="double_page_horizontal">平板/橫屏雙頁</string>
-    <string name="copy_url">複製url</string>
     <string name="full_screen">全屏</string>
     <string name="open_fun">打開方式</string>
     <string name="use_browser_open">是否使用外部瀏覽器打開？</string>
@@ -933,10 +926,6 @@
     <string name="url_option">Url參數</string>
     <string name="only_wifi">僅WIFI</string>
     <string name="only_wifi_summary">僅在wifi下載入網路封面</string>
-    <string name="cover_rule">封面規則</string>
-    <string name="search_via_url">搜索URL</string>
-	<string name="cover_rule_edit">封面规则</string>
-    <string name="cover_rule_summary">進入詳情頁時使用封面規則重新獲取封面</string>
     <string name="cannot_timed_non_playback">非播放狀態無法定時</string>
     <string name="all_bookmark">所有書籤</string>
     <string name="book_type_different">書籍類型不一樣</string>
@@ -1073,7 +1062,6 @@
     <string name="export_chapter_index">需要輸出的章節</string>
     <string name="shrink_database">压缩数据库</string>
     <string name="shrink_database_summary">减小数据库文件的大小</string>
-    <string name="is_compress">是否压缩</string>
     <string name="sort_desc">反序</string>
     <string name="test">测试</string>
     <string name="show_wait_up_count">显示等待更新数量</string>
@@ -1431,12 +1419,10 @@
 可以在變數前後新增固定文字。</string>
     <string name="related_books">相關書籍（relatedBooks）</string>
     <string name="clipboard_empty">剪貼簿為空</string>
-    <string name="clipboard_empty_or_invalid">剪貼簿為空或格式無效</string>
     <string name="invalid_format">無效格式</string>
     <string name="regex_is_empty">正則表達式為空</string>
     <string name="example_is_empty">範例為空</string>
     <string name="invalid_regex">正則表達式無效</string>
-    <string name="complete_required_information">請填寫所有必填資訊</string>
     <string name="cannot_open_url">無法直接開啟此 URL</string>
     <string name="show_select_menu_icon">展示圖示</string>
 
@@ -1446,7 +1432,6 @@
     <string name="is_event_listener">事件監聽器</string>
     <string name="custom_button">自訂按鈕</string>
     <string name="rule_call_back">回呼 JS（callBackJs）</string>
-    <string name="cover_rule_fields_required">搜尋 URL 和封面規則不能為空</string>
     <string name="custom_tip">自訂範本</string>
     <string name="custom_tip_template_hint">使用佔位符，如 {BookName}、{ChapterTitle}…</string>
     <string name="custom_tip_invalid">範本包含未知佔位符</string>

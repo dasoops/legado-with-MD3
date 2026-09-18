@@ -19,7 +19,6 @@ import io.legado.app.domain.gateway.ReadSettingsGateway
 import io.legado.app.utils.ArchiveUtils
 import io.legado.app.utils.FileUtils
 import io.legado.app.utils.HtmlFormatter
-import io.legado.app.utils.ImageUtils
 import io.legado.app.utils.MD5Utils
 import io.legado.app.utils.NetworkUtils
 import io.legado.app.utils.StringUtils
@@ -72,7 +71,6 @@ object BookHelp {
     private const val cacheEpubFolderName = "epub"
     private val downloadImages = ConcurrentHashMap<String, Mutex>()
     private val imageDownloadSlots = Semaphore(2)
-    private val imageDecodeSlots = Semaphore(1)
 
     val cachePath = FileUtils.getPath(downloadDir, cacheFolderName)
 
@@ -356,35 +354,11 @@ object BookHelp {
                 val analyzeUrl = AnalyzeUrl(
                     src, source = bookSource, coroutineContext = currentCoroutineContext()
                 )
-                if (ImageUtils.skipDecode(bookSource, isCover = false)) {
-                    analyzeUrl.getInputStreamAwait().use {
-                        writeImage(book, src, it)
-                    }
-                    return true
-                } else {
-                    imageDecodeSlots.acquire()
-                    try {
-                        val bytes = analyzeUrl.getByteArrayAwait()
-                        //某些图片被加密，需要进一步解密
-                        val decoded = ImageUtils.decode(
-                            src, bytes, isCover = false, bookSource, book
-                        )
-                        if (decoded == null) {
-                            AppLog.put("${book.name} ${chapter?.title} 图片 $src 下载失败 解码为空")
-                            return false
-                        }
-                        // 如果部分图片失效，每次进入正文都会花很长时间再次获取图片数据
-                        // 所以无论如何都要将数据写入到文件里；但仍记失败，避免章节被标为已缓存
-                        writeImage(book, src, decoded)
-                        if (!checkImage(decoded)) {
-                            AppLog.put("${book.name} ${chapter?.title} 图片 $src 下载错误 数据异常")
-                            return false
-                        }
-                        return true
-                    } finally {
-                        imageDecodeSlots.release()
-                    }
+                // 图片解密规则为 JS，JS 求值已移除，直接按原始数据落盘
+                analyzeUrl.getInputStreamAwait().use {
+                    writeImage(book, src, it)
                 }
+                return true
             } finally {
                 imageDownloadSlots.release()
             }

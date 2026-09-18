@@ -728,7 +728,6 @@
     <string name="select_start">Select start</string>
     <string name="share_layout">Shared layout</string>
     <string name="browser">Browser</string>
-    <string name="import_default_rule">Import default rules</string>
     <string name="name">Name</string>
     <string name="regex">Regex</string>
     <string name="chapter_rule">Chapter Regex</string>
@@ -1045,21 +1044,14 @@
     <string name="pref_cronet_summary">use Cronet access network</string>
     <string name="anti_alias">Anti-Aliasing</string>
     <string name="pref_anti_alias_summary">Anti-Aliasing when draw picture</string>
-    <string name="upload_url">upload URL</string>
-    <string name="download_url_rule">downloadUrlRule(downloadUrls)</string>
     <string name="related_books">Related Books(relatedBooks)</string>
     <string name="clipboard_empty">Clipboard is empty</string>
-    <string name="clipboard_empty_or_invalid">Clipboard is empty or has an invalid format</string>
     <string name="invalid_format">Invalid format</string>
     <string name="regex_is_empty">Regex is empty</string>
     <string name="example_is_empty">Example is empty</string>
     <string name="invalid_regex">Invalid regex</string>
-    <string name="complete_required_information">Fill in all required information</string>
     <string name="export_success">export success</string>
     <string name="path">path</string>
-    <string name="direct_link_upload_rule">Direct Link Upload Rules</string>
-    <string name="direct_link_upload_rule_summary">Generate Direct URLs for Exported Book Source Lists</string>
-    <string name="direct_link_upload_config">Direct link upload configuration</string>
     <string name="copy_play_url">Copy Play URL</string>
     <string name="set_source_variable">Set source variable</string>
     <string name="set_book_variable">Set book variable</string>
@@ -1078,7 +1070,6 @@
     <string name="disable_source">disable source</string>
     <string name="chapter_pay">pay</string>
     <string name="double_page_horizontal">Tablet/Landscape Dual Page</string>
-    <string name="copy_url">copy URL</string>
     <string name="full_screen">full screen</string>
     <string name="open_fun">open function</string>
     <string name="use_browser_open">Is it opened in an external browser?</string>
@@ -1156,11 +1147,6 @@
     <string name="url_option">URL parameter</string>
     <string name="only_wifi">Wi-Fi Only</string>
     <string name="only_wifi_summary">Load network cover only under wifi</string>
-    <string name="cover_rule">Cover Rules</string>
-    <string name="search_via_url">Search via URL</string>
-	<string name="cover_rule_edit">Cover Rules</string>
-    <string name="cover_rule_summary">Use the cover rule to retrieve the cover when entering the details page</string>
-    <string name="cover_rule_fields_required">Search URL and cover rule cannot be empty</string>
     <string name="cover_selected_images_count">%1$d images selected</string>
     <string name="cannot_timed_non_playback">When the non-playback state is not legal</string>
     <string name="all_bookmark">All bookmarks</string>
@@ -1305,7 +1291,6 @@
     <string name="export_chapter_index">The section index that needs to be exported</string>
     <string name="shrink_database">Shrink Database</string>
     <string name="shrink_database_summary">Reduce the size of the database file</string>
-    <string name="is_compress">Compressed or not</string>
     <string name="sort_desc">Descend order</string>
     <string name="test">Test</string>
     <string name="show_wait_up_count">Display the Number of Pending Updates</string>

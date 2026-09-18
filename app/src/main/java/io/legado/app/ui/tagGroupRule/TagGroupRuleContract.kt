@@ -40,7 +40,6 @@ sealed interface TagGroupRuleIntent {
     data class SetSelection(val ids: Set<Long>) : TagGroupRuleIntent
     data class ToggleSelection(val id: Long) : TagGroupRuleIntent
     data object DeleteSelection : TagGroupRuleIntent
-    data object UploadSelection : TagGroupRuleIntent
     data class ExportSelection(val uri: android.net.Uri) : TagGroupRuleIntent
     data class MoveItem(val from: Int, val to: Int) : TagGroupRuleIntent
     data object SaveSortOrder : TagGroupRuleIntent

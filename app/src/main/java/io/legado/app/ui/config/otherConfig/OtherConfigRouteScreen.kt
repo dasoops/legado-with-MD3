@@ -98,13 +98,6 @@ fun OtherConfigRouteScreen(
         },
     )
 
-    DirectLinkUploadBottomSheet(
-        show = state.activeOverlay == OtherConfigOverlay.DirectLinkUpload,
-        state = state,
-        onIntent = viewModel::onIntent,
-        onDismiss = { viewModel.onIntent(OtherConfigIntent.DismissOverlay) },
-    )
-
     AppAlertDialog(
         show = state.activeOverlay == OtherConfigOverlay.ClearWebViewConfirmation,
         onDismissRequest = { viewModel.onIntent(OtherConfigIntent.DismissOverlay) },

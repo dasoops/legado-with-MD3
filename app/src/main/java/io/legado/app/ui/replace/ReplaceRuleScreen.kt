@@ -196,10 +196,6 @@ fun ReplaceRuleScreen(
             showExportSheet = false
             exportDoc.launch("exportReplaceRule.json")
         },
-        onUpload = {
-            showExportSheet = false
-            onIntent(ReplaceRuleIntent.UploadSelection)
-        },
         allowExtensions = arrayOf("json")
     )
 

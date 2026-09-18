@@ -53,13 +53,11 @@ sealed interface BookshelfIntent {
     data object RefreshAll : BookshelfIntent
     data class RefreshToc(val books: List<BookUiItem>) : BookshelfIntent
     data class ExportToUri(val uri: Uri, val books: List<BookUiItem>) : BookshelfIntent
-    data class UploadBookshelf(val books: List<BookUiItem>) : BookshelfIntent
     data class UpdateSetting(
         val transform: (BookshelfSettings) -> BookshelfSettings,
     ) : BookshelfIntent
     data class SetCustomTagColorsEnabled(val enabled: Boolean) : BookshelfIntent
     data class SetCustomTagColors(val colors: List<TagColorPair>) : BookshelfIntent
-    data object UploadResultConsumed : BookshelfIntent
 }
 
 sealed interface BookshelfEffect {
@@ -108,5 +106,4 @@ data class BookshelfUiState(
     val enableCustomTagColors: Boolean = false,
     val customTagColors: ImmutableList<TagColorPair> = persistentListOf(),
     val themeColor: Int = 0,
-    val pendingUploadUrl: String? = null,
 ) : ListUiState<BookUiItem>

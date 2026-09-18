@@ -11,7 +11,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -31,9 +30,6 @@ import io.legado.app.ui.widget.components.topbar.GlassMediumFlexibleTopAppBar
 import io.legado.app.ui.widget.components.topbar.GlassTopAppBarDefaults
 import io.legado.app.ui.widget.components.topbar.TopBarNavigationButton
 import org.koin.androidx.compose.koinViewModel
-import androidx.compose.ui.platform.LocalContext
-import io.legado.app.utils.toastOnUi
-import kotlinx.coroutines.flow.collectLatest
 
 @Composable
 fun CoverConfigRouteScreen(
@@ -41,15 +37,7 @@ fun CoverConfigRouteScreen(
     onNavigateToCoverAlbums: () -> Unit,
     viewModel: CoverConfigViewModel = koinViewModel(),
 ) {
-    val context = LocalContext.current
     val state by viewModel.uiState.collectAsStateWithLifecycle()
-    LaunchedEffect(Unit) {
-        viewModel.effects.collectLatest { effect ->
-            when (effect) {
-                is CoverConfigEffect.ShowToast -> context.toastOnUi(effect.stringRes)
-            }
-        }
-    }
     CoverConfigScreen(
         state = state,
         onIntent = viewModel::onIntent,
@@ -100,12 +88,6 @@ fun CoverConfigScreen(
                     onCheckedChange = { value ->
                         onIntent(CoverConfigIntent.SetLoadOnlyOnWifi(value))
                     }
-                )
-
-                ClickableSettingItem(
-                    title = stringResource(R.string.cover_rule),
-                    description = stringResource(R.string.cover_rule_summary),
-                    onClick = { onIntent(CoverConfigIntent.ShowSheet(CoverConfigSheet.Rule)) }
                 )
 
                 SwitchSettingItem(
@@ -316,13 +298,6 @@ fun CoverConfigScreen(
             }
         }
     }
-
-    CoverRuleConfigSheet(
-        show = state.activeSheet == CoverConfigSheet.Rule,
-        state = state.rule,
-        onIntent = onIntent,
-        onDismissRequest = { onIntent(CoverConfigIntent.DismissSheet) },
-    )
 
     if (state.activeSheet == CoverConfigSheet.Album) {
         CoverAlbumSelectSheet(

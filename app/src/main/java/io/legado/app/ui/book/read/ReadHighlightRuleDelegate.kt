@@ -7,7 +7,6 @@ import io.legado.app.constant.AppConst
 import io.legado.app.constant.AppLog
 import io.legado.app.data.entities.HighlightRule
 import io.legado.app.data.repository.HighlightRuleRepository
-import io.legado.app.data.repository.UploadRepository
 import io.legado.app.exception.NoStackTraceException
 import io.legado.app.help.config.ReadBookConfig
 import io.legado.app.help.coroutine.Coroutine
@@ -24,7 +23,6 @@ import io.legado.app.utils.fromJsonObject
 import io.legado.app.utils.isAbsUrl
 import io.legado.app.utils.isJsonArray
 import io.legado.app.utils.isJsonObject
-import io.legado.app.utils.sendToClip
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -46,7 +44,6 @@ class ReadHighlightRuleDelegate(
     private val scope: CoroutineScope,
     private val host: Host,
     private val highlightRuleRepository: HighlightRuleRepository,
-    private val uploadRepository: UploadRepository,
 ) {
 
     interface Host {
@@ -329,20 +326,6 @@ class ReadHighlightRuleDelegate(
             host.showToast(context.getString(R.string.export_success))
         }.onError {
             host.showToast(it.localizedMessage ?: context.getString(R.string.error))
-        }
-    }
-
-    fun exportAsUrl() {
-        val rules = _uiState.value.rules
-        Coroutine.async(scope, Dispatchers.IO) {
-            uploadRepository.upload(
-                fileName = HighlightRuleRepository.backupFileName,
-                file = GSON.toJson(rules),
-                contentType = "application/json",
-            )
-        }.onSuccess { url ->
-            context.sendToClip(url)
-            host.showToast(context.getString(R.string.copy_url))
         }
     }
 }

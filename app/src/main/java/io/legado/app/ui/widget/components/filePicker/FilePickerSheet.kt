@@ -3,7 +3,6 @@ package io.legado.app.ui.widget.components.filePicker
 import android.webkit.MimeTypeMap
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.InsertDriveFile
-import androidx.compose.material.icons.filled.CloudUpload
 import androidx.compose.material.icons.filled.EditNote
 import androidx.compose.material.icons.filled.FolderOpen
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -27,7 +26,6 @@ fun FilePickerSheet(
     onSelectSysFile: ((Array<String>) -> Unit)? = null,
     onSelectSysFiles: ((Array<String>) -> Unit)? = null,
     onManualInput: (() -> Unit)? = null,
-    onUpload: (() -> Unit)? = null,
     allowExtensions: Array<String>? = null,
 ) {
     OptionSheet(
@@ -63,14 +61,6 @@ fun FilePickerSheet(
             OptionCard(
                 icon = Icons.Default.EditNote,
                 text = stringResource(R.string.manual_input),
-                onClick = it
-            )
-        }
-
-        onUpload?.let {
-            OptionCard(
-                icon = Icons.Default.CloudUpload,
-                text = stringResource(R.string.upload_url),
                 onClick = it
             )
         }

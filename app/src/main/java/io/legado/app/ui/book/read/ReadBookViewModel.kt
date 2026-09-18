@@ -22,7 +22,6 @@ import io.legado.app.data.repository.ReadRecordRepository
 import io.legado.app.data.repository.ReadSettingsRepository
 import io.legado.app.data.repository.ReplaceRuleRepository
 import io.legado.app.data.repository.SettingsRepository
-import io.legado.app.data.repository.UploadRepository
 import io.legado.app.domain.gateway.AppShellSettingsGateway
 import io.legado.app.domain.gateway.AppUiConfigurationGateway
 import io.legado.app.domain.gateway.BackupSettingsGateway
@@ -94,7 +93,6 @@ class ReadBookViewModel(
     private val readBookStyleConfigRepository: ReadStyleGateway,
     private val localPreferencesRepository: SettingsRepository,
     private val highlightRuleRepository: HighlightRuleRepository,
-    private val uploadRepository: UploadRepository,
     private val saveBookContentProcessUseCase: SaveBookContentProcessUseCase,
     private val saveMarkingUseCase: SaveMarkingUseCase,
     private val verifyBookmarkTargetUseCase: VerifyBookmarkTargetUseCase,
@@ -247,7 +245,6 @@ class ReadBookViewModel(
             }
         },
         highlightRuleRepository = highlightRuleRepository,
-        uploadRepository = uploadRepository,
     ) }
 
     val highlightRuleState get() = highlightRuleDelegate.uiState
@@ -831,7 +828,6 @@ class ReadBookViewModel(
             is ReadBookIntent.ClearReadRecordAliasDecisions -> readRecordAliasDelegate.clearDecisions()
             is ReadBookIntent.DismissDialog -> _uiState.update { it.copy(activeDialog = null) }
             is ReadBookIntent.PayAction -> showPayDialog()
-            is ReadBookIntent.ConfirmPayAction -> confirmPayAction()
             is ReadBookIntent.DisableSource -> disableSource()
             is ReadBookIntent.OpenSourceEditByUrl -> {
                 _effects.tryEmit(ReadBookEffect.OpenSourceEdit(intent.sourceUrl))
@@ -1043,7 +1039,6 @@ class ReadBookViewModel(
             is ReadBookIntent.ExportHighlightRules -> {
                 _effects.tryEmit(ReadBookEffect.OpenHighlightRuleExportPicker)
             }
-            is ReadBookIntent.ExportHighlightRulesAsUrl -> highlightRuleDelegate.exportAsUrl()
             is ReadBookIntent.ExportHighlightRulesToFile ->
                 highlightRuleDelegate.exportToFile(intent.uri)
             is ReadBookIntent.SaveMenuCustomIcon ->
@@ -2045,10 +2040,6 @@ class ReadBookViewModel(
                 it.copy(activeDialog = ReadBookDialog.ConfirmChapterPay(chapter.title))
             }
         }
-    }
-
-    private fun confirmPayAction() {
-        // 购买操作为书源 JS 规则，JS 求值已移除
     }
 
     private fun requestBooksDirPicker(reloadChapterList: Boolean) {

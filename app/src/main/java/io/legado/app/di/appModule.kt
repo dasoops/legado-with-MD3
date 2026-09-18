@@ -32,8 +32,6 @@ import io.legado.app.data.repository.BookshelfSettingsRepository
 import io.legado.app.data.repository.CoverAlbumRepository
 import io.legado.app.data.repository.CoverSettingsRepository
 import io.legado.app.data.repository.DatabaseMaintenanceRepository
-import io.legado.app.data.repository.DirectLinkSettingsRepository
-import io.legado.app.data.repository.DirectLinkUploadRepository
 import io.legado.app.data.repository.DownloadCacheSettingsRepository
 import io.legado.app.data.repository.HighlightRuleRepository
 import io.legado.app.data.repository.HighlightTagRuleRepository
@@ -61,7 +59,6 @@ import io.legado.app.data.repository.TagGroupRuleApplier
 import io.legado.app.data.repository.ThemePackageSettingsRepository
 import io.legado.app.data.repository.ThemeSettingsRepository
 import io.legado.app.data.repository.TxtTocRuleRepository
-import io.legado.app.data.repository.UploadRepository
 import io.legado.app.data.repository.WebDavBackupRepository
 import io.legado.app.data.repository.WebDavReadingProgressRepository
 import io.legado.app.domain.gateway.AiProfileGateway
@@ -83,7 +80,6 @@ import io.legado.app.domain.gateway.BookshelfSettingsGateway
 import io.legado.app.domain.gateway.CoverAlbumGateway
 import io.legado.app.domain.gateway.CoverSettingsGateway
 import io.legado.app.domain.gateway.DatabaseMaintenanceGateway
-import io.legado.app.domain.gateway.DirectLinkSettingsGateway
 import io.legado.app.domain.gateway.DownloadCacheSettingsGateway
 import io.legado.app.domain.gateway.HomeDashboardGateway
 import io.legado.app.domain.gateway.HomepageModulesGateway
@@ -219,7 +215,6 @@ val appModule = module {
         )
     }
     single<OtherSettingsGateway> { OtherSettingsRepository() }
-    single<DirectLinkSettingsGateway> { DirectLinkSettingsRepository() }
     single<LocalPasswordGateway> { LocalPasswordRepository() }
     single<OtherConfigSystemGateway> { OtherConfigSystemRepository(get()) }
     single<DownloadCacheSettingsGateway> { DownloadCacheSettingsRepository() }
@@ -259,7 +254,6 @@ val appModule = module {
     singleOf(::BookshelfManageScreenConfig)
     singleOf(::ThemePackageManager)
 
-    single<UploadRepository> { DirectLinkUploadRepository() }
     single<AiProfileGateway> { AiProfileRepository(get()) }
     single<AiTextGateway> { AiTextRepositoryImpl() }
     single<AppStartupGateway> { AppStartupRepository(get()) }
@@ -329,7 +323,6 @@ val appModule = module {
             appLocaleGateway = get(),
             otherSettingsGateway = get(),
             downloadCacheSettingsGateway = get(),
-            directLinkSettingsGateway = get(),
             localPasswordGateway = get(),
             systemGateway = get(),
         )
@@ -366,7 +359,6 @@ val appModule = module {
             readBookStyleConfigRepository = get(),
             localPreferencesRepository = get(),
             highlightRuleRepository = get(),
-            uploadRepository = get(),
             saveBookContentProcessUseCase = get(),
             saveMarkingUseCase = get(),
             verifyBookmarkTargetUseCase = get(),

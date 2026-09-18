@@ -169,12 +169,6 @@ fun OtherConfigScreen(
                 )
 
                 ClickableSettingItem(
-                    title = stringResource(R.string.direct_link_upload_rule),
-                    description = stringResource(R.string.direct_link_upload_rule_summary),
-                    onClick = { onIntent(OtherConfigIntent.ShowOverlay(OtherConfigOverlay.DirectLinkUpload)) }
-                )
-
-                ClickableSettingItem(
                     title = stringResource(R.string.clear_webview_data),
                     description = stringResource(R.string.clear_webview_data_summary),
                     onClick = { onIntent(OtherConfigIntent.ShowOverlay(OtherConfigOverlay.ClearWebViewConfirmation)) }

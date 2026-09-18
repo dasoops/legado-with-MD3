@@ -179,10 +179,6 @@ fun HighlightTagRuleScreen(
             showExportSheet = false
             exportDoc.launch("exportHighlightTagRule.json")
         },
-        onUpload = {
-            showExportSheet = false
-            onIntent(HighlightTagRuleIntent.UploadSelection)
-        },
         allowExtensions = arrayOf("json")
     )
 

@@ -11,14 +11,12 @@ import io.legado.app.domain.gateway.BackupSettingsGateway
 import io.legado.app.domain.gateway.ReadStyleGateway
 import io.legado.app.exception.NoStackTraceException
 import io.legado.app.help.AppWebDav
-import io.legado.app.help.DirectLinkUpload
 import io.legado.app.help.book.isLocal
 import io.legado.app.help.config.AppConfigStore
 import io.legado.app.help.config.LocalConfig
 import io.legado.app.help.config.ReadBookConfig
 import io.legado.app.help.config.ThemeConfigStore
 import io.legado.app.help.coroutine.Coroutine
-import io.legado.app.model.BookCover
 import io.legado.app.utils.FileUtils
 import io.legado.app.utils.GSON
 import io.legado.app.utils.LogUtils
@@ -84,11 +82,9 @@ object Backup {
             "highlightTagRule.json",
             "tagGroupRule.json",
             "servers.json",
-            DirectLinkUpload.ruleFileName,
             ReadBookConfig.configFileName,
             ReadBookConfig.shareConfigFileName,
             ThemeConfigStore.configFileName,
-            BookCover.configFileName,
             "config.xml"
         )
     }
@@ -221,16 +217,6 @@ object Backup {
             GSON.toJson(ThemeConfigStore.configList).let {
                 FileUtils.createFileIfNotExist(backupPath + File.separator + ThemeConfigStore.configFileName)
                     .writeText(it)
-            }
-        }
-        DirectLinkUpload.getConfig()?.let {
-            FileUtils.createFileIfNotExist(backupPath + File.separator + DirectLinkUpload.ruleFileName)
-                .writeText(GSON.toJson(it))
-        }
-        if (!BackupConfig.backupIgnoreCoverConfig) {
-            BookCover.getConfig()?.let {
-                FileUtils.createFileIfNotExist(backupPath + File.separator + BookCover.configFileName)
-                    .writeText(GSON.toJson(it))
             }
         }
         currentCoroutineContext().ensureActive()

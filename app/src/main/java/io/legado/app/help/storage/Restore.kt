@@ -37,7 +37,6 @@ import io.legado.app.domain.gateway.AppLocaleGateway
 import io.legado.app.domain.gateway.ReadStyleGateway
 import io.legado.app.ui.book.read.ConfigUpdateAction
 import io.legado.app.ui.book.read.ReadConfigUpdateBus
-import io.legado.app.help.DirectLinkUpload
 import io.legado.app.help.LauncherIconHelp
 import io.legado.app.help.book.isLocal
 import io.legado.app.help.book.upType
@@ -46,9 +45,7 @@ import io.legado.app.help.config.LocalConfig
 import io.legado.app.help.config.ReadBookConfig
 import io.legado.app.help.config.SettingsWriter
 import io.legado.app.help.config.ThemeConfigStore
-import io.legado.app.model.BookCover
 import io.legado.app.model.localBook.LocalBook
-import io.legado.app.utils.ACache
 import io.legado.app.utils.FileUtils
 import io.legado.app.utils.GSON
 import io.legado.app.utils.LogUtils
@@ -279,14 +276,6 @@ object Restore : KoinComponent {
                 AppLog.put("恢复服务器配置出错\n${it.localizedMessage}", it)
             }
         }
-        File(path, DirectLinkUpload.ruleFileName).takeIf {
-            it.exists()
-        }?.runCatching {
-            val json = readText()
-            ACache.get(cacheDir = false).put(DirectLinkUpload.ruleFileName, json)
-        }?.onFailure {
-            AppLog.put("恢复直链上传出错\n${it.localizedMessage}", it)
-        }
         //恢复主题配置
         if (!BackupConfig.ignoreThemeConfig) {
             File(path, ThemeConfigStore.configFileName).takeIf {
@@ -297,14 +286,6 @@ object Restore : KoinComponent {
             }?.onFailure {
                 AppLog.put("恢复主题出错\n${it.localizedMessage}", it)
             }
-        }
-        File(path, BookCover.configFileName).takeIf {
-            it.exists() && !BackupConfig.ignoreCoverConfig
-        }?.runCatching {
-            val json = readText()
-            BookCover.saveCoverRule(json)
-        }?.onFailure {
-            AppLog.put("恢复封面规则出错\n${it.localizedMessage}", it)
         }
         if (!BackupConfig.ignoreReadConfig) {
             //恢复阅读界面配置
