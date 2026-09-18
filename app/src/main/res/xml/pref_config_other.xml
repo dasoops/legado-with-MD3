@@ -24,12 +24,6 @@
         app:entries="@array/default_app_variant"
         app:entryValues="@array/default_app_variant_value" />
 
-    <io.legado.app.lib.prefs.SwitchPreference
-        android:defaultValue="false"
-        android:key="webServiceAutoStart"
-        android:title="@string/web_service_auto_start"
-        app:iconSpaceReserved="false" />
-
     <io.legado.app.lib.prefs.PreferenceCategory
         android:title="@string/main_activity"
         app:allowDividerAbove="false"
@@ -156,12 +150,6 @@
             android:key="userAgent"
             android:title="@string/user_agent" />
 
-        <io.legado.app.lib.prefs.SwitchPreference
-            android:defaultValue="false"
-            android:key="webServiceWakeLock"
-            android:summary="@string/web_service_wake_lock_summary"
-            android:title="@string/web_service_wake_lock" />
-
         <io.legado.app.lib.prefs.Preference
             android:key="sourceEditMaxLine"
             android:title="@string/source_edit_text_max_line" />
@@ -180,11 +168,6 @@
             android:key="Cronet"
             android:summary="@string/pref_cronet_summary"
             android:title="Cronet" />
-
-        <io.legado.app.lib.prefs.Preference
-            android:key="webPort"
-            android:title="@string/web_port_title"
-            app:iconSpaceReserved="false" />
 
         <io.legado.app.lib.prefs.Preference
             android:key="cleanCache"

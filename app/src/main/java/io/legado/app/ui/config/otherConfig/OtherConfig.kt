@@ -12,7 +12,6 @@ object OtherConfig {
     val language get() = GlobalContext.get().get<AppLocaleGateway>().currentLanguage
     val updateToVariant get() = settings.updateToVariant
     val autoCheckUpdateOnStart get() = settings.autoCheckUpdateOnStart
-    val webServiceAutoStart get() = settings.webServiceAutoStart
     val autoRefresh get() = settings.autoRefresh
     val defaultToRead get() = settings.defaultToRead
     val notificationsPost get() = settings.notificationsPost
@@ -23,9 +22,7 @@ object OtherConfig {
     val replaceEnableDefault get() = settings.replaceEnableDefault
     val autoClearExpired get() = settings.autoClearExpired
     val showAddToShelfAlert get() = settings.showAddToShelfAlert
-    val webServiceWakeLock get() = settings.webServiceWakeLock
     val sourceEditMaxLine get() = settings.sourceEditMaxLine
-    val webPort get() = settings.webPort
     val processText get() = settings.processText
     val recordLog get() = settings.recordLog
     val recordHeapDump get() = settings.recordHeapDump

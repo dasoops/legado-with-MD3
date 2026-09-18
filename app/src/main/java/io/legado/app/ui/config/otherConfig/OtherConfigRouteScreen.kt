@@ -18,7 +18,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.legado.app.R
-import io.legado.app.service.WebService
 import io.legado.app.ui.theme.LegadoTheme
 import io.legado.app.ui.widget.components.AppTextField
 import io.legado.app.ui.widget.components.alert.AppAlertDialog
@@ -65,12 +64,6 @@ fun OtherConfigRouteScreen(
                     (context as? Activity)?.let(SystemUtils::ignoreBatteryOptimization)
                 }
                 OtherConfigEffect.OpenSystemDirectory -> selectDocTree.launch(null)
-                OtherConfigEffect.RestartWebService -> {
-                    if (WebService.isRun) {
-                        WebService.stop(context)
-                        WebService.start(context)
-                    }
-                }
                 OtherConfigEffect.RestartApp -> {
                     delay(RESTART_DELAY_MILLIS)
                     context.restart()

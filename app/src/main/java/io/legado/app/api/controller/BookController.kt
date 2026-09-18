@@ -8,16 +8,13 @@ import io.legado.app.api.ReturnData
 import io.legado.app.data.appDb
 import io.legado.app.data.entities.Book
 import io.legado.app.data.entities.BookProgress
-import io.legado.app.data.entities.BookSource
 import io.legado.app.help.AppWebDav
-import io.legado.app.help.CacheManager
 import io.legado.app.help.book.BookHelp
 import io.legado.app.help.book.ContentProcessor
 import io.legado.app.help.book.isLocal
 import io.legado.app.domain.gateway.BookshelfSettingsGateway
 import io.legado.app.help.glide.ImageLoader
 import io.legado.app.model.BookCover
-import io.legado.app.model.ImageProvider
 import io.legado.app.model.ReadBook
 import io.legado.app.model.localBook.LocalBook
 import io.legado.app.model.webBook.WebBook
@@ -30,7 +27,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import splitties.init.appCtx
 import org.koin.core.context.GlobalContext
-import java.io.File
 import java.util.WeakHashMap
 import java.util.concurrent.TimeUnit
 
@@ -38,9 +34,6 @@ object BookController {
 
     private val bookshelfGateway by lazy { GlobalContext.get().get<BookshelfSettingsGateway>() }
 
-    private lateinit var book: Book
-    private var bookSource: BookSource? = null
-    private var bookUrl: String = ""
     private val defaultCoverCache by lazy { WeakHashMap<Drawable, Bitmap>() }
 
     /**
@@ -94,29 +87,6 @@ object BookController {
                 returnData.setErrorMsg(e.localizedMessage ?: "getCover error")
             }
         }
-    }
-
-    /**
-     * 获取正文图片
-     */
-    fun getImg(parameters: Map<String, List<String>>): ReturnData {
-        val returnData = ReturnData()
-        val bookUrl = parameters["url"]?.firstOrNull()
-            ?: return returnData.setErrorMsg("bookUrl为空")
-        val src = parameters["path"]?.firstOrNull()
-            ?: return returnData.setErrorMsg("图片链接为空")
-        val width = parameters["width"]?.firstOrNull()?.toInt() ?: 640
-        if (this.bookUrl != bookUrl) {
-            this.book = appDb.bookDao.getBook(bookUrl)
-                ?: return returnData.setErrorMsg("bookUrl不对")
-            this.bookSource = appDb.bookSourceDao.getBookSource(book.origin)
-        }
-        this.bookUrl = bookUrl
-        val bitmap = runBlocking {
-            ImageProvider.cacheImage(book, src, bookSource)
-            ImageProvider.getImage(book, src, width)
-        }
-        return returnData.setData(bitmap)
     }
 
     /**
@@ -278,51 +248,6 @@ object BookController {
                 }
             }
         return returnData.setErrorMsg("格式不对")
-    }
-
-    /**
-     * 添加本地书籍
-     */
-    fun addLocalBook(
-        parameters: Map<String, List<String>>,
-        files: Map<String, String>
-    ): ReturnData {
-        val returnData = ReturnData()
-        val fileName = parameters["fileName"]?.firstOrNull()
-            ?: return returnData.setErrorMsg("fileName 不能为空")
-        val fileData = files["fileData"]
-            ?: return returnData.setErrorMsg("fileData 不能为空")
-        kotlin.runCatching {
-            val uri = LocalBook.saveBookFile(File(fileData).inputStream(), fileName)
-            LocalBook.importFile(uri)
-        }.onFailure {
-            return when (it) {
-                is SecurityException -> returnData.setErrorMsg("需重新设置书籍保存位置!")
-                else -> returnData.setErrorMsg("保存书籍错误\n${it.localizedMessage}")
-            }
-        }
-        return returnData.setData(true)
-    }
-
-    /**
-     * 保存web阅读界面配置
-     */
-    fun saveWebReadConfig(postData: String?): ReturnData {
-        val returnData = ReturnData()
-        postData?.let {
-            CacheManager.put("webReadConfig", postData)
-        } ?: CacheManager.delete("webReadConfig")
-        return returnData.setData("")
-    }
-
-    /**
-     * 获取web阅读界面配置
-     */
-    fun getWebReadConfig(): ReturnData {
-        val returnData = ReturnData()
-        val data = CacheManager.get("webReadConfig")
-            ?: return returnData.setErrorMsg("没有配置")
-        return returnData.setData(data)
     }
 
 }

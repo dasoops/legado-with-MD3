@@ -47,7 +47,6 @@ import io.legado.app.help.coroutine.Coroutine
 import io.legado.app.help.storage.Backup
 import io.legado.app.help.update.AppUpdateGitHub
 import io.legado.app.lib.dialogs.alert
-import io.legado.app.service.WebService
 import io.legado.app.ui.about.MarkdownSheet
 import io.legado.app.ui.about.UpdateDialog
 import io.legado.app.ui.book.read.ReadBookInputHandler
@@ -205,11 +204,6 @@ open class MainActivity : BaseComposeActivity() {
         val shouldAutoCheckUpdate = startupUpdateCheckGate.consume(
             otherSettingsGateway.currentSettings.autoCheckUpdateOnStart
         )
-
-        // 智能自启：如果上次是手动开启状态（web_service_auto 为 true），则自启
-        if (otherSettingsGateway.currentSettings.webServiceAutoStart) {
-            WebService.startForeground(this)
-        }
 
         lifecycleScope.launch {
             //版本更新
@@ -444,7 +438,7 @@ open class MainActivity : BaseComposeActivity() {
         }
         LocalConfig.versionCode = appInfo.versionCode
         if (!BuildConfig.DEBUG) {
-            lifecycleScope.launch {
+        lifecycleScope.launch {
                 try {
                     val info = AppUpdateGitHub.getReleaseByTag(BuildConfig.VERSION_NAME)
                     if (info != null) {

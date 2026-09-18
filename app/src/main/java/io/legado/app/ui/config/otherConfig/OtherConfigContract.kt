@@ -10,7 +10,6 @@ data class OtherConfigUiState(
     val language: String = "auto",
     val updateToVariant: String = "official_version",
     val autoCheckUpdateOnStart: Boolean = false,
-    val webServiceAutoStart: Boolean = false,
     val autoRefresh: Boolean = false,
     val defaultToRead: Boolean = false,
     val firebaseEnable: Boolean = true,
@@ -20,9 +19,7 @@ data class OtherConfigUiState(
     val autoClearExpired: Boolean = true,
     val showAddToShelfAlert: Boolean = true,
     val showMangaUi: Boolean = true,
-    val webServiceWakeLock: Boolean = false,
     val sourceEditMaxLine: Int = Int.MAX_VALUE,
-    val webPort: Int = 1122,
     val processText: Boolean = true,
     val recordLog: Boolean = false,
     val recordHeapDump: Boolean = false,
@@ -76,7 +73,6 @@ sealed interface OtherConfigIntent {
     data class LanguageChanged(val value: String) : OtherConfigIntent
     data class UpdateToVariantChanged(val value: String) : OtherConfigIntent
     data class AutoCheckUpdateOnStartChanged(val value: Boolean) : OtherConfigIntent
-    data class WebServiceAutoStartChanged(val value: Boolean) : OtherConfigIntent
     data class AutoRefreshChanged(val value: Boolean) : OtherConfigIntent
     data class DefaultToReadChanged(val value: Boolean) : OtherConfigIntent
     data class FirebaseEnableChanged(val value: Boolean) : OtherConfigIntent
@@ -86,9 +82,7 @@ sealed interface OtherConfigIntent {
     data class AutoClearExpiredChanged(val value: Boolean) : OtherConfigIntent
     data class ShowAddToShelfAlertChanged(val value: Boolean) : OtherConfigIntent
     data class ShowMangaUiChanged(val value: Boolean) : OtherConfigIntent
-    data class WebServiceWakeLockChanged(val value: Boolean) : OtherConfigIntent
     data class SourceEditMaxLineChanged(val value: Int) : OtherConfigIntent
-    data class WebPortChanged(val value: Int) : OtherConfigIntent
     data class ProcessTextChanged(val value: Boolean) : OtherConfigIntent
     data class RecordLogChanged(val value: Boolean) : OtherConfigIntent
     data class RecordHeapDumpChanged(val value: Boolean) : OtherConfigIntent
@@ -119,6 +113,5 @@ sealed interface OtherConfigEffect {
     data object RequestNotificationPermission : OtherConfigEffect
     data object RequestBatteryPermission : OtherConfigEffect
     data object OpenSystemDirectory : OtherConfigEffect
-    data object RestartWebService : OtherConfigEffect
     data object RestartApp : OtherConfigEffect
 }

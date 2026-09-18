@@ -16,7 +16,6 @@ internal val alwaysIgnoredPreferenceKeys = setOf(
     PreferKey.webDavDeviceName,
     PreferKey.launcherIcon,
     PreferKey.bitmapCacheSize,
-    PreferKey.webServiceWakeLock,
     LocalPreferencesKeys.PASSWORD.name,
     LocalPreferencesKeys.MIGRATED_TO_SETTINGS.name,
 )

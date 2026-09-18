@@ -1,20 +1,12 @@
 package io.legado.app.ui.main.my
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.expandVertically
-import androidx.compose.animation.shrinkVertically
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBars
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -22,26 +14,21 @@ import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.automirrored.filled.HelpOutline
 import androidx.compose.material.icons.automirrored.filled.Rule
 import androidx.compose.material.icons.filled.Bookmark
-import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.FindReplace
 import androidx.compose.material.icons.filled.Folder
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.OpenInBrowser
 import androidx.compose.material.icons.filled.Sell
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Source
-import androidx.compose.material.icons.filled.Web
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.legado.app.R
 import io.legado.app.ui.book.bookmark.AllBookmarkActivity
 import io.legado.app.ui.book.toc.rule.TxtTocRuleActivity
@@ -50,25 +37,18 @@ import io.legado.app.ui.replace.ReplaceRuleActivity
 import io.legado.app.ui.theme.adaptiveContentPadding
 import io.legado.app.ui.widget.components.AppScaffold
 import io.legado.app.ui.widget.components.SplicedColumnGroup
-import io.legado.app.ui.widget.components.button.series.SmallPlainButton
 import io.legado.app.ui.widget.components.settingItem.ClickableSettingItem
-import io.legado.app.ui.widget.components.settingItem.SwitchSettingItem
 import io.legado.app.ui.widget.components.topbar.GlassMediumFlexibleTopAppBar
 import io.legado.app.ui.widget.components.topbar.GlassTopAppBarDefaults
-import org.koin.androidx.compose.koinViewModel
 
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun MyRouteScreen(
-    viewModel: MyViewModel = koinViewModel(),
     onOpenSettings: () -> Unit,
     onNavigate: (PrefClickEvent) -> Unit
 ) {
-    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     MyScreen(
-        state = uiState,
-        onIntent = viewModel::onIntent,
         onOpenSettings = onOpenSettings,
         onNavigate = onNavigate,
     )
@@ -77,8 +57,6 @@ fun MyRouteScreen(
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun MyScreen(
-    state: MyUiState,
-    onIntent: (MyIntent) -> Unit,
     onOpenSettings: () -> Unit,
     onNavigate: (PrefClickEvent) -> Unit,
 ) {
@@ -106,18 +84,6 @@ fun MyScreen(
                     )
                 )
         ) {
-            SplicedColumnGroup(
-                title = ""
-            ) {
-                WebServiceSettingBlock(
-                    uiState = state,
-                    onToggleWebService = {
-                        onIntent(MyIntent.ToggleWebService)
-                    },
-                    onNavigate = onNavigate
-                )
-            }
-
             SplicedColumnGroup(
                 title = stringResource(R.string.rule_segment),
             ) {
@@ -207,59 +173,6 @@ fun MyScreen(
                     onClick = {
                         onNavigate(PrefClickEvent.ExitApp)
                     }
-                )
-            }
-        }
-    }
-}
-
-
-@Composable
-fun WebServiceSettingBlock(
-    uiState: MyUiState,
-    onToggleWebService: () -> Unit,
-    onNavigate: (PrefClickEvent) -> Unit
-) {
-    Column(modifier = Modifier.fillMaxWidth()) {
-        SwitchSettingItem(
-            title = stringResource(R.string.web_service),
-            description = if (uiState.isWebServiceRun) {
-                uiState.webServiceAddress
-            } else {
-                stringResource(R.string.web_service_desc)
-            },
-            imageVector = Icons.Default.Web,
-            checked = uiState.isWebServiceRun,
-            onCheckedChange = { onToggleWebService() }
-        )
-
-        AnimatedVisibility(
-            visible = uiState.isWebServiceRun,
-            enter = expandVertically(),
-            exit = shrinkVertically()
-        ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(start = 16.dp, end = 16.dp, top = 12.dp, bottom = 12.dp),
-                horizontalArrangement = Arrangement.End
-            ) {
-                SmallPlainButton(
-                    onClick = {
-                        onNavigate(PrefClickEvent.CopyUrl(uiState.webServiceAddress))
-                    },
-                    icon = Icons.Default.ContentCopy,
-                    text = stringResource(R.string.copy_url)
-                )
-
-                Spacer(modifier = Modifier.width(12.dp))
-
-                SmallPlainButton(
-                    onClick = {
-                        onNavigate(PrefClickEvent.OpenUrl(uiState.webServiceAddress))
-                    },
-                    icon = Icons.Default.OpenInBrowser,
-                    text = stringResource(R.string.open_in_browser)
                 )
             }
         }

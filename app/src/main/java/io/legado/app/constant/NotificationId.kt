@@ -8,7 +8,6 @@ object NotificationId {
 
     const val CacheBookService = 103
     const val ExportBookService = 104
-    const val WebService = 105
     const val DownloadService = 106
     const val BookSourceCheckService = 107
     const val Download = 10000

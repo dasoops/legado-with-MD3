@@ -21,7 +21,6 @@ import com.script.rhino.RhinoScriptEngine
 import com.script.rhino.RhinoWrapFactory
 import io.legado.app.constant.AppConst.channelIdBookSourceCheck
 import io.legado.app.constant.AppConst.channelIdDownload
-import io.legado.app.constant.AppConst.channelIdWeb
 import io.legado.app.constant.PreferKey
 import io.legado.app.data.appDb
 import io.legado.app.data.entities.Book
@@ -306,23 +305,11 @@ class App : Application(), SingletonImageLoader.Factory {
             lockscreenVisibility = Notification.VISIBILITY_PUBLIC
         }
 
-        val webChannel = NotificationChannel(
-            channelIdWeb,
-            getString(R.string.web_service),
-            NotificationManager.IMPORTANCE_DEFAULT
-        ).apply {
-            enableLights(false)
-            enableVibration(false)
-            setSound(null, null)
-            lockscreenVisibility = Notification.VISIBILITY_PUBLIC
-        }
-
         //向notification manager 提交channel
         notificationManager.createNotificationChannels(
             listOf(
                 downloadChannel,
-                bookSourceCheckChannel,
-                webChannel
+                bookSourceCheckChannel
             )
         )
     }

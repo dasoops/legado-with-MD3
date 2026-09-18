@@ -63,7 +63,6 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.core.net.toUri
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleOwner
@@ -95,7 +94,6 @@ import io.legado.app.ui.widget.components.navigation.AppNavigationBar
 import io.legado.app.ui.widget.components.navigation.AppNavigationBarItem
 import io.legado.app.ui.widget.components.pager.rememberPagerFlingPassThroughConnection
 import io.legado.app.ui.widget.components.text.AppText
-import io.legado.app.utils.sendToClip
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
@@ -136,13 +134,6 @@ fun MainScreen(
     LaunchedEffect(effects, context) {
         effects.collectLatest { effect ->
             when (effect) {
-                is MainEffect.OpenUrl -> {
-                    context.startActivity(
-                        Intent(Intent.ACTION_VIEW, effect.url.toUri())
-                    )
-                }
-
-                is MainEffect.CopyUrl -> context.sendToClip(effect.url)
                 is MainEffect.StartActivity -> {
                     context.startActivity(Intent(context, effect.destination).apply {
                         effect.configTag?.let { putExtra("configTag", it) }
