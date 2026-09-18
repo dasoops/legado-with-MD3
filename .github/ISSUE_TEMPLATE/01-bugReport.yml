@@ -13,7 +13,7 @@ body:
           required: true
         - label: 此问题和Xposed、Lsposed、Magisk、手机主题、浏览器插件、无障碍服务等无关 / Make sure your machine is not touched by hook frameworks, plugins, accessibility etc
           required: true
-        - label: 此问题仅出现在分支版本中，官方版本及其他分支均未出现此问题。 / Only affects this version; not present in the official or other branch builds.
+        - label: 此问题仅出现在本 fork 版本中，上游 Legado 未出现此问题。 / Only affects this fork; not present in upstream Legado builds.
           required: false
   - type: textarea
     attributes:
@@ -34,8 +34,6 @@ body:
   - type: textarea
     attributes:
       label: 其他信息 / Additions
-      description: |
-        反馈WEB书架前端问题时请提供浏览器版本信息，如Edge 129.0.2792.89
       placeholder: "请用```将提交的内容包裹"
 
   - type: textarea
