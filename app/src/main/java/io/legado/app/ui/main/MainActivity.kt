@@ -97,34 +97,10 @@ open class MainActivity : BaseComposeActivity() {
         @Volatile
         var hasActiveReadBookRoute: Boolean = false
 
-        @Volatile
-        var hasActiveSourceLoginRoute: Boolean = false
-
         fun createLauncherIntent(context: Context): Intent =
             MainIntent.createLauncherIntent(context)
 
         fun createHomeIntent(context: Context): Intent = MainIntent.createHomeIntent(context)
-        fun createSourceLoginIntent(
-            context: Context,
-            type: io.legado.app.ui.login.SourceLoginType,
-            sourceKey: String? = null,
-            bookUrl: String? = null,
-        ): Intent = MainIntent.createSourceLoginIntent(context, type, sourceKey, bookUrl)
-
-        fun createWebViewIntent(
-            context: Context,
-            title: String? = null,
-            url: String,
-            sourceOrigin: String? = null,
-            sourceName: String? = null,
-            sourceType: Int? = null,
-            sourceVerificationEnable: Boolean = false,
-            refetchAfterSuccess: Boolean = true,
-            html: String? = null,
-        ): Intent = MainIntent.createWebViewIntent(
-            context, title, url, sourceOrigin, sourceName, sourceType,
-            sourceVerificationEnable, refetchAfterSuccess, html,
-        )
 
         fun createBookSourceManageIntent(context: Context, importSource: String? = null) =
             MainIntent.createBookSourceManageIntent(context, importSource)
@@ -278,9 +254,6 @@ open class MainActivity : BaseComposeActivity() {
                         defaultToRead &&
                         resolved == MainRouteBookshelf -> {
                     arrayOf(MainRouteBookshelf, MainRouteReadBook())
-                }
-                resolved is MainRouteSourceLogin -> {
-                    arrayOf(MainRouteBookshelf, resolved)
                 }
                 else -> {
                     arrayOf(resolved)

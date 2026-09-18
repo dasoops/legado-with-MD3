@@ -17,16 +17,6 @@ object MainIntent {
     const val EXTRA_CHAPTER_CHANGED = "chapterChanged"
     const val EXTRA_SOURCE_URL = "sourceUrl"
     const val EXTRA_BOOK_SOURCE_IMPORT = "bookSourceImport"
-    const val EXTRA_SOURCE_LOGIN_TYPE = "source_login_type"
-    const val EXTRA_SOURCE_LOGIN_KEY = "source_login_key"
-    const val EXTRA_WEB_VIEW_TITLE = "title"
-    const val EXTRA_WEB_VIEW_URL = "url"
-    const val EXTRA_WEB_VIEW_SOURCE_ORIGIN = "sourceOrigin"
-    const val EXTRA_WEB_VIEW_SOURCE_NAME = "sourceName"
-    const val EXTRA_WEB_VIEW_SOURCE_TYPE = "sourceType"
-    const val EXTRA_WEB_VIEW_VERIFICATION = "sourceVerificationEnable"
-    const val EXTRA_WEB_VIEW_REFETCH = "refetchAfterSuccess"
-    const val EXTRA_WEB_VIEW_HTML = "html"
 
     fun createLauncherIntent(context: Context): Intent {
         val launcherComponent =
@@ -42,47 +32,6 @@ object MainIntent {
         return createLauncherIntent(context).apply {
             putExtra(EXTRA_START_ROUTE, MainRouteConst.ROUTE_MAIN)
         }
-    }
-
-    fun createSourceLoginIntent(
-        context: Context,
-        type: io.legado.app.ui.login.SourceLoginType,
-        sourceKey: String? = null,
-        bookUrl: String? = null,
-    ): Intent = createLauncherIntent(context).apply {
-        // NEW_TASK: 支持从 Application context 启动；
-        // SINGLE_TOP: MainActivity 已在栈顶时复用现有实例走 onNewIntent，直接把登录路由
-        // 压进 nav3 back stack，避免 standard launchMode 下新建 MainActivity 先回主页面。
-        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP)
-        putExtra(EXTRA_START_ROUTE, MainRouteConst.ROUTE_SOURCE_LOGIN)
-        putExtra(EXTRA_SOURCE_LOGIN_TYPE, type.name)
-        putExtra(EXTRA_SOURCE_LOGIN_KEY, sourceKey)
-        putExtra(EXTRA_BOOK_URL, bookUrl)
-    }
-
-    fun createWebViewIntent(
-        context: Context,
-        title: String? = null,
-        url: String,
-        sourceOrigin: String? = null,
-        sourceName: String? = null,
-        sourceType: Int? = null,
-        sourceVerificationEnable: Boolean = false,
-        refetchAfterSuccess: Boolean = true,
-        html: String? = null,
-    ): Intent = createLauncherIntent(context).apply {
-        // NEW_TASK: 支持从 Application context（如 SourceVerificationHelp）启动；
-        // SINGLE_TOP: MainActivity 已在栈顶时复用现有实例走 onNewIntent，直接把路由压进 nav3 back stack。
-        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP)
-        putExtra(EXTRA_START_ROUTE, MainRouteConst.ROUTE_WEB_VIEW)
-        putExtra(EXTRA_WEB_VIEW_TITLE, title)
-        putExtra(EXTRA_WEB_VIEW_URL, url)
-        putExtra(EXTRA_WEB_VIEW_SOURCE_ORIGIN, sourceOrigin)
-        putExtra(EXTRA_WEB_VIEW_SOURCE_NAME, sourceName)
-        sourceType?.let { putExtra(EXTRA_WEB_VIEW_SOURCE_TYPE, it) }
-        putExtra(EXTRA_WEB_VIEW_VERIFICATION, sourceVerificationEnable)
-        putExtra(EXTRA_WEB_VIEW_REFETCH, refetchAfterSuccess)
-        putExtra(EXTRA_WEB_VIEW_HTML, html)
     }
 
     fun createBookSourceManageIntent(

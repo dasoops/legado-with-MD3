@@ -8,7 +8,7 @@ import io.legado.app.data.entities.BaseSource
 import io.legado.app.data.entities.BookSource
 import io.legado.app.data.entities.rule.ExploreKind
 import io.legado.app.help.source.getExploreInfoMap
-import io.legado.app.ui.login.SourceLoginJsExtensions
+import io.legado.app.help.webView.JsExtensionsBase
 import io.legado.app.utils.InfoMap
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -68,14 +68,7 @@ class ExploreKindUiUseCase(
         val effectiveSourceUrl = sourceUrl ?: return
         val effectiveInfoMap = infoMap ?: return
         val source = getOrLoadBookSource(effectiveSourceUrl) ?: return
-        val sourceJsExtensions = SourceLoginJsExtensions(
-            activity = activity,
-            source = source,
-            callback = object : SourceLoginJsExtensions.Callback {
-                override fun upUiData(data: Map<String, Any?>?) = Unit
-                override fun reUiView(deltaUp: Boolean) = onRefreshKinds()
-            }
-        )
+        val sourceJsExtensions = JsExtensionsBase(activity, source)
         withContext(Dispatchers.IO) {
             evalButtonClick(actionText, source, effectiveInfoMap, title, sourceJsExtensions)
         }
@@ -114,7 +107,7 @@ class ExploreKindUiUseCase(
         source: BaseSource?,
         infoMap: InfoMap,
         name: String,
-        java: SourceLoginJsExtensions
+        java: JsExtensionsBase
     ) {
         val source = source ?: return
         try {

@@ -188,7 +188,6 @@ import io.legado.app.ui.book.source.manage.BookSourceViewModel
 import io.legado.app.ui.book.toc.TocViewModel
 import io.legado.app.ui.book.toc.rule.TxtTocRuleViewModel
 import io.legado.app.ui.book.toc.rule.preview.TxtTocRulePreviewViewModel
-import io.legado.app.ui.browser.WebViewModel
 import io.legado.app.ui.config.backupConfig.BackupConfigViewModel
 import io.legado.app.ui.config.bookshelfConfig.BookshelfManageScreenConfig
 import io.legado.app.ui.config.coverConfig.CoverAlbumManageViewModel
@@ -202,7 +201,6 @@ import io.legado.app.ui.config.readConfig.ReadConfigViewModel
 import io.legado.app.ui.config.themeConfig.ThemeConfigViewModel
 import io.legado.app.ui.config.themeManage.ThemeManageViewModel
 import io.legado.app.ui.highlightTagRule.HighlightTagRuleViewModel
-import io.legado.app.ui.login.SourceLoginViewModel
 import io.legado.app.ui.main.MainRouteSearchContent
 import io.legado.app.ui.main.MainViewModel
 import io.legado.app.ui.main.bookshelf.BookshelfViewModel
@@ -430,24 +428,9 @@ val appModule = module {
     viewModelOf(::ServersViewModel)
     viewModelOf(::BookInfoViewModel)
     viewModel {
-        WebViewModel(
-            application = get(),
-            bookSourceRepository = get(),
-        )
-    }
-    viewModel {
         BookInfoEditViewModel(
             application = get(),
             bookRepository = get(),
-        )
-    }
-    viewModel {
-        SourceLoginViewModel(
-            application = get(),
-            bookRepository = get(),
-            bookSourceRepository = get(),
-            searchRepository = get(),
-            downloadCacheSettingsGateway = get(),
         )
     }
     viewModelOf(::MangaReaderViewModel)

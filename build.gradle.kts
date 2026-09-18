@@ -260,7 +260,6 @@ val verifyConfigArchitecture = tasks.register<VerifyConfigArchitectureTask>(
             "io/legado/app/ui/book/search/SearchScope.kt" to 4,
             "io/legado/app/ui/config/bookshelfConfig/BookshelfManageScreenConfig.kt" to 1,
             "io/legado/app/ui/main/MainNavGraph.kt" to 2,
-            "io/legado/app/ui/widget/dialog/BottomWebViewDialog.kt" to 1,
         )
     )
 }

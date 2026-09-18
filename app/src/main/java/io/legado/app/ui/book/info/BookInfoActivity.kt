@@ -3,7 +3,6 @@ package io.legado.app.ui.book.info
 import android.os.Bundle
 import androidx.compose.runtime.Composable
 import io.legado.app.base.BaseComposeActivity
-import io.legado.app.ui.login.SourceLoginType
 import io.legado.app.ui.main.MainActivity
 import io.legado.app.utils.startActivity
 import org.koin.androidx.viewmodel.ext.android.viewModel
@@ -28,15 +27,6 @@ class BookInfoActivity : BaseComposeActivity() {
             },
             onOpenBookSourceEdit = { sourceUrl ->
                 startActivity(MainActivity.createBookSourceEditIntent(this, sourceUrl))
-            },
-            onOpenSourceLogin = { sourceUrl ->
-                startActivity(
-                    MainActivity.createSourceLoginIntent(
-                        this,
-                        SourceLoginType.BookSource,
-                        sourceUrl,
-                    )
-                )
             },
             onOpenReader = { bookUrl, inBookshelf, chapterChanged ->
                 startActivity(

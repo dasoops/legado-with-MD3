@@ -1199,10 +1199,6 @@ class BookInfoViewModel(
             BookInfoMenuAction.SyncRemote -> syncFromRemote()
             BookInfoMenuAction.Refresh -> refreshCurrentBook()
             BookInfoMenuAction.ReadRecord -> setSheet(BookInfoSheet.ReadRecord)
-            BookInfoMenuAction.Login -> bookSource?.let {
-                emitEffect(BookInfoEffect.OpenSourceLogin(it.bookSourceUrl))
-            }
-
             BookInfoMenuAction.Top -> topBook()
             BookInfoMenuAction.SetSourceVariable -> requestSourceVariableSheet()
             BookInfoMenuAction.SetBookVariable -> requestBookVariableSheet()
@@ -1575,7 +1571,6 @@ class BookInfoViewModel(
     private fun BookSource.toBookInfoSourceUi(): BookInfoSourceUi {
         return BookInfoSourceUi(
             sourceUrl = bookSourceUrl,
-            hasLogin = !loginUrl.isNullOrBlank(),
             hasCustomButton = customButton,
         )
     }

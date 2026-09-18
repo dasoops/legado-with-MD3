@@ -37,7 +37,6 @@ import io.legado.app.utils.getFile
 import io.legado.app.utils.isContentScheme
 import io.legado.app.utils.readUri
 import io.legado.app.utils.showDialogFragment
-import io.legado.app.utils.startActivity
 import io.legado.app.utils.startActivityForBook
 import io.legado.app.utils.takePersistablePermissionSafely
 import io.legado.app.utils.toastOnUi
@@ -96,12 +95,6 @@ class FileAssociationActivity : BaseComposeActivity(transparent = true) {
         super.onCreate(savedInstanceState)
         viewModel.importBookLiveData.observe(this) { uri ->
             importBook(uri)
-        }
-        viewModel.onLineImportLive.observe(this) {
-            startActivity<OnLineImportActivity> {
-                data = it
-            }
-            finish()
         }
         viewModel.successLive.observe(this) {
             when (it.first) {

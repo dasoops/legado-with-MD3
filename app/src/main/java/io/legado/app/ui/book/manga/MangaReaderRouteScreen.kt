@@ -37,15 +37,7 @@ fun MangaReaderRouteScreen(
     restoreSystemBarsVisible: Boolean,
     onFinish: (bookshelfChanged: Boolean) -> Unit,
     onOpenBookInfo: (name: String, author: String, bookUrl: String) -> Unit,
-    onOpenSourceLogin: (sourceUrl: String) -> Unit,
     onOpenSourceEdit: (sourceUrl: String) -> Unit,
-    onOpenWebView: (
-        title: String?,
-        url: String,
-        sourceOrigin: String?,
-        sourceName: String?,
-        sourceType: Int?,
-    ) -> Unit,
 ) {
     val activity = LocalActivity.current as MainActivity
     val lifecycleOwner = LocalLifecycleOwner.current
@@ -79,16 +71,8 @@ fun MangaReaderRouteScreen(
                 }
                 is MangaReaderEffect.OpenChapterUrl -> {
                     val chapterUrl = currentState.chapterUrl ?: return@collectLatest
-                    if (effect.externalBrowser) activity.openUrl(chapterUrl)
-                    else onOpenWebView(
-                        currentState.chapterName,
-                        chapterUrl,
-                        currentState.sourceUrl,
-                        currentState.sourceName,
-                        currentState.sourceType,
-                    )
+                    activity.openUrl(chapterUrl)
                 }
-                is MangaReaderEffect.OpenSourceLogin -> onOpenSourceLogin(effect.sourceUrl)
                 is MangaReaderEffect.OpenSourceEdit -> onOpenSourceEdit(effect.sourceUrl)
                 is MangaReaderEffect.RunSourceCustomButton -> SourceCallBack.callBackBtn(
                     activity,
@@ -98,13 +82,7 @@ fun MangaReaderRouteScreen(
                     effect.chapter,
                     BookType.image,
                 )
-                is MangaReaderEffect.OpenPaymentUrl -> onOpenWebView(
-                    activity.getString(io.legado.app.R.string.chapter_pay),
-                    effect.url,
-                    effect.sourceOrigin,
-                    effect.sourceName,
-                    effect.sourceType,
-                )
+                is MangaReaderEffect.OpenPaymentUrl -> activity.openUrl(effect.url)
                 is MangaReaderEffect.SetWindowBrightness -> {
                     activity.window.attributes = activity.window.attributes.apply {
                         screenBrightness = if (effect.auto) {

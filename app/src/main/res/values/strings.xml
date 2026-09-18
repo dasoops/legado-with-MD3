@@ -253,13 +253,10 @@
     <string name="disable_book_source">Disable Book source</string>
     <string name="add_book_source">Add Book Source</string>
     <string name="book_file_selector">Add books</string>
-    <string name="scan_book_source">Scan</string>
     <string name="copy_source">Copy source</string>
     <string name="paste_source">Paste source</string>
     <string name="source_rule_s">Source rules description</string>
     <string name="check_update">Check for Updates</string>
-    <string name="camera_scan">Scan QR code</string>
-    <string name="scan_image">Scan local images</string>
     <string name="rule_summary">Rules description</string>
     <string name="share">Share</string>
     <string name="share_app">Share to</string>
@@ -542,8 +539,6 @@
     <string name="up_change_source_last_chapter_s">If enabled,the update will start 1 minute later when the software is run</string>
     <string name="behavior_main_t">Auto Hide Toolbar</string>
     <string name="behavior_main_s">The toolbar will be hidden automatically when scroll the Bookshelf</string>
-    <string name="login">Login</string>
-    <string name="login_source">Login%s</string>
     <string name="success">Success</string>
     <string name="source_no_login">The current source has not configured with a login address</string>
     <string name="no_prev_page">No prior page</string>
@@ -556,9 +551,6 @@
     <string name="diy_source_group">Custom source grouping</string>
     <string name="diy_edit_source_group">Enter the custom source group name</string>
     <string name="concurrent_rate">Concurrency rate(concurrentRate)</string>
-    <string name="login_url">Log in URL(loginUrl)</string>
-    <string name="login_ui">Login UI(loginUi)</string>
-    <string name="login_check_js">Login check js(loginCheckJs)</string>
     <string name="comment">Source comment(sourceComment)</string>
     <string name="r_search_url">Search URL(url)</string>
     <string name="r_find_url">Discover URL(url)</string>
@@ -617,9 +609,7 @@
 
     <string name="source_http_header">HTTP Header</string>
     <string name="debug_source">Debug source</string>
-    <string name="import_by_qr_code">Import from QR code</string>
     <string name="share_selected_source">Share selected sources</string>
-    <string name="scan_qr_code">Scan QR code</string>
     <string name="click_on_selected_show_menu">Tap to display menu when selected </string>
     <string name="theme">Theme</string>
     <string name="theme_mode">Theme mode</string>
@@ -651,7 +641,6 @@
     <string name="sure_del_any">Are you sure to delete %s?</string>
     <string name="sure_del_all_book">Are you sure to delete all books？</string>
     <string name="sure_del_download_book">Do you want to delete the downloaded book chapters at the same time?</string>
-    <string name="qr_per">Scan QR code requires Camera permissions</string>
     <string name="input_charset">Input encoding</string>
     <string name="text_chapter_list_rule">Txt Chapters Regex</string>
     <string name="open_local_book_per">Open local books requires storage permission</string>
@@ -695,7 +684,6 @@
     <string name="e_ink_mode">E-Ink mode</string>
     <string name="e_ink_mode_detail">Remove animations and optimize the experience of using E-paper books</string>
     <string name="web_menu">Web service</string>
-    <string name="qr_share">QR code sharing</string>
     <string name="str_share">Strings sharing</string>
     <string name="wifi_share">Wi-Fi sharing</string>
     <string name="please_grant_storage_permission">Please grant Storage Permission</string>
@@ -1162,19 +1150,13 @@
     <string name="delete_source">delete source</string>
     <string name="chapter_pay">pay</string>
     <string name="double_page_horizontal">Tablet/Landscape Dual Page</string>
-    <string name="open_in_browser">open in browser</string>
     <string name="copy_url">copy URL</string>
     <string name="full_screen">full screen</string>
     <string name="open_fun">open function</string>
     <string name="use_browser_open">Is it opened in an external browser?</string>
     <string name="cannot_open_url">This URL cannot be opened directly</string>
-    <string name="open_by_browser">Switched to browser opening</string>
-    <string name="open_by_webview">Switched to WebView opening</string>
     <string name="see">see</string>
     <string name="open">open</string>
-    <string name="del_login_header">del login header</string>
-    <string name="show_login_header">show login header</string>
-    <string name="login_header">login header</string>
     <string name="font_scale">Font Scale</string>
     <string name="font_scale_summary">Font Scale : %.1f</string>
     <string name="search_content_size">Search Result</string>
@@ -1264,8 +1246,6 @@
     <string name="change_source_batch">Batch source switching</string>
     <string name="book_type_different">Different types of books</string>
     <string name="soure_change_source">Whether to confirm the source change</string>
-    <string name="input_verification_code">Enter the CAPTCHA</string>
-    <string name="verification_code">Verification code</string>
     <string name="timeout_millisecond">Timed out milliseconds</string>
     <string name="file_not_supported">Continue to open although %1$s is not supported ?</string>
     <string name="import_theme">Import theme</string>

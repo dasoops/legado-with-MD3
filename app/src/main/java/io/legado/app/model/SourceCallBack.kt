@@ -8,7 +8,7 @@ import io.legado.app.data.entities.Book
 import io.legado.app.data.entities.BookChapter
 import io.legado.app.data.entities.BookSource
 import io.legado.app.help.coroutine.Coroutine
-import io.legado.app.ui.login.SourceLoginJsExtensions
+import io.legado.app.help.webView.JsExtensionsBase
 import io.legado.app.utils.isTrue
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -56,7 +56,7 @@ object SourceCallBack {
             return
         }
         activity.lifecycleScope.launch(IO) {
-            val java = SourceLoginJsExtensions(activity, source, bookType)
+            val java = JsExtensionsBase(activity, source)
             kotlin.runCatching {
                 val result = runScriptWithContext {
                     source.evalJS(jsStr) {

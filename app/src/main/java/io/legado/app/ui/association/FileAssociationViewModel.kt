@@ -12,7 +12,6 @@ import io.legado.app.utils.*
 
 class FileAssociationViewModel(application: Application) : BaseAssociationViewModel(application) {
     val importBookLiveData = MutableLiveData<Uri>()
-    val onLineImportLive = MutableLiveData<Uri>()
     val openBookLiveData = MutableLiveData<Book>()
     val notSupportedLiveData = MutableLiveData<Pair<Uri, String>>()
 
@@ -32,7 +31,7 @@ class FileAssociationViewModel(application: Application) : BaseAssociationViewMo
                     dispatch(fileDoc)
                 }
             } else {
-                onLineImportLive.postValue(uri)
+                errorLive.postValue("不支持的链接")
             }
         }.onError {
             it.printOnDebug()

@@ -223,13 +223,10 @@
     <string name="disable_book_source">禁用书源</string>
     <string name="add_book_source">新建书源</string>
     <string name="book_file_selector">添加书籍</string>
-    <string name="scan_book_source">扫描</string>
     <string name="copy_source">拷贝源</string>
     <string name="paste_source">粘贴源</string>
     <string name="source_rule_s">源规则说明</string>
     <string name="check_update">检查更新</string>
-    <string name="camera_scan">扫描二维码</string>
-    <string name="scan_image">扫描本地图片</string>
     <string name="rule_summary">规则说明</string>
     <string name="share">分享</string>
     <string name="share_app">软件分享</string>
@@ -512,8 +509,6 @@
     <string name="up_change_source_last_chapter_s">开启则会在软件打开 1 分钟后开始更新</string>
     <string name="behavior_main_t">书架工具栏自动隐藏</string>
     <string name="behavior_main_s">滚动书架时工具栏自动隐藏与显示</string>
-    <string name="login">登录</string>
-    <string name="login_source">登录 %s</string>
     <string name="success">成功</string>
     <string name="source_no_login">当前源没有配置登陆地址</string>
     <string name="no_prev_page">没有上一页</string>
@@ -526,9 +521,6 @@
     <string name="diy_source_group">自定义源分组</string>
     <string name="diy_edit_source_group">输入自定义源分组名称</string>
     <string name="concurrent_rate">并发率（concurrentRate）</string>
-    <string name="login_url">登录 URL(loginUrl)</string>
-    <string name="login_ui">登录 UI（loginUi）</string>
-    <string name="login_check_js">登录检查 JS（loginCheckJs）</string>
     <string name="comment">源注释（sourceComment）</string>
     <string name="r_search_url">搜索地址（url）</string>
     <string name="r_find_url">发现地址规则（url）</string>
@@ -587,9 +579,7 @@
 
     <string name="source_http_header">请求头（header）</string>
     <string name="debug_source">调试源</string>
-    <string name="import_by_qr_code">二维码导入</string>
     <string name="share_selected_source">分享选中源</string>
-    <string name="scan_qr_code">扫描二维码</string>
     <string name="click_on_selected_show_menu">选中时点击可弹出菜单</string>
     <string name="theme">主题模式</string>
     <string name="theme_mode">深色模式</string>
@@ -621,7 +611,6 @@
     <string name="sure_del_any">是否确认删除 %s ?</string>
     <string name="sure_del_all_book">是否删除全部书籍?</string>
     <string name="sure_del_download_book">是否同时删除已下载的书籍目录?</string>
-    <string name="qr_per">扫描二维码需相机权限</string>
     <string name="input_charset">输入编码</string>
     <string name="text_chapter_list_rule">TXT 目录规则</string>
     <string name="open_local_book_per">打开外部书籍需要存储权限</string>
@@ -665,7 +654,6 @@
     <string name="e_ink_mode">E-Ink 模式</string>
     <string name="e_ink_mode_detail">去除动画，优化电纸书使用体验</string>
     <string name="web_menu">Web 服务</string>
-    <string name="qr_share">二维码分享</string>
     <string name="str_share">字符串分享</string>
     <string name="wifi_share">WiFi 分享</string>
     <string name="please_grant_storage_permission">请给予存储权限</string>
@@ -1123,19 +1111,13 @@
     <string name="delete_source">删除源</string>
     <string name="chapter_pay">购买</string>
     <string name="double_page_horizontal">平板/横屏双页</string>
-    <string name="open_in_browser">浏览器打开</string>
     <string name="copy_url">拷贝 URL</string>
     <string name="full_screen">全屏</string>
     <string name="open_fun">打开方式</string>
     <string name="use_browser_open">是否使用外部浏览器打开？</string>
     <string name="cannot_open_url">该URL无法直接打开</string>
-    <string name="open_by_browser">已切换为浏览器打开</string>
-    <string name="open_by_webview">已切换为WebView打开</string>
     <string name="see">查看</string>
     <string name="open">打开</string>
-    <string name="del_login_header">删除登录头</string>
-    <string name="show_login_header">查看登录头</string>
-    <string name="login_header">登录头</string>
     <string name="font_scale">字体大小</string>
     <string name="font_scale_summary">当前字体大小: %.1f</string>
     <string name="open_sys_dir_picker_error">打开系统文件夹选择器出错，将自动打开应用文件夹选择器</string>
@@ -1206,8 +1188,6 @@
     <string name="change_source_batch">批量换源</string>
     <string name="book_type_different">书籍类型不一样</string>
     <string name="soure_change_source">是否确认换源</string>
-    <string name="input_verification_code">输入验证码</string>
-    <string name="verification_code">验证码</string>
     <string name="timeout_millisecond">超时毫秒数</string>
     <string name="file_not_supported">文件 %1$s 不受支持，是否继续打开？</string>
     <string name="import_theme">导入主题</string>

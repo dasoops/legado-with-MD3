@@ -156,11 +156,6 @@ class MangaReaderViewModel(
                 _uiState.update { it.copy(activeDialog = null) }
                 payCurrentChapter()
             }
-            MangaReaderIntent.OpenSourceLogin -> {
-                _uiState.value.sourceUrl?.let {
-                    _effects.tryEmit(MangaReaderEffect.OpenSourceLogin(it))
-                }
-            }
             MangaReaderIntent.OpenSourceEdit -> {
                 _uiState.value.sourceUrl?.let {
                     _effects.tryEmit(MangaReaderEffect.OpenSourceEdit(it))

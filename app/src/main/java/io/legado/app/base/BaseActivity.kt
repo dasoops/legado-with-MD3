@@ -22,7 +22,6 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.viewbinding.ViewBinding
-import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.color.DynamicColors
 import com.google.android.material.color.DynamicColorsOptions
 import io.legado.app.R
@@ -132,9 +131,6 @@ abstract class BaseActivity<VB : ViewBinding>(
         //setupSystemBar()
         setContentView(binding.root)
         upBackgroundImage()
-        findViewById<AppBarLayout>(R.id.title_bar)
-        //?.onMultiWindowModeChanged(isInMultiWindowMode, fullScreen)
-
 
         observeLiveBus()
         observeAppUiConfiguration()

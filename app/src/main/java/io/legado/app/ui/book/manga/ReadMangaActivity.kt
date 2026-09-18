@@ -21,7 +21,6 @@ import io.legado.app.ui.book.info.READER_RESULT_DELETED
 import io.legado.app.ui.book.read.sheet.ReaderBookSheetRoute
 import io.legado.app.ui.book.read.sheet.ReaderBookSheetTab
 import io.legado.app.ui.book.toc.TocActivityResult
-import io.legado.app.ui.login.SourceLoginType
 import io.legado.app.ui.main.MainActivity
 import io.legado.app.utils.NetworkUtils
 import io.legado.app.utils.StartActivityContract
@@ -113,13 +112,6 @@ class ReadMangaActivity : BaseComposeActivity(imageBg = false) {
             }
             MangaReaderEffect.OpenBookInfo -> openBookInfoActivity()
             is MangaReaderEffect.OpenChapterUrl -> openCurrentChapterUrl(effect.externalBrowser)
-            is MangaReaderEffect.OpenSourceLogin -> startActivity(
-                MainActivity.createSourceLoginIntent(
-                    this,
-                    SourceLoginType.BookSource,
-                    effect.sourceUrl,
-                )
-            )
             is MangaReaderEffect.OpenSourceEdit -> sourceEditActivity.launch(
                 MainActivity.createBookSourceEditIntent(this, effect.sourceUrl)
             )
@@ -131,16 +123,7 @@ class ReadMangaActivity : BaseComposeActivity(imageBg = false) {
                 effect.chapter,
                 BookType.image,
             )
-            is MangaReaderEffect.OpenPaymentUrl -> startActivity(
-                MainActivity.createWebViewIntent(
-                    this,
-                    getString(R.string.chapter_pay),
-                    effect.url,
-                    effect.sourceOrigin,
-                    effect.sourceName,
-                    effect.sourceType,
-                )
-            )
+            is MangaReaderEffect.OpenPaymentUrl -> openUrl(effect.url)
             is MangaReaderEffect.SetWindowBrightness -> {
                 if (effect.auto) resetWindowToSystemBrightness()
                 else updateWindowBrightness(effect.brightness)
@@ -209,20 +192,7 @@ class ReadMangaActivity : BaseComposeActivity(imageBg = false) {
     private fun openCurrentChapterUrl(externalBrowser: Boolean) {
         val state = readerViewModel.uiState.value
         val chapterUrl = state.chapterUrl ?: return
-        if (externalBrowser) {
-            openUrl(chapterUrl)
-            return
-        }
-        startActivity(
-            MainActivity.createWebViewIntent(
-                this,
-                state.chapterName,
-                chapterUrl,
-                state.sourceUrl,
-                state.sourceName,
-                state.sourceType,
-            )
-        )
+        openUrl(chapterUrl)
     }
 
     private fun resetWindowToSystemBrightness() {

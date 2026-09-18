@@ -66,7 +66,6 @@ class BookSourceEditViewModel(
             BookSourceEditIntent.ToggleAutoComplete -> _uiState.update { it.copy(autoComplete = !it.autoComplete) }
             BookSourceEditIntent.Save -> save(BookSourceEditEffect::Finish)
             BookSourceEditIntent.SaveAndDebug -> save { BookSourceEditEffect.OpenDebug(it) }
-            BookSourceEditIntent.SaveAndLogin -> save { BookSourceEditEffect.OpenLogin(it) }
 
             BookSourceEditIntent.Copy -> _effects.tryEmit(
                 BookSourceEditEffect.CopyText(
@@ -321,9 +320,6 @@ class BookSourceEditViewModel(
                 f("bookSourceName", R.string.source_name),
                 f("bookSourceGroup", R.string.source_group),
                 f("bookSourceComment", R.string.comment),
-                f("loginUrl", R.string.login_url),
-                f("loginUi", R.string.login_ui),
-                f("loginCheckJs", R.string.login_check_js),
                 f("coverDecodeJs", R.string.cover_decode_js),
                 f("bookUrlPattern", R.string.book_url_pattern),
                 f("header", R.string.source_http_header),

@@ -77,7 +77,6 @@ data class BookInfoBookUi(
 @Stable
 data class BookInfoSourceUi(
     val sourceUrl: String,
-    val hasLogin: Boolean,
     val hasCustomButton: Boolean,
 )
 
@@ -206,7 +205,6 @@ sealed interface BookInfoEffect {
         val chapterChanged: Boolean,
     ) : BookInfoEffect
     data class OpenBookSourceEdit(val sourceUrl: String) : BookInfoEffect
-    data class OpenSourceLogin(val sourceUrl: String) : BookInfoEffect
     data object OpenSelectBooksDir : BookInfoEffect
     data class OpenFile(val uri: Uri, val mimeType: String) : BookInfoEffect
     data class RunSourceCallback(
@@ -222,7 +220,7 @@ sealed interface BookInfoEffect {
         val origin: String?,
         val coverPath: String?,
     ) : BookInfoEffect
-    /** 简介按钮/图片触发的书源 JS 执行，由宿主（持有 Activity）用 SourceLoginJsExtensions 运行。 */
+    /** 简介按钮/图片触发的书源 JS 执行，由宿主（持有 Activity）用 JsExtensionsBase 运行。 */
     data class RunIntroJs(
         val name: String,
         val click: String,
@@ -246,7 +244,6 @@ enum class BookInfoMenuAction {
     SyncRemote,
     Refresh,
     ReadRecord,
-    Login,
     Top,
     SetSourceVariable,
     SetBookVariable,

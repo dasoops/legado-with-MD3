@@ -1,6 +1,5 @@
 package io.legado.app.ui.book.info
 
-import android.content.Intent
 import android.graphics.Bitmap
 import android.net.Uri
 import android.webkit.WebResourceRequest
@@ -100,7 +99,6 @@ import io.legado.app.data.entities.SearchBook
 import io.legado.app.help.WebCacheManager
 import io.legado.app.help.coil.CoverExtras
 import io.legado.app.help.webView.WebJsExtensions
-import io.legado.app.ui.association.OnLineImportActivity
 import io.legado.app.ui.main.bookCoverSharedElementKey
 import io.legado.app.ui.theme.LegadoTheme
 import io.legado.app.ui.theme.LocalHazeState
@@ -848,12 +846,6 @@ private fun BookInfoOverflowMenu(
                 onClick = { onMenuAction(BookInfoMenuAction.Upload) }
             )
         }
-        if (state.bookSourceUi?.hasLogin == true) {
-            RoundDropdownMenuItem(
-                text = stringResource(R.string.login),
-                onClick = { onMenuAction(BookInfoMenuAction.Login) }
-            )
-        }
         if (state.bookSourceUi != null) {
             RoundDropdownMenuItem(
                 text = stringResource(R.string.set_source_variable),
@@ -1282,7 +1274,7 @@ private fun BookInfoSummary(
 
 /**
  * 上游书籍详情页的简介渲染：
- * - `<useweb>...<` 用 WebView 渲染（注入缓存/书源/Java 桥接 JS，处理 legado/yuedu 等 scheme）
+ * - `<useweb>...<` 用 WebView 渲染（注入缓存/书源/Java 桥接 JS）
  * - `<usehtml>...<` 用 HTML 渲染（含行内图片/链接/样式）
  * - `<md>...<` 用 Markdown 渲染
  * - 其余纯文本
@@ -1400,7 +1392,7 @@ private fun parseBookInfoIntro(intro: String?): BookInfoIntroContent? {
 /**
  * `<useweb>` 简介：用 WebView 渲染，注入与上游一致的 JS 桥接
  * （WebCacheManager 缓存、书源对象、WebJsExtensions），
- * 并处理 legado/yuedu scheme（导入）与其他 scheme（确认后跳转）。
+ * 非 http(s) scheme 交给外部应用处理。
  */
 @Composable
 private fun BookInfoWebIntro(
@@ -1429,15 +1421,6 @@ private fun BookInfoWebIntro(
                     request?.url?.let { url ->
                         return when (url.scheme) {
                             "http", "https" -> false
-                            "legado", "yuedu" -> {
-                                context.startActivity(
-                                    Intent(context, OnLineImportActivity::class.java).apply {
-                                        data = url
-                                    }
-                                )
-                                true
-                            }
-
                             else -> {
                                 onJumpToAnotherApp(url)
                                 true

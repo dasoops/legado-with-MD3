@@ -381,9 +381,6 @@ private fun BookSourceEditMenu(
     }
     RoundDropdownMenu(expanded = expanded, onDismissRequest = { onExpandedChange(false) }) {
         RoundDropdownMenuItem(
-            text = stringResource(R.string.login),
-            onClick = { click(BookSourceEditIntent.SaveAndLogin) })
-        RoundDropdownMenuItem(
             text = stringResource(R.string.cookie),
             onClick = { click(BookSourceEditIntent.ClearCookie) })
         RoundDropdownMenuItem(

@@ -495,7 +495,6 @@ sealed interface ReadBookIntent {
     data object DismissDialog : ReadBookIntent
 
     // Source actions
-    data object ShowLogin : ReadBookIntent
     data object PayAction : ReadBookIntent
     data object ConfirmPayAction : ReadBookIntent
     data object DisableSource : ReadBookIntent
@@ -506,7 +505,6 @@ sealed interface ReadBookIntent {
     data object OpenChapterList : ReadBookIntent
     data object OpenChapterUrl : ReadBookIntent
     data class SourceCustomButton(val longClick: Boolean) : ReadBookIntent
-    data object ToggleReadUrlInBrowser : ReadBookIntent
 
     // Content edit
     data object OpenContentEdit : ReadBookIntent
@@ -737,18 +735,9 @@ sealed interface ReadBookEffect {
     data object ExitSearch : ReadBookEffect
 
     // Source actions
-    data class ShowLogin(val sourceUrl: String) : ReadBookEffect
     data class OpenSourceEdit(val sourceUrl: String) : ReadBookEffect
     data class OpenBookInfo(val name: String, val author: String, val bookUrl: String) : ReadBookEffect
     data class OpenChapterList(val bookUrl: String) : ReadBookEffect
-    data class OpenWebView(
-        val title: String,
-        val url: String,
-        val sourceOrigin: String?,
-        val sourceName: String?,
-        val sourceType: Int?,
-        val html: String? = null,
-    ) : ReadBookEffect
 
     data class RunSourceCustomButton(
         val event: String,

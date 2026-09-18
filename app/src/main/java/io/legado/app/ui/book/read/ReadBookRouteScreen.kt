@@ -82,7 +82,6 @@ import io.legado.app.ui.book.read.sheet.ReaderBookSourceActions
 import io.legado.app.ui.book.read.sheet.TextSelectMenuConfigSheet
 import io.legado.app.ui.book.searchContent.SearchContentResult
 import io.legado.app.ui.book.toc.TocActivityResult
-import io.legado.app.ui.login.SourceLoginType
 import io.legado.app.ui.main.AndroidPlatformCapabilities
 import io.legado.app.ui.main.MainActivity
 import io.legado.app.ui.replace.ReplaceEditRoute
@@ -368,22 +367,6 @@ fun ReadBookRouteScreen(
                                     putExtra("author", effect.author)
                                     putExtra("bookUrl", effect.bookUrl)
                                 }
-                            }
-                            is ReadBookEffect.ShowLogin -> {
-                                context.startActivity(
-                                    MainActivity.createSourceLoginIntent(
-                                        context,
-                                        SourceLoginType.ReadingBook
-                                    )
-                                )
-                            }
-                            is ReadBookEffect.OpenWebView -> {
-                                context.startActivity(
-                                    MainActivity.createWebViewIntent(
-                                        context, effect.title, effect.url, effect.sourceOrigin,
-                                        effect.sourceName, effect.sourceType, html = effect.html,
-                                    )
-                                )
                             }
                             is ReadBookEffect.RunSourceCustomButton -> {
                                 (context as? AppCompatActivity)?.let { activity ->
@@ -846,11 +829,7 @@ fun ReadBookRouteScreen(
                 },
                 bookSource = state.bookSource,
                 onOpenChapterUrl = { viewModel.onIntent(ReadBookIntent.OpenChapterUrl) },
-                onToggleReadUrlInBrowser = {
-                    viewModel.onIntent(ReadBookIntent.ToggleReadUrlInBrowser)
-                },
                 sourceActions = ReaderBookSourceActions(
-                    onLogin = { viewModel.onIntent(ReadBookIntent.ShowLogin) },
                     onPay = { viewModel.onIntent(ReadBookIntent.PayAction) },
                     onEdit = { viewModel.onIntent(ReadBookIntent.OpenSourceEdit) },
                     onDisable = { viewModel.onIntent(ReadBookIntent.DisableSource) },

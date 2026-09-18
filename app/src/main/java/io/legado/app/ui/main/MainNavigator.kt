@@ -49,12 +49,6 @@ object MainNavigator {
         }
 
         when (route) {
-            is MainRouteSourceLogin -> {
-                backStack.add(route)
-            }
-
-            is MainRouteWebView -> backStack.add(route)
-
             is MainRouteBookSourceManage,
             is MainRouteBookSourceEdit,
             is MainRouteBookSourceDebug -> backStack.add(route)
@@ -186,35 +180,6 @@ object MainNavigator {
     private fun resolveStartRoute(route: String?, intent: Intent?): MainRoute {
         return when (route) {
             MainRouteConst.ROUTE_MAIN -> MainRouteBookshelf
-            MainRouteConst.ROUTE_SOURCE_LOGIN -> MainRouteSourceLogin(
-                type = intent?.getStringExtra(MainIntent.EXTRA_SOURCE_LOGIN_TYPE)
-                    ?.let { runCatching { io.legado.app.ui.login.SourceLoginType.valueOf(it) }.getOrNull() }
-                    ?: io.legado.app.ui.login.SourceLoginType.BookSource,
-                sourceKey = intent?.getStringExtra(MainIntent.EXTRA_SOURCE_LOGIN_KEY),
-                bookUrl = intent?.getStringExtra(MainIntent.EXTRA_BOOK_URL),
-            )
-
-            MainRouteConst.ROUTE_WEB_VIEW -> intent?.getStringExtra(MainIntent.EXTRA_WEB_VIEW_URL)
-                ?.takeIf { it.isNotBlank() }
-                ?.let { url ->
-                    MainRouteWebView(
-                        title = intent.getStringExtra(MainIntent.EXTRA_WEB_VIEW_TITLE),
-                        url = url,
-                        sourceOrigin = intent.getStringExtra(MainIntent.EXTRA_WEB_VIEW_SOURCE_ORIGIN),
-                        sourceName = intent.getStringExtra(MainIntent.EXTRA_WEB_VIEW_SOURCE_NAME),
-                        sourceType = if (intent.hasExtra(MainIntent.EXTRA_WEB_VIEW_SOURCE_TYPE)) {
-                            intent.getIntExtra(MainIntent.EXTRA_WEB_VIEW_SOURCE_TYPE, 0)
-                        } else null,
-                        sourceVerificationEnable = intent.getBooleanExtra(
-                            MainIntent.EXTRA_WEB_VIEW_VERIFICATION, false
-                        ),
-                        refetchAfterSuccess = intent.getBooleanExtra(
-                            MainIntent.EXTRA_WEB_VIEW_REFETCH, true
-                        ),
-                        html = intent.getStringExtra(MainIntent.EXTRA_WEB_VIEW_HTML),
-                    )
-                } ?: MainRouteBookshelf
-
             MainRouteConst.ROUTE_BOOK_SOURCE_MANAGE -> MainRouteBookSourceManage(
                 intent?.getStringExtra(MainIntent.EXTRA_BOOK_SOURCE_IMPORT)
             )

@@ -30,7 +30,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.automirrored.filled.Login
 import androidx.compose.material.icons.filled.Block
 import androidx.compose.material.icons.filled.CloudDownload
 import androidx.compose.material.icons.filled.Edit
@@ -338,9 +337,6 @@ internal fun MenuTitleBar(
                             if (!state.isLocalBook) {
                                 Modifier.combinedClickable(
                                     onClick = { onIntent(ReadBookIntent.OpenChapterUrl) },
-                                    onLongClick = {
-                                        onIntent(ReadBookIntent.ToggleReadUrlInBrowser)
-                                    },
                                 )
                             } else {
                                 Modifier
@@ -368,16 +364,6 @@ internal fun MenuTitleBar(
                             expanded = sourceMenuExpanded,
                             onDismissRequest = { sourceMenuExpanded = false },
                         ) {
-                            if (!state.bookSource.loginUrl.isNullOrBlank()) {
-                                RoundDropdownMenuItem(
-                                    leadingIcon = { MenuItemIcon(Icons.AutoMirrored.Filled.Login) },
-                                    text = stringResource(R.string.login),
-                                    onClick = {
-                                        sourceMenuExpanded = false
-                                        onIntent(ReadBookIntent.ShowLogin)
-                                    },
-                                )
-                            }
                             if (!state.bookSource.getContentRule().payAction.isNullOrBlank()) {
                                 RoundDropdownMenuItem(
                                     leadingIcon = { MenuItemIcon(Icons.Default.Payment) },

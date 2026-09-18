@@ -851,11 +851,6 @@ class ReadBookViewModel(
                 readRecordAliasDelegate.resolve(intent.merge, intent.rememberChoice)
             is ReadBookIntent.ClearReadRecordAliasDecisions -> readRecordAliasDelegate.clearDecisions()
             is ReadBookIntent.DismissDialog -> _uiState.update { it.copy(activeDialog = null) }
-            is ReadBookIntent.ShowLogin -> {
-                ReadBook.bookSource?.bookSourceUrl?.let { sourceUrl ->
-                    _effects.tryEmit(ReadBookEffect.ShowLogin(sourceUrl))
-                }
-            }
             is ReadBookIntent.PayAction -> showPayDialog()
             is ReadBookIntent.ConfirmPayAction -> confirmPayAction()
             is ReadBookIntent.DisableSource -> disableSource()
@@ -877,7 +872,6 @@ class ReadBookViewModel(
             }
             is ReadBookIntent.OpenChapterUrl -> openChapterUrl()
             is ReadBookIntent.SourceCustomButton -> runSourceCustomButton(intent.longClick)
-            is ReadBookIntent.ToggleReadUrlInBrowser -> toggleReadUrlInBrowser()
             is ReadBookIntent.OpenContentEdit -> contentEditDelegate.open()
             is ReadBookIntent.LoadContentEdit -> contentEditDelegate.load()
             is ReadBookIntent.SaveContentEdit ->
@@ -2094,21 +2088,7 @@ class ReadBookViewModel(
                 ?: return@launch
             val url = chapter.getAbsoluteURL()
             if (url.isBlank()) return@launch
-            val useBrowser = readSettingsRepository.currentSettings.readUrlInBrowser
-            if (useBrowser) {
-                context.openUrl(url.substringBefore(",{"))
-            } else {
-                val bookSource = ReadBook.bookSource
-                _effects.tryEmit(
-                    ReadBookEffect.OpenWebView(
-                        title = chapter.title,
-                        url = url,
-                        sourceOrigin = bookSource?.bookSourceUrl,
-                        sourceName = bookSource?.bookSourceName,
-                        sourceType = bookSource?.getSourceType(),
-                    )
-                )
-            }
+            context.openUrl(url.substringBefore(",{"))
         }
     }
 
@@ -2127,21 +2107,6 @@ class ReadBookViewModel(
                     source = source,
                     book = book,
                     chapter = chapter,
-                )
-            )
-        }
-    }
-
-    private fun toggleReadUrlInBrowser() {
-        viewModelScope.launch {
-            val current = readSettingsRepository.currentSettings.readUrlInBrowser
-            val newValue = !current
-            readSettingsRepository.update { it.copy(readUrlInBrowser = newValue) }
-            _effects.tryEmit(
-                ReadBookEffect.ShowToast(
-                    context.getString(
-                        if (newValue) R.string.open_by_browser else R.string.open_by_webview
-                    )
                 )
             )
         }
@@ -2180,15 +2145,7 @@ class ReadBookViewModel(
             analyzeRule.evalJS(payAction).toString() to chapter
         }.onSuccess(IO) { (result, chapter) ->
             if (result.isAbsUrl()) {
-                _effects.tryEmit(
-                    ReadBookEffect.OpenWebView(
-                        title = context.getString(R.string.chapter_pay),
-                        url = result,
-                        sourceOrigin = ReadBook.bookSource?.bookSourceUrl,
-                        sourceName = ReadBook.bookSource?.bookSourceName,
-                        sourceType = ReadBook.bookSource?.getSourceType(),
-                    )
-                )
+                context.openUrl(result)
             } else if (result.isTrue()) {
                 BookHelp.delContent(book, chapter)
                 loadChapterList(book)

@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.Login
 import androidx.compose.material.icons.filled.CloudDownload
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Download
@@ -98,11 +97,6 @@ internal fun MangaReaderSourceActionsSheet(
                         stringResource(R.string.refresh),
                         Icons.Default.Refresh,
                         MangaReaderIntent.RefreshChapter
-                    ),
-                    MangaMoreAction(
-                        stringResource(R.string.login),
-                        Icons.AutoMirrored.Filled.Login,
-                        MangaReaderIntent.OpenSourceLogin
                     ),
                     MangaMoreAction(
                         stringResource(R.string.manga_reader_buy_chapter),

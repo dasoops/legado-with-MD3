@@ -30,10 +30,10 @@ import io.legado.app.constant.AppLog
 import io.legado.app.data.entities.BookGroup
 import io.legado.app.help.book.isImage
 import io.legado.app.help.book.isLocal
+import io.legado.app.help.webView.JsExtensionsBase
 import io.legado.app.model.SourceCallBack
 import io.legado.app.ui.book.info.edit.BookInfoEditActivity
 import io.legado.app.ui.book.toc.TocActivityResult
-import io.legado.app.ui.login.SourceLoginJsExtensions
 import io.legado.app.ui.widget.components.filePicker.FilePickerSheet
 import io.legado.app.utils.RealPathUtil
 import io.legado.app.utils.StartActivityContract
@@ -61,7 +61,6 @@ fun BookInfoRouteScreen(
     onBack: () -> Unit,
     onFinish: (resultCode: Int?, afterTransition: Boolean) -> Unit,
     onOpenBookSourceEdit: (String) -> Unit,
-    onOpenSourceLogin: (String) -> Unit,
     onOpenReader: (bookUrl: String, inBookshelf: Boolean, chapterChanged: Boolean) -> Unit = { _, _, _ -> },
     onOpenMangaReader: (bookUrl: String, inBookshelf: Boolean, chapterChanged: Boolean) -> Unit = { _, _, _ -> },
     onNavigateToBookInfo: (name: String?, author: String?, bookUrl: String, origin: String?, coverPath: String?) -> Unit = { _, _, _, _, _ -> },
@@ -159,10 +158,6 @@ fun BookInfoRouteScreen(
                     onOpenBookSourceEdit(effect.sourceUrl)
                 }
 
-                is BookInfoEffect.OpenSourceLogin -> {
-                    onOpenSourceLogin(effect.sourceUrl)
-                }
-
                 BookInfoEffect.OpenSelectBooksDir -> showSelectBooksDirSheet = true
 
                 is BookInfoEffect.OpenFile -> activity.openFileUri(effect.uri, effect.mimeType)
@@ -241,7 +236,7 @@ private fun runIntroJs(activity: AppCompatActivity, effect: BookInfoEffect.RunIn
     val source = effect.source ?: return
     activity.lifecycleScope.launch(IO) {
         try {
-            val java = SourceLoginJsExtensions(activity, source)
+            val java = JsExtensionsBase(activity, source)
             runScriptWithContext {
                 source.evalJS(effect.click) {
                     put("result", null)

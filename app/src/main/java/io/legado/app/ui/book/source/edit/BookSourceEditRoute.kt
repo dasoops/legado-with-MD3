@@ -22,7 +22,6 @@ fun BookSourceEditRoute(
     sourceUrl: String?,
     viewModel: BookSourceEditViewModel,
     onBack: (savedSourceUrl: String?) -> Unit,
-    onLogin: (String) -> Unit,
     onDebug: (String) -> Unit,
 ) {
     val context = LocalContext.current
@@ -37,7 +36,6 @@ fun BookSourceEditRoute(
                     onBack(effect.sourceUrl.takeIf { it.isNotEmpty() })
 
                 is BookSourceEditEffect.OpenDebug -> onDebug(effect.sourceUrl)
-                is BookSourceEditEffect.OpenLogin -> onLogin(effect.sourceUrl)
                 is BookSourceEditEffect.CopyText -> context.sendToClip(effect.text)
                 is BookSourceEditEffect.ShareText -> context.share(effect.text)
                 BookSourceEditEffect.ReadClipboard -> {

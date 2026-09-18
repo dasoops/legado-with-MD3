@@ -11,7 +11,6 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -33,7 +32,6 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.Login
 import androidx.compose.material.icons.filled.Block
 import androidx.compose.material.icons.filled.BookmarkAdd
 import androidx.compose.material.icons.filled.CheckCircle
@@ -142,7 +140,6 @@ fun ReaderBookSheetRoute(
     onMarkingEdit: (markingId: String) -> Unit = {},
     bookSource: BookSource? = null,
     onOpenChapterUrl: () -> Unit = {},
-    onToggleReadUrlInBrowser: () -> Unit = {},
     sourceActions: ReaderBookSourceActions? = null,
     viewModel: TocViewModel = koinViewModel(key = "reader-book-sheet-$bookUrl"),
 ) {
@@ -243,7 +240,6 @@ fun ReaderBookSheetRoute(
         bookSource = bookSource,
         onOpenFullBookInfo = onOpenFullBookInfo,
         onOpenChapterUrl = onOpenChapterUrl,
-        onToggleReadUrlInBrowser = onToggleReadUrlInBrowser,
         sourceActions = sourceActions,
     )
 }
@@ -266,7 +262,6 @@ private fun ReaderBookSheet(
     bookSource: BookSource? = null,
     onOpenFullBookInfo: () -> Unit = {},
     onOpenChapterUrl: () -> Unit = {},
-    onToggleReadUrlInBrowser: () -> Unit = {},
     sourceActions: ReaderBookSourceActions? = null,
 ) {
     val initialPage = initialTab.ordinal
@@ -300,7 +295,6 @@ private fun ReaderBookSheet(
                 bookSource = bookSource,
                 onOpenBookInfo = onOpenFullBookInfo,
                 onOpenChapterUrl = onOpenChapterUrl,
-                onToggleReadUrlInBrowser = onToggleReadUrlInBrowser,
                 sourceActions = sourceActions,
             )
         }
@@ -389,7 +383,6 @@ private fun ReaderBookSheet(
 }
 
 data class ReaderBookSourceActions(
-    val onLogin: () -> Unit = {},
     val onPay: () -> Unit = {},
     val onEdit: () -> Unit = {},
     val onDisable: () -> Unit = {},
@@ -402,7 +395,6 @@ internal fun ReaderBookHeader(
     bookSource: BookSource? = null,
     onOpenBookInfo: (() -> Unit)? = null,
     onOpenChapterUrl: (() -> Unit)? = null,
-    onToggleReadUrlInBrowser: (() -> Unit)? = null,
     sourceActions: ReaderBookSourceActions? = null,
 ) {
     val current = ((book?.durChapterIndex ?: -1) + 1).coerceAtLeast(0)
@@ -450,10 +442,7 @@ internal fun ReaderBookHeader(
                         .weight(1f)
                         .then(
                             if (!isLocal && onOpenChapterUrl != null) {
-                                Modifier.combinedClickable(
-                                    onClick = { onOpenChapterUrl() },
-                                    onLongClick = onToggleReadUrlInBrowser,
-                                )
+                                Modifier.clickable { onOpenChapterUrl() }
                             } else {
                                 Modifier
                             }
@@ -536,16 +525,6 @@ private fun ReaderBookSourceDropdown(
         expanded = expanded,
         onDismissRequest = onDismiss,
     ) {
-        if (!bookSource?.loginUrl.isNullOrBlank()) {
-            RoundDropdownMenuItem(
-                leadingIcon = { MenuItemIcon(Icons.AutoMirrored.Filled.Login) },
-                text = stringResource(R.string.login),
-                onClick = {
-                    onDismiss()
-                    sourceActions.onLogin()
-                },
-            )
-        }
         if (!bookSource?.getContentRule()?.payAction.isNullOrBlank()) {
             RoundDropdownMenuItem(
                 leadingIcon = { MenuItemIcon(Icons.Default.Payment) },

@@ -67,8 +67,6 @@ import io.legado.app.ui.book.source.debug.BookSourceDebugViewModel
 import io.legado.app.ui.book.source.edit.BookSourceEditRoute
 import io.legado.app.ui.book.source.edit.BookSourceEditViewModel
 import io.legado.app.ui.book.source.manage.BookSourceRouteScreen
-import io.legado.app.ui.browser.WebViewModel
-import io.legado.app.ui.browser.WebViewRouteScreen
 import io.legado.app.ui.config.ConfigNavScreen
 import io.legado.app.ui.config.backupConfig.BackupConfigRouteScreen
 import io.legado.app.ui.config.coverConfig.CoverAlbumManageRouteScreen
@@ -81,10 +79,6 @@ import io.legado.app.ui.config.readConfig.ReadConfigRouteScreen
 import io.legado.app.ui.config.themeConfig.ThemeConfigRouteScreen
 import io.legado.app.ui.config.themeManage.ThemeManageRouteScreen
 import io.legado.app.ui.highlightTagRule.HighlightTagRuleRouteScreen
-import io.legado.app.ui.login.SourceLoginIntent
-import io.legado.app.ui.login.SourceLoginRoute
-import io.legado.app.ui.login.SourceLoginType
-import io.legado.app.ui.login.SourceLoginViewModel
 import io.legado.app.ui.theme.ProvideThemeOverride
 import io.legado.app.ui.theme.rememberImageSeedColor
 import io.legado.app.ui.theme.rememberThemeOverride
@@ -103,53 +97,6 @@ import org.koin.androidx.compose.koinViewModel
 import org.koin.compose.koinInject
 import org.koin.core.parameter.parametersOf
 
-/**
- * WebView 类页面（内置浏览器）只做位移转场。
- *
- * WebView 是 AndroidView interop view：所在子树一旦被加上 graphicsLayer（fade 的 alpha、
- * scaleOut 的缩放），Compose 会把网页一并画进离屏 RenderNode
- * （`AndroidViewHolder.draw` → `AndroidComposeView.drawAndroidView`），Chromium 在这条绘制路径上
- * 不稳定，部分设备会表现为网页闪烁。`slideIntoContainer` / `slideOutOfContainer` 只改 layout
- * offset、不产生图层，所以这里保留默认的位移与时长，去掉 fade 与 scale。
- */
-private fun webViewEntryMetadata(predictiveBackEnabled: Boolean) = metadata {
-    put(NavDisplay.TransitionKey) {
-        slideIntoContainer(
-            towards = AnimatedContentTransitionScope.SlideDirection.Start,
-            animationSpec = tween(durationMillis = 480, easing = FastOutSlowInEasing),
-            initialOffset = { fullWidth -> fullWidth }
-        ) togetherWith slideOutOfContainer(
-            towards = AnimatedContentTransitionScope.SlideDirection.Start,
-            animationSpec = tween(durationMillis = 480, easing = FastOutSlowInEasing),
-            targetOffset = { fullWidth -> fullWidth / 4 }
-        )
-    }
-    put(NavDisplay.PopTransitionKey) {
-        slideIntoContainer(
-            towards = AnimatedContentTransitionScope.SlideDirection.Start,
-            animationSpec = tween(durationMillis = 480, easing = FastOutSlowInEasing),
-            initialOffset = { fullWidth -> -fullWidth / 4 }
-        ) togetherWith slideOutOfContainer(
-            towards = AnimatedContentTransitionScope.SlideDirection.Start,
-            animationSpec = tween(durationMillis = 480, easing = FastOutSlowInEasing),
-            targetOffset = { fullWidth -> fullWidth }
-        )
-    }
-    if (predictiveBackEnabled) {
-        put(NavDisplay.PredictivePopTransitionKey) { _ ->
-            slideIntoContainer(
-                towards = AnimatedContentTransitionScope.SlideDirection.Start,
-                animationSpec = tween(easing = FastOutSlowInEasing),
-                initialOffset = { fullWidth -> -fullWidth / 4 }
-            ) togetherWith slideOutOfContainer(
-                towards = AnimatedContentTransitionScope.SlideDirection.Start,
-                animationSpec = tween(easing = FastOutSlowInEasing),
-                targetOffset = { fullWidth -> fullWidth }
-            )
-        }
-    }
-}
-
 @OptIn(ExperimentalSharedTransitionApi::class)
 fun MainActivity.mainEntryProvider(
     backStack: MutableList<NavKey>,
@@ -160,52 +107,6 @@ fun MainActivity.mainEntryProvider(
     onNavigateToRoute: (NavKey) -> Unit,
     onNavigateBack: () -> Unit,
 ) = entryProvider<NavKey> {
-    entry<MainRouteWebView>(
-        metadata = webViewEntryMetadata(configuration.appShell.predictiveBackEnabled)
-    ) { route ->
-        val viewModel = koinViewModel<WebViewModel>(
-            key = "WebView:${route.url}:${route.sourceOrigin}:${route.sourceVerificationEnable}",
-        )
-        val browserIntent = remember(route) {
-            Intent().apply {
-                putExtra("title", route.title)
-                putExtra("url", route.url)
-                putExtra("sourceOrigin", route.sourceOrigin)
-                putExtra("sourceName", route.sourceName)
-                route.sourceType?.let { putExtra("sourceType", it) }
-                putExtra("sourceVerificationEnable", route.sourceVerificationEnable)
-                putExtra("refetchAfterSuccess", route.refetchAfterSuccess)
-                putExtra("html", route.html)
-            }
-        }
-        WebViewRouteScreen(
-            intent = browserIntent,
-            viewModel = viewModel,
-            onFinish = onNavigateBack,
-            onImportBookSource = { importUrl ->
-                onNavigateToRoute(MainRouteBookSourceManage(importUrl))
-            },
-        )
-    }
-    entry<MainRouteSourceLogin>(
-        metadata = ModalOverlaySceneStrategy.modalOverlay(),
-    ) { route ->
-        DisposableEffect(route) {
-            MainActivity.hasActiveSourceLoginRoute = true
-            onDispose {
-                MainActivity.hasActiveSourceLoginRoute = false
-            }
-        }
-        val viewModel = koinViewModel<SourceLoginViewModel>(
-            key = "SourceLogin:${route.type}:${route.sourceKey}:${route.bookUrl}",
-        )
-        SourceLoginRoute(
-            request = SourceLoginIntent.Initialize(route.type, route.sourceKey, route.bookUrl),
-            viewModel = viewModel,
-            host = this@mainEntryProvider,
-            onBack = onNavigateBack,
-        )
-    }
     entry<MainRouteBookSourceManage> { route ->
         BookSourceRouteScreen(
             initialImportUrl = route.importUrl,
@@ -214,9 +115,6 @@ fun MainActivity.mainEntryProvider(
             onBackClick = onNavigateBack,
             onAddSource = { onNavigateToRoute(MainRouteBookSourceEdit()) },
             onEditSource = { onNavigateToRoute(MainRouteBookSourceEdit(it)) },
-            onLoginSource = {
-                onNavigateToRoute(MainRouteSourceLogin(SourceLoginType.BookSource, it))
-            },
             onDebugSource = { sourceUrl ->
                 onNavigateToRoute(MainRouteBookSourceDebug(sourceUrl))
             },
@@ -239,9 +137,6 @@ fun MainActivity.mainEntryProvider(
                     }
                     this@mainEntryProvider.finish()
                 } else onNavigateBack()
-            },
-            onLogin = {
-                onNavigateToRoute(MainRouteSourceLogin(SourceLoginType.BookSource, it))
             },
             onDebug = { onNavigateToRoute(MainRouteBookSourceDebug(it)) },
         )
@@ -561,16 +456,8 @@ fun MainActivity.mainEntryProvider(
             onOpenBookInfo = { name, author, bookUrl ->
                 onNavigateToRoute(MainRouteBookInfo(name, author, bookUrl))
             },
-            onOpenSourceLogin = { sourceUrl ->
-                onNavigateToRoute(MainRouteSourceLogin(SourceLoginType.BookSource, sourceUrl))
-            },
             onOpenSourceEdit = { sourceUrl ->
                 onNavigateToRoute(MainRouteBookSourceEdit(sourceUrl))
-            },
-            onOpenWebView = { title, url, sourceOrigin, sourceName, sourceType ->
-                onNavigateToRoute(
-                    MainRouteWebView(title, url, sourceOrigin, sourceName, sourceType)
-                )
             },
         )
     }
@@ -648,9 +535,6 @@ fun MainActivity.mainEntryProvider(
             onFinish = { _, _ -> onNavigateBack() },
             onOpenBookSourceEdit = { sourceUrl ->
                 onNavigateToRoute(MainRouteBookSourceEdit(sourceUrl))
-            },
-            onOpenSourceLogin = { sourceUrl ->
-                onNavigateToRoute(MainRouteSourceLogin(SourceLoginType.BookSource, sourceUrl))
             },
             onOpenReader = { bookUrl, inBookshelf, chapterChanged ->
                 onNavigateToRoute(

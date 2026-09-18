@@ -67,7 +67,6 @@ sealed interface BookSourceEditIntent {
     data object ToggleAutoComplete : BookSourceEditIntent
     data object Save : BookSourceEditIntent
     data object SaveAndDebug : BookSourceEditIntent
-    data object SaveAndLogin : BookSourceEditIntent
     data object Copy : BookSourceEditIntent
     data object Share : BookSourceEditIntent
     data object Paste : BookSourceEditIntent
@@ -86,7 +85,6 @@ sealed interface BookSourceEditIntent {
 sealed interface BookSourceEditEffect {
     data class Finish(val sourceUrl: String) : BookSourceEditEffect
     data class OpenDebug(val sourceUrl: String) : BookSourceEditEffect
-    data class OpenLogin(val sourceUrl: String) : BookSourceEditEffect
     data class CopyText(val text: String) : BookSourceEditEffect
     data class ShareText(val text: String) : BookSourceEditEffect
     data object ReadClipboard : BookSourceEditEffect

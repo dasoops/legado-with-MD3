@@ -66,9 +66,8 @@ import io.legado.app.model.analyzeRule.AnalyzeUrl.Companion.paramPattern
 import io.legado.app.model.reader.ReaderChapterInput
 import io.legado.app.receiver.NetworkChangedListener
 import io.legado.app.receiver.TimeBatteryReceiver
-import io.legado.app.ui.association.OpenUrlConfirmActivity
 import io.legado.app.ui.book.read.page.entities.PageDirection
-import io.legado.app.ui.login.SourceLoginJsExtensions
+import io.legado.app.help.webView.JsExtensionsBase
 import io.legado.app.ui.widget.PopupAction
 import io.legado.app.utils.ColorUtils
 import io.legado.app.utils.Debounce
@@ -78,6 +77,7 @@ import io.legado.app.utils.buildMainHandler
 import io.legado.app.utils.fromJsonObject
 import io.legado.app.utils.isAbsUrl
 import io.legado.app.utils.longToastOnUi
+import io.legado.app.utils.openUrl
 import io.legado.app.utils.printOnDebug
 import io.legado.app.utils.sendToClip
 import io.legado.app.utils.setLightStatusBar
@@ -504,7 +504,7 @@ class ReadBookController(
         is ReaderElement.Text -> when {
             element.markingId != null -> { onMarkingClick(element.markingId); true }
             element.link != null -> {
-                activity.startActivity(Intent(activity, OpenUrlConfirmActivity::class.java).putExtra("uri", element.link))
+                activity.openUrl(element.link)
                 true
             }
             else -> false
@@ -1365,7 +1365,7 @@ class ReadBookController(
                 activity.lifecycleScope.launch(IO) {
                     try {
                         val source = ReadBook.bookSource ?: return@launch
-                        val java = SourceLoginJsExtensions(activity, source, BookType.text)
+                        val java = JsExtensionsBase(activity, source)
                         val book = ReadBook.book ?: return@launch
                         val chapter = appDb.bookChapterDao.getChapter(
                             book.bookUrl,
@@ -1414,7 +1414,7 @@ class ReadBookController(
         activity.lifecycleScope.launch(IO) {
             try {
                 val source = ReadBook.bookSource ?: return@launch
-                val java = SourceLoginJsExtensions(activity, source, BookType.text)
+                val java = JsExtensionsBase(activity, source)
                 val book = ReadBook.book ?: return@launch
                 val chapter =
                     appDb.bookChapterDao.getChapter(book.bookUrl, ReadBook.durChapterIndex)
@@ -1910,8 +1910,6 @@ class ReadBookController(
             is ReadBookEffect.OpenChapterList,
             is ReadBookEffect.OpenBookInfo,
             is ReadBookEffect.OpenSearch,
-            is ReadBookEffect.ShowLogin,
-            is ReadBookEffect.OpenWebView,
             is ReadBookEffect.RunSourceCustomButton,
             is ReadBookEffect.MenuSettingReplace,
             is ReadBookEffect.TextActionReplace,

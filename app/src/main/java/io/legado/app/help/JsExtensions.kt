@@ -3,7 +3,6 @@ package io.legado.app.help
 import android.webkit.JavascriptInterface
 import android.webkit.WebSettings
 import androidx.annotation.Keep
-import androidx.core.net.toUri
 import com.script.rhino.rhinoContext
 import com.script.rhino.rhinoContextOrNull
 import io.legado.app.constant.AppConst
@@ -25,13 +24,10 @@ import io.legado.app.help.http.CookieManager.cookieJarHeader
 import io.legado.app.help.http.CookieStore
 import io.legado.app.help.http.SSLHelper
 import io.legado.app.help.http.StrResponse
-import io.legado.app.help.source.SourceVerificationHelp
 import io.legado.app.help.source.getSourceType
 import io.legado.app.model.Debug
 import io.legado.app.model.analyzeRule.AnalyzeUrl
 import io.legado.app.model.analyzeRule.QueryTTF
-import io.legado.app.ui.association.OnLineImportActivity
-import io.legado.app.ui.association.OpenUrlConfirmActivity
 import io.legado.app.utils.ArchiveUtils
 import io.legado.app.utils.ChineseUtils
 import io.legado.app.utils.EncoderUtils
@@ -51,8 +47,8 @@ import io.legado.app.utils.isAbsUrl
 import io.legado.app.utils.isMainThread
 import io.legado.app.utils.longToastForJs
 import io.legado.app.utils.mapAsync
+import io.legado.app.utils.openUrl
 import io.legado.app.utils.stackTraceStr
-import io.legado.app.utils.startActivity
 import io.legado.app.utils.toStringArray
 import io.legado.app.utils.toastForJs
 import kotlinx.coroutines.Dispatchers.IO
@@ -328,53 +324,6 @@ interface JsExtensions : JsEncodeUtils {
                 delayTime = delayTime
             ).getStrResponse().body
         }
-    }
-
-    /**
-     * 使用内置浏览器打开链接，手动验证网站防爬
-     * @param url 要打开的链接
-     * @param title 浏览器页面的标题
-     */
-    fun startBrowser(url: String, title: String) {
-        return startBrowser(url, title, null)
-    }
-
-    fun startBrowser(url: String, title: String, html: String?) {
-        rhinoContext.ensureActive()
-        SourceVerificationHelp.startBrowser(getSource(), url, title, html = html)
-    }
-
-    /**
-     * 使用内置浏览器打开链接，并等待网页结果
-     */
-    fun startBrowserAwait(url: String, title: String): StrResponse {
-        return startBrowserAwait(url, title, true, null)
-    }
-
-    fun startBrowserAwait(url: String, title: String, refetchAfterSuccess: Boolean): StrResponse {
-        return startBrowserAwait(url, title, refetchAfterSuccess, null)
-    }
-
-    fun startBrowserAwait(
-        url: String,
-        title: String,
-        refetchAfterSuccess: Boolean,
-        html: String?
-    ): StrResponse {
-        rhinoContext.ensureActive()
-        val pair = SourceVerificationHelp.getVerificationResult(
-            getSource(), url, title, true, refetchAfterSuccess, html
-        )
-        val (url2, body) = pair
-        return StrResponse(url2.ifEmpty { url }, body)
-    }
-
-    /**
-     * 打开图片验证码对话框，等待返回验证结果
-     */
-    fun getVerificationCode(imageUrl: String): String {
-        rhinoContext.ensureActive()
-        return SourceVerificationHelp.getVerificationResult(getSource(), imageUrl, "", false).second
     }
 
     /**
@@ -1168,20 +1117,7 @@ interface JsExtensions : JsEncodeUtils {
     fun openUrl(url: String, mimeType: String? = null) {
         require(url.length < 64 * 1024) { "openUrl parameter url too long" }
         rhinoContextOrNull?.ensureActive()
-        if (url.startsWith("legado://") || url.startsWith("yuedu://")) {
-            appCtx.startActivity<OnLineImportActivity> {
-                data = url.toUri()
-            }
-            return
-        }
-        val source = getSource() ?: throw NoStackTraceException("openUrl source cannot be null")
-        appCtx.startActivity<OpenUrlConfirmActivity> {
-            putExtra("uri", url)
-            putExtra("mimeType", mimeType)
-            putExtra("sourceOrigin", source.getKey())
-            putExtra("sourceName", source.getTag())
-            putExtra("sourceType", source.getSourceType())
-        }
+        appCtx.openUrl(url)
     }
 
     /**

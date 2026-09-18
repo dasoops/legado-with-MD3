@@ -49,7 +49,6 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.legado.app.R
 import io.legado.app.service.BookSourceCheckService
-import io.legado.app.ui.qrcode.QrCodeResult
 import io.legado.app.ui.theme.LegadoTheme
 import io.legado.app.ui.theme.adaptiveContentPadding
 import io.legado.app.ui.widget.components.ActionItem
@@ -91,7 +90,6 @@ fun BookSourceRouteScreen(
     onBackClick: () -> Unit,
     onAddSource: () -> Unit,
     onEditSource: (String) -> Unit,
-    onLoginSource: (String) -> Unit,
     onDebugSource: (String) -> Unit,
 ) {
     LaunchedEffect(initialImportUrl) {
@@ -139,7 +137,6 @@ fun BookSourceRouteScreen(
         onBackClick = onBackClick,
         onAddSource = onAddSource,
         onEditSource = onEditSource,
-        onLoginSource = onLoginSource,
         onDebugSource = onDebugSource,
     )
 }
@@ -154,7 +151,6 @@ fun BookSourceScreen(
     onBackClick: () -> Unit,
     onAddSource: () -> Unit,
     onEditSource: (String) -> Unit,
-    onLoginSource: (String) -> Unit,
     onDebugSource: (String) -> Unit,
 ) {
     val context = LocalContext.current
@@ -216,10 +212,6 @@ fun BookSourceScreen(
                     onIntent(BookSourceIntent.Import(reader.readText()))
                 }
             }
-        }
-    val qrCodeImport =
-        rememberLauncherForActivityResult(QrCodeResult()) { result ->
-            result?.let { onIntent(BookSourceIntent.Import(it)) }
         }
     val exportDocument =
         rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("application/json")) { uri ->
@@ -531,9 +523,6 @@ fun BookSourceScreen(
                 )
                 })
             RoundDropdownMenuItem(
-                text = stringResource(R.string.import_by_qr_code),
-                onClick = { dismiss(); qrCodeImport.launch(null) })
-            RoundDropdownMenuItem(
                 text = stringResource(R.string.import_on_line),
                 onClick = { dismiss(); showOnlineImport = true })
             RoundDropdownMenuItem(
@@ -690,7 +679,6 @@ fun BookSourceScreen(
                                     onMoveToEdge = { toTop ->
                                         onIntent(BookSourceIntent.MoveToEdge(setOf(item.id), toTop))
                                     },
-                                    onLogin = { onLoginSource(item.id) },
                                     onDebug = { onDebugSource(item.id) },
                                     onDelete = { deleteIds = setOf(item.id) },
                                     onSetExploreEnabled = { enabled ->
@@ -807,7 +795,6 @@ private fun BookSourceItemMenu(
     item: BookSourceItemUi,
     canMoveToEdge: Boolean,
     onMoveToEdge: (Boolean) -> Unit,
-    onLogin: () -> Unit,
     onDebug: () -> Unit,
     onDelete: () -> Unit,
     onSetExploreEnabled: (Boolean) -> Unit,
@@ -829,11 +816,6 @@ private fun BookSourceItemMenu(
                 })
                 RoundDropdownMenuItem(stringResource(R.string.to_bottom), onClick = {
                     dismiss(); onMoveToEdge(false)
-                })
-            }
-            if (item.hasLoginUrl) {
-                RoundDropdownMenuItem(stringResource(R.string.login), onClick = {
-                    dismiss(); onLogin()
                 })
             }
             RoundDropdownMenuItem(stringResource(R.string.debug), onClick = {

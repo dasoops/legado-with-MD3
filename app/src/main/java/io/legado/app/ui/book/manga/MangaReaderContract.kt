@@ -207,7 +207,6 @@ sealed interface MangaReaderIntent {
     data object DisableCurrentSource : MangaReaderIntent
     data object RequestPayCurrentChapter : MangaReaderIntent
     data object PayCurrentChapter : MangaReaderIntent
-    data object OpenSourceLogin : MangaReaderIntent
     data object OpenSourceEdit : MangaReaderIntent
     data class SourceCustomButton(val longClick: Boolean) : MangaReaderIntent
     data object BackPressed : MangaReaderIntent
@@ -347,7 +346,6 @@ sealed interface MangaReaderEffect {
     data class Finish(val bookshelfChanged: Boolean = false) : MangaReaderEffect
     data object OpenBookInfo : MangaReaderEffect
     data class OpenChapterUrl(val externalBrowser: Boolean) : MangaReaderEffect
-    data class OpenSourceLogin(val sourceUrl: String) : MangaReaderEffect
     data class OpenSourceEdit(val sourceUrl: String) : MangaReaderEffect
     data class RunSourceCustomButton(
         val event: String,

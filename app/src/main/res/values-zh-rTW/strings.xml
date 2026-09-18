@@ -174,13 +174,10 @@
     <string name="disable_book_source">禁用書源</string>
     <string name="add_book_source">建立書源</string>
     <string name="book_file_selector">新增書籍</string>
-    <string name="scan_book_source">掃描</string>
     <string name="copy_source">複製源</string>
     <string name="paste_source">貼上源</string>
     <string name="source_rule_s">源規則說明</string>
     <string name="check_update">檢查更新</string>
-    <string name="camera_scan">掃描二維碼</string>
-    <string name="scan_image">掃描本機圖片</string>
     <string name="rule_summary">規則說明</string>
     <string name="share">分享</string>
     <string name="share_app">軟體分享</string>
@@ -451,8 +448,6 @@
     <string name="up_change_source_last_chapter_s">開啟則會在軟體打開1分鐘後開始更新</string>
     <string name="behavior_main_t">書架ToolBar自動隱藏</string>
     <string name="behavior_main_s">滾動書架時ToolBar自動隱藏與顯示</string>
-    <string name="login">登入</string>
-    <string name="login_source">登入%s</string>
     <string name="success">成功</string>
     <string name="source_no_login">目前源沒有配置登入地址</string>
     <string name="no_prev_page">沒有上一頁</string>
@@ -465,9 +460,6 @@
     <string name="diy_source_group">自訂源分組</string>
     <string name="diy_edit_source_group">輸入自訂源分組名稱</string>
     <string name="concurrent_rate">並發率(concurrentRate)</string>
-    <string name="login_url">登入URL(loginUrl)</string>
-    <string name="login_ui">登入UI(loginUi)</string>
-    <string name="login_check_js">登入檢查JS(loginCheckJs)</string>
     <string name="comment">源注釋(sourceComment)</string>
     <string name="r_search_url">搜尋地址(url)</string>
     <string name="r_find_url">發現地址規則(url)</string>
@@ -525,9 +517,7 @@
 
     <string name="source_http_header">請求頭(header)</string>
     <string name="debug_source">除錯源</string>
-    <string name="import_by_qr_code">二維碼匯入</string>
     <string name="share_selected_source">分享選取源</string>
-    <string name="scan_qr_code">掃描二維碼</string>
     <string name="click_on_selected_show_menu">選中時點擊可彈出選單</string>
     <string name="theme">主題</string>
     <string name="theme_mode">主題模式</string>
@@ -559,7 +549,6 @@
     <string name="sure_del_any">是否確認刪除 %s？</string>
     <string name="sure_del_all_book">是否刪除全部書籍？</string>
     <string name="sure_del_download_book">是否同時刪除已下載的書籍目錄？</string>
-    <string name="qr_per">掃描二維碼需相機權限</string>
     <string name="input_charset">輸入編碼</string>
     <string name="text_chapter_list_rule">TXT目錄規則</string>
     <string name="open_local_book_per">打開外部書籍需獲取儲存權限</string>
@@ -603,7 +592,6 @@
     <string name="e_ink_mode">E-Ink 模式</string>
     <string name="e_ink_mode_detail">去除動畫，最佳化電紙書使用體驗</string>
     <string name="web_menu">Web服務</string>
-    <string name="qr_share">二維碼分享</string>
     <string name="str_share">字串分享</string>
     <string name="wifi_share">wifi分享</string>
     <string name="please_grant_storage_permission">請給於儲存權限</string>
@@ -960,16 +948,12 @@
     <string name="delete_source">刪除源</string>
     <string name="chapter_pay">購買</string>
     <string name="double_page_horizontal">平板/橫屏雙頁</string>
-    <string name="open_in_browser">瀏覽器打開</string>
     <string name="copy_url">複製url</string>
     <string name="full_screen">全屏</string>
     <string name="open_fun">打開方式</string>
     <string name="use_browser_open">是否使用外部瀏覽器打開？</string>
     <string name="see">查看</string>
     <string name="open">打開</string>
-    <string name="del_login_header">刪除登入頭</string>
-    <string name="show_login_header">查看登入頭</string>
-    <string name="login_header">登入頭</string>
     <string name="font_scale">字體大小</string>
     <string name="font_scale_summary">目前字體大小：%.1f</string>
     <string name="open_sys_dir_picker_error">打開系統資料夾選擇器出錯，自動打開應用程式資料夾選擇器</string>
@@ -1034,8 +1018,6 @@
     <string name="change_source_batch">批次換源</string>
     <string name="book_type_different">書籍類型不一樣</string>
     <string name="soure_change_source">是否確認換源</string>
-    <string name="input_verification_code">輸入驗證碼</string>
-    <string name="verification_code">驗證碼</string>
     <string name="timeout_millisecond">超時毫秒數</string>
     <string name="file_not_supported">文件%1$s 不受支援，是否繼續打開？</string>
     <string name="import_theme">匯入主題</string>
@@ -1577,8 +1559,6 @@
     <string name="invalid_regex">正則表達式無效</string>
     <string name="complete_required_information">請填寫所有必填資訊</string>
     <string name="cannot_open_url">無法直接開啟此 URL</string>
-    <string name="open_by_browser">已切換到瀏覽器開啟</string>
-    <string name="open_by_webview">已切換到 WebView 開啟</string>
     <string name="show_select_menu_icon">展示圖示</string>
 
     <string name="show_all">全部顯示</string>
