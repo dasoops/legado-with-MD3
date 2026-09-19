@@ -228,7 +228,6 @@ dependencies {
     implementation(libs.ktor.serialization.gson)
     implementation(libs.ktor.server.cors)
     implementation(libs.ktor.server.websockets)
-    implementation(libs.zxing.lite)
     implementation(libs.colorpicker)
     implementation(libs.colorpicker.compose)
     implementation(libs.libarchive)

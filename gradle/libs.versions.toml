@@ -78,8 +78,6 @@ uiViewbinding = "1.9.4"
     viewpager2 = "1.1.0"
     collection = "1.6.0"
 
-zxingLite = "3.4.1"
-
 koin-bom = "4.2.2"
 biometricKtx = "1.1.0"
 
@@ -223,8 +221,6 @@ kotlin-stdlib = { module = "org.jetbrains.kotlin:kotlin-stdlib", version.ref = "
 
 liveeventbus = { module = "com.github.michaellee123:LiveEventBus", version.ref = "liveeventbus" }
 material = { module = "com.google.android.material:material", version.ref = "material" }
-
-zxing-lite = { module = "com.github.jenly1314:zxing-lite", version.ref = "zxingLite" }
 
 reorderable = { module = "sh.calvin.reorderable:reorderable", version.ref = "reorderable" }
 

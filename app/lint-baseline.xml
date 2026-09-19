@@ -1009,17 +1009,6 @@
     </issue>
 
     <issue
-        id="NewerVersionAvailable"
-        message="A newer version of com.github.jenly1314:zxing-lite than 3.4.1 is available: 3.5.0"
-        errorLine1="zxingLite = &quot;3.4.1&quot;"
-        errorLine2="            ~~~~~~~">
-        <location
-            file="../gradle/libs.versions.toml"
-            line="85"
-            column="13"/>
-    </issue>
-
-    <issue
         id="RestrictedApi"
         message="NavigationMenuView can only be accessed from within the same library group (referenced groupId=`com.google.android.material` from groupId=`legado`)"
         errorLine1="    val navigationMenuView = getChildAt(0) as? NavigationMenuView"
@@ -3896,72 +3885,6 @@
             file="src/main/java/io/legado/app/lib/prefs/Preference.kt"
             line="31"
             column="26"/>
-    </issue>
-
-    <issue
-        id="UseKtx"
-        message="Use the KTX function `createBitmap` instead?"
-        errorLine1="            var bitmap: Bitmap? = Bitmap.createBitmap(heightPix, heightPix, Bitmap.Config.ARGB_8888)"
-        errorLine2="                                  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/java/io/legado/app/utils/QRCodeUtils.kt"
-            line="98"
-            column="35"/>
-    </issue>
-
-    <issue
-        id="UseKtx"
-        message="Use the KTX function `createBitmap` instead?"
-        errorLine1="        var bitmap: Bitmap? = Bitmap.createBitmap(srcWidth, srcHeight, Bitmap.Config.ARGB_8888)"
-        errorLine2="                              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/java/io/legado/app/utils/QRCodeUtils.kt"
-            line="143"
-            column="31"/>
-    </issue>
-
-    <issue
-        id="UseKtx"
-        message="Use the KTX extension function `Canvas.withSave` instead?"
-        errorLine1="            canvas.save()"
-        errorLine2="            ~~~~~~~~~~~~~">
-        <location
-            file="src/main/java/io/legado/app/utils/QRCodeUtils.kt"
-            line="159"
-            column="13"/>
-    </issue>
-
-    <issue
-        id="UseKtx"
-        message="Use the KTX function `createBitmap` instead?"
-        errorLine1="            val bitmap = Bitmap.createBitmap("
-        errorLine2="                         ^">
-        <location
-            file="src/main/java/io/legado/app/utils/QRCodeUtils.kt"
-            line="409"
-            column="26"/>
-    </issue>
-
-    <issue
-        id="UseKtx"
-        message="Use the KTX function `createBitmap` instead?"
-        errorLine1="        var bitmap: Bitmap? = Bitmap.createBitmap("
-        errorLine2="                              ^">
-        <location
-            file="src/main/java/io/legado/app/utils/QRCodeUtils.kt"
-            line="451"
-            column="31"/>
-    </issue>
-
-    <issue
-        id="UseKtx"
-        message="Use the KTX extension function `Canvas.withSave` instead?"
-        errorLine1="            canvas.save()"
-        errorLine2="            ~~~~~~~~~~~~~">
-        <location
-            file="src/main/java/io/legado/app/utils/QRCodeUtils.kt"
-            line="469"
-            column="13"/>
     </issue>
 
     <issue
