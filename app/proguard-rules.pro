@@ -123,20 +123,11 @@
 -keep class org.jsoup.**{*;}
 -dontwarn org.jspecify.annotations.NullMarked
 
-## ExoPlayer 反射设置ua 保证该私有变量不被混淆
--keepclassmembers class androidx.media3.datasource.cache.CacheDataSource$Factory {
-    *** upstreamDataSourceFactory;
-}
-## ExoPlayer 如果还不能播放就取消注释这个
-# -keep class com.google.android.exoplayer2.** {*;}
-
 ## 对外提供api
 -keep class io.legado.app.api.ReturnData{*;}
 
 # Throwable
 -keepnames class * extends java.lang.Throwable
 -keepclassmembernames,allowobfuscation class * extends java.lang.Throwable{*;}
-# 忽略 Ktor 在 Android 上对 Java SE 管理类的引用
+# Hutool 引用了 Android 不存在的 Java SE 管理类
 -dontwarn java.lang.management.**
--dontwarn io.ktor.util.debug.IntellijIdeaDebugDetector
--keep,allowobfuscation class io.ktor.util.debug.** { *; }
