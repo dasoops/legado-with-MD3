@@ -843,8 +843,18 @@ fun BookshelfScreen(
                             val localDirectoryUri = group.localDirectoryUri
                             if (group.isLocalDirectory && localDirectoryUri != null) {
                                 LocalDirectoryRouteScreen(
+                                    groupId = group.groupId,
                                     rootUri = localDirectoryUri,
-                                    onOpenBook = { onBookClick(it.toShelfItem(), null) },
+                                    settings = uiState.settings,
+                                    customTagColors = if (uiState.enableCustomTagColors) {
+                                        uiState.customTagColors
+                                    } else {
+                                        persistentListOf()
+                                    },
+                                    searchKey = uiState.searchKey,
+                                    isSearch = uiState.isSearch,
+                                    contentPadding = paddingValues,
+                                    onOpenBook = onBookClick,
                                 )
                             } else {
                             val isSelectedGroup = group.groupId == uiState.selectedGroupId

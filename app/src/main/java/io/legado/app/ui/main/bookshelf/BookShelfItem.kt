@@ -86,33 +86,6 @@ data class BookUiItem(
     }
 }
 
-// 目录视图打开的书籍复用书架导航回调, 需映射为书架条目形态
-fun Book.toShelfItem(): BookShelfItem = BookShelfItem(
-    bookUrl = bookUrl,
-    name = name,
-    author = author,
-    origin = origin,
-    originName = originName,
-    coverUrl = coverUrl,
-    customCoverUrl = customCoverUrl,
-    durChapterTitle = durChapterTitle,
-    durChapterTime = durChapterTime,
-    durChapterPos = durChapterPos,
-    latestChapterTitle = latestChapterTitle,
-    latestChapterTime = latestChapterTime,
-    lastCheckCount = lastCheckCount,
-    totalChapterNum = totalChapterNum,
-    durChapterIndex = durChapterIndex,
-    type = type,
-    group = group,
-    order = order,
-    canUpdate = canUpdate,
-    intro = intro,
-    kind = kind,
-    customTag = customTag,
-    wordCount = wordCount
-)
-
 fun BookShelfItem.toLightBook() = Book(
     bookUrl = bookUrl,
     origin = origin,

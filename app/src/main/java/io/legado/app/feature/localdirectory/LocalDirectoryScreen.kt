@@ -1,31 +1,28 @@
 package io.legado.app.feature.localdirectory
 
 import androidx.activity.compose.BackHandler
-import androidx.compose.animation.animateContentSize
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentSize
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Folder
-import androidx.compose.material.icons.outlined.Book
-import androidx.compose.material.icons.outlined.Description
-import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -34,174 +31,97 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.legado.app.R
-import io.legado.app.constant.AppConst
-import io.legado.app.data.entities.Book
-import io.legado.app.domain.model.LocalBookProgress
+import io.legado.app.domain.model.settings.BookshelfSettings
+import io.legado.app.ui.config.themeConfig.TagColorPair
+import io.legado.app.ui.main.bookCoverSharedElementKey
+import io.legado.app.ui.main.bookshelf.BookItem
+import io.legado.app.ui.main.bookshelf.BookShelfItem
+import io.legado.app.ui.main.bookshelf.BookshelfGridItem
+import io.legado.app.ui.main.bookshelf.BookshelfListItem
 import io.legado.app.ui.theme.LegadoTheme
 import io.legado.app.ui.widget.components.EmptyMessage
 import io.legado.app.ui.widget.components.button.series.SmallTonalButton
 import io.legado.app.ui.widget.components.card.GlassCard
-import io.legado.app.ui.widget.components.card.TextCard
 import io.legado.app.ui.widget.components.icon.AppIcon
-import io.legado.app.ui.widget.components.list.ListScaffold
-import io.legado.app.ui.widget.components.menuItem.RoundDropdownMenuItem
 import io.legado.app.ui.widget.components.progressIndicator.AppCircularProgressIndicator
 import io.legado.app.ui.widget.components.text.AppText
-import io.legado.app.ui.widget.components.topbar.GlassTopAppBarDefaults
-import io.legado.app.utils.ConvertUtils
 import io.legado.app.utils.toastOnUi
+import kotlinx.collections.immutable.ImmutableList
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
 
 @Composable
 fun LocalDirectoryRouteScreen(
+    groupId: Long,
     rootUri: String,
+    settings: BookshelfSettings,
+    customTagColors: ImmutableList<TagColorPair>,
+    searchKey: String,
+    isSearch: Boolean,
+    contentPadding: PaddingValues,
+    onOpenBook: (BookShelfItem, String?) -> Unit,
     modifier: Modifier = Modifier,
-    onOpenBook: (Book) -> Unit,
     viewModel: LocalDirectoryViewModel = koinViewModel(
-        key = "localDir:$rootUri",
-        parameters = { parametersOf(rootUri) },
+        key = "localDir:$groupId",
+        parameters = { parametersOf(groupId, rootUri) },
     ),
 ) {
     val context = LocalContext.current
     val state by viewModel.uiState.collectAsStateWithLifecycle()
 
-    // 在子目录时优先退出一级, 到根目录则不拦截, 交还宿主返回
-    BackHandler(enabled = state.pathNames.size > 1) {
-        viewModel.onIntent(LocalDirectoryIntent.NavigateBack)
-    }
-
     LaunchedEffect(viewModel) {
         viewModel.onIntent(LocalDirectoryIntent.Initialize)
         viewModel.effects.collect { effect ->
             when (effect) {
-                is LocalDirectoryEffect.OpenBook -> onOpenBook(effect.book)
                 is LocalDirectoryEffect.ShowToast -> context.toastOnUi(effect.message)
             }
         }
     }
+    LaunchedEffect(searchKey, isSearch) {
+        viewModel.onIntent(LocalDirectoryIntent.SearchChange(searchKey, isSearch))
+    }
+    BackHandler(enabled = state.path.isNotEmpty()) {
+        viewModel.onIntent(LocalDirectoryIntent.NavigateBack)
+    }
 
-    LocalDirectoryScreen(
-        state = state,
-        modifier = modifier,
-        onIntent = viewModel::onIntent,
-    )
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun LocalDirectoryScreen(
-    state: LocalDirectoryUiState,
-    onIntent: (LocalDirectoryIntent) -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    val scrollBehavior = GlassTopAppBarDefaults.defaultScrollBehavior()
-    ListScaffold(
-        title = state.pathNames.lastOrNull() ?: stringResource(R.string.local_book),
-        state = state,
-        scrollBehavior = scrollBehavior,
-        onBackClick = { onIntent(LocalDirectoryIntent.NavigateBack) },
-        showSearchAction = !state.isUnavailable,
-        onSearchToggle = { onIntent(LocalDirectoryIntent.SearchToggle(it)) },
-        onSearchQueryChange = { onIntent(LocalDirectoryIntent.SearchQueryChange(it)) },
-        searchPlaceholder = stringResource(R.string.screen),
-        dropDownMenuContent = { dismiss ->
-            val sorts = listOf(
-                R.string.sort_by_name to 0,
-                R.string.sort_by_size to 1,
-                R.string.sort_by_time to 2,
-            )
-            sorts.forEach { (textRes, sort) ->
-                RoundDropdownMenuItem(
-                    text = stringResource(textRes),
-                    onClick = {
-                        onIntent(LocalDirectoryIntent.SortChange(sort))
-                        dismiss()
-                    },
-                    trailingIcon = {
-                        if (state.sort == sort) {
-                            Icon(Icons.Default.Check, null)
-                        }
-                    }
-                )
-            }
-        },
-        bottomContent = {
-            if (!state.isUnavailable && state.pathNames.isNotEmpty()) {
-                LocalPathNavigationBar(
-                    pathNames = state.pathNames,
-                    canGoBack = state.pathNames.size > 1,
-                    onNavigateBack = { onIntent(LocalDirectoryIntent.NavigateBack) },
-                    onNavigateToLevel = { onIntent(LocalDirectoryIntent.NavigateToLevel(it)) },
-                )
-            }
-        },
-    ) { paddingValues ->
-        when {
-            state.isUnavailable -> {
-                EmptyMessage(
-                    modifier = modifier
-                        .fillMaxSize()
-                        .padding(paddingValues),
-                    message = stringResource(R.string.directory_unavailable),
-                )
-            }
-
-            state.items.isEmpty() && state.isLoading -> {
-                AppCircularProgressIndicator(
-                    modifier = modifier
-                        .fillMaxSize()
-                        .wrapContentSize(Alignment.Center)
-                )
-            }
-
-            state.items.isEmpty() -> {
-                EmptyMessage(
-                    modifier = modifier
-                        .fillMaxSize()
-                        .padding(paddingValues),
-                    message = stringResource(R.string.empty),
-                )
-            }
-
-            else -> {
-                LazyColumn(
-                    modifier = modifier
-                        .fillMaxSize()
-                        .padding(paddingValues)
-                ) {
-                    items(state.items, key = { it.entry.uri }) { item ->
-                        LocalDirectoryItemRow(
-                            modifier = Modifier.animateItem(),
-                            item = item,
-                            onClick = { onIntent(LocalDirectoryIntent.ItemClick(item)) },
-                        )
-                    }
-                }
-            }
-        }
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .padding(top = contentPadding.calculateTopPadding())
+    ) {
+        DirectoryBreadcrumb(
+            pathNames = state.pathNames,
+            onNavigateToLevel = { viewModel.onIntent(LocalDirectoryIntent.NavigateToLevel(it)) },
+            onRefresh = { viewModel.onIntent(LocalDirectoryIntent.Refresh) },
+        )
+        DirectoryContent(
+            state = state,
+            settings = settings,
+            customTagColors = customTagColors,
+            groupId = groupId,
+            onIntent = viewModel::onIntent,
+            onOpenBook = onOpenBook,
+        )
     }
 }
 
 @Composable
-private fun LocalPathNavigationBar(
-    pathNames: List<String>,
-    canGoBack: Boolean,
-    onNavigateBack: () -> Unit,
+private fun DirectoryBreadcrumb(
+    pathNames: ImmutableList<String>,
     onNavigateToLevel: (Int) -> Unit,
+    onRefresh: () -> Unit,
 ) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(start = 16.dp, end = 16.dp, bottom = 4.dp)
-            .animateContentSize(),
+            .padding(start = 16.dp, end = 16.dp, top = 4.dp, bottom = 4.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
@@ -248,99 +168,161 @@ private fun LocalPathNavigationBar(
                 }
             }
         }
-
-        if (canGoBack) {
-            SmallTonalButton(
-                onClick = onNavigateBack,
-                icon = Icons.AutoMirrored.Filled.ArrowBack,
-                contentDescription = stringResource(R.string.back)
-            )
-        }
+        SmallTonalButton(
+            onClick = onRefresh,
+            icon = Icons.Default.Refresh,
+            contentDescription = stringResource(R.string.refresh),
+        )
     }
 }
 
 @Composable
-private fun LocalDirectoryItemRow(
-    modifier: Modifier,
-    item: LocalDirectoryItem,
-    onClick: () -> Unit,
+private fun DirectoryContent(
+    state: LocalDirectoryUiState,
+    settings: BookshelfSettings,
+    customTagColors: ImmutableList<TagColorPair>,
+    groupId: Long,
+    onIntent: (LocalDirectoryIntent) -> Unit,
+    onOpenBook: (BookShelfItem, String?) -> Unit,
 ) {
-    val entry = item.entry
-    val progress = item.progress
-    GlassCard(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 4.dp),
-        onClick = onClick,
+    if (state.isUnavailable) {
+        EmptyMessage(
+            modifier = Modifier.fillMaxSize(),
+            message = stringResource(R.string.directory_unavailable),
+        )
+        return
+    }
+    if (state.isLoading && state.nodes.isEmpty()) {
+        AppCircularProgressIndicator(
+            modifier = Modifier.fillMaxSize()
+        )
+        return
+    }
+    if (state.nodes.isEmpty()) {
+        EmptyMessage(
+            modifier = Modifier.fillMaxSize(),
+            message = stringResource(R.string.empty),
+        )
+        return
+    }
+
+    val configuration = LocalConfiguration.current
+    val isLandscape = configuration.orientation ==
+            android.content.res.Configuration.ORIENTATION_LANDSCAPE
+    val layoutMode = if (isLandscape) {
+        settings.bookshelfLayoutModeLandscape
+    } else {
+        settings.bookshelfLayoutModePortrait
+    }
+    val layoutGrid = if (isLandscape) {
+        settings.bookshelfLayoutGridLandscape
+    } else {
+        settings.bookshelfLayoutGridPortrait
+    }
+    val layoutList = if (isLandscape) {
+        settings.bookshelfLayoutListLandscape
+    } else {
+        settings.bookshelfLayoutListPortrait
+    }
+    val columns = if (layoutMode == 0) layoutList else layoutGrid
+    val isGridMode = layoutMode != 0
+    val gridState = rememberLazyGridState()
+
+    LazyVerticalGrid(
+        columns = GridCells.Fixed(columns.coerceAtLeast(1)),
+        state = gridState,
+        modifier = Modifier.fillMaxSize(),
+        contentPadding = PaddingValues(8.dp),
+        verticalArrangement = Arrangement.spacedBy(if (isGridMode) 8.dp else 0.dp),
+        horizontalArrangement = Arrangement.spacedBy(if (isGridMode) 8.dp else 0.dp),
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 12.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            AppIcon(
-                imageVector = when {
-                    entry.isDir -> Icons.Default.Folder
-                    progress != null -> Icons.Outlined.Book
-                    else -> Icons.Outlined.Description
-                },
-                contentDescription = null,
-                modifier = Modifier.size(20.dp),
-                tint = if (progress != null) {
-                    LegadoTheme.colorScheme.primary
-                } else {
-                    LegadoTheme.colorScheme.onSurfaceVariant
+        items(
+            items = state.nodes,
+            key = { node ->
+                when (node) {
+                    is LocalDirectoryNode.Folder -> "f:${node.name}"
+                    is LocalDirectoryNode.Book -> "b:${node.item.book.bookUrl}"
                 }
-            )
-
-            Spacer(modifier = Modifier.width(16.dp))
-
-            Column(modifier = Modifier.weight(1f)) {
-                AppText(
-                    text = entry.name,
-                    style = LegadoTheme.typography.bodyMedium,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
+            }
+        ) { node ->
+            when (node) {
+                is LocalDirectoryNode.Folder -> DirectoryFolderItem(
+                    name = node.name,
+                    settings = settings,
+                    isGridMode = isGridMode,
+                    onClick = { onIntent(LocalDirectoryIntent.EnterFolder(node.name)) },
                 )
 
-                if (!entry.isDir) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        TextCard(
-                            text = entry.name.substringAfterLast('.', "").uppercase(),
-                            textStyle = LegadoTheme.typography.labelSmall,
-                            horizontalPadding = 4.dp,
-                            verticalPadding = 2.dp,
-                            cornerRadius = 4.dp,
-                            icon = null,
-                            backgroundColor = LegadoTheme.colorScheme.surfaceContainerHighest
-                        )
-                        Spacer(modifier = Modifier.width(6.dp))
-                        AppText(
-                            text = "${ConvertUtils.formatFileSize(entry.size)} - " +
-                                    AppConst.dateFormat.format(entry.lastModified),
-                            style = LegadoTheme.typography.labelMedium,
-                            color = LegadoTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                    progress?.let { readingProgress ->
-                        AppText(
-                            text = buildProgressText(readingProgress),
-                            style = LegadoTheme.typography.labelMedium,
-                            color = LegadoTheme.colorScheme.primary,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
-                        )
-                    }
+                is LocalDirectoryNode.Book -> {
+                    val bookUi = node.item.ui
+                    BookItem(
+                        settings = settings,
+                        customTagColors = customTagColors,
+                        bookUi = bookUi,
+                        layoutMode = layoutMode,
+                        gridStyle = settings.bookshelfGridLayout,
+                        isCompact = settings.bookshelfLayoutCompact,
+                        titleSmallFont = settings.bookshelfTitleSmallFont,
+                        titleCenter = settings.bookshelfTitleCenter,
+                        titleMaxLines = settings.bookshelfTitleMaxLines,
+                        coverShadow = settings.bookshelfCoverShadow,
+                        onClick = {
+                            onOpenBook(
+                                bookUi.book,
+                                bookCoverSharedElementKey(bookUi.book.bookUrl, "localdir:$groupId")
+                            )
+                        },
+                        onLongClick = null,
+                    )
                 }
             }
         }
     }
 }
 
-private fun buildProgressText(progress: LocalBookProgress): String {
-    if (progress.totalChapterNum <= 0) return ""
-    val position = "${progress.durChapterIndex + 1}/${progress.totalChapterNum}"
-    val title = progress.durChapterTitle
-    return if (title.isNullOrBlank()) position else "$title  $position"
+@Composable
+private fun DirectoryFolderItem(
+    name: String,
+    settings: BookshelfSettings,
+    isGridMode: Boolean,
+    onClick: () -> Unit,
+) {
+    val cover: @Composable (Modifier) -> Unit = { coverModifier ->
+        Box(
+            modifier = coverModifier.background(LegadoTheme.colorScheme.surfaceContainer),
+            contentAlignment = Alignment.Center,
+        ) {
+            AppIcon(
+                imageVector = Icons.Default.Folder,
+                contentDescription = null,
+                modifier = Modifier.size(40.dp),
+                tint = LegadoTheme.colorScheme.primary,
+            )
+        }
+    }
+    if (isGridMode) {
+        BookshelfGridItem(
+            cover = cover,
+            title = name,
+            gridStyle = settings.bookshelfGridLayout,
+            titleSmallFont = settings.bookshelfTitleSmallFont,
+            titleCenter = settings.bookshelfTitleCenter,
+            titleMaxLines = settings.bookshelfTitleMaxLines,
+            coverShadow = settings.bookshelfCoverShadow,
+            coverWidth = settings.bookshelfGridCoverWidth,
+            onClick = onClick,
+            onLongClick = null,
+        )
+    } else {
+        BookshelfListItem(
+            settings = settings,
+            isCompact = settings.bookshelfLayoutCompact,
+            cover = cover,
+            title = name,
+            coverWidth = settings.bookshelfListCoverWidth,
+            coverShadow = settings.bookshelfCoverShadow,
+            onClick = onClick,
+            onLongClick = null,
+        )
+    }
 }

@@ -1,60 +1,115 @@
 package io.legado.app.data.repository
 
+import android.provider.DocumentsContract
+import android.provider.DocumentsContract.getDocumentId
+import android.provider.DocumentsContract.getTreeDocumentId
 import androidx.core.net.toUri
+import androidx.documentfile.provider.DocumentFile
 import io.legado.app.constant.AppPattern
 import io.legado.app.domain.gateway.LocalDirectoryGateway
-import io.legado.app.domain.model.LocalBookProgress
-import io.legado.app.domain.model.LocalDirectoryEntry
+import io.legado.app.model.localBook.LocalBook
 import io.legado.app.utils.FileDoc
+import io.legado.app.utils.isContentScheme
 import io.legado.app.utils.list
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
+import splitties.init.appCtx
+import java.io.File
 
 class LocalDirectoryRepository(
-    private val bookImportRepository: BookImportRepository,
+    private val bookRepository: BookRepository,
 ) : LocalDirectoryGateway {
 
-    override suspend fun rootDocument(treeUri: String): LocalDirectoryEntry? =
-        withContext(Dispatchers.IO) {
-            // SAF 的 fromTreeUri 在权限失效等情况下会返回 null 并触发 !! 崩溃, 故整体兜底
-            runCatching {
-                FileDoc.fromUri(treeUri.toUri(), true)
-            }.getOrNull()?.toEntry()
-        }
+    override suspend fun directoryName(rootUri: String): String? = withContext(Dispatchers.IO) {
+        runCatching {
+            val uri = rootUri.toUri()
+            if (uri.isContentScheme()) {
+                DocumentFile.fromTreeUri(appCtx, uri)?.name
+            } else {
+                uri.path?.let { File(it).name }
+            }
+        }.getOrNull()
+            ?.takeIf { it.isNotBlank() }
+            ?: treeDocumentId(rootUri)?.substringAfterLast('/')?.substringAfter(':')
+                ?.takeIf { it.isNotBlank() }
+    }
 
-    override suspend fun listChildren(dirUri: String): List<LocalDirectoryEntry> =
-        withContext(Dispatchers.IO) {
+    override suspend fun importDirectoryToGroup(
+        groupId: Long,
+        rootUri: String,
+    ): Int = withContext(Dispatchers.IO) {
+        val root = rootDirDoc(rootUri) ?: return@withContext 0
+        val files = scanBookFiles(root)
+        var count = 0
+        files.forEach { file ->
             runCatching {
-                FileDoc.fromUri(dirUri.toUri(), true)
-                    .list { item ->
-                        // 隐藏项与压缩包不参与目录浏览
-                        !item.name.startsWith(".") &&
-                            (item.isDir || item.name.matches(AppPattern.bookFileRegex))
-                    }
-                    .orEmpty()
-                    .map { it.toEntry() }
-            }.getOrDefault(emptyList())
-        }
-
-    override fun flowLocalBookProgress(): Flow<Map<String, LocalBookProgress>> =
-        bookImportRepository.flowLocalBooks().map { books ->
-            books.associate { book ->
-                book.originName to LocalBookProgress(
-                    bookUrl = book.bookUrl,
-                    durChapterIndex = book.durChapterIndex,
-                    totalChapterNum = book.totalChapterNum,
-                    durChapterTitle = book.durChapterTitle,
-                )
+                val bookUrl = file.toString()
+                val existing = bookRepository.getBook(bookUrl)
+                // 已归入本组说明是重复扫描, 重新导入会重解析元数据并重置目录, 直接跳过
+                if (existing != null && (existing.group and groupId) != 0L) return@forEach
+                val book = LocalBook.importFile(file.uri)
+                if ((book.group and groupId) == 0L) {
+                    book.group = book.group or groupId
+                    book.save()
+                }
+                count++
             }
         }
+        count
+    }
 
-    private fun FileDoc.toEntry() = LocalDirectoryEntry(
-        uri = uri.toString(),
-        name = name,
-        isDir = isDir,
-        size = size,
-        lastModified = lastModified,
-    )
+    override fun relativeDirectory(rootUri: String, bookUrl: String): List<String> {
+        return runCatching {
+            val root = rootUri.toUri()
+            if (root.isContentScheme()) {
+                val rootId = getTreeDocumentId(root)
+                val bookId = getDocumentId(bookUrl.toUri())
+                bookId.removePrefix(rootId).trim('/')
+                    .split('/')
+                    .dropLast(1)
+                    .filter { it.isNotBlank() }
+            } else {
+                val rootPath = root.path ?: return emptyList()
+                val bookPath = bookUrl.toUri().path ?: return emptyList()
+                File(bookPath).relativeTo(File(rootPath)).path
+                    .split('/')
+                    .dropLast(1)
+                    .filter { it.isNotBlank() }
+            }
+        }.getOrDefault(emptyList())
+    }
+
+    private fun treeDocumentId(rootUri: String): String? =
+        runCatching { getTreeDocumentId(rootUri.toUri()) }.getOrNull()
+
+    /**
+     * 直接用传入 uri 构造根文档。不能用 FileDoc.fromUri(..., true):
+     * 子目录 uri 会被 DocumentFile.fromTreeUri 退回树的根文档, 丢失子文档 id。
+     */
+    private fun rootDirDoc(rootUri: String): FileDoc? {
+        val uri = rootUri.toUri()
+        val name = if (uri.isContentScheme()) {
+            runCatching { DocumentFile.fromTreeUri(appCtx, uri)?.name }.getOrNull()
+        } else {
+            uri.path?.let { File(it).name }
+        } ?: uri.lastPathSegment ?: return null
+        return FileDoc(name = name, isDir = true, size = 0, lastModified = 0, uri = uri)
+    }
+
+    private fun scanBookFiles(root: FileDoc): List<FileDoc> {
+        val result = arrayListOf<FileDoc>()
+        val queue = ArrayDeque<FileDoc>()
+        queue.add(root)
+        while (queue.isNotEmpty()) {
+            val dir = queue.removeFirst()
+            dir.list()?.forEach { child ->
+                when {
+                    child.name.startsWith(".") -> Unit
+                    child.isDir -> queue.add(child)
+                    child.name.matches(AppPattern.bookFileRegex) -> result.add(child)
+                }
+            }
+        }
+        return result
+    }
 }

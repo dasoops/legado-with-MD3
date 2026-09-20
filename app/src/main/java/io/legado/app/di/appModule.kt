@@ -345,11 +345,12 @@ val appModule = module {
     viewModelOf(::LabConfigViewModel)
     viewModelOf(::TocViewModel)
     viewModelOf(::ImportBookViewModel)
-    viewModel { (rootUri: String) ->
+    viewModel { (groupId: Long, rootUri: String) ->
         LocalDirectoryViewModel(
             application = get(),
             gateway = get(),
-            importRepository = get(),
+            bookRepository = get(),
+            groupId = groupId,
             rootUri = rootUri,
         )
     }

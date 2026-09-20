@@ -375,3 +375,113 @@ git diff --check
 - **分页索引耦合**: 目录组混入 `HorizontalPager` 后需复核 `selectedGroupIndex`/`saveTabPosition`。
 - **门禁**: 任何 UI 直连 DAO/偏好会在 `verifyConfigArchitecture` 直接失败。
 - **备份语义**: 目录 URI 随 `book_groups` 备份到其他设备属预期代价, 用「目录不可用 + 重选」兜底。
+
+---
+
+# Revision 2 — 改为「自动入库 + 文件夹分层」
+
+> Phase 1-6 已完成并提交 (commit 94d9bbc0d)。用户实测后要求改方向。以下为覆盖式修订, 实现时以本节为准; 旧 Phase 2/3/4 的文件浏览实现全部作废。
+
+## R0. 新模型与用户反馈
+
+- **模型**: 目录组不再即时浏览文件, 而是把目录内书籍**递归导入书架并归入该组**; 标签内按真实文件夹分层浏览这些已入库书籍。
+- 用户反馈:
+  1. 旧实现多级目录不生效 (点击只改面包屑, 内容不变)。根因: `LocalDirectoryRepository.listChildren` 用 `FileDoc.fromUri(childDocUri, true)` 走了 `DocumentFile.fromTreeUri`, 会退回树的**根文档**, 丢失子文档 id, 导致永远重列根目录。
+  2. 移除目录 tab 内的 返回/标题/搜索/排序; 搜索走书架全局搜索。
+  3. 书籍用统一卡片展示: 封面 + 标题 + x章未读; 不要大小/修改时间。
+  4. 允许"添加标签时导入全部书籍, 刷新时重扫"。
+
+## R1. 数据/导入层 (Phase R1, 无 UI)
+
+### 接口 (替换旧 `LocalDirectoryGateway`)
+
+```kotlin
+// io.legado.app.domain.gateway.LocalDirectoryGateway
+interface LocalDirectoryGateway {
+    /** 目录显示名 (最后一级); 无法解析返回 null */
+    suspend fun directoryName(rootUri: String): String?
+    /** 递归扫描 rootUri 内书籍并导入书架、归入 groupId; 返回本次处理的书籍数 */
+    suspend fun importDirectoryToGroup(groupId: Long, rootUri: String): Int
+    /** bookUrl 相对于 rootUri 的目录层级 (不含文件名); 解析失败返回空 */
+    fun relativeDirectory(rootUri: String, bookUrl: String): List<String>
+}
+```
+
+- 删除 `LocalDirectoryEntry`/`LocalBookProgress` (`domain/model/LocalDirectory.kt`) 与旧 gateway 三方法, 确认无残留引用后删文件。
+- `LocalDirectoryRepository` 重写:
+  - 构造注入 `BookRepository` (取书/更新) 或直接用 `appDb` (与 `BookImportRepository` 一致)。用 `BookRepository.getBook/insert/update`。
+  - `directoryName`: content scheme 用 `DocumentFile.fromTreeUri`; file scheme 用 `File(path).name`; 兜底 `getTreeDocumentId(...).substringAfterLast('/').substringAfter(':')`。
+  - `importDirectoryToGroup`: 用 `FileDoc` 构造根目录 (content 用 `fromUri(uri,true)` 得到根 tree; file 用 `File(path)`), BFS 扫描匹配 `AppPattern.bookFileRegex` 的文件 (排除压缩包、隐藏项), 对每个: 已存在且 `(book.group and groupId) != 0L` 则跳过; 否则 `LocalBook.importFile(uri)` 后把 `book.group` 置为该组并 `book.save()`。全程 `Dispatchers.IO`, 单项失败 `runCatching` 跳过。返回处理计数。
+  - `relativeDirectory`: content scheme 用 `DocumentsContract.getTreeDocumentId(rootUri)` 与 `getDocumentId(bookUrl.toUri())`, `removePrefix` 后 `split('/').dropLast(1)`; file scheme 用 `File(...).relativeTo(root).path` 同理。失败返回空。
+
+## R2. Feature 重写 (Phase R2)
+
+- 删除旧的 `ContentObserver` 文件浏览逻辑; 改为读取 DB 中的组内书籍并构建虚拟文件夹树。
+- `LocalDirectoryContract.kt`:
+  ```kotlin
+  @Stable data class DirectoryBook(val ui: BookUiItem, val dir: ImmutableList<String>)
+  sealed interface LocalDirectoryNode {
+      data class Folder(val name: String) : LocalDirectoryNode
+      data class Book(val book: DirectoryBook) : LocalDirectoryNode
+  }
+  @Stable data class LocalDirectoryUiState(
+      val path: ImmutableList<String> = persistentListOf(),
+      val pathNames: ImmutableList<String> = persistentListOf(), // 根名 + path
+      val nodes: ImmutableList<LocalDirectoryNode> = persistentListOf(),
+      val isLoading: Boolean = false,
+      val isUnavailable: Boolean = false,
+  )
+  ```
+  Intent: Initialize/Refresh/EnterFolder(name)/NavigateToLevel(index)/NavigateBack/SearchChange(key, isSearch)。
+  Effect: OpenBook(bookUrl: String)、ShowToast(String)。
+- `LocalDirectoryViewModel(application, gateway, bookRepository, groupId: Long, rootUri: String)`:
+  - `Initialize`: 先 `gateway.importDirectoryToGroup(groupId, rootUri)` (重扫); 失败/空目录置 `isUnavailable`; 然后基于书籍流构建树。
+  - 书籍流: `bookRepository.flowBookShelfByGroup(groupId).map { it.map { b -> b.toUiItem() } }`; 对每本用 `gateway.relativeDirectory(rootUri, book.bookUrl)` 得到 `dir` (在 Default 调度计算一次并缓存)。
+  - 树: 当前 `path` 下, 子文件夹 = 各书 dir 在 path 前缀后多出的第一段去重; 本级书籍 = dir == path。文件夹按名称排序在前, 书籍按名称排序在后。
+  - `isSearch`: 忽略 path, 扁平展示按 `searchKey` 过滤 name/author 的书籍。
+  - 不直连 DAO/偏好; 经 `BookRepository` 与 `LocalDirectoryGateway`。
+- `LocalDirectoryScreen.kt` (content-only, 不再用 `ListScaffold`):
+  - 顶部一行: 面包屑 (根名 + path, 可点击跳级) + 右侧刷新按钮 (`Refresh` intent)。无返回/标题/搜索/排序。
+  - `BackHandler(enabled = path.isNotEmpty())` 上溯; 搜索态不拦截。
+  - 内容: `LazyVerticalGrid`, 网格/列表按 `BookshelfSettings` 的 portrait/landscape 配置解析 (与 `BookshelfPage` 一致)。
+    - 文件夹: 用 `BookshelfGridItem`/`BookshelfListItem` 展示 (cover 传 folder 图标), 点击 `EnterFolder`。
+    - 书籍: 复用 public `BookItem` (settings、customTagColors、layoutMode、gridStyle、title 等), 点击 `OpenBook`。
+  - 搜索态: 扁平展示过滤后的书籍。
+  - 签名 (供 Phase R3 调用):
+    ```kotlin
+    @Composable fun LocalDirectoryRouteScreen(
+        groupId: Long, rootUri: String,
+        settings: BookshelfSettings, customTagColors: ImmutableList<TagColorPair>,
+        searchKey: String, isSearch: Boolean,
+        contentPadding: PaddingValues,
+        onOpenBook: (BookShelfItem, String?) -> Unit,
+        modifier: Modifier = Modifier,
+    )
+    ```
+- Koin: `viewModel { (groupId: Long, rootUri: String) -> LocalDirectoryViewModel(get(), get(), get(), groupId, rootUri) }`。
+
+## R3. 书架集成与入口 (Phase R3)
+
+- `BookshelfScreen.kt` 目录组 page 改为:
+  ```kotlin
+  LocalDirectoryRouteScreen(
+      groupId = group.groupId,
+      rootUri = localDirectoryUri,
+      settings = uiState.settings,
+      customTagColors = if (uiState.enableCustomTagColors) uiState.customTagColors else persistentListOf(),
+      searchKey = uiState.searchKey,
+      isSearch = uiState.isSearch,
+      contentPadding = paddingValues,
+      onOpenBook = onBookClick,
+  )
+  ```
+  不再包 `AppPullToRefresh`, 不做内容级编辑/多选。
+- `BookshelfViewModel`: 目录组的 `allGroupBooks` 仍走 `flowBookShelfByGroup` (现在有书了); 目录组**不参与**空格隐藏 (已实现) 与预览计数 (已实现) 保持。
+  注意: 全局搜索时 `visibleGroupBooks[groupId]` 会过滤; `LocalDirectoryViewModel` 自行按 `searchKey` 过滤, 二者无需强一致。
+- `GroupManageSheet`: 添加目录组时仍只创建分组 + 保存 URI; **不再**在创建时同步扫描 (导入改由打开 tab / 点刷新时触发), 避免 sheet 关闭导致协程取消。
+- 字符串: 移除不再使用的 `add_local_directory_group`(仍用)/`directory_unavailable` 保留; 新增刷新按钮 contentDescription 复用现有 `R.string.refresh`。
+
+## R4. 验证
+
+- `cmd.exe /c "cd /d C:\dasoops\workSpace\jvm\legado-with-MD3 && gradlew.bat :app:compileAppDebugKotlin verifyConfigArchitecture --no-configuration-cache"`
+- 手工: 添加目录组 → 打开 tab 触发扫描导入 → 面包屑分层进入 → 文件夹/书籍卡片正确 → 全局搜索命中 → 点书打开 → 外部新增文件后点刷新出现。
