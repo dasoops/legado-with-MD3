@@ -75,7 +75,8 @@ This is a Material Design 3 **local-reading fork** of [Legado](https://github.co
 (based on [HapeLee/legado-with-MD3](https://github.com/HapeLee/legado-with-MD3)). It keeps only
 offline reading of local TXT/EPUB/MOBI/PDF files, reading settings, replace rules, TXT chapter
 rules, bookmarks, reading history and WebDAV backup; online features (book sources, RSS, AI,
-dictionary, online read-aloud) are being removed and must not receive new investment.
+dictionary, read-aloud, WebService, Cronet, Firebase, WebView, Rhino JS) have been removed and must
+not be reintroduced.
 `app/src/main/java/io/legado/app/` uses **Clean Architecture** with three layers:
 
 | Layer | Package | Role |
@@ -93,8 +94,8 @@ Additional top-level packages:
 - **`utils/`** — Extension functions and utility classes (~70 files)
 
 Modules: `:app`, `:modules:book` (epub/TXT parsing, namespace `me.ag2s`), `:baselineprofile`.
-`:modules:rhino` (Rhino JS wrapper) and `modules/web` (Vue 3 frontend) still exist in the tree but
-are **targets for removal in P6**; do not extend them.
+The online `:modules:rhino` (JS engine) and `modules/web` (Vue frontend) have been removed; do not
+reintroduce them.
 
 ## Dependency Injection (Koin)
 
@@ -139,7 +140,7 @@ Legacy View-based theme still exists in `lib/theme/` (used by non-migrated scree
 
 ## Hybrid Compose + View
 
-The app is mid-migration from Views to Compose. View-based screens (reader, book info) coexist with Compose screens (main tabs, settings, bookshelf, cache management). Online screens (search, RSS, source management) still exist in the tree but are **targets for removal in P4/P5**. XML layouts, `viewBinding`, and traditional Activities are still heavily used. The `viewBinding` build feature is enabled but Compose screens are the target.
+The app is mid-migration from Views to Compose. View-based screens (reader, book info) coexist with Compose screens (main tabs, settings, bookshelf). Online screens (search, RSS, source management, discovery, read-aloud, manga, audio) have been removed. XML layouts, `viewBinding`, and traditional Activities are still heavily used. The `viewBinding` build feature is enabled but Compose screens are the target.
 
 ## Jetpack Compose Requirements (new screens MUST follow)
 
@@ -368,11 +369,10 @@ For detailed Compose review conventions and migration patterns, see
 
 - Code namespace is `io.legado.app`; Android `applicationId` is `io.github.dasoops.reader` (they are
   intentionally different — the fork installs alongside the original app without replacing it)
-- App crypto uses JCA (`javax.crypto`/`java.security`) under `help/crypto/`. Hutool 5.8.22 is still
-  on the classpath for the online rule JS engine and lenient base64 decoding in
-  `help/crypto/CryptoUtils.kt`; it is a **removal target for P6** — do not upgrade it meanwhile
+- App crypto uses JCA (`javax.crypto`/`java.security`) under `help/crypto/`. Hutool 5.8.22 remains
+  on the classpath only for lenient base64 decoding in `help/crypto/CryptoUtils.kt` (its semantics
+  differ from the JDK decoder); do not upgrade or remove it without verification
 - Min SDK 26, target SDK 37, compile SDK 37
 - Release builds enable R8 minification + resource shrinking; `noR8` variant disables both for crash debugging
 - APK is split by ABI (`armeabi-v7a`, `arm64-v8a`, plus universal)
-- Firebase Analytics and Performance are still wired in but are **removal targets for P6**; do not
-  add new telemetry
+- Firebase telemetry has been removed; do not add new telemetry

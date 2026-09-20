@@ -38,9 +38,8 @@ TXT 目录规则、书签、阅读记录、WebDAV 备份），不提供书源 / 
 
 当前工程是 Android-first 的渐进迁移仓库，不是已经完成的 KMP 工程：
 
-- 目标 Gradle 模块：`:app`、`:modules:book`、`:baselineprofile`。
-  - `:modules:rhino`（在线规则 JS 引擎）与 `modules/web`（在线服务 Vue 3 前端）当前仍在代码库中，
-    **目标: 待 P6 移除**，不要把它们当作要保留或继续扩展的模块。
+- Gradle 模块：`:app`、`:modules:book`、`:baselineprofile`。
+  - 在线相关的 `:modules:rhino`（JS 规则引擎）与 `modules/web`（Vue 前端）已移除，不要重新引入。
 - `:app` 同时包含 Android UI、数据、领域、服务和大量遗留 View 代码；包目录只表达逻辑边界，尚无 Gradle
   编译隔离。
 - 新 UI 以 Jetpack Compose、Material 3、Navigation 3、Koin、StateFlow/SharedFlow 为默认；阅读器渲染核心等成熟
@@ -173,13 +172,15 @@ KMP 任务名在模块实际创建后才存在；不要假装运行尚未定义�
 - 代码 namespace 为 `io.legado.app`，Android `applicationId` 为 `io.github.dasoops.reader`；两者本来就
   不一致，不要混用。
 - 当前 minSdk 26、target/compile SDK 37；Release 启用 R8 与资源压缩，`noR8` 变体用于排障。
-- 应用内部加密主体使用现有 JCA（`javax.crypto`/`java.security`）与 `help/crypto` 路径。Hutool 目前仍被
-  在线书源 JS 与 `help/crypto/CryptoUtils.kt` 的 base64 宽松解码使用，**目标: 待 P6 随在线规则引擎一并评估
-  移除**，在此之前版本固定 5.8.22 勿升级。
-- 阅读器渲染属于高行为风险平台能力，迁移前必须建立兼容测试或 capability 边界。在线规则引擎（Rhino）、
-  内嵌 WebService、TTS / 音频等同样高风险，但**目标: 待 P5/P6 整体移除**，不要在这些方向新增投入。
-- 存在在线功能的过渡期，可参考源码与测试确认其当前行为；但任何改动都不应把在线能力带入本地阅读的
-  共享契约与 Feature UI。
+- 应用内部加密主体使用现有 JCA（`javax.crypto`/`java.security`）与 `help/crypto` 路径。Hutool 5.8.22 目前
+  仅被 `help/crypto/CryptoUtils.kt` 的 base64 宽松解码使用（与 JDK 解码语义不同，无法无差别替换）；如无
+  充分验证不要升级或移除。
+- 本 fork 已移除全部在线能力：书源、RSS、词典 / 翻译、AI、发现、源登录、内置浏览器、内嵌 WebService、
+  `modules/web`、朗读 / TTS / 音频、在线漫画、Cronet、Firebase、WebView、Rhino JS、二维码分享。不要重新
+  引入这些能力或依赖。
+- 阅读器渲染属于高行为风险平台能力，迁移前必须建立兼容测试或 capability 边界。
+- 部分历史 Room 实体 / DAO（书源、RSS、HttpTTS、DictRule 等）为规避 schema 迁移风险仍保留在数据库定义
+  中，但已无功能引用；新增本地能力不要依赖这些历史表。
 
 ## 交付说明
 
