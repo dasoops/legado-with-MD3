@@ -109,9 +109,16 @@ fi
 
 if [[ ! -f "$manifest_dir/$other_channel.json" ]]; then
   if [[ "$other_channel" == "official" ]]; then
-    gh_api "repos/$GITHUB_REPOSITORY/releases/latest" > "$release_tmp"
-    other_version="$(jq -r '.tag_name' "$release_tmp")"
-    write_manifest "$release_tmp" "$other_channel" "$other_version"
+    # 仓库可能尚无正式版 release, 此时 releases/latest 返回 404, 属于正常情况
+    if gh api \
+      -H "Accept: application/vnd.github+json" \
+      -H "X-GitHub-Api-Version: 2026-03-10" \
+      "repos/$GITHUB_REPOSITORY/releases/latest" > "$release_tmp" 2>/dev/null; then
+      other_version="$(jq -r '.tag_name' "$release_tmp")"
+      write_manifest "$release_tmp" "$other_channel" "$other_version"
+    else
+      echo "no official release yet; skipping $other_channel manifest" >&2
+    fi
   else
     gh_api "repos/$GITHUB_REPOSITORY/releases?per_page=100" > "$release_list_tmp"
     if jq -e \
