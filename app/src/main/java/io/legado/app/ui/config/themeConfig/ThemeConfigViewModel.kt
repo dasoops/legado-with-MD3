@@ -288,7 +288,15 @@ class ThemeConfigViewModel(
     }
 
     private fun setMainDestinationVisible(intent: ThemeConfigIntent.SetMainDestinationVisible) {
-        // 移除 RSS 后剩余主导航项均固定显示, 不再支持隐藏
+        val transform: (AppShellSettings) -> AppShellSettings = when (intent.route) {
+            MainDestination.Home.route -> { current ->
+                current.copy(showHome = intent.visible)
+            }
+            else -> return
+        }
+        viewModelScope.launch {
+            appShellSettingsGateway.update(transform)
+        }
     }
 
     private fun selectLauncherIcon(value: String) {
@@ -302,11 +310,17 @@ class ThemeConfigViewModel(
         val current = appShellSettingsGateway.currentSettings
         val oldPath = current.navIconPath(intent.destination)
         val transform: (AppShellSettings) -> AppShellSettings = when (intent.destination) {
+            MainDestination.Home.route -> { settings ->
+                settings.copy(navIconHome = intent.path)
+            }
             MainDestination.Bookshelf.route -> { settings ->
                 settings.copy(navIconBookshelf = intent.path)
             }
             MainDestination.My.route -> { settings ->
                 settings.copy(navIconMy = intent.path)
+            }
+            "${MainDestination.Home.route}:selected" -> { settings ->
+                settings.copy(navIconHomeSelected = intent.path)
             }
             "${MainDestination.Bookshelf.route}:selected" -> { settings ->
                 settings.copy(navIconBookshelfSelected = intent.path)
@@ -332,8 +346,10 @@ class ThemeConfigViewModel(
     }
 
     private fun AppShellSettings.navIconPath(destination: String): String = when (destination) {
+        MainDestination.Home.route -> navIconHome
         MainDestination.Bookshelf.route -> navIconBookshelf
         MainDestination.My.route -> navIconMy
+        "${MainDestination.Home.route}:selected" -> navIconHomeSelected
         "${MainDestination.Bookshelf.route}:selected" -> navIconBookshelfSelected
         "${MainDestination.My.route}:selected" -> navIconMySelected
         else -> ""

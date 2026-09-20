@@ -11,6 +11,7 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material.icons.filled.History
+import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.LocationSearching
 import androidx.compose.material.icons.filled.MoreHoriz
 import androidx.compose.material.icons.filled.MoreVert
@@ -19,6 +20,7 @@ import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Replay
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material.icons.outlined.Sell
 import androidx.compose.runtime.Composable
@@ -118,6 +120,12 @@ object AppIcons {
     @Composable
     fun mainDestination(destination: MainDestination, selected: Boolean): ImageVector {
         return when (destination) {
+            MainDestination.Home -> if (isMiuix) {
+                MiuixIcons.Regular.ContactsBook
+            } else {
+                if (selected) Icons.Default.Home else Icons.Outlined.Home
+            }
+
             MainDestination.Bookshelf -> if (isMiuix) {
                 if (selected) MiuixIcons.Regular.Notes else MiuixIcons.Regular.Notes
             } else {

@@ -82,10 +82,10 @@ class ThemePackageSettingsRepository : ThemePackageSettingsGateway {
         ),
         tabletInterface = string(PreferKey.tabletInterface, "auto"),
         labelVisibilityMode = string(PreferKey.labelVisibilityMode, "auto"),
-        defaultHomePage = string(PreferKey.defaultHomePage, "bookshelf"),
+        defaultHomePage = string(PreferKey.defaultHomePage, "home"),
         mainNavigationOrder = string(
             PreferKey.mainNavigationOrder,
-            "bookshelf,my",
+            "home,bookshelf,my",
         ),
         navIconHome = string(PreferKey.navIconHome, ""),
         navIconBookshelf = string(PreferKey.navIconBookshelf, ""),

@@ -138,8 +138,14 @@ fun MainActivity.mainEntryProvider(
                     )
                 )
             },
+            onNavigateToBackupSettings = {
+                onNavigateToRoute(MainRouteSettingsBackup)
+            },
             onNavigateToReadRecord = {
                 onNavigateToRoute(MainRouteReadRecord)
+            },
+            onNavigateToReadRecordOverview = {
+                onNavigateToRoute(MainRouteReadRecordOverview)
             },
             onNavigateToHighlightTagRule = {
                 onNavigateToRoute(MainRouteHighlightTagRule)

@@ -315,7 +315,7 @@ object ThemeImportExport {
             useFloatingBottomBarLiquidGlass = root.boolean("S"),
             tabletInterface = root.string("T", "auto"),
             labelVisibilityMode = root.string("U", "auto"),
-            defaultHomePage = root.string("V", "bookshelf"),
+            defaultHomePage = root.string("V", "home"),
             navIconHome = root.string("W"),
             navIconBookshelf = root.string("X"),
             navIconExplore = root.string("Y"),

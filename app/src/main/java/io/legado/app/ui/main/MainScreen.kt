@@ -78,6 +78,7 @@ import io.legado.app.R
 import io.legado.app.ui.main.bookshelf.BookShelfItem
 import io.legado.app.ui.main.bookshelf.BookshelfRouteScreen
 import io.legado.app.ui.main.bookshelf.BookshelfViewModel
+import io.legado.app.ui.main.home.HomeRouteScreen
 import io.legado.app.ui.main.my.MyRouteScreen
 import io.legado.app.ui.main.my.PrefClickEvent
 import io.legado.app.ui.theme.LegadoTheme
@@ -94,6 +95,7 @@ import io.legado.app.ui.widget.components.navigation.AppNavigationBar
 import io.legado.app.ui.widget.components.navigation.AppNavigationBarItem
 import io.legado.app.ui.widget.components.pager.rememberPagerFlingPassThroughConnection
 import io.legado.app.ui.widget.components.text.AppText
+import io.legado.app.utils.startActivityForBook
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
@@ -120,7 +122,9 @@ fun MainScreen(
     onNavigateToCache: (Long) -> Unit,
     onOpenBookshelfBook: (BookShelfItem, String?) -> Unit,
     onNavigateToBookInfo: (name: String, author: String, bookUrl: String, origin: String?, coverPath: String?, sharedCoverKey: String?) -> Unit,
+    onNavigateToBackupSettings: () -> Unit,
     onNavigateToReadRecord: () -> Unit,
+    onNavigateToReadRecordOverview: () -> Unit,
     onNavigateToHighlightTagRule: () -> Unit,
     onNavigateToAbout: () -> Unit,
     sharedTransitionScope: SharedTransitionScope? = null,
@@ -447,6 +451,17 @@ fun MainScreen(
                         )
                         CompositionLocalProvider(LocalLifecycleOwner provides pageLifecycleOwner) {
                             when (destination) {
+                            MainDestination.Home -> HomeRouteScreen(
+                                onOpenBook = { book ->
+                                    context.startActivityForBook(book)
+                                },
+                                onOpenBackupSettings = onNavigateToBackupSettings,
+                                onNavigateToReadRecord = onNavigateToReadRecord,
+                                onNavigateToReadRecordOverview = onNavigateToReadRecordOverview,
+                                sharedTransitionScope = sharedTransitionScope,
+                                animatedVisibilityScope = animatedVisibilityScope,
+                            )
+
                             MainDestination.Bookshelf -> BookshelfRouteScreen(
                                 scrollToTopRequest = bookshelfScrollToTopRequest,
                                 onScrollToTopRequestHandled = { handledRequest ->

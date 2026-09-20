@@ -61,6 +61,7 @@ fun MainNavigationSettingsSheet(
     }
 
     fun isRouteVisible(route: String): Boolean = when (route) {
+        MainDestination.Home.route -> settings.showHome
         else -> true
     }
 
@@ -107,8 +108,10 @@ fun MainNavigationSettingsSheet(
             )
             Spacer(modifier = Modifier.padding(bottom = 4.dp))
             val customIconCount = listOf(
+                settings.navIconHome,
                 settings.navIconBookshelf,
                 settings.navIconMy,
+                settings.navIconHomeSelected,
                 settings.navIconBookshelfSelected,
                 settings.navIconMySelected,
             ).count { it.isNotEmpty() }

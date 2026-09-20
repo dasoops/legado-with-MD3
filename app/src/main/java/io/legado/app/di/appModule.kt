@@ -160,6 +160,7 @@ import io.legado.app.ui.highlightTagRule.HighlightTagRuleViewModel
 import io.legado.app.ui.main.MainRouteSearchContent
 import io.legado.app.ui.main.MainViewModel
 import io.legado.app.ui.main.bookshelf.BookshelfViewModel
+import io.legado.app.ui.main.home.HomeViewModel
 import io.legado.app.ui.replace.ReplaceEditRoute
 import io.legado.app.ui.replace.ReplaceRuleViewModel
 import io.legado.app.ui.replace.edit.ReplaceEditViewModel
@@ -305,6 +306,7 @@ val appModule = module {
     viewModelOf(::ReadRecordViewModel)
     viewModelOf(::ReadRecordOverviewViewModel)
     viewModelOf(::BookshelfViewModel)
+    viewModelOf(::HomeViewModel)
     viewModelOf(::MainViewModel)
     viewModelOf(::AboutViewModel)
     viewModelOf(::GroupViewModel)

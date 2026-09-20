@@ -94,20 +94,24 @@ private fun buildMainUiState(
     appShell: AppShellSettings,
     theme: ThemeSettings,
 ): MainUiState {
-    val destinations = MainDestination.ordered(appShell.mainNavigationOrder)
+    val destinations = MainDestination.ordered(appShell.mainNavigationOrder).filter {
+        when (it) {
+            MainDestination.Home -> appShell.showHome
+            else -> true
+        }
+    }
     return MainUiState(
         destinations = destinations.toImmutableList(),
-        // 旧版本可能把已下线的首页存为默认页, 这里回退到书架
-        defaultHomePage = appShell.defaultHomePage
-            .takeIf { it != "home" }
-            ?: MainDestination.Bookshelf.route,
+        defaultHomePage = appShell.defaultHomePage,
         showBottomView = appShell.showBottomView,
         useFloatingBottomBar = appShell.useFloatingBottomBar,
         useFloatingBottomBarLiquidGlass = appShell.useFloatingBottomBarLiquidGlass,
         labelVisibilityMode = appShell.labelVisibilityMode,
         navExtended = appShell.navExtended,
+        navIconHome = appShell.navIconHome,
         navIconBookshelf = appShell.navIconBookshelf,
         navIconMy = appShell.navIconMy,
+        navIconHomeSelected = appShell.navIconHomeSelected,
         navIconBookshelfSelected = appShell.navIconBookshelfSelected,
         navIconMySelected = appShell.navIconMySelected,
         deepPersonalizationActive = theme.appTheme == "12" && theme.enableDeepPersonalization,

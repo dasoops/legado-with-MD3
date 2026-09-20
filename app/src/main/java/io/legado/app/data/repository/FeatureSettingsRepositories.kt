@@ -241,9 +241,9 @@ internal fun Preferences.toAppShellSettings(): AppShellSettings = AppShellSettin
         compatDsBoolean(PreferKey.useFloatingBottomBarLiquidGlass) ?: false,
     tabletInterface = compatDsString(PreferKey.tabletInterface) ?: "auto",
     labelVisibilityMode = compatDsString(PreferKey.labelVisibilityMode) ?: "auto",
-    defaultHomePage = compatDsString(PreferKey.defaultHomePage) ?: "bookshelf",
+    defaultHomePage = compatDsString(PreferKey.defaultHomePage) ?: "home",
     mainNavigationOrder = compatDsString(PreferKey.mainNavigationOrder)
-        ?: "bookshelf,my",
+        ?: "home,bookshelf,my",
     navExtended = compatDsBoolean(PreferKey.navExtended) ?: false,
     navIconHome = compatDsString(PreferKey.navIconHome) ?: "",
     navIconBookshelf = compatDsString(PreferKey.navIconBookshelf) ?: "",
