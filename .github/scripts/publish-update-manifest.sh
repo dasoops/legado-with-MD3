@@ -21,6 +21,35 @@ manifest_dir="$RUNNER_TEMP/$manifest_branch"
 release_tmp="$manifest_dir/release.tmp"
 release_list_tmp="$manifest_dir/releases.tmp"
 
+# 带重试的 gh api: release 刚创建时按 tag 查询偶发 404, 重试可规避时序问题
+gh_api() {
+  local path="$1"
+  local attempt
+  for attempt in 1 2 3 4 5; do
+    if gh api \
+      -H "Accept: application/vnd.github+json" \
+      -H "X-GitHub-Api-Version: 2026-03-10" \
+      "$path"; then
+      return 0
+    fi
+    echo "gh api $path failed (attempt $attempt/5), retrying..." >&2
+    sleep $((attempt * 3))
+  done
+  return 1
+}
+
+# 先按 tag 精确查询, 失败则回退到 releases 列表按 tag_name 过滤
+fetch_release_by_tag() {
+  local tag="$1"
+  local out="$2"
+  if gh_api "repos/$GITHUB_REPOSITORY/releases/tags/$tag" > "$out"; then
+    return 0
+  fi
+  echo "releases/tags/$tag unavailable, falling back to releases list" >&2
+  gh_api "repos/$GITHUB_REPOSITORY/releases?per_page=100" > "$release_list_tmp"
+  jq -e --arg tag "$tag" '[.[] | select(.tag_name == $tag)] | .[0]' "$release_list_tmp" > "$out"
+}
+
 write_manifest() {
   local source_file="$1"
   local target_channel="$2"
@@ -70,10 +99,7 @@ else
 fi
 trap 'git worktree remove --force "$manifest_dir" >/dev/null 2>&1 || true' EXIT
 
-gh api \
-  -H "Accept: application/vnd.github+json" \
-  -H "X-GitHub-Api-Version: 2026-03-10" \
-  "repos/$GITHUB_REPOSITORY/releases/tags/$version" > "$release_tmp"
+fetch_release_by_tag "$version" "$release_tmp"
 write_manifest "$release_tmp" "$channel" "$version"
 
 other_channel="official"
@@ -83,17 +109,11 @@ fi
 
 if [[ ! -f "$manifest_dir/$other_channel.json" ]]; then
   if [[ "$other_channel" == "official" ]]; then
-    gh api \
-      -H "Accept: application/vnd.github+json" \
-      -H "X-GitHub-Api-Version: 2026-03-10" \
-      "repos/$GITHUB_REPOSITORY/releases/latest" > "$release_tmp"
+    gh_api "repos/$GITHUB_REPOSITORY/releases/latest" > "$release_tmp"
     other_version="$(jq -r '.tag_name' "$release_tmp")"
     write_manifest "$release_tmp" "$other_channel" "$other_version"
   else
-    gh api \
-      -H "Accept: application/vnd.github+json" \
-      -H "X-GitHub-Api-Version: 2026-03-10" \
-      "repos/$GITHUB_REPOSITORY/releases?per_page=100" > "$release_list_tmp"
+    gh_api "repos/$GITHUB_REPOSITORY/releases?per_page=100" > "$release_list_tmp"
     if jq -e \
       '[.[] | select(.draft == false and .prerelease == true)] | max_by(.created_at) | select(. != null)' \
       "$release_list_tmp" > "$release_tmp"; then
