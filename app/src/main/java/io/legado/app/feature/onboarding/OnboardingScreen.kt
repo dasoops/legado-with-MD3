@@ -169,7 +169,7 @@ private fun BackupSelectorDialog(state: OnboardingUiState, onIntent: (Onboarding
         title = stringResource(R.string.select_restore_file),
         onDismiss = { onIntent(OnboardingIntent.DismissBackupSelector) },
         content = {
-            Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
+            Column {
                 backupNames.forEach { name ->
                     AppText(
                         text = name,
