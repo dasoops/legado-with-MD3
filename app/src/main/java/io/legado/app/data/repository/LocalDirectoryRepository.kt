@@ -5,6 +5,7 @@ import android.provider.DocumentsContract.getDocumentId
 import android.provider.DocumentsContract.getTreeDocumentId
 import androidx.core.net.toUri
 import androidx.documentfile.provider.DocumentFile
+import io.legado.app.constant.AppLog
 import io.legado.app.constant.AppPattern
 import io.legado.app.domain.gateway.LocalDirectoryGateway
 import io.legado.app.model.localBook.LocalBook
@@ -53,6 +54,8 @@ class LocalDirectoryRepository(
                     book.save()
                 }
                 count++
+            }.onFailure {
+                AppLog.put("导入目录书籍失败\n${file.uri}", it)
             }
         }
         count
@@ -83,17 +86,29 @@ class LocalDirectoryRepository(
         runCatching { getTreeDocumentId(rootUri.toUri()) }.getOrNull()
 
     /**
-     * 直接用传入 uri 构造根文档。不能用 FileDoc.fromUri(..., true):
+     * 构造根文档。不能用 FileDoc.fromUri(..., true):
      * 子目录 uri 会被 DocumentFile.fromTreeUri 退回树的根文档, 丢失子文档 id。
      */
     private fun rootDirDoc(rootUri: String): FileDoc? {
-        val uri = rootUri.toUri()
-        val name = if (uri.isContentScheme()) {
-            runCatching { DocumentFile.fromTreeUri(appCtx, uri)?.name }.getOrNull()
-        } else {
-            uri.path?.let { File(it).name }
-        } ?: uri.lastPathSegment ?: return null
-        return FileDoc(name = name, isDir = true, size = 0, lastModified = 0, uri = uri)
+        val treeUri = rootUri.toUri()
+        if (!treeUri.isContentScheme()) {
+            val path = treeUri.path ?: return null
+            return FileDoc(
+                name = File(path).name,
+                isDir = true,
+                size = 0,
+                lastModified = 0,
+                uri = treeUri,
+            )
+        }
+        val name = runCatching { DocumentFile.fromTreeUri(appCtx, treeUri)?.name }.getOrNull()
+            ?: getTreeDocumentId(treeUri).substringAfterLast('/').substringAfter(':')
+        // FileDoc.list 内部用 getDocumentId, 对 tree URI (2 段路径) 会抛 IllegalArgumentException;
+        // 转成 document URI (4 段) 后根目录与子目录列举才能正常工作
+        val documentUri = runCatching {
+            DocumentsContract.buildDocumentUriUsingTree(treeUri, getTreeDocumentId(treeUri))
+        }.getOrDefault(treeUri)
+        return FileDoc(name = name, isDir = true, size = 0, lastModified = 0, uri = documentUri)
     }
 
     private fun scanBookFiles(root: FileDoc): List<FileDoc> {
@@ -102,7 +117,10 @@ class LocalDirectoryRepository(
         queue.add(root)
         while (queue.isNotEmpty()) {
             val dir = queue.removeFirst()
-            dir.list()?.forEach { child ->
+            val children = runCatching { dir.list() }
+                .onFailure { AppLog.put("读取目录失败\n${dir.uri}", it) }
+                .getOrNull() ?: continue
+            children.forEach { child ->
                 when {
                     child.name.startsWith(".") -> Unit
                     child.isDir -> queue.add(child)

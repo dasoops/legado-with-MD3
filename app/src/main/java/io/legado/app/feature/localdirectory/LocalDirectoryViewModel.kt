@@ -4,6 +4,7 @@ import android.app.Application
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import io.legado.app.R
+import io.legado.app.constant.AppLog
 import io.legado.app.data.repository.BookRepository
 import io.legado.app.domain.gateway.LocalDirectoryGateway
 import io.legado.app.utils.AlphanumComparator
@@ -128,11 +129,10 @@ class LocalDirectoryViewModel(
             _state.update { it.copy(isLoading = true) }
             runCatching { gateway.importDirectoryToGroup(groupId, rootUri) }
                 .onFailure {
-                    _effects.tryEmit(
-                        LocalDirectoryEffect.ShowToast(
-                            appContext.getString(R.string.error)
-                        )
-                    )
+                    AppLog.put("扫描本地目录失败\n${it.localizedMessage}", it)
+                    val message = it.localizedMessage?.takeIf { it.isNotBlank() }
+                        ?: appContext.getString(R.string.error)
+                    _effects.tryEmit(LocalDirectoryEffect.ShowToast(message))
                 }
             withContext(Dispatchers.Main) {
                 _state.update { it.copy(isLoading = false) }
