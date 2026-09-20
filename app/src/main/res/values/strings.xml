@@ -478,6 +478,7 @@
     <string name="fattening_book">Awaiting more chapters books</string>
     <string name="finish_book">Finished books</string>
     <string name="local_book">Local Books</string>
+    <string name="directory_unavailable">Directory unavailable, please select it again</string>
     <string name="status_bar_immersion">The status bar color becomes transparent</string>
     <string name="imm_navigation_bar">immersion navigation bar</string>
     <string name="imm_navigation_bar_s">The navigation bar becomes transparent</string>
@@ -2269,4 +2270,7 @@
     <string name="feature_bookmarks_chapter_fallback">Chapter %1$d</string>
     <string name="book_type_audio">Audio</string>
     <string name="audio">Audio</string>
+    <string name="add_local_directory_group">Add local directory group</string>
+    <string name="reselect_directory">Reselect directory</string>
+    <string name="local_directory">Local directory</string>
 </resources>

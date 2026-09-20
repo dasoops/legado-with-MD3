@@ -2174,4 +2174,8 @@
     <string name="feature_bookmarks_chapter_fallback">第 %1$d 章</string>
     <string name="audio">音訊</string>
     <string name="book_type_audio">音訊</string>
+    <string name="add_local_directory_group">新增本地目錄分組</string>
+    <string name="reselect_directory">重新選擇目錄</string>
+    <string name="local_directory">本地目錄</string>
+    <string name="directory_unavailable">目錄不可用, 請重新選擇</string>
 </resources>

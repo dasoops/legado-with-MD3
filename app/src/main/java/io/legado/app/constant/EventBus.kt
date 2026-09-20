@@ -1,7 +1,6 @@
 package io.legado.app.constant
 
 object EventBus {
-    const val UP_BOOKSHELF = "upBookToc"
     const val BOOKSHELF_REFRESH = "bookshelfRefresh"
     const val BATTERY_CHANGED = "batteryChanged"
     const val TIME_CHANGED = "timeChanged"
@@ -19,6 +18,4 @@ object EventBus {
     const val REFRESH_BOOK_TOC = "refreshBookToc"
     const val REFRESH_BOOK_CONTENT = "refreshBookContent"
     const val UP_TOC = "upToc"
-
-    const val UP_ALL_BOOK_TOC = "upAllBookToc"
 }

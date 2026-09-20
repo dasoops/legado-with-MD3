@@ -28,6 +28,7 @@ class BookGroupMutationRepository(
                 enableRefresh = group.enableRefresh,
                 isPrivate = group.isPrivate,
                 order = groupDao.maxOrder.plus(1),
+                localDirectoryUri = group.localDirectoryUri,
             )
 
             if (groupDao.getByID(groupId) == null) {
@@ -112,6 +113,7 @@ class BookGroupMutationRepository(
         show = show,
         bookSort = bookSort,
         isPrivate = isPrivate,
+        localDirectoryUri = localDirectoryUri,
     )
 
     private fun TagGroupRuleUpdate.toEntity(id: Long = this.id) = TagGroupRule(

@@ -159,11 +159,6 @@ open class MainActivity : BaseComposeActivity() {
             upVersion()
             //备份同步
             backupSync()
-            //自动更新书籍
-            val isAutoRefreshedBook = savedInstanceState?.getBoolean("isAutoRefreshedBook") ?: false
-            if (otherSettingsGateway.currentSettings.autoRefresh && !isAutoRefreshedBook) {
-                viewModel.upAllBookToc()
-            }
             if (shouldAutoCheckUpdate) {
                 checkUpdateOnStart()
             }
@@ -429,9 +424,6 @@ open class MainActivity : BaseComposeActivity() {
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        if (otherSettingsGateway.currentSettings.autoRefresh) {
-            outState.putBoolean("isAutoRefreshedBook", true)
-        }
         val readRoute = latestBackStack.lastOrNull() as? MainRouteReadBook
             ?: activeReadBookRoute
         if (readRoute != null) {

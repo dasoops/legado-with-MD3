@@ -1,5 +1,8 @@
 package io.legado.app.ui.main.bookshelf
 
+import android.provider.DocumentsContract
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.SizeTransform
 import androidx.compose.animation.fadeIn
@@ -30,6 +33,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.documentfile.provider.DocumentFile
 import io.legado.app.R
 import io.legado.app.data.entities.BookGroup
 import io.legado.app.ui.book.group.GroupDeleteAction
@@ -46,6 +50,7 @@ import io.legado.app.ui.widget.components.menuItem.RoundDropdownMenu
 import io.legado.app.ui.widget.components.menuItem.RoundDropdownMenuItem
 import io.legado.app.ui.widget.components.modalBottomSheet.AppModalBottomSheet
 import io.legado.app.utils.move
+import io.legado.app.utils.takePersistablePermissionSafely
 import org.koin.androidx.compose.koinViewModel
 import sh.calvin.reorderable.rememberReorderableLazyListState
 
@@ -59,6 +64,7 @@ fun GroupManageSheet(
     tagGroupRuleViewModel: TagGroupRuleViewModel = koinViewModel()
 ) {
     val context = LocalContext.current
+    val defaultLocalDirectoryName = stringResource(R.string.local_directory)
     val groups by bookshelfViewModel.allGroupsFlow.collectAsState()
 
     var editingGroup by remember { mutableStateOf<BookGroup?>(null) }
@@ -121,6 +127,32 @@ fun GroupManageSheet(
             if (!isEditing) {
                 Box {
                     var showMenu by remember { mutableStateOf(false) }
+                    val directoryPicker = rememberLauncherForActivityResult(
+                        ActivityResultContracts.OpenDocumentTree()
+                    ) { uri ->
+                        if (uri != null) {
+                            uri.takePersistablePermissionSafely(context)
+                            // 部分 provider 不返回显示名, 退化到 tree document id 的末段
+                            val pickedName = DocumentFile.fromTreeUri(context, uri)
+                                ?.name
+                                ?.takeIf { it.isNotBlank() }
+                                ?: DocumentsContract.getTreeDocumentId(uri)
+                                    .substringAfterLast('/')
+                                    .substringAfter(':')
+                                    .takeIf { it.isNotBlank() }
+                                ?: defaultLocalDirectoryName
+                            viewModel.addGroup(
+                                groupName = pickedName,
+                                bookSort = -1,
+                                enableRefresh = false,
+                                isPrivate = false,
+                                cover = null,
+                                pattern = null,
+                                localDirectoryUri = uri.toString(),
+                                onSuccess = { showMenu = false }
+                            )
+                        }
+                    }
                     MediumTonalButton(
                         onClick = { showMenu = true },
                         icon = Icons.Default.Add,
@@ -135,6 +167,14 @@ fun GroupManageSheet(
                                 editingGroup = null
                                 coverPath = null
                                 isEditing = true
+                            }
+                        )
+                        RoundDropdownMenuItem(
+                            text = stringResource(R.string.add_local_directory_group),
+                            leadingIcon = { Icon(Icons.Default.Add, null) },
+                            onClick = {
+                                showMenu = false
+                                directoryPicker.launch(null)
                             }
                         )
                         RoundDropdownMenuItem(

@@ -24,19 +24,18 @@ data class BookGroup(
     @ColumnInfo(defaultValue = "-1")
     var bookSort: Int = -1,
     @ColumnInfo(defaultValue = "0")
-    var isPrivate: Boolean = false
+    var isPrivate: Boolean = false,
+    var localDirectoryUri: String? = null
 ) : Parcelable {
+
+    val isLocalDirectory: Boolean get() = !localDirectoryUri.isNullOrBlank()
 
     companion object {
         const val IdRoot = -100L
         const val IdAll = -1L
         const val IdLocal = -2L
-        const val IdAudio = -3L
-        const val IdNetNone = -4L
         const val IdLocalNone = -5L
-        const val IdManga = -7L
         const val IdText = -8L
-        const val IdError = -11L
         const val IdReading = -20L
         const val IdUnread = -21L
         const val IdReadFinished = -22L
@@ -52,13 +51,9 @@ data class BookGroup(
     fun getManageName(context: Context): GroupNameInfo {
         return when (groupId) {
             IdAll -> GroupNameInfo(groupName, context.getString(R.string.all))
-            IdAudio -> GroupNameInfo(groupName, context.getString(R.string.audio))
             IdLocal -> GroupNameInfo(groupName, context.getString(R.string.local))
-            IdNetNone -> GroupNameInfo(groupName, context.getString(R.string.net_no_group))
             IdLocalNone -> GroupNameInfo(groupName, context.getString(R.string.local_no_group))
-            IdManga -> GroupNameInfo(groupName, context.getString(R.string.manga))
             IdText -> GroupNameInfo(groupName, context.getString(R.string.noval))
-            IdError -> GroupNameInfo(groupName, context.getString(R.string.update_book_fail))
             IdReading -> GroupNameInfo(groupName, context.getString(R.string.is_reading))
             IdUnread -> GroupNameInfo(groupName, context.getString(R.string.is_unread))
             IdReadFinished -> GroupNameInfo(groupName, context.getString(R.string.is_read_finished))
@@ -76,7 +71,7 @@ data class BookGroup(
     }
 
     override fun hashCode(): Int {
-        return groupId.hashCode()
+        return 31 * groupId.hashCode() + (localDirectoryUri?.hashCode() ?: 0)
     }
 
     override fun equals(other: Any?): Boolean {
@@ -89,6 +84,7 @@ data class BookGroup(
                     && other.show == show
                     && other.order == order
                     && other.isPrivate == isPrivate
+                    && other.localDirectoryUri == localDirectoryUri
         }
         return false
     }

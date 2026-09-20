@@ -2,7 +2,6 @@ package io.legado.app.ui.main
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import io.legado.app.constant.EventBus
 import io.legado.app.domain.gateway.AppShellSettingsGateway
 import io.legado.app.domain.gateway.ThemeSettingsGateway
 import io.legado.app.domain.model.settings.AppShellSettings
@@ -10,7 +9,6 @@ import io.legado.app.domain.model.settings.ThemeSettings
 import io.legado.app.domain.usecase.AppStartupMaintenanceUseCase
 import io.legado.app.domain.usecase.WebDavBackupUseCase
 import io.legado.app.ui.main.my.PrefClickEvent
-import io.legado.app.utils.eventBus.FlowEventBus
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -53,10 +51,6 @@ class MainViewModel(
             is MainUiIntent.SetNavigationRailExpanded -> setNavExtended(intent.expanded)
             is MainUiIntent.HandlePreferenceClick -> handlePrefClick(intent.event)
         }
-    }
-
-    fun upAllBookToc() {
-        FlowEventBus.post(EventBus.UP_ALL_BOOK_TOC, Unit)
     }
 
     fun restoreWebDav(name: String) {

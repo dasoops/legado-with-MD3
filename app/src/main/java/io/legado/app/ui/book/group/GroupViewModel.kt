@@ -38,6 +38,7 @@ class GroupViewModel(
         isPrivate: Boolean,
         cover: String?,
         pattern: String? = null,
+        localDirectoryUri: String? = null,
         onError: ((Throwable) -> Unit)? = null,
         onSuccess: () -> Unit
     ) {
@@ -51,6 +52,7 @@ class GroupViewModel(
                         isPrivate = isPrivate,
                         cover = cover,
                         pattern = pattern,
+                        localDirectoryUri = localDirectoryUri,
                     )
                 )
                 onSuccess()
@@ -128,6 +130,7 @@ class GroupViewModel(
         show = show,
         bookSort = bookSort,
         isPrivate = isPrivate,
+        localDirectoryUri = localDirectoryUri,
     )
 
     private fun TagGroupRule.toUpdate() = TagGroupRuleUpdate(

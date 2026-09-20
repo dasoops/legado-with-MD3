@@ -12,7 +12,9 @@ data class BookGroupUi(
     val enableRefresh: Boolean,
     val show: Boolean,
     val bookSort: Int,
-    val isPrivate: Boolean
+    val isPrivate: Boolean,
+    val isLocalDirectory: Boolean,
+    val localDirectoryUri: String?
 )
 
 fun BookGroup.toBookGroupUi() = BookGroupUi(
@@ -23,5 +25,7 @@ fun BookGroup.toBookGroupUi() = BookGroupUi(
     enableRefresh = enableRefresh,
     show = show,
     bookSort = bookSort,
-    isPrivate = isPrivate
+    isPrivate = isPrivate,
+    isLocalDirectory = isLocalDirectory,
+    localDirectoryUri = localDirectoryUri
 )

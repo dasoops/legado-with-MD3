@@ -7,6 +7,7 @@ data class NewBookGroup(
     val isPrivate: Boolean,
     val cover: String?,
     val pattern: String?,
+    val localDirectoryUri: String? = null,
 )
 
 data class BookGroupUpdate(
@@ -18,6 +19,7 @@ data class BookGroupUpdate(
     val show: Boolean,
     val bookSort: Int,
     val isPrivate: Boolean,
+    val localDirectoryUri: String? = null,
 )
 
 data class TagGroupRuleUpdate(

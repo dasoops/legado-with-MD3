@@ -21,7 +21,7 @@ object DatabaseMigrations {
             migration_35_36, migration_36_37, migration_37_38, migration_38_39,
             migration_39_40, migration_40_41, migration_41_42, migration_42_43,
             migration_82_83, migration_98_99, migration_99_100,
-            migration_102_103,
+            migration_102_103, migration_105_106,
         )
     }
 
@@ -664,6 +664,14 @@ object DatabaseMigrations {
             )
             db.execSQL("DROP TABLE readRecordSession")
             db.execSQL("ALTER TABLE readRecordSession_migrated RENAME TO readRecordSession")
+        }
+    }
+
+    private val migration_105_106 = object : Migration(105, 106) {
+        override fun migrate(db: SupportSQLiteDatabase) {
+            db.execSQL("ALTER TABLE book_groups ADD COLUMN localDirectoryUri TEXT")
+            // 清理 fork 早期写入的恒空线上系统分组 (音频/网络未分组/漫画/更新失败)
+            db.execSQL("DELETE FROM book_groups WHERE groupId IN (-3, -4, -7, -11)")
         }
     }
 }

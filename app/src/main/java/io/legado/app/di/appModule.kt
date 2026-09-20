@@ -41,6 +41,7 @@ import io.legado.app.data.repository.HomepageSettingsRepository
 import io.legado.app.data.repository.ImportBookSettingsRepository
 import io.legado.app.data.repository.LabSettingsRepository
 import io.legado.app.data.repository.LocalBookRepository
+import io.legado.app.data.repository.LocalDirectoryRepository
 import io.legado.app.data.repository.LocalPasswordRepository
 import io.legado.app.data.repository.OtherConfigSystemRepository
 import io.legado.app.data.repository.OtherSettingsRepository
@@ -87,6 +88,7 @@ import io.legado.app.domain.gateway.HomepageSettingsGateway
 import io.legado.app.domain.gateway.ImportBookSettingsGateway
 import io.legado.app.domain.gateway.LabSettingsGateway
 import io.legado.app.domain.gateway.LocalBookGateway
+import io.legado.app.domain.gateway.LocalDirectoryGateway
 import io.legado.app.domain.gateway.LocalPasswordGateway
 import io.legado.app.domain.gateway.OtherConfigSystemGateway
 import io.legado.app.domain.gateway.OtherSettingsGateway
@@ -116,6 +118,7 @@ import io.legado.app.domain.usecase.UploadReadingProgressUseCase
 import io.legado.app.domain.usecase.VerifyBookmarkTargetUseCase
 import io.legado.app.domain.usecase.WebDavBackupUseCase
 import io.legado.app.domain.usecase.readRecord.GetReadRecordOverviewUseCase
+import io.legado.app.feature.localdirectory.LocalDirectoryViewModel
 import io.legado.app.feature.onboarding.OnboardingViewModel
 import io.legado.app.help.coil.CoverFetcher
 import io.legado.app.help.coil.CoverInterceptor
@@ -264,6 +267,7 @@ val appModule = module {
     single<HomepageSettingsGateway> { HomepageSettingsRepository() }
     single<CoverAlbumGateway> { CoverAlbumRepository(get(), get()) }
     single<LocalBookGateway> { LocalBookRepository(get()) }
+    single<LocalDirectoryGateway> { LocalDirectoryRepository(get()) }
     single<DatabaseMaintenanceGateway> { DatabaseMaintenanceRepository(get()) }
     single<WebDavBackupGateway> { WebDavBackupRepository() }
     single<ReadingProgressGateway> { WebDavReadingProgressRepository() }
@@ -341,6 +345,14 @@ val appModule = module {
     viewModelOf(::LabConfigViewModel)
     viewModelOf(::TocViewModel)
     viewModelOf(::ImportBookViewModel)
+    viewModel { (rootUri: String) ->
+        LocalDirectoryViewModel(
+            application = get(),
+            gateway = get(),
+            importRepository = get(),
+            rootUri = rootUri,
+        )
+    }
     viewModelOf(::RemoteBookViewModel)
     viewModelOf(::ServerConfigViewModel)
     viewModelOf(::ServersViewModel)

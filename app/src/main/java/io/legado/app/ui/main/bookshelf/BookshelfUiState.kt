@@ -45,13 +45,10 @@ sealed interface BookshelfIntent {
     data class ToggleBookSelection(val bookUrl: String) : BookshelfIntent
     data class SetInFolderRoot(val value: Boolean) : BookshelfIntent
     data class MoveBooksToGroup(val bookUrls: Set<String>, val groupId: Long) : BookshelfIntent
-    data class RefreshBooks(val books: List<BookUiItem>) : BookshelfIntent
     data class StartDragging(val books: List<BookUiItem>) : BookshelfIntent
     data class MoveDragging(val from: Int, val to: Int, val books: List<BookUiItem>) : BookshelfIntent
     data object FinishDragging : BookshelfIntent
     data object ScrollToTop : BookshelfIntent
-    data object RefreshAll : BookshelfIntent
-    data class RefreshToc(val books: List<BookUiItem>) : BookshelfIntent
     data class ExportToUri(val uri: Uri, val books: List<BookUiItem>) : BookshelfIntent
     data class UpdateSetting(
         val transform: (BookshelfSettings) -> BookshelfSettings,
@@ -85,13 +82,10 @@ data class BookshelfUiState(
     val selectedGroupIndex: Int = 0,
     val selectedGroupId: Long = BookGroup.IdAll,
     val loadingText: String? = null,
-    val upBooksCount: Int = 0,
-    val updatingBooks: ImmutableSet<String> = persistentSetOf(),
     val activeOverlay: BookshelfOverlay? = null,
     val isEditMode: Boolean = false,
     val selectedBookUrls: ImmutableSet<String> = persistentSetOf(),
     val isInFolderRoot: Boolean = false,
-    val isRefreshing: Boolean = false,
     val bookGroupStyle: Int = 0,
     val bookshelfSort: Int = 0,
     val bookshelfSortOrder: Int = 1,

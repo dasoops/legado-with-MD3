@@ -1,6 +1,7 @@
 package io.legado.app.ui.book.group
 
 import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -14,6 +15,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.FolderOpen
 import androidx.compose.material.icons.filled.Restore
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
@@ -46,6 +48,7 @@ import io.legado.app.utils.MD5Utils
 import io.legado.app.utils.SelectImageContract
 import io.legado.app.utils.externalFiles
 import io.legado.app.utils.launch
+import io.legado.app.utils.takePersistablePermissionSafely
 import io.legado.app.utils.toastOnUi
 import org.koin.androidx.compose.koinViewModel
 import splitties.init.appCtx
@@ -104,13 +107,24 @@ fun GroupEditContent(
 ) {
     val context = LocalContext.current
     var groupName by remember(group) { mutableStateOf(group?.groupName ?: "") }
-    var enableRefresh by remember(group) { mutableStateOf(group?.enableRefresh ?: true) }
     var isPrivate by remember(group) { mutableStateOf(group?.isPrivate ?: false) }
     var showDisablePrivateDialog by remember(group) { mutableStateOf(false) }
     var selectedSortIndex by remember(group) { mutableIntStateOf(group?.bookSort ?: -1) }
     var pattern by remember(tagGroupRule) { mutableStateOf(tagGroupRule?.pattern ?: "") }
     var showPattern by remember(tagGroupRule) { mutableStateOf(tagGroupRule != null || pattern.isNotBlank()) }
     var isSaving by remember(group) { mutableStateOf(false) }
+    var localDirectoryUri by remember(group) { mutableStateOf(group?.localDirectoryUri) }
+
+    val isLocalDirectory = group?.isLocalDirectory == true
+
+    val directoryPicker = rememberLauncherForActivityResult(
+        ActivityResultContracts.OpenDocumentTree()
+    ) { uri ->
+        if (uri != null) {
+            uri.takePersistablePermissionSafely(context)
+            localDirectoryUri = uri.toString()
+        }
+    }
 
     val sortOptions = stringArrayResource(R.array.book_sort)
     val sortEntryValues = remember(sortOptions) {
@@ -174,68 +188,85 @@ fun GroupEditContent(
                     singleLine = true
                 )
 
-                GlassCard(
-                    containerColor = LegadoTheme.colorScheme.onSheetContent,
-                ) {
-                    CompactDropdownSettingItem(
-                        title = stringResource(R.string.sort),
-                        selectedValue = selectedSortIndex.toString(),
-                        color = LegadoTheme.colorScheme.onSheetContent,
-                        displayEntries = sortOptions,
-                        entryValues = sortEntryValues,
-                        onValueChange = {
-                            selectedSortIndex = it.toInt()
-                        }
-                    )
+                if (!isLocalDirectory) {
+                    GlassCard(
+                        containerColor = LegadoTheme.colorScheme.onSheetContent,
+                    ) {
+                        CompactDropdownSettingItem(
+                            title = stringResource(R.string.sort),
+                            selectedValue = selectedSortIndex.toString(),
+                            color = LegadoTheme.colorScheme.onSheetContent,
+                            displayEntries = sortOptions,
+                            entryValues = sortEntryValues,
+                            onValueChange = {
+                                selectedSortIndex = it.toInt()
+                            }
+                        )
+                    }
                 }
             }
         }
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        CompactSwitchSettingItem(
-            title = stringResource(R.string.allow_drop_down_refresh),
-            checked = enableRefresh,
-            onCheckedChange = { enableRefresh = it }
-        )
+        if (isLocalDirectory) {
+            AppTextField(
+                value = localDirectoryUri.orEmpty(),
+                onValueChange = {},
+                backgroundColor = LegadoTheme.colorScheme.onSheetContent,
+                label = stringResource(R.string.local_directory),
+                modifier = Modifier.fillMaxWidth(),
+                readOnly = true,
+                singleLine = true
+            )
 
-        if (canSetPrivate) {
+            Spacer(modifier = Modifier.height(8.dp))
+
+            MediumTonalButton(
+                onClick = { directoryPicker.launch(null) },
+                icon = Icons.Default.FolderOpen,
+                text = stringResource(R.string.reselect_directory),
+                modifier = Modifier.fillMaxWidth()
+            )
+        } else {
+            if (canSetPrivate) {
+                Spacer(modifier = Modifier.height(8.dp))
+
+                CompactSwitchSettingItem(
+                    title = stringResource(R.string.private_group),
+                    description = stringResource(R.string.private_group_desc),
+                    checked = isPrivate,
+                    onCheckedChange = { checked ->
+                        if (!checked && group?.isPrivate == true) {
+                            showDisablePrivateDialog = true
+                        } else {
+                            isPrivate = checked
+                        }
+                    }
+                )
+            }
+
             Spacer(modifier = Modifier.height(8.dp))
 
             CompactSwitchSettingItem(
-                title = stringResource(R.string.private_group),
-                description = stringResource(R.string.private_group_desc),
-                checked = isPrivate,
-                onCheckedChange = { checked ->
-                    if (!checked && group?.isPrivate == true) {
-                        showDisablePrivateDialog = true
-                    } else {
-                        isPrivate = checked
-                    }
-                }
+                title = "标签匹配规则",
+                description = if (showPattern) "启用后分组将根据书籍标签自动匹配" else "关闭后分组为手动管理",
+                checked = showPattern,
+                onCheckedChange = { showPattern = it }
             )
-        }
 
-        Spacer(modifier = Modifier.height(8.dp))
+            if (showPattern) {
+                Spacer(modifier = Modifier.height(8.dp))
 
-        CompactSwitchSettingItem(
-            title = "标签匹配规则",
-            description = if (showPattern) "启用后分组将根据书籍标签自动匹配" else "关闭后分组为手动管理",
-            checked = showPattern,
-            onCheckedChange = { showPattern = it }
-        )
-
-        if (showPattern) {
-            Spacer(modifier = Modifier.height(8.dp))
-
-            AppTextField(
-                value = pattern,
-                onValueChange = { pattern = it },
-                backgroundColor = LegadoTheme.colorScheme.onSheetContent,
-                label = stringResource(R.string.tag_group_pattern),
-                modifier = Modifier.fillMaxWidth(),
-                minLines = 3
-            )
+                AppTextField(
+                    value = pattern,
+                    onValueChange = { pattern = it },
+                    backgroundColor = LegadoTheme.colorScheme.onSheetContent,
+                    label = stringResource(R.string.tag_group_pattern),
+                    modifier = Modifier.fillMaxWidth(),
+                    minLines = 3
+                )
+            }
         }
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -261,8 +292,8 @@ fun GroupEditContent(
                                 groupName = groupName,
                                 cover = coverPath,
                                 bookSort = selectedSortIndex,
-                                enableRefresh = enableRefresh,
-                                isPrivate = isPrivate
+                                isPrivate = isPrivate,
+                                localDirectoryUri = localDirectoryUri
                             ),
                             ruleToSave = ruleToSave,
                             ruleToDelete = ruleToDelete,
@@ -276,7 +307,7 @@ fun GroupEditContent(
                         viewModel.addGroup(
                             groupName,
                             selectedSortIndex,
-                            enableRefresh,
+                            enableRefresh = true,
                             isPrivate,
                             coverPath,
                             pattern = pattern.takeIf { showPattern && it.isNotBlank() },
