@@ -1,7 +1,4 @@
 # 放置一些模块类
 
-* analyzeRule 书源规则解析
+* analyzeRule 规则解析 (正则 / XPath / JSON, 供 WebDAV 远程书与本地规则使用)
 * localBook 本地书籍解析
-* rss 订阅规则解析
-* webBook 获取网络书籍
-

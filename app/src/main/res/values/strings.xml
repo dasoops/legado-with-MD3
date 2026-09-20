@@ -2260,7 +2260,6 @@
     <string name="whole_book_page_format">Book %1$d / %2$d</string>
     <string name="whole_book_page_estimated_format">Book %1$s / %2$s</string>
     <string name="whole_book_page_unavailable">Book - / -</string>
-    <string name="import_current_folder_as_manga">Import current folder as comic</string>
     <string name="feature_bookmarks_search_notes">Search note content</string>
     <string name="feature_bookmarks_search_current">Search current %1$s</string>
     <string name="feature_bookmarks_counts">%1$d bookmarks · %2$d notes</string>

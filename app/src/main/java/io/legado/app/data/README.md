@@ -6,13 +6,8 @@
 * \BookChapter 目录信息
 * \BookGroup 书籍分组
 * \Bookmark 书签
-* \BookSource 书源
-* \Cookie http cookie
 * \ReplaceRule 替换规则
-* \RssArticle rss条目
-* \RssReadRecord rss阅读记录
-* \RssSource rss源
-* \RssStar rss收藏
-* \SearchBook 搜索结果
-* \SearchKeyword 搜索关键字
-* \TxtTocRule txt文件目录规则
+* \TxtTocRule txt 文件目录规则
+* \ReadRecord 阅读记录
+
+> 说明: 部分历史实体 (如 BookSource / RssSource / HttpTTS 等) 仍保留在数据库 schema 中以避免迁移风险, 但已无功能引用。
