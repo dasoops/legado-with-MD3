@@ -155,7 +155,7 @@
         \u3000\u3000 This is an open source reading software newly developed by Kotlin, welcome to join us.
     </string>
     <string name="app_share_description">
-        Legado (YueDu 3.0) download link：\n https://github.com/gedoor/legado/releases
+        Legado (YueDu 3.0) download link：\n https://github.com/dasoops/legado-with-MD3/releases
     </string>
     <string name="version_name">Version %s</string>
     <string name="pt_background_verification">Background-verification</string>
@@ -864,7 +864,7 @@
     <string name="alipay">AliPay</string>
     <string name="alipay_red_envelope_search_code">AliPay red envelope search code</string>
     <string name="alipay_red_envelope_copy">537954522 Click to copy</string>
-    <string name="contributors_summary">gedoor,Invinciblelee,Xwite etc. Checking in github for details</string>
+    <string name="contributors_summary">A local-reading fork maintained by dasoops, based on the upstream work of gedoor, Invinciblelee, Xwite and others. See GitHub for details</string>
     <string name="clear_cache_summary">Clear the cache of the downloaded books and fonts</string>
     <string name="default_cover">Default Cover</string>
     <string name="restore_ignore">Bypass List</string>

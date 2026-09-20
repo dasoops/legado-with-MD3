@@ -90,7 +90,7 @@
         \u3000\u3000這是一款使用Kotlin全新開發的開源的閱讀軟體，歡迎您的加入。
     </string>
     <string name="app_share_description">
-        閱讀3.0下載網址：\nhttps://github.com/gedoor/legado/releases
+        閱讀3.0下載網址：\nhttps://github.com/dasoops/legado-with-MD3/releases
     </string>
     <string name="version_name">Version %s</string>
     <string name="pt_background_verification">後臺校驗書源</string>
@@ -716,7 +716,7 @@
     <string name="alipay">支付寶</string>
     <string name="alipay_red_envelope_search_code">支付寶紅包搜尋碼</string>
     <string name="alipay_red_envelope_copy">537954522 點擊複製</string>
-    <string name="contributors_summary">gedoor、Invinciblelee、Xwite等，詳情請在github中查看</string>
+    <string name="contributors_summary">由 dasoops 維護的本地閱讀分支，基於 gedoor、Invinciblelee、Xwite 等的上游作品，詳情請在 GitHub 中查看</string>
     <string name="clear_cache_summary">清除已下載書籍和字體快取</string>
     <string name="default_cover">預設封面</string>
     <string name="restore_ignore">復原忽略列表</string>
