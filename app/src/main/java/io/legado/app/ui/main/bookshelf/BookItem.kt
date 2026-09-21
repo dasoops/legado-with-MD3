@@ -805,7 +805,7 @@ fun BookItem(
                 )
             }
         } else null,
-        subTitle = if (isCompact) {
+        subTitle = if (isCompact && showUnread) {
             stringResource(R.string.author_read, book.author, unreadCount)
         } else {
             book.author
