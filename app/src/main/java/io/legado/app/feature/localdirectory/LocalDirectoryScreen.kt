@@ -1,7 +1,7 @@
 package io.legado.app.feature.localdirectory
 
 import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -18,12 +18,11 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Folder
-import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -47,14 +46,14 @@ import io.legado.app.ui.main.bookshelf.BookShelfItem
 import io.legado.app.ui.main.bookshelf.BookshelfGridItem
 import io.legado.app.ui.main.bookshelf.BookshelfListItem
 import io.legado.app.ui.theme.LegadoTheme
+import io.legado.app.ui.widget.components.AppPullToRefresh
 import io.legado.app.ui.widget.components.EmptyMessage
-import io.legado.app.ui.widget.components.button.series.SmallTonalButton
-import io.legado.app.ui.widget.components.card.GlassCard
 import io.legado.app.ui.widget.components.icon.AppIcon
 import io.legado.app.ui.widget.components.progressIndicator.AppCircularProgressIndicator
 import io.legado.app.ui.widget.components.text.AppText
 import io.legado.app.utils.toastOnUi
 import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.ImmutableSet
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
 
@@ -66,8 +65,13 @@ fun LocalDirectoryRouteScreen(
     customTagColors: ImmutableList<TagColorPair>,
     searchKey: String,
     isSearch: Boolean,
+    isEditMode: Boolean,
+    selectedBookUrls: ImmutableSet<String>,
     contentPadding: PaddingValues,
     onOpenBook: (BookShelfItem, String?) -> Unit,
+    onOpenDetail: (BookShelfItem, String?) -> Unit,
+    onToggleSelection: (String) -> Unit,
+    onEnterSelection: (String) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: LocalDirectoryViewModel = koinViewModel(
         key = "localDir:$groupId",
@@ -88,7 +92,8 @@ fun LocalDirectoryRouteScreen(
     LaunchedEffect(searchKey, isSearch) {
         viewModel.onIntent(LocalDirectoryIntent.SearchChange(searchKey, isSearch))
     }
-    BackHandler(enabled = state.path.isNotEmpty()) {
+    // 多选态交给书架统一的返回处理, 目录这里只负责逐级退回
+    BackHandler(enabled = state.path.isNotEmpty() && !isEditMode) {
         viewModel.onIntent(LocalDirectoryIntent.NavigateBack)
     }
 
@@ -100,16 +105,29 @@ fun LocalDirectoryRouteScreen(
         DirectoryBreadcrumb(
             pathNames = state.pathNames,
             onNavigateToLevel = { viewModel.onIntent(LocalDirectoryIntent.NavigateToLevel(it)) },
+        )
+        AppPullToRefresh(
+            isRefreshing = state.isLoading,
             onRefresh = { viewModel.onIntent(LocalDirectoryIntent.Refresh) },
-        )
-        DirectoryContent(
-            state = state,
-            settings = settings,
-            customTagColors = customTagColors,
-            groupId = groupId,
-            onIntent = viewModel::onIntent,
-            onOpenBook = onOpenBook,
-        )
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxWidth(),
+            topPadding = 8.dp,
+        ) {
+            DirectoryContent(
+                state = state,
+                settings = settings,
+                customTagColors = customTagColors,
+                groupId = groupId,
+                isEditMode = isEditMode,
+                selectedBookUrls = selectedBookUrls,
+                onIntent = viewModel::onIntent,
+                onOpenBook = onOpenBook,
+                onOpenDetail = onOpenDetail,
+                onToggleSelection = onToggleSelection,
+                onEnterSelection = onEnterSelection,
+            )
+        }
     }
 }
 
@@ -117,63 +135,45 @@ fun LocalDirectoryRouteScreen(
 private fun DirectoryBreadcrumb(
     pathNames: ImmutableList<String>,
     onNavigateToLevel: (Int) -> Unit,
-    onRefresh: () -> Unit,
 ) {
-    Row(
+    LazyRow(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(start = 16.dp, end = 16.dp, top = 4.dp, bottom = 4.dp),
+            .padding(horizontal = 16.dp, vertical = 6.dp),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
+        horizontalArrangement = Arrangement.spacedBy(4.dp)
     ) {
-        GlassCard(
-            modifier = Modifier.weight(1f),
-            containerColor = LegadoTheme.colorScheme.surfaceContainer
-        ) {
-            LazyRow(
-                modifier = Modifier.fillMaxWidth(),
-                contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(4.dp)
-            ) {
-                itemsIndexed(pathNames) { index, name ->
-                    val isLast = index == pathNames.lastIndex
-                    AppText(
-                        text = name,
-                        style = LegadoTheme.typography.labelSmall,
-                        fontWeight = if (isLast) FontWeight.SemiBold else FontWeight.Medium,
-                        color = if (isLast) {
-                            LegadoTheme.colorScheme.primary
+        itemsIndexed(pathNames) { index, name ->
+            val isLast = index == pathNames.lastIndex
+            AppText(
+                text = name,
+                style = LegadoTheme.typography.labelSmall,
+                fontWeight = if (isLast) FontWeight.SemiBold else FontWeight.Medium,
+                color = if (isLast) {
+                    LegadoTheme.colorScheme.primary
+                } else {
+                    LegadoTheme.colorScheme.onSurfaceVariant
+                },
+                modifier = Modifier
+                    .clip(MaterialTheme.shapes.small)
+                    .then(
+                        if (!isLast) {
+                            Modifier.clickable { onNavigateToLevel(index) }
                         } else {
-                            LegadoTheme.colorScheme.onSurfaceVariant
-                        },
-                        modifier = Modifier
-                            .clip(MaterialTheme.shapes.small)
-                            .then(
-                                if (!isLast) {
-                                    Modifier.clickable { onNavigateToLevel(index) }
-                                } else {
-                                    Modifier
-                                }
-                            )
-                            .padding(horizontal = 4.dp, vertical = 4.dp)
+                            Modifier
+                        }
                     )
-                    if (!isLast) {
-                        Icon(
-                            imageVector = Icons.Default.ChevronRight,
-                            contentDescription = null,
-                            modifier = Modifier.size(12.dp),
-                            tint = LegadoTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
-                        )
-                    }
-                }
+                    .padding(horizontal = 4.dp, vertical = 4.dp)
+            )
+            if (!isLast) {
+                Icon(
+                    imageVector = Icons.Default.ChevronRight,
+                    contentDescription = null,
+                    modifier = Modifier.size(12.dp),
+                    tint = LegadoTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
+                )
             }
         }
-        SmallTonalButton(
-            onClick = onRefresh,
-            icon = Icons.Default.Refresh,
-            contentDescription = stringResource(R.string.refresh),
-        )
     }
 }
 
@@ -183,14 +183,16 @@ private fun DirectoryContent(
     settings: BookshelfSettings,
     customTagColors: ImmutableList<TagColorPair>,
     groupId: Long,
+    isEditMode: Boolean,
+    selectedBookUrls: ImmutableSet<String>,
     onIntent: (LocalDirectoryIntent) -> Unit,
     onOpenBook: (BookShelfItem, String?) -> Unit,
+    onOpenDetail: (BookShelfItem, String?) -> Unit,
+    onToggleSelection: (String) -> Unit,
+    onEnterSelection: (String) -> Unit,
 ) {
     if (state.isUnavailable) {
-        EmptyMessage(
-            modifier = Modifier.fillMaxSize(),
-            message = stringResource(R.string.directory_unavailable),
-        )
+        ScrollableMessage(stringResource(R.string.directory_unavailable))
         return
     }
     if (state.isLoading && state.nodes.isEmpty()) {
@@ -202,10 +204,7 @@ private fun DirectoryContent(
         return
     }
     if (state.nodes.isEmpty()) {
-        EmptyMessage(
-            modifier = Modifier.fillMaxSize(),
-            message = stringResource(R.string.empty),
-        )
+        ScrollableMessage(stringResource(R.string.empty))
         return
     }
 
@@ -258,29 +257,70 @@ private fun DirectoryContent(
 
                 is LocalDirectoryNode.Book -> {
                     val bookUi = node.item.ui
+                    val bookUrl = bookUi.book.bookUrl
+                    val sharedCoverKey = bookCoverSharedElementKey(bookUrl, "localdir:$groupId")
+                    val isSelected = bookUrl in selectedBookUrls
+                    val onRowClick = {
+                        if (isEditMode) onToggleSelection(bookUrl)
+                        else onOpenBook(bookUi.book, sharedCoverKey)
+                    }
+                    val onCoverClick = {
+                        if (isEditMode) onToggleSelection(bookUrl)
+                        else onOpenDetail(bookUi.book, sharedCoverKey)
+                    }
+                    val onLongClick = {
+                        if (isEditMode) {
+                            onToggleSelection(bookUrl)
+                        } else if (isGridMode) {
+                            onOpenDetail(bookUi.book, sharedCoverKey)
+                        } else {
+                            onEnterSelection(bookUrl)
+                        }
+                    }
                     BookItem(
                         settings = settings,
                         customTagColors = customTagColors,
                         bookUi = bookUi,
                         layoutMode = layoutMode,
+                        isSelected = isSelected,
                         gridStyle = settings.bookshelfGridLayout,
                         isCompact = settings.bookshelfLayoutCompact,
                         titleSmallFont = settings.bookshelfTitleSmallFont,
                         titleCenter = settings.bookshelfTitleCenter,
                         titleMaxLines = settings.bookshelfTitleMaxLines,
                         coverShadow = settings.bookshelfCoverShadow,
-                        onClick = {
-                            onOpenBook(
-                                bookUi.book,
-                                bookCoverSharedElementKey(bookUi.book.bookUrl, "localdir:$groupId")
-                            )
-                        },
-                        onLongClick = null,
+                        showUnread = false,
+                        descOverride = directoryBookDesc(bookUi.book),
+                        onCoverClick = if (isGridMode) null else onCoverClick,
+                        onClick = onRowClick,
+                        onLongClick = onLongClick,
                     )
                 }
             }
         }
     }
+}
+
+@Composable
+private fun ScrollableMessage(message: String) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState())
+    ) {
+        EmptyMessage(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 48.dp),
+            message = message,
+        )
+    }
+}
+
+private fun directoryBookDesc(book: BookShelfItem): String {
+    val format = book.originName.substringAfterLast('.', "").uppercase()
+    val chapter = book.durChapterTitle?.takeIf { it.isNotBlank() }
+    return listOfNotNull(chapter, format.takeIf { it.isNotBlank() }).joinToString(" · ")
 }
 
 @Composable
@@ -292,7 +332,7 @@ private fun DirectoryFolderItem(
 ) {
     val cover: @Composable (Modifier) -> Unit = { coverModifier ->
         Box(
-            modifier = coverModifier.background(LegadoTheme.colorScheme.surfaceContainer),
+            modifier = coverModifier,
             contentAlignment = Alignment.Center,
         ) {
             AppIcon(

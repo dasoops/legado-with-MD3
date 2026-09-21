@@ -853,8 +853,20 @@ fun BookshelfScreen(
                                     },
                                     searchKey = uiState.searchKey,
                                     isSearch = uiState.isSearch,
+                                    isEditMode = isEditMode,
+                                    selectedBookUrls = selectedBookUrls,
                                     contentPadding = paddingValues,
                                     onOpenBook = onBookClick,
+                                    onOpenDetail = onBookLongClick,
+                                    onToggleSelection = { bookUrl ->
+                                        onIntent(BookshelfIntent.ToggleBookSelection(bookUrl))
+                                    },
+                                    onEnterSelection = { bookUrl ->
+                                        if (!isEditMode) {
+                                            onIntent(BookshelfIntent.ToggleEditMode)
+                                        }
+                                        onIntent(BookshelfIntent.ToggleBookSelection(bookUrl))
+                                    },
                                 )
                             } else {
                             val isSelectedGroup = group.groupId == uiState.selectedGroupId

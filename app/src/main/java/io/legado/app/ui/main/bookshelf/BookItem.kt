@@ -682,7 +682,10 @@ fun BookItem(
     animatedVisibilityScope: AnimatedVisibilityScope? = null,
     sharedCoverKey: String? = null,
     onClick: () -> Unit,
-    onLongClick: (() -> Unit)?
+    onLongClick: (() -> Unit)?,
+    showUnread: Boolean = true,
+    descOverride: String? = null,
+    onCoverClick: (() -> Unit)? = null,
 ) {
     val book = bookUi.book
     val showListDetails = layoutMode == 0 && !isCompact && settings.showBookIntro
@@ -699,8 +702,12 @@ fun BookItem(
     val showIntro = showIntroText && intro != null
     val showIntroBelowContent = showIntro && settings.bookshelfListIntroBelowContent
     val unreadCount = book.getUnreadChapterNum()
-    val unreadText = if (settings.showUnread && unreadCount > 0) unreadCount.toString() else null
-    val showUpdateBadge = settings.showUnread && settings.showUnreadNew && book.isNew
+    val unreadText = if (showUnread && settings.showUnread && unreadCount > 0) {
+        unreadCount.toString()
+    } else {
+        null
+    }
+    val showUpdateBadge = showUnread && settings.showUnread && settings.showUnreadNew && book.isNew
     val bookTypeLabel = if (settings.showTip) {
         when {
             book.isAudio -> stringResource(R.string.audio)
@@ -728,7 +735,11 @@ fun BookItem(
             author = book.author,
             path = book.getDisplayCover(),
             isUpdating = isUpdating,
-            modifier = coverModifier,
+            modifier = if (onCoverClick != null) {
+                coverModifier.clickable(onClick = onCoverClick)
+            } else {
+                coverModifier
+            },
             coverModifier = Modifier
                 .fillMaxWidth()
                 .aspectRatio(5f / 7f),
@@ -799,7 +810,7 @@ fun BookItem(
         } else {
             book.author
         },
-        desc = book.durChapterTitle ?: "",
+        desc = descOverride ?: (book.durChapterTitle ?: ""),
         columnContent = if (showListDetails) {
             {
                 val kindList = bookUi.displayTags
