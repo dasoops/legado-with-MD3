@@ -289,7 +289,6 @@ private fun DirectoryContent(
                         titleCenter = settings.bookshelfTitleCenter,
                         titleMaxLines = settings.bookshelfTitleMaxLines,
                         coverShadow = settings.bookshelfCoverShadow,
-                        showUnread = false,
                         descOverride = directoryBookDesc(bookUi.book),
                         onCoverClick = if (isGridMode) null else onCoverClick,
                         onClick = onRowClick,

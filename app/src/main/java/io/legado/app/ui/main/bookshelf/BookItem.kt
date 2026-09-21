@@ -683,7 +683,6 @@ fun BookItem(
     sharedCoverKey: String? = null,
     onClick: () -> Unit,
     onLongClick: (() -> Unit)?,
-    showUnread: Boolean = true,
     descOverride: String? = null,
     onCoverClick: (() -> Unit)? = null,
 ) {
@@ -702,12 +701,12 @@ fun BookItem(
     val showIntro = showIntroText && intro != null
     val showIntroBelowContent = showIntro && settings.bookshelfListIntroBelowContent
     val unreadCount = book.getUnreadChapterNum()
-    val unreadText = if (showUnread && settings.showUnread && unreadCount > 0) {
+    val unreadText = if (settings.showUnread && unreadCount > 0) {
         unreadCount.toString()
     } else {
         null
     }
-    val showUpdateBadge = showUnread && settings.showUnread && settings.showUnreadNew && book.isNew
+    val showUpdateBadge = settings.showUnread && settings.showUnreadNew && book.isNew
     val bookTypeLabel = if (settings.showTip) {
         when {
             book.isAudio -> stringResource(R.string.audio)
@@ -805,7 +804,7 @@ fun BookItem(
                 )
             }
         } else null,
-        subTitle = if (isCompact && showUnread) {
+        subTitle = if (isCompact) {
             stringResource(R.string.author_read, book.author, unreadCount)
         } else {
             book.author
