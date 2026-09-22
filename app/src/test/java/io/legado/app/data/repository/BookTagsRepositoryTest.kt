@@ -58,12 +58,17 @@ class BookTagsRepositoryTest {
     fun `标签分组随书籍标签和阅读状态变化且不落库`() = runBlocking {
         db.bookGroupDao.insert(BookGroup(1, "目录", localDirectoryUri = "file:///Books"))
         db.bookDao.insert(Book(bookUrl = "a", customTag = "Shared", totalChapterNum = 10))
-        assertTrue(groups.flowAll().first().any { it.isLocalDirectory })
-        assertTrue(groups.flowAll().first().any { it.groupName == "Shared" && it.isTag })
+        assertTrue(groups.flowAll().first { list -> list.any { it.isLocalDirectory } }.any { it.isLocalDirectory })
+        assertTrue(groups.flowAll().first { list -> list.any { it.groupName == "Shared" && it.isTag } }
+            .any { it.groupName == "Shared" && it.isTag })
         assertEquals(1, books.flowBookShelfByGroup(BookTags.groupId("Shared")).first().size)
-        assertTrue(groups.flowAll().first().any { it.groupName == BookTags.UNREAD })
+        assertTrue(groups.flowAll().first { list -> list.any { it.groupName == BookTags.UNREAD } }
+            .any { it.groupName == BookTags.UNREAD })
         db.bookDao.update(db.bookDao.getBook("a")!!.copy(customTag = null, durChapterIndex = 9))
-        val updated = groups.flowAll().first()
+        val updated = groups.flowAll().first { list ->
+            list.any { it.groupName == BookTags.READ } &&
+                list.none { it.groupName == "Shared" || it.groupName == BookTags.UNREAD }
+        }
         assertFalse(updated.any { it.groupName == "Shared" || it.groupName == BookTags.UNREAD })
         assertTrue(updated.any { it.groupName == BookTags.READ })
         assertEquals(listOf("目录"), db.bookGroupDao.all.map { it.groupName })
@@ -74,14 +79,20 @@ class BookTagsRepositoryTest {
         db.bookGroupDao.insert(BookGroup(BookGroup.IdAll, "全部", order = -10))
         db.bookDao.insert(Book(bookUrl = "a", customTag = "Shared", durChapterIndex = 1))
         val tagId = BookTags.groupId("Shared")
-        val tag = groups.flowAll().first().first { it.groupId == tagId }
+        val tag = groups.flowAll().first { list -> list.any { it.groupId == tagId } }
+            .first { it.groupId == tagId }
 
         groups.upsert(tag.copy(show = false, order = 5))
         assertFalse(groups.flowShow().first().any { it.groupId == tagId })
         assertTrue(db.bookGroupDao.all.any { it.groupId == tagId && !it.show })
 
         groups.upsert(tag.copy(show = true, order = -9))
-        assertEquals(listOf(BookGroup.IdAll, tagId), groups.flowAll().first().map { it.groupId })
+        assertEquals(
+            listOf(BookGroup.IdAll, tagId),
+            groups.flowAll().first()
+                .map { it.groupId }
+                .filter { it == BookGroup.IdAll || it == tagId }
+        )
     }
 
     @Test

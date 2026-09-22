@@ -26,7 +26,8 @@ class BookGroupRepository(
                     (group.isTag && group.groupId in liveTagIds)
             }.sortedBy { it.order }
             val persistedIds = persisted.mapTo(HashSet()) { it.groupId }
-            val generated = BookTags.builtInGroupTags.map { tag ->
+            // 实际标签必须实时生成, 否则新标签在首次调整显示或排序前不会出现在分组列表.
+            val generated = (tags + BookTags.builtInGroupTags).distinct().map { tag ->
                 val groupId = BookTags.groupId(tag)
                 if (groupId in persistedIds) null else BookGroup(
                     groupId = groupId,
