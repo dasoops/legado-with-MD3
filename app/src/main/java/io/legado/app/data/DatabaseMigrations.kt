@@ -456,6 +456,7 @@ object DatabaseMigrations {
     class Migration_54_55 : AutoMigrationSpec {
 
         override fun onPostMigrate(db: SupportSQLiteDatabase) {
+            // 保留目录和标签规则分组; 清除旧手动分组时同步移除书籍上的位标记.
             db.execSQL(
                 """
                 update books set type = ${BookType.audio}
@@ -511,6 +512,64 @@ object DatabaseMigrations {
                 where listIntro is null
             """.trimIndent()
             )
+        }
+    }
+
+    @Suppress("ClassName")
+    class Migration_106_107 : AutoMigrationSpec {
+
+        override fun onPostMigrate(db: SupportSQLiteDatabase) {
+            db.execSQL(
+                """
+                UPDATE books
+                SET `group` = `group` & ~(
+                    SELECT COALESCE(SUM(groupId), 0)
+                    FROM book_groups AS user_group
+                    WHERE groupId > 0
+                        AND localDirectoryUri IS NULL
+                        AND NOT EXISTS (
+                            SELECT 1 FROM tag_group_rules
+                            WHERE tag_group_rules.groupName = user_group.groupName
+                        )
+                )
+                """.trimIndent()
+            )
+            db.execSQL(
+                """
+                UPDATE books
+                SET `group` = `group` & 9223372036854775807
+                WHERE EXISTS (
+                    SELECT 1 FROM book_groups
+                    WHERE groupId = -9223372036854775808
+                        AND localDirectoryUri IS NULL
+                )
+                """.trimIndent()
+            )
+            db.execSQL(
+                """
+                DELETE FROM book_groups
+                WHERE (groupId > 0 OR groupId = -9223372036854775808)
+                    AND localDirectoryUri IS NULL
+                    AND NOT EXISTS (
+                        SELECT 1 FROM tag_group_rules
+                        WHERE tag_group_rules.groupName = book_groups.groupName
+                    )
+                """.trimIndent()
+            )
+        }
+    }
+
+    @Suppress("ClassName")
+    class Migration_107_108 : AutoMigrationSpec {
+        override fun onPostMigrate(db: SupportSQLiteDatabase) {
+            db.execSQL("DELETE FROM tag_group_rules")
+            db.execSQL("DELETE FROM book_groups WHERE localDirectoryUri IS NULL AND groupId != -1")
+            db.execSQL("""
+                UPDATE books SET `group` = `group` & (
+                    SELECT COALESCE(SUM(groupId), 0) FROM book_groups
+                    WHERE localDirectoryUri IS NOT NULL
+                )
+            """.trimIndent())
         }
     }
 

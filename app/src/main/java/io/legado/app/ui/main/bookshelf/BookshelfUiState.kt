@@ -44,7 +44,7 @@ sealed interface BookshelfIntent {
     data object InvertVisibleSelection : BookshelfIntent
     data class ToggleBookSelection(val bookUrl: String) : BookshelfIntent
     data class SetInFolderRoot(val value: Boolean) : BookshelfIntent
-    data class MoveBooksToGroup(val bookUrls: Set<String>, val groupId: Long) : BookshelfIntent
+    data class AddTags(val bookUrls: Set<String>, val tags: Set<String>) : BookshelfIntent
     data class StartDragging(val books: List<BookUiItem>) : BookshelfIntent
     data class MoveDragging(val from: Int, val to: Int, val books: List<BookUiItem>) : BookshelfIntent
     data object FinishDragging : BookshelfIntent

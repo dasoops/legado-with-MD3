@@ -33,6 +33,10 @@ private const val PUBLIC_BOOK_FILTER =
 @Dao
 interface BookDao {
 
+    @Query("UPDATE books SET customTag = :tags WHERE bookUrl = :bookUrl")
+    fun updateCustomTag(bookUrl: String, tags: String)
+
+
     fun flowByGroup(groupId: Long): Flow<List<Book>> {
         return when (groupId) {
             BookGroup.IdRoot -> flowRoot()

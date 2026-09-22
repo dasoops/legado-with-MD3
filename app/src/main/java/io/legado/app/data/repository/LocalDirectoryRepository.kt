@@ -8,6 +8,7 @@ import androidx.documentfile.provider.DocumentFile
 import io.legado.app.constant.AppLog
 import io.legado.app.constant.AppPattern
 import io.legado.app.domain.gateway.LocalDirectoryGateway
+import io.legado.app.help.book.isLocal
 import io.legado.app.model.localBook.LocalBook
 import io.legado.app.utils.FileDoc
 import io.legado.app.utils.isContentScheme
@@ -46,8 +47,16 @@ class LocalDirectoryRepository(
             runCatching {
                 val bookUrl = file.toString()
                 val existing = bookRepository.getBook(bookUrl)
-                // 已归入本组说明是重复扫描, 重新导入会重解析元数据并重置目录, 直接跳过
-                if (existing != null && (existing.group and groupId) != 0L) return@forEach
+                // 已归入本组时避免重导入重置目录, 只补取旧条目缺少的封面.
+                if (existing != null && (existing.group and groupId) != 0L) {
+                    if (existing.isLocal && existing.coverUrl.isNullOrBlank()) {
+                        LocalBook.upBookInfo(existing)
+                        if (!existing.coverUrl.isNullOrBlank()) {
+                            bookRepository.update(existing)
+                        }
+                    }
+                    return@forEach
+                }
                 val book = LocalBook.importFile(file.uri)
                 if ((book.group and groupId) == 0L) {
                     book.group = book.group or groupId

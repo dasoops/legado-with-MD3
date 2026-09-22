@@ -8,6 +8,7 @@ data class NewBookGroup(
     val cover: String?,
     val pattern: String?,
     val localDirectoryUri: String? = null,
+    val isTag: Boolean = false,
 )
 
 data class BookGroupUpdate(

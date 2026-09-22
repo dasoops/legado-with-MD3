@@ -7,7 +7,6 @@
 * book\info 书籍信息查看
 * book\read 书籍阅读界面
 * book\toc 目录界面
-* book\import 本地书籍导入界面
 * book\bookmark 书签界面
 * file 文件管理界面
 * config 配置界面

@@ -87,7 +87,6 @@
     <string name="bookshelf_layout">书架布局</string>
     <string name="view">视图</string>
     <string name="book_library">书城</string>
-    <string name="book_local">添加本地</string>
     <string name="book_source">书源</string>
     <string name="setting">设置</string>
     <string name="theme_setting">外观</string>
@@ -2268,4 +2267,8 @@
     <string name="reselect_directory">重新选择目录</string>
     <string name="local_directory">本地目录</string>
     <string name="directory_unavailable">目录不可用, 请重新选择</string>
+    <string name="open_in_other_app">在其他应用中打开</string>
+    <string name="add_book_tags">添加标签</string>
+    <string name="new_book_tags">新标签, 多个标签用逗号分隔</string>
+    <string name="long_press_add_tags">长按添加标签</string>
 </resources>

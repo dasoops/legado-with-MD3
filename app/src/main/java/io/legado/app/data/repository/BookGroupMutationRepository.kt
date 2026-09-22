@@ -5,6 +5,7 @@ import io.legado.app.data.AppDatabase
 import io.legado.app.data.entities.BookGroup
 import io.legado.app.data.entities.TagGroupRule
 import io.legado.app.domain.gateway.BookGroupMutationGateway
+import io.legado.app.domain.model.BookTags
 import io.legado.app.domain.model.BookGroupUpdate
 import io.legado.app.domain.model.NewBookGroup
 import io.legado.app.domain.model.TagGroupRuleUpdate
@@ -19,7 +20,7 @@ class BookGroupMutationRepository(
 
         database.withTransaction {
             val groupDao = database.bookGroupDao
-            val groupId = groupDao.getUnusedId()
+            val groupId = if (group.isTag) BookTags.groupId(group.groupName) else groupDao.getUnusedId()
             val bookGroup = BookGroup(
                 groupId = groupId,
                 groupName = group.groupName,
@@ -31,7 +32,7 @@ class BookGroupMutationRepository(
                 localDirectoryUri = group.localDirectoryUri,
             )
 
-            if (groupDao.getByID(groupId) == null) {
+            if (!group.isTag && groupDao.getByID(groupId) == null) {
                 database.bookDao.removeGroup(groupId)
             }
             groupDao.insert(bookGroup)

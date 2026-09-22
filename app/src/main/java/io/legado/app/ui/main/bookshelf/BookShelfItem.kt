@@ -1,9 +1,9 @@
 package io.legado.app.ui.main.bookshelf
 
 import androidx.compose.runtime.Stable
+import io.legado.app.domain.model.BookTags
 import io.legado.app.constant.BookType
 import io.legado.app.data.entities.Book
-import io.legado.app.utils.splitNotBlank
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 import kotlin.math.max
@@ -52,13 +52,9 @@ data class BookShelfItem(
      * 将 DTO 转换为专为 Compose 设计的 UI 状态
      */
     fun toUiItem(): BookUiItem {
-        val tagList = mutableListOf<String>()
-        customTag?.splitNotBlank(",", "\n")?.filter { it.isNotBlank() }?.let {
-            tagList.addAll(it)
-        }
-        kind?.splitNotBlank(",", "\n")?.filter { it.isNotBlank() }?.let {
-            tagList.addAll(it.filterNot(tagList::contains))
-        }
+        val tagList = BookTags.display(
+            customTag, kind, durChapterIndex, durChapterPos, totalChapterNum
+        ).toMutableList()
         if (!wordCount.isNullOrBlank() && !tagList.contains(wordCount)) {
             tagList.add(wordCount)
         }

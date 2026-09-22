@@ -6,6 +6,7 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
+import androidx.room.Upsert
 import io.legado.app.data.entities.BookGroup
 import kotlinx.coroutines.flow.Flow
 
@@ -47,6 +48,10 @@ interface BookGroupDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insert(vararg bookGroup: BookGroup)
+
+    // 标签分组按需落库以保存显示/排序, 首次写入时记录尚不存在.
+    @Upsert
+    fun upsert(vararg bookGroup: BookGroup)
 
     @androidx.room.Transaction
     fun replaceAll(bookGroups: List<BookGroup>) {

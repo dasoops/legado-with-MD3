@@ -28,6 +28,8 @@ data class BookGroup(
     var localDirectoryUri: String? = null
 ) : Parcelable {
 
+    val isTag: Boolean get() = groupId < -100 && groupId != Long.MIN_VALUE
+
     val isLocalDirectory: Boolean get() = !localDirectoryUri.isNullOrBlank()
 
     companion object {

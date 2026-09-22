@@ -87,15 +87,6 @@ fun BookshelfConfigSheet(
                 }
             )
 
-            CompactSwitchSettingItem(
-                title = stringResource(R.string.hide_empty_groups),
-                checked = settings.hideEmptyGroups,
-                color = LegadoTheme.colorScheme.surface,
-                onCheckedChange = { value ->
-                    onUpdate { it.copy(hideEmptyGroups = value) }
-                }
-            )
-
             PillHeaderDivider(title = stringResource(R.string.sort))
 
             CompactDropdownSettingItem(

@@ -8,7 +8,7 @@ import org.junit.Test
 class BookshelfSettingsMappingTest {
 
     @Test
-    fun `Bookshelf 47 键写读映射逐字段对应`() {
+    fun `Bookshelf 48 键写读映射逐字段对应`() {
         assertEquals(47, BookshelfSettings().toPrefMap().size)
         bookshelfMappingSamples().forEach { expected ->
             assertEquals(expected.expectedPrefMap(), expected.toPrefMap())

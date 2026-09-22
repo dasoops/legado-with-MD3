@@ -101,7 +101,7 @@ class BookInfoViewModel(
     private val otherSettingsGateway: OtherSettingsGateway,
 ) : BaseViewModel(application) {
 
-    val allGroups = bookGroupRepository.flowSelect().map { it.toImmutableList() }
+    val allGroups = bookGroupRepository.flowAll().map { it.toImmutableList() }
 
     // 仅保存“每本书/屏幕”状态；外观与其他设置不在此存储，避免整体重置时被抹掉。
     private val _screenState = MutableStateFlow(BookInfoUiState())
@@ -262,6 +262,9 @@ class BookInfoViewModel(
 
             BookInfoIntent.ReadClick -> onReadClick()
             BookInfoIntent.ShelfClick -> onShelfClick()
+            BookInfoIntent.OpenLocalBookExternally -> currentBook
+                ?.takeIf { it.isLocal }
+                ?.let { emitEffect(BookInfoEffect.OpenLocalBookExternally(Uri.parse(it.bookUrl))) }
             BookInfoIntent.TocClick -> onTocClick()
             BookInfoIntent.CoverClick -> setSheet(BookInfoSheet.CoverPicker)
             BookInfoIntent.CoverLongClick -> currentBook?.getDisplayCover()?.takeIf { it.isNotBlank() }
@@ -283,10 +286,7 @@ class BookInfoViewModel(
                 saveRemark(intent.remark)
             }
 
-            is BookInfoIntent.SelectGroup -> {
-                dismissSheet()
-                updateGroup(intent.groupId)
-            }
+            is BookInfoIntent.AddTags -> addTags(intent.tags)
 
             is BookInfoIntent.SelectCover -> {
                 dismissSheet()
@@ -891,19 +891,20 @@ class BookInfoViewModel(
         }
     }
 
-    private fun updateGroup(groupId: Long) {
-        currentBook?.let { book ->
-            book.group = groupId
-            currentGroupNames = null
-            currentHasCustomGroup = false
-            refreshMeta(book)
-            if (inBookshelf) {
-                saveBook(book)
-            } else if (groupId > 0) {
-                addToBookshelf()
-            } else {
+    private fun addTags(tags: Set<String>) {
+        val book = currentBook ?: return
+        execute {
+            bookRepository.addTags(setOf(book.bookUrl), tags)
+            bookRepository.getBook(book.bookUrl)
+        }.onSuccess { updated ->
+            updated?.let {
+                currentBook = it
+                refreshMeta(it)
                 syncUiState()
             }
+            dismissSheet()
+        }.onError {
+            showMessage("添加标签失败\n${it.localizedMessage}")
         }
     }
 

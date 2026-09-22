@@ -33,6 +33,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.FormatListBulleted
+import androidx.compose.material.icons.automirrored.filled.OpenInNew
 import androidx.compose.material.icons.filled.Book
 import androidx.compose.material.icons.filled.BookmarkAdd
 import androidx.compose.material.icons.filled.Edit
@@ -79,6 +80,9 @@ import androidx.compose.ui.unit.dp
 import coil3.ImageLoader
 import coil3.compose.AsyncImage
 import coil3.size.Size
+import io.legado.app.feature.booktags.TagSelectSheet
+import io.legado.app.domain.model.BookTags
+import kotlinx.collections.immutable.toImmutableList
 import io.legado.app.R
 import io.legado.app.constant.BookType
 import io.legado.app.data.entities.BookGroup
@@ -323,7 +327,11 @@ private fun BookInfoScreenContent(
                             ) {
                                 BookInfoActions(
                                     inBookshelf = state.inBookshelf,
+                                    isLocalBook = state.book?.isLocal == true,
                                     onShelfClick = { onIntent(BookInfoIntent.ShelfClick) },
+                                    onOpenLocalBookExternally = {
+                                        onIntent(BookInfoIntent.OpenLocalBookExternally)
+                                    },
                                     onTocClick = { onIntent(BookInfoIntent.TocClick) },
                                     onGroupClick = { onIntent(BookInfoIntent.GroupClick) },
                                     onReadRecordClick = { onIntent(BookInfoIntent.ReadRecordClick) },
@@ -376,12 +384,12 @@ private fun BookInfoScreenContent(
             onSelect = { onIntent(BookInfoIntent.SelectCover(it)) },
         )
         BookInfoSheet.GroupPicker -> {
-            GroupSelectSheet(
+            TagSelectSheet(
                 show = currentSheet == BookInfoSheet.GroupPicker,
-                groups = groups,
-                currentGroupId = state.book?.group ?: 0L,
+                tags = groups.filter { it.isTag && it.groupName !in BookTags.builtIn }
+                    .map { it.groupName }.toImmutableList(),
                 onDismissRequest = { onIntent(BookInfoIntent.DismissSheet) },
-                onConfirm = { onIntent(BookInfoIntent.SelectGroup(it)) },
+                onConfirm = { onIntent(BookInfoIntent.AddTags(it)) },
             )
         }
         BookInfoSheet.ReadRecord -> BookReadRecordSheet(
@@ -1004,7 +1012,9 @@ private fun BookInfoHeader(
 @Composable
 private fun BookInfoActions(
     inBookshelf: Boolean,
+    isLocalBook: Boolean,
     onShelfClick: () -> Unit,
+    onOpenLocalBookExternally: () -> Unit,
     onTocClick: () -> Unit,
     onGroupClick: () -> Unit,
     onReadRecordClick: () -> Unit,
@@ -1030,8 +1040,9 @@ private fun BookInfoActions(
     }
 
     val shelfLabel = when {
+        inBookshelf && isLocalBook -> stringResource(R.string.open_in_other_app)
         showShelfRemoveHint -> stringResource(R.string.click_to_remove)
-        showLongPressGroupHint -> stringResource(R.string.long_press_group)
+        showLongPressGroupHint -> stringResource(R.string.long_press_add_tags)
         inBookshelf -> stringResource(R.string.already_in_bookshelf)
         else -> stringResource(R.string.add_to_bookshelf)
     }
@@ -1045,18 +1056,23 @@ private fun BookInfoActions(
     ) {
         BookInfoActionCard(
             modifier = Modifier.weight(1f),
-            icon = if (inBookshelf) Icons.Outlined.Book else Icons.Default.BookmarkAdd,
+            icon = if (inBookshelf && isLocalBook) {
+                Icons.AutoMirrored.Filled.OpenInNew
+            } else if (inBookshelf) Icons.Outlined.Book else Icons.Default.BookmarkAdd,
             label = shelfLabel,
             onLongClick = onGroupClick,
             onClick = {
-                if (!inBookshelf) {
+                if (inBookshelf && isLocalBook) {
+                    onOpenLocalBookExternally()
+                } else if (!inBookshelf) {
                     awaitingShelfAddition = true
+                    onShelfClick()
                 } else {
                     awaitingShelfAddition = false
                     showShelfRemoveHint = false
                     showLongPressGroupHint = false
+                    onShelfClick()
                 }
-                onShelfClick()
             },
         )
         BookInfoActionCard(

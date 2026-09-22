@@ -4,6 +4,7 @@ import android.net.Uri
 import android.util.Base64
 import androidx.core.net.toUri
 import androidx.documentfile.provider.DocumentFile
+import io.legado.app.domain.model.BookTags
 import io.legado.app.R
 import io.legado.app.constant.AppLog
 import io.legado.app.constant.AppPattern
@@ -263,6 +264,17 @@ object LocalBook {
             )
             upBookInfo(book)
             book.upKind()
+            val directoryPath = if (uri.scheme == "content") {
+                runCatching { android.provider.DocumentsContract.getDocumentId(uri).substringAfter(':') }
+                    .getOrDefault("")
+            } else uri.path.orEmpty()
+            val directoryTags = BookTags.editable(
+                BookTags.directoryNames(directoryPath)
+            )
+            book.config.directoryTags = directoryTags
+            book.customTag = BookTags.editable(
+                BookTags.parse(book.customTag) + directoryTags
+            ).joinToString(",").ifBlank { null }
             appDb.bookDao.insert(book)
         } else {
             deleteBook(book, false)

@@ -4,6 +4,7 @@ package io.legado.app.help.book
 
 import android.net.Uri
 import androidx.core.net.toUri
+import io.legado.app.domain.model.BookTags
 import io.legado.app.constant.AppLog
 import io.legado.app.constant.AppPattern
 import io.legado.app.constant.BookSourceType
@@ -111,11 +112,11 @@ val Book.archiveName: String
 
 fun Book.getBookTypeName(): String {
     return when {
-        isLocalTxt   -> "TXT"
-        isEpub       -> "EPUB"
-        isUmd        -> "UMD"
-        isPdf        -> "PDF"
-        isMobi       -> "MOBI"
+        isLocalTxt   -> "txt"
+        isEpub       -> "epub"
+        isUmd        -> "umd"
+        isPdf        -> "pdf"
+        isMobi       -> "mobi"
         isAudio      -> "有声书"
         isImage      -> "漫画"
         isOnLineTxt  -> "小说"
@@ -145,7 +146,7 @@ fun Book.getCustomTagList(): List<String> =
     customTag?.splitNotBlank(",", "\n").orEmpty().distinct()
 
 fun Book.getDisplayTagList(): List<String> =
-    (getCustomTagList() + getSourceTagList()).distinct()
+    BookTags.display(customTag, kind, durChapterIndex, durChapterPos, totalChapterNum)
 
 /**
  * 仅在目标bookUrl未被其他书占用，或判定为同一本书时，允许迁移主键。
@@ -488,52 +489,6 @@ fun applyTagGroupRules(
 
     if (updatedBooks.isNotEmpty()) {
         bookDao.update(*updatedBooks.toTypedArray())
-    }
-}
-
-/**
- * Apply tag group rules to a single book. Called from Book.save().
- * Lightweight: only processes the given book, not all books.
- */
-fun applyTagGroupRulesForBook(book: Book) {
-    val rules = appDb.tagGroupRuleDao.getAll()
-    if (rules.isEmpty()) return
-
-    val compiledRules = rules.mapNotNull { rule ->
-        val regex = try { Regex(rule.pattern) } catch (_: Exception) { return@mapNotNull null }
-        rule to regex
-    }
-    if (compiledRules.isEmpty()) return
-
-    val groupDao = appDb.bookGroupDao
-    val groupCache = mutableMapOf<String, Long>()
-    for ((rule, _) in compiledRules) {
-        if (rule.groupName !in groupCache) {
-            val existing = groupDao.getByName(rule.groupName)
-            val groupId = existing?.groupId ?: run {
-                val newId = groupDao.getUnusedId()
-                groupDao.insert(
-                    io.legado.app.data.entities.BookGroup(
-                        groupId = newId,
-                        groupName = rule.groupName,
-                    )
-                )
-                newId
-            }
-            groupCache[rule.groupName] = groupId
-        }
-    }
-
-    val kinds = book.getDisplayTagList()
-    var newGroupMask = 0L
-    for ((rule, regex) in compiledRules) {
-        if (kinds.any { regex.containsMatchIn(it) }) {
-            newGroupMask = newGroupMask or (groupCache[rule.groupName] ?: 0L)
-        }
-    }
-    val finalGroup = book.group or newGroupMask
-    if (book.group != finalGroup) {
-        book.group = finalGroup
     }
 }
 

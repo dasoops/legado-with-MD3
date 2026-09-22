@@ -14,7 +14,6 @@ import io.legado.app.constant.PageAnim
 import io.legado.app.data.appDb
 import io.legado.app.help.book.BookHelp
 import io.legado.app.help.book.ContentProcessor
-import io.legado.app.help.book.applyTagGroupRulesForBook
 import io.legado.app.help.book.getFolderNameNoCache
 import io.legado.app.help.book.isEpub
 import io.legado.app.help.book.isImage
@@ -131,7 +130,6 @@ data class Book(
         kind = kind?.take(1000)
         intro = intro?.take(5000)
         listIntro = listIntro?.take(5000)
-        customTag = customTag?.take(1000)
         customIntro = customIntro?.take(5000)
         remark = remark?.take(1000)
         latestChapterTitle = latestChapterTitle?.take(200)
@@ -435,7 +433,6 @@ data class Book(
     }
 
     fun save() {
-        applyTagGroupRulesForBook(this)
         if (appDb.bookDao.has(bookUrl)) {
             appDb.bookDao.update(this)
         } else {
@@ -463,6 +460,7 @@ data class Book(
 
     @Parcelize
     data class ReadConfig(
+        var directoryTags: List<String>? = null,
         var reverseToc: Boolean = false,
         var pageAnim: Int? = null,
         var reSegment: Boolean = false,

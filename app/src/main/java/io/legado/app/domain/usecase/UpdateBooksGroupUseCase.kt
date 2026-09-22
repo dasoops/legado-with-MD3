@@ -10,6 +10,11 @@ class UpdateBooksGroupUseCase(
         updateGroups(bookUrls) { groupId }
     }
 
+    suspend fun addGroup(bookUrls: Set<String>, groupId: Long) {
+        if (groupId <= 0L) return
+        updateGroups(bookUrls) { it or groupId }
+    }
+
     suspend fun updateGroups(bookUrls: Set<String>, transform: (Long) -> Long) {
         if (bookUrls.isEmpty()) return
         val updateGroups = bookRepository.getBookGroupAssignments(bookUrls).mapNotNull { book ->

@@ -118,7 +118,6 @@ fun MainScreen(
     useRail: Boolean,
     onOpenSettings: () -> Unit,
     onNavigateToRemoteImport: () -> Unit,
-    onNavigateToLocalImport: () -> Unit,
     onNavigateToCache: (Long) -> Unit,
     onOpenBookshelfBook: (BookShelfItem, String?) -> Unit,
     onNavigateToBookInfo: (name: String, author: String, bookUrl: String, origin: String?, coverPath: String?, sharedCoverKey: String?) -> Unit,
@@ -483,7 +482,6 @@ fun MainScreen(
                                     )
                                 },
                                 onNavigateToRemoteImport = onNavigateToRemoteImport,
-                                onNavigateToLocalImport = onNavigateToLocalImport,
                                 onNavigateToCache = onNavigateToCache,
                                 sharedTransitionScope = sharedTransitionScope,
                                 animatedVisibilityScope = animatedVisibilityScope,

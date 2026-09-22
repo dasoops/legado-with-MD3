@@ -10,7 +10,6 @@ import io.legado.app.data.repository.BookGroupRepository
 import io.legado.app.data.repository.BookRepository
 import io.legado.app.data.repository.BookshelfRepository
 import io.legado.app.domain.usecase.ExportBookshelfUseCase
-import io.legado.app.domain.usecase.UpdateBooksGroupUseCase
 import io.legado.app.domain.gateway.BookshelfSettingsGateway
 import io.legado.app.domain.gateway.AppShellSettingsGateway
 import io.legado.app.domain.gateway.ThemeSettingsGateway
@@ -48,13 +47,13 @@ import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.io.File
+import java.util.concurrent.ConcurrentHashMap
 
 class BookshelfViewModel(
     application: Application,
     private val bookRepository: BookRepository,
     private val bookGroupRepository: BookGroupRepository,
     private val bookshelfRepository: BookshelfRepository,
-    private val updateBooksGroupUseCase: UpdateBooksGroupUseCase,
     private val exportBookshelfUseCase: ExportBookshelfUseCase,
     private val bookshelfSettingsGateway: BookshelfSettingsGateway,
     private val appShellSettingsGateway: AppShellSettingsGateway,
@@ -73,6 +72,7 @@ class BookshelfViewModel(
     private val draggingBooksFlow = MutableStateFlow<List<BookUiItem>?>(null)
     private val pendingSavedBooksFlow = MutableStateFlow<List<BookUiItem>?>(null)
     private val isInitialLoadingFlow = MutableStateFlow(true)
+    private val localBookCoverBackfills = ConcurrentHashMap.newKeySet<String>()
 
     private data class BookshelfSortConfig(
         val sort: Int,
@@ -110,89 +110,19 @@ class BookshelfViewModel(
     val allGroupsFlow: StateFlow<List<BookGroup>> = bookGroupRepository.flowAll()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
-    private val hideEmptyGroupsFlow: StateFlow<Boolean> = bookshelfSettings
-        .map { it.hideEmptyGroups }
-        .distinctUntilChanged()
-        .stateIn(
-            viewModelScope,
-            SharingStarted.WhileSubscribed(5000),
-            initialSettings.hideEmptyGroups
-        )
-
-    /**
-     * 开启「隐藏空分组」时，返回当前书数为 0、应从分组列表中隐藏的 groupId 集合；
-     * 关闭时始终为空集。「全部」分组永不隐藏，避免书架清空后无标签页可显示。
-     */
-    @OptIn(ExperimentalCoroutinesApi::class)
-    private val hiddenGroupIdsFlow: SharedFlow<Set<Long>> = hideEmptyGroupsFlow
-        .flatMapLatest { hide ->
-            if (!hide) {
-                flowOf(emptySet())
-            } else {
-                combine(
-                    groupsFlow,
-                    bookRepository.flowSystemGroupCounts()
-                ) { groups, systemCounts ->
-                    groups to systemCounts.associate { it.groupId to it.count }
-                }.flatMapLatest { (groups, systemCountsMap) ->
-                    val userGroups = groups.filter { it.groupId > 0 }
-                    if (userGroups.isEmpty()) {
-                        flowOf(computeHiddenGroupIds(groups, systemCountsMap, emptyMap()))
-                    } else {
-                        combine(
-                            userGroups.map { group ->
-                                bookRepository.flowUserGroupBookCount(group.groupId)
-                                    .map { group.groupId to it }
-                            }
-                        ) { pairs ->
-                            computeHiddenGroupIds(groups, systemCountsMap, pairs.toMap())
-                        }
-                    }
-                }
-            }
-        }
-        .distinctUntilChanged()
-        .flowOn(Dispatchers.Default)
-        .shareIn(viewModelScope, SharingStarted.WhileSubscribed(5000), replay = 1)
-
-    private fun computeHiddenGroupIds(
-        groups: List<BookGroup>,
-        systemCounts: Map<Long, Int>,
-        userCounts: Map<Long, Int>
-    ): Set<Long> = groups.mapNotNullTo(hashSetOf()) { group ->
-        if (group.groupId == BookGroup.IdAll) return@mapNotNullTo null
-        // 目录组书数恒为 0, 不能因空而被隐藏
-        if (group.localDirectoryUri != null) return@mapNotNullTo null
-        val count = if (group.groupId > 0) {
-            userCounts[group.groupId] ?: 0
-        } else {
-            systemCounts[group.groupId] ?: 0
-        }
-        if (count == 0) group.groupId else null
-    }
-
     private data class GroupPreviewState(
         val previews: ImmutableMap<Long, ImmutableList<BookUiItem>>,
         val counts: ImmutableMap<Long, Int>,
         val allBookCount: Int
     )
 
-    private data class DataForPreviews(
-        val groups: List<BookGroup>,
-        val bookGroupStyle: Int,
-        val systemCountsMap: Map<Long, Int>,
-        val allBookCount: Int
-    )
-
     val groupSelectorState: StateFlow<BookshelfGroupSelectorState> = combine(
         groupsFlow,
-        groupIdFlow,
-        hiddenGroupIdsFlow
-    ) { groups, selectedGroupId, hiddenIds ->
-        val visibleGroups = groups.filter { it.groupId !in hiddenIds }
+        groupIdFlow
+    ) { groups, selectedGroupId ->
         BookshelfGroupSelectorState(
-            groups = visibleGroups.map { it.toBookGroupUi() }.toImmutableList(),
-            selectedGroupIndex = visibleGroups.indexOfFirst { it.groupId == selectedGroupId }
+            groups = groups.map { it.toBookGroupUi() }.toImmutableList(),
+            selectedGroupIndex = groups.indexOfFirst { it.groupId == selectedGroupId }
                 .coerceAtLeast(0),
             selectedGroupId = selectedGroupId
         )
@@ -215,27 +145,22 @@ class BookshelfViewModel(
     )
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    private val selectedGroupBooksFlow: SharedFlow<SelectedGroupBooksState> = groupIdFlow
-        .flatMapLatest { groupId ->
-            combine(
-                bookRepository.flowBookShelfByGroup(groupId),
-                groupsFlow,
-                sortConfigFlow
-            ) { list, groups, sortConfig ->
+    private val selectedGroupBooksFlow: SharedFlow<SelectedGroupBooksState> =
+        combine(groupIdFlow, allGroupsFlow) { id, groups ->
+            groups.firstOrNull { it.groupId == id } ?: BookGroup(BookGroup.IdAll, "全部")
+        }.flatMapLatest { group ->
+            combine(bookRepository.flowBookShelfByGroup(group), sortConfigFlow) { list, sortConfig ->
+                scheduleMissingLocalBookCoverBackfills(list)
                 SelectedGroupBooksState(
-                    groupId = groupId,
-                    books = bookshelfRepository.sortBooks(
-                        list,
-                        groups.find { it.groupId == groupId },
-                        sortConfig.sort,
-                        sortConfig.sortOrder
-                    ).map { it.toUiItem() },
+                    groupId = group.groupId,
+                    books = bookshelfRepository.sortBooks(list, group, sortConfig.sort, sortConfig.sortOrder)
+                        .map { it.toUiItem() },
                     sortConfig = sortConfig
                 )
             }
         }.distinctUntilChanged()
-        .flowOn(Dispatchers.Default)
-        .shareIn(viewModelScope, SharingStarted.WhileSubscribed(5000), replay = 1)
+            .flowOn(Dispatchers.Default)
+            .shareIn(viewModelScope, SharingStarted.WhileSubscribed(5000), replay = 1)
 
     val booksFlow: Flow<List<BookUiItem>> = selectedGroupBooksFlow
         .map { it.books }
@@ -250,7 +175,8 @@ class BookshelfViewModel(
                 flowOf(persistentMapOf())
             } else {
                 val flows = groups.map { group ->
-                    bookRepository.flowBookShelfByGroup(group.groupId).map { books ->
+                    bookRepository.flowBookShelfByGroup(group).map { books ->
+                        scheduleMissingLocalBookCoverBackfills(books)
                         group.groupId to bookshelfRepository.sortBooks(
                             books,
                             group,
@@ -267,6 +193,7 @@ class BookshelfViewModel(
             }
         }.distinctUntilChanged()
             .flowOn(Dispatchers.Default)
+            .shareIn(viewModelScope, SharingStarted.WhileSubscribed(5000), replay = 1)
 
     private val selectedBooksStateFlow: Flow<SelectedBooksState> = combine(
         selectedGroupBooksFlow,
@@ -307,58 +234,15 @@ class BookshelfViewModel(
         selectedBookUrls.intersect(visibleBookUrls)
     }.distinctUntilChanged()
 
-    @OptIn(ExperimentalCoroutinesApi::class)
     private val groupPreviewsFlow = combine(
-        groupsFlow,
-        bookGroupStyleFlow,
-        bookRepository.flowSystemGroupCounts(),
-        bookRepository.flowAllBookShelfCount()
-    ) { groups, bookGroupStyle, systemCounts, totalCount ->
-        DataForPreviews(
-            groups,
-            bookGroupStyle,
-            systemCounts.associate { it.groupId to it.count },
-            totalCount
+        allGroupBooksImmutableFlow, bookRepository.flowAllBookShelfCount()
+    ) { groups, count ->
+        GroupPreviewState(
+            groups.mapValues { (_, books) -> books.take(9).toImmutableList() }.toImmutableMap(),
+            groups.mapValues { (_, books) -> books.size }.toImmutableMap(),
+            count
         )
-    }.flatMapLatest { data ->
-        val groups = data.groups
-        val bookGroupStyle = data.bookGroupStyle
-        val systemCountsMap = data.systemCountsMap
-        val allBookCount = data.allBookCount
-
-        if (bookGroupStyle !in 2..3) {
-            flowOf(GroupPreviewState(persistentMapOf(), persistentMapOf(), allBookCount))
-        } else if (groups.isEmpty()) {
-            flowOf(GroupPreviewState(persistentMapOf(), persistentMapOf(), allBookCount))
-        } else {
-            // 目录组不查 DB 预览/计数, 其 page 由本地目录视图接管, 缺失即不显示
-            val previewGroups = groups.filter { it.localDirectoryUri == null }
-            if (previewGroups.isEmpty()) {
-                flowOf(GroupPreviewState(persistentMapOf(), persistentMapOf(), allBookCount))
-            } else {
-                val groupFlows = previewGroups.map { group ->
-                    val countFlow: Flow<Int> = if (group.groupId > 0) {
-                        bookRepository.flowUserGroupBookCount(group.groupId)
-                    } else {
-                        flowOf(systemCountsMap[group.groupId] ?: 0)
-                    }
-                    val previewFlow = bookRepository.flowGroupPreview(group.groupId)
-                    combine(countFlow, previewFlow) { count, preview ->
-                        Triple(group.groupId, count, preview.map { it.toUiItem() })
-                    }
-                }
-                combine(groupFlows) { results ->
-                    var previews = persistentMapOf<Long, ImmutableList<BookUiItem>>()
-                    var counts = persistentMapOf<Long, Int>()
-                    results.forEach { (groupId, count, preview) ->
-                        counts = counts.putting(groupId, count)
-                        previews = previews.putting(groupId, preview.toImmutableList())
-                    }
-                    GroupPreviewState(previews, counts, allBookCount)
-                }
-            }
-        }
-    }.distinctUntilChanged().flowOn(Dispatchers.Default)
+    }.distinctUntilChanged()
 
     private val internalStateFlow = combine(
         groupIdFlow,
@@ -455,11 +339,10 @@ class BookshelfViewModel(
     private val contentUiState: Flow<BookshelfUiState> = combine(
         dataStateFlow,
         interactionStateFlow,
-        isInitialLoadingFlow,
-        hiddenGroupIdsFlow
-    ) { data, interaction, isInitialLoading, hiddenIds ->
+        isInitialLoadingFlow
+    ) { data, interaction, isInitialLoading ->
         val selectedBooks = data.selectedBooks
-        val groups = data.groups.filter { it.groupId !in hiddenIds }
+        val groups = data.groups
         val allGroups = data.allGroups
         val previews = data.previews
         val internal = data.internal
@@ -569,6 +452,13 @@ class BookshelfViewModel(
 
     init {
         viewModelScope.launch {
+            groupsFlow.collect { groups ->
+                if (groups.isNotEmpty() && groups.none { it.groupId == groupIdFlow.value }) {
+                    changeGroup(groups.first().groupId)
+                }
+            }
+        }
+        viewModelScope.launch {
             delay(500)
             isInitialLoadingFlow.value = false
         }
@@ -609,7 +499,7 @@ class BookshelfViewModel(
             BookshelfIntent.InvertVisibleSelection -> invertVisibleSelection()
             is BookshelfIntent.ToggleBookSelection -> toggleBookSelection(intent.bookUrl)
             is BookshelfIntent.SetInFolderRoot -> setInFolderRoot(intent.value)
-            is BookshelfIntent.MoveBooksToGroup -> moveBooksToGroup(intent.bookUrls, intent.groupId)
+            is BookshelfIntent.AddTags -> addTags(intent.bookUrls, intent.tags)
             is BookshelfIntent.StartDragging -> startDraggingBooks(intent.books)
             is BookshelfIntent.MoveDragging -> moveDraggingBook(intent.from, intent.to, intent.books)
             BookshelfIntent.FinishDragging -> finishDraggingBooks()
@@ -675,6 +565,22 @@ class BookshelfViewModel(
             clearSelection()
             clearDragState()
         }
+    }
+
+    private fun scheduleMissingLocalBookCoverBackfills(books: List<BookShelfItem>) {
+        books.asSequence()
+            .filter { it.isLocal && it.coverUrl.isNullOrBlank() }
+            .forEach { book ->
+                if (localBookCoverBackfills.add(book.bookUrl)) {
+                    viewModelScope.launch {
+                        try {
+                            bookRepository.backfillLocalBookCoverIfMissing(book.bookUrl)
+                        } finally {
+                            localBookCoverBackfills.remove(book.bookUrl)
+                        }
+                    }
+                }
+            }
     }
 
     fun setSearchKey(key: String) {
@@ -757,12 +663,12 @@ class BookshelfViewModel(
         clearDragState()
     }
 
-    fun moveBooksToGroup(bookUrls: Set<String>, groupId: Long) {
-        if (bookUrls.isEmpty()) return
-        execute {
-            updateBooksGroupUseCase.replaceGroup(bookUrls, groupId)
+    fun addTags(bookUrls: Set<String>, tags: Set<String>) {
+        execute { bookRepository.addTags(bookUrls, tags) }.onSuccess {
+            dismissOverlay()
+            clearSelection()
         }.onError {
-            showMessage("更新分组失败\n${it.localizedMessage}")
+            showMessage("添加标签失败\n${it.localizedMessage}")
         }
     }
 

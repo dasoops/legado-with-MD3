@@ -129,6 +129,7 @@ sealed interface BookInfoIntent {
     data object OriginClick : BookInfoIntent
     data object ReadClick : BookInfoIntent
     data object ShelfClick : BookInfoIntent
+    data object OpenLocalBookExternally : BookInfoIntent
     data object TocClick : BookInfoIntent
     data object CoverClick : BookInfoIntent
     data object CoverLongClick : BookInfoIntent
@@ -138,7 +139,7 @@ sealed interface BookInfoIntent {
     data class SaveCover(val path: String) : BookInfoIntent
     data class ConfirmDelete(val deleteOriginal: Boolean) : BookInfoIntent
     data class UpdateRemark(val remark: String) : BookInfoIntent
-    data class SelectGroup(val groupId: Long) : BookInfoIntent
+    data class AddTags(val tags: Set<String>) : BookInfoIntent
     data class SelectCover(val coverUrl: String) : BookInfoIntent
 
     data class SelectWebFile(
@@ -178,6 +179,7 @@ sealed interface BookInfoEffect {
     ) : BookInfoEffect
     data object OpenSelectBooksDir : BookInfoEffect
     data class OpenFile(val uri: Uri, val mimeType: String) : BookInfoEffect
+    data class OpenLocalBookExternally(val uri: Uri) : BookInfoEffect
     data class RunSourceCallback(
         val event: String,
         val source: BookSource?,

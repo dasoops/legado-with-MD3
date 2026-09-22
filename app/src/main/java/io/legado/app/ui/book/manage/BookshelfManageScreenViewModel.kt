@@ -11,7 +11,6 @@ import io.legado.app.data.repository.SearchRepository
 import io.legado.app.domain.gateway.BookExportSettingsGateway
 import io.legado.app.domain.model.settings.BookExportSettings
 import io.legado.app.domain.usecase.DeleteBooksUseCase
-import io.legado.app.domain.usecase.UpdateBooksGroupUseCase
 import io.legado.app.help.config.LocalConfig
 import io.legado.app.service.ExportBookService
 import io.legado.app.domain.gateway.BookshelfSettingsGateway
@@ -65,7 +64,7 @@ data class BookshelfManageScreenUiState(
 sealed interface BookshelfManageScreenIntent {
     data class Initialize(val groupId: Long) : BookshelfManageScreenIntent
     data class ChangeGroup(val groupId: Long) : BookshelfManageScreenIntent
-    data class MoveBooksToGroup(val bookUrls: Set<String>, val groupId: Long) : BookshelfManageScreenIntent
+    data class AddTags(val bookUrls: Set<String>, val tags: Set<String>) : BookshelfManageScreenIntent
     data class DeleteBooks(val bookUrls: Set<String>, val deleteOriginal: Boolean) : BookshelfManageScreenIntent
     data class MoveBookOrder(val fromIndex: Int, val toIndex: Int) : BookshelfManageScreenIntent
     data class OpenBookInfoPreview(val book: Book, val inBookshelf: Boolean) : BookshelfManageScreenIntent
@@ -95,7 +94,6 @@ class BookshelfManageScreenViewModel(
     val bookshelfManageScreenConfig: BookshelfManageScreenConfig,
     private val bookExportSettingsGateway: BookExportSettingsGateway,
     private val deleteBooksUseCase: DeleteBooksUseCase,
-    private val updateBooksGroupUseCase: UpdateBooksGroupUseCase,
 ) : BaseViewModel(application) {
 
     private val _uiState = MutableStateFlow(BookshelfManageScreenUiState())
@@ -117,7 +115,7 @@ class BookshelfManageScreenViewModel(
         when (intent) {
             is BookshelfManageScreenIntent.Initialize -> initialize(intent.groupId)
             is BookshelfManageScreenIntent.ChangeGroup -> changeGroup(intent.groupId)
-            is BookshelfManageScreenIntent.MoveBooksToGroup -> moveBooksToGroup(intent.bookUrls, intent.groupId)
+            is BookshelfManageScreenIntent.AddTags -> addTags(intent.bookUrls, intent.tags)
             is BookshelfManageScreenIntent.DeleteBooks -> deleteBooks(intent.bookUrls, intent.deleteOriginal)
             is BookshelfManageScreenIntent.MoveBookOrder -> moveBookOrder(intent.fromIndex, intent.toIndex)
             is BookshelfManageScreenIntent.OpenBookInfoPreview -> openBookInfoPreview(
@@ -276,13 +274,12 @@ class BookshelfManageScreenViewModel(
         }
     }
 
-    private fun moveBooksToGroup(bookUrls: Set<String>, groupId: Long) {
+    private fun addTags(bookUrls: Set<String>, tags: Set<String>) {
         if (bookUrls.isEmpty()) return
-        val safeGroupId = groupId.coerceAtLeast(0L)
         execute {
-            updateBooksGroupUseCase.replaceGroup(bookUrls, safeGroupId)
+            bookRepository.addTags(bookUrls, tags)
         }.onError {
-            _effects.tryEmit(BookshelfManageScreenEffect.ShowMessage("移动分组失败\n${it.localizedMessage}"))
+            _effects.tryEmit(BookshelfManageScreenEffect.ShowMessage("添加标签失败\n${it.localizedMessage}"))
         }
     }
 

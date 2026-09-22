@@ -72,7 +72,6 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
@@ -102,7 +101,9 @@ import io.legado.app.R
 import io.legado.app.data.entities.BookGroup
 import io.legado.app.feature.localdirectory.LocalDirectoryRouteScreen
 import io.legado.app.ui.book.group.GroupEditSheet
-import io.legado.app.ui.book.info.GroupSelectSheet
+import io.legado.app.feature.booktags.TagSelectSheet
+import io.legado.app.domain.model.BookTags
+import kotlinx.collections.immutable.toImmutableList
 import io.legado.app.ui.main.bookCoverSharedElementKey
 import io.legado.app.ui.theme.LegadoTheme
 import io.legado.app.ui.theme.ProvideAppDensity
@@ -158,7 +159,6 @@ fun BookshelfRouteScreen(
     onBookClick: (BookShelfItem, String?) -> Unit,
     onBookLongClick: (book: BookShelfItem, sharedCoverKey: String?) -> Unit,
     onNavigateToRemoteImport: () -> Unit,
-    onNavigateToLocalImport: () -> Unit,
     onNavigateToCache: (Long) -> Unit,
     sharedTransitionScope: SharedTransitionScope? = null,
     animatedVisibilityScope: AnimatedVisibilityScope? = null,
@@ -175,7 +175,6 @@ fun BookshelfRouteScreen(
         onBookClick = onBookClick,
         onBookLongClick = onBookLongClick,
         onNavigateToRemoteImport = onNavigateToRemoteImport,
-        onNavigateToLocalImport = onNavigateToLocalImport,
         onNavigateToCache = onNavigateToCache,
         sharedTransitionScope = sharedTransitionScope,
         animatedVisibilityScope = animatedVisibilityScope,
@@ -198,7 +197,6 @@ fun BookshelfScreen(
     onBookClick: (BookShelfItem, String?) -> Unit,
     onBookLongClick: (book: BookShelfItem, sharedCoverKey: String?) -> Unit,
     onNavigateToRemoteImport: () -> Unit,
-    onNavigateToLocalImport: () -> Unit,
     onNavigateToCache: (Long) -> Unit,
     sharedTransitionScope: SharedTransitionScope? = null,
     animatedVisibilityScope: AnimatedVisibilityScope? = null,
@@ -297,28 +295,10 @@ fun BookshelfScreen(
             }
     }
 
-    val currentTabGroupId by remember {
-        derivedStateOf {
-            uiState.groups.getOrNull(pagerState.settledPage)?.groupId ?: BookGroup.IdAll
-        }
-    }
-    val searchGroupExists by remember {
-        derivedStateOf { uiState.allGroups.any { it.groupId == uiState.selectedGroupId } }
-    }
-    val currentGroupId by remember {
-        derivedStateOf {
-            if (uiState.isSearch && searchGroupExists) {
-                uiState.selectedGroupId
-            } else {
-                currentTabGroupId
-            }
-        }
-    }
-    val isUsingStandaloneSearchGroup by remember {
-        derivedStateOf {
-            uiState.isSearch && uiState.groups.none { it.groupId == currentGroupId }
-        }
-    }
+    val currentTabGroupId = uiState.groups.getOrNull(pagerState.settledPage)?.groupId ?: BookGroup.IdAll
+    val searchGroupExists = uiState.allGroups.any { it.groupId == uiState.selectedGroupId }
+    val currentGroupId = if (uiState.isSearch && searchGroupExists) uiState.selectedGroupId else currentTabGroupId
+    val isUsingStandaloneSearchGroup = uiState.isSearch && uiState.groups.none { it.groupId == currentGroupId }
     val isShowingFolderRoot =
         bookGroupStyle == 2 && isInFolderRoot && !isUsingStandaloneSearchGroup
     LaunchedEffect(scrollToTopRequest) {
@@ -335,7 +315,7 @@ fun BookshelfScreen(
             }
         }
     }
-    val currentGroupBookCount by remember { derivedStateOf { uiState.currentGroupBookCount } }
+    val currentGroupBookCount = uiState.currentGroupBookCount
 
     val clearSelection = {
         onIntent(BookshelfIntent.ClearSelection)
@@ -362,7 +342,7 @@ fun BookshelfScreen(
         }
     }
 
-    val currentGroupName by remember { derivedStateOf { uiState.currentGroupName } }
+    val currentGroupName = uiState.currentGroupName
 
     PredictiveBackHandler(enabled = bookGroupStyle == 2 && !isInFolderRoot && !isEditMode) { progress ->
         try {
@@ -393,22 +373,16 @@ fun BookshelfScreen(
     } else {
         uiState.settings.bookshelfFolderLayoutListPortrait
     }
-    val currentMenuGroupId by remember {
-        derivedStateOf { if (uiState.isSearch) uiState.selectedGroupId else currentTabGroupId }
-    }
-    val editStickySummary by remember {
-        derivedStateOf {
-            if (uiState.isEditMode) {
-                BookshelfEditStickySummary(
-                    selectedCount = uiState.selectedBookUrls.size,
-                    currentGroupTotalCount = currentGroupBookCount,
-                    groupName = currentGroupName,
-                    showGroupName = uiState.bookGroupStyle != 0
-                )
-            } else {
-                null
-            }
-        }
+    val currentMenuGroupId = if (uiState.isSearch) uiState.selectedGroupId else currentTabGroupId
+    val editStickySummary = if (uiState.isEditMode) {
+        BookshelfEditStickySummary(
+            selectedCount = uiState.selectedBookUrls.size,
+            currentGroupTotalCount = currentGroupBookCount,
+            groupName = currentGroupName,
+            showGroupName = uiState.bookGroupStyle != 0
+        )
+    } else {
+        null
     }
 
     val scrollBehavior = GlassTopAppBarDefaults.defaultScrollBehavior()
@@ -465,7 +439,7 @@ fun BookshelfScreen(
                                 }
                             },
                             imageVector = Icons.Default.Bookmarks,
-                            contentDescription = stringResource(R.string.move_to_group)
+                            contentDescription = stringResource(R.string.add_book_tags)
                         )
                     }
 
@@ -484,11 +458,6 @@ fun BookshelfScreen(
                                     text = stringResource(R.string.add_remote_book),
                                     onClick = { onNavigateToRemoteImport(); dismiss() },
                                     leadingIcon = { Icon(Icons.Default.Wifi, null) }
-                                )
-                                RoundDropdownMenuItem(
-                                    text = stringResource(R.string.book_local),
-                                    onClick = { onNavigateToLocalImport(); dismiss() },
-                                    leadingIcon = { Icon(Icons.Default.Save, null) }
                                 )
                                 RoundDropdownMenuItem(
                                     text = stringResource(R.string.layout_setting),
@@ -1132,7 +1101,7 @@ private fun BookshelfOverlays(
 
     if (activeOverlay is BookshelfOverlay.GroupEditSheet) {
         val editGroup = allGroups.firstOrNull { it.groupId == activeOverlay.groupId }
-        if (editGroup != null) {
+        if (editGroup != null && !editGroup.isTag) {
             GroupEditSheet(
                 show = true,
                 group = editGroup,
@@ -1141,16 +1110,12 @@ private fun BookshelfOverlays(
         }
     }
 
-    GroupSelectSheet(
+    TagSelectSheet(
         show = activeOverlay == BookshelfOverlay.GroupSelectSheet,
-        groups = allGroups.filter { it.groupId > 0 },
-        currentGroupId = 0L,
+        tags = allGroups.filter { it.isTag && it.groupName !in BookTags.builtIn }
+            .map { it.groupName }.toImmutableList(),
         onDismissRequest = { onIntent(BookshelfIntent.DismissOverlay) },
-        onConfirm = { groupId ->
-            onIntent(BookshelfIntent.MoveBooksToGroup(selectedBookUrls, groupId))
-            onIntent(BookshelfIntent.DismissOverlay)
-            clearSelection()
-        }
+        onConfirm = { tags -> onIntent(BookshelfIntent.AddTags(selectedBookUrls, tags)) }
     )
 
     FilePickerSheet(
@@ -1396,6 +1361,13 @@ fun BookshelfPage(
                                 } else {
                                     onBookLongClick(bookUi.book, sharedCoverKey)
                                 }
+                            }
+                        },
+                        onCoverClick = {
+                            if (uiState.isEditMode) {
+                                onToggleBookSelection(bookUi)
+                            } else {
+                                onBookLongClick(bookUi.book, sharedCoverKey)
                             }
                         }
                     )

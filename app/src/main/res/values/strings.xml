@@ -88,7 +88,6 @@
     <string name="bookshelf_layout">Layout</string>
     <string name="view">View</string>
     <string name="book_library">Library</string>
-    <string name="book_local">Import Books</string>
     <string name="book_source">Book sources</string>
     <string name="setting">Settings</string>
     <string name="theme_setting">Theme Settings</string>
@@ -2273,4 +2272,8 @@
     <string name="add_local_directory_group">Add local directory group</string>
     <string name="reselect_directory">Reselect directory</string>
     <string name="local_directory">Local directory</string>
+    <string name="open_in_other_app">Open in another app</string>
+    <string name="add_book_tags">添加标签</string>
+    <string name="new_book_tags">新标签, 多个标签用逗号分隔</string>
+    <string name="long_press_add_tags">长按添加标签</string>
 </resources>

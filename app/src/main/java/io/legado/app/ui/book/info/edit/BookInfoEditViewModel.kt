@@ -4,6 +4,7 @@ import android.app.Application
 import android.content.Context
 import android.database.sqlite.SQLiteConstraintException
 import android.net.Uri
+import io.legado.app.domain.model.BookTags
 import io.legado.app.base.BaseViewModel
 import io.legado.app.constant.AppLog
 import io.legado.app.constant.BookType
@@ -11,7 +12,6 @@ import io.legado.app.data.entities.Book
 import io.legado.app.data.repository.BookRepository
 import io.legado.app.help.book.BookHelp
 import io.legado.app.help.book.addType
-import io.legado.app.help.book.applyTagGroupRulesForBook
 import io.legado.app.help.book.isAudio
 import io.legado.app.help.book.isImage
 import io.legado.app.help.book.isLocal
@@ -109,7 +109,7 @@ class BookInfoEditViewModel(
     }
 
     fun onKindListChange(kindList: List<String>) {
-        _uiState.value = _uiState.value.copy(kindList = kindList.distinct())
+        _uiState.value = _uiState.value.copy(kindList = BookTags.editable(kindList))
     }
 
     fun onBookTypeChange(bookType: BookInfoEditType) {
@@ -144,7 +144,7 @@ class BookInfoEditViewModel(
                 book.customCoverUrl = if (currentState.coverUrl == book.coverUrl) null else currentState.coverUrl
                 book.customIntro = if (currentState.intro == book.intro) null else currentState.intro
                 book.customTag = currentState.kindList.joinToString(",").ifBlank { null }
-                applyTagGroupRulesForBook(book)
+                book.config.directoryTags = book.config.directoryTags?.filter { it in currentState.kindList }
                 BookHelp.updateCacheFolder(oldBook, book)
 
                 if (ReadBook.isCurrentBook(book.bookUrl)) {

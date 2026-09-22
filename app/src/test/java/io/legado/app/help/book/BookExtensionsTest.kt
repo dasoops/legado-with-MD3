@@ -16,7 +16,7 @@ class BookExtensionsTest {
 
         assertEquals(listOf("奇幻", "连载"), book.getSourceTagList())
         assertEquals(listOf("收藏", "奇幻"), book.getCustomTagList())
-        assertEquals(listOf("收藏", "奇幻", "连载"), book.getDisplayTagList())
+        assertEquals(listOf("收藏", "奇幻", "连载", "未读"), book.getDisplayTagList())
         assertEquals("奇幻,连载", book.kind)
         assertEquals("收藏,奇幻", book.customTag)
     }

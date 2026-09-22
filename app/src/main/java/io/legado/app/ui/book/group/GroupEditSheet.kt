@@ -1,5 +1,9 @@
 package io.legado.app.ui.book.group
 
+import androidx.compose.runtime.setValue
+
+import androidx.compose.runtime.getValue
+
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
@@ -19,11 +23,9 @@ import androidx.compose.material.icons.filled.FolderOpen
 import androidx.compose.material.icons.filled.Restore
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -32,7 +34,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import io.legado.app.R
 import io.legado.app.data.entities.BookGroup
-import io.legado.app.data.entities.TagGroupRule
 import io.legado.app.ui.theme.LegadoTheme
 import io.legado.app.ui.widget.components.AppTextField
 import io.legado.app.ui.widget.components.alert.AppAlertDialog
@@ -99,10 +100,10 @@ fun GroupEditSheet(
 @Composable
 fun GroupEditContent(
     group: BookGroup? = null,
+    isTag: Boolean = false,
     onDismissRequest: () -> Unit,
     coverPath: String?,
     onCoverPathChange: (String?) -> Unit,
-    tagGroupRule: TagGroupRule? = null,
     viewModel: GroupViewModel = koinViewModel()
 ) {
     val context = LocalContext.current
@@ -110,8 +111,6 @@ fun GroupEditContent(
     var isPrivate by remember(group) { mutableStateOf(group?.isPrivate ?: false) }
     var showDisablePrivateDialog by remember(group) { mutableStateOf(false) }
     var selectedSortIndex by remember(group) { mutableIntStateOf(group?.bookSort ?: -1) }
-    var pattern by remember(tagGroupRule) { mutableStateOf(tagGroupRule?.pattern ?: "") }
-    var showPattern by remember(tagGroupRule) { mutableStateOf(tagGroupRule != null || pattern.isNotBlank()) }
     var isSaving by remember(group) { mutableStateOf(false) }
     var localDirectoryUri by remember(group) { mutableStateOf(group?.localDirectoryUri) }
 
@@ -248,25 +247,7 @@ fun GroupEditContent(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            CompactSwitchSettingItem(
-                title = "标签匹配规则",
-                description = if (showPattern) "启用后分组将根据书籍标签自动匹配" else "关闭后分组为手动管理",
-                checked = showPattern,
-                onCheckedChange = { showPattern = it }
-            )
 
-            if (showPattern) {
-                Spacer(modifier = Modifier.height(8.dp))
-
-                AppTextField(
-                    value = pattern,
-                    onValueChange = { pattern = it },
-                    backgroundColor = LegadoTheme.colorScheme.onSheetContent,
-                    label = stringResource(R.string.tag_group_pattern),
-                    modifier = Modifier.fillMaxWidth(),
-                    minLines = 3
-                )
-            }
         }
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -280,13 +261,6 @@ fun GroupEditContent(
                 } else {
                     isSaving = true
                     if (group != null) {
-                        val ruleToSave = if (showPattern && pattern.isNotBlank()) {
-                            tagGroupRule?.copy(groupName = groupName, pattern = pattern)
-                                ?: TagGroupRule(groupName = groupName, pattern = pattern)
-                        } else {
-                            null
-                        }
-                        val ruleToDelete = tagGroupRule.takeIf { ruleToSave == null }
                         viewModel.saveGroup(
                             bookGroup = group.copy(
                                 groupName = groupName,
@@ -295,8 +269,8 @@ fun GroupEditContent(
                                 isPrivate = isPrivate,
                                 localDirectoryUri = localDirectoryUri
                             ),
-                            ruleToSave = ruleToSave,
-                            ruleToDelete = ruleToDelete,
+                            ruleToSave = null,
+                            ruleToDelete = null,
                             onSuccess = onDismissRequest,
                             onError = { error ->
                                 isSaving = false
@@ -310,7 +284,8 @@ fun GroupEditContent(
                             enableRefresh = true,
                             isPrivate,
                             coverPath,
-                            pattern = pattern.takeIf { showPattern && it.isNotBlank() },
+                            pattern = null,
+                            isTag = isTag,
                             onError = { error ->
                                 isSaving = false
                                 appCtx.toastOnUi(error.localizedMessage ?: "分组保存失败")

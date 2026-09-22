@@ -25,7 +25,7 @@ class GroupViewModel(
 
     fun upGroup(vararg bookGroup: BookGroup, finally: (() -> Unit)? = null) {
         execute {
-            bookGroupRepository.update(*bookGroup)
+            bookGroupRepository.upsert(*bookGroup)
         }.onFinally {
             finally?.invoke()
         }
@@ -39,6 +39,7 @@ class GroupViewModel(
         cover: String?,
         pattern: String? = null,
         localDirectoryUri: String? = null,
+        isTag: Boolean = false,
         onError: ((Throwable) -> Unit)? = null,
         onSuccess: () -> Unit
     ) {
@@ -53,6 +54,7 @@ class GroupViewModel(
                         cover = cover,
                         pattern = pattern,
                         localDirectoryUri = localDirectoryUri,
+                        isTag = isTag,
                     )
                 )
                 onSuccess()

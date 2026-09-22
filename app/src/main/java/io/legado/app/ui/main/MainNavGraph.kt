@@ -41,7 +41,6 @@ import io.legado.app.model.Download
 import io.legado.app.ui.about.AboutEffect
 import io.legado.app.ui.about.AboutScreen
 import io.legado.app.ui.about.AboutViewModel
-import io.legado.app.ui.book.import.local.ImportBookRouteScreen
 import io.legado.app.ui.book.import.remote.RemoteBookRouteScreen
 import io.legado.app.ui.book.info.BookInfoRouteScreen
 import io.legado.app.ui.book.info.BookInfoViewModel
@@ -107,9 +106,6 @@ fun MainActivity.mainEntryProvider(
             },
             onNavigateToRemoteImport = {
                 onNavigateToRoute(MainRouteImportRemote)
-            },
-            onNavigateToLocalImport = {
-                onNavigateToRoute(MainRouteImportLocal)
             },
             onNavigateToCache = { groupId ->
                 onNavigateToRoute(MainRouteCache(groupId))
@@ -220,12 +216,6 @@ fun MainActivity.mainEntryProvider(
 
     entry<MainRouteSettingsThemeManage> {
         ThemeManageRouteScreen(onBackClick = { onNavigateBack() })
-    }
-
-    entry<MainRouteImportLocal> {
-        ImportBookRouteScreen(
-            onBackClick = { onNavigateBack() }
-        )
     }
 
     entry<MainRouteImportRemote> {

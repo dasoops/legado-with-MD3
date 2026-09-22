@@ -132,7 +132,6 @@ import io.legado.app.ui.association.ImportTxtTocRuleViewModel
 import io.legado.app.ui.book.bookmark.AllBookmarkViewModel
 import io.legado.app.ui.book.changecover.ChangeCoverViewModel
 import io.legado.app.ui.book.group.GroupViewModel
-import io.legado.app.ui.book.import.local.ImportBookViewModel
 import io.legado.app.ui.book.import.remote.RemoteBookViewModel
 import io.legado.app.ui.book.import.remote.ServerConfigViewModel
 import io.legado.app.ui.book.import.remote.ServersViewModel
@@ -344,7 +343,6 @@ val appModule = module {
     viewModelOf(::BackupConfigViewModel)
     viewModelOf(::LabConfigViewModel)
     viewModelOf(::TocViewModel)
-    viewModelOf(::ImportBookViewModel)
     viewModel { (groupId: Long, rootUri: String) ->
         LocalDirectoryViewModel(
             application = get(),
@@ -402,7 +400,6 @@ val appModule = module {
             bookshelfManageScreenConfig = get(),
             bookExportSettingsGateway = get(),
             deleteBooksUseCase = get(),
-            updateBooksGroupUseCase = get(),
         )
     }
 

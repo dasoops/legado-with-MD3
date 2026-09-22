@@ -135,6 +135,7 @@ fun BookInfoRouteScreen(
                 BookInfoEffect.OpenSelectBooksDir -> showSelectBooksDirSheet = true
 
                 is BookInfoEffect.OpenFile -> activity.openFileUri(effect.uri, effect.mimeType)
+                is BookInfoEffect.OpenLocalBookExternally -> activity.openFileUri(effect.uri)
                 is BookInfoEffect.RunSourceCallback -> {
                     runSourceCallback(activity, effect, viewModel)
                 }

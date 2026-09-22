@@ -1,5 +1,9 @@
 package io.legado.app.ui.book.manage
 
+import androidx.compose.runtime.setValue
+
+import androidx.compose.runtime.getValue
+
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -15,46 +19,34 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Bookmarks
-import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.SelectAll
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.filled.Stop
 import androidx.compose.material.icons.filled.Upload
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -71,7 +63,9 @@ import io.legado.app.help.book.getExportFileName
 import io.legado.app.help.book.isLocal
 import io.legado.app.help.book.tryParesExportFileName
 import io.legado.app.service.ExportBookService
-import io.legado.app.ui.book.info.GroupSelectSheet
+import io.legado.app.feature.booktags.TagSelectSheet
+import io.legado.app.domain.model.BookTags
+import kotlinx.collections.immutable.toImmutableList
 import io.legado.app.ui.theme.LegadoTheme
 import io.legado.app.ui.theme.LegadoTheme.composeEngine
 import io.legado.app.ui.theme.ThemeResolver
@@ -83,8 +77,6 @@ import io.legado.app.ui.widget.components.alert.AppAlertDialog
 import io.legado.app.ui.widget.components.button.series.MediumTonalButton
 import io.legado.app.ui.widget.components.button.series.SmallTonalButton
 import io.legado.app.ui.widget.components.card.GlassCard
-import io.legado.app.ui.widget.components.card.ReorderableSelectionItem
-import io.legado.app.ui.widget.components.card.SelectionItemCard
 import io.legado.app.ui.widget.components.card.TextCard
 import io.legado.app.ui.widget.components.divider.PillDivider
 import io.legado.app.ui.widget.components.filePicker.FilePickerSheet
@@ -96,7 +88,6 @@ import io.legado.app.ui.widget.components.log.AppLogSheet
 import io.legado.app.ui.widget.components.menuItem.RoundDropdownMenu
 import io.legado.app.ui.widget.components.menuItem.RoundDropdownMenuItem
 import io.legado.app.ui.widget.components.modalBottomSheet.AppModalBottomSheet
-import io.legado.app.ui.widget.components.progressIndicator.AppCircularProgressIndicator
 import io.legado.app.ui.widget.components.reorderAccessibility
 import io.legado.app.ui.widget.components.settingItem.TinyClickableSettingItem
 import io.legado.app.ui.widget.components.settingItem.TinyDropdownSettingItem
@@ -107,7 +98,6 @@ import io.legado.app.utils.ACache
 import io.legado.app.utils.FileDoc
 import io.legado.app.utils.checkWrite
 import io.legado.app.utils.isContentScheme
-import io.legado.app.utils.move
 import io.legado.app.utils.startService
 import io.legado.app.utils.toastOnUi
 import io.legado.app.utils.verificationField
@@ -160,7 +150,6 @@ private fun BookshelfManageScreen(
     var showDeleteBookConfirmDialog by remember { mutableStateOf(false) }
     var showCustomExportDialog by remember { mutableStateOf(false) }
     var pendingMoveGroupBookUrl by remember { mutableStateOf<String?>(null) }
-    var groupPickerCurrentGroupId by remember { mutableLongStateOf(0L) }
     var moreMenuBookUrl by remember { mutableStateOf<String?>(null) }
     var pendingDeleteBookUrls by remember { mutableStateOf<Set<String>>(emptySet()) }
     var fabMenuExpanded by rememberSaveable { mutableStateOf(false) }
@@ -198,15 +187,15 @@ private fun BookshelfManageScreen(
     val exportSheetBooks = remember(exportSheetBookUrls, booksByUrl) {
         exportSheetBookUrls.mapNotNull(booksByUrl::get)
     }
-    val userGroups = remember(state.groupList) { state.groupList.filter { it.groupId > 0L } }
+    val userGroups = remember(state.groupList) { state.groupList.filter { it.isLocalDirectory } }
 
     val groupNameResolver: (Book) -> String = remember(userGroups, noGroupText) {
         { book ->
-            if (book.group <= 0L) {
+            if (book.group == 0L) {
                 noGroupText
             } else {
                 val groups = userGroups.filter {
-                    (book.group and it.groupId) > 0L
+                    (book.group and it.groupId) != 0L
                 }
                 if (groups.isEmpty()) noGroupText
                 else groups.joinToString("、") { it.groupName }
@@ -358,12 +347,6 @@ private fun BookshelfManageScreen(
     fun exportSelected() {
         showExportSheetFor(selectedBookUrls.mapNotNull(booksByUrl::get))
     }
-    fun resolveSelectionGroupMask(): Long {
-        val targetBooks = selectedBookUrls.mapNotNull { booksByUrl[it] }
-        if (targetBooks.isEmpty()) return 0L
-        val firstGroup = targetBooks.first().group.coerceAtLeast(0L)
-        return if (targetBooks.all { it.group == firstGroup }) firstGroup else 0L
-    }
     val fabItems = listOf(
         FabMenuItem(
             Icons.Default.SelectAll,
@@ -380,10 +363,9 @@ private fun BookshelfManageScreen(
         },
         FabMenuItem(
             Icons.Default.Bookmarks,
-            stringResource(R.string.move_to_group)
+            stringResource(R.string.add_book_tags)
         ) {
             if (selectedBookUrls.isNotEmpty()) {
-                groupPickerCurrentGroupId = resolveSelectionGroupMask()
                 pendingMoveGroupBookUrl = null
                 showGroupSelectSheet = true
             }
@@ -613,12 +595,11 @@ private fun BookshelfManageScreen(
                                     SmallTonalButton(
                                         onClick = {
                                             pendingMoveGroupBookUrl = book.bookUrl
-                                            groupPickerCurrentGroupId = book.group.coerceAtLeast(0L)
                                             showGroupSelectSheet = true
                                         },
                                         modifier = Modifier.weight(1f),
                                         icon = Icons.Default.Bookmarks,
-                                        text = "分组",
+                                        text = stringResource(R.string.add_book_tags),
                                         contentColor = LegadoTheme.colorScheme.onSurfaceVariant.copy(
                                             alpha = 0.8f
                                         )
@@ -713,22 +694,20 @@ private fun BookshelfManageScreen(
         onDismiss = { showDeleteBookConfirmDialog = false }
     )
 
-    GroupSelectSheet(
+    TagSelectSheet(
         show = showGroupSelectSheet,
-        groups = userGroups,
-        currentGroupId = groupPickerCurrentGroupId,
+        tags = state.groupList.filter { it.isTag && it.groupName !in BookTags.builtIn }
+            .map { it.groupName }.toImmutableList(),
         onDismissRequest = { showGroupSelectSheet = false },
-        onConfirm = { groupId ->
+        onConfirm = { tags ->
             val moveSet = pendingMoveGroupBookUrl?.let { setOf(it) } ?: selectedBookUrls
-            val targetGroupId = groupId.coerceAtLeast(0L)
             viewModel.dispatch(
-                BookshelfManageScreenIntent.MoveBooksToGroup(
+                BookshelfManageScreenIntent.AddTags(
                     bookUrls = moveSet,
-                    groupId = targetGroupId
+                    tags = tags
                 )
             )
             pendingMoveGroupBookUrl = null
-            groupPickerCurrentGroupId = 0L
             showGroupSelectSheet = false
             clearSelection()
         }

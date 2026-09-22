@@ -1,13 +1,17 @@
 package io.legado.app.data.repository
 
+import io.legado.app.domain.model.BookTags
 import io.legado.app.data.AppDatabase
 import io.legado.app.data.dao.BookChapterDao
 import io.legado.app.data.dao.BookDao
 import io.legado.app.data.dao.GroupBookCount
 import io.legado.app.data.entities.Book
 import io.legado.app.data.entities.BookChapter
+import io.legado.app.help.book.isLocal
+import io.legado.app.model.localBook.LocalBook
 import io.legado.app.ui.main.bookshelf.BookShelfItem
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.withContext
 
@@ -50,6 +54,17 @@ class BookRepository(
         }
     }
 
+    suspend fun backfillLocalBookCoverIfMissing(bookUrl: String) {
+        withContext(Dispatchers.IO) {
+            val book = bookDao.getBook(bookUrl) ?: return@withContext
+            if (!book.isLocal || !book.coverUrl.isNullOrBlank()) return@withContext
+            LocalBook.upBookInfo(book)
+            if (!book.coverUrl.isNullOrBlank()) {
+                bookDao.update(book)
+            }
+        }
+    }
+
     suspend fun getBook(name: String, author: String): Book? {
         return withContext(Dispatchers.IO) {
             bookDao.getBook(name, author)
@@ -63,7 +78,51 @@ class BookRepository(
     }
 
     fun flowBookShelfByGroup(groupId: Long): Flow<List<BookShelfItem>> {
-        return bookDao.flowBookShelfByGroup(groupId)
+        return if (groupId < -100 && groupId != Long.MIN_VALUE) {
+            bookDao.flowBookShelf().map { books ->
+                books.filterNot { it.isNotShelf }.filter { book ->
+                    BookTags.grouping(
+                        book.customTag, book.kind, book.durChapterIndex, book.durChapterPos, book.totalChapterNum
+                    ).any { BookTags.groupId(it) == groupId }
+                }
+            }
+        } else bookDao.flowBookShelfByGroup(groupId)
+    }
+
+    fun flowTagNames(): Flow<List<String>> = bookDao.flowBookShelf().map { books ->
+        books.filterNot { it.isNotShelf }.flatMap { book ->
+            BookTags.grouping(
+                book.customTag, book.kind, book.durChapterIndex, book.durChapterPos, book.totalChapterNum
+            )
+        }.distinct().sorted()
+    }
+
+    fun flowDirectoryTagNames(): Flow<Set<String>> = bookDao.flowBookShelf().map { books ->
+        books
+            .filter { it.type and io.legado.app.constant.BookType.local != 0 && !it.isNotShelf }
+            .flatMap { book -> BookTags.directoryNames(book.bookUrl) }
+            .toSet()
+    }
+
+    fun flowBookShelfByGroup(group: io.legado.app.data.entities.BookGroup): Flow<List<BookShelfItem>> =
+        if (group.isTag) bookDao.flowBookShelf().map { books ->
+            books.filterNot { it.isNotShelf }.filter { book ->
+                group.groupName in BookTags.grouping(
+                    book.customTag, book.kind, book.durChapterIndex, book.durChapterPos, book.totalChapterNum
+                )
+            }
+        } else bookDao.flowBookShelfByGroup(group.groupId)
+
+    suspend fun addTags(bookUrls: Set<String>, tags: Set<String>) = withContext(Dispatchers.IO) {
+        val additions = BookTags.editable(tags)
+        if (additions.isEmpty()) return@withContext
+        appDb.runInTransaction {
+            bookUrls.forEach { url ->
+                val book = bookDao.getBook(url) ?: return@forEach
+                val merged = (BookTags.parse(book.customTag) + additions).distinct()
+                bookDao.updateCustomTag(url, merged.joinToString(","))
+            }
+        }
     }
 
     fun flowSystemGroupCounts(): Flow<List<GroupBookCount>> {
