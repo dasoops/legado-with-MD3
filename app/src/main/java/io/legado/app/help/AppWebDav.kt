@@ -19,6 +19,8 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import splitties.init.appCtx
 import org.koin.core.context.GlobalContext
+import java.io.File
+import io.legado.app.lib.webdav.WebDavFile
 
 /**
  * webDav初始化会访问网络,不要放到主线程

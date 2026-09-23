@@ -12,7 +12,6 @@ import io.legado.app.data.entities.readRecord.ReadRecord
 import io.legado.app.data.entities.readRecord.ReadRecordSession
 import io.legado.app.data.repository.HighlightRuleRepository
 import io.legado.app.data.repository.ReadRecordRepository
-import io.legado.app.domain.gateway.BackupSettingsGateway
 import io.legado.app.domain.gateway.OtherSettingsGateway
 import io.legado.app.domain.gateway.ReadSettingsGateway
 import io.legado.app.feature.reader.core.navigation.ReaderChapterPaginationSnapshot
@@ -150,7 +149,6 @@ object ReadBook : CoroutineScope by MainScope(), KoinComponent {
     private val readRecordRepository: ReadRecordRepository by inject()
     private val readSettingsGateway: ReadSettingsGateway by inject()
     private val otherSettingsGateway: OtherSettingsGateway by inject()
-    private val backupSettingsGateway: BackupSettingsGateway by inject()
     private var lastReadLength: Long = 0
     private val loadingChapters = arrayListOf<Int>()
     private val readRecord = ReadRecord()
@@ -168,9 +166,6 @@ object ReadBook : CoroutineScope by MainScope(), KoinComponent {
     /* 跳转进度前进度记录 */
     var lastBookProgress: BookProgress? = null
     private var readingAnchorJumpCount = 0
-
-    /* web端阅读进度记录 */
-    var webBookProgress: BookProgress? = null
 
     var preDownloadTask: Job? = null
     val downloadedChapters = hashSetOf<Int>()
@@ -284,7 +279,6 @@ object ReadBook : CoroutineScope by MainScope(), KoinComponent {
         upWebBook(book)
         lastBookProgress = null
         readingAnchorJumpCount = 0
-        webBookProgress = null
         TextFile.clear()
         requestWholeBookPageEstimate()
         synchronized(this) {

@@ -6,7 +6,6 @@ import io.legado.app.constant.AppLog
 import io.legado.app.data.entities.Book
 import io.legado.app.data.entities.BookProgress
 import io.legado.app.data.repository.BookRepository
-import io.legado.app.domain.gateway.BackupSettingsGateway
 import io.legado.app.domain.model.ReadingProgress
 import io.legado.app.feature.reader.platform.ReaderPerfTrace
 import io.legado.app.help.book.BookHelp
@@ -38,7 +37,6 @@ class ReadBookLoadDelegate(
     private val scope: CoroutineScope,
     private val host: Host,
     private val bookRepository: BookRepository,
-    private val backupSettingsGateway: BackupSettingsGateway,
 ) {
 
     interface Host {
@@ -138,11 +136,6 @@ class ReadBookLoadDelegate(
         }
         if (ReadBook.chapterChanged) {
             ReadBook.chapterChanged = false
-        } else if (ReadBook.inBookshelf) {
-            if (backupSettingsGateway.currentSettings.syncBookProgressPlus) {
-                ReadBook.syncProgress({ progress -> host.sureNewProgress(progress) })
-            } else {
-            }
         }
     }
 

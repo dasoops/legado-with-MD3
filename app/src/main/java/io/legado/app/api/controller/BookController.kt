@@ -202,13 +202,6 @@ object BookController {
                     book.durChapterTitle = bookProgress.durChapterTitle
                     book.durChapterTime = bookProgress.durChapterTime
                     appDb.bookDao.update(book)
-                    ReadBook.book?.let {
-                        if (it.name == bookProgress.name &&
-                            it.author == bookProgress.author
-                        ) {
-                            ReadBook.webBookProgress = bookProgress
-                        }
-                    }
                     return returnData.setData("")
                 }
             }

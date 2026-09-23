@@ -541,19 +541,7 @@ class ReadBookController(
             ReaderTapAction.TOGGLE_REPLACE -> viewModel.onIntent(ReadBookIntent.MenuEnableReplace)
             ReaderTapAction.OPEN_CHAPTER_LIST -> viewModel.onIntent(ReadBookIntent.OpenChapterList)
             ReaderTapAction.OPEN_SEARCH -> viewModel.onIntent(ReadBookIntent.OpenSearch(null))
-            ReaderTapAction.SYNC_PROGRESS -> ReadBook.syncProgress(
-                newProgressAction = { progress ->
-                    activity.runOnUiThread {
-                        viewModel.onIntent(ReadBookIntent.SureNewProgress(progress))
-                    }
-                },
-                uploadSuccessAction = {
-                    activity.longToastOnUi(activity.getString(R.string.upload_book_success))
-                },
-                syncSuccessAction = {
-                    activity.longToastOnUi(activity.getString(R.string.sync_book_progress_success))
-                },
-            )
+            ReaderTapAction.SYNC_PROGRESS -> Unit
         }
     }
 
@@ -1803,7 +1791,6 @@ class ReadBookController(
             is ReadBookEffect.RegisterNetworkListener -> {
                 networkChangedListener.register()
                 networkChangedListener.onNetworkChanged = {
-                    viewModel.onNetworkChanged()
                 }
             }
 

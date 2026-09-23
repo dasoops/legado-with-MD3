@@ -42,7 +42,7 @@ class RemoteBookRepository(
             }
         }
 
-        return AppWebDav.defaultBookWebDav
+        return null
     }
 
     suspend fun refreshLocalBook(book: Book): Boolean {
@@ -94,7 +94,7 @@ class RemoteBookRepository(
     }
 
     fun getDefaultBookWebDav(): RemoteBookWebDav? {
-        return AppWebDav.defaultBookWebDav
+        return null
     }
 
     suspend fun loadBooks(

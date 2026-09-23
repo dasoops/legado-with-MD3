@@ -364,7 +364,6 @@ val appModule = module {
             appShellSettingsGateway = get(),
             appUiConfigurationGateway = get(),
             otherSettingsGateway = get(),
-            backupSettingsGateway = get(),
             themeSettingsGateway = get(),
             bookSourceRepository = get(),
             bookmarkRepository = get(),

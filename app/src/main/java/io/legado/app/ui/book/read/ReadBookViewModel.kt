@@ -24,7 +24,6 @@ import io.legado.app.data.repository.ReplaceRuleRepository
 import io.legado.app.data.repository.SettingsRepository
 import io.legado.app.domain.gateway.AppShellSettingsGateway
 import io.legado.app.domain.gateway.AppUiConfigurationGateway
-import io.legado.app.domain.gateway.BackupSettingsGateway
 import io.legado.app.domain.gateway.BookContentProcessGateway
 import io.legado.app.domain.gateway.OtherSettingsGateway
 import io.legado.app.domain.gateway.ReadStyleGateway
@@ -53,7 +52,6 @@ import io.legado.app.ui.book.read.sheet.ReaderBookSheetTab
 import io.legado.app.ui.book.searchContent.SearchResult
 import io.legado.app.utils.GSON
 import io.legado.app.utils.ImageSaveUtils
-import io.legado.app.utils.NetworkUtils
 import io.legado.app.utils.openUrl
 import io.legado.app.utils.toStringArray
 import kotlinx.collections.immutable.toImmutableList
@@ -98,7 +96,6 @@ class ReadBookViewModel(
     private val appShellSettingsGateway: AppShellSettingsGateway,
     private val appUiConfigurationGateway: AppUiConfigurationGateway,
     private val otherSettingsGateway: OtherSettingsGateway,
-    private val backupSettingsGateway: BackupSettingsGateway,
     private val themeSettingsGateway: ThemeSettingsGateway,
     private val bookSourceRepository: BookSourceRepository,
     private val bookmarkRepository: BookmarkRepository,
@@ -360,7 +357,6 @@ class ReadBookViewModel(
             override suspend fun checkReadRecordAlias(book: Book) = readRecordAliasDelegate.check(book)
         },
         bookRepository = bookRepository,
-        backupSettingsGateway = backupSettingsGateway,
     )
 
     // --- 阅读样式域（无自持状态，styleConfig / activeReminder / eyeProtection 仍在 UiState）---
@@ -869,11 +865,7 @@ class ReadBookViewModel(
 
             is ReadBookIntent.MenuCoverProgress -> {
                 ReadBook.book?.let {
-                    ReadBook.uploadProgress(true) {
-                        _effects.tryEmit(
-                            ReadBookEffect.ShowToast(context.getString(R.string.upload_book_success))
-                        )
-                    }
+                    Unit
                 }
             }
 
@@ -1265,11 +1257,6 @@ class ReadBookViewModel(
         ReadBook.isUiActive = true
         ReadBook.startReadSession()
 
-        // Web book progress sync
-        ReadBook.webBookProgress?.let {
-            ReadBook.setProgress(it)
-            ReadBook.webBookProgress = null
-        }
 
         // View-layer operations via effects
         _effects.tryEmit(ReadBookEffect.UpSystemUiVisibility)
@@ -1302,11 +1289,6 @@ class ReadBookViewModel(
         _effects.tryEmit(ReadBookEffect.UnregisterNetworkListener)
 
         if (!BuildConfig.DEBUG) {
-            if (backupSettingsGateway.currentSettings.syncBookProgressPlus) {
-                ReadBook.syncProgress()
-            } else {
-                ReadBook.uploadProgress()
-            }
             _effects.tryEmit(ReadBookEffect.BackupNow)
         }
         justInitData = false
@@ -1315,18 +1297,6 @@ class ReadBookViewModel(
     private fun handleOnDispose() {
         backupJob?.cancel()
         ReadBook.cancelPreDownloadTask()
-    }
-
-    fun onNetworkChanged() {
-        if (
-            backupSettingsGateway.currentSettings.syncBookProgressPlus &&
-            NetworkUtils.isAvailable() &&
-            !justInitData
-        ) {
-            ReadBook.syncProgress(newProgressAction = { progress ->
-                sureNewProgress(progress)
-            })
-        }
     }
 
     /**
@@ -1731,7 +1701,7 @@ class ReadBookViewModel(
         justInitData = true
     }
 
-    fun isReadingProgressSyncConfigured(): Boolean = loadDelegate.isReadingProgressSyncConfigured()
+    fun isReadingProgressSyncConfigured(): Boolean = false
 
 
     fun openChapter(index: Int, durChapterPos: Int = 0, success: (() -> Unit)? = null) {

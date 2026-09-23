@@ -146,14 +146,6 @@ class App : Application(), SingletonImageLoader.Factory {
         super.onCreate()
         CrashHandler(this)
         registerActivityLifecycleCallbacks(LifecycleHelp)
-        Coroutine.async {
-            get<BackupSettingsGateway>().settings
-                .map {
-                    listOf(it.webDavUrl, it.webDavDir, it.webDavAccount, it.webDavPassword)
-                }
-                .distinctUntilChanged()
-                .collect { AppWebDav.upConfig() }
-        }
         // themeMode 是日夜的唯一来源，除外观设置外（阅读页快捷按钮、主题包、恢复备份）
         // 也会直接写网关。AppCompat 的夜间模式统一跟随网关，否则资源配置不变，
         // WebView、旧 View 界面拿到的仍是切换前的深浅色。
