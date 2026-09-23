@@ -115,7 +115,6 @@ fun OnboardingScreen(
                     when (page) {
                         0 -> PrivacyPage(state)
                         1 -> WebDavPage(state, onIntent)
-                        2 -> BookFolderPage(state, onIntent)
                         else -> ThemePage(state, onIntent)
                     }
                 }
@@ -289,40 +288,6 @@ private fun WebDavPage(state: OnboardingUiState, onIntent: (OnboardingIntent) ->
 }
 
 @Composable
-private fun BookFolderPage(state: OnboardingUiState, onIntent: (OnboardingIntent) -> Unit) {
-    Column(
-        modifier = Modifier
-            .verticalScroll(rememberScrollState())
-            .padding(16.dp)
-    ) {
-        AppText(
-            text = stringResource(R.string.welcome_book_folder_tip),
-            style = LegadoTheme.typography.bodySmall,
-            color = LegadoTheme.colorScheme.onSurfaceVariant
-        )
-        AppText(
-            text = stringResource(R.string.select_book_folder),
-            style = LegadoTheme.typography.titleMedium,
-            modifier = Modifier.padding(top = 12.dp)
-        )
-        AppText(
-            text = state.bookFolderUri
-                ?: stringResource(R.string.welcome_book_folder_not_selected),
-            style = LegadoTheme.typography.bodySmall,
-            color = LegadoTheme.colorScheme.onSurfaceVariant,
-            maxLines = 3,
-            overflow = TextOverflow.Ellipsis,
-            modifier = Modifier.padding(top = 8.dp)
-        )
-        MediumTonalButton(
-            onClick = { onIntent(OnboardingIntent.SelectFolder) },
-            text = stringResource(R.string.select_folder),
-            modifier = Modifier.padding(top = 12.dp)
-        )
-    }
-}
-
-@Composable
 private fun ThemePage(state: OnboardingUiState, onIntent: (OnboardingIntent) -> Unit) {
     val context = LocalContext.current
     val isDark = LegadoTheme.isDark
@@ -363,7 +328,6 @@ private fun pageTitle(page: Int): String = stringResource(
     when (page) {
         0 -> R.string.onboarding_title_welcome
         1 -> R.string.onboarding_title_backup
-        2 -> R.string.onboarding_title_book_folder
         else -> R.string.onboarding_title_theme
     }
 )
@@ -373,7 +337,6 @@ private fun pageSummary(page: Int): String = stringResource(
     when (page) {
         0 -> R.string.onboarding_summary_welcome
         1 -> R.string.onboarding_summary_backup
-        2 -> R.string.onboarding_summary_book_folder
         else -> R.string.onboarding_summary_theme
     }
 )

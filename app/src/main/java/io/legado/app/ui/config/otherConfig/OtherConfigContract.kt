@@ -7,12 +7,12 @@ import kotlinx.collections.immutable.persistentListOf
 
 @Stable
 data class OtherConfigUiState(
+    val defaultBookTreeUri: String? = null,
     val language: String = "auto",
     val updateToVariant: String = "official_version",
     val autoCheckUpdateOnStart: Boolean = false,
     val autoRefresh: Boolean = false,
     val defaultToRead: Boolean = false,
-    val defaultBookTreeUri: String? = null,
     val antiAlias: Boolean = false,
     val replaceEnableDefault: Boolean = true,
     val autoClearExpired: Boolean = true,

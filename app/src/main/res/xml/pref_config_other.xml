@@ -81,11 +81,6 @@
         app:iconSpaceReserved="false"
         app:layout="@layout/view_preference_category">
 
-        <io.legado.app.lib.prefs.Preference
-            android:key="defaultBookTreeUri"
-            android:summary="@string/book_tree_uri_s"
-            android:title="@string/book_tree_uri_t" />
-
         <io.legado.app.lib.prefs.SwitchPreference
             android:defaultValue="false"
             android:key="antiAlias"

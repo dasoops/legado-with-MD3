@@ -42,7 +42,6 @@ class OnboardingViewModel(
             webDavAccount = backupSettingsGateway.currentSettings.webDavAccount,
             webDavPassword = backupSettingsGateway.currentSettings.webDavPassword,
             appAccessPassword = LocalConfig.password ?: "",
-            bookFolderUri = otherSettingsGateway.currentSettings.defaultBookTreeUri,
             theme = themeSettingsGateway.currentSettings,
             themeMode = appShellSettingsGateway.currentSettings.themeMode,
         )
@@ -109,13 +108,6 @@ class OnboardingViewModel(
                 _effects.tryEmit(OnboardingEffect.OpenRestoreFilePicker)
             }
             is OnboardingIntent.RestoreLocalFile -> restoreLocal(intent.uri)
-            OnboardingIntent.SelectFolder -> _effects.tryEmit(OnboardingEffect.OpenBookFolderPicker)
-            is OnboardingIntent.SelectBookFolder -> viewModelScope.launch {
-                otherSettingsGateway.update {
-                    it.copy(defaultBookTreeUri = intent.uri)
-                }
-                _uiState.update { it.copy(bookFolderUri = intent.uri) }
-            }
             is OnboardingIntent.SelectTheme -> selectTheme(intent.value)
             is OnboardingIntent.SetThemeMode -> viewModelScope.launch {
                 appShellSettingsGateway.update { it.copy(themeMode = intent.value) }

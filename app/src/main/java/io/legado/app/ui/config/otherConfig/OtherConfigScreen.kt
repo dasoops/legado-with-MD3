@@ -117,12 +117,6 @@ fun OtherConfigScreen(
 
             SplicedColumnGroup(title = stringResource(R.string.read)) {
 
-                ClickableSettingItem(
-                    title = stringResource(R.string.book_tree_uri_t),
-                    description = state.defaultBookTreeUri,
-                    onClick = { onIntent(OtherConfigIntent.ShowOverlay(OtherConfigOverlay.FilePicker)) }
-                )
-
                 SwitchSettingItem(
                     title = stringResource(R.string.anti_alias),
                     description = stringResource(R.string.pref_anti_alias_summary),

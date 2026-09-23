@@ -2,6 +2,7 @@ package io.legado.app.constant
 
 @Suppress("ConstPropertyName")
 object PreferKey {
+    const val defaultBookTreeUri = "defaultBookTreeUri"
     const val language = "language"
     const val fontScale = "fontScale"
     const val appFontPath = "appFontPath"
@@ -134,7 +135,6 @@ object PreferKey {
     const val lastMarkingStyle = "lastMarkingStyle"
     const val doublePageHorizontal = "doubleHorizontalPage"
     const val readUrlOpenInBrowser = "readUrlInBrowser"
-    const val defaultBookTreeUri = "defaultBookTreeUri"
     const val importBookPath = "importBookPath"
     const val checkSource = "checkSource"
     const val uploadRule = "uploadRule"

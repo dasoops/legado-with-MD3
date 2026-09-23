@@ -41,7 +41,6 @@ import io.legado.app.model.Download
 import io.legado.app.ui.about.AboutEffect
 import io.legado.app.ui.about.AboutScreen
 import io.legado.app.ui.about.AboutViewModel
-import io.legado.app.ui.book.import.remote.RemoteBookRouteScreen
 import io.legado.app.ui.book.info.BookInfoRouteScreen
 import io.legado.app.ui.book.info.BookInfoViewModel
 import io.legado.app.ui.book.manage.BookshelfManageRouteScreen

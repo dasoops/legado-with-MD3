@@ -7,6 +7,7 @@ import org.koin.core.context.GlobalContext
 
 @Deprecated("使用 OtherSettingsGateway.currentSettings")
 object OtherConfig {
+    val defaultBookTreeUri get() = settings.defaultBookTreeUri
     private val settings get() = GlobalContext.get().get<OtherSettingsGateway>().currentSettings
     private val cache get() = GlobalContext.get().get<DownloadCacheSettingsGateway>().currentSettings
     val language get() = GlobalContext.get().get<AppLocaleGateway>().currentLanguage
@@ -16,7 +17,6 @@ object OtherConfig {
     val defaultToRead get() = settings.defaultToRead
     val notificationsPost get() = settings.notificationsPost
     val ignoreBatteryPermission get() = settings.ignoreBatteryPermission
-    val defaultBookTreeUri get() = settings.defaultBookTreeUri
     val antiAlias get() = settings.antiAlias
     val replaceEnableDefault get() = settings.replaceEnableDefault
     val autoClearExpired get() = settings.autoClearExpired

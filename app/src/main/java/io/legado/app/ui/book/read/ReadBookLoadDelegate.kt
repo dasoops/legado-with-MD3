@@ -18,6 +18,7 @@ import io.legado.app.model.localBook.LocalBook
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ensureActive
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.FileNotFoundException
 import kotlin.coroutines.coroutineContext
@@ -146,7 +147,11 @@ class ReadBookLoadDelegate(
         } catch (e: Throwable) {
             ReadBook.upMsg("打开本地书籍出错: ${e.localizedMessage}")
             if (e is SecurityException || e is FileNotFoundException) {
-                host.requestBooksDirPicker(reloadChapterList = false)
+                host.emitEffect(ReadBookEffect.ShowToast("本地书籍文件不存在, 已从书架移除"))
+                scope.launch(Dispatchers.IO) {
+                    bookRepository.deleteChaptersByBook(book.bookUrl)
+                    bookRepository.delete(book)
+                }
             }
             return false
         }
