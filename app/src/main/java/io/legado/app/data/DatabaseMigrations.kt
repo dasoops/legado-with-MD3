@@ -1,6 +1,7 @@
 package io.legado.app.data
 
 import androidx.room.DeleteColumn
+import androidx.room.DeleteTable
 import androidx.room.migration.AutoMigrationSpec
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
@@ -22,7 +23,20 @@ object DatabaseMigrations {
             migration_39_40, migration_40_41, migration_41_42, migration_42_43,
             migration_82_83, migration_98_99, migration_99_100,
             migration_102_103, migration_105_106,
+            migration_108_109,
         )
+    }
+
+    private val migration_108_109 = object : Migration(108, 109) {
+        override fun migrate(db: SupportSQLiteDatabase) {
+            db.execSQL("DROP TABLE IF EXISTS rssSources")
+            db.execSQL("DROP TABLE IF EXISTS rssArticles")
+            db.execSQL("DROP TABLE IF EXISTS rssReadRecords")
+            db.execSQL("DROP TABLE IF EXISTS rssStars")
+            db.execSQL("DROP TABLE IF EXISTS httpTTS")
+            db.execSQL("DROP TABLE IF EXISTS dictRules")
+            db.execSQL("DROP TABLE IF EXISTS cloud_tts_engines")
+        }
     }
 
     private val migration_10_11 = object : Migration(10, 11) {
@@ -559,6 +573,15 @@ object DatabaseMigrations {
         }
     }
 
+    @DeleteTable.Entries(
+        DeleteTable("rssSources"),
+        DeleteTable("rssArticles"),
+        DeleteTable("rssReadRecords"),
+        DeleteTable("rssStars"),
+        DeleteTable("httpTTS"),
+        DeleteTable("dictRules"),
+        DeleteTable("cloud_tts_engines"),
+    )
     @Suppress("ClassName")
     class Migration_107_108 : AutoMigrationSpec {
         override fun onPostMigrate(db: SupportSQLiteDatabase) {

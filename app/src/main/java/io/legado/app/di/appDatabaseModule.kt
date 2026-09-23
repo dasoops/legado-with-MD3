@@ -27,10 +27,6 @@ import io.legado.app.data.dao.KeyboardAssistsDao
 import io.legado.app.data.dao.ReadAloudVoiceDao
 import io.legado.app.data.dao.ReadRecordDao
 import io.legado.app.data.dao.ReplaceRuleDao
-import io.legado.app.data.dao.RssArticleDao
-import io.legado.app.data.dao.RssReadRecordDao
-import io.legado.app.data.dao.RssSourceDao
-import io.legado.app.data.dao.RssStarDao
 import io.legado.app.data.dao.RuleSubDao
 import io.legado.app.data.dao.SearchBookDao
 import io.legado.app.data.dao.SearchKeywordDao
@@ -66,11 +62,7 @@ val appDatabaseModule = module {
     factory<ReplaceRuleDao> { get<AppDatabase>().replaceRuleDao }
     factory<SearchBookDao> { get<AppDatabase>().searchBookDao }
     factory<SearchKeywordDao> { get<AppDatabase>().searchKeywordDao }
-    factory<RssSourceDao> { get<AppDatabase>().rssSourceDao }
     factory<BookmarkDao> { get<AppDatabase>().bookmarkDao }
-    factory<RssArticleDao> { get<AppDatabase>().rssArticleDao }
-    factory<RssStarDao> { get<AppDatabase>().rssStarDao }
-    factory<RssReadRecordDao> { get<AppDatabase>().rssReadRecordDao }
     factory<CookieDao> { get<AppDatabase>().cookieDao }
     factory<TxtTocRuleDao> { get<AppDatabase>().txtTocRuleDao }
     factory<ReadRecordDao> { get<AppDatabase>().readRecordDao }
