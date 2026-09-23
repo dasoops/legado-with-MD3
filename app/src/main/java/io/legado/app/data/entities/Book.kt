@@ -287,14 +287,6 @@ data class Book(
         return config.ttsEngine
     }
 
-    fun setSplitLongChapter(limitLongContent: Boolean) {
-        config.splitLongChapter = limitLongContent
-    }
-
-    fun getSplitLongChapter(): Boolean {
-        return config.splitLongChapter
-    }
-
     // readSimulating 的 setter 和 getter
     fun setReadSimulating(readSimulating: Boolean) {
         config.readSimulating = readSimulating
@@ -468,7 +460,6 @@ data class Book(
         var useReplaceRule: Boolean? = null,// 正文使用净化替换规则
         var delTag: Long = 0L,//去除标签
         var ttsEngine: String? = null,
-        var splitLongChapter: Boolean = true,
         var readSimulating: Boolean = false,
         var startDate: String? = null,
         var startChapter: Int? = null,     // 用户设置的起始章节

@@ -471,14 +471,6 @@ fun TocScreen(
                                         dismiss()
                                     }
                                 )
-                                RoundDropdownMenuItem(
-                                    text = stringResource(R.string.split_long_chapters),
-                                    isSelected = uiState.isSplitLongChapter,
-                                    onClick = {
-                                        onIntent(TocIntent.ToggleSplitLongChapter)
-                                        dismiss()
-                                    }
-                                )
                             }
                         }
 

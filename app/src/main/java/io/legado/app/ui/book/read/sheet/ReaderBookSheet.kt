@@ -1065,11 +1065,6 @@ private fun ReaderBookTocMenu(
                 },
             )
         }
-        RoundDropdownMenuItem(
-            text = stringResource(R.string.split_long_chapters),
-            isSelected = state.isSplitLongChapter,
-            onClick = { dispatch(TocIntent.ToggleSplitLongChapter) },
-        )
     }
 }
 

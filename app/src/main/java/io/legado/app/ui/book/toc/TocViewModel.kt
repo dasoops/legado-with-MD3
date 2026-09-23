@@ -125,7 +125,6 @@ data class TocUiState(
     val collapsedVolumes: ImmutableSet<Int> = persistentSetOf(),
     val bookmarks: ImmutableList<TocBookmarkItemUi> = persistentListOf(),
     val markings: ImmutableList<TocMarkingItemUi> = persistentListOf(),
-    val isSplitLongChapter: Boolean = false,
     val isReverse: Boolean = false,
 )
 
@@ -147,7 +146,6 @@ sealed interface TocIntent {
     data object ToggleUseReplace : TocIntent
     data object ToggleShowWordCount : TocIntent
     data object ReverseToc : TocIntent
-    data object ToggleSplitLongChapter : TocIntent
     data object ExpandAllVolumes : TocIntent
     data object CollapseAllVolumes : TocIntent
     data object UpdateToc : TocIntent
@@ -239,7 +237,6 @@ class TocViewModel(
         }
         .stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
-    val isSplitLongChapter: Boolean get() = bookState.value?.getSplitLongChapter() ?: false
 
     // 目录更新（重新解析章节）期间的忙碌态，独立于导入状态。
     private val _isTocUpdating = MutableStateFlow(false)
@@ -355,7 +352,6 @@ class TocViewModel(
                 collapsedVolumes = collapsed.toImmutableSet(),
                 bookmarks = bookmarks.toImmutableList(),
                 markings = markings.toImmutableList(),
-                isSplitLongChapter = book?.getSplitLongChapter() ?: false,
                 isReverse = book?.getReverseToc() ?: false,
             )
         }.stateIn(
@@ -545,7 +541,6 @@ class TocViewModel(
             TocIntent.ToggleUseReplace -> toggleUseReplace()
             TocIntent.ToggleShowWordCount -> toggleShowWordCount()
             TocIntent.ReverseToc -> reverseToc()
-            TocIntent.ToggleSplitLongChapter -> toggleSplitLongChapter()
             TocIntent.ExpandAllVolumes -> expandAllVolumes()
             TocIntent.CollapseAllVolumes -> collapseAllVolumes()
             TocIntent.UpdateToc -> updateToc()
@@ -644,22 +639,6 @@ class TocViewModel(
             else {
                 showMessage(R.string.toc_rule_updated)
                 if (ReadBook.book?.bookUrl == book.bookUrl) ReadBook.upMsg(null)
-            }
-        }
-    }
-
-    fun toggleSplitLongChapter() {
-        val book = bookState.value ?: return
-        val newState = !isSplitLongChapter
-        book.setSplitLongChapter(newState)
-        upBookTocRule(book) { error ->
-            if (error != null) {
-                showMessage(context.getString(R.string.setting_failed, error.localizedMessage))
-            } else {
-                showMessage(
-                    if (newState) R.string.split_long_chapters_enabled
-                    else R.string.split_long_chapters_disabled
-                )
             }
         }
     }

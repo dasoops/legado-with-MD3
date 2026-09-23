@@ -346,18 +346,6 @@ private fun OtherSettings(
         onCheckedChange = onUseNewTocSheetChange,
     )
 
-    TinySliderSettingItem(
-        title = stringResource(R.string.no_toc_split_length_title),
-        description = stringResource(
-            R.string.no_toc_split_length_summary,
-            preferences.maxLengthWithNoToc
-        ),
-        value = preferences.maxLengthWithNoToc.toFloat(),
-        valueRange = 3000f..100000f,
-        stepSize = 100f,
-        valueFormat = { it.roundToInt().toString() },
-        onValueChange = { onMaxLengthWithNoTocChange(it.roundToInt()) },
-    )
 
     TinySwitchSettingItem(
         title = stringResource(R.string.enable_select_vibrator),

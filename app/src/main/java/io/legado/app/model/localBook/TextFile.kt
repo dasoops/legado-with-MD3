@@ -5,7 +5,6 @@ import io.legado.app.data.appDb
 import io.legado.app.data.entities.Book
 import io.legado.app.data.entities.BookChapter
 import io.legado.app.data.entities.TxtTocRule
-import io.legado.app.domain.gateway.ReadSettingsGateway
 import io.legado.app.exception.EmptyFileException
 import io.legado.app.help.DefaultData
 import io.legado.app.help.book.isLocalModified
@@ -18,11 +17,9 @@ import java.io.FileNotFoundException
 import java.nio.charset.Charset
 import java.util.regex.PatternSyntaxException
 import kotlin.math.min
-import org.koin.core.context.GlobalContext
 
 class TextFile(private var book: Book) {
 
-    private val readSettingsGateway get() = GlobalContext.get().get<ReadSettingsGateway>()
 
     @Suppress("ConstPropertyName")
     companion object {
@@ -62,8 +59,6 @@ class TextFile(private var book: Book) {
     //默认从文件中获取数据的长度
     private val bufferSize = 512000
 
-    //使用正则划分目录，每个章节的最大允许长度
-    private val maxLengthWithToc = 102400
 
     private var charset: Charset = book.fileCharset()
 
@@ -149,8 +144,9 @@ class TextFile(private var book: Book) {
             )
         }
 
-        return String(buffer, charset)
-            .substringAfter(chapter.title)
+        val content = String(buffer, charset)
+        // 无规则时的目录标题是占位名称, 不能据此截掉原文.
+        return (if (book.tocUrl.isBlank()) content else content.substringAfter(chapter.title))
             .replace(padRegex, "　　")
     }
 
@@ -159,7 +155,7 @@ class TextFile(private var book: Book) {
      */
     private fun analyze(pattern: Regex?, volumePattern: Regex? = null): Pair<ArrayList<BookChapter>, Int> {
         if (pattern == null || pattern.pattern.isEmpty()) {
-            return analyze()
+            return analyzeWholeText()
         }
         val toc = arrayListOf<BookChapter>()
         var bookWordCount = 0
@@ -204,33 +200,7 @@ class TextFile(private var book: Book) {
                     //获取章节内容
                     val chapterContent = blockContent.substring(seekPos, chapterStart)
                     val chapterLength = chapterContent.toByteArray(charset).size.toLong()
-                    val lastStart = toc.lastOrNull()?.start ?: curOffset
-                    if (book.getSplitLongChapter() && curOffset + chapterLength - lastStart > maxLengthWithToc) {
-                        toc.lastOrNull()?.let {
-                            it.end = it.start
-                            it.tag = null
-                        }
-                        //章节字数太多进行拆分
-                        val lastTitle = toc.lastOrNull()?.title
-                        val lastTitleLength = lastTitle?.toByteArray(charset)?.size ?: 0
-                        val (chapters, wordCount) = analyze(
-                            lastStart + lastTitleLength, curOffset + chapterLength
-                        )
-                        lastTitle?.let {
-                            chapters.forEachIndexed { index, bookChapter ->
-                                bookChapter.title = "$lastTitle(${index + 1})"
-                            }
-                        }
-                        toc.addAll(chapters)
-                        bookWordCount += wordCount
-                        //创建当前章节
-                        val curChapter = BookChapter()
-                        curChapter.title = m.value
-                        curChapter.start = curOffset + chapterLength
-                        curChapter.end = curChapter.start
-                        toc.add(curChapter)
-                        lastChapterWordCount = 0
-                    } else if (seekPos == 0 && chapterStart != 0) {
+                    if (seekPos == 0 && chapterStart != 0) {
                         /**
                          * 如果 seekPos == 0 && chapterStart != 0 表示当前block处前面有一段内容
                          * 第一种情况一定是序章 第二种情况是上一个章节的内容
@@ -326,25 +296,10 @@ class TextFile(private var book: Book) {
                     it.wordCount = StringUtils.wordCountFormat(lastChapterWordCount)
                 }
             }
-            // 检查最后一章是否为分卷（循环中无法检测到最后一章），并处理长章节拆分
+            // 最后一章没有后继标题触发分卷判定.
             toc.lastOrNull()?.let { chapter ->
                 if (volumePattern != null) {
                     chapter.isVolume = volumePattern.containsMatchIn(chapter.title)
-                }
-                //章节字数太多进行拆分
-                if (book.getSplitLongChapter() && chapter.end!! - chapter.start!! > maxLengthWithToc) {
-                    val end = chapter.end!!
-                    chapter.end = chapter.start
-                    chapter.tag = null
-                    val lastTitle = chapter.title
-                    val lastTitleLength = lastTitle.toByteArray(charset).size
-                    val (chapters, _) = analyze(
-                        chapter.start!! + lastTitleLength, end
-                    )
-                    chapters.forEachIndexed { index, bookChapter ->
-                        bookChapter.title = "$lastTitle(${index + 1})"
-                    }
-                    toc.addAll(chapters)
                 }
             }
         }
@@ -353,124 +308,18 @@ class TextFile(private var book: Book) {
         return toc to bookWordCount
     }
 
-    /**
-     * 无规则拆分目录
-     */
-    private fun analyze(
-        fileStart: Long = 0L, fileEnd: Long = Long.MAX_VALUE
-    ): Pair<ArrayList<BookChapter>, Int> {
-        val toc = arrayListOf<BookChapter>()
-        var bookWordCount = 0
-        val maxByteLengthWithNoToc = maxLengthWithNoTocBytes(
-            charset, readSettingsGateway.currentSettings.maxLengthWithNoToc
-        )
-        LocalBook.getBookInputStream(book).use { bis ->
-            //block的个数
-            var blockPos = 0
-            //加载章节
-            var curOffset: Long = 0
-            var chapterPos = 0
-            //读取的长度
-            var length = 0
-            var lastChapterWordCount = 0
-            val buffer = ByteArray(bufferSize)
-            var bufferStart = 3
-            if (fileStart == 0L) {
-                bis.read(buffer, 0, 3)
-                if (Utf8BomUtils.hasBom(buffer)) {
-                    bufferStart = 0
-                    curOffset = 3
-                }
-            } else {
-                bis.skip(fileStart)
-                curOffset = fileStart
-                bufferStart = 0
-            }
-            //获取文件中的数据到buffer，直到没有数据为止
-            while (fileEnd - curOffset - bufferStart > 0 && bis.read(
-                    buffer, bufferStart, min(
-                        (bufferSize - bufferStart).toLong(), fileEnd - curOffset - bufferStart
-                    ).toInt()
-                ).also { length = it } > 0
-            ) {
-                blockPos++
-                //章节在buffer的偏移量
-                var chapterOffset = 0
-                //当前剩余可分配的长度
-                length += bufferStart
-                var strLength = length
-                //分章的位置
-                chapterPos = 0
-                while (strLength > 0) {
-                    chapterPos++
-                    //是否长度超过一章
-                    if (strLength > maxByteLengthWithNoToc) { //在buffer中一章的终止点
-                        var end = length
-                        //寻找换行符作为终止点
-                        for (i in chapterOffset + maxByteLengthWithNoToc until length) {
-                            if (buffer[i] == blank) {
-                                end = i
-                                break
-                            }
-                        }
-                        val content = String(buffer, chapterOffset, end - chapterOffset, charset)
-                        bookWordCount += content.length
-                        lastChapterWordCount = content.length
-                        val chapter = BookChapter()
-                        chapter.title = "第${blockPos}章($chapterPos)"
-                        chapter.start = toc.lastOrNull()?.end ?: curOffset
-                        chapter.end = chapter.start!! + end - chapterOffset
-                        chapter.wordCount = StringUtils.wordCountFormat(content.length)
-                        toc.add(chapter)
-                        //减去已经被分配的长度
-                        strLength -= (end - chapterOffset)
-                        //设置偏移的位置
-                        chapterOffset = end
-                    } else {
-                        buffer.copyInto(buffer, 0, length - strLength, length)
-                        length -= strLength
-                        bufferStart = strLength
-                        strLength = 0
-                    }
-                }
-                //block的偏移点
-                curOffset += length.toLong()
-            }
-            //设置结尾章节
-            val content = String(buffer, 0, bufferStart, charset)
-            bookWordCount += content.length
-            if (bufferStart > 100 || toc.isEmpty()) {
-                val chapter = BookChapter()
-                chapter.title = "第${blockPos}章(${chapterPos})"
-                chapter.start = toc.lastOrNull()?.end ?: curOffset
-                chapter.end = chapter.start!! + bufferStart
-                chapter.wordCount = StringUtils.wordCountFormat(content.length)
-                toc.add(chapter)
-            } else {
-                val wordCount = lastChapterWordCount + content.length
-                toc.lastOrNull()?.let {
-                    it.end = it.end!! + bufferStart
-                    it.wordCount = StringUtils.wordCountFormat(wordCount)
-                }
-            }
+    private fun analyzeWholeText(): Pair<ArrayList<BookChapter>, Int> {
+        val bytes = LocalBook.getBookInputStream(book).use { it.readBytes() }
+        if (bytes.isEmpty()) throw EmptyFileException("Unexpected Empty Txt File")
+        val start = if (Utf8BomUtils.hasBom(bytes)) 3 else 0
+        val wordCount = String(bytes, start, bytes.size - start, charset).length
+        val chapter = BookChapter().apply {
+            title = "正文"
+            this.start = start.toLong()
+            end = bytes.size.toLong()
+            this.wordCount = StringUtils.wordCountFormat(wordCount)
         }
-        return toc to bookWordCount
-    }
-
-    /**
-     * 把无目录时章节的"字数"上限换算成 buffer 的字节长度上限。
-     * 不同编码单个汉字占用的字节数不同：UTF-8 为 3 字节、GBK/GB18030 为 2 字节、
-     * UTF-16 基本平面为 2 字节（代理对按 2 字节估算），其余单字节编码按 1 字节处理。
-     */
-    private fun maxLengthWithNoTocBytes(charset: Charset, chars: Int): Int {
-        val name = charset.name().uppercase()
-        val bytesPerChar = when {
-            name.contains("UTF-8") -> 3
-            name.startsWith("GB") -> 2
-            name.contains("UTF-16") -> 2
-            else -> 1
-        }
-        return chars * bytesPerChar
+        return arrayListOf(chapter) to wordCount
     }
 
     /**

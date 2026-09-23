@@ -811,13 +811,6 @@ private fun BookInfoOverflowMenu(
                 isSelected = book.canUpdate
             )
         }
-        if (book?.isLocal == true && book.type and BookType.text > 0) {
-            RoundDropdownMenuItem(
-                text = stringResource(R.string.split_long_chapter),
-                onClick = { onMenuAction(BookInfoMenuAction.ToggleSplitLongChapter) },
-                isSelected = book.splitLongChapter
-            )
-        }
         RoundDropdownMenuItem(
             text = stringResource(R.string.delete_alert),
             onClick = { onMenuAction(BookInfoMenuAction.ToggleDeleteAlert) },

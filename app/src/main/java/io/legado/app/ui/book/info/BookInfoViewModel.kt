@@ -412,17 +412,6 @@ class BookInfoViewModel(
         }
     }
 
-    fun toggleSplitLongChapter() {
-        currentBook?.takeIf { it.isLocal && it.type and BookType.text > 0 }?.let { book ->
-            book.setSplitLongChapter(!book.getSplitLongChapter())
-            syncUiState(isTocLoading = true)
-            loadBookInfo(book, canReName = false)
-            if (!book.getSplitLongChapter()) {
-                showMessage(R.string.need_more_time_load_content)
-            }
-        }
-    }
-
     fun toggleDeleteAlert() {
         LocalConfig.bookInfoDeleteAlert = !LocalConfig.bookInfoDeleteAlert
         syncUiState()
@@ -994,7 +983,6 @@ class BookInfoViewModel(
             )
 
             BookInfoMenuAction.ToggleCanUpdate -> toggleCanUpdate()
-            BookInfoMenuAction.ToggleSplitLongChapter -> toggleSplitLongChapter()
             BookInfoMenuAction.ToggleDeleteAlert -> toggleDeleteAlert()
             BookInfoMenuAction.ClearCache -> emitEffect(
                 BookInfoEffect.RunSourceCallback(
@@ -1326,7 +1314,6 @@ class BookInfoViewModel(
             isLocal = isLocal,
             type = type,
             canUpdate = canUpdate,
-            splitLongChapter = getSplitLongChapter(),
             durChapterTitle = durChapterTitle,
             latestChapterTitle = latestChapterTitle,
             totalChapterNum = totalChapterNum,
