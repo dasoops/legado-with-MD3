@@ -10,4 +10,4 @@
 * \TxtTocRule txt 文件目录规则
 * \ReadRecord 阅读记录
 
-> 说明: 部分历史实体 (如 BookSource / RssSource / HttpTTS 等) 仍保留在数据库 schema 中以避免迁移风险, 但已无功能引用。
+> 说明: 书源相关实体仍用于现有书籍来源元数据和兼容逻辑; RSS、HttpTTS、DictRule、CloudTts 等历史在线实体已移除。
