@@ -137,11 +137,13 @@ object Backup {
         LocalConfig.lastBackup = System.currentTimeMillis()
         val aes = BackupAES()
         FileUtils.delete(backupPath)
-        writeListToJson(
-            appDb.bookDao.all.filterNot { BackupConfig.backupIgnoreLocalBook && it.isLocal },
-            "bookshelf.json",
-            backupPath,
-        )
+        // WebDAV 仅作为跨设备配置同步使用, 书籍和数据库内容仍由本地备份负责.
+        if (mode == "local" || mode == "both") {
+            writeListToJson(
+                appDb.bookDao.all.filterNot { BackupConfig.backupIgnoreLocalBook && it.isLocal },
+                "bookshelf.json",
+                backupPath,
+            )
         // 书签与划线/想法笔记（book_marks）视为一体，统一受既有 bookmark 忽略项控制
         if (BackupConfig.dbIsNotIgnored("bookmark", true)) {
             writeListToJson(appDb.bookmarkDao.all, "bookmark.json", backupPath)
@@ -201,6 +203,7 @@ object Backup {
                         .writeText(it)
                 }
             }
+        }
         }
         currentCoroutineContext().ensureActive()
         if (!BackupConfig.backupIgnoreReadConfig) {
@@ -284,15 +287,6 @@ object Backup {
         FileUtils.delete(backupPath)
         FileUtils.delete(zipFilePath)
         currentCoroutineContext().ensureActive()
-        readStyleGateway.allBackgroundImagePaths().map {
-            if (it.contains(File.separator)) {
-                File(it)
-            } else {
-                appCtx.externalFiles.getFile("bg", it)
-            }
-        }.let {
-            AppWebDav.upBgs(it.toTypedArray())
-        }
     }
 
     private suspend fun writeListToJson(list: List<Any>, fileName: String, path: String) {
