@@ -167,6 +167,26 @@ KMP 任务名在模块实际创建后才存在；不要假装运行尚未定义�
 
 所有文本改动至少运行 `git diff --check`。构建通过不替代架构边界、行为和真机性能复核。
 
+## GitHub Actions 与 CI 排查
+
+- 查看最近执行: `gh run list --limit 10`；查看指定执行的状态和任务: `gh run view <run-id> --json status,conclusion,jobs,headSha,workflowName`。
+- 失败时优先读取失败日志: `gh run view <run-id> --log-failed`；测试报告可用 `gh run download <run-id> -n <artifact-name> -D <output-dir>` 下载。
+- 先区分 Workflow 配置、Gradle 配置/依赖、编译、lint/架构检查和单元测试断言失败。若同一提交的构建成功而 Verify 失败, 优先检查测试报告, 不要先修改 CI 配置。
+- Gradle 单元测试失败时, 优先查看 `app/build/test-results/testAppDebugUnitTest/TEST-*.xml`。XML 报告通常比 Actions 截断日志更适合确认具体行号及 expected/actual 值。
+- 推送到 `main` 后用 `gh run list --limit 5` 确认新提交对应的 Verify / Auto Build run, 不要误看上一次执行。仅为重跑 CI 时不要额外修改 workflow。
+
+## Room 与 Flow 测试经验
+
+- Robolectric + Room 测试中, 数据库写入触发的 `Flow` 可能先发出初始快照, 再发出变更后的快照; 不要无条件使用 `flow.first()` 断言变更后的状态。
+- 对组合 Flow 使用 `first { value -> value 满足目标状态 }` 等待目标 emission。删除或更新实体后, 将“新状态存在”和“旧状态不存在”同时放入等待条件, 避免在中间状态提前断言。
+- 测试预期依赖实时派生数据时, 先确认生产逻辑是否确实生成该数据。不要为了让测试通过而削弱产品行为断言; 若是实际逻辑缺失, 应修复生产代码并保留行为测试。
+
+## 提交与验证
+
+- 提交前至少执行 `git status --short`、`git diff --check`；暂存后再执行 `git diff --cached --check` 并复核暂存内容。
+- Windows/WSL 环境下优先使用 Windows 侧 `gradlew.bat`。首次编译或测试可能较慢, 命令超时不等于测试失败; 先检查测试报告的生成时间和内容, 再决定是否重跑。
+- 若存在占用中的 Gradle Daemon, 不要同时启动多个相同测试任务; 先确认已有任务是否仍在运行, 避免读取过期报告。
+
 ## 重要项目约束
 
 - 代码 namespace 为 `io.legado.app`，Android `applicationId` 为 `io.github.dasoops.reader`；两者本来就
