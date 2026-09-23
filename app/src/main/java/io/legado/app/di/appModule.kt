@@ -50,7 +50,6 @@ import io.legado.app.data.repository.ReadRecordRepository
 import io.legado.app.data.repository.ReadSettingsRepository
 import io.legado.app.data.repository.ReadStyleConfigStore
 import io.legado.app.data.repository.ReadStyleRepository
-import io.legado.app.data.repository.RemoteBookRepository
 import io.legado.app.data.repository.ReplaceRuleRepository
 import io.legado.app.data.repository.SearchContentRepository
 import io.legado.app.data.repository.SearchRepository
@@ -61,7 +60,6 @@ import io.legado.app.data.repository.ThemePackageSettingsRepository
 import io.legado.app.data.repository.ThemeSettingsRepository
 import io.legado.app.data.repository.TxtTocRuleRepository
 import io.legado.app.data.repository.WebDavBackupRepository
-import io.legado.app.data.repository.WebDavReadingProgressRepository
 import io.legado.app.domain.gateway.AiProfileGateway
 import io.legado.app.domain.gateway.AiTextGateway
 import io.legado.app.domain.gateway.AppLocaleGateway
@@ -94,7 +92,6 @@ import io.legado.app.domain.gateway.OtherConfigSystemGateway
 import io.legado.app.domain.gateway.OtherSettingsGateway
 import io.legado.app.domain.gateway.ReadSettingsGateway
 import io.legado.app.domain.gateway.ReadStyleGateway
-import io.legado.app.domain.gateway.ReadingProgressGateway
 import io.legado.app.domain.gateway.ThemePackageSettingsGateway
 import io.legado.app.domain.gateway.ThemeSettingsGateway
 import io.legado.app.domain.gateway.WebDavBackupGateway
@@ -105,7 +102,6 @@ import io.legado.app.domain.usecase.ClearBookCacheUseCase
 import io.legado.app.domain.usecase.CoverAlbumUseCase
 import io.legado.app.domain.usecase.DeleteBooksUseCase
 import io.legado.app.domain.usecase.ExportBookshelfUseCase
-import io.legado.app.domain.usecase.GetReadingProgressUseCase
 import io.legado.app.domain.usecase.HomeDashboardUseCase
 import io.legado.app.domain.usecase.RelocateMarkingTargetUseCase
 import io.legado.app.domain.usecase.RemoveBookGroupAssignmentUseCase
@@ -114,7 +110,6 @@ import io.legado.app.domain.usecase.SaveBookContentProcessUseCase
 import io.legado.app.domain.usecase.SaveMarkingUseCase
 import io.legado.app.domain.usecase.ShrinkDatabaseUseCase
 import io.legado.app.domain.usecase.UpdateBooksGroupUseCase
-import io.legado.app.domain.usecase.UploadReadingProgressUseCase
 import io.legado.app.domain.usecase.VerifyBookmarkTargetUseCase
 import io.legado.app.domain.usecase.WebDavBackupUseCase
 import io.legado.app.domain.usecase.readRecord.GetReadRecordOverviewUseCase
@@ -132,9 +127,6 @@ import io.legado.app.ui.association.ImportTxtTocRuleViewModel
 import io.legado.app.ui.book.bookmark.AllBookmarkViewModel
 import io.legado.app.ui.book.changecover.ChangeCoverViewModel
 import io.legado.app.ui.book.group.GroupViewModel
-import io.legado.app.ui.book.import.remote.RemoteBookViewModel
-import io.legado.app.ui.book.import.remote.ServerConfigViewModel
-import io.legado.app.ui.book.import.remote.ServersViewModel
 import io.legado.app.ui.book.info.BookInfoViewModel
 import io.legado.app.ui.book.info.edit.BookInfoEditViewModel
 import io.legado.app.ui.book.manage.BookshelfManageScreenViewModel
@@ -205,7 +197,6 @@ val appModule = module {
             otherSettingsGateway = get(),
         )
     }
-    singleOf(::RemoteBookRepository)
     singleOf(::SettingsRepository)
     single<AppLocaleGateway> { AppLocaleRepository() }
     single<AppShellSettingsGateway> { AppShellSettingsRepository() }
@@ -244,11 +235,9 @@ val appModule = module {
     singleOf(::ClearBookCacheUseCase)
     singleOf(::CoverAlbumUseCase)
     singleOf(::DeleteBooksUseCase)
-    singleOf(::GetReadingProgressUseCase)
     single { HomeDashboardUseCase(get(), Clock.System) }
     singleOf(::RemoveBookGroupAssignmentUseCase)
     singleOf(::UpdateBooksGroupUseCase)
-    singleOf(::UploadReadingProgressUseCase)
     singleOf(::ResolveBookShelfStateUseCase)
     singleOf(::ExportBookshelfUseCase)
     factory { GetReadRecordOverviewUseCase() }
@@ -269,7 +258,6 @@ val appModule = module {
     single<LocalDirectoryGateway> { LocalDirectoryRepository(get()) }
     single<DatabaseMaintenanceGateway> { DatabaseMaintenanceRepository(get()) }
     single<WebDavBackupGateway> { WebDavBackupRepository() }
-    single<ReadingProgressGateway> { WebDavReadingProgressRepository() }
     single<HomepageModulesGateway> { HomepageModulesRepository(get(), get()) }
     single<BookDomainRepository> { BookDomainRepositoryImpl(get(), get()) }
     single<BookContentProcessGateway> { BookContentProcessRepository(get()) }
@@ -352,9 +340,6 @@ val appModule = module {
             rootUri = rootUri,
         )
     }
-    viewModelOf(::RemoteBookViewModel)
-    viewModelOf(::ServerConfigViewModel)
-    viewModelOf(::ServersViewModel)
     viewModelOf(::BookInfoViewModel)
     viewModel {
         BookInfoEditViewModel(
@@ -366,8 +351,6 @@ val appModule = module {
     viewModel {
         ReadBookViewModel(
             application = get(),
-            getReadingProgressUseCase = get(),
-            uploadReadingProgressUseCase = get(),
             readSettingsRepository = get(),
             readBookStyleConfigRepository = get(),
             localPreferencesRepository = get(),

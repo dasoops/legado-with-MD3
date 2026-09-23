@@ -117,7 +117,6 @@ fun MainScreen(
     effects: kotlinx.coroutines.flow.Flow<MainEffect>,
     useRail: Boolean,
     onOpenSettings: () -> Unit,
-    onNavigateToRemoteImport: () -> Unit,
     onNavigateToCache: (Long) -> Unit,
     onOpenBookshelfBook: (BookShelfItem, String?) -> Unit,
     onNavigateToBookInfo: (name: String, author: String, bookUrl: String, origin: String?, coverPath: String?, sharedCoverKey: String?) -> Unit,
@@ -481,7 +480,6 @@ fun MainScreen(
                                         sharedCoverKey
                                     )
                                 },
-                                onNavigateToRemoteImport = onNavigateToRemoteImport,
                                 onNavigateToCache = onNavigateToCache,
                                 sharedTransitionScope = sharedTransitionScope,
                                 animatedVisibilityScope = animatedVisibilityScope,

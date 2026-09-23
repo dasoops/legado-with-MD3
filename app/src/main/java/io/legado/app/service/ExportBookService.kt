@@ -21,7 +21,6 @@ import io.legado.app.domain.gateway.OtherSettingsGateway
 import io.legado.app.domain.gateway.ReadSettingsGateway
 import io.legado.app.domain.model.settings.BookExportSettings
 import io.legado.app.exception.NoStackTraceException
-import io.legado.app.help.AppWebDav
 import io.legado.app.help.book.BookHelp
 import io.legado.app.help.book.ContentProcessor
 import io.legado.app.help.book.getExportFileName
@@ -295,10 +294,6 @@ class ExportBookService : BaseService(), KoinComponent {
                 }
             }
         }
-        if (currentExportSettings.exportToWebDav) {
-            // 导出到webdav
-            AppWebDav.exportWebDav(bookDoc.uri, filename)
-        }
     }
 
     private suspend fun getAllContents(
@@ -407,10 +402,6 @@ class ExportBookService : BaseService(), KoinComponent {
             EpubWriter().write(epubBook, bookOs)
         }
 
-        if (currentExportSettings.exportToWebDav) {
-            // 导出到webdav
-            AppWebDav.exportWebDav(bookDoc.uri, filename)
-        }
     }
 
     private fun setAssets(doc: FileDoc, book: Book, epubBook: EpubBook): String {
@@ -867,10 +858,6 @@ class ExportBookService : BaseService(), KoinComponent {
                     .write(epubBook, bookOs)
             }
 
-            if (currentExportSettings.exportToWebDav) {
-                // 导出到webdav
-                AppWebDav.exportWebDav(bookDoc.uri, filename)
-            }
         }
 
         /**

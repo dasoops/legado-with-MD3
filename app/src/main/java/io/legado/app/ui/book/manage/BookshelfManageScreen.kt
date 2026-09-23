@@ -825,16 +825,6 @@ private fun BookshelfManageScreen(
                     }
                     item {
                         TinySwitchSettingItem(
-                            title = "导出到WebDav",
-                            checked = state.exportConfig.exportToWebDav,
-                            onCheckedChange = {
-                                viewModel.dispatch(
-                                    BookshelfManageScreenIntent.SetExportToWebDav(it)
-                                )
-                            })
-                    }
-                    item {
-                        TinySwitchSettingItem(
                             title = "导出插图文件",
                             checked = state.exportConfig.exportPictureFile,
                             onCheckedChange = {

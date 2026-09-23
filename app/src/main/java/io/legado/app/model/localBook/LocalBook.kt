@@ -95,9 +95,6 @@ object LocalBook {
                     }.firstOrNull()?.let {
                         getBookInputStream(it)
                     }
-                } else if (webDavUrl != null && downloadRemoteBook(book)) {
-                    // 下载远程链接
-                    getBookInputStream(book)
                 } else {
                     null
                 }

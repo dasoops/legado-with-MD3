@@ -206,8 +206,6 @@ enum class BookInfoMenuAction {
     CustomButton,
     Edit,
     Share,
-    Upload,
-    SyncRemote,
     Refresh,
     ReadRecord,
     Top,

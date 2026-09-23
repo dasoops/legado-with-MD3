@@ -25,7 +25,6 @@ import io.legado.app.data.repository.BookRepository
 import io.legado.app.data.repository.BookSourceRepository
 import io.legado.app.data.repository.HighlightTagRuleRepository
 import io.legado.app.data.repository.ReadRecordRepository
-import io.legado.app.data.repository.RemoteBookRepository
 import io.legado.app.data.repository.SearchRepository
 import io.legado.app.domain.gateway.CoverSettingsGateway
 import io.legado.app.domain.gateway.OtherSettingsGateway
@@ -87,7 +86,6 @@ import java.io.ByteArrayOutputStream
 
 class BookInfoViewModel(
     application: Application,
-    private val remoteBookRepository: RemoteBookRepository,
     private val readRecordRepository: ReadRecordRepository,
     private val clearBookCacheUseCase: ClearBookCacheUseCase,
     private val bookGroupRepository: BookGroupRepository,
@@ -512,44 +510,6 @@ class BookInfoViewModel(
             }
         }
     }
-    fun syncFromRemote() {
-        val book = currentBook ?: return
-        if (!book.isLocal) return
-
-        execute {
-            setBusy(true)
-            val newBook = remoteBookRepository.syncBookFromRemote(book)
-            bookRepository.delete(book)
-            bookRepository.insert(newBook)
-            newBook
-        }.onSuccess { newBook ->
-            currentBook = newBook
-            inBookshelf = true
-            syncUiState(isTocLoading = true)
-            loadChapter(newBook)
-            showMessage("同步完成")
-        }.onFinally {
-            setBusy(false)
-        }.onError {
-            showMessage(it.localizedMessage ?: "同步失败")
-        }
-    }
-
-    fun uploadBook(success: () -> Unit) {
-        val book = currentBook ?: return
-        execute {
-            setBusy(true)
-            remoteBookRepository.uploadBook(book)
-            saveBook(book)
-        }.onSuccess {
-            success.invoke()
-        }.onFinally {
-            setBusy(false)
-        }.onError {
-            showMessage(it.localizedMessage ?: "操作失败")
-        }
-    }
-
     fun clearCache() {
         currentBook?.let { book ->
             execute {
@@ -690,8 +650,7 @@ class BookInfoViewModel(
         syncUiState(isTocLoading = true)
         execute {
             if (book.isLocal) {
-                book.tocUrl = ""
-                remoteBookRepository.refreshLocalBook(book)
+                LocalBook.upBookInfo(book)
             } else {
                 val bs = bookSource ?: return@execute
                 if (book.originName != bs.bookSourceName) {
@@ -705,9 +664,7 @@ class BookInfoViewModel(
                     book.origin = BookType.localTag
                 }
 
-                else -> {
-                    AppLog.put("下载远程书籍<${book.name}>失败", it)
-                }
+                else -> AppLog.put("刷新书籍失败", it)
             }
         }.onFinally {
             loadBookInfo(book, canReName = false)
@@ -1013,10 +970,6 @@ class BookInfoViewModel(
                 )
             }
 
-            BookInfoMenuAction.Upload -> uploadBook {
-                showMessage("上传成功")
-            }
-            BookInfoMenuAction.SyncRemote -> syncFromRemote()
             BookInfoMenuAction.Refresh -> refreshCurrentBook()
             BookInfoMenuAction.ReadRecord -> setSheet(BookInfoSheet.ReadRecord)
             BookInfoMenuAction.Top -> topBook()

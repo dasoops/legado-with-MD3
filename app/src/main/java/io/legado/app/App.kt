@@ -23,13 +23,11 @@ import io.legado.app.di.appDatabaseModule
 import io.legado.app.di.appModule
 import io.legado.app.domain.gateway.AppLocaleGateway
 import io.legado.app.domain.gateway.AppShellSettingsGateway
-import io.legado.app.domain.gateway.BackupSettingsGateway
 import io.legado.app.domain.gateway.OtherSettingsGateway
 import io.legado.app.domain.gateway.ReadSettingsGateway
 import io.legado.app.domain.gateway.ReadStyleGateway
 import io.legado.app.domain.gateway.ThemeSettingsGateway
 import io.legado.app.help.AppFreezeMonitor
-import io.legado.app.help.AppWebDav
 import io.legado.app.help.CrashHandler
 import io.legado.app.help.DefaultData
 import io.legado.app.help.DispatchersMonitor
@@ -70,7 +68,6 @@ class App : Application(), SingletonImageLoader.Factory {
 
     private val themeGateway get() = get<ThemeSettingsGateway>()
     private val otherGateway get() = get<OtherSettingsGateway>()
-    private val backupGateway get() = get<BackupSettingsGateway>()
     private val readGateway get() = get<ReadSettingsGateway>()
 
     override fun newImageLoader(context: Context): ImageLoader {
@@ -203,11 +200,6 @@ class App : Application(), SingletonImageLoader.Factory {
                 }
 
                 2 -> ChineseUtils.preLoad(true, TransType.SIMPLE_TO_TRADITIONAL)
-            }
-            //同步阅读记录
-            if (backupGateway.currentSettings.syncBookProgress) {
-                AppWebDav.upConfig()
-                AppWebDav.downloadAllBookProgress()
             }
         }
     }

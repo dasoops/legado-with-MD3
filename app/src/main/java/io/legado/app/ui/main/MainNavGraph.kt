@@ -104,9 +104,6 @@ fun MainActivity.mainEntryProvider(
             onOpenSettings = {
                 onNavigateToRoute(MainRouteSettings)
             },
-            onNavigateToRemoteImport = {
-                onNavigateToRoute(MainRouteImportRemote)
-            },
             onNavigateToCache = { groupId ->
                 onNavigateToRoute(MainRouteCache(groupId))
             },
@@ -216,12 +213,6 @@ fun MainActivity.mainEntryProvider(
 
     entry<MainRouteSettingsThemeManage> {
         ThemeManageRouteScreen(onBackClick = { onNavigateBack() })
-    }
-
-    entry<MainRouteImportRemote> {
-        RemoteBookRouteScreen(
-            onBackClick = { onNavigateBack() }
-        )
     }
 
     entry<MainRouteCache> { route ->

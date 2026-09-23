@@ -158,7 +158,6 @@ fun BookshelfRouteScreen(
     onScrollToTopRequestHandled: (Long) -> Unit = {},
     onBookClick: (BookShelfItem, String?) -> Unit,
     onBookLongClick: (book: BookShelfItem, sharedCoverKey: String?) -> Unit,
-    onNavigateToRemoteImport: () -> Unit,
     onNavigateToCache: (Long) -> Unit,
     sharedTransitionScope: SharedTransitionScope? = null,
     animatedVisibilityScope: AnimatedVisibilityScope? = null,
@@ -174,7 +173,6 @@ fun BookshelfRouteScreen(
         onScrollToTopRequestHandled = onScrollToTopRequestHandled,
         onBookClick = onBookClick,
         onBookLongClick = onBookLongClick,
-        onNavigateToRemoteImport = onNavigateToRemoteImport,
         onNavigateToCache = onNavigateToCache,
         sharedTransitionScope = sharedTransitionScope,
         animatedVisibilityScope = animatedVisibilityScope,
@@ -196,7 +194,6 @@ fun BookshelfScreen(
     onScrollToTopRequestHandled: (Long) -> Unit = {},
     onBookClick: (BookShelfItem, String?) -> Unit,
     onBookLongClick: (book: BookShelfItem, sharedCoverKey: String?) -> Unit,
-    onNavigateToRemoteImport: () -> Unit,
     onNavigateToCache: (Long) -> Unit,
     sharedTransitionScope: SharedTransitionScope? = null,
     animatedVisibilityScope: AnimatedVisibilityScope? = null,
@@ -454,11 +451,6 @@ fun BookshelfScreen(
                                 expanded = showTopBarMenu,
                                 onDismissRequest = { showTopBarMenu = false }
                             ) { dismiss ->
-                                RoundDropdownMenuItem(
-                                    text = stringResource(R.string.add_remote_book),
-                                    onClick = { onNavigateToRemoteImport(); dismiss() },
-                                    leadingIcon = { Icon(Icons.Default.Wifi, null) }
-                                )
                                 RoundDropdownMenuItem(
                                     text = stringResource(R.string.layout_setting),
                                     onClick = {

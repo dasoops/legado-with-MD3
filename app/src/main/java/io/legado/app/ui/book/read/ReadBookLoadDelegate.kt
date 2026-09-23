@@ -8,8 +8,6 @@ import io.legado.app.data.entities.BookProgress
 import io.legado.app.data.repository.BookRepository
 import io.legado.app.domain.gateway.BackupSettingsGateway
 import io.legado.app.domain.model.ReadingProgress
-import io.legado.app.domain.usecase.GetReadingProgressUseCase
-import io.legado.app.domain.usecase.UploadReadingProgressUseCase
 import io.legado.app.feature.reader.platform.ReaderPerfTrace
 import io.legado.app.help.book.BookHelp
 import io.legado.app.help.book.isLocal
@@ -41,8 +39,6 @@ class ReadBookLoadDelegate(
     private val host: Host,
     private val bookRepository: BookRepository,
     private val backupSettingsGateway: BackupSettingsGateway,
-    private val getReadingProgressUseCase: GetReadingProgressUseCase,
-    private val uploadReadingProgressUseCase: UploadReadingProgressUseCase,
 ) {
 
     interface Host {
@@ -146,7 +142,6 @@ class ReadBookLoadDelegate(
             if (backupSettingsGateway.currentSettings.syncBookProgressPlus) {
                 ReadBook.syncProgress({ progress -> host.sureNewProgress(progress) })
             } else {
-                syncBookProgress(book)
             }
         }
     }
@@ -193,40 +188,6 @@ class ReadBookLoadDelegate(
             return false
         }
         return true
-    }
-
-    fun syncBookProgress(
-        book: Book,
-        alertSync: ((progress: BookProgress) -> Unit)? = null
-    ) {
-        if (!backupSettingsGateway.currentSettings.syncBookProgress) return
-        Coroutine.async(scope, Dispatchers.IO) {
-            getReadingProgressUseCase.execute(book.name, book.author)?.toBookProgress()
-        }.onError {
-            AppLog.put("拉取阅读进度失败《${book.name}》\n${it.localizedMessage}", it)
-        }.onSuccess { progress ->
-            progress ?: return@onSuccess
-            if (progress.durChapterIndex < book.durChapterIndex ||
-                (progress.durChapterIndex == book.durChapterIndex
-                        && progress.durChapterPos < book.durChapterPos)
-            ) {
-                alertSync?.invoke(progress)
-            } else if (progress.durChapterIndex < book.simulatedTotalChapterNum()) {
-                ReadBook.setProgress(progress)
-                AppLog.put("自动同步阅读进度成功《${book.name}》 ${progress.durChapterTitle}")
-            }
-        }
-    }
-
-    fun isReadingProgressSyncConfigured(): Boolean {
-        return getReadingProgressUseCase.isConfigured
-    }
-
-    suspend fun uploadBookProgress(book: Book) {
-        uploadReadingProgressUseCase.execute(book.toReadingProgress())?.let { uploadTime ->
-            book.syncTime = uploadTime
-            bookRepository.update(book)
-        }
     }
 
     private fun Book.toReadingProgress() = ReadingProgress(

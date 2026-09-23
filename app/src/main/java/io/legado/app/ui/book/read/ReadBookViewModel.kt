@@ -29,11 +29,9 @@ import io.legado.app.domain.gateway.BookContentProcessGateway
 import io.legado.app.domain.gateway.OtherSettingsGateway
 import io.legado.app.domain.gateway.ReadStyleGateway
 import io.legado.app.domain.gateway.ThemeSettingsGateway
-import io.legado.app.domain.usecase.GetReadingProgressUseCase
 import io.legado.app.domain.usecase.RelocateMarkingTargetUseCase
 import io.legado.app.domain.usecase.SaveBookContentProcessUseCase
 import io.legado.app.domain.usecase.SaveMarkingUseCase
-import io.legado.app.domain.usecase.UploadReadingProgressUseCase
 import io.legado.app.domain.usecase.VerifyBookmarkTargetUseCase
 import io.legado.app.exception.NoStackTraceException
 import io.legado.app.feature.reader.core.navigation.ReaderChapterPagePosition
@@ -87,8 +85,6 @@ private const val READER_SYNC_MIN_INTERVAL_MS = 250L
  */
 class ReadBookViewModel(
     application: Application,
-    private val getReadingProgressUseCase: GetReadingProgressUseCase,
-    private val uploadReadingProgressUseCase: UploadReadingProgressUseCase,
     private val readSettingsRepository: ReadSettingsRepository,
     private val readBookStyleConfigRepository: ReadStyleGateway,
     private val localPreferencesRepository: SettingsRepository,
@@ -365,8 +361,6 @@ class ReadBookViewModel(
         },
         bookRepository = bookRepository,
         backupSettingsGateway = backupSettingsGateway,
-        getReadingProgressUseCase = getReadingProgressUseCase,
-        uploadReadingProgressUseCase = uploadReadingProgressUseCase,
     )
 
     // --- 阅读样式域（无自持状态，styleConfig / activeReminder / eyeProtection 仍在 UiState）---
@@ -1343,7 +1337,6 @@ class ReadBookViewModel(
         backupJob = viewModelScope.launch(IO) {
             delay(5 * 60 * 1000) // 5 minutes
             ReadBook.book?.let { book ->
-                uploadBookProgress(book)
                 coroutineContext.ensureActive()
                 _effects.tryEmit(ReadBookEffect.BackupNow)
             }
@@ -1740,7 +1733,6 @@ class ReadBookViewModel(
 
     fun isReadingProgressSyncConfigured(): Boolean = loadDelegate.isReadingProgressSyncConfigured()
 
-    suspend fun uploadBookProgress(book: Book) = loadDelegate.uploadBookProgress(book)
 
     fun openChapter(index: Int, durChapterPos: Int = 0, success: (() -> Unit)? = null) {
         ReadBook.openChapter(index, durChapterPos, success = success)
