@@ -128,13 +128,9 @@ class ThemePackageSettingsRepository : ThemePackageSettingsGateway {
         coverDefaultImage = string(PreferKey.defaultCover, ""),
         coverTextColor = int(PreferKey.coverTextColor, -16777216),
         coverShadowColor = int(PreferKey.coverShadowColor, -16777216),
-        coverShowName = boolean(PreferKey.coverShowName, true),
-        coverShowAuthor = boolean(PreferKey.coverShowAuthor, true),
         coverDefaultImageDark = string(PreferKey.defaultCoverDark, ""),
         coverTextColorN = int(PreferKey.coverTextColorN, -1),
         coverShadowColorN = int(PreferKey.coverShadowColorN, -1),
-        coverShowNameN = boolean(PreferKey.coverShowNameN, true),
-        coverShowAuthorN = boolean(PreferKey.coverShowAuthorN, true),
         coverInfoOrientation = string(PreferKey.coverInfoOrientation, "0"),
     )
 
@@ -257,13 +253,9 @@ internal fun ThemeExportData.toPreferenceValues(): Map<String, Any?> {
                 PreferKey.defaultCover to data.coverDefaultImage,
                 PreferKey.coverTextColor to data.coverTextColor,
                 PreferKey.coverShadowColor to data.coverShadowColor,
-                PreferKey.coverShowName to data.coverShowName,
-                PreferKey.coverShowAuthor to data.coverShowAuthor,
                 PreferKey.defaultCoverDark to data.coverDefaultImageDark,
                 PreferKey.coverTextColorN to data.coverTextColorN,
                 PreferKey.coverShadowColorN to data.coverShadowColorN,
-                PreferKey.coverShowNameN to data.coverShowNameN,
-                PreferKey.coverShowAuthorN to data.coverShowAuthorN,
                 PreferKey.coverInfoOrientation to data.coverInfoOrientation,
     )
 }

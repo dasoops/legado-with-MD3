@@ -405,7 +405,6 @@
     <string name="tip_margin_change">提示边距跟随页边距调整</string>
     <string name="allow_update">允许更新</string>
     <string name="disable_update">禁止更新</string>
-    <string name="split_long_chapter">拆分超长章节</string>
     <string name="need_more_time_load_content">正文长度过长时，加载正文可能会花费更多时间</string>
     <string name="revert_selection">反选</string>
     <string name="search_book_key">搜索书名、作者</string>
@@ -1012,10 +1011,6 @@
     <string name="summary">注释</string>
     <string name="cover_config">封面设置</string>
     <string name="cover_config_summary">通用封面规则及默认封面样式</string>
-    <string name="cover_show_name">显示书名</string>
-    <string name="cover_show_name_summary">封面上显示书名</string>
-    <string name="cover_show_author">显示作者</string>
-    <string name="cover_show_author_summary">封面上显示作者</string>
     <string name="wait_download">待下载</string>
     <string name="download_success">下载完成</string>
     <string name="download_error">下载失败</string>
@@ -1459,7 +1454,6 @@
     <string name="select_rule_to_preview_chapters">选择规则立即预览章节列表</string>
     <string name="chapter_count_format">%d 章</string>
     <string name="chapter_list_preview_limit">仅显示前 500 章</string>
-    <string name="split_long_chapters">拆分超长章节</string>
     <string name="export_bookmarks_json">导出书签为 JSON</string>
     <string name="export_bookmarks_markdown">导出书签为 Markdown</string>
     <string name="volume_management">卷管理</string>
@@ -1467,8 +1461,6 @@
     <string name="toc_rule_update_failed">更新目录规则失败：%1$s</string>
     <string name="toc_rule_updated">目录规则已更新</string>
     <string name="setting_failed">设置失败：%1$s</string>
-    <string name="split_long_chapters_enabled">已开启长章节拆分</string>
-    <string name="split_long_chapters_disabled">已关闭长章节拆分</string>
     <string name="no_bookmarks_to_export">没有可导出的书签</string>
     <string name="save_success">保存成功</string>
     <string name="save_failed_with_error">保存失败：%1$s</string>
@@ -1584,7 +1576,6 @@
     <string name="enable_slider_vibrator">滑动进度条时震动</string>
     <string name="use_new_toc_sheet">使用新版目录</string>
     <string name="no_toc_split_length_title">无规则匹配时章节分割字数</string>
-    <string name="no_toc_split_length_summary">未匹配到目录规则时每个章节的分割字数（当前 %s 字）</string>
     <string name="edit_remark">编辑备注</string>
     <string name="book_remark">书籍备注</string>
     <string name="save_to_local">保存至本地</string>

@@ -435,7 +435,6 @@
     <string name="tip_margin_change">Margin adjustment</string>
     <string name="allow_update">Enable update</string>
     <string name="disable_update">Disable update</string>
-    <string name="split_long_chapter">Split extra-long chapters</string>
     <string name="need_more_time_load_content">When the body length is too long, it may take more time to load the text.</string>
     <string name="revert_selection">Inverse</string>
     <string name="search_book_key">Search book name/author</string>
@@ -1052,10 +1051,6 @@
     <string name="summary">summary</string>
     <string name="cover_config">Cover Config</string>
     <string name="cover_config_summary">Generic Cover Rules and Default Cover Style</string>
-    <string name="cover_show_name">Show Name</string>
-    <string name="cover_show_name_summary">Book title shown on cover</string>
-    <string name="cover_show_author">Show Author</string>
-    <string name="cover_show_author_summary">Author shown on cover</string>
     <string name="wait_download">wait download</string>
     <string name="download_success">download success</string>
     <string name="download_error">download failure</string>
@@ -1509,7 +1504,6 @@
     <string name="select_rule_to_preview_chapters">Select rule to preview chapter list</string>
     <string name="chapter_count_format">%d chapters</string>
     <string name="chapter_list_preview_limit">Only showing first 500 chapters</string>
-    <string name="split_long_chapters">Split Long Chapters</string>
     <string name="export_bookmarks_json">Export Bookmarks as JSON</string>
     <string name="export_bookmarks_markdown">Export Bookmarks as Markdown</string>
     <string name="volume_management">Volume Management</string>
@@ -1517,8 +1511,6 @@
     <string name="toc_rule_update_failed">Failed to update chapter rule: %1$s</string>
     <string name="toc_rule_updated">Chapter rule updated</string>
     <string name="setting_failed">Setting failed: %1$s</string>
-    <string name="split_long_chapters_enabled">Long chapter splitting enabled</string>
-    <string name="split_long_chapters_disabled">Long chapter splitting disabled</string>
     <string name="no_bookmarks_to_export">No bookmarks to export</string>
     <string name="save_success">Saved</string>
     <string name="save_failed_with_error">Save failed: %1$s</string>
@@ -1636,7 +1628,6 @@
     <string name="enable_slider_vibrator">Vibrate While Sliding Progress Bar</string>
     <string name="use_new_toc_sheet">Use New TOC Sheet</string>
     <string name="no_toc_split_length_title">Chapter Split Length (No Rule Match)</string>
-    <string name="no_toc_split_length_summary">Characters per chapter when no TOC rule matches (currently %s)</string>
     <string name="edit_remark">Edit remark</string>
     <string name="book_remark">Book Alias</string>
     <string name="save_to_local">Save to local</string>

@@ -336,13 +336,9 @@ object ThemeImportExport {
             coverDefaultImage = root.string("n0"),
             coverTextColor = root.int("o0", -16777216),
             coverShadowColor = root.int("p0", -16777216),
-            coverShowName = root.boolean("q0", true),
-            coverShowAuthor = root.boolean("r0", true),
             coverDefaultImageDark = root.string("s0"),
             coverTextColorN = root.int("t0", -1),
             coverShadowColorN = root.int("u0", -1),
-            coverShowNameN = root.boolean("v0", true),
-            coverShowAuthorN = root.boolean("w0", true),
             coverInfoOrientation = root.string("x0", "0"),
             assets = root.get("y0")?.takeUnless { it.isJsonNull }?.let {
                 GSON.fromJson(it, assetsType)

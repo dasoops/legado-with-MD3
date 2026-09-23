@@ -105,13 +105,9 @@ data class ThemeExportData(
     val coverDefaultImage: String = "",
     val coverTextColor: Int = -16777216,
     val coverShadowColor: Int = -16777216,
-    val coverShowName: Boolean = true,
-    val coverShowAuthor: Boolean = true,
     val coverDefaultImageDark: String = "",
     val coverTextColorN: Int = -1,
     val coverShadowColorN: Int = -1,
-    val coverShowNameN: Boolean = true,
-    val coverShowAuthorN: Boolean = true,
     val coverInfoOrientation: String = "0",
     val assets: Map<String, String>? = null,
 )

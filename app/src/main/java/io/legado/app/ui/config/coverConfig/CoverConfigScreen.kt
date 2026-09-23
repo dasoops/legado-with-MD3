@@ -213,24 +213,6 @@ fun CoverConfigScreen(
                     }
                 )
 
-                SwitchSettingItem(
-                    title = stringResource(R.string.cover_show_name),
-                    description = stringResource(R.string.cover_show_name_summary),
-                    checked = settings.showName,
-                    onCheckedChange = { value ->
-                        onIntent(CoverConfigIntent.SetShowName(value))
-                    }
-                )
-
-                SwitchSettingItem(
-                    title = stringResource(R.string.cover_show_author),
-                    description = stringResource(R.string.cover_show_author_summary),
-                    checked = settings.showAuthor,
-                    enabled = settings.showName,
-                    onCheckedChange = { value ->
-                        onIntent(CoverConfigIntent.SetShowAuthor(value))
-                    }
-                )
             }
 
             SplicedColumnGroup(title = stringResource(R.string.night)) {
@@ -276,24 +258,6 @@ fun CoverConfigScreen(
                     }
                 )
 
-                SwitchSettingItem(
-                    title = stringResource(R.string.cover_show_name),
-                    description = stringResource(R.string.cover_show_name_summary),
-                    checked = settings.showNameDark,
-                    onCheckedChange = { value ->
-                        onIntent(CoverConfigIntent.SetShowNameDark(value))
-                    }
-                )
-
-                SwitchSettingItem(
-                    title = stringResource(R.string.cover_show_author),
-                    description = stringResource(R.string.cover_show_author_summary),
-                    checked = settings.showAuthorDark,
-                    enabled = settings.showNameDark,
-                    onCheckedChange = { value ->
-                        onIntent(CoverConfigIntent.SetShowAuthorDark(value))
-                    }
-                )
                 }
             }
         }

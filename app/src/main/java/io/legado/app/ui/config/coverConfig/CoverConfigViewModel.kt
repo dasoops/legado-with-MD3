@@ -58,14 +58,6 @@ class CoverConfigViewModel(
                 updateSettings { it.copy(infoOrientation = intent.value) }
             is CoverConfigIntent.SetExploreFilterState ->
                 updateSettings { it.copy(exploreFilterState = intent.value) }
-            is CoverConfigIntent.SetShowName ->
-                updateSettings { it.copy(showName = intent.value) }
-            is CoverConfigIntent.SetShowAuthor ->
-                updateSettings { it.copy(showAuthor = intent.value) }
-            is CoverConfigIntent.SetShowNameDark ->
-                updateSettings { it.copy(showNameDark = intent.value) }
-            is CoverConfigIntent.SetShowAuthorDark ->
-                updateSettings { it.copy(showAuthorDark = intent.value) }
             is CoverConfigIntent.SetTextColor ->
                 updateSettings { it.copy(textColor = intent.value) }
             is CoverConfigIntent.SetShadowColor ->
