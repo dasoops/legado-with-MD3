@@ -74,7 +74,6 @@ import io.legado.app.domain.gateway.BookExportSettingsGateway
 import io.legado.app.domain.gateway.BookGroupMutationGateway
 import io.legado.app.domain.gateway.BookKnowledgeGateway
 import io.legado.app.domain.gateway.BookMarkingGateway
-import io.legado.app.domain.gateway.BookSearchGateway
 import io.legado.app.domain.gateway.BookshelfSettingsGateway
 import io.legado.app.domain.gateway.CoverAlbumGateway
 import io.legado.app.domain.gateway.CoverSettingsGateway
@@ -267,7 +266,6 @@ val appModule = module {
         SearchRepositoryImpl(get())
     }
     single<SearchRepository> { get<SearchRepositoryImpl>() }
-    single<BookSearchGateway> { get<SearchRepositoryImpl>() }
     singleOf(::SaveBookContentProcessUseCase)
     singleOf(::SaveMarkingUseCase)
     singleOf(::VerifyBookmarkTargetUseCase)
