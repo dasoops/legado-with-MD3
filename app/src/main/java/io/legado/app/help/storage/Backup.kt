@@ -138,7 +138,7 @@ object Backup {
         val aes = BackupAES()
         FileUtils.delete(backupPath)
         // WebDAV 仅作为跨设备配置同步使用, 书籍和数据库内容仍由本地备份负责.
-        if (mode == "local" || mode == "both") {
+        if (mode == "local") {
             writeListToJson(
                 appDb.bookDao.all.filterNot { BackupConfig.backupIgnoreLocalBook && it.isLocal },
                 "bookshelf.json",
