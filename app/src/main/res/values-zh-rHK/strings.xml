@@ -2150,6 +2150,9 @@
     <string name="audio">音頻</string>
     <string name="book_type_audio">有聲</string>
     <string name="add_local_directory_group">添加本地目錄分組</string>
+    <string name="add_advanced_group">新增進階分組</string>
+    <string name="advanced_group_pattern">匹配規則（正則）</string>
+    <string name="advanced_group_pattern_hint">比對書名、作者、標籤三個欄位（依次為 name=、author=、tags=，欄位之間以定位字元分隔）。範例：author=劉慈欣 / name=.*三體.* / author=貓膩.*tags=.*歷史</string>
     <string name="reselect_directory">重新選擇目錄</string>
     <string name="local_directory">本地目錄</string>
     <string name="directory_unavailable">目錄不可用, 請重新選擇</string>

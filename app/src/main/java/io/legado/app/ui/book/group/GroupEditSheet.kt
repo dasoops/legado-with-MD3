@@ -36,6 +36,7 @@ import io.legado.app.R
 import io.legado.app.data.entities.BookGroup
 import io.legado.app.ui.theme.LegadoTheme
 import io.legado.app.ui.widget.components.AppTextField
+import io.legado.app.ui.widget.components.text.AppText
 import io.legado.app.ui.widget.components.alert.AppAlertDialog
 import io.legado.app.ui.widget.components.button.ConfirmDismissButtonsRow
 import io.legado.app.ui.widget.components.button.series.MediumTonalButton
@@ -101,6 +102,7 @@ fun GroupEditSheet(
 fun GroupEditContent(
     group: BookGroup? = null,
     isTag: Boolean = false,
+    isAdvanced: Boolean = false,
     onDismissRequest: () -> Unit,
     coverPath: String?,
     onCoverPathChange: (String?) -> Unit,
@@ -113,8 +115,10 @@ fun GroupEditContent(
     var selectedSortIndex by remember(group) { mutableIntStateOf(group?.bookSort ?: -1) }
     var isSaving by remember(group) { mutableStateOf(false) }
     var localDirectoryUri by remember(group) { mutableStateOf(group?.localDirectoryUri) }
+    var pattern by remember(group, isAdvanced) { mutableStateOf(group?.pattern.orEmpty()) }
 
     val isLocalDirectory = group?.isLocalDirectory == true
+    val advanced = isAdvanced || group?.isAdvanced == true
 
     val directoryPicker = rememberLauncherForActivityResult(
         ActivityResultContracts.OpenDocumentTree()
@@ -129,7 +133,8 @@ fun GroupEditContent(
     val sortEntryValues = remember(sortOptions) {
         Array(sortOptions.size) { (it - 1).toString() }
     }
-    val canSetPrivate = group == null || group.groupId > 0
+    // 动态分组没有固定的私有语义, 不提供私有开关.
+    val canSetPrivate = !advanced && (group == null || group.groupId > 0)
 
     val selectImage = rememberLauncherForActivityResult(SelectImageContract()) { result ->
         result.uri?.let { uri ->
@@ -228,6 +233,29 @@ fun GroupEditContent(
                 modifier = Modifier.fillMaxWidth()
             )
         } else {
+            if (advanced) {
+                Spacer(modifier = Modifier.height(8.dp))
+
+                AppTextField(
+                    value = pattern,
+                    onValueChange = { pattern = it },
+                    backgroundColor = LegadoTheme.colorScheme.onSheetContent,
+                    label = stringResource(R.string.advanced_group_pattern),
+                    modifier = Modifier.fillMaxWidth(),
+                    minLines = 2,
+                    maxLines = 6,
+                )
+
+                AppText(
+                    text = stringResource(R.string.advanced_group_pattern_hint),
+                    style = LegadoTheme.typography.bodySmall,
+                    color = LegadoTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 4.dp, vertical = 4.dp),
+                )
+            }
+
             if (canSetPrivate) {
                 Spacer(modifier = Modifier.height(8.dp))
 
@@ -267,7 +295,8 @@ fun GroupEditContent(
                                 cover = coverPath,
                                 bookSort = selectedSortIndex,
                                 isPrivate = isPrivate,
-                                localDirectoryUri = localDirectoryUri
+                                localDirectoryUri = localDirectoryUri,
+                                pattern = pattern.takeIf(String::isNotBlank)
                             ),
                             onSuccess = onDismissRequest,
                             onError = { error ->
@@ -282,6 +311,7 @@ fun GroupEditContent(
                             enableRefresh = true,
                             isPrivate,
                             coverPath,
+                            pattern = pattern.takeIf(String::isNotBlank),
                             isTag = isTag,
                             onError = { error ->
                                 isSaving = false

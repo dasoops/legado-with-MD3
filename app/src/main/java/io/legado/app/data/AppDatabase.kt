@@ -96,7 +96,7 @@ val appDb by lazy {
 }
 
 @Database(
-    version = 109,
+    version = 110,
     exportSchema = true,
     entities = [Book::class, BookGroup::class, BookSource::class, BookChapter::class,
         ReplaceRule::class, SearchBook::class, SearchKeyword::class, Cookie::class,
@@ -178,7 +178,9 @@ val appDb by lazy {
         AutoMigration(from = 104, to = 105),
         AutoMigration(from = 106, to = 107, spec = DatabaseMigrations.Migration_106_107::class),
         AutoMigration(from = 107, to = 108, spec = DatabaseMigrations.Migration_107_108::class),
-        AutoMigration(from = 108, to = 109, spec = DatabaseMigrations.Migration_108_109::class)
+        AutoMigration(from = 108, to = 109, spec = DatabaseMigrations.Migration_108_109::class),
+        // book_groups 新增可空列 pattern(高级分组正则)
+        AutoMigration(from = 109, to = 110)
     ]
 )
 abstract class AppDatabase : RoomDatabase() {

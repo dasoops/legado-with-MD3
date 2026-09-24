@@ -13,6 +13,8 @@ class BookGroupMutationRepository(
 ) : BookGroupMutationGateway {
 
     override suspend fun addGroup(group: NewBookGroup) {
+        // 非法正则在写入前拦截, 避免落库后动态分组静默失效.
+        group.pattern?.takeIf(String::isNotBlank)?.let(::Regex)
         database.withTransaction {
             val groupDao = database.bookGroupDao
             val groupId = if (group.isTag) BookTags.groupId(group.groupName) else groupDao.getUnusedId()
@@ -25,6 +27,7 @@ class BookGroupMutationRepository(
                 isPrivate = group.isPrivate,
                 order = groupDao.maxOrder.plus(1),
                 localDirectoryUri = group.localDirectoryUri,
+                pattern = group.pattern,
             )
 
             if (!group.isTag && groupDao.getByID(groupId) == null) {
@@ -35,6 +38,8 @@ class BookGroupMutationRepository(
     }
 
     override suspend fun saveGroup(bookGroup: BookGroupUpdate) {
+        // 非法正则在写入前拦截, 避免落库后动态分组静默失效.
+        bookGroup.pattern?.takeIf(String::isNotBlank)?.let(::Regex)
         database.withTransaction {
             database.bookGroupDao.update(bookGroup.toEntity())
         }
@@ -58,5 +63,6 @@ class BookGroupMutationRepository(
         bookSort = bookSort,
         isPrivate = isPrivate,
         localDirectoryUri = localDirectoryUri,
+        pattern = pattern,
     )
 }

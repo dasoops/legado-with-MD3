@@ -6,6 +6,7 @@ data class NewBookGroup(
     val enableRefresh: Boolean,
     val isPrivate: Boolean,
     val cover: String?,
+    val pattern: String? = null,
     val localDirectoryUri: String? = null,
     val isTag: Boolean = false,
 )
@@ -20,4 +21,5 @@ data class BookGroupUpdate(
     val bookSort: Int,
     val isPrivate: Boolean,
     val localDirectoryUri: String? = null,
+    val pattern: String? = null,
 )

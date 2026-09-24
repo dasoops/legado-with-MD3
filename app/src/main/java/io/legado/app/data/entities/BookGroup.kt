@@ -25,12 +25,15 @@ data class BookGroup(
     var bookSort: Int = -1,
     @ColumnInfo(defaultValue = "0")
     var isPrivate: Boolean = false,
-    var localDirectoryUri: String? = null
+    var localDirectoryUri: String? = null,
+    var pattern: String? = null
 ) : Parcelable {
 
     val isTag: Boolean get() = groupId < -100 && groupId != Long.MIN_VALUE
 
     val isLocalDirectory: Boolean get() = !localDirectoryUri.isNullOrBlank()
+
+    val isAdvanced: Boolean get() = !pattern.isNullOrBlank()
 
     companion object {
         const val IdRoot = -100L
@@ -87,6 +90,7 @@ data class BookGroup(
                     && other.order == order
                     && other.isPrivate == isPrivate
                     && other.localDirectoryUri == localDirectoryUri
+                    && other.pattern == pattern
         }
         return false
     }

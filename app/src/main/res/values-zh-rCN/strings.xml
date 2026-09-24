@@ -2242,6 +2242,9 @@
     <string name="book_type_audio">音频</string>
     <string name="audio">音频</string>
     <string name="add_local_directory_group">添加本地目录分组</string>
+    <string name="add_advanced_group">添加高级分组</string>
+    <string name="advanced_group_pattern">匹配规则（正则）</string>
+    <string name="advanced_group_pattern_hint">匹配书名、作者、标签三个字段（依次为 name=、author=、tags=，字段之间以制表符分隔）。示例：author=刘慈欣 / name=.*三体.* / author=猫腻.*tags=.*历史</string>
     <string name="reselect_directory">重新选择目录</string>
     <string name="local_directory">本地目录</string>
     <string name="directory_unavailable">目录不可用, 请重新选择</string>

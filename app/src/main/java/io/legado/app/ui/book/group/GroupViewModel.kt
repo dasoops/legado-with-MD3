@@ -32,6 +32,7 @@ class GroupViewModel(
         enableRefresh: Boolean,
         isPrivate: Boolean,
         cover: String?,
+        pattern: String? = null,
         localDirectoryUri: String? = null,
         isTag: Boolean = false,
         onError: ((Throwable) -> Unit)? = null,
@@ -46,6 +47,7 @@ class GroupViewModel(
                         enableRefresh = enableRefresh,
                         isPrivate = isPrivate,
                         cover = cover,
+                        pattern = pattern,
                         localDirectoryUri = localDirectoryUri,
                         isTag = isTag,
                     )
@@ -102,6 +104,7 @@ class GroupViewModel(
         bookSort = bookSort,
         isPrivate = isPrivate,
         localDirectoryUri = localDirectoryUri,
+        pattern = pattern,
     )
 
 }

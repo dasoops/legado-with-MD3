@@ -1,5 +1,6 @@
 package io.legado.app.data.repository
 
+import io.legado.app.domain.model.AdvancedGroup
 import io.legado.app.domain.model.BookTags
 import io.legado.app.data.AppDatabase
 import io.legado.app.data.dao.BookChapterDao
@@ -7,10 +8,14 @@ import io.legado.app.data.dao.BookDao
 import io.legado.app.data.dao.GroupBookCount
 import io.legado.app.data.entities.Book
 import io.legado.app.data.entities.BookChapter
+import io.legado.app.data.entities.BookGroup
 import io.legado.app.help.book.isLocal
 import io.legado.app.model.localBook.LocalBook
 import io.legado.app.ui.main.bookshelf.BookShelfItem
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.emitAll
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.withContext
@@ -78,15 +83,24 @@ class BookRepository(
     }
 
     fun flowBookShelfByGroup(groupId: Long): Flow<List<BookShelfItem>> {
-        return if (groupId < -100 && groupId != Long.MIN_VALUE) {
-            bookDao.flowBookShelf().map { books ->
+        return when {
+            groupId < -100 && groupId != Long.MIN_VALUE -> bookDao.flowBookShelf().map { books ->
                 books.filterNot { it.isNotShelf }.filter { book ->
                     BookTags.grouping(
                         book.customTag, book.kind, book.durChapterIndex, book.durChapterPos, book.totalChapterNum
                     ).any { BookTags.groupId(it) == groupId }
                 }
             }
-        } else bookDao.flowBookShelfByGroup(groupId)
+            // 高级分组 id 为正数且已落库, 需按正则动态匹配, 不能走位掩码查询.
+            groupId > 0 -> flow {
+                val group = appDb.bookGroupDao.getByID(groupId)
+                emitAll(
+                    if (group?.isAdvanced == true) flowBookShelfByGroup(group)
+                    else bookDao.flowBookShelfByGroup(groupId)
+                )
+            }
+            else -> bookDao.flowBookShelfByGroup(groupId)
+        }
     }
 
     fun flowTagNames(): Flow<List<String>> = bookDao.flowBookShelf().map { books ->
@@ -104,14 +118,38 @@ class BookRepository(
             .toSet()
     }
 
-    fun flowBookShelfByGroup(group: io.legado.app.data.entities.BookGroup): Flow<List<BookShelfItem>> =
-        if (group.isTag) bookDao.flowBookShelf().map { books ->
-            books.filterNot { it.isNotShelf }.filter { book ->
-                group.groupName in BookTags.grouping(
-                    book.customTag, book.kind, book.durChapterIndex, book.durChapterPos, book.totalChapterNum
-                )
+    fun flowBookShelfByGroup(group: BookGroup): Flow<List<BookShelfItem>> =
+        when {
+            group.isAdvanced -> {
+                val regex = group.pattern?.takeIf(String::isNotBlank)
+                    ?.let { runCatching { Regex(it) }.getOrNull() }
+                if (regex == null) {
+                    flowOf(emptyList())
+                } else {
+                    bookDao.flowBookShelf().map { books ->
+                        books.filterNot { it.isNotShelf }.filter { book ->
+                            regex.containsMatchIn(book.advancedGroupText())
+                        }
+                    }
+                }
             }
-        } else bookDao.flowBookShelfByGroup(group.groupId)
+            group.isTag -> bookDao.flowBookShelf().map { books ->
+                books.filterNot { it.isNotShelf }.filter { book ->
+                    group.groupName in BookTags.grouping(
+                        book.customTag, book.kind, book.durChapterIndex, book.durChapterPos, book.totalChapterNum
+                    )
+                }
+            }
+            else -> bookDao.flowBookShelfByGroup(group.groupId)
+        }
+
+    private fun BookShelfItem.advancedGroupText() = AdvancedGroup.serialize(
+        name = name,
+        author = author,
+        tags = BookTags.grouping(
+            customTag, kind, durChapterIndex, durChapterPos, totalChapterNum
+        ),
+    )
 
     suspend fun addTags(bookUrls: Set<String>, tags: Set<String>) = withContext(Dispatchers.IO) {
         val additions = BookTags.editable(tags)

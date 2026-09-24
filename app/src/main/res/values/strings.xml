@@ -2248,6 +2248,9 @@
     <string name="book_type_audio">Audio</string>
     <string name="audio">Audio</string>
     <string name="add_local_directory_group">Add local directory group</string>
+    <string name="add_advanced_group">Add Advanced Group</string>
+    <string name="advanced_group_pattern">Pattern (regex)</string>
+    <string name="advanced_group_pattern_hint">Matches the Name, Author and Tags fields in order (name=, author=, tags=, separated by tabs). Examples: author=刘慈欣 / name=.*三体.* / author=猫腻.*tags=.*历史</string>
     <string name="reselect_directory">Reselect directory</string>
     <string name="local_directory">Local directory</string>
     <string name="open_in_other_app">Open in another app</string>

@@ -74,6 +74,43 @@ class BookGroupMutationRepositoryTest {
     }
 
     @Test
+    fun `新增高级分组写入正则`() = runBlocking {
+        repository.addGroup(
+            NewBookGroup(
+                groupName = "科幻",
+                bookSort = -1,
+                enableRefresh = true,
+                isPrivate = false,
+                cover = null,
+                pattern = "author=刘慈欣",
+            )
+        )
+
+        val group = database.bookGroupDao.all.single()
+        assertEquals("author=刘慈欣", group.pattern)
+        assertTrue(group.isAdvanced)
+    }
+
+    @Test
+    fun `新增高级分组非法正则被拒绝且不落库`() = runBlocking {
+        val result = runCatching {
+            repository.addGroup(
+                NewBookGroup(
+                    groupName = "坏正则",
+                    bookSort = -1,
+                    enableRefresh = true,
+                    isPrivate = false,
+                    cover = null,
+                    pattern = "[",
+                )
+            )
+        }
+
+        assertTrue(result.isFailure)
+        assertTrue(database.bookGroupDao.all.isEmpty())
+    }
+
+    @Test
     fun `保存分组更新分组信息`() = runBlocking {
         database.bookGroupDao.insert(BookGroup(groupId = 1L, groupName = "Fantasy"))
 

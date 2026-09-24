@@ -149,6 +149,61 @@ class BookTagsRepositoryTest {
     }
 
     @Test
+    fun `高级分组始终出现在分组列表`() = runBlocking {
+        db.bookGroupDao.insert(BookGroup(5L, "科幻", pattern = "author=刘慈欣"))
+        val group = groups.flowAll().first { list -> list.any { it.groupId == 5L } }
+        assertTrue(group.any { it.groupId == 5L && it.isAdvanced })
+    }
+
+    @Test
+    fun `高级分组按作者正则动态匹配书目`() = runBlocking {
+        db.bookDao.insert(
+            Book(bookUrl = "a", name = "三体", author = "刘慈欣", customTag = "科幻,宇宙"),
+            Book(bookUrl = "b", name = "诡秘之主", author = "爱潜水的乌贼", customTag = "奇幻,冒险"),
+            Book(bookUrl = "c", name = "庆余年", author = "猫腻", customTag = "历史,权谋"),
+        )
+        val group = BookGroup(5L, "科幻", pattern = "author=刘慈欣")
+
+        val matched = books.flowBookShelfByGroup(group)
+            .first { list -> list.isNotEmpty() }
+        assertEquals(listOf("三体"), matched.map { it.name })
+    }
+
+    @Test
+    fun `高级分组按标签正则动态匹配书目`() = runBlocking {
+        db.bookDao.insert(
+            Book(bookUrl = "a", name = "三体", author = "刘慈欣", customTag = "科幻,宇宙"),
+            Book(bookUrl = "c", name = "庆余年", author = "猫腻", customTag = "历史,权谋"),
+        )
+        val group = BookGroup(6L, "历史", pattern = "tags=.*历史.*")
+
+        val matched = books.flowBookShelfByGroup(group)
+            .first { list -> list.isNotEmpty() }
+        assertEquals(listOf("庆余年"), matched.map { it.name })
+    }
+
+    @Test
+    fun `高级分组非法正则返回空`() = runBlocking {
+        db.bookDao.insert(Book(bookUrl = "a", name = "三体", author = "刘慈欣"))
+        val group = BookGroup(7L, "坏正则", pattern = "[")
+
+        assertTrue(books.flowBookShelfByGroup(group).first().isEmpty())
+    }
+
+    @Test
+    fun `按分组 id 查询高级分组同样动态匹配`() = runBlocking {
+        db.bookDao.insert(
+            Book(bookUrl = "a", name = "三体", author = "刘慈欣"),
+            Book(bookUrl = "c", name = "庆余年", author = "猫腻"),
+        )
+        db.bookGroupDao.insert(BookGroup(8L, "科幻", pattern = "author=刘慈欣"))
+
+        val matched = books.flowBookShelfByGroup(8L)
+            .first { list -> list.isNotEmpty() }
+        assertEquals(listOf("三体"), matched.map { it.name })
+    }
+
+    @Test
     fun `详情页分组名称去重`() = runBlocking {
         db.bookGroupDao.insert(
             BookGroup(1, "Books", localDirectoryUri = "content://books"),
