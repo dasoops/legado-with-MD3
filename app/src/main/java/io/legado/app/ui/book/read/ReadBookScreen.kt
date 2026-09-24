@@ -34,7 +34,6 @@ import io.legado.app.ui.book.read.sheet.PageKeyConfigSheet
 import io.legado.app.ui.book.read.sheet.PhotoSheet
 import io.legado.app.ui.book.read.sheet.ReaderMoreActionsSheet
 import io.legado.app.ui.book.read.sheet.ShadowSetSheet
-import io.legado.app.ui.book.read.sheet.SimulatedReadingSheet
 import io.legado.app.ui.book.read.sheet.TextProcessingSheet
 import io.legado.app.ui.book.read.sheet.ToolButtonConfigSheet
 import io.legado.app.ui.book.read.sheet.UnderlineConfigSheet
@@ -418,7 +417,6 @@ fun ReadBookScreen(
     }
 
     val showCharsetSheet = state.activeSheet is ReadBookSheet.Charset
-    val showSimulatedReadingSheet = state.activeSheet is ReadBookSheet.SimulatedReading
 
     // AlertDialog-based sheets and special cases — conditionally composed
     when (state.activeSheet) {
@@ -447,14 +445,6 @@ fun ReadBookScreen(
             CharsetConfigSheet(
                 show = showCharsetSheet,
                 onDismissRequest = dismissSheet,
-            )
-        }
-
-        is ReadBookSheet.SimulatedReading -> {
-            SimulatedReadingSheet(
-                show = showSimulatedReadingSheet,
-                onDismissRequest = dismissSheet,
-                onApply = { onIntent(ReadBookIntent.ApplySimulatedReading) },
             )
         }
 

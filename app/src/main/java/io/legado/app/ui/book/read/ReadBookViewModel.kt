@@ -1220,13 +1220,6 @@ class ReadBookViewModel(
                 }
             }
 
-            is ReadBookIntent.ApplySimulatedReading -> {
-                ReadBook.clearTextChapter()
-                execute {
-                    ReadBook.book?.let { loadDelegate.initBook(it) }
-                }
-            }
-
             is ReadBookIntent.PageAnimChanged -> {
                 _effects.tryEmit(ReadBookEffect.PageAnimChanged)
             }

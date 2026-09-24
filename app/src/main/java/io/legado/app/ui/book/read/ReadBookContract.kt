@@ -374,10 +374,8 @@ internal val ReadBookButtonIds = listOf(
 )
 
 internal val MoreActionIds = listOf(
-    "source_custom_button", "refresh", "download", "edit_content", "add_bookmark",
-    "text_processing", "reverse_content", "re_segment",
-    "del_ruby", "del_h", "toc_rule", "charset", "image_style", "page_anim",
-    "simulated_reading", "get_progress", "cover_progress", "highlight_rule", "read_style",
+    "add_bookmark", "re_segment", "del_ruby", "toc_rule", "charset", "image_style",
+    "get_progress", "cover_progress", "read_style",
     "bottom_button_config", "log",
 )
 
@@ -507,7 +505,6 @@ sealed interface ReadBookIntent {
     data object ResetContentEdit : ReadBookIntent
     data class SetContentEditText(val text: String) : ReadBookIntent
     data class SetContentEditSaveToSource(val value: Boolean) : ReadBookIntent
-
     // Tools
     data class RefreshImage(val src: String) : ReadBookIntent
     data class SaveImage(val src: String) : ReadBookIntent
@@ -657,7 +654,6 @@ sealed interface ReadBookIntent {
     data class ColorSelected(val dialogId: Int, val color: Int) : ReadBookIntent
 
     // Simulated reading apply (clear chapter cache + reinit)
-    data object ApplySimulatedReading : ReadBookIntent
 
     // Page anim changed (reload content + update view)
     data object PageAnimChanged : ReadBookIntent
@@ -791,7 +787,6 @@ sealed interface ReadBookSheet {
     data class BookNavigation(val initialTab: ReaderBookSheetTab) : ReadBookSheet
     data object PageAnim : ReadBookSheet
     data object Charset : ReadBookSheet
-    data object SimulatedReading : ReadBookSheet
     data object ToolButtonConfig : ReadBookSheet
     data object EyeProtection : ReadBookSheet
     data object FloatingBarIconConfig : ReadBookSheet

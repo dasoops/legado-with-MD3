@@ -32,10 +32,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Block
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.Extension
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Payment
-import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.automirrored.filled.Toc
 import androidx.compose.material.icons.filled.Translate
 import androidx.compose.material3.Icon
@@ -239,24 +237,7 @@ internal fun MenuTitleBar(
                     horizontalArrangement = Arrangement.spacedBy(6.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    if (!state.isLocalBook) {
-                        if (!compact && state.bookSource?.customButton == true) {
-                            SourceCustomActionButton(
-                                state = state,
-                                colors = colors,
-                                onIntent = onIntent,
-                                backdrop = backdrop,
-                            )
-                        }
-                        if (!compact) {
-                            RefreshActionButton(
-                                state = state,
-                                colors = colors,
-                                onIntent = onIntent,
-                                backdrop = backdrop,
-                            )
-                        }
-                    } else if (state.isLocalBook && !compact) {
+                    if (state.isLocalBook && !compact) {
                         if (state.isLocalTxt) {
                             TxtTocRuleActionButton(
                                 state = state,
@@ -678,22 +659,6 @@ private fun MergedGlassDivider(tint: Color) {
     )
 }
 
-@Composable
-private fun RefreshMenuItems(
-    dismiss: () -> Unit,
-    onRefreshDur: () -> Unit,
-    onRefreshAfter: () -> Unit,
-) {
-    RoundDropdownMenuItem(
-        text = stringResource(R.string.menu_refresh_dur),
-        onClick = { dismiss(); onRefreshDur() },
-    )
-    RoundDropdownMenuItem(
-        text = stringResource(R.string.menu_refresh_after),
-        onClick = { dismiss(); onRefreshAfter() },
-    )
-}
-
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun MenuTitleBarMergedGlassButton(
@@ -703,8 +668,6 @@ private fun MenuTitleBarMergedGlassButton(
     backdrop: Backdrop?,
     glassEnabled: Boolean,
 ) {
-    var refreshExpanded by remember { mutableStateOf(false) }
-
     val pillShape = RoundedCornerShape(50)
     val tint = LegadoTheme.colorScheme.onSurfaceVariant
     val compact = state.menuConfig.titleBarCompact
@@ -757,29 +720,7 @@ private fun MenuTitleBarMergedGlassButton(
                 ),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            if (!state.isLocalBook && !compact) {
-                if (state.bookSource?.customButton == true) {
-                    MergedGlassIconButton(
-                        icon = Icons.Default.Extension,
-                        tint = tint,
-                        contentDescription = stringResource(R.string.custom_button),
-                        onClick = { onIntent(ReadBookIntent.SourceCustomButton(false)) },
-                        onLongClick = { onIntent(ReadBookIntent.SourceCustomButton(true)) },
-                    )
-                    MergedGlassDivider(tint)
-                }
-
-                // Refresh
-                MergedGlassIconButton(
-                    icon = Icons.Default.Refresh,
-                    tint = tint,
-                    contentDescription = stringResource(R.string.menu_refresh_dur),
-                    onClick = { onIntent(ReadBookIntent.MenuRefreshDur) },
-                    onLongClick = { refreshExpanded = true },
-                )
-                MergedGlassDivider(tint)
-
-            } else if (state.isLocalBook && !compact) {
+            if (state.isLocalBook && !compact) {
                 // TXT directory rule
                 if (state.isLocalTxt) {
                     MergedGlassIconButton(
@@ -810,71 +751,6 @@ private fun MenuTitleBarMergedGlassButton(
             )
         }
 
-        // Dropdown menus
-        if (!state.isLocalBook) {
-            RoundDropdownMenu(
-                expanded = refreshExpanded,
-                onDismissRequest = { refreshExpanded = false },
-            ) { dismiss ->
-                RefreshMenuItems(
-                    dismiss = dismiss,
-                    onRefreshDur = { onIntent(ReadBookIntent.MenuRefreshDur) },
-                    onRefreshAfter = { onIntent(ReadBookIntent.MenuRefreshAfter) },
-                )
-            }
-        }
-
-    }
-}
-
-@Composable
-private fun SourceCustomActionButton(
-    state: ReadBookUiState,
-    colors: ReadMenuColors,
-    onIntent: (ReadBookIntent) -> Unit,
-    backdrop: Backdrop?,
-) {
-    MenuTitleGlassButton(
-        onClick = { onIntent(ReadBookIntent.SourceCustomButton(false)) },
-        onLongClick = { onIntent(ReadBookIntent.SourceCustomButton(true)) },
-        icon = Icons.Default.Extension,
-        contentDescription = stringResource(R.string.custom_button),
-        state = state,
-        colors = colors,
-        backdrop = backdrop,
-    )
-}
-
-@Composable
-private fun RefreshActionButton(
-    state: ReadBookUiState,
-    colors: ReadMenuColors,
-    onIntent: (ReadBookIntent) -> Unit,
-    backdrop: Backdrop?,
-) {
-    var expanded by remember { mutableStateOf(false) }
-
-    Box {
-        MenuTitleGlassButton(
-            onClick = { onIntent(ReadBookIntent.MenuRefreshDur) },
-            onLongClick = { expanded = true },
-            icon = Icons.Default.Refresh,
-            contentDescription = stringResource(R.string.menu_refresh_dur),
-            state = state,
-            colors = colors,
-            backdrop = backdrop,
-        )
-
-        RoundDropdownMenu(
-            expanded = expanded,
-            onDismissRequest = { expanded = false },
-        ) { dismiss ->
-            RefreshMenuItems(
-                dismiss = dismiss,
-                onRefreshDur = { onIntent(ReadBookIntent.MenuRefreshDur) },
-                onRefreshAfter = { onIntent(ReadBookIntent.MenuRefreshAfter) },
-            )
-        }
     }
 }
 

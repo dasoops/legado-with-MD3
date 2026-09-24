@@ -14,22 +14,14 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Animation
-import androidx.compose.material.icons.filled.AutoStories
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.BugReport
 import androidx.compose.material.icons.filled.CleanHands
-import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Extension
-import androidx.compose.material.icons.filled.FindReplace
 import androidx.compose.material.icons.filled.Image
-import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material.icons.filled.Replay
-import androidx.compose.material.icons.filled.SwapVert
 import androidx.compose.material.icons.filled.Sync
 import androidx.compose.material.icons.automirrored.filled.Toc
 import androidx.compose.material.icons.filled.Translate
-import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -162,18 +154,7 @@ private fun OverflowDropdownMenu(
 
         // Compact mode: moved from top bar buttons
         if (state.menuConfig.titleBarCompact) {
-            if (!state.isLocalBook) {
-                RoundDropdownMenuItem(
-                    text = stringResource(R.string.menu_refresh_dur),
-                    leadingIcon = menuIcon(Icons.Default.Refresh),
-                    onClick = { dismiss(); onIntent(ReadBookIntent.MenuRefreshDur) },
-                )
-                RoundDropdownMenuItem(
-                    text = stringResource(R.string.menu_refresh_after),
-                    leadingIcon = menuIcon(Icons.Default.Refresh),
-                    onClick = { dismiss(); onIntent(ReadBookIntent.MenuRefreshAfter) },
-                )
-            } else {
+            if (state.isLocalBook) {
                 if (state.isLocalTxt) {
                     RoundDropdownMenuItem(
                         text = stringResource(R.string.txt_toc_rule),
@@ -192,38 +173,9 @@ private fun OverflowDropdownMenu(
 
         // 内容处理
         RoundDropdownMenuItem(
-            text = stringResource(R.string.edit_content),
-            leadingIcon = menuIcon(Icons.Default.Edit),
-            onClick = {
-                dismiss()
-                onIntent(ReadBookIntent.OpenContentEdit)
-            },
-        )
-        RoundDropdownMenuItem(
             text = stringResource(R.string.bookmark_add),
             leadingIcon = menuIcon(Icons.Default.Bookmark),
             onClick = { dismiss(); onIntent(ReadBookIntent.AddBookmark) },
-        )
-        RoundDropdownMenuItem(
-            text = stringResource(R.string.highlight_rule_config),
-            leadingIcon = menuIcon(Icons.Default.Tune),
-            onClick = {
-                dismiss()
-                onIntent(ReadBookIntent.ShowSheet(ReadBookSheet.HighlightRuleConfig))
-            },
-        )
-        RoundDropdownMenuItem(
-            text = stringResource(R.string.text_processing),
-            leadingIcon = menuIcon(Icons.Default.FindReplace),
-            onClick = {
-                dismiss()
-                onIntent(ReadBookIntent.ShowSheet(ReadBookSheet.TextProcessing))
-            },
-        )
-        RoundDropdownMenuItem(
-            text = stringResource(R.string.reverse_content),
-            leadingIcon = menuIcon(Icons.Default.SwapVert),
-            onClick = { dismiss(); onIntent(ReadBookIntent.MenuReverseContent) },
         )
         RoundDropdownMenuItem(
             text = stringResource(R.string.re_segment),
@@ -237,12 +189,6 @@ private fun OverflowDropdownMenu(
                 leadingIcon = menuIcon(Icons.Default.CleanHands),
                 isSelected = state.delRubyTag,
                 onClick = { onIntent(ReadBookIntent.MenuDelRubyTag) },
-            )
-            RoundDropdownMenuItem(
-                text = stringResource(R.string.del_h_tag),
-                leadingIcon = menuIcon(Icons.Default.CleanHands),
-                isSelected = state.delHTag,
-                onClick = { onIntent(ReadBookIntent.MenuDelHTag) },
             )
         }
 
@@ -275,34 +221,7 @@ private fun OverflowDropdownMenu(
                 }
             }
         }
-        RoundDropdownMenuItem(
-            text = stringResource(R.string.book_page_anim),
-            leadingIcon = menuIcon(Icons.Default.Animation),
-            onClick = {
-                dismiss()
-                onIntent(ReadBookIntent.ShowSheet(ReadBookSheet.PageAnim))
-            },
-        )
-        RoundDropdownMenuItem(
-            text = stringResource(R.string.simulated_reading),
-            leadingIcon = menuIcon(Icons.Default.AutoStories),
-            onClick = {
-                dismiss()
-                onIntent(ReadBookIntent.ShowSheet(ReadBookSheet.SimulatedReading))
-            },
-        )
-
         PillDivider()
-
-        // 书源
-        if (!state.isLocalBook) {
-            RoundDropdownMenuItem(
-                text = stringResource(R.string.menu_refresh_all),
-                leadingIcon = menuIcon(Icons.Default.Replay),
-                onClick = { dismiss(); onIntent(ReadBookIntent.MenuRefreshAll) },
-            )
-            PillDivider()
-        }
 
         // 进度同步
         if (state.isReadingProgressSyncConfigured) {

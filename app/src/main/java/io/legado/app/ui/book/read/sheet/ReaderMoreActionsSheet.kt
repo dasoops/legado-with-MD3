@@ -13,22 +13,14 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Toc
-import androidx.compose.material.icons.filled.Animation
-import androidx.compose.material.icons.filled.AutoStories
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.BugReport
 import androidx.compose.material.icons.filled.CleanHands
 import androidx.compose.material.icons.filled.DisplaySettings
-import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.Extension
-import androidx.compose.material.icons.filled.FindReplace
 import androidx.compose.material.icons.filled.Image
-import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.filled.SwapVert
 import androidx.compose.material.icons.filled.Sync
 import androidx.compose.material.icons.filled.Translate
-import androidx.compose.material.icons.filled.Tune
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -39,7 +31,6 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import io.legado.app.R
-import io.legado.app.constant.PageAnim
 import io.legado.app.data.entities.Book
 import io.legado.app.model.ReadBook
 import io.legado.app.ui.book.read.MoreActionIds
@@ -184,14 +175,14 @@ private fun ActionSquareHost(
     modifier: Modifier = Modifier,
 ) {
     var expanded by remember(action.id) { mutableStateOf(false) }
-    val hasMore = action.id == "refresh" || action.id == "source_custom_button"
+    val hasMore = false
     Box(modifier = modifier) {
         ReaderMenuActionSquare(
             icon = action.icon,
             text = action.label,
             selected = action.selected,
             hasMore = hasMore,
-            onClick = if (action.id == "image_style" || action.id == "page_anim") {
+            onClick = if (action.id == "image_style") {
                 { expanded = true }
             } else {
                 action.onClick
@@ -199,35 +190,6 @@ private fun ActionSquareHost(
             onMoreClick = { expanded = true },
         )
         when (action.id) {
-            "source_custom_button" -> RoundDropdownMenu(
-                expanded = expanded,
-                onDismissRequest = { expanded = false },
-            ) { dismiss ->
-                RoundDropdownMenuItem(
-                    text = stringResource(R.string.source_custom_button_long_action),
-                    onClick = {
-                        dismiss()
-                        dispatch(ReadBookIntent.SourceCustomButton(true))
-                    },
-                )
-            }
-
-            "refresh" -> RoundDropdownMenu(
-                expanded = expanded,
-                onDismissRequest = { expanded = false },
-            ) { dismiss ->
-                listOf(
-                    R.string.menu_refresh_dur to ReadBookIntent.MenuRefreshDur,
-                    R.string.menu_refresh_after to ReadBookIntent.MenuRefreshAfter,
-                    R.string.menu_refresh_all to ReadBookIntent.MenuRefreshAll,
-                ).forEach { (label, intent) ->
-                    RoundDropdownMenuItem(
-                        text = stringResource(label),
-                        onClick = { dismiss(); dispatch(intent) },
-                    )
-                }
-            }
-
             "image_style" -> ImageStyleDropdown(
                 expanded = expanded,
                 currentStyle = state.book?.getImageStyle() ?: Book.imgStyleDefault,
@@ -235,12 +197,6 @@ private fun ActionSquareHost(
                 onIntent = onIntent,
             )
 
-            "page_anim" -> PageAnimDropdown(
-                expanded = expanded,
-                currentPageAnim = state.book?.getPageAnim() ?: -1,
-                onDismissRequest = { expanded = false },
-                onIntent = onIntent,
-            )
         }
     }
 }
@@ -276,14 +232,6 @@ private fun moreActionSpecs(
     dispatch: (ReadBookIntent) -> Unit,
 ): List<MoreActionSpec> = listOf(
     MoreActionSpec(
-        "source_custom_button", stringResource(R.string.custom_button), Icons.Default.Extension,
-        applicable = state.bookSource?.customButton == true,
-        onClick = { dispatch(ReadBookIntent.SourceCustomButton(false)) },
-    ),
-    MoreActionSpec(
-        "refresh", stringResource(R.string.menu_refresh), Icons.Default.Refresh,
-        applicable = !state.isLocalBook, onClick = { dispatch(ReadBookIntent.MenuRefreshDur) }),
-    MoreActionSpec(
         "toc_rule", stringResource(R.string.txt_toc_rule), Icons.AutoMirrored.Filled.Toc,
         applicable = state.isLocalTxt, onClick = { dispatch(ReadBookIntent.MenuTocRegex) }),
     MoreActionSpec(
@@ -291,23 +239,11 @@ private fun moreActionSpecs(
         applicable = state.isLocalBook,
         onClick = { onIntent(ReadBookIntent.ShowSheet(ReadBookSheet.Charset)) }),
     MoreActionSpec(
-        "edit_content", stringResource(R.string.edit_content), Icons.Default.Edit,
-        onClick = { dispatch(ReadBookIntent.OpenContentEdit) }),
-    MoreActionSpec(
         "add_bookmark", stringResource(R.string.bookmark_add), Icons.Default.Bookmark,
         onClick = { dispatch(ReadBookIntent.AddBookmark) }),
     MoreActionSpec(
-        "text_processing", stringResource(R.string.text_processing), Icons.Default.FindReplace,
-        onClick = { onIntent(ReadBookIntent.ShowSheet(ReadBookSheet.TextProcessing)) }),
-    MoreActionSpec(
-        "highlight_rule", stringResource(R.string.highlight_rule_config), Icons.Default.Tune,
-        onClick = { onIntent(ReadBookIntent.ShowSheet(ReadBookSheet.HighlightRuleConfig)) }),
-    MoreActionSpec(
         "read_style", stringResource(R.string.read_config), Icons.Default.DisplaySettings,
         onClick = { dispatch(ReadBookIntent.OpenReadMenuRoute(ReadBookMenuRoute.ReadStyle)) }),
-    MoreActionSpec(
-        "reverse_content", stringResource(R.string.reverse_content), Icons.Default.SwapVert,
-        onClick = { dispatch(ReadBookIntent.MenuReverseContent) }),
     MoreActionSpec(
         "re_segment", stringResource(R.string.re_segment), Icons.AutoMirrored.Filled.Toc,
         selected = state.reSegment, onClick = { onIntent(ReadBookIntent.MenuReSegment) }),
@@ -316,18 +252,8 @@ private fun moreActionSpecs(
         applicable = state.isEpub, selected = state.delRubyTag,
         onClick = { onIntent(ReadBookIntent.MenuDelRubyTag) }),
     MoreActionSpec(
-        "del_h", stringResource(R.string.del_h_tag), Icons.Default.CleanHands,
-        applicable = state.isEpub, selected = state.delHTag,
-        onClick = { onIntent(ReadBookIntent.MenuDelHTag) }),
-    MoreActionSpec(
         "image_style", stringResource(R.string.image_style), Icons.Default.Image,
         onClick = {}),
-    MoreActionSpec(
-        "page_anim", stringResource(R.string.book_page_anim), Icons.Default.Animation,
-        onClick = {}),
-    MoreActionSpec(
-        "simulated_reading", stringResource(R.string.simulated_reading), Icons.Default.AutoStories,
-        onClick = { onIntent(ReadBookIntent.ShowSheet(ReadBookSheet.SimulatedReading)) }),
     MoreActionSpec(
         "get_progress", stringResource(R.string.get_book_progress), Icons.Default.Sync,
         applicable = state.isReadingProgressSyncConfigured,
@@ -362,37 +288,6 @@ private fun ImageStyleDropdown(
                 text = stringResource(label),
                 isSelected = currentStyle == style,
                 onClick = { dismiss(); onIntent(ReadBookIntent.MenuImageStyle(style)) },
-            )
-        }
-    }
-}
-
-@Composable
-private fun PageAnimDropdown(
-    expanded: Boolean,
-    currentPageAnim: Int,
-    onDismissRequest: () -> Unit,
-    onIntent: (ReadBookIntent) -> Unit,
-) {
-    val pageAnimOptions = listOf(
-        R.string.btn_default_s to -1,
-        R.string.page_anim_cover to PageAnim.coverPageAnim,
-        R.string.page_anim_slide to PageAnim.slidePageAnim,
-        R.string.page_anim_simulation to PageAnim.simulationPageAnim,
-        R.string.page_anim_scroll to PageAnim.scrollPageAnim,
-        R.string.page_anim_fade to PageAnim.fadePageAnim,
-        R.string.page_anim_none to PageAnim.noAnim,
-    )
-    RoundDropdownMenu(expanded = expanded, onDismissRequest = onDismissRequest) { dismiss ->
-        pageAnimOptions.forEach { (label, value) ->
-            RoundDropdownMenuItem(
-                text = stringResource(label),
-                isSelected = currentPageAnim == value,
-                onClick = {
-                    ReadBook.book?.setPageAnim(value)
-                    dismiss()
-                    onIntent(ReadBookIntent.PageAnimChanged)
-                },
             )
         }
     }

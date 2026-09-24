@@ -2,7 +2,7 @@
 
 本文件定义仓库级不变量。本仓库是 `dasoops/legado-with-MD3`, 基于 `HapeLee/legado-with-MD3`
 (其上游 `gedoor/legado`) 的 **本地阅读精简 fork**：只保留本地目录 / 文件阅读（TXT/EPUB/MOBI/PDF、阅读设置、替换规则、
-TXT 目录规则、书签、阅读记录、WebDAV 备份），不提供书源 / RSS / AI / 词典 / 在线朗读等在线功能。
+TXT 目录规则、书签、阅读记录、WebDAV 备份与阅读进度同步），不提供书源 / RSS / AI / 词典 / 在线朗读等在线内容功能。
 专项流程放在 `.agents/skills/`；不要把临时任务、讨论过程或一次性结论堆进本文件。
 
 ## 资料优先级
