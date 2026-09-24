@@ -141,7 +141,6 @@ fun GroupManageSheet(
                                 enableRefresh = false,
                                 isPrivate = false,
                                 cover = null,
-                                pattern = null,
                                 localDirectoryUri = uri.toString(),
                                 onSuccess = { showMenu = false }
                             )

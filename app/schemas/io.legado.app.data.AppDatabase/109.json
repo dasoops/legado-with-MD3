@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 109,
-    "identityHash": "543639607b91aa6f75bf8c9fb63b43d7",
+    "identityHash": "02c436d6d6c0d33420f3849477f8c65e",
     "entities": [
       {
         "tableName": "books",
@@ -2453,42 +2453,6 @@
         }
       },
       {
-        "tableName": "tag_group_rules",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER NOT NULL, `pattern` TEXT NOT NULL, `groupName` TEXT NOT NULL, `order` INTEGER NOT NULL, PRIMARY KEY(`id`))",
-        "fields": [
-          {
-            "fieldPath": "id",
-            "columnName": "id",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "pattern",
-            "columnName": "pattern",
-            "affinity": "TEXT",
-            "notNull": true
-          },
-          {
-            "fieldPath": "groupName",
-            "columnName": "groupName",
-            "affinity": "TEXT",
-            "notNull": true
-          },
-          {
-            "fieldPath": "order",
-            "columnName": "order",
-            "affinity": "INTEGER",
-            "notNull": true
-          }
-        ],
-        "primaryKey": {
-          "autoGenerate": false,
-          "columnNames": [
-            "id"
-          ]
-        }
-      },
-      {
         "tableName": "book_content_processes",
         "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `bookUrl` TEXT NOT NULL, `chapterIndex` INTEGER, `kind` TEXT NOT NULL, `stage` TEXT NOT NULL, `target` TEXT NOT NULL, `anchorJson` TEXT NOT NULL, `actionJson` TEXT NOT NULL, `styleJson` TEXT, `source` TEXT NOT NULL, `aiArtifactId` TEXT, `sourceContentHash` TEXT, `enabled` INTEGER NOT NULL, `sortOrder` INTEGER NOT NULL, `status` INTEGER NOT NULL, `schemaVersion` INTEGER NOT NULL, `createdAt` INTEGER NOT NULL, `updatedAt` INTEGER NOT NULL, PRIMARY KEY(`id`))",
         "fields": [
@@ -4013,7 +3977,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '543639607b91aa6f75bf8c9fb63b43d7')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '02c436d6d6c0d33420f3849477f8c65e')"
     ]
   }
 }

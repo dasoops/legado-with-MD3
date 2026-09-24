@@ -26,7 +26,6 @@ import io.legado.app.data.entities.ReplaceRule
 import io.legado.app.data.entities.RuleSub
 import io.legado.app.data.entities.SearchKeyword
 import io.legado.app.data.entities.Server
-import io.legado.app.data.entities.TagGroupRule
 import io.legado.app.data.entities.TxtTocRule
 import io.legado.app.data.entities.readRecord.ReadRecord
 import io.legado.app.data.entities.readRecord.ReadRecordDetail
@@ -234,11 +233,6 @@ object Restore : KoinComponent {
         if (BackupConfig.dbIsNotIgnored("highlightTagRule")) {
             fileToListT<HighlightTagRule>(path, "highlightTagRule.json")?.let {
                 appDb.highlightTagRuleDao.replaceAll(it)
-            }
-        }
-        if (BackupConfig.dbIsNotIgnored("tagGroupRule")) {
-            fileToListT<TagGroupRule>(path, "tagGroupRule.json")?.let {
-                appDb.tagGroupRuleDao.replaceAll(it)
             }
         }
         if (BackupConfig.dbIsNotIgnored("readRecord")) {

@@ -4,13 +4,10 @@ import android.app.Application
 import androidx.lifecycle.viewModelScope
 import io.legado.app.base.BaseViewModel
 import io.legado.app.data.entities.BookGroup
-import io.legado.app.data.entities.TagGroupRule
 import io.legado.app.data.repository.BookGroupRepository
-import io.legado.app.data.repository.TagGroupRuleRepository
 import io.legado.app.domain.gateway.BookGroupMutationGateway
 import io.legado.app.domain.model.BookGroupUpdate
 import io.legado.app.domain.model.NewBookGroup
-import io.legado.app.domain.model.TagGroupRuleUpdate
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.launch
@@ -20,8 +17,6 @@ class GroupViewModel(
     private val bookGroupRepository: BookGroupRepository,
     private val bookGroupMutationGateway: BookGroupMutationGateway,
 ) : BaseViewModel(application) {
-
-    private val tagGroupRuleRepository = TagGroupRuleRepository()
 
     fun upGroup(vararg bookGroup: BookGroup, finally: (() -> Unit)? = null) {
         execute {
@@ -37,7 +32,6 @@ class GroupViewModel(
         enableRefresh: Boolean,
         isPrivate: Boolean,
         cover: String?,
-        pattern: String? = null,
         localDirectoryUri: String? = null,
         isTag: Boolean = false,
         onError: ((Throwable) -> Unit)? = null,
@@ -52,7 +46,6 @@ class GroupViewModel(
                         enableRefresh = enableRefresh,
                         isPrivate = isPrivate,
                         cover = cover,
-                        pattern = pattern,
                         localDirectoryUri = localDirectoryUri,
                         isTag = isTag,
                     )
@@ -67,8 +60,6 @@ class GroupViewModel(
 
     fun saveGroup(
         bookGroup: BookGroup,
-        ruleToSave: TagGroupRule?,
-        ruleToDelete: TagGroupRule?,
         onSuccess: () -> Unit,
         onError: (Throwable) -> Unit
     ) {
@@ -76,8 +67,6 @@ class GroupViewModel(
             try {
                 bookGroupMutationGateway.saveGroup(
                     bookGroup = bookGroup.toUpdate(),
-                    ruleToSave = ruleToSave?.toUpdate(),
-                    ruleIdToDelete = ruleToDelete?.id,
                 )
                 onSuccess()
             } catch (error: Throwable) {
@@ -103,26 +92,6 @@ class GroupViewModel(
         }
     }
 
-    suspend fun getTagGroupRule(groupName: String): TagGroupRule? {
-        return tagGroupRuleRepository.getByGroupName(groupName)
-    }
-
-    fun saveTagGroupRule(rule: TagGroupRule, finally: (() -> Unit)? = null) {
-        execute {
-            bookGroupMutationGateway.saveTagGroupRule(rule.toUpdate())
-        }.onFinally {
-            finally?.invoke()
-        }
-    }
-
-    fun deleteTagGroupRule(rule: TagGroupRule, finally: (() -> Unit)? = null) {
-        execute {
-            bookGroupMutationGateway.deleteTagGroupRule(rule.id)
-        }.onFinally {
-            finally?.invoke()
-        }
-    }
-
     private fun BookGroup.toUpdate() = BookGroupUpdate(
         groupId = groupId,
         groupName = groupName,
@@ -133,13 +102,6 @@ class GroupViewModel(
         bookSort = bookSort,
         isPrivate = isPrivate,
         localDirectoryUri = localDirectoryUri,
-    )
-
-    private fun TagGroupRule.toUpdate() = TagGroupRuleUpdate(
-        id = id,
-        pattern = pattern,
-        groupName = groupName,
-        order = order,
     )
 
 }

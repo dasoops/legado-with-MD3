@@ -55,7 +55,6 @@ import io.legado.app.data.repository.SearchContentRepository
 import io.legado.app.data.repository.SearchRepository
 import io.legado.app.data.repository.SearchRepositoryImpl
 import io.legado.app.data.repository.SettingsRepository
-import io.legado.app.data.repository.TagGroupRuleApplier
 import io.legado.app.data.repository.ThemePackageSettingsRepository
 import io.legado.app.data.repository.ThemeSettingsRepository
 import io.legado.app.data.repository.TxtTocRuleRepository
@@ -157,7 +156,6 @@ import io.legado.app.ui.main.home.HomeViewModel
 import io.legado.app.ui.replace.ReplaceEditRoute
 import io.legado.app.ui.replace.ReplaceRuleViewModel
 import io.legado.app.ui.replace.edit.ReplaceEditViewModel
-import io.legado.app.ui.tagGroupRule.TagGroupRuleViewModel
 import io.legado.app.utils.isNightMode
 import io.legado.app.utils.sysConfiguration
 import kotlinx.coroutines.Dispatchers
@@ -184,8 +182,7 @@ val appModule = module {
     singleOf(::BookGroupRepository)
     singleOf(::BookSourceRepository)
     singleOf(::BookmarkRepository)
-    singleOf(::TagGroupRuleApplier)
-    single<BookGroupMutationGateway> { BookGroupMutationRepository(get(), get()) }
+    single<BookGroupMutationGateway> { BookGroupMutationRepository(get()) }
     singleOf(::BookshelfRepository)
     singleOf(::TxtTocRuleRepository)
     single {
@@ -291,7 +288,6 @@ val appModule = module {
     viewModelOf(::ImportReplaceRuleViewModel)
     viewModelOf(::ImportTxtTocRuleViewModel)
     viewModelOf(::HighlightTagRuleViewModel)
-    viewModelOf(::TagGroupRuleViewModel)
     viewModelOf(::ReadRecordViewModel)
     viewModelOf(::ReadRecordOverviewViewModel)
     viewModelOf(::BookshelfViewModel)

@@ -1511,7 +1511,6 @@
     <string name="import_status_existing">已存在</string>
     <string name="import_status_new">新增</string>
     <string name="import_status_update">更新</string>
-    <string name="import_tag_group_rule">匯入標籤分組規則</string>
     <string name="input">輸入</string>
     <string name="input_regex_or_keyword">輸入正則或關鍵字</string>
     <string name="input_regex_pattern">輸入正則表達式</string>
@@ -1797,16 +1796,6 @@
     <string name="system_media_control_compatibility_change_summary">若鎖定螢幕缺少系統媒體控制項時啟用（例如 OneUI 7.0、OriginOS）</string>
     <string name="tabletInterface">平板介面</string>
     <string name="tag">標籤</string>
-    <string name="tag_group_add_rule">新建標籤分組</string>
-    <string name="tag_group_edit_rule">編輯分組規則</string>
-    <string name="tag_group_empty_hint">未設定標籤分組規則。添加規則以自動按分類標籤分組書籍。</string>
-    <string name="tag_group_name">分組名稱</string>
-    <string name="tag_group_pattern">正則表達式（匹配分類標籤）</string>
-    <string name="tag_group_rules">標籤分組規則</string>
-    <string name="tag_group_sync">同步標籤分組</string>
-    <string name="tag_group_sync_complete">分組同步完成</string>
-    <string name="tag_group_tab_group">分組</string>
-    <string name="tag_group_tab_highlight">高亮</string>
     <string name="target_all">全部</string>
     <string name="target_body">僅正文</string>
     <string name="target_scope">作用範圍</string>

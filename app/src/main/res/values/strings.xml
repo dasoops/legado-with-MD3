@@ -1900,19 +1900,6 @@
     <string name="highlight_tag_test_no_match">No match</string>
     <string name="highlight_tag_test_error">Error: %1$s</string>
 
-    <!-- Tag Group Rules -->
-    <string name="tag_group_tab_highlight">Highlight</string>
-    <string name="tag_group_tab_group">Group</string>
-    <string name="tag_group_add_rule">New Tag Group</string>
-    <string name="tag_group_edit_rule">Edit Group Rule</string>
-    <string name="tag_group_name">Group Name</string>
-    <string name="tag_group_pattern">Pattern (matches kind tags)</string>
-    <string name="tag_group_empty_hint">No tag group rules configured. Add rules to auto-group books by their kind tags.</string>
-    <string name="tag_group_sync">Sync Tag Groups</string>
-    <string name="tag_group_rules">Tag Group Rules</string>
-    <string name="tag_group_sync_complete">Group sync complete</string>
-    <string name="import_tag_group_rule">Import Tag Group Rules</string>
-
     <!-- Compose UI extracted strings -->
     <string name="edit_replace_rule">Edit Replace Rule</string>
     <string name="more_actions">More Actions</string>

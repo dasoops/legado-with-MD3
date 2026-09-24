@@ -37,7 +37,6 @@ import io.legado.app.data.dao.SearchBookDao
 import io.legado.app.data.dao.SearchContentHistoryDao
 import io.legado.app.data.dao.SearchKeywordDao
 import io.legado.app.data.dao.ServerDao
-import io.legado.app.data.dao.TagGroupRuleDao
 import io.legado.app.data.dao.TxtTocRuleDao
 import io.legado.app.data.entities.AiArtifact
 import io.legado.app.data.entities.AiChatConversation
@@ -78,7 +77,6 @@ import io.legado.app.data.entities.SearchBook
 import io.legado.app.data.entities.SearchContentHistory
 import io.legado.app.data.entities.SearchKeyword
 import io.legado.app.data.entities.Server
-import io.legado.app.data.entities.TagGroupRule
 import io.legado.app.data.entities.TxtTocRule
 import io.legado.app.data.entities.readRecord.ReadRecord
 import io.legado.app.data.entities.readRecord.ReadRecordDetail
@@ -98,7 +96,7 @@ val appDb by lazy {
 }
 
 @Database(
-    version = 108,
+    version = 109,
     exportSchema = true,
     entities = [Book::class, BookGroup::class, BookSource::class, BookChapter::class,
         ReplaceRule::class, SearchBook::class, SearchKeyword::class, Cookie::class,
@@ -108,7 +106,7 @@ val appDb by lazy {
         SearchContentHistory::class, HomepageModule::class, HomepageCustomSet::class,
         HighlightRule::class, AiProviderProfile::class, AiModelProfile::class,
         AiTaskPreset::class, AiArtifact::class, AiChatConversation::class,
-        AiChatMessage::class, AiMemory::class, HighlightTagRule::class, TagGroupRule::class,
+        AiChatMessage::class, AiMemory::class, HighlightTagRule::class,
         BookContentProcess::class, AiPromptPreset::class, BookCharacterProfile::class,
         BookCharacterEvent::class, BookCharacterRelation::class, BookKnowledgeEntry::class,
         BookOutlineNode::class, ReadAloudVoiceEntity::class, BookVoiceBindingEntity::class,
@@ -179,7 +177,8 @@ val appDb by lazy {
         AutoMigration(from = 103, to = 104),
         AutoMigration(from = 104, to = 105),
         AutoMigration(from = 106, to = 107, spec = DatabaseMigrations.Migration_106_107::class),
-        AutoMigration(from = 107, to = 108, spec = DatabaseMigrations.Migration_107_108::class)
+        AutoMigration(from = 107, to = 108, spec = DatabaseMigrations.Migration_107_108::class),
+        AutoMigration(from = 108, to = 109, spec = DatabaseMigrations.Migration_108_109::class)
     ]
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -210,7 +209,6 @@ abstract class AppDatabase : RoomDatabase() {
     abstract val homepageCustomSetDao: HomepageCustomSetDao
     abstract val highlightRuleDao: HighlightRuleDao
     abstract val highlightTagRuleDao: HighlightTagRuleDao
-    abstract val tagGroupRuleDao: TagGroupRuleDao
     abstract val aiProfileDao: AiProfileDao
     abstract val aiArtifactDao: AiArtifactDao
     abstract val aiChatDao: AiChatDao

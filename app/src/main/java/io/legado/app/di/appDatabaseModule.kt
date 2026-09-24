@@ -31,7 +31,6 @@ import io.legado.app.data.dao.RuleSubDao
 import io.legado.app.data.dao.SearchBookDao
 import io.legado.app.data.dao.SearchKeywordDao
 import io.legado.app.data.dao.ServerDao
-import io.legado.app.data.dao.TagGroupRuleDao
 import io.legado.app.data.dao.TxtTocRuleDao
 import org.koin.dsl.module
 
@@ -75,5 +74,4 @@ val appDatabaseModule = module {
     factory<HomepageCustomSetDao> { get<AppDatabase>().homepageCustomSetDao }
     factory<HighlightRuleDao> { get<AppDatabase>().highlightRuleDao }
     factory<HighlightTagRuleDao> { get<AppDatabase>().highlightTagRuleDao }
-    factory<TagGroupRuleDao> { get<AppDatabase>().tagGroupRuleDao }
 }

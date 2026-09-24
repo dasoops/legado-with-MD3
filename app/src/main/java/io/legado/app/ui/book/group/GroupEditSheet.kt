@@ -269,8 +269,6 @@ fun GroupEditContent(
                                 isPrivate = isPrivate,
                                 localDirectoryUri = localDirectoryUri
                             ),
-                            ruleToSave = null,
-                            ruleToDelete = null,
                             onSuccess = onDismissRequest,
                             onError = { error ->
                                 isSaving = false
@@ -284,7 +282,6 @@ fun GroupEditContent(
                             enableRefresh = true,
                             isPrivate,
                             coverPath,
-                            pattern = null,
                             isTag = isTag,
                             onError = { error ->
                                 isSaving = false

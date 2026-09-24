@@ -5,7 +5,8 @@ import androidx.room.Room
 import io.legado.app.data.AppDatabase
 import io.legado.app.data.entities.Book
 import io.legado.app.data.entities.BookGroup
-import io.legado.app.data.entities.TagGroupRule
+import io.legado.app.domain.model.BookGroupUpdate
+import io.legado.app.domain.model.BookTags
 import io.legado.app.domain.model.NewBookGroup
 import kotlinx.coroutines.runBlocking
 import org.junit.After
@@ -31,10 +32,7 @@ class BookGroupMutationRepositoryTest {
             RuntimeEnvironment.getApplication(),
             AppDatabase::class.java,
         ).allowMainThreadQueries().build()
-        repository = BookGroupMutationRepository(
-            database = database,
-            tagGroupRuleApplier = TagGroupRuleApplier(database),
-        )
+        repository = BookGroupMutationRepository(database)
     }
 
     @After
@@ -43,18 +41,89 @@ class BookGroupMutationRepositoryTest {
     }
 
     @Test
-    fun `应用规则失败时回滚分组和规则写入`() = runBlocking {
+    fun `新增分组后分组落库`() = runBlocking {
+        repository.addGroup(
+            NewBookGroup(
+                groupName = "Fantasy",
+                bookSort = -1,
+                enableRefresh = true,
+                isPrivate = false,
+                cover = null,
+            )
+        )
+
+        val group = database.bookGroupDao.all.single()
+        assertEquals("Fantasy", group.groupName)
+        assertEquals(1L, group.groupId)
+    }
+
+    @Test
+    fun `新增标签分组使用标签分组位`() = runBlocking {
+        repository.addGroup(
+            NewBookGroup(
+                groupName = "Shared",
+                bookSort = -1,
+                enableRefresh = true,
+                isPrivate = false,
+                cover = null,
+                isTag = true,
+            )
+        )
+
+        assertEquals(BookTags.groupId("Shared"), database.bookGroupDao.all.single().groupId)
+    }
+
+    @Test
+    fun `保存分组更新分组信息`() = runBlocking {
+        database.bookGroupDao.insert(BookGroup(groupId = 1L, groupName = "Fantasy"))
+
+        repository.saveGroup(
+            BookGroupUpdate(
+                groupId = 1L,
+                groupName = "Renamed",
+                cover = "cover.png",
+                order = 5,
+                enableRefresh = false,
+                show = false,
+                bookSort = 2,
+                isPrivate = true,
+            )
+        )
+
+        val group = database.bookGroupDao.getByID(1L)!!
+        assertEquals("Renamed", group.groupName)
+        assertEquals("cover.png", group.cover)
+        assertEquals(5, group.order)
+        assertEquals(false, group.enableRefresh)
+        assertEquals(false, group.show)
+        assertEquals(2, group.bookSort)
+        assertEquals(true, group.isPrivate)
+    }
+
+    @Test
+    fun `删除分组时清除书籍分组位`() = runBlocking {
+        val group = BookGroup(groupId = 1L, groupName = "Fantasy")
         val book = Book(
             bookUrl = "book-1",
             name = "Book",
             author = "Author",
-            kind = "fantasy",
+            group = group.groupId,
         )
+        database.bookGroupDao.insert(group)
         database.bookDao.insert(book)
+
+        repository.deleteGroup(group.groupId)
+
+        assertTrue(database.bookGroupDao.all.isEmpty())
+        assertEquals(0L, database.bookDao.getBook(book.bookUrl)?.group)
+    }
+
+    @Test
+    fun `新增分组写入失败时回滚`() = runBlocking {
         database.openHelper.writableDatabase.execSQL(
             """
-            CREATE TRIGGER fail_book_update
-            BEFORE UPDATE ON books
+            CREATE TRIGGER fail_group_insert
+            BEFORE INSERT ON book_groups
             BEGIN
                 SELECT RAISE(ABORT, 'forced failure');
             END
@@ -69,129 +138,11 @@ class BookGroupMutationRepositoryTest {
                     enableRefresh = true,
                     isPrivate = false,
                     cover = null,
-                    pattern = "fantasy",
                 )
             )
         }
 
         assertTrue(result.isFailure)
         assertTrue(database.bookGroupDao.all.isEmpty())
-        assertTrue(database.tagGroupRuleDao.getAll().isEmpty())
-        assertEquals(0L, database.bookDao.getBook(book.bookUrl)?.group)
-    }
-
-    @Test
-    fun `删除规则后保留已有分组成员`() = runBlocking {
-        val group = BookGroup(groupId = 1L, groupName = "Fantasy")
-        val rule = TagGroupRule(id = 1L, groupName = group.groupName, pattern = "fantasy")
-        val book = Book(
-            bookUrl = "book-1",
-            name = "Book",
-            author = "Author",
-            kind = "fantasy",
-            group = group.groupId,
-        )
-        database.bookGroupDao.insert(group)
-        database.tagGroupRuleDao.insert(rule)
-        database.bookDao.insert(book)
-
-        repository.deleteTagGroupRule(rule.id)
-
-        assertTrue(database.tagGroupRuleDao.getAll().isEmpty())
-        assertEquals(group.groupId, database.bookDao.getBook(book.bookUrl)?.group)
-    }
-
-    @Test
-    fun `删除分组时同时删除匹配规则和书籍分组位`() = runBlocking {
-        val group = BookGroup(groupId = 1L, groupName = "Fantasy")
-        val rule = TagGroupRule(id = 1L, groupName = group.groupName, pattern = "fantasy")
-        val book = Book(
-            bookUrl = "book-1",
-            name = "Book",
-            author = "Author",
-            kind = "fantasy",
-            group = group.groupId,
-        )
-        database.bookGroupDao.insert(group)
-        database.tagGroupRuleDao.insert(rule)
-        database.bookDao.insert(book)
-
-        repository.deleteGroup(group.groupId)
-
-        assertTrue(database.bookGroupDao.all.isEmpty())
-        assertTrue(database.tagGroupRuleDao.getAll().isEmpty())
-        assertEquals(0L, database.bookDao.getBook(book.bookUrl)?.group)
-    }
-
-    @Test
-    fun `标签规则只添加新匹配分组而不清除旧分组`() = runBlocking {
-        val fantasy = BookGroup(groupId = 1L, groupName = "Fantasy")
-        val adventure = BookGroup(groupId = 2L, groupName = "Adventure")
-        val book = Book(
-            bookUrl = "book-1",
-            name = "Book",
-            author = "Author",
-            kind = "adventure",
-            group = fantasy.groupId,
-        )
-        database.bookGroupDao.insert(fantasy, adventure)
-        database.tagGroupRuleDao.insert(
-            TagGroupRule(id = 1L, groupName = fantasy.groupName, pattern = "fantasy"),
-            TagGroupRule(id = 2L, groupName = adventure.groupName, pattern = "adventure"),
-        )
-        database.bookDao.insert(book)
-
-        TagGroupRuleApplier(database).applyInCurrentTransaction()
-
-        assertEquals(
-            fantasy.groupId or adventure.groupId,
-            database.bookDao.getBook(book.bookUrl)?.group,
-        )
-    }
-
-    @Test
-    fun `新增带规则分组后立即更新匹配书籍`() = runBlocking {
-        val book = Book(
-            bookUrl = "book-1",
-            name = "Book",
-            author = "Author",
-            kind = "fantasy",
-        )
-        database.bookDao.insert(book)
-
-        repository.addGroup(
-            NewBookGroup(
-                groupName = "Fantasy",
-                bookSort = -1,
-                enableRefresh = true,
-                isPrivate = false,
-                cover = null,
-                pattern = "fantasy",
-            )
-        )
-
-        val group = database.bookGroupDao.all.single()
-        assertEquals(group.groupId, database.bookDao.getBook(book.bookUrl)?.group)
-        assertEquals(group.groupName, database.tagGroupRuleDao.getAll().single().groupName)
-    }
-
-    @Test
-    fun `非法正则不会产生数据库写入`() = runBlocking {
-        val result = runCatching {
-            repository.addGroup(
-                NewBookGroup(
-                    groupName = "Broken",
-                    bookSort = -1,
-                    enableRefresh = true,
-                    isPrivate = false,
-                    cover = null,
-                    pattern = "[",
-                )
-            )
-        }
-
-        assertTrue(result.isFailure)
-        assertTrue(database.bookGroupDao.all.isEmpty())
-        assertTrue(database.tagGroupRuleDao.getAll().isEmpty())
     }
 }
