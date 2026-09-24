@@ -32,6 +32,7 @@ import io.legado.app.domain.usecase.RelocateMarkingTargetUseCase
 import io.legado.app.domain.usecase.SaveBookContentProcessUseCase
 import io.legado.app.domain.usecase.SaveMarkingUseCase
 import io.legado.app.domain.usecase.VerifyBookmarkTargetUseCase
+import io.legado.app.domain.usecase.WebDavBackupUseCase
 import io.legado.app.exception.NoStackTraceException
 import io.legado.app.feature.reader.core.navigation.ReaderChapterPagePosition
 import io.legado.app.feature.reader.core.navigation.ReaderPageContext
@@ -91,6 +92,7 @@ class ReadBookViewModel(
     private val saveMarkingUseCase: SaveMarkingUseCase,
     private val verifyBookmarkTargetUseCase: VerifyBookmarkTargetUseCase,
     private val relocateMarkingTargetUseCase: RelocateMarkingTargetUseCase,
+    private val webDavBackupUseCase: WebDavBackupUseCase,
     private val bookContentProcessGateway: BookContentProcessGateway,
     private val replaceRuleRepository: ReplaceRuleRepository,
     private val appShellSettingsGateway: AppShellSettingsGateway,
@@ -466,6 +468,9 @@ class ReadBookViewModel(
         collectReaderSession()
         collectReadStyle()
         replaceRuleDelegate.start()
+        viewModelScope.launch {
+            webDavBackupUseCase.refreshConfig()
+        }
     }
 
     /** Starts non-renderer features only after navigation/shared-bounds animation is idle. */

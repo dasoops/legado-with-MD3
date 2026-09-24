@@ -357,6 +357,7 @@ val appModule = module {
             saveMarkingUseCase = get(),
             verifyBookmarkTargetUseCase = get(),
             relocateMarkingTargetUseCase = get(),
+            webDavBackupUseCase = get(),
             bookContentProcessGateway = get(),
             replaceRuleRepository = get(),
             appShellSettingsGateway = get(),
