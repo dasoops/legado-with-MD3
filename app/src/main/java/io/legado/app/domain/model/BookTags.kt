@@ -4,8 +4,8 @@ object BookTags {
     const val READ = "已读"
     const val UNREAD = "未读"
     val builtIn = setOf(READ, UNREAD)
-    // 格式标签需要始终提供对应的内置分组, 但仍属于书籍可见标签.
-    val builtInGroupTags = builtIn + setOf("txt", "epub", "umd", "pdf", "mobi")
+    // 只有格式标签始终提供分组: 未读/已读随书籍阅读状态实时生成, 无对应书籍时不应残留分组.
+    val builtInGroupTags = setOf("txt", "epub", "umd", "pdf", "mobi")
 
     fun parse(value: String?): List<String> = value.orEmpty().split(',', '\n')
         .map(String::trim).filter(String::isNotEmpty).distinct()
