@@ -17,6 +17,8 @@ concurrency:
 jobs:
   verify:
     runs-on: ubuntu-latest
+    # 单测若出现挂起, 不设上限会一直占用到 GitHub 默认 6 小时; 正常全流程约 10 分钟.
+    timeout-minutes: 40
     steps:
       - name: Checkout
         uses: actions/checkout@v5
