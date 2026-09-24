@@ -131,7 +131,7 @@ internal fun FloatingIconRow(
 }
 
 @Composable
-private fun OverflowDropdownMenu(
+internal fun OverflowDropdownMenu(
     state: ReadBookUiState,
     onIntent: (ReadBookIntent) -> Unit,
     expanded: Boolean,
@@ -152,49 +152,20 @@ private fun OverflowDropdownMenu(
     ) { dismiss ->
         var imageStyleExpanded by remember { mutableStateOf(false) }
 
-        // Compact mode: moved from top bar buttons
-        if (state.menuConfig.titleBarCompact) {
-            if (state.isLocalBook) {
-                if (state.isLocalTxt) {
-                    RoundDropdownMenuItem(
-                        text = stringResource(R.string.txt_toc_rule),
-                        leadingIcon = menuIcon(Icons.AutoMirrored.Filled.Toc),
-                        onClick = { dismiss(); onIntent(ReadBookIntent.MenuTocRegex) },
-                    )
-                }
-                RoundDropdownMenuItem(
-                    text = stringResource(R.string.set_charset),
-                    leadingIcon = menuIcon(Icons.Default.Translate),
-                    onClick = { dismiss(); onIntent(ReadBookIntent.ShowSheet(ReadBookSheet.Charset)) },
-                )
-            }
-            PillDivider()
+        if (state.isLocalBook) {
+            RoundDropdownMenuItem(
+                text = stringResource(R.string.set_charset),
+                leadingIcon = menuIcon(Icons.Default.Translate),
+                onClick = { dismiss(); onIntent(ReadBookIntent.ShowSheet(ReadBookSheet.Charset)) },
+            )
         }
-
-        // 内容处理
         RoundDropdownMenuItem(
             text = stringResource(R.string.bookmark_add),
             leadingIcon = menuIcon(Icons.Default.Bookmark),
             onClick = { dismiss(); onIntent(ReadBookIntent.AddBookmark) },
         )
-        RoundDropdownMenuItem(
-            text = stringResource(R.string.re_segment),
-            leadingIcon = menuIcon(Icons.AutoMirrored.Filled.Toc),
-            isSelected = state.reSegment,
-            onClick = { onIntent(ReadBookIntent.MenuReSegment) },
-        )
-        if (state.isEpub) {
-            RoundDropdownMenuItem(
-                text = stringResource(R.string.del_ruby_tag),
-                leadingIcon = menuIcon(Icons.Default.CleanHands),
-                isSelected = state.delRubyTag,
-                onClick = { onIntent(ReadBookIntent.MenuDelRubyTag) },
-            )
-        }
 
-        PillDivider()
-
-        // 阅读设置
+        // 图片样式需要紧跟书签，保持常用的阅读操作集中在第一组。
         Box {
             RoundDropdownMenuItem(
                 text = stringResource(R.string.image_style),
@@ -221,9 +192,24 @@ private fun OverflowDropdownMenu(
                 }
             }
         }
+
+        RoundDropdownMenuItem(
+            text = stringResource(R.string.re_segment),
+            leadingIcon = menuIcon(Icons.AutoMirrored.Filled.Toc),
+            isSelected = state.reSegment,
+            onClick = { onIntent(ReadBookIntent.MenuReSegment) },
+        )
+        if (state.isEpub) {
+            RoundDropdownMenuItem(
+                text = stringResource(R.string.del_ruby_tag),
+                leadingIcon = menuIcon(Icons.Default.CleanHands),
+                isSelected = state.delRubyTag,
+                onClick = { onIntent(ReadBookIntent.MenuDelRubyTag) },
+            )
+        }
+
         PillDivider()
 
-        // 进度同步
         if (state.isReadingProgressSyncConfigured) {
             RoundDropdownMenuItem(
                 text = stringResource(R.string.get_book_progress),
@@ -238,21 +224,20 @@ private fun OverflowDropdownMenu(
             PillDivider()
         }
 
-        // 其他
-        RoundDropdownMenuItem(
-            text = stringResource(R.string.config_btn),
-            leadingIcon = menuIcon(Icons.Default.Extension),
-            onClick = {
-                dismiss()
-                onIntent(ReadBookIntent.ShowSheet(ReadBookSheet.ToolButtonConfig))
-            },
-        )
         RoundDropdownMenuItem(
             text = stringResource(R.string.log),
             leadingIcon = menuIcon(Icons.Default.BugReport),
             onClick = {
                 dismiss()
                 onIntent(ReadBookIntent.ShowSheet(ReadBookSheet.AppLog))
+            },
+        )
+        RoundDropdownMenuItem(
+            text = stringResource(R.string.config_btn),
+            leadingIcon = menuIcon(Icons.Default.Extension),
+            onClick = {
+                dismiss()
+                onIntent(ReadBookIntent.ShowSheet(ReadBookSheet.ToolButtonConfig))
             },
         )
     }

@@ -113,6 +113,7 @@ internal fun MenuTitleBar(
         shadow = menuTextShadow
     )
     val useTitleCapsule = state.menuConfig.readMenuTopBarTitleCapsule
+    var overflowMenuExpanded by remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier
@@ -230,6 +231,9 @@ internal fun MenuTitleBar(
                         backdrop,
                         state.menuConfig
                     ),
+                    onMoreClick = { overflowMenuExpanded = true },
+                    overflowMenuExpanded = overflowMenuExpanded,
+                    onOverflowMenuDismiss = { overflowMenuExpanded = false },
                 )
             } else {
                 val compact = state.menuConfig.titleBarCompact
@@ -254,16 +258,22 @@ internal fun MenuTitleBar(
                         )
                     }
 
-                    MenuTitleGlassButton(
-                        onClick = {
-                            onIntent(ReadBookIntent.ShowSheet(ReadBookSheet.MoreActions))
-                        },
-                        icon = Icons.Default.MoreVert,
-                        contentDescription = stringResource(R.string.more_actions),
-                        state = state,
-                        colors = colors,
-                        backdrop = backdrop,
-                    )
+                    Box {
+                        MenuTitleGlassButton(
+                            onClick = { overflowMenuExpanded = true },
+                            icon = Icons.Default.MoreVert,
+                            contentDescription = stringResource(R.string.more_actions),
+                            state = state,
+                            colors = colors,
+                            backdrop = backdrop,
+                        )
+                        OverflowDropdownMenu(
+                            state = state,
+                            onIntent = onIntent,
+                            expanded = overflowMenuExpanded,
+                            onDismiss = { overflowMenuExpanded = false },
+                        )
+                    }
                 }
             }
         }
@@ -667,6 +677,9 @@ private fun MenuTitleBarMergedGlassButton(
     onIntent: (ReadBookIntent) -> Unit,
     backdrop: Backdrop?,
     glassEnabled: Boolean,
+    onMoreClick: () -> Unit,
+    overflowMenuExpanded: Boolean,
+    onOverflowMenuDismiss: () -> Unit,
 ) {
     val pillShape = RoundedCornerShape(50)
     val tint = LegadoTheme.colorScheme.onSurfaceVariant
@@ -747,9 +760,16 @@ private fun MenuTitleBarMergedGlassButton(
                 icon = AppIcons.MoreVert,
                 tint = tint,
                 contentDescription = stringResource(R.string.more_actions),
-                onClick = { onIntent(ReadBookIntent.ShowSheet(ReadBookSheet.MoreActions)) },
+                onClick = onMoreClick,
             )
         }
+
+        OverflowDropdownMenu(
+            state = state,
+            onIntent = onIntent,
+            expanded = overflowMenuExpanded,
+            onDismiss = onOverflowMenuDismiss,
+        )
 
     }
 }
