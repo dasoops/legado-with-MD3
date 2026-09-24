@@ -24,6 +24,7 @@ import io.legado.app.data.repository.ReplaceRuleRepository
 import io.legado.app.data.repository.SettingsRepository
 import io.legado.app.domain.gateway.AppShellSettingsGateway
 import io.legado.app.domain.gateway.AppUiConfigurationGateway
+import io.legado.app.domain.gateway.BackupSettingsGateway
 import io.legado.app.domain.gateway.BookContentProcessGateway
 import io.legado.app.domain.gateway.OtherSettingsGateway
 import io.legado.app.domain.gateway.ReadStyleGateway
@@ -97,6 +98,7 @@ class ReadBookViewModel(
     private val replaceRuleRepository: ReplaceRuleRepository,
     private val appShellSettingsGateway: AppShellSettingsGateway,
     private val appUiConfigurationGateway: AppUiConfigurationGateway,
+    private val backupSettingsGateway: BackupSettingsGateway,
     private val otherSettingsGateway: OtherSettingsGateway,
     private val themeSettingsGateway: ThemeSettingsGateway,
     private val bookSourceRepository: BookSourceRepository,
@@ -321,6 +323,8 @@ class ReadBookViewModel(
     private val loadDelegate: ReadBookLoadDelegate = ReadBookLoadDelegate(
         context = context,
         scope = viewModelScope,
+        backupSettingsGateway = backupSettingsGateway,
+        webDavBackupUseCase = webDavBackupUseCase,
         host = object : ReadBookLoadDelegate.Host {
             override var justInitData: Boolean
                 get() = this@ReadBookViewModel.justInitData
@@ -470,6 +474,9 @@ class ReadBookViewModel(
         replaceRuleDelegate.start()
         viewModelScope.launch {
             webDavBackupUseCase.refreshConfig()
+            _uiState.update {
+                it.copy(isReadingProgressSyncConfigured = webDavBackupUseCase.isConfigured)
+            }
         }
     }
 
@@ -869,8 +876,12 @@ class ReadBookViewModel(
             }
 
             is ReadBookIntent.MenuCoverProgress -> {
-                ReadBook.book?.let {
-                    Unit
+                ReadBook.book?.let { book ->
+                    loadDelegate.uploadBookProgress(book) {
+                        _effects.tryEmit(
+                            ReadBookEffect.ShowToast(context.getString(R.string.upload_book_success))
+                        )
+                    }
                 }
             }
 
@@ -901,7 +912,7 @@ class ReadBookViewModel(
 
             is ReadBookIntent.MenuGetProgress -> {
                 ReadBook.book?.let { book ->
-                    _effects.tryEmit(ReadBookEffect.SyncBookProgress(book))
+                    loadDelegate.getBookProgress(book)
                 }
             }
 
@@ -1294,6 +1305,13 @@ class ReadBookViewModel(
         _effects.tryEmit(ReadBookEffect.UnregisterNetworkListener)
 
         if (!BuildConfig.DEBUG) {
+            ReadBook.book?.let { book ->
+                if (backupSettingsGateway.currentSettings.syncBookProgressPlus) {
+                    loadDelegate.syncBookProgressOnNetwork(book)
+                } else {
+                    loadDelegate.uploadBookProgress(book)
+                }
+            }
             _effects.tryEmit(ReadBookEffect.BackupNow)
         }
         justInitData = false
@@ -1312,6 +1330,7 @@ class ReadBookViewModel(
         backupJob = viewModelScope.launch(IO) {
             delay(5 * 60 * 1000) // 5 minutes
             ReadBook.book?.let { book ->
+                loadDelegate.uploadBookProgress(book)
                 coroutineContext.ensureActive()
                 _effects.tryEmit(ReadBookEffect.BackupNow)
             }
@@ -1706,7 +1725,13 @@ class ReadBookViewModel(
         justInitData = true
     }
 
-    fun isReadingProgressSyncConfigured(): Boolean = false
+    fun isReadingProgressSyncConfigured(): Boolean = webDavBackupUseCase.isConfigured
+
+    fun onNetworkChanged() {
+        if (backupSettingsGateway.currentSettings.syncBookProgressPlus && !justInitData) {
+            ReadBook.book?.let(loadDelegate::syncBookProgressOnNetwork)
+        }
+    }
 
 
     fun openChapter(index: Int, durChapterPos: Int = 0, success: (() -> Unit)? = null) {

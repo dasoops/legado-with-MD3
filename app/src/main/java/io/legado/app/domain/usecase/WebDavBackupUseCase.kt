@@ -1,11 +1,16 @@
 package io.legado.app.domain.usecase
 
+import io.legado.app.data.entities.Book
+import io.legado.app.data.entities.BookProgress
 import io.legado.app.domain.gateway.WebDavBackupGateway
 import io.legado.app.domain.model.WebDavBackup
 
 class WebDavBackupUseCase(
     private val webDavBackupGateway: WebDavBackupGateway
 ) {
+
+    val isConfigured: Boolean
+        get() = webDavBackupGateway.isConfigured
 
     val isJianGuoYun: Boolean
         get() = webDavBackupGateway.isJianGuoYun
@@ -37,5 +42,15 @@ class WebDavBackupUseCase(
     suspend fun restore(name: String) {
         webDavBackupGateway.syncConfig()
         webDavBackupGateway.restore(name)
+    }
+
+    suspend fun getBookProgress(book: Book): BookProgress? {
+        webDavBackupGateway.syncConfig()
+        return webDavBackupGateway.getBookProgress(book)
+    }
+
+    suspend fun uploadBookProgress(book: Book) {
+        webDavBackupGateway.syncConfig()
+        webDavBackupGateway.uploadBookProgress(book)
     }
 }

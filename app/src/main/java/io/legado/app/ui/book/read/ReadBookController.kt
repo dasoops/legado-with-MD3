@@ -1791,6 +1791,7 @@ class ReadBookController(
             is ReadBookEffect.RegisterNetworkListener -> {
                 networkChangedListener.register()
                 networkChangedListener.onNetworkChanged = {
+                    viewModel.onNetworkChanged()
                 }
             }
 

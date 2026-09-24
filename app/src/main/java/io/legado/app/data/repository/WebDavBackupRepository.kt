@@ -2,6 +2,8 @@ package io.legado.app.data.repository
 
 import io.legado.app.domain.gateway.WebDavBackupGateway
 import io.legado.app.domain.model.WebDavBackup
+import io.legado.app.data.entities.Book
+import io.legado.app.data.entities.BookProgress
 import io.legado.app.help.AppWebDav
 import io.legado.app.help.storage.Backup
 import kotlinx.coroutines.Dispatchers.IO
@@ -9,6 +11,9 @@ import kotlinx.coroutines.withContext
 import splitties.init.appCtx
 
 class WebDavBackupRepository : WebDavBackupGateway {
+
+    override val isConfigured: Boolean
+        get() = AppWebDav.isOk
 
     override val isJianGuoYun: Boolean
         get() = AppWebDav.isJianGuoYun
@@ -52,5 +57,13 @@ class WebDavBackupRepository : WebDavBackupGateway {
         withContext(IO) {
             AppWebDav.restoreWebDav(name)
         }
+    }
+
+    override suspend fun getBookProgress(book: Book): BookProgress? = withContext(IO) {
+        AppWebDav.getBookProgress(book)
+    }
+
+    override suspend fun uploadBookProgress(book: Book) = withContext(IO) {
+        AppWebDav.uploadBookProgress(book)
     }
 }

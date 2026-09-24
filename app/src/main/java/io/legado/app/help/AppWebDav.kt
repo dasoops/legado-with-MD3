@@ -1,6 +1,8 @@
 package io.legado.app.help
 
 import io.legado.app.R
+import io.legado.app.data.entities.Book
+import io.legado.app.data.entities.BookProgress
 import io.legado.app.exception.NoStackTraceException
 import io.legado.app.domain.gateway.BackupSettingsGateway
 import io.legado.app.help.config.LocalConfig
@@ -13,7 +15,12 @@ import io.legado.app.lib.webdav.WebDavException
 import io.legado.app.utils.AlphanumComparator
 import io.legado.app.utils.FileUtils
 import io.legado.app.utils.NetworkUtils
+import io.legado.app.utils.GSON
+import io.legado.app.utils.UrlUtil
 import io.legado.app.utils.compress.ZipUtils
+import io.legado.app.utils.fromJsonObject
+import io.legado.app.utils.isJson
+import io.legado.app.utils.normalizeFileName
 import io.legado.app.utils.toastOnUi
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -72,6 +79,7 @@ object AppWebDav {
                     val mAuthorization = Authorization(config.account, config.password)
                     checkAuthorization(mAuthorization)
                     WebDav(rootWebDavUrl, mAuthorization).makeAsDir()
+                    WebDav("${rootWebDavUrl}bookProgress/", mAuthorization).makeAsDir()
                     authorization = mAuthorization
                 }
                 appliedConfig = config
@@ -133,6 +141,26 @@ object AppWebDav {
             return WebDav(url, it).exists()
         }
         return false
+    }
+
+    suspend fun getBookProgress(book: Book): BookProgress? {
+        val auth = authorization ?: return null
+        return runCatching {
+            val fileName = UrlUtil.replaceReservedChar(
+                "${book.name}_${book.author}".normalizeFileName()
+            ) + ".json"
+            val json = String(WebDav("${rootWebDavUrl}bookProgress/$fileName", auth).download())
+            if (json.isJson()) GSON.fromJsonObject<BookProgress>(json).getOrNull() else null
+        }.getOrNull()
+    }
+
+    suspend fun uploadBookProgress(book: Book) {
+        val auth = authorization ?: return
+        val fileName = UrlUtil.replaceReservedChar(
+            "${book.name}_${book.author}".normalizeFileName()
+        ) + ".json"
+        val json = GSON.toJson(BookProgress(book)).toByteArray()
+        WebDav("${rootWebDavUrl}bookProgress/$fileName", auth).upload(json, "application/json")
     }
 
     suspend fun lastBackUp(): Result<WebDavFile?> {

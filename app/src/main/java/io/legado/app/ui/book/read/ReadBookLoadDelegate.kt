@@ -6,7 +6,9 @@ import io.legado.app.constant.AppLog
 import io.legado.app.data.entities.Book
 import io.legado.app.data.entities.BookProgress
 import io.legado.app.data.repository.BookRepository
+import io.legado.app.domain.gateway.BackupSettingsGateway
 import io.legado.app.domain.model.ReadingProgress
+import io.legado.app.domain.usecase.WebDavBackupUseCase
 import io.legado.app.feature.reader.platform.ReaderPerfTrace
 import io.legado.app.help.book.BookHelp
 import io.legado.app.help.book.isLocal
@@ -38,6 +40,8 @@ class ReadBookLoadDelegate(
     private val scope: CoroutineScope,
     private val host: Host,
     private val bookRepository: BookRepository,
+    private val backupSettingsGateway: BackupSettingsGateway,
+    private val webDavBackupUseCase: WebDavBackupUseCase,
 ) {
 
     interface Host {
@@ -137,6 +141,75 @@ class ReadBookLoadDelegate(
         }
         if (ReadBook.chapterChanged) {
             ReadBook.chapterChanged = false
+        } else if (backupSettingsGateway.currentSettings.syncBookProgress) {
+            if (backupSettingsGateway.currentSettings.syncBookProgressPlus) {
+                syncBookProgressPlus(book)
+            } else {
+                syncBookProgress(book)
+            }
+        }
+    }
+
+    private fun syncBookProgress(book: Book) {
+        Coroutine.async(scope, Dispatchers.IO) {
+            webDavBackupUseCase.getBookProgress(book)
+        }.onError {
+            AppLog.put("拉取 WebDAV 阅读进度失败《${book.name}》\n${it.localizedMessage}", it)
+        }.onSuccess { progress ->
+            progress ?: return@onSuccess
+            if (progress.durChapterIndex > book.durChapterIndex ||
+                (progress.durChapterIndex == book.durChapterIndex &&
+                    progress.durChapterPos > book.durChapterPos)
+            ) {
+                host.sureNewProgress(progress)
+            }
+        }
+    }
+
+    fun getBookProgress(book: Book) {
+        Coroutine.async(scope, Dispatchers.IO) {
+            webDavBackupUseCase.getBookProgress(book)
+        }.onError {
+            AppLog.put("拉取 WebDAV 阅读进度失败《${book.name}》\n${it.localizedMessage}", it)
+        }.onSuccess { progress ->
+            progress?.let(host::sureNewProgress)
+        }
+    }
+
+    fun uploadBookProgress(book: Book, onSuccess: (() -> Unit)? = null) {
+        Coroutine.async(scope, Dispatchers.IO) {
+            webDavBackupUseCase.uploadBookProgress(book)
+        }.onError {
+            AppLog.put("上传 WebDAV 阅读进度失败《${book.name}》\n${it.localizedMessage}", it)
+        }.onSuccess {
+            onSuccess?.invoke()
+        }
+    }
+
+    fun syncBookProgressOnNetwork(book: Book) {
+        syncBookProgressPlus(book)
+    }
+
+    private fun syncBookProgressPlus(book: Book) {
+        Coroutine.async(scope, Dispatchers.IO) {
+            webDavBackupUseCase.getBookProgress(book)
+        }.onError {
+            AppLog.put("拉取 WebDAV 阅读进度失败《${book.name}》\n${it.localizedMessage}", it)
+        }.onSuccess { progress ->
+            if (progress == null || progress.durChapterIndex < book.durChapterIndex ||
+                (progress.durChapterIndex == book.durChapterIndex &&
+                    progress.durChapterPos < book.durChapterPos)
+            ) {
+                Coroutine.async(scope, Dispatchers.IO) {
+                    webDavBackupUseCase.uploadBookProgress(book)
+                }.onError {
+                    AppLog.put("上传 WebDAV 阅读进度失败《${book.name}》\n${it.localizedMessage}", it)
+                }
+            } else if (progress.durChapterIndex > book.durChapterIndex ||
+                progress.durChapterPos > book.durChapterPos
+            ) {
+                host.sureNewProgress(progress)
+            }
         }
     }
 
