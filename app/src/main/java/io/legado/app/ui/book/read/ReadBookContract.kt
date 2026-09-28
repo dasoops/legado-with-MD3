@@ -644,8 +644,6 @@ sealed interface ReadBookIntent {
     data class TextSelectAbleChanged(val enabled: Boolean) : ReadBookIntent
 
     // Dialog callback bridge
-    data object ConfirmAddCurrentBookToBookshelf : ReadBookIntent
-    data object ExitWithoutAddingCurrentBookToBookshelf : ReadBookIntent
 
     data class SelectFont(val path: String) : ReadBookIntent
     data class SelectTitleFont(val path: String) : ReadBookIntent
@@ -829,7 +827,6 @@ sealed interface ReadBookDialog {
     data object RestoreLastBookProgress : ReadBookDialog
     data object ConfirmSkipToChapter : ReadBookDialog
     data class ConfirmChapterPay(val chapterTitle: String) : ReadBookDialog
-    data class ConfirmAddToBookshelf(val bookName: String) : ReadBookDialog
 }
 
 /**

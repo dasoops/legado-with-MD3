@@ -261,7 +261,6 @@ class BookInfoViewModel(
             }
 
             BookInfoIntent.ReadClick -> onReadClick()
-            BookInfoIntent.ShelfClick -> onShelfClick()
             BookInfoIntent.OpenLocalBookExternally -> currentBook
                 ?.takeIf { it.isLocal }
                 ?.let { emitEffect(BookInfoEffect.OpenLocalBookExternally(Uri.parse(it.bookUrl))) }
@@ -598,32 +597,6 @@ class BookInfoViewModel(
         }
     }
 
-    fun addToBookshelf(success: (() -> Unit)? = null) {
-        val book = currentBook ?: return
-        execute {
-            book.removeType(BookType.notShelf)
-            if (book.order == 0) {
-                book.order = bookRepository.getMinOrder() - 1
-            }
-            bookRepository.getBook(book.name, book.author)?.let {
-                book.durChapterIndex = it.durChapterIndex
-                book.durChapterPos = it.durChapterPos
-                book.durChapterTitle = it.durChapterTitle
-            }
-            if (ReadBook.isCurrentBook(book)) {
-                ReadBook.replaceCurrentBook(book)
-            }
-            book.save()
-            bookRepository.insertChapters(*currentChapterList.toTypedArray())
-            book
-        }.onSuccess {
-            currentBook = it
-            inBookshelf = true
-            syncUiState()
-            success?.invoke()
-        }
-    }
-
     fun delBook(deleteOriginal: Boolean = false, success: (() -> Unit)? = null) {
         val book = currentBook ?: return
         execute {
@@ -799,25 +772,10 @@ class BookInfoViewModel(
 
     private fun onReadClick() {
         val book = currentBook ?: return
-        if (book.isWebFile) {
-            setSheet(BookInfoSheet.WebFiles(openAfterImport = true))
-        } else {
-            readBook(book)
-        }
-    }
-
-    private fun onShelfClick() {
-        val book = currentBook ?: return
         if (inBookshelf) {
-            if (LocalConfig.bookInfoDeleteAlert) {
-                showDialog(BookInfoDialog.DeleteBook(book.isLocal))
-            } else {
-                deleteBook(LocalConfig.deleteBookOriginal)
-            }
-        } else if (book.isWebFile) {
-            setSheet(BookInfoSheet.WebFiles(openAfterImport = false))
+            readBook(book)
         } else {
-            addToBookshelf()
+            showMessage("书籍尚未通过本地目录导入")
         }
     }
 
@@ -827,15 +785,10 @@ class BookInfoViewModel(
             showMessage(R.string.chapter_list_empty)
             return
         }
-        if (!inBookshelf) {
-            book.addType(BookType.notShelf)
-            saveBook(book) {
-                saveChapterList {
-                    emitEffect(BookInfoEffect.OpenToc(book.bookUrl))
-                }
-            }
-        } else {
+        if (inBookshelf) {
             emitEffect(BookInfoEffect.OpenToc(book.bookUrl))
+        } else {
+            showMessage("书籍尚未通过本地目录导入")
         }
     }
 
@@ -916,18 +869,8 @@ class BookInfoViewModel(
     }
 
     private fun readBook(book: Book) {
-        if (!inBookshelf) {
-            book.addType(BookType.notShelf)
-            saveBook(book) {
-                saveChapterList {
-                    openReader(book)
-                }
-            }
-        } else {
-            saveBook(book) {
-                openReader(book)
-            }
-        }
+        if (!inBookshelf) return
+        saveBook(book) { openReader(book) }
     }
 
     private fun openReader(book: Book) {

@@ -84,14 +84,12 @@ sealed interface BackupConfigIntent {
     data object RequestNetworkRestore : BackupConfigIntent
     data class RestoreNetwork(val name: String) : BackupConfigIntent
     data object ConfirmLocalRestoreFallback : BackupConfigIntent
-    data object RequestImportOldData : BackupConfigIntent
 }
 
 sealed interface BackupConfigEffect {
     data object LaunchBackupDirectoryPicker : BackupConfigEffect
     data object LaunchBackupAndRunDirectoryPicker : BackupConfigEffect
     data object LaunchRestoreFilePicker : BackupConfigEffect
-    data object LaunchImportOldDataPicker : BackupConfigEffect
     data class RequestStoragePermission(val path: String, val mode: String) : BackupConfigEffect
     data class ShowMessage(@StringRes val messageRes: Int, val argument: String? = null) : BackupConfigEffect
 }

@@ -325,7 +325,6 @@ private fun BookInfoScreenContent(
                                 BookInfoActions(
                                     inBookshelf = state.inBookshelf,
                                     isLocalBook = state.book?.isLocal == true,
-                                    onShelfClick = { onIntent(BookInfoIntent.ShelfClick) },
                                     onOpenLocalBookExternally = {
                                         onIntent(BookInfoIntent.OpenLocalBookExternally)
                                     },
@@ -992,7 +991,6 @@ private fun BookInfoHeader(
 private fun BookInfoActions(
     inBookshelf: Boolean,
     isLocalBook: Boolean,
-    onShelfClick: () -> Unit,
     onOpenLocalBookExternally: () -> Unit,
     onTocClick: () -> Unit,
     onGroupClick: () -> Unit,
@@ -1033,27 +1031,17 @@ private fun BookInfoActions(
             .padding(horizontal = 16.dp, vertical = 8.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        BookInfoActionCard(
-            modifier = Modifier.weight(1f),
-            icon = if (inBookshelf && isLocalBook) {
-                Icons.AutoMirrored.Filled.OpenInNew
-            } else if (inBookshelf) Icons.Outlined.Book else Icons.Default.BookmarkAdd,
-            label = shelfLabel,
-            onLongClick = onGroupClick,
-            onClick = {
-                if (inBookshelf && isLocalBook) {
-                    onOpenLocalBookExternally()
-                } else if (!inBookshelf) {
-                    awaitingShelfAddition = true
-                    onShelfClick()
-                } else {
-                    awaitingShelfAddition = false
-                    showShelfRemoveHint = false
-                    showLongPressGroupHint = false
-                    onShelfClick()
-                }
-            },
-        )
+        if (inBookshelf) {
+            BookInfoActionCard(
+                modifier = Modifier.weight(1f),
+                icon = if (isLocalBook) Icons.AutoMirrored.Filled.OpenInNew else Icons.Outlined.Book,
+                label = shelfLabel,
+                onLongClick = onGroupClick,
+                onClick = {
+                    if (isLocalBook) onOpenLocalBookExternally()
+                },
+            )
+        }
         BookInfoActionCard(
             modifier = Modifier.weight(1f),
             icon = Icons.AutoMirrored.Outlined.FormatListBulleted,

@@ -167,12 +167,6 @@ object Restore : KoinComponent {
                     appDb.bookSourceDao.insert(*it.toTypedArray())
                 } catch (_: SQLiteConstraintException) {
                 }
-            } ?: run {
-                val bookSourceFile = File(path, "bookSource.json")
-                if (bookSourceFile.exists()) {
-                    val json = bookSourceFile.readText()
-                    ImportOldData.importOldSource(json)
-                }
             }
         }
         if (BackupConfig.dbIsNotIgnored("replaceRule")) {

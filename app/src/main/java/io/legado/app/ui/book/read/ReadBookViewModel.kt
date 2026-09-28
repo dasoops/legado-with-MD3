@@ -1079,8 +1079,6 @@ class ReadBookViewModel(
                 )
             )
 
-            is ReadBookIntent.ConfirmAddCurrentBookToBookshelf -> addCurrentBookToBookshelfAndFinish()
-            is ReadBookIntent.ExitWithoutAddingCurrentBookToBookshelf -> removeCurrentNotShelfBookAndFinish()
 
             is ReadBookIntent.SelectFont -> styleDelegate.selectFont(intent.path)
             is ReadBookIntent.SelectTitleFont -> styleDelegate.selectTitleFont(intent.path)
@@ -1742,36 +1740,10 @@ class ReadBookViewModel(
 
     private fun closeReadBook() {
         val book = ReadBook.book
-        if (!ReadBook.inBookshelf && book != null && otherSettingsGateway.currentSettings.showAddToShelfAlert) {
-            _uiState.update {
-                it.copy(activeDialog = ReadBookDialog.ConfirmAddToBookshelf(book.name))
-            }
-        } else if (!ReadBook.inBookshelf) {
+        if (!ReadBook.inBookshelf) {
             removeCurrentNotShelfBookAndFinish()
         } else {
             _effects.tryEmit(ReadBookEffect.Finish)
-        }
-    }
-
-    private fun addCurrentBookToBookshelfAndFinish() {
-        val book = ReadBook.book ?: return removeCurrentNotShelfBookAndFinish()
-        execute {
-            val toc = bookRepository.getChapters(book.bookUrl)
-            book.removeType(BookType.notShelf)
-            if (book.order == 0) {
-                book.order = bookRepository.getMinOrder() - 1
-            }
-            bookRepository.insert(book)
-            if (toc.isNotEmpty()) {
-                bookRepository.insertChapters(*toc.toTypedArray())
-            }
-            ReadBook.inBookshelf = true
-        }.onSuccess {
-            _uiState.update { it.copy(activeDialog = null) }
-            _effects.tryEmit(ReadBookEffect.Finish)
-        }.onError {
-            AppLog.put("添加书籍到书架失败", it)
-            _effects.tryEmit(ReadBookEffect.ShowToast("添加书籍失败"))
         }
     }
 

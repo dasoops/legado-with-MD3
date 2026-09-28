@@ -138,12 +138,6 @@ fun OtherConfigScreen(
                     onCheckedChange = { onIntent(OtherConfigIntent.AutoClearExpiredChanged(it)) }
                 )
 
-                SwitchSettingItem(
-                    title = stringResource(R.string.show_add_to_shelf_alert_title),
-                    description = stringResource(R.string.show_add_to_shelf_alert_summary),
-                    checked = state.showAddToShelfAlert,
-                    onCheckedChange = { onIntent(OtherConfigIntent.ShowAddToShelfAlertChanged(it)) }
-                )
             }
 
                 SplicedColumnGroup(title = stringResource(R.string.other_setting)) {

@@ -40,7 +40,6 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.legado.app.R
-import io.legado.app.help.storage.ImportOldData
 import io.legado.app.lib.permission.Permissions
 import io.legado.app.lib.permission.PermissionsCompat
 import io.legado.app.ui.theme.LegadoTheme
@@ -95,9 +94,6 @@ fun BackupConfigRouteScreen(
     val restoreFileLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.OpenDocument()
     ) { uri -> uri?.let { viewModel.onIntent(BackupConfigIntent.RestoreLocal(it.toString())) } }
-    val importOldLauncher = rememberLauncherForActivityResult(
-        ActivityResultContracts.OpenDocument()
-    ) { uri -> uri?.let { ImportOldData.importUri(context, it) } }
 
     LaunchedEffect(Unit) {
         viewModel.effects.collectLatest { effect ->
@@ -107,7 +103,6 @@ fun BackupConfigRouteScreen(
                     backupAndSelectLauncher.launch(null)
                 BackupConfigEffect.LaunchRestoreFilePicker ->
                     restoreFileLauncher.launch(arrayOf("application/zip"))
-                BackupConfigEffect.LaunchImportOldDataPicker -> importOldLauncher.launch(arrayOf("*/*"))
                 is BackupConfigEffect.RequestStoragePermission -> {
                     PermissionsCompat.Builder()
                         .addPermissions(*Permissions.Group.STORAGE)
@@ -260,11 +255,6 @@ fun BackupConfigScreen(
                         title = stringResource(R.string.backup_ignore),
                         description = stringResource(R.string.backup_ignore_summary),
                         onClick = { onIntent(BackupConfigIntent.OpenBackupIgnoreDialog) },
-                    )
-                    ClickableSettingItem(
-                        title = stringResource(R.string.menu_import_old_version),
-                        description = stringResource(R.string.import_old_summary),
-                        onClick = { onIntent(BackupConfigIntent.RequestImportOldData) },
                     )
                     SwitchSettingItem(
                         title = stringResource(R.string.only_latest_backup_t),

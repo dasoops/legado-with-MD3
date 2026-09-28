@@ -127,7 +127,6 @@ sealed interface BookInfoIntent {
     data class BookNameClick(val longClick: Boolean) : BookInfoIntent
     data object OriginClick : BookInfoIntent
     data object ReadClick : BookInfoIntent
-    data object ShelfClick : BookInfoIntent
     data object OpenLocalBookExternally : BookInfoIntent
     data object TocClick : BookInfoIntent
     data object CoverClick : BookInfoIntent

@@ -102,8 +102,6 @@ class BackupConfigViewModel(
             BackupConfigIntent.RequestNetworkRestore -> loadNetworkBackups()
             is BackupConfigIntent.RestoreNetwork -> restoreNetwork(intent.name)
             BackupConfigIntent.ConfirmLocalRestoreFallback -> requestLocalRestore()
-            BackupConfigIntent.RequestImportOldData ->
-                _effects.tryEmit(BackupConfigEffect.LaunchImportOldDataPicker)
         }
     }
 
