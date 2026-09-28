@@ -7,6 +7,7 @@ import androidx.core.net.toUri
 import androidx.documentfile.provider.DocumentFile
 import io.legado.app.constant.AppLog
 import io.legado.app.constant.AppPattern
+import io.legado.app.data.entities.Book
 import io.legado.app.domain.gateway.LocalDirectoryGateway
 import io.legado.app.domain.model.BookTags
 import io.legado.app.help.book.isLocal
@@ -48,6 +49,7 @@ class LocalDirectoryRepository(
         files.forEach { file ->
             runCatching {
                 val bookUrl = file.toString()
+                val directoryTags = directoryTagsOf(rootUri, rootName, bookUrl)
                 val existing = bookRepository.getBook(bookUrl)
                 // 已归入本组时避免重导入重置目录, 只补取旧条目缺少的封面.
                 if (existing != null && (existing.group and groupId) != 0L) {
@@ -57,15 +59,11 @@ class LocalDirectoryRepository(
                             bookRepository.update(existing)
                         }
                     }
+                    syncDirectoryTags(existing, directoryTags)
                     return@forEach
                 }
-                val book = LocalBook.importFile(
-                    file.uri,
-                    directoryTags = BookTags.directoryTags(
-                        rootName,
-                        relativeDirectoryOf(rootUri, bookUrl),
-                    ),
-                )
+                val book = LocalBook.importFile(file.uri, directoryTags = directoryTags)
+                syncDirectoryTags(book, directoryTags)
                 if ((book.group and groupId) == 0L) {
                     book.group = book.group or groupId
                     book.save()
@@ -76,6 +74,19 @@ class LocalDirectoryRepository(
             }
         }
         count
+    }
+
+    /**
+     * 用当前规则刷新书籍的目录标签: 先摘掉旧目录标签, 再补入新目录标签, 保留用户手动标签.
+     * 历史导入曾把所选目录名及绝对路径层级写成标签, 会与本地目录分组名重复.
+     */
+    internal suspend fun syncDirectoryTags(book: Book, newTags: List<String>) {
+        val oldTags = book.config.directoryTags.orEmpty()
+        if (oldTags == newTags) return
+        val userTags = BookTags.parse(book.customTag).filterNot { it in oldTags }
+        book.config.directoryTags = newTags
+        book.customTag = BookTags.editable(userTags + newTags).joinToString(",").ifBlank { null }
+        bookRepository.update(book)
     }
 
     override fun relativeDirectory(rootUri: String, bookUrl: String): List<String> =
@@ -157,3 +168,12 @@ internal fun relativeDirectoryOf(rootUri: String, bookUrl: String): List<String>
         }
     }.getOrDefault(emptyList())
 }
+
+/**
+ * 本地目录分组的书籍目录标签: 取所选目录之下的相对子目录, 并剔除与分组同名者.
+ * 所选目录名本身即分组名, 作为标签只会与分组重复, 因此不生成.
+ */
+internal fun directoryTagsOf(rootUri: String, rootName: String?, bookUrl: String): List<String> =
+    BookTags.editable(
+        relativeDirectoryOf(rootUri, bookUrl).filter { it != rootName }
+    )

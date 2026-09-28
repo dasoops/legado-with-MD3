@@ -127,6 +127,32 @@ class BookTagsRepositoryTest {
     }
 
     @Test
+    fun `刷新目录标签摘除旧目录标签并保留用户标签`() = runBlocking {
+        val directoryRepository = LocalDirectoryRepository(books)
+        val book = Book(bookUrl = "a", customTag = "层级,Novel,用户标签")
+        book.config.directoryTags = listOf("层级", "Novel")
+        db.bookDao.insert(book)
+
+        directoryRepository.syncDirectoryTags(db.bookDao.getBook("a")!!, emptyList())
+
+        val updated = db.bookDao.getBook("a")!!
+        assertEquals(listOf("用户标签"), BookTags.parse(updated.customTag))
+        assertEquals(emptyList<String>(), updated.config.directoryTags)
+    }
+
+    @Test
+    fun `刷新目录标签可补入新的相对子目录标签`() = runBlocking {
+        val directoryRepository = LocalDirectoryRepository(books)
+        db.bookDao.insert(Book(bookUrl = "a", customTag = "用户标签"))
+
+        directoryRepository.syncDirectoryTags(db.bookDao.getBook("a")!!, listOf("ggg"))
+
+        val updated = db.bookDao.getBook("a")!!
+        assertEquals(listOf("用户标签", "ggg"), BookTags.parse(updated.customTag))
+        assertEquals(listOf("ggg"), updated.config.directoryTags)
+    }
+
+    @Test
     fun `非书架记录不生成标签页`() = runBlocking {
         db.bookDao.insert(Book(bookUrl = "preview", customTag = "预览", type = BookType.text or BookType.notShelf))
         assertTrue(books.flowTagNames().first().isEmpty())

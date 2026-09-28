@@ -30,10 +30,6 @@ object BookTags {
         .split('/').dropLast(1).map(String::trim)
         .filter { it.isNotEmpty() && !it.endsWith(':') }.distinct()
 
-    /** 由所选目录名与其下相对子目录生成书籍目录标签, 不含所选目录之上的层级 */
-    fun directoryTags(rootName: String?, relativeDirectories: List<String>): List<String> =
-        editable(listOfNotNull(rootName?.takeIf(String::isNotBlank)) + relativeDirectories)
-
     // 使用完整标签名的稳定散列, 避开系统 ID 和目录分组位的取值空间.
     fun groupId(tag: String): Long {
         var hash = -3750763034362895579L
