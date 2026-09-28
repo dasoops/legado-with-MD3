@@ -229,8 +229,11 @@ object LocalBook {
 
     /**
      * 导入本地文件
+     *
+     * [directoryTags] 用于本地目录分组导入: 由调用方按所选目录算出相对标签,
+     * 避免把绝对路径的上级目录(如 home/Download)也挂到书上. 为空时回退到文件自身路径.
      */
-    fun importFile(uri: Uri): Book {
+    fun importFile(uri: Uri, directoryTags: List<String>? = null): Book {
         val input = FileDoc.fromUri(uri, false)
         if (input.isDir) throw io.legado.app.exception.NoStackTraceException("暂不支持导入目录")
         val bookUrl: String
@@ -254,16 +257,18 @@ object LocalBook {
             )
             upBookInfo(book)
             book.upKind()
-            val directoryPath = if (uri.scheme == "content") {
-                runCatching { android.provider.DocumentsContract.getDocumentId(uri).substringAfter(':') }
-                    .getOrDefault("")
-            } else uri.path.orEmpty()
-            val directoryTags = BookTags.editable(
-                BookTags.directoryNames(directoryPath)
+            val resolvedTags = directoryTags ?: BookTags.editable(
+                BookTags.directoryNames(
+                    if (uri.scheme == "content") {
+                        runCatching {
+                            android.provider.DocumentsContract.getDocumentId(uri).substringAfter(':')
+                        }.getOrDefault("")
+                    } else uri.path.orEmpty()
+                )
             )
-            book.config.directoryTags = directoryTags
+            book.config.directoryTags = resolvedTags
             book.customTag = BookTags.editable(
-                BookTags.parse(book.customTag) + directoryTags
+                BookTags.parse(book.customTag) + resolvedTags
             ).joinToString(",").ifBlank { null }
             appDb.bookDao.insert(book)
         } else {

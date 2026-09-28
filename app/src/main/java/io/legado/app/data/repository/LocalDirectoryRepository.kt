@@ -8,6 +8,7 @@ import androidx.documentfile.provider.DocumentFile
 import io.legado.app.constant.AppLog
 import io.legado.app.constant.AppPattern
 import io.legado.app.domain.gateway.LocalDirectoryGateway
+import io.legado.app.domain.model.BookTags
 import io.legado.app.help.book.isLocal
 import io.legado.app.model.localBook.LocalBook
 import io.legado.app.utils.FileDoc
@@ -42,6 +43,7 @@ class LocalDirectoryRepository(
     ): Int = withContext(Dispatchers.IO) {
         val root = rootDirDoc(rootUri) ?: return@withContext 0
         val files = scanBookFiles(root)
+        val rootName = directoryName(rootUri)
         var count = 0
         files.forEach { file ->
             runCatching {
@@ -57,7 +59,13 @@ class LocalDirectoryRepository(
                     }
                     return@forEach
                 }
-                val book = LocalBook.importFile(file.uri)
+                val book = LocalBook.importFile(
+                    file.uri,
+                    directoryTags = BookTags.directoryTags(
+                        rootName,
+                        relativeDirectoryOf(rootUri, bookUrl),
+                    ),
+                )
                 if ((book.group and groupId) == 0L) {
                     book.group = book.group or groupId
                     book.save()
@@ -70,26 +78,8 @@ class LocalDirectoryRepository(
         count
     }
 
-    override fun relativeDirectory(rootUri: String, bookUrl: String): List<String> {
-        return runCatching {
-            val root = rootUri.toUri()
-            if (root.isContentScheme()) {
-                val rootId = getTreeDocumentId(root)
-                val bookId = getDocumentId(bookUrl.toUri())
-                bookId.removePrefix(rootId).trim('/')
-                    .split('/')
-                    .dropLast(1)
-                    .filter { it.isNotBlank() }
-            } else {
-                val rootPath = root.path ?: return emptyList()
-                val bookPath = bookUrl.toUri().path ?: return emptyList()
-                File(bookPath).relativeTo(File(rootPath)).path
-                    .split('/')
-                    .dropLast(1)
-                    .filter { it.isNotBlank() }
-            }
-        }.getOrDefault(emptyList())
-    }
+    override fun relativeDirectory(rootUri: String, bookUrl: String): List<String> =
+        relativeDirectoryOf(rootUri, bookUrl)
 
     private fun treeDocumentId(rootUri: String): String? =
         runCatching { getTreeDocumentId(rootUri.toUri()) }.getOrNull()
@@ -139,4 +129,31 @@ class LocalDirectoryRepository(
         }
         return result
     }
+}
+
+/**
+ * 计算 bookUrl 相对 rootUri 的目录层级 (不含文件名). 本地目录分组据此生成相对标签,
+ * 不能让绝对路径里所选目录之上的层级混入标签.
+ */
+internal fun relativeDirectoryOf(rootUri: String, bookUrl: String): List<String> {
+    return runCatching {
+        val root = rootUri.toUri()
+        if (root.isContentScheme()) {
+            val rootId = getTreeDocumentId(root)
+            val bookId = getDocumentId(bookUrl.toUri())
+            bookId.removePrefix(rootId).trim('/')
+                .split('/')
+                .dropLast(1)
+                .filter { it.isNotBlank() }
+        } else {
+            val rootPath = root.path ?: return emptyList()
+            val bookPath = bookUrl.toUri().path ?: return emptyList()
+            // 测试/构建可能运行在 Windows 上, File.relativeTo 的路径分隔符随平台变化.
+            File(bookPath).relativeTo(File(rootPath)).path
+                .replace('\\', '/')
+                .split('/')
+                .dropLast(1)
+                .filter { it.isNotBlank() }
+        }
+    }.getOrDefault(emptyList())
 }
