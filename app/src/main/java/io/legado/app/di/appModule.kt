@@ -138,7 +138,6 @@ import io.legado.app.ui.book.toc.TocViewModel
 import io.legado.app.ui.book.toc.rule.TxtTocRuleViewModel
 import io.legado.app.ui.book.toc.rule.preview.TxtTocRulePreviewViewModel
 import io.legado.app.ui.config.backupConfig.BackupConfigViewModel
-import io.legado.app.ui.config.bookshelfConfig.BookshelfManageScreenConfig
 import io.legado.app.ui.config.coverConfig.CoverAlbumManageViewModel
 import io.legado.app.ui.config.coverConfig.CoverConfigViewModel
 import io.legado.app.ui.config.customTheme.CustomThemeViewModel
@@ -242,7 +241,6 @@ val appModule = module {
     factory { GetReadRecordOverviewUseCase() }
     singleOf(::ShrinkDatabaseUseCase)
     singleOf(::WebDavBackupUseCase)
-    singleOf(::BookshelfManageScreenConfig)
     singleOf(::ThemePackageManager)
 
     single<AiProfileGateway> { AiProfileRepository(get()) }
@@ -334,6 +332,8 @@ val appModule = module {
             application = get(),
             gateway = get(),
             bookRepository = get(),
+            bookshelfRepository = get(),
+            bookshelfSettingsGateway = get(),
             groupId = groupId,
             rootUri = rootUri,
         )
@@ -379,7 +379,6 @@ val appModule = module {
             bookRepository = get(),
             bookGroupRepository = get(),
             searchRepository = get(),
-            bookshelfManageScreenConfig = get(),
             bookExportSettingsGateway = get(),
             deleteBooksUseCase = get(),
         )

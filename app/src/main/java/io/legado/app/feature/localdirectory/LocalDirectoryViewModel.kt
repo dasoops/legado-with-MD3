@@ -6,7 +6,10 @@ import androidx.lifecycle.viewModelScope
 import io.legado.app.R
 import io.legado.app.constant.AppLog
 import io.legado.app.data.repository.BookRepository
+import io.legado.app.data.repository.BookshelfRepository
+import io.legado.app.domain.gateway.BookshelfSettingsGateway
 import io.legado.app.domain.gateway.LocalDirectoryGateway
+import io.legado.app.ui.main.bookshelf.BookShelfItem
 import io.legado.app.utils.AlphanumComparator
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
@@ -15,6 +18,8 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
@@ -25,6 +30,8 @@ class LocalDirectoryViewModel(
     application: Application,
     private val gateway: LocalDirectoryGateway,
     private val bookRepository: BookRepository,
+    private val bookshelfRepository: BookshelfRepository,
+    bookshelfSettingsGateway: BookshelfSettingsGateway,
     private val groupId: Long,
     private val rootUri: String,
 ) : ViewModel() {
@@ -39,36 +46,43 @@ class LocalDirectoryViewModel(
         val isUnavailable: Boolean = false,
     )
 
+    private data class SortConfig(val sort: Int, val sortOrder: Int)
+
     private val appContext = application.applicationContext
     private val _state = MutableStateFlow(InternalState())
     private val _effects = MutableSharedFlow<LocalDirectoryEffect>(extraBufferCapacity = 16)
     val effects = _effects.asSharedFlow()
 
+    // 本地目录页复用书架的排序设置, 否则与「书架-布局设置」的排序口径不一致.
+    private val sortConfigFlow = bookshelfSettingsGateway.settings
+        .map { SortConfig(it.bookshelfSort, it.bookshelfSortOrder) }
+        .distinctUntilChanged()
+
     private var initialized = false
 
-    val uiState = _state
-        .map { state ->
-            val searching = state.isSearch && state.searchKey.isNotBlank()
-            val nodes = if (searching) {
-                state.books
-                    .asSequence()
-                    .filter { it.matches(state.searchKey) }
-                    .sortedWith(compareBy(AlphanumComparator) { it.book.name })
-                    .map { LocalDirectoryNode.Book(it) }
-                    .toList()
-            } else {
-                buildNodes(state.books, state.path)
-            }
-            LocalDirectoryUiState(
-                path = state.path.toImmutableList(),
-                pathNames = (listOf(state.rootName) + state.path)
-                    .filter { it.isNotBlank() }
-                    .toImmutableList(),
-                nodes = nodes.toImmutableList(),
-                isLoading = state.isLoading,
-                isUnavailable = state.isUnavailable,
-            )
+    val uiState = combine(_state, sortConfigFlow) { state, sortConfig ->
+        val bookComparator = bookshelfRepository.bookComparator(sortConfig.sort, sortConfig.sortOrder)
+        val searching = state.isSearch && state.searchKey.isNotBlank()
+        val nodes = if (searching) {
+            state.books
+                .asSequence()
+                .filter { it.matches(state.searchKey) }
+                .sortedWith(compareBy(bookComparator) { it.book })
+                .map { LocalDirectoryNode.Book(it) }
+                .toList()
+        } else {
+            buildNodes(state.books, state.path, bookComparator)
         }
+        LocalDirectoryUiState(
+            path = state.path.toImmutableList(),
+            pathNames = (listOf(state.rootName) + state.path)
+                .filter { it.isNotBlank() }
+                .toImmutableList(),
+            nodes = nodes.toImmutableList(),
+            isLoading = state.isLoading,
+            isUnavailable = state.isUnavailable,
+        )
+    }
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
@@ -143,6 +157,7 @@ class LocalDirectoryViewModel(
     private fun buildNodes(
         books: List<DirectoryBook>,
         path: List<String>,
+        bookComparator: Comparator<BookShelfItem>,
     ): List<LocalDirectoryNode> {
         val folders = linkedSetOf<String>()
         val currentBooks = arrayListOf<DirectoryBook>()
@@ -159,9 +174,10 @@ class LocalDirectoryViewModel(
             if (item.dir == path) currentBooks.add(item)
         }
         return buildList {
+            // 文件夹作为导航层级始终按名称排序, 仅同一层级内的书籍跟随书架排序设置.
             folders.sortedWith(AlphanumComparator).forEach { add(LocalDirectoryNode.Folder(it)) }
             currentBooks
-                .sortedWith(compareBy(AlphanumComparator) { it.book.name })
+                .sortedWith(compareBy(bookComparator) { it.book })
                 .forEach { add(LocalDirectoryNode.Book(it)) }
         }
     }

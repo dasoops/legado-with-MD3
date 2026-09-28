@@ -835,8 +835,7 @@ fun BookshelfScreen(
                                 ?: persistentListOf()
                             val canReorderBooks = isEditMode &&
                                     !uiState.isSearch &&
-                                    (group.bookSort.takeIf { it >= 0 }
-                                        ?: uiState.bookshelfSort) == 3 &&
+                                    uiState.bookshelfSort == 3 &&
                                     isSelectedGroup
                             BookshelfPage(
                                 gridState = groupGridStates.getValue(group.groupId),

@@ -25,7 +25,6 @@ class BookGroupMutationRepository(
                 groupId = groupId,
                 groupName = group.groupName,
                 cover = group.cover,
-                bookSort = group.bookSort,
                 enableRefresh = group.enableRefresh,
                 isPrivate = group.isPrivate,
                 order = groupDao.maxOrder.plus(1),
@@ -112,7 +111,6 @@ class BookGroupMutationRepository(
         order = order,
         enableRefresh = enableRefresh,
         show = show,
-        bookSort = bookSort,
         isPrivate = isPrivate,
         localDirectoryUri = localDirectoryUri,
     )

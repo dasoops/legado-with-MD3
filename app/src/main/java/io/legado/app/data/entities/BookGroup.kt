@@ -21,6 +21,7 @@ data class BookGroup(
     var enableRefresh: Boolean = true,
     @ColumnInfo(defaultValue = "1")
     var show: Boolean = true,
+    // 历史分组级排序列: fork 已不提供分组独立排序入口, 保留列以规避 schema 迁移, 排序统一由书架设置决定.
     @ColumnInfo(defaultValue = "-1")
     var bookSort: Int = -1,
     @ColumnInfo(defaultValue = "0")
@@ -63,13 +64,6 @@ data class BookGroup(
             IdReadFinishedComplete -> GroupNameInfo(groupName, context.getString(R.string.is_read_finished_complete))
             else -> GroupNameInfo(groupName)
         }
-    }
-
-    fun getRealBookSort(defaultBookSort: Int): Int {
-        if (bookSort < 0) {
-            return defaultBookSort
-        }
-        return bookSort
     }
 
     override fun hashCode(): Int {

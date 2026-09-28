@@ -33,7 +33,6 @@ class GroupViewModel(
 
     fun addGroup(
         groupName: String,
-        bookSort: Int,
         enableRefresh: Boolean,
         isPrivate: Boolean,
         cover: String?,
@@ -48,7 +47,6 @@ class GroupViewModel(
                 bookGroupMutationGateway.addGroup(
                     NewBookGroup(
                         groupName = groupName,
-                        bookSort = bookSort,
                         enableRefresh = enableRefresh,
                         isPrivate = isPrivate,
                         cover = cover,
@@ -130,7 +128,6 @@ class GroupViewModel(
         order = order,
         enableRefresh = enableRefresh,
         show = show,
-        bookSort = bookSort,
         isPrivate = isPrivate,
         localDirectoryUri = localDirectoryUri,
     )

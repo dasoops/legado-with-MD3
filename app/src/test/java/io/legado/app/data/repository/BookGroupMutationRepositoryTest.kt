@@ -65,7 +65,6 @@ class BookGroupMutationRepositoryTest {
             repository.addGroup(
                 NewBookGroup(
                     groupName = "Fantasy",
-                    bookSort = -1,
                     enableRefresh = true,
                     isPrivate = false,
                     cover = null,
@@ -162,7 +161,6 @@ class BookGroupMutationRepositoryTest {
         repository.addGroup(
             NewBookGroup(
                 groupName = "Fantasy",
-                bookSort = -1,
                 enableRefresh = true,
                 isPrivate = false,
                 cover = null,
@@ -181,7 +179,6 @@ class BookGroupMutationRepositoryTest {
             repository.addGroup(
                 NewBookGroup(
                     groupName = "Broken",
-                    bookSort = -1,
                     enableRefresh = true,
                     isPrivate = false,
                     cover = null,

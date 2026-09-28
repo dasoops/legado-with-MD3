@@ -15,7 +15,6 @@ import io.legado.app.help.config.LocalConfig
 import io.legado.app.service.ExportBookService
 import io.legado.app.domain.gateway.BookshelfSettingsGateway
 import org.koin.core.context.GlobalContext
-import io.legado.app.ui.config.bookshelfConfig.BookshelfManageScreenConfig
 import io.legado.app.ui.main.bookshelf.toLightBook
 import io.legado.app.utils.cnCompare
 import io.legado.app.utils.move
@@ -91,7 +90,6 @@ class BookshelfManageScreenViewModel(
     private val bookRepository: BookRepository,
     private val bookGroupRepository: BookGroupRepository,
     private val searchRepository: SearchRepository,
-    val bookshelfManageScreenConfig: BookshelfManageScreenConfig,
     private val bookExportSettingsGateway: BookExportSettingsGateway,
     private val deleteBooksUseCase: DeleteBooksUseCase,
 ) : BaseViewModel(application) {
@@ -196,8 +194,8 @@ class BookshelfManageScreenViewModel(
         booksJob = viewModelScope.launch {
             bookRepository.flowBookShelfByGroup(groupId).map { books ->
                 val booksDownload = books.map { it.toLightBook() }
-                val bookSort = bookshelfManageScreenConfig.getBookSortByGroupId(groupId)
-                val isDescending = bookshelfManageScreenConfig.bookshelfSortOrder == 1
+                val bookSort = bookshelfSettingsGateway.currentSettings.bookshelfSort
+                val isDescending = bookshelfSettingsGateway.currentSettings.bookshelfSortOrder == 1
                 bookSort to when (bookSort) {
                     1 -> if (isDescending) booksDownload.sortedByDescending { it.latestChapterTime }
                     else booksDownload.sortedBy { it.latestChapterTime }
@@ -225,7 +223,7 @@ class BookshelfManageScreenViewModel(
                     it.copy(
                         books = books,
                         bookSort = bookSort,
-                        bookSortOrder = bookshelfManageScreenConfig.bookshelfSortOrder
+                        bookSortOrder = bookshelfSettingsGateway.currentSettings.bookshelfSortOrder
                     )
                 }
             }

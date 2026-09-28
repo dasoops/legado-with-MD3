@@ -137,7 +137,6 @@ fun GroupManageSheet(
                                 ?: defaultLocalDirectoryName
                             viewModel.addGroup(
                                 groupName = pickedName,
-                                bookSort = -1,
                                 enableRefresh = false,
                                 isPrivate = false,
                                 cover = null,

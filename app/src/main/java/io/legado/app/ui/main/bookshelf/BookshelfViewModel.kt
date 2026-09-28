@@ -153,7 +153,7 @@ class BookshelfViewModel(
                 scheduleMissingLocalBookCoverBackfills(list)
                 SelectedGroupBooksState(
                     groupId = group.groupId,
-                    books = bookshelfRepository.sortBooks(list, group, sortConfig.sort, sortConfig.sortOrder)
+                    books = bookshelfRepository.sortBooks(list, sortConfig.sort, sortConfig.sortOrder)
                         .map { it.toUiItem() },
                     sortConfig = sortConfig
                 )
@@ -179,7 +179,6 @@ class BookshelfViewModel(
                         scheduleMissingLocalBookCoverBackfills(books)
                         group.groupId to bookshelfRepository.sortBooks(
                             books,
-                            group,
                             sortConfig.sort,
                             sortConfig.sortOrder
                         ).map { it.toUiItem() }.toImmutableList()
@@ -217,13 +216,9 @@ class BookshelfViewModel(
     private val selectedGroupCanReorderFlow = combine(
         isEditModeFlow,
         searchModeFlow,
-        groupIdFlow,
-        groupsFlow,
         sortConfigFlow
-    ) { isEditMode, isSearchMode, groupId, groups, sortConfig ->
-        val group = groups.find { it.groupId == groupId }
-        val bookSort = group?.bookSort?.takeIf { it >= 0 } ?: sortConfig.sort
-        isEditMode && !isSearchMode && bookSort == 3
+    ) { isEditMode, isSearchMode, sortConfig ->
+        isEditMode && !isSearchMode && sortConfig.sort == 3
     }.distinctUntilChanged()
 
     private val selectedVisibleBookUrlsFlow = combine(

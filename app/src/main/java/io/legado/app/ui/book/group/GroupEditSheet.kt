@@ -23,13 +23,11 @@ import androidx.compose.material.icons.filled.FolderOpen
 import androidx.compose.material.icons.filled.Restore
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import io.legado.app.R
@@ -39,10 +37,8 @@ import io.legado.app.ui.widget.components.AppTextField
 import io.legado.app.ui.widget.components.alert.AppAlertDialog
 import io.legado.app.ui.widget.components.button.ConfirmDismissButtonsRow
 import io.legado.app.ui.widget.components.button.series.MediumTonalButton
-import io.legado.app.ui.widget.components.card.GlassCard
 import io.legado.app.ui.widget.components.image.cover.CoilBookCover
 import io.legado.app.ui.widget.components.modalBottomSheet.AppModalBottomSheet
-import io.legado.app.ui.widget.components.settingItem.CompactDropdownSettingItem
 import io.legado.app.ui.widget.components.settingItem.CompactSwitchSettingItem
 import io.legado.app.utils.FileUtils
 import io.legado.app.utils.MD5Utils
@@ -110,7 +106,6 @@ fun GroupEditContent(
     var groupName by remember(group) { mutableStateOf(group?.groupName ?: "") }
     var isPrivate by remember(group) { mutableStateOf(group?.isPrivate ?: false) }
     var showDisablePrivateDialog by remember(group) { mutableStateOf(false) }
-    var selectedSortIndex by remember(group) { mutableIntStateOf(group?.bookSort ?: -1) }
     var isSaving by remember(group) { mutableStateOf(false) }
     var localDirectoryUri by remember(group) { mutableStateOf(group?.localDirectoryUri) }
 
@@ -125,10 +120,6 @@ fun GroupEditContent(
         }
     }
 
-    val sortOptions = stringArrayResource(R.array.book_sort)
-    val sortEntryValues = remember(sortOptions) {
-        Array(sortOptions.size) { (it - 1).toString() }
-    }
     val canSetPrivate = group == null || group.groupId > 0
 
     val selectImage = rememberLauncherForActivityResult(SelectImageContract()) { result ->
@@ -186,23 +177,6 @@ fun GroupEditContent(
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true
                 )
-
-                if (!isLocalDirectory) {
-                    GlassCard(
-                        containerColor = LegadoTheme.colorScheme.onSheetContent,
-                    ) {
-                        CompactDropdownSettingItem(
-                            title = stringResource(R.string.sort),
-                            selectedValue = selectedSortIndex.toString(),
-                            color = LegadoTheme.colorScheme.onSheetContent,
-                            displayEntries = sortOptions,
-                            entryValues = sortEntryValues,
-                            onValueChange = {
-                                selectedSortIndex = it.toInt()
-                            }
-                        )
-                    }
-                }
             }
         }
 
@@ -265,7 +239,6 @@ fun GroupEditContent(
                             bookGroup = group.copy(
                                 groupName = groupName,
                                 cover = coverPath,
-                                bookSort = selectedSortIndex,
                                 isPrivate = isPrivate,
                                 localDirectoryUri = localDirectoryUri
                             ),
@@ -280,7 +253,6 @@ fun GroupEditContent(
                     } else {
                         viewModel.addGroup(
                             groupName,
-                            selectedSortIndex,
                             enableRefresh = true,
                             isPrivate,
                             coverPath,
