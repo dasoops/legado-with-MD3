@@ -9,6 +9,7 @@ import io.legado.app.data.entities.BookGroup
 import io.legado.app.data.repository.BookGroupRepository
 import io.legado.app.data.repository.BookRepository
 import io.legado.app.data.repository.BookshelfRepository
+import io.legado.app.domain.model.BookTags
 import io.legado.app.domain.usecase.ExportBookshelfUseCase
 import io.legado.app.domain.gateway.BookshelfSettingsGateway
 import io.legado.app.domain.gateway.AppShellSettingsGateway
@@ -108,6 +109,11 @@ class BookshelfViewModel(
         .shareIn(viewModelScope, SharingStarted.WhileSubscribed(5000), replay = 1)
 
     val allGroupsFlow: StateFlow<List<BookGroup>> = bookGroupRepository.flowAll()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+    // 书籍标签与标签分组已解耦: 分组手动维护, 但添加书籍标签时仍以书籍上的实际标签作为候选.
+    val tagNamesFlow: StateFlow<List<String>> = bookRepository.flowTagNames()
+        .map { tags -> tags.filterNot { it in BookTags.builtIn } }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     private data class GroupPreviewState(

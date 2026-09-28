@@ -81,11 +81,8 @@ import coil3.ImageLoader
 import coil3.compose.AsyncImage
 import coil3.size.Size
 import io.legado.app.feature.booktags.TagSelectSheet
-import io.legado.app.domain.model.BookTags
-import kotlinx.collections.immutable.toImmutableList
 import io.legado.app.R
 import io.legado.app.constant.BookType
-import io.legado.app.data.entities.BookGroup
 import io.legado.app.data.entities.BookSource
 import io.legado.app.data.entities.SearchBook
 import io.legado.app.help.coil.CoverExtras
@@ -144,7 +141,7 @@ import top.yukonga.miuix.kmp.basic.TopAppBar as MiuixTopAppBar
 @Composable
 fun BookInfoScreen(
     state: BookInfoUiState,
-    groups: ImmutableList<BookGroup>,
+    tags: ImmutableList<String>,
     onIntent: (BookInfoIntent) -> Unit,
     onBack: () -> Unit,
     sharedTransitionScope: SharedTransitionScope? = null,
@@ -202,7 +199,7 @@ fun BookInfoScreen(
     }) {
         BookInfoScreenContent(
             state = state,
-            groups = groups,
+            tags = tags,
             onIntent = onIntent,
             onBack = onBack,
             sharedTransitionScope = sharedTransitionScope,
@@ -225,7 +222,7 @@ fun BookInfoScreen(
 @Composable
 private fun BookInfoScreenContent(
     state: BookInfoUiState,
-    groups: ImmutableList<BookGroup>,
+    tags: ImmutableList<String>,
     onIntent: (BookInfoIntent) -> Unit,
     onBack: () -> Unit,
     sharedTransitionScope: SharedTransitionScope?,
@@ -386,8 +383,7 @@ private fun BookInfoScreenContent(
         BookInfoSheet.GroupPicker -> {
             TagSelectSheet(
                 show = currentSheet == BookInfoSheet.GroupPicker,
-                tags = groups.filter { it.isTag && it.groupName !in BookTags.builtIn }
-                    .map { it.groupName }.toImmutableList(),
+                tags = tags,
                 onDismissRequest = { onIntent(BookInfoIntent.DismissSheet) },
                 onConfirm = { onIntent(BookInfoIntent.AddTags(it)) },
             )

@@ -31,7 +31,7 @@ class BookTagsRepositoryTest {
         db = Room.inMemoryDatabaseBuilder(RuntimeEnvironment.getApplication(), AppDatabase::class.java)
             .allowMainThreadQueries().build()
         books = BookRepository(db.bookDao, db.bookChapterDao, db)
-        groups = BookGroupRepository(db.bookGroupDao, books)
+        groups = BookGroupRepository(db.bookGroupDao)
     }
 
     @After
@@ -54,38 +54,31 @@ class BookTagsRepositoryTest {
     }
 
     @Test
-    fun `标签分组随书籍标签和阅读状态变化且不落库`() = runBlocking {
+    fun `书籍标签不再自动生成标签分组`() = runBlocking {
         db.bookGroupDao.insert(BookGroup(1, "目录", localDirectoryUri = "file:///Books"))
         db.bookDao.insert(Book(bookUrl = "a", customTag = "Shared", totalChapterNum = 10))
-        assertTrue(groups.flowAll().first { list -> list.any { it.isLocalDirectory } }.any { it.isLocalDirectory })
-        assertTrue(groups.flowAll().first { list -> list.any { it.groupName == "Shared" && it.isTag } }
-            .any { it.groupName == "Shared" && it.isTag })
+        val all = groups.flowAll().first { list -> list.any { it.isLocalDirectory } }
+        assertTrue(all.any { it.isLocalDirectory })
+        assertFalse(all.any { it.isTag })
+        // 标签分组改为手动维护, 但书籍标签与阅读状态仍可用于动态筛选书目
         assertEquals(1, books.flowBookShelfByGroup(BookTags.groupId("Shared")).first().size)
-        assertTrue(groups.flowAll().first { list -> list.any { it.groupName == BookTags.UNREAD } }
-            .any { it.groupName == BookTags.UNREAD })
-        db.bookDao.update(db.bookDao.getBook("a")!!.copy(customTag = null, durChapterIndex = 9))
-        val updated = groups.flowAll().first { list ->
-            list.any { it.groupName == BookTags.READ } &&
-                list.none { it.groupName == "Shared" || it.groupName == BookTags.UNREAD }
-        }
-        assertFalse(updated.any { it.groupName == "Shared" || it.groupName == BookTags.UNREAD })
-        assertTrue(updated.any { it.groupName == BookTags.READ })
+        assertTrue(books.flowTagNames().first().contains(BookTags.UNREAD))
         assertEquals(listOf("目录"), db.bookGroupDao.all.map { it.groupName })
     }
 
     @Test
-    fun `标签分组的显示与排序可持久化`() = runBlocking {
+    fun `手动标签分组的显示与排序可持久化`() = runBlocking {
         db.bookGroupDao.insert(BookGroup(BookGroup.IdAll, "全部", order = -10))
         db.bookDao.insert(Book(bookUrl = "a", customTag = "Shared", durChapterIndex = 1))
         val tagId = BookTags.groupId("Shared")
-        val tag = groups.flowAll().first { list -> list.any { it.groupId == tagId } }
-            .first { it.groupId == tagId }
+        groups.insert(BookGroup(tagId, "Shared", order = 5))
+        assertTrue(groups.flowAll().first().any { it.groupId == tagId })
 
-        groups.upsert(tag.copy(show = false, order = 5))
+        groups.upsert(BookGroup(tagId, "Shared", order = 5, show = false))
         assertFalse(groups.flowShow().first().any { it.groupId == tagId })
         assertTrue(db.bookGroupDao.all.any { it.groupId == tagId && !it.show })
 
-        groups.upsert(tag.copy(show = true, order = -9))
+        groups.upsert(BookGroup(tagId, "Shared", order = -9, show = true))
         assertEquals(
             listOf(BookGroup.IdAll, tagId),
             groups.flowAll().first()

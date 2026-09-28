@@ -65,7 +65,7 @@ fun GroupEditSheet(
     AppModalBottomSheet(
         show = show,
         onDismissRequest = onDismissRequest,
-        startAction = if (group != null && (group.groupId > 0 || group.groupId == Long.MIN_VALUE)) {
+        startAction = if (group != null && (group.groupId > 0 || group.groupId == Long.MIN_VALUE || group.isTag)) {
             {
                 GroupDeleteAction(
                     group = group,

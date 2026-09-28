@@ -9,6 +9,7 @@ import io.legado.app.data.repository.BookGroupRepository
 import io.legado.app.data.repository.BookRepository
 import io.legado.app.data.repository.SearchRepository
 import io.legado.app.domain.gateway.BookExportSettingsGateway
+import io.legado.app.domain.model.BookTags
 import io.legado.app.domain.model.settings.BookExportSettings
 import io.legado.app.domain.usecase.DeleteBooksUseCase
 import io.legado.app.help.config.LocalConfig
@@ -52,6 +53,7 @@ data class BookshelfManageScreenUiState(
     val groupId: Long = -1,
     val groupName: String? = null,
     val groupList: List<BookGroup> = emptyList(),
+    val tagNames: List<String> = emptyList(),
     val books: List<Book> = emptyList(),
     val bookSort: Int = bookshelfSettingsGateway.currentSettings.bookshelfSort,
     val bookSortOrder: Int = bookshelfSettingsGateway.currentSettings.bookshelfSortOrder,
@@ -106,6 +108,11 @@ class BookshelfManageScreenViewModel(
     init {
         viewModelScope.launch {
             bookExportSettingsGateway.settings.collect(::syncExportConfig)
+        }
+        viewModelScope.launch {
+            bookRepository.flowTagNames().collect { tags ->
+                _uiState.update { it.copy(tagNames = tags.filterNot { tag -> tag in BookTags.builtIn }) }
+            }
         }
     }
 

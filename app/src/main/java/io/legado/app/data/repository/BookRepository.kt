@@ -111,13 +111,6 @@ class BookRepository(
         }.distinct().sorted()
     }
 
-    fun flowDirectoryTagNames(): Flow<Set<String>> = bookDao.flowBookShelf().map { books ->
-        books
-            .filter { it.type and io.legado.app.constant.BookType.local != 0 && !it.isNotShelf }
-            .flatMap { book -> BookTags.directoryNames(book.bookUrl) }
-            .toSet()
-    }
-
     fun flowBookShelfByGroup(group: BookGroup): Flow<List<BookShelfItem>> =
         when {
             group.isAdvanced -> {

@@ -102,7 +102,6 @@ import io.legado.app.data.entities.BookGroup
 import io.legado.app.feature.localdirectory.LocalDirectoryRouteScreen
 import io.legado.app.ui.book.group.GroupEditSheet
 import io.legado.app.feature.booktags.TagSelectSheet
-import io.legado.app.domain.model.BookTags
 import kotlinx.collections.immutable.toImmutableList
 import io.legado.app.ui.main.bookCoverSharedElementKey
 import io.legado.app.ui.theme.LegadoTheme
@@ -164,11 +163,13 @@ fun BookshelfRouteScreen(
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val allGroups by viewModel.allGroupsFlow.collectAsStateWithLifecycle()
+    val allTags by viewModel.tagNamesFlow.collectAsStateWithLifecycle()
     BookshelfScreen(
         uiState = state,
         onIntent = viewModel::onIntent,
         effects = viewModel.effects,
         allGroups = allGroups,
+        allTags = allTags,
         scrollToTopRequest = scrollToTopRequest,
         onScrollToTopRequestHandled = onScrollToTopRequestHandled,
         onBookClick = onBookClick,
@@ -190,6 +191,7 @@ fun BookshelfScreen(
     onIntent: (BookshelfIntent) -> Unit,
     effects: kotlinx.coroutines.flow.Flow<BookshelfEffect>,
     allGroups: List<io.legado.app.data.entities.BookGroup>,
+    allTags: List<String> = emptyList(),
     scrollToTopRequest: Long = 0L,
     onScrollToTopRequestHandled: (Long) -> Unit = {},
     onBookClick: (BookShelfItem, String?) -> Unit,
@@ -997,6 +999,7 @@ fun BookshelfScreen(
         uiState = uiState,
         onIntent = onIntent,
         allGroups = allGroups,
+        allTags = allTags,
         selectedBookUrls = selectedBookUrls,
         exportLauncher = exportLauncher,
         clearSelection = clearSelection
@@ -1065,6 +1068,7 @@ private fun BookshelfOverlays(
     uiState: BookshelfUiState,
     onIntent: (BookshelfIntent) -> Unit,
     allGroups: List<BookGroup>,
+    allTags: List<String>,
     selectedBookUrls: Set<String>,
     exportLauncher: ManagedActivityResultLauncher<String, Uri?>,
     clearSelection: () -> Unit
@@ -1092,7 +1096,7 @@ private fun BookshelfOverlays(
 
     if (activeOverlay is BookshelfOverlay.GroupEditSheet) {
         val editGroup = allGroups.firstOrNull { it.groupId == activeOverlay.groupId }
-        if (editGroup != null && !editGroup.isTag) {
+        if (editGroup != null) {
             GroupEditSheet(
                 show = true,
                 group = editGroup,
@@ -1103,8 +1107,7 @@ private fun BookshelfOverlays(
 
     TagSelectSheet(
         show = activeOverlay == BookshelfOverlay.GroupSelectSheet,
-        tags = allGroups.filter { it.isTag && it.groupName !in BookTags.builtIn }
-            .map { it.groupName }.toImmutableList(),
+        tags = allTags.toImmutableList(),
         onDismissRequest = { onIntent(BookshelfIntent.DismissOverlay) },
         onConfirm = { tags -> onIntent(BookshelfIntent.AddTags(selectedBookUrls, tags)) }
     )

@@ -64,7 +64,6 @@ import io.legado.app.help.book.isLocal
 import io.legado.app.help.book.tryParesExportFileName
 import io.legado.app.service.ExportBookService
 import io.legado.app.feature.booktags.TagSelectSheet
-import io.legado.app.domain.model.BookTags
 import kotlinx.collections.immutable.toImmutableList
 import io.legado.app.ui.theme.LegadoTheme
 import io.legado.app.ui.theme.LegadoTheme.composeEngine
@@ -696,8 +695,7 @@ private fun BookshelfManageScreen(
 
     TagSelectSheet(
         show = showGroupSelectSheet,
-        tags = state.groupList.filter { it.isTag && it.groupName !in BookTags.builtIn }
-            .map { it.groupName }.toImmutableList(),
+        tags = state.tagNames.toImmutableList(),
         onDismissRequest = { showGroupSelectSheet = false },
         onConfirm = { tags ->
             val moveSet = pendingMoveGroupBookUrl?.let { setOf(it) } ?: selectedBookUrls

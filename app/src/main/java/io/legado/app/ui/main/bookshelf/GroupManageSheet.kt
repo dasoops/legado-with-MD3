@@ -71,7 +71,7 @@ fun GroupManageSheet(
     var hasPendingOrder by remember { mutableStateOf(false) }
     val listState = rememberLazyListState()
 
-    // 全部/本地目录/标签三类分组的显示与排序统一持久化; 标签分组首次调整时在此落库.
+    // 全部/本地目录/标签三类分组的显示与排序统一持久化.
     val persistGroups: (Map<Long, Boolean>) -> Unit = { showOverrides ->
         val updated = listData.mapIndexed { index, group ->
             group.copy(order = index, show = showOverrides[group.groupId] ?: group.show)
@@ -105,7 +105,7 @@ fun GroupManageSheet(
         onDismissRequest = onDismissRequest,
         title = if (!isEditing) stringResource(R.string.group_manage) else stringResource(R.string.group_edit),
         startAction = editingGroup?.takeIf {
-            isEditing && (it.groupId > 0 || it.groupId == Long.MIN_VALUE)
+            isEditing && (it.groupId > 0 || it.groupId == Long.MIN_VALUE || it.isTag)
         }?.let { group ->
             {
                 GroupDeleteAction(
@@ -242,7 +242,7 @@ fun GroupManageSheet(
                             onEnabledChange = { isChecked ->
                                 persistGroups(mapOf(group.groupId to isChecked))
                             },
-                            onClickEdit = if (group.isLocalDirectory || group.groupId > 0) {
+                            onClickEdit = if (group.isLocalDirectory || group.groupId > 0 || group.isTag) {
                                 {
                                     editingGroup = group
                                     coverPath = group.cover

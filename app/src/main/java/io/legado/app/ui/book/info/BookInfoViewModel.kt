@@ -29,6 +29,7 @@ import io.legado.app.data.repository.SearchRepository
 import io.legado.app.domain.gateway.CoverSettingsGateway
 import io.legado.app.domain.gateway.OtherSettingsGateway
 import io.legado.app.domain.gateway.ThemeSettingsGateway
+import io.legado.app.domain.model.BookTags
 import io.legado.app.domain.model.settings.CoverSettings
 import io.legado.app.domain.model.settings.ThemeSettings
 import io.legado.app.domain.usecase.ClearBookCacheUseCase
@@ -99,7 +100,8 @@ class BookInfoViewModel(
     private val otherSettingsGateway: OtherSettingsGateway,
 ) : BaseViewModel(application) {
 
-    val allGroups = bookGroupRepository.flowAll().map { it.toImmutableList() }
+    val tagNames = bookRepository.flowTagNames()
+        .map { tags -> tags.filterNot { it in BookTags.builtIn }.toImmutableList() }
 
     // 仅保存“每本书/屏幕”状态；外观与其他设置不在此存储，避免整体重置时被抹掉。
     private val _screenState = MutableStateFlow(BookInfoUiState())

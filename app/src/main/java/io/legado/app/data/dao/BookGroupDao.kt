@@ -49,7 +49,7 @@ interface BookGroupDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insert(vararg bookGroup: BookGroup)
 
-    // 标签分组按需落库以保存显示/排序, 首次写入时记录尚不存在.
+    // 标签分组与普通分组一样按需落库
     @Upsert
     fun upsert(vararg bookGroup: BookGroup)
 

@@ -23,7 +23,6 @@ import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.legado.app.R
-import io.legado.app.data.entities.BookGroup
 import io.legado.app.ui.book.info.edit.BookInfoEditActivity
 import io.legado.app.ui.book.toc.TocActivityResult
 import io.legado.app.ui.widget.components.filePicker.FilePickerSheet
@@ -158,8 +157,8 @@ fun BookInfoRouteScreen(
     )
     BookInfoScreen(
         state = uiState,
-        groups = viewModel.allGroups
-            .collectAsStateWithLifecycle(persistentListOf<BookGroup>()).value,
+        tags = viewModel.tagNames
+            .collectAsStateWithLifecycle(persistentListOf<String>()).value,
         onIntent = viewModel::onIntent,
         onBack = onBack,
         sharedTransitionScope = sharedTransitionScope,

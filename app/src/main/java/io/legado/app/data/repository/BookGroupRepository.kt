@@ -1,43 +1,18 @@
 package io.legado.app.data.repository
 
-import io.legado.app.domain.model.BookTags
 import io.legado.app.data.dao.BookGroupDao
 import io.legado.app.data.entities.BookGroup
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.Flow
 
 class BookGroupRepository(
     private val bookGroupDao: BookGroupDao,
-    private val bookRepository: BookRepository,
 ) {
 
+    // 分组由用户(或本地目录/高级分组创建流程)显式落库, 不再从书籍标签实时生成,
+    // 否则本地目录路径等标签会凭空变成一堆不可维护的标签分组.
     fun flowAll(): Flow<List<BookGroup>> {
-        return combine(
-            bookGroupDao.flowAll(),
-            bookRepository.flowTagNames(),
-            bookRepository.flowDirectoryTagNames()
-        ) { groups, tags, directoryTags ->
-            val liveTagIds = tags.mapTo(HashSet()) { BookTags.groupId(it) }
-            // 标签分组默认按书籍标签实时生成; 用户调整过显示/排序后会落库, 此时以落库状态为准.
-            // 高级分组已落库且不依赖书籍标签存在, 始终保留.
-            val persisted = groups.filter { group ->
-                group.isAdvanced || group.isLocalDirectory || group.groupId == BookGroup.IdAll ||
-                    (group.isTag && group.groupId in liveTagIds)
-            }.sortedBy { it.order }
-            val persistedIds = persisted.mapTo(HashSet()) { it.groupId }
-            // 实际标签必须实时生成, 否则新标签在首次调整显示或排序前不会出现在分组列表.
-            val generated = (tags + BookTags.builtInGroupTags).distinct().map { tag ->
-                val groupId = BookTags.groupId(tag)
-                if (groupId in persistedIds) null else BookGroup(
-                    groupId = groupId,
-                    groupName = tag,
-                    show = false
-                )
-            }
-            persisted + generated.filterNotNull()
-        }
+        return bookGroupDao.flowAll()
     }
 
     fun flowSelect(): Flow<List<BookGroup>> {
@@ -69,9 +44,7 @@ class BookGroupRepository(
     }
 
     suspend fun getByID(id: Long): BookGroup? {
-        return if (id < -100 && id != Long.MIN_VALUE) {
-            flowAll().first().firstOrNull { it.groupId == id }
-        } else bookGroupDao.getByID(id)
+        return bookGroupDao.getByID(id)
     }
 
     suspend fun getIdsSum(): Long {
