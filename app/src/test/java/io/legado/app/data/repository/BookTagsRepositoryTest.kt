@@ -7,7 +7,6 @@ import io.legado.app.data.AppDatabase
 import io.legado.app.data.DatabaseMigrations
 import io.legado.app.data.entities.Book
 import io.legado.app.data.entities.BookGroup
-import io.legado.app.data.entities.TagGroupRule
 import io.legado.app.domain.model.BookTags
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
@@ -96,16 +95,27 @@ class BookTagsRepositoryTest {
     }
 
     @Test
-    fun `迁移只清理旧分组和规则并保留书籍标签目录`() {
+    fun `迁移只清理旧分组并保留书籍标签目录`() {
         db.bookGroupDao.insert(
             BookGroup(-1, "全部"), BookGroup(-23, "连载已读"),
             BookGroup(1, "手动"), BookGroup(2, "Books", localDirectoryUri = "file:///Books")
         )
         db.bookDao.insert(Book(bookUrl = "a", customTag = "连载,旧标签", kind = "完本", group = 3))
-        runBlocking { db.tagGroupRuleDao.insert(TagGroupRule(pattern = "连载", groupName = "手动")) }
-        DatabaseMigrations.Migration_107_108().onPostMigrate(db.openHelper.writableDatabase)
+        // Migration_107_108 的 onPostMigrate 会访问历史表 tag_group_rules, 当前 schema 已删除该表,
+        // 重建并预置一行以还原 107 版本时的状态, 才能直接复用它验证迁移清理行为.
+        val sqlite = db.openHelper.writableDatabase
+        sqlite.execSQL(
+            "CREATE TABLE IF NOT EXISTS `tag_group_rules` (`id` INTEGER NOT NULL, " +
+                    "`pattern` TEXT NOT NULL, `groupName` TEXT NOT NULL, " +
+                    "`order` INTEGER NOT NULL, PRIMARY KEY(`id`))"
+        )
+        sqlite.execSQL("INSERT INTO tag_group_rules (id, pattern, groupName, `order`) VALUES (1, '连载', '手动', 0)")
+        DatabaseMigrations.Migration_107_108().onPostMigrate(sqlite)
         assertEquals(setOf(-1L, 2L), db.bookGroupDao.all.map { it.groupId }.toSet())
-        assertTrue(db.tagGroupRuleDao.getAll().isEmpty())
+        sqlite.query("SELECT COUNT(*) FROM tag_group_rules").use { cursor ->
+            cursor.moveToFirst()
+            assertEquals(0, cursor.getInt(0))
+        }
         val book = db.bookDao.getBook("a")!!
         assertEquals(2L, book.group)
         assertEquals("连载,旧标签", book.customTag)
@@ -136,6 +146,61 @@ class BookTagsRepositoryTest {
         db.bookDao.insert(Book(bookUrl = "a", customTag = original))
         books.addTags(setOf("a"), setOf("新标签"))
         assertEquals("$original,新标签", db.bookDao.getBook("a")!!.customTag)
+    }
+
+    @Test
+    fun `高级分组始终出现在分组列表`() = runBlocking {
+        db.bookGroupDao.insert(BookGroup(5L, "科幻", pattern = "author=刘慈欣"))
+        val group = groups.flowAll().first { list -> list.any { it.groupId == 5L } }
+        assertTrue(group.any { it.groupId == 5L && it.isAdvanced })
+    }
+
+    @Test
+    fun `高级分组按作者正则动态匹配书目`() = runBlocking {
+        db.bookDao.insert(
+            Book(bookUrl = "a", name = "三体", author = "刘慈欣", customTag = "科幻,宇宙"),
+            Book(bookUrl = "b", name = "诡秘之主", author = "爱潜水的乌贼", customTag = "奇幻,冒险"),
+            Book(bookUrl = "c", name = "庆余年", author = "猫腻", customTag = "历史,权谋"),
+        )
+        val group = BookGroup(5L, "科幻", pattern = "author=刘慈欣")
+
+        val matched = books.flowBookShelfByGroup(group)
+            .first { list -> list.isNotEmpty() }
+        assertEquals(listOf("三体"), matched.map { it.name })
+    }
+
+    @Test
+    fun `高级分组按标签正则动态匹配书目`() = runBlocking {
+        db.bookDao.insert(
+            Book(bookUrl = "a", name = "三体", author = "刘慈欣", customTag = "科幻,宇宙"),
+            Book(bookUrl = "c", name = "庆余年", author = "猫腻", customTag = "历史,权谋"),
+        )
+        val group = BookGroup(6L, "历史", pattern = "tags=.*历史.*")
+
+        val matched = books.flowBookShelfByGroup(group)
+            .first { list -> list.isNotEmpty() }
+        assertEquals(listOf("庆余年"), matched.map { it.name })
+    }
+
+    @Test
+    fun `高级分组非法正则返回空`() = runBlocking {
+        db.bookDao.insert(Book(bookUrl = "a", name = "三体", author = "刘慈欣"))
+        val group = BookGroup(7L, "坏正则", pattern = "[")
+
+        assertTrue(books.flowBookShelfByGroup(group).first().isEmpty())
+    }
+
+    @Test
+    fun `按分组 id 查询高级分组同样动态匹配`() = runBlocking {
+        db.bookDao.insert(
+            Book(bookUrl = "a", name = "三体", author = "刘慈欣"),
+            Book(bookUrl = "c", name = "庆余年", author = "猫腻"),
+        )
+        db.bookGroupDao.insert(BookGroup(8L, "科幻", pattern = "author=刘慈欣"))
+
+        val matched = books.flowBookShelfByGroup(8L)
+            .first { list -> list.isNotEmpty() }
+        assertEquals(listOf("三体"), matched.map { it.name })
     }
 
     @Test

@@ -64,6 +64,7 @@ fun GroupManageSheet(
     var editingGroup by remember { mutableStateOf<BookGroup?>(null) }
     var isEditing by remember { mutableStateOf(false) }
     var isCreatingTag by remember { mutableStateOf(false) }
+    var isCreatingAdvanced by remember { mutableStateOf(false) }
     var coverPath by remember(editingGroup) { mutableStateOf(editingGroup?.cover) }
 
     var listData by remember { mutableStateOf(allGroups) }
@@ -112,6 +113,8 @@ fun GroupManageSheet(
                     onDismissRequest = {
                         editingGroup = null
                         isEditing = false
+                        isCreatingTag = false
+                        isCreatingAdvanced = false
                     },
                     viewModel = viewModel
                 )
@@ -140,7 +143,6 @@ fun GroupManageSheet(
                                 enableRefresh = false,
                                 isPrivate = false,
                                 cover = null,
-                                pattern = null,
                                 localDirectoryUri = uri.toString(),
                                 onSuccess = { showMenu = false }
                             )
@@ -167,6 +169,18 @@ fun GroupManageSheet(
                                 showMenu = false
                                 editingGroup = null
                                 isCreatingTag = true
+                                isCreatingAdvanced = false
+                                isEditing = true
+                            }
+                        )
+                        RoundDropdownMenuItem(
+                            text = stringResource(R.string.add_advanced_group),
+                            leadingIcon = { Icon(Icons.Default.Add, null) },
+                            onClick = {
+                                showMenu = false
+                                editingGroup = null
+                                isCreatingAdvanced = true
+                                isCreatingTag = false
                                 isEditing = true
                             }
                         )
@@ -193,9 +207,12 @@ fun GroupManageSheet(
                 GroupEditContent(
                     group = editingGroup,
                     isTag = isCreatingTag,
+                    isAdvanced = isCreatingAdvanced,
                     onDismissRequest = {
                         editingGroup = null
                         isEditing = false
+                        isCreatingTag = false
+                        isCreatingAdvanced = false
                     },
                     coverPath = coverPath,
                     onCoverPathChange = { coverPath = it },
@@ -229,6 +246,8 @@ fun GroupManageSheet(
                                 {
                                     editingGroup = group
                                     coverPath = group.cover
+                                    isCreatingTag = false
+                                    isCreatingAdvanced = false
                                     isEditing = true
                                 }
                             } else {

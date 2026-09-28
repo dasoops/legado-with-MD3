@@ -80,7 +80,6 @@ object Backup {
             "homepageCustomSets.json",
             "highlightRule.json",
             "highlightTagRule.json",
-            "tagGroupRule.json",
             "servers.json",
             ReadBookConfig.configFileName,
             ReadBookConfig.shareConfigFileName,
@@ -190,9 +189,6 @@ object Backup {
         }
         if (BackupConfig.dbIsNotIgnored("highlightTagRule", true)) {
             writeListToJson(appDb.highlightTagRuleDao.getAll(), "highlightTagRule.json", backupPath)
-        }
-        if (BackupConfig.dbIsNotIgnored("tagGroupRule", true)) {
-            writeListToJson(appDb.tagGroupRuleDao.getAll(), "tagGroupRule.json", backupPath)
         }
         if (BackupConfig.dbIsNotIgnored("server", true)) {
             GSON.toJson(appDb.serverDao.all).let { json ->

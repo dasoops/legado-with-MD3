@@ -23,20 +23,7 @@ object DatabaseMigrations {
             migration_39_40, migration_40_41, migration_41_42, migration_42_43,
             migration_82_83, migration_98_99, migration_99_100,
             migration_102_103, migration_105_106,
-            migration_108_109,
         )
-    }
-
-    private val migration_108_109 = object : Migration(108, 109) {
-        override fun migrate(db: SupportSQLiteDatabase) {
-            db.execSQL("DROP TABLE IF EXISTS rssSources")
-            db.execSQL("DROP TABLE IF EXISTS rssArticles")
-            db.execSQL("DROP TABLE IF EXISTS rssReadRecords")
-            db.execSQL("DROP TABLE IF EXISTS rssStars")
-            db.execSQL("DROP TABLE IF EXISTS httpTTS")
-            db.execSQL("DROP TABLE IF EXISTS dictRules")
-            db.execSQL("DROP TABLE IF EXISTS cloud_tts_engines")
-        }
     }
 
     private val migration_10_11 = object : Migration(10, 11) {
@@ -595,6 +582,10 @@ object DatabaseMigrations {
             """.trimIndent())
         }
     }
+
+    @DeleteTable.Entries(DeleteTable("tag_group_rules"))
+    @Suppress("ClassName")
+    class Migration_108_109 : AutoMigrationSpec
 
     private val migration_98_99 = object : Migration(98, 99) {
         override fun migrate(db: SupportSQLiteDatabase) {

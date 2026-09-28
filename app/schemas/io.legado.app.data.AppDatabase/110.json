@@ -1,8 +1,8 @@
 {
   "formatVersion": 1,
   "database": {
-    "version": 109,
-    "identityHash": "02c436d6d6c0d33420f3849477f8c65e",
+    "version": 110,
+    "identityHash": "61a4a5f4eb376e4e9cce2007b8517049",
     "entities": [
       {
         "tableName": "books",
@@ -242,7 +242,7 @@
       },
       {
         "tableName": "book_groups",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`groupId` INTEGER NOT NULL, `groupName` TEXT NOT NULL, `cover` TEXT, `order` INTEGER NOT NULL, `enableRefresh` INTEGER NOT NULL DEFAULT 1, `show` INTEGER NOT NULL DEFAULT 1, `bookSort` INTEGER NOT NULL DEFAULT -1, `isPrivate` INTEGER NOT NULL DEFAULT 0, `localDirectoryUri` TEXT, PRIMARY KEY(`groupId`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`groupId` INTEGER NOT NULL, `groupName` TEXT NOT NULL, `cover` TEXT, `order` INTEGER NOT NULL, `enableRefresh` INTEGER NOT NULL DEFAULT 1, `show` INTEGER NOT NULL DEFAULT 1, `bookSort` INTEGER NOT NULL DEFAULT -1, `isPrivate` INTEGER NOT NULL DEFAULT 0, `localDirectoryUri` TEXT, `pattern` TEXT, PRIMARY KEY(`groupId`))",
         "fields": [
           {
             "fieldPath": "groupId",
@@ -298,6 +298,11 @@
           {
             "fieldPath": "localDirectoryUri",
             "columnName": "localDirectoryUri",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "pattern",
+            "columnName": "pattern",
             "affinity": "TEXT"
           }
         ],
@@ -3977,7 +3982,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '02c436d6d6c0d33420f3849477f8c65e')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '61a4a5f4eb376e4e9cce2007b8517049')"
     ]
   }
 }

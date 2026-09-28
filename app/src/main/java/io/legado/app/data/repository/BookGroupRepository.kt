@@ -21,8 +21,9 @@ class BookGroupRepository(
         ) { groups, tags, directoryTags ->
             val liveTagIds = tags.mapTo(HashSet()) { BookTags.groupId(it) }
             // 标签分组默认按书籍标签实时生成; 用户调整过显示/排序后会落库, 此时以落库状态为准.
+            // 高级分组已落库且不依赖书籍标签存在, 始终保留.
             val persisted = groups.filter { group ->
-                group.isLocalDirectory || group.groupId == BookGroup.IdAll ||
+                group.isAdvanced || group.isLocalDirectory || group.groupId == BookGroup.IdAll ||
                     (group.isTag && group.groupId in liveTagIds)
             }.sortedBy { it.order }
             val persistedIds = persisted.mapTo(HashSet()) { it.groupId }
