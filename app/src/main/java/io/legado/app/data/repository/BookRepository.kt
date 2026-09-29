@@ -16,6 +16,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.withContext
@@ -119,9 +120,12 @@ class BookRepository(
                 if (regex == null) {
                     flowOf(emptyList())
                 } else {
-                    bookDao.flowBookShelf().map { books ->
+                    combine(bookDao.flowBookShelf(), appDb.bookGroupDao.flowAll()) { books, groups ->
+                        val localGroupNames = groups
+                            .filter { it.isLocalDirectory }
+                            .associate { it.groupId to it.groupName }
                         books.filterNot { it.isNotShelf }.filter { book ->
-                            regex.containsMatchIn(book.advancedGroupText())
+                            regex.containsMatchIn(book.advancedGroupText(localGroupNames))
                         }
                     }
                 }
@@ -136,12 +140,13 @@ class BookRepository(
             else -> bookDao.flowBookShelfByGroup(group.groupId)
         }
 
-    private fun BookShelfItem.advancedGroupText() = AdvancedGroup.serialize(
+    private fun BookShelfItem.advancedGroupText(localGroupNames: Map<Long, String> = emptyMap()) = AdvancedGroup.serialize(
         name = name,
         author = author,
-        tags = BookTags.grouping(
+        // 本地目录名不再写入书籍标签, 但高级分组仍需能按目录身份筛选.
+        tags = (BookTags.grouping(
             customTag, kind, durChapterIndex, durChapterPos, totalChapterNum
-        ),
+        ) + localGroupNames.filterKeys { (group and it) != 0L }.values).distinct(),
     )
 
     suspend fun addTags(bookUrls: Set<String>, tags: Set<String>) = withContext(Dispatchers.IO) {

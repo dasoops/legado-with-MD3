@@ -202,6 +202,24 @@ class BookTagsRepositoryTest {
     }
 
     @Test
+    fun `高级分组按本地目录名与格式组合匹配`() = runBlocking {
+        db.bookGroupDao.insert(BookGroup(1L, "韩轻", localDirectoryUri = "file:///books/韩轻"))
+        db.bookDao.insert(
+            Book(bookUrl = "a", name = "本地书", customTag = null, kind = "epub", group = 1L),
+            Book(bookUrl = "b", name = "其他书", customTag = "韩轻", kind = "txt"),
+        )
+        val group = BookGroup(
+            2L,
+            "韩轻 EPUB",
+            pattern = "(?i)(?=.*(?:^|\\t)tags=[^\\t]*韩轻)(?=.*(?:^|\\t)tags=[^\\t]*epub)",
+        )
+
+        val matched = books.flowBookShelfByGroup(group)
+            .first { list -> list.isNotEmpty() }
+        assertEquals(listOf("本地书"), matched.map { it.name })
+    }
+
+    @Test
     fun `高级分组非法正则返回空`() = runBlocking {
         db.bookDao.insert(Book(bookUrl = "a", name = "三体", author = "刘慈欣"))
         val group = BookGroup(7L, "坏正则", pattern = "[")
