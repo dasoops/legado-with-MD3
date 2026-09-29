@@ -152,7 +152,11 @@ internal fun relativeDirectoryOf(rootUri: String, bookUrl: String): List<String>
         if (root.isContentScheme()) {
             val rootId = getTreeDocumentId(root)
             val bookId = getDocumentId(bookUrl.toUri())
-            bookId.removePrefix(rootId).trim('/')
+            val relativeId = bookId
+                .takeIf { it.startsWith("$rootId/") }
+                ?.removePrefix("$rootId/")
+                ?: return emptyList()
+            relativeId
                 .split('/')
                 .dropLast(1)
                 .filter { it.isNotBlank() }

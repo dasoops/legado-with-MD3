@@ -25,4 +25,20 @@ class LocalDirectoryTagsTest {
             directoryTagsOf(root, "Novel", "/home/Awork/Novel/ggg/c.txt")
         )
     }
+
+    @Test
+    fun `文档不在所选树下时不泄露绝对文档目录`() {
+        val root = "content://com.android.externalstorage.documents/tree/primary%3ANovel"
+        val book = "content://com.android.externalstorage.documents/document/primary%3AAWork%2Fbook.epub"
+
+        assertEquals(emptyList<String>(), relativeDirectoryOf(root, book))
+    }
+
+    @Test
+    fun `文档 URI 只返回所选树下的相对子目录`() {
+        val root = "content://com.android.externalstorage.documents/tree/primary%3AAWork%2FNovel"
+        val book = "content://com.android.externalstorage.documents/document/primary%3AAWork%2FNovel%2Fggg%2Fbook.epub"
+
+        assertEquals(listOf("ggg"), relativeDirectoryOf(root, book))
+    }
 }
