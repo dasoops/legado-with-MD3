@@ -11,6 +11,7 @@ import io.legado.app.data.entities.readRecord.ReadRecordSession
 import io.legado.app.data.entities.readRecord.ReadRecordTimelineDay
 import io.legado.app.data.entities.readRecord.ReadRecordIdentity
 import io.legado.app.data.entities.readRecord.ReadRecordRepairReport
+import io.legado.app.data.entities.readRecord.ReadRecordTimeBuckets
 import io.legado.app.data.entities.readRecord.ReadRecordTimeTotals
 import io.legado.app.data.local.preferences.LocalPreferencesKeys
 import kotlinx.coroutines.flow.Flow
@@ -19,6 +20,8 @@ import kotlinx.coroutines.flow.map
 import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
+import java.time.LocalDate
+import java.time.ZoneId
 import kotlin.math.max
 import kotlin.math.min
 
@@ -31,6 +34,17 @@ class ReadRecordRepository(
 
     private fun Long.toDateString(): String =
         Instant.fromEpochMilliseconds(this).toLocalDateTime(TimeZone.currentSystemDefault()).date.toString()
+
+    private fun dateRangeMillis(date: String): LongRange? = runCatching {
+        val localDate = LocalDate.parse(date)
+        val zone = ZoneId.systemDefault()
+        val start = localDate.atStartOfDay(zone).toInstant().toEpochMilli()
+        val end = localDate.plusDays(1).atStartOfDay(zone).toInstant().toEpochMilli()
+        start until end
+    }.getOrNull()
+
+    private fun ReadRecordSession.hasTimeOnDate(date: String): Boolean =
+        ReadRecordTimeBuckets.split(startTime, endTime).any { it.date.toString() == date }
 
     val readRecordEnabled: Flow<Boolean> =
         localPreferencesRepository.getPreference(LocalPreferencesKeys.ENABLE_READ_RECORD, true)
@@ -197,8 +211,7 @@ class ReadRecordRepository(
 
             val segmentDuration = normalizedSession.endTime - normalizedSession.startTime
             dao.insertSession(normalizedSession)
-            val dateString = normalizedSession.startTime.toDateString()
-            updateReadRecordDetail(normalizedSession, segmentDuration, normalizedSession.words, dateString)
+            updateReadRecordDetail(normalizedSession, segmentDuration, normalizedSession.words)
             updateReadRecord(normalizedSession, segmentDuration)
         }
     }
@@ -241,45 +254,79 @@ class ReadRecordRepository(
         session: ReadRecordSession,
         durationDelta: Long,
         wordsDelta: Long,
-        dateString: String
     ) {
         if (durationDelta <= 0 && wordsDelta <= 0) return
-        val existingDetail = dao.getDetail(
-            session.deviceId,
-            session.bookName,
-            session.bookAuthor,
-            dateString
-        )
-        if (existingDetail != null) {
-            existingDetail.readTime += durationDelta
-            existingDetail.readWords += wordsDelta
-            existingDetail.firstReadTime = minPositive(existingDetail.firstReadTime, session.startTime)
-            existingDetail.lastReadTime = max(existingDetail.lastReadTime, session.endTime)
-            dao.insertDetail(existingDetail)
-        } else {
-            dao.insertDetail(
-                ReadRecordDetail(
-                    deviceId = session.deviceId,
-                    bookName = session.bookName,
-                    bookAuthor = session.bookAuthor,
-                    date = dateString,
-                    readTime = durationDelta,
-                    readWords = wordsDelta,
-                    firstReadTime = session.startTime,
-                    lastReadTime = session.endTime
-                )
+        val slices = ReadRecordTimeBuckets.split(session.startTime, session.endTime)
+        if (slices.isEmpty()) return
+
+        slices.groupBy { it.date.toString() }.forEach { (date, daySlices) ->
+            val existingDetail = dao.getDetail(
+                session.deviceId,
+                session.bookName,
+                session.bookAuthor,
+                date
             )
+            val dayDuration = daySlices.sumOf { it.duration }
+            val dayWords = if (date == slices.first().date.toString()) wordsDelta else 0L
+            val firstReadTime = daySlices.minOf { it.startTime }
+            val lastReadTime = daySlices.maxOf { it.endTime }
+            if (existingDetail != null) {
+                existingDetail.readTime += dayDuration
+                existingDetail.readWords += dayWords
+                existingDetail.firstReadTime = minPositive(existingDetail.firstReadTime, firstReadTime)
+                existingDetail.lastReadTime = max(existingDetail.lastReadTime, lastReadTime)
+                dao.insertDetail(existingDetail)
+            } else {
+                dao.insertDetail(
+                    ReadRecordDetail(
+                        deviceId = session.deviceId,
+                        bookName = session.bookName,
+                        bookAuthor = session.bookAuthor,
+                        date = date,
+                        readTime = dayDuration,
+                        readWords = dayWords,
+                        firstReadTime = firstReadTime,
+                        lastReadTime = lastReadTime
+                    )
+                )
+            }
+        }
+    }
+
+    /** 从会话重新生成汇总和每日详情, 用于恢复备份时丢弃不可拆分的旧聚合数据。 */
+    suspend fun rebuildReadRecordAggregatesFromSessions() {
+        database.withTransaction {
+            val sessions = dao.allSession
+                .distinctBy { listOf(it.bookName, it.bookAuthor, it.startTime, it.endTime, it.words) }
+            dao.clearReadRecordDetails()
+            dao.clearReadRecords()
+            sessions.groupBy { Triple(it.deviceId, it.bookName, it.bookAuthor) }
+                .forEach { (key, bookSessions) ->
+                    dao.insert(
+                        ReadRecord(
+                            deviceId = key.first,
+                            bookName = key.second,
+                            bookAuthor = key.third,
+                            readTime = bookSessions.sumOf { it.endTime - it.startTime },
+                            lastRead = bookSessions.maxOf { it.endTime },
+                        )
+                    )
+                    bookSessions.forEach { session ->
+                        updateReadRecordDetail(session, session.endTime - session.startTime, session.words)
+                    }
+                }
         }
     }
 
     suspend fun deleteDetail(detail: ReadRecordDetail) {
         database.withTransaction {
+            val dateRange = dateRangeMillis(detail.date) ?: return@withTransaction
             // 聚合详情代表所有设备同一天的阅读，删除时必须同步删除底层阅读时段记录。
             val affectedDevices = dao.allSession.asSequence()
                 .filter {
                     it.bookName == detail.bookName &&
                         it.bookAuthor == detail.bookAuthor &&
-                        it.startTime.toDateString() == detail.date
+                        it.hasTimeOnDate(detail.date)
                 }
                 .mapTo(linkedSetOf()) { it.deviceId }
                 .apply { addAll(dao.getReadRecordsByName(detail.bookName, detail.bookAuthor).map { it.deviceId }) }
@@ -293,7 +340,14 @@ class ReadRecordRepository(
             }
             dao.deleteDetailByNameAndDate(detail.bookName, detail.bookAuthor, detail.date)
             affectedDevices.forEach { deviceId ->
-                dao.deleteSessionsByBookAndDate(deviceId, detail.bookName, detail.bookAuthor, detail.date)
+                dao.deleteSessionsByBookAndTimeRange(
+                    deviceId,
+                    detail.bookName,
+                    detail.bookAuthor,
+                    dateRange.first,
+                    dateRange.last + 1,
+                )
+                rebuildDetailsFromSessions(deviceId, detail.bookName, detail.bookAuthor)
                 updateReadRecordTotal(
                     deviceId,
                     detail.bookName,
@@ -322,14 +376,6 @@ class ReadRecordRepository(
                     .sumOf { it.endTime - it.startTime }
                 ((record?.readTime ?: 0L) - sessionTime).coerceAtLeast(0L)
             }
-            val daySessionsBeforeDelete = affectedDevices.associateWith { deviceId ->
-                dao.getSessionsByBookAndDate(
-                    deviceId,
-                    session.bookName,
-                    session.bookAuthor,
-                    session.startTime.toDateString(),
-                )
-            }
             dao.deleteSessionByIdentity(
                 session.bookName,
                 session.bookAuthor,
@@ -337,70 +383,23 @@ class ReadRecordRepository(
                 session.endTime,
                 session.words,
             )
-            val dateString = session.startTime.toDateString()
             affectedDevices.forEach { deviceId ->
-                    val record = ReadRecord(
-                        deviceId = deviceId,
-                        bookName = session.bookName,
-                        bookAuthor = session.bookAuthor,
-                    )
-                    val remainingSessions = dao.getSessionsByBookAndDate(
-                        deviceId,
-                        record.bookName,
-                        record.bookAuthor,
-                        dateString,
-                    )
-                    val detail = dao.getDetail(
-                        deviceId,
-                        record.bookName,
-                        record.bookAuthor,
-                        dateString,
-                    )
-                    val legacyDetailTime = ((detail?.readTime ?: 0L) -
-                        daySessionsBeforeDelete[deviceId].orEmpty().sumOf { it.endTime - it.startTime }).coerceAtLeast(0L)
-                    val legacyDetailWords = ((detail?.readWords ?: 0L) -
-                        daySessionsBeforeDelete[deviceId].orEmpty().sumOf { it.words }).coerceAtLeast(0L)
-                    if (remainingSessions.isEmpty()) {
-                        if (legacyDetailTime <= 0L && legacyDetailWords <= 0L) {
-                            detail?.let { dao.deleteDetail(it) }
-                        } else {
-                            dao.insertDetail(
-                                (detail ?: ReadRecordDetail(
-                                    deviceId = record.deviceId,
-                                    bookName = record.bookName,
-                                    bookAuthor = record.bookAuthor,
-                                    date = dateString,
-                                )).copy(
-                                    readTime = legacyDetailTime,
-                                    readWords = legacyDetailWords,
-                                )
-                            )
-                        }
-                    } else {
-                        dao.insertDetail(
-                            (detail ?: ReadRecordDetail(
-                                deviceId = record.deviceId,
-                                bookName = record.bookName,
-                                bookAuthor = record.bookAuthor,
-                                date = dateString,
-                            )).copy(
-                                readTime = legacyDetailTime + remainingSessions.sumOf { it.endTime - it.startTime },
-                                readWords = legacyDetailWords + remainingSessions.sumOf { it.words },
-                                firstReadTime = remainingSessions
-                                    .map { it.startTime }
-                                    .filter { it > 0L }
-                                    .minOrNull() ?: 0L,
-                                lastReadTime = remainingSessions.maxOf { it.endTime },
-                            )
-                        )
-                    }
-                    updateReadRecordTotal(
-                        deviceId,
-                        record.bookName,
-                        record.bookAuthor,
-                        legacyReadTimes[deviceId] ?: 0L,
-                    )
-                }
+                rebuildDetailsFromSessions(deviceId, session.bookName, session.bookAuthor)
+                updateReadRecordTotal(
+                    deviceId,
+                    session.bookName,
+                    session.bookAuthor,
+                    legacyReadTimes[deviceId] ?: 0L,
+                )
+            }
+        }
+    }
+
+    private suspend fun rebuildDetailsFromSessions(deviceId: String, bookName: String, bookAuthor: String) {
+        val sessions = dao.getSessionsByBook(deviceId, bookName, bookAuthor)
+        dao.deleteDetailsByBook(deviceId, bookName, bookAuthor)
+        sessions.forEach { session ->
+            updateReadRecordDetail(session, session.endTime - session.startTime, session.words)
         }
     }
 
@@ -519,32 +518,51 @@ class ReadRecordRepository(
         val allDetails = targetDetails + sourceDetails.values.flatten()
         val originalSessions = targetSessions + sourceSessions.values.flatten()
         val sessionsByRecord = originalSessions.groupBy { Triple(it.deviceId, it.bookName, it.bookAuthor) }
-        val sessionsByDate = originalSessions
+        val mergedSessions = originalSessions
             .map { it.copy(deviceId = target.deviceId, bookName = target.bookName, bookAuthor = target.bookAuthor) }
             .distinctBy { listOf(it.bookName, it.bookAuthor, it.startTime, it.endTime, it.words) }
-            .groupBy { it.startTime.toDateString() }
         val detailsByDate = allDetails.groupBy { it.date }
         dao.deleteDetailsByBook(target.deviceId, target.bookName, target.bookAuthor)
         sourceDetails.keys.forEach { dao.deleteDetailsByBook(it.deviceId, it.bookName, it.bookAuthor) }
-        (sessionsByDate.keys + detailsByDate.keys).forEach { date ->
-            val sessions = sessionsByDate[date].orEmpty()
+        val sessionDates = originalSessions
+            .flatMap { session -> ReadRecordTimeBuckets.split(session.startTime, session.endTime).map { it.date.toString() } }
+            .toSet()
+        (sessionDates + detailsByDate.keys).forEach { date ->
+            val sessions = mergedSessions.filter { it.hasTimeOnDate(date) }
             val details = detailsByDate[date].orEmpty()
             val legacyTime = details.sumOf { detail ->
                 ReadRecordTimeTotals.legacy(detail.readTime, sessionsByRecord[Triple(detail.deviceId, detail.bookName, detail.bookAuthor)]
-                    .orEmpty().filter { it.startTime.toDateString() == date }.sumOf { it.endTime - it.startTime })
+                    .orEmpty().sumOf { session ->
+                        ReadRecordTimeBuckets.split(session.startTime, session.endTime)
+                            .filter { it.date.toString() == date }
+                            .sumOf { it.duration }
+                    })
             }
             val legacyWords = details.sumOf { detail ->
                 (detail.readWords - sessionsByRecord[Triple(detail.deviceId, detail.bookName, detail.bookAuthor)]
                     .orEmpty().filter { it.startTime.toDateString() == date }.sumOf { it.words }).coerceAtLeast(0L)
             }
-            val sessionTime = sessions.sumOf { it.endTime - it.startTime }
-            val sessionWords = sessions.sumOf { it.words }
+            val sessionTime = sessions.sumOf { session ->
+                ReadRecordTimeBuckets.split(session.startTime, session.endTime)
+                    .filter { it.date.toString() == date }
+                    .sumOf { it.duration }
+            }
+            val sessionWords = sessions.filter { it.startTime.toDateString() == date }.sumOf { it.words }
             if (sessionTime + legacyTime > 0L || sessionWords + legacyWords > 0L) {
+                val sessionSlices = sessions.flatMap { session ->
+                    ReadRecordTimeBuckets.split(session.startTime, session.endTime)
+                        .filter { it.date.toString() == date }
+                }
                 dao.insertDetail(ReadRecordDetail(
                     deviceId = target.deviceId, bookName = target.bookName, bookAuthor = target.bookAuthor, date = date,
                     readTime = sessionTime + legacyTime, readWords = sessionWords + legacyWords,
-                    firstReadTime = details.map { it.firstReadTime }.filter { it > 0L }.plus(sessions.map { it.startTime }.filter { it > 0L }).minOrNull() ?: 0L,
-                    lastReadTime = maxOf(details.maxOfOrNull { it.lastReadTime } ?: 0L, sessions.maxOfOrNull { it.endTime } ?: 0L),
+                    firstReadTime = details.map { it.firstReadTime }.filter { it > 0L }
+                        .plus(sessionSlices.map { it.startTime }.filter { it > 0L })
+                        .minOrNull() ?: 0L,
+                    lastReadTime = maxOf(
+                        details.maxOfOrNull { it.lastReadTime } ?: 0L,
+                        sessionSlices.maxOfOrNull { it.endTime } ?: 0L,
+                    ),
                 ))
             }
         }
@@ -588,19 +606,33 @@ class ReadRecordRepository(
         oldDetails: List<ReadRecordDetail>,
     ) {
         val newSessions = dao.getSessionsByBook(deviceId, bookName, bookAuthor)
-        val oldSessionsByDate = oldSessions.groupBy { it.startTime.toDateString() }
-        val newSessionsByDate = newSessions.groupBy { it.startTime.toDateString() }
         val detailsByDate = oldDetails.associateBy { it.date }
-        val dates = (oldSessionsByDate.keys + newSessionsByDate.keys + detailsByDate.keys)
+        val dates = (
+            oldSessions.flatMap { session ->
+                ReadRecordTimeBuckets.split(session.startTime, session.endTime).map { it.date.toString() }
+            } +
+                newSessions.flatMap { session ->
+                    ReadRecordTimeBuckets.split(session.startTime, session.endTime).map { it.date.toString() }
+                } +
+                detailsByDate.keys
+            ).toSet()
         dates.forEach { date ->
             val oldDetail = detailsByDate[date]
-            val oldSessionTime = oldSessionsByDate[date].orEmpty().sumOf { it.endTime - it.startTime }
-            val oldSessionWords = oldSessionsByDate[date].orEmpty().sumOf { it.words }
+            val oldSessionTime = oldSessions.sumOf { session ->
+                ReadRecordTimeBuckets.split(session.startTime, session.endTime)
+                    .filter { it.date.toString() == date }
+                    .sumOf { it.duration }
+            }
+            val oldSessionWords = oldSessions.filter { it.startTime.toDateString() == date }.sumOf { it.words }
             val legacyTime = oldDetail?.let { (it.readTime - oldSessionTime).coerceAtLeast(0L) } ?: 0L
             val legacyWords = oldDetail?.let { (it.readWords - oldSessionWords).coerceAtLeast(0L) } ?: 0L
-            val sessions = newSessionsByDate[date].orEmpty()
-            val readTime = sessions.sumOf { it.endTime - it.startTime } + legacyTime
-            val readWords = sessions.sumOf { it.words } + legacyWords
+            val sessions = newSessions.filter { it.hasTimeOnDate(date) }
+            val sessionSlices = sessions.flatMap { session ->
+                ReadRecordTimeBuckets.split(session.startTime, session.endTime)
+                    .filter { it.date.toString() == date }
+            }
+            val readTime = sessionSlices.sumOf { it.duration } + legacyTime
+            val readWords = sessions.filter { it.startTime.toDateString() == date }.sumOf { it.words } + legacyWords
             if (readTime <= 0L && readWords <= 0L) {
                 oldDetail?.let { dao.deleteDetail(it) }
             } else {
@@ -614,11 +646,11 @@ class ReadRecordRepository(
                     readWords = readWords,
                     firstReadTime = listOfNotNull(
                         oldDetail?.firstReadTime?.takeIf { it > 0L },
-                        sessions.map { it.startTime }.filter { it > 0L }.minOrNull(),
+                        sessionSlices.map { it.startTime }.filter { it > 0L }.minOrNull(),
                     ).minOrNull() ?: 0L,
                     lastReadTime = maxOf(
                         oldDetail?.lastReadTime ?: 0L,
-                        sessions.maxOfOrNull { it.endTime } ?: 0L,
+                        sessionSlices.maxOfOrNull { it.endTime } ?: 0L,
                     ),
                 ))
             }

@@ -42,15 +42,67 @@ fun ReadingTimeBarChartCard(
     period: ReadPeriod,
     modifier: Modifier = Modifier
 ) {
-    val rawMaxTime = data.maxOfOrNull { it.second }?.coerceAtLeast(1L) ?: 1L
+    val bars = data.mapIndexed { index, (date, time) ->
+        ChartBar(
+            value = time,
+            label = when (period) {
+                ReadPeriod.YEAR -> "${date.monthValue}月"
+                ReadPeriod.WEEK -> when (date.dayOfWeek.value) {
+                    1 -> "一"; 2 -> "二"; 3 -> "三"; 4 -> "四"; 5 -> "五"; 6 -> "六"; 7 -> "日"; else -> ""
+                }
+                else -> date.dayOfMonth.toString()
+            },
+            showLabel = when (period) {
+                ReadPeriod.DAY -> true
+                ReadPeriod.WEEK -> true
+                ReadPeriod.MONTH -> date.dayOfMonth == 1 || date.dayOfMonth == 15 || index == data.lastIndex
+                ReadPeriod.YEAR -> true
+                else -> false
+            },
+            barWidthFraction = if (period == ReadPeriod.MONTH) 0.8f else 0.6f,
+        )
+    }
 
-    // 向上取整逻辑：根据时长跨度选择合适的对齐单位
+    ReadingTimeBarChartCardContent(bars = bars, modifier = modifier)
+}
+
+@Composable
+fun HourlyReadingTimeBarChartCard(
+    data: List<Pair<Int, Long>>,
+    modifier: Modifier = Modifier,
+) {
+    val bars = data.map { (hour, time) ->
+        ChartBar(
+            value = time,
+            label = (hour + 1).toString(),
+            showLabel = true,
+            barWidthFraction = 0.9f,
+        )
+    }
+    ReadingTimeBarChartCardContent(bars = bars, modifier = modifier)
+}
+
+private data class ChartBar(
+    val value: Long,
+    val label: String,
+    val showLabel: Boolean,
+    val barWidthFraction: Float,
+)
+
+@Composable
+private fun ReadingTimeBarChartCardContent(
+    bars: List<ChartBar>,
+    modifier: Modifier = Modifier,
+) {
+    val rawMaxTime = bars.maxOfOrNull { it.value }?.coerceAtLeast(1L) ?: 1L
+
+    // 向上取整让不同跨度的图表共享稳定的 Y 轴刻度。
     val roundedMaxTime = when {
-        rawMaxTime < 60_000 -> 60_000L // 不足1分钟取1分钟
-        rawMaxTime < 10 * 60_000 -> ((rawMaxTime + 59_999) / 60_000) * 60_000L // 10分钟内按1分钟对齐
-        rawMaxTime < 60 * 60_000 -> ((rawMaxTime + 5 * 60_000 - 1) / (5 * 60_000)) * 5 * 60_000L // 1小时内按5分钟对齐
-        rawMaxTime < 12 * 3600_000 -> ((rawMaxTime + 3600_000 - 1) / 3600_000) * 3600_000L // 12小时内按1小时对齐
-        else -> ((rawMaxTime + 4 * 3600_000 - 1) / (4 * 3600_000)) * 4 * 3600_000L // 超过12小时按4小时对齐
+        rawMaxTime < 60_000 -> 60_000L
+        rawMaxTime < 10 * 60_000 -> ((rawMaxTime + 59_999) / 60_000) * 60_000L
+        rawMaxTime < 60 * 60_000 -> ((rawMaxTime + 5 * 60_000 - 1) / (5 * 60_000)) * 5 * 60_000L
+        rawMaxTime < 12 * 3600_000 -> ((rawMaxTime + 3600_000 - 1) / 3600_000) * 3600_000L
+        else -> ((rawMaxTime + 4 * 3600_000 - 1) / (4 * 3600_000)) * 4 * 3600_000L
     }
 
     GlassCard(
@@ -109,29 +161,13 @@ fun ReadingTimeBarChartCard(
                     verticalAlignment = Alignment.Bottom,
                     horizontalArrangement = Arrangement.SpaceEvenly
                 ) {
-                    data.forEachIndexed { index, (date, time) ->
-                        val targetHeightFactor = time.toFloat() / roundedMaxTime
+                    bars.forEachIndexed { index, bar ->
+                        val targetHeightFactor = bar.value.toFloat() / roundedMaxTime
                         val heightFactor by animateFloatAsState(
                             targetValue = targetHeightFactor,
                             animationSpec = tween(durationMillis = 320, delayMillis = index * 20),
                             label = "BarHeight"
                         )
-
-                        val showLabel = when (period) {
-                            ReadPeriod.DAY -> true
-                            ReadPeriod.WEEK -> true
-                            ReadPeriod.MONTH -> date.dayOfMonth == 1 || date.dayOfMonth == 15 || index == data.lastIndex
-                            ReadPeriod.YEAR -> true
-                            else -> false
-                        }
-
-                        val labelText = when (period) {
-                            ReadPeriod.YEAR -> "${date.monthValue}月"
-                            ReadPeriod.WEEK -> when (date.dayOfWeek.value) {
-                                1 -> "一"; 2 -> "二"; 3 -> "三"; 4 -> "四"; 5 -> "五"; 6 -> "六"; 7 -> "日"; else -> ""
-                            }
-                            else -> date.dayOfMonth.toString()
-                        }
 
                         Column(
                             modifier = Modifier
@@ -148,23 +184,23 @@ fun ReadingTimeBarChartCard(
                             ) {
                                 Box(
                                     modifier = Modifier
-                                        .fillMaxWidth(if (period == ReadPeriod.MONTH) 0.8f else 0.6f)
+                                        .fillMaxWidth(bar.barWidthFraction)
                                         .fillMaxHeight(heightFactor.coerceAtLeast(0.01f))
                                         .padding(horizontal = 1.dp)
                                         .clip(RoundedCornerShape(topStart = 4.dp, topEnd = 4.dp))
                                         .background(
-                                            if (time > 0) LegadoTheme.colorScheme.primary
+                                            if (bar.value > 0) LegadoTheme.colorScheme.primary
                                             else LegadoTheme.colorScheme.surfaceVariant
                                         )
                                 )
                             }
 
                             Box(modifier = Modifier.height(20.dp), contentAlignment = Alignment.TopCenter) {
-                                if (showLabel) {
+                                if (bar.showLabel) {
                                     AppText(
-                                        text = labelText,
+                                        text = bar.label,
                                         style = LegadoTheme.typography.labelSmall,
-                                        fontSize = 8.sp,
+                                        fontSize = if (bars.size > 20) 6.sp else 8.sp,
                                         color = LegadoTheme.colorScheme.onSurfaceVariant,
                                         softWrap = false,
                                         overflow = TextOverflow.Visible,

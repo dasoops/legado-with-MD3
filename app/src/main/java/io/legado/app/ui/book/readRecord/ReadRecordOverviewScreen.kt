@@ -54,6 +54,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.legado.app.R
+import io.legado.app.ui.book.readRecord.component.HourlyReadingTimeBarChartCard
 import io.legado.app.ui.book.readRecord.component.ReadingTimeBarChartCard
 import io.legado.app.ui.book.readRecord.component.StatItem
 import io.legado.app.ui.book.readRecord.component.StatsGridCard
@@ -136,7 +137,11 @@ fun ReadRecordOverviewScreen(
                 contentPadding = PaddingValues(bottom = 16.dp)
             ) {
 
-                if (state.period != ReadPeriod.ALL && state.dailyTimeData.isNotEmpty()) {
+                if (state.period == ReadPeriod.DAY) {
+                    item {
+                        HourlyReadingTimeBarChartCard(data = state.hourlyTimeData)
+                    }
+                } else if (state.period != ReadPeriod.ALL && state.dailyTimeData.isNotEmpty()) {
                     item {
                         ReadingTimeBarChartCard(data = state.dailyTimeData, period = state.period)
                     }

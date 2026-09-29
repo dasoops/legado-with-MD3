@@ -3,6 +3,10 @@ package io.legado.app.ui.book.readRecord
 import androidx.compose.runtime.Stable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import io.legado.app.data.entities.Book
+import io.legado.app.data.entities.readRecord.ReadRecord
+import io.legado.app.data.entities.readRecord.ReadRecordDetail
+import io.legado.app.data.entities.readRecord.ReadRecordSession
 import io.legado.app.data.repository.BookRepository
 import io.legado.app.data.repository.ReadRecordRepository
 import io.legado.app.domain.usecase.readRecord.GetReadRecordOverviewUseCase
@@ -23,6 +27,7 @@ data class ReadRecordOverviewUiState(
     val finishedBooks: Int = 0,
     val readingBooks: Int = 0,
     val dailyTimeData: List<Pair<LocalDate, Long>> = emptyList(),
+    val hourlyTimeData: List<Pair<Int, Long>> = emptyList(),
     val topBooks: List<ReadBookRanking> = emptyList(),
     val dailyTopBook: Map<LocalDate, Pair<String, String>> = emptyMap(),
     val allReadTimes: Map<LocalDate, Long> = emptyMap(),
@@ -49,14 +54,28 @@ class ReadRecordOverviewViewModel(
     private val _period = MutableStateFlow(ReadPeriod.DAY)
     private val _referenceDate = MutableStateFlow(LocalDate.now())
 
+    private val overviewData = combine(
+        repository.getAllRecordDetails(""),
+        repository.getAllSessions(),
+        repository.getLatestReadRecords(""),
+        bookRepository.getAllBooks()
+    ) { details, sessions, latestRecords, allBooks ->
+        OverviewData(details, sessions, latestRecords, allBooks)
+    }
+
     val uiState: StateFlow<ReadRecordOverviewUiState> = combine(
         _period,
         _referenceDate,
-        repository.getAllRecordDetails(""),
-        repository.getLatestReadRecords(""),
-        bookRepository.getAllBooks()
-    ) { period, refDate, details, latestRecords, allBooks ->
-        getReadRecordOverviewUseCase(period, refDate, details, latestRecords, allBooks)
+        overviewData
+    ) { period, refDate, data ->
+        getReadRecordOverviewUseCase(
+            period,
+            refDate,
+            data.details,
+            data.latestRecords,
+            data.allBooks,
+            data.sessions,
+        )
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5000),
@@ -98,6 +117,13 @@ class ReadRecordOverviewViewModel(
     }
 
     suspend fun getBookCover(name: String, author: String) = bookRepository.getBookCoverByNameAndAuthor(name, author)
+
+    private data class OverviewData(
+        val details: List<ReadRecordDetail>,
+        val sessions: List<ReadRecordSession>,
+        val latestRecords: List<ReadRecord>,
+        val allBooks: List<Book>,
+    )
 }
 
 sealed interface ReadRecordOverviewIntent {

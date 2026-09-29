@@ -23,6 +23,7 @@ object DatabaseMigrations {
             migration_39_40, migration_40_41, migration_41_42, migration_42_43,
             migration_82_83, migration_98_99, migration_99_100,
             migration_102_103, migration_105_106,
+            migration_110_111,
         )
     }
 
@@ -745,6 +746,17 @@ object DatabaseMigrations {
             db.execSQL("ALTER TABLE book_groups ADD COLUMN localDirectoryUri TEXT")
             // 清理 fork 早期写入的恒空线上系统分组 (音频/网络未分组/漫画/更新失败)
             db.execSQL("DELETE FROM book_groups WHERE groupId IN (-3, -4, -7, -11)")
+        }
+    }
+
+    /**
+     * 小时统计依赖完整的阅读会话, 旧汇总记录无法还原到小时, 因此从新口径开始重新累计。
+     */
+    private val migration_110_111 = object : Migration(110, 111) {
+        override fun migrate(db: SupportSQLiteDatabase) {
+            db.execSQL("DELETE FROM readRecordSession")
+            db.execSQL("DELETE FROM readRecordDetail")
+            db.execSQL("DELETE FROM readRecord")
         }
     }
 }

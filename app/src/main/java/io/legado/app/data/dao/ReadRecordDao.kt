@@ -339,6 +339,25 @@ interface ReadRecordDao {
         date: String
     )
 
+    /** 删除与本地日期有交集的阅读时段, 包括跨午夜的时段。 */
+    @Query(
+        """
+        DELETE FROM readRecordSession
+        WHERE deviceId = :deviceId
+        AND bookName = :bookName
+        AND bookAuthor = :bookAuthor
+        AND startTime < :endTime
+        AND endTime > :startTime
+        """
+    )
+    suspend fun deleteSessionsByBookAndTimeRange(
+        deviceId: String,
+        bookName: String,
+        bookAuthor: String,
+        startTime: Long,
+        endTime: Long,
+    )
+
     @Delete
     suspend fun deleteSession(session: ReadRecordSession)
 

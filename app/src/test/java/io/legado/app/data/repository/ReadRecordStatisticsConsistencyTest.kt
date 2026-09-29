@@ -16,6 +16,8 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.RuntimeEnvironment
 import org.robolectric.annotation.Config
+import java.time.LocalDate
+import java.time.ZoneId
 
 /**
  * 阅读统计口径回归测试：
@@ -122,6 +124,20 @@ class ReadRecordStatisticsConsistencyTest {
         assertEquals(180_000L, merged.sumOf { it.readTime })
         // 当天实际阅读 3 个章节，却显示"阅读字数"为章节序号之和 45+46+47=138。
         assertEquals(138L, merged.sumOf { it.readWords })
+    }
+
+    @Test
+    fun `session crossing midnight is split into both daily details`() = runBlocking {
+        val zone = ZoneId.systemDefault()
+        val startDate = LocalDate.of(2026, 1, 2)
+        val start = startDate.atTime(23, 30).atZone(zone).toInstant().toEpochMilli()
+        val end = startDate.plusDays(1).atTime(0, 30).atZone(zone).toInstant().toEpochMilli()
+
+        repository.saveReadSession(session(start, end, words = 45))
+
+        val details = repository.getAllRecordDetails("").first().associateBy { it.date }
+        assertEquals(30 * 60_000L, details[startDate.toString()]?.readTime)
+        assertEquals(30 * 60_000L, details[startDate.plusDays(1).toString()]?.readTime)
     }
 
     private fun session(

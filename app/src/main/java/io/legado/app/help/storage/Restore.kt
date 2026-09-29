@@ -242,9 +242,8 @@ object Restore : KoinComponent {
                 }
             }
             reconcileReadRecordAliases()
-            // 会话导入按身份去重（幂等），汇总/明细取较大值后按会话重算，
-            // 避免同一备份重复导入导致阅读时长翻倍。
-            get<ReadRecordRepository>().reconcileRestoredReadRecordTotals()
+            // 聚合数据无法表达小时边界, 只保留去重后的会话并重新生成汇总与每日详情。
+            get<ReadRecordRepository>().rebuildReadRecordAggregatesFromSessions()
         }
         if (BackupConfig.dbIsNotIgnored("server")) {
             File(path, "servers.json").takeIf {

@@ -3,6 +3,8 @@ package io.legado.app.domain.usecase.readRecord
 import io.legado.app.data.entities.Book
 import io.legado.app.data.entities.readRecord.ReadRecord
 import io.legado.app.data.entities.readRecord.ReadRecordDetail
+import io.legado.app.data.entities.readRecord.ReadRecordSession
+import io.legado.app.data.entities.readRecord.ReadRecordTimeBuckets
 import io.legado.app.ui.book.readRecord.ReadBookRanking
 import io.legado.app.ui.book.readRecord.ReadPeriod
 import io.legado.app.ui.book.readRecord.ReadRecordOverviewUiState
@@ -18,7 +20,8 @@ class GetReadRecordOverviewUseCase {
         refDate: LocalDate,
         details: List<ReadRecordDetail>,
         latestRecords: List<ReadRecord>,
-        allBooks: List<Book>
+        allBooks: List<Book>,
+        sessions: List<ReadRecordSession> = emptyList(),
     ): ReadRecordOverviewUiState {
         val (startDate, endDate) = getPeriodRange(period, refDate)
 
@@ -35,10 +38,21 @@ class GetReadRecordOverviewUseCase {
             }
         }
 
-        // 阅读时间口径与阅读记录页/首页一致：「总」模式使用合并后的 readRecord 汇总
-        // （包含无每日详情来源的旧版遗留时长），周期模式只能按有日期的详情统计。
+        val periodSessionSlices = sessions
+            .asSequence()
+            .distinctBy { listOf(it.bookName, it.bookAuthor, it.startTime, it.endTime, it.words) }
+            .flatMap { session ->
+                ReadRecordTimeBuckets.split(session.startTime, session.endTime).asSequence()
+            }
+            .filter { it.date >= startDate && it.date <= endDate }
+            .toList()
+
+        // 按小时统计必须使用原始会话, 因为每日详情已经丢失了小时边界。
+        // 「总」模式继续使用汇总记录, 以保持首页、阅读记录页和总览的既有口径。
         val totalTime = if (period == ReadPeriod.ALL) {
             latestRecords.sumOf { it.readTime }
+        } else if (periodSessionSlices.isNotEmpty()) {
+            periodSessionSlices.sumOf { it.duration }
         } else {
             filteredDetails.sumOf { it.readTime }
         }
@@ -87,7 +101,7 @@ class GetReadRecordOverviewUseCase {
                 }
             }.toMap()
 
-        val dailyTimeData = if (period == ReadPeriod.ALL) {
+        val dailyTimeData = if (period == ReadPeriod.ALL || period == ReadPeriod.DAY) {
             emptyList()
         } else if (period == ReadPeriod.YEAR) {
             val dateToTime = filteredDetails.groupBy { 
@@ -112,6 +126,16 @@ class GetReadRecordOverviewUseCase {
                 curr = curr.plusDays(1)
             }
             daysList
+        }
+
+        val hourlyTimeData = if (period == ReadPeriod.DAY) {
+            val timeByHour = periodSessionSlices
+                .filter { it.date == refDate }
+                .groupingBy { it.hour }
+                .fold(0L) { total, slice -> total + slice.duration }
+            (0..23).map { hour -> hour to (timeByHour[hour] ?: 0L) }
+        } else {
+            emptyList()
         }
 
         val allReadTimesMap = details.groupBy { it.date }
@@ -145,6 +169,7 @@ class GetReadRecordOverviewUseCase {
             finishedBooks = finishedCount,
             readingBooks = readingCount,
             dailyTimeData = dailyTimeData,
+            hourlyTimeData = hourlyTimeData,
             topBooks = topBooks,
             dailyTopBook = dailyTopBookMap,
             allReadTimes = allReadTimesMap,

@@ -2,10 +2,12 @@ package io.legado.app.domain.usecase.readRecord
 
 import io.legado.app.data.entities.readRecord.ReadRecord
 import io.legado.app.data.entities.readRecord.ReadRecordDetail
+import io.legado.app.data.entities.readRecord.ReadRecordSession
 import io.legado.app.ui.book.readRecord.ReadPeriod
 import org.junit.Assert.assertEquals
 import org.junit.Test
 import java.time.LocalDate
+import java.time.ZoneId
 
 class GetReadRecordOverviewUseCaseTest {
 
@@ -43,6 +45,36 @@ class GetReadRecordOverviewUseCaseTest {
 
         // 周期视图没有日期的旧版时长无法归属，仍按详情统计。
         assertEquals(100_000L, state.totalTime)
+    }
+
+    @Test
+    fun `day mode exposes all 24 hourly buckets from sessions`() {
+        val date = LocalDate.of(2026, 1, 2)
+        val zone = ZoneId.systemDefault()
+        val start = date.atTime(9, 30).atZone(zone).toInstant().toEpochMilli()
+        val end = date.atTime(11, 15).atZone(zone).toInstant().toEpochMilli()
+        val session = ReadRecordSession(
+            deviceId = "",
+            bookName = "book",
+            bookAuthor = "author",
+            startTime = start,
+            endTime = end,
+        )
+
+        val state = useCase(
+            ReadPeriod.DAY,
+            date,
+            details = listOf(detail(date.toString(), 6_300_000L)),
+            latestRecords = listOf(ReadRecord("", "book", "author", 6_300_000L, end)),
+            allBooks = emptyList(),
+            sessions = listOf(session),
+        )
+
+        assertEquals(24, state.hourlyTimeData.size)
+        assertEquals(1_800_000L, state.hourlyTimeData[9].second)
+        assertEquals(3_600_000L, state.hourlyTimeData[10].second)
+        assertEquals(900_000L, state.hourlyTimeData[11].second)
+        assertEquals(6_300_000L, state.hourlyTimeData.sumOf { it.second })
     }
 
     private fun detail(date: String, readTime: Long) = ReadRecordDetail(
