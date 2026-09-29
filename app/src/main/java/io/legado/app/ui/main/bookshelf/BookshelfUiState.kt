@@ -1,7 +1,6 @@
 package io.legado.app.ui.main.bookshelf
 
 import androidx.compose.runtime.Stable
-import android.net.Uri
 import io.legado.app.data.entities.BookGroup
 import io.legado.app.domain.model.settings.BookshelfSettings
 import io.legado.app.ui.config.themeConfig.TagColorPair
@@ -22,10 +21,8 @@ data class BookshelfGroupSelectorState(
 )
 
 sealed interface BookshelfOverlay {
-    data object ExportSheet : BookshelfOverlay
     data object ConfigSheet : BookshelfOverlay
     data object GroupManageSheet : BookshelfOverlay
-    data object LogSheet : BookshelfOverlay
     data object GroupMenu : BookshelfOverlay
     data object GroupSelectSheet : BookshelfOverlay
     data class GroupEditSheet(val groupId: Long) : BookshelfOverlay
@@ -49,7 +46,6 @@ sealed interface BookshelfIntent {
     data class MoveDragging(val from: Int, val to: Int, val books: List<BookUiItem>) : BookshelfIntent
     data object FinishDragging : BookshelfIntent
     data object ScrollToTop : BookshelfIntent
-    data class ExportToUri(val uri: Uri, val books: List<BookUiItem>) : BookshelfIntent
     data class UpdateSetting(
         val transform: (BookshelfSettings) -> BookshelfSettings,
     ) : BookshelfIntent

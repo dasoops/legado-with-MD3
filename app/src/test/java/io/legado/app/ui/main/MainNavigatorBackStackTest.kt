@@ -7,17 +7,6 @@ import org.junit.Test
 class MainNavigatorBackStackTest {
 
     @Test
-    fun `opening book info from bookshelf manage keeps manage in back stack`() {
-        val manage = MainRouteCache(-1L)
-        val bookInfo = MainRouteBookInfo("Book", "Author", "book-url")
-        val backStack = mutableListOf<NavKey>(MainRouteBookshelf, manage)
-
-        MainNavigator.navigateToRoute(backStack, bookInfo)
-
-        assertEquals(listOf(MainRouteBookshelf, manage, bookInfo), backStack)
-    }
-
-    @Test
     fun `reader with reset to home replaces stale route with home parent`() {
         val bookInfo = MainRouteBookInfo("Book", "Author", "book-url")
         val reader = MainRouteReadBook(bookUrl = "book-url")

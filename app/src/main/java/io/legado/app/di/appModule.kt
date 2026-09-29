@@ -99,7 +99,6 @@ import io.legado.app.domain.usecase.BackupRestoreUseCase
 import io.legado.app.domain.usecase.ClearBookCacheUseCase
 import io.legado.app.domain.usecase.CoverAlbumUseCase
 import io.legado.app.domain.usecase.DeleteBooksUseCase
-import io.legado.app.domain.usecase.ExportBookshelfUseCase
 import io.legado.app.domain.usecase.HomeDashboardUseCase
 import io.legado.app.domain.usecase.RelocateMarkingTargetUseCase
 import io.legado.app.domain.usecase.RemoveBookGroupAssignmentUseCase
@@ -127,7 +126,6 @@ import io.legado.app.ui.book.changecover.ChangeCoverViewModel
 import io.legado.app.ui.book.group.GroupViewModel
 import io.legado.app.ui.book.info.BookInfoViewModel
 import io.legado.app.ui.book.info.edit.BookInfoEditViewModel
-import io.legado.app.ui.book.manage.BookshelfManageScreenViewModel
 import io.legado.app.ui.book.read.ReadBookViewModel
 import io.legado.app.ui.book.read.ReaderSessionViewModel
 import io.legado.app.ui.book.readRecord.ReadRecordOverviewViewModel
@@ -234,7 +232,6 @@ val appModule = module {
     singleOf(::RemoveBookGroupAssignmentUseCase)
     singleOf(::UpdateBooksGroupUseCase)
     singleOf(::ResolveBookShelfStateUseCase)
-    singleOf(::ExportBookshelfUseCase)
     factory { GetReadRecordOverviewUseCase() }
     singleOf(::ShrinkDatabaseUseCase)
     singleOf(::WebDavBackupUseCase)
@@ -369,16 +366,6 @@ val appModule = module {
         )
     }
     viewModelOf(::ChangeCoverViewModel)
-    viewModel {
-        BookshelfManageScreenViewModel(
-            application = get(),
-            bookRepository = get(),
-            bookGroupRepository = get(),
-            searchRepository = get(),
-            bookExportSettingsGateway = get(),
-            deleteBooksUseCase = get(),
-        )
-    }
 
     viewModel { (route: ReplaceEditRoute) ->
         ReplaceEditViewModel(

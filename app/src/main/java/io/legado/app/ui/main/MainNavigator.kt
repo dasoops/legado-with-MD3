@@ -68,7 +68,6 @@ object MainNavigator {
             }
 
             MainRouteImportRemote,
-            is MainRouteCache,
             is MainRouteReadBook -> {
                 if (
                     currentRoute == MainRouteBookshelf ||
@@ -89,8 +88,7 @@ object MainNavigator {
             is MainRouteBookInfo -> {
                 if (
                     currentRoute == MainRouteBookshelf ||
-                    currentRoute is MainRouteBookInfo ||
-                    currentRoute is MainRouteCache
+                    currentRoute is MainRouteBookInfo
                 ) {
                     backStack.add(route)
                 } else {
@@ -171,13 +169,6 @@ object MainNavigator {
             MainRouteConst.ROUTE_SETTINGS_LAB_CONFIG -> MainRouteSettingsLabConfig
             MainRouteConst.ROUTE_SETTINGS_DOWNLOAD_CACHE -> MainRouteSettingsDownloadCache
             MainRouteConst.ROUTE_IMPORT_REMOTE -> MainRouteImportRemote
-            MainRouteConst.ROUTE_CACHE -> MainRouteCache(
-                intent?.getLongExtra(
-                    MainIntent.EXTRA_CACHE_GROUP_ID,
-                    -1L
-                ) ?: -1L
-            )
-
             MainRouteConst.ROUTE_READ_BOOK -> MainRouteReadBook(
                 bookUrl = intent?.getStringExtra(MainIntent.EXTRA_BOOK_URL),
                 inBookshelf = intent?.getBooleanExtra(MainIntent.EXTRA_IN_BOOKSHELF, true) != false,

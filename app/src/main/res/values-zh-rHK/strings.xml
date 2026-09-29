@@ -289,7 +289,6 @@
     <string name="load_over_time">加載超時</string>
     <string name="join_group">關注: %s</string>
     <string name="copy_complete">拷貝咗</string>
-    <string name="bookshelf_management">書架管理</string>
     <string name="clear_bookshelf_s">這將會刪除所有書籍，請謹慎操作。</string>
     <string name="search_book_source">搜索書源</string>
     <string name="chapter_list_size">目錄(%d)</string>
@@ -592,7 +591,6 @@
     <string name="custom_page_key">自定義翻頁按鍵</string>
     <string name="prev_page_key">上一頁按鍵</string>
     <string name="next_page_key">下一頁按鍵</string>
-    <string name="no_group">未分組</string>
     <string name="prev_sentence">上一句</string>
     <string name="next_sentence">下一句</string>
     <string name="other_folder">其它目錄</string>
@@ -785,7 +783,6 @@
     <string name="sync_book_progress_plus_s">重新進入頁面（熄屏、返回背景等）或者當網絡可用時同步雲端進度</string>
     <string name="create_bookmark_error">建立書籤失敗</string>
     <string name="single_url">單URL</string>
-    <string name="export_bookshelf">導出書單</string>
     <string name="import_bookshelf">導入書單</string>
     <string name="pre_download">預下載</string>
     <string name="pre_download_m">預下載%s页</string>
@@ -795,15 +792,12 @@
     <string name="background_image_blurring">背景圖片虛化</string>
     <string name="background_image_blurring_radius">虛化半徑</string>
     <string name="background_image_hint">0為停用，啓用範圍1~25\n半徑數值越大，虛化效果越高</string>
-    <string name="export_folder">導出資料夾</string>
-    <string name="export_charset">導出編碼</string>
     <string name="export_to_web_dav">導出到WebDav</string>
     <string name="reverse_content">反轉內容</string>
     <string name="debug">調試</string>
     <string name="crash_log">崩潰日誌</string>
     <string name="use_zh_layout">使用自訂中文分行</string>
     <string name="image_style">圖片樣式</string>
-    <string name="export_type">導出格式</string>
     <string name="checkAuthor">校驗作者</string>
     <string name="search_src">搜尋源碼</string>
     <string name="boo_src">書輯源碼</string>
@@ -833,7 +827,6 @@
     <string name="navigation_order">導覽順序</string>
     <string name="style">樣式</string>
     <string name="group_style">分組樣式</string>
-    <string name="export_file_name">導出文件名</string>
     <string name="reset">重置</string>
     <string name="null_url">url為空</string>
     <string name="unknown_error">未知錯誤</string>
@@ -1040,18 +1033,13 @@
     <string name="replace_exclude_scope">排除范围，选填书名或者书源 URL</string>
     <string name="format_js_rule">格式化规则(formatJs)</string>
     <string name="adjust_pos">调整位置</string>
-    <string name="select_section_export">選擇待導出章節</string>
-    <string name="error_scope_input">請輸入正確的範圍</string>
     <string name="custom_export">自定義導出</string>
-    <string name="file_contains_number">每個文件包含的章節數量</string>
-    <string name="export_chapter_index">需要輸出的章節</string>
     <string name="shrink_database">压缩数据库</string>
     <string name="shrink_database_summary">减小数据库文件的大小</string>
     <string name="sort_desc">反序</string>
     <string name="test">测试</string>
     <string name="show_wait_up_count">显示等待更新数量</string>
     <string name="exit_app">退出软件</string>
-    <string name="result_analyzed">解析示例</string>
     <string name="bookshelf_px_4">綜合排序</string>
     <string name="bookshelf_px_5">按作者</string>
     <string name="effective_replaces">起效的替换</string>
@@ -1430,13 +1418,6 @@
     <string name="export_bookmarks_json">匯出書籤為 JSON</string>
     <string name="export_bookmarks_markdown">匯出書籤為 Markdown</string>
     <string name="export_complete">匯出完成</string>
-    <string name="export_file_name_template_help">可用變數：{name} 書名、{author} 作者、{group} 分組、{source} 來源、{remark} 備註。
-
-範例：{name} - {author}
-結果：三體 - 劉慈欣
-
-可在變數前後加入固定文字。</string>
-    <string name="export_file_name_template_hint">{name} - {author}</string>
     <string name="eye_protection">護眼模式</string>
     <string name="eye_protection_enabled">啟用護眼模式</string>
     <string name="eye_protection_enabled_summary">透過暖色調減少藍光</string>
@@ -1980,7 +1961,6 @@
     <string name="a11y_next_chapter">下一章</string>
     <string name="a11y_grid_columns">網格欄數</string>
     <string name="a11y_switch_layout">切換版面配置</string>
-    <string name="a11y_group_filter">依分組篩選</string>
     <string name="a11y_parent_folder">返回上層目錄</string>
     <string name="a11y_previous_result">上一個結果</string>
     <string name="a11y_next_result">下一個結果</string>

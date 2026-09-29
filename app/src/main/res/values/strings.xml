@@ -372,7 +372,6 @@
     <string name="load_over_time">Loading timeout</string>
     <string name="join_group">Follow:%s</string>
     <string name="copy_complete">Copied successfully</string>
-    <string name="bookshelf_management">Bookshelf Management</string>
     <string name="clear_bookshelf_s">It will delete all books. Be careful,please.</string>
     <string name="search_book_source">Search book sources</string>
     <string name="chapter_list_size">Chapters(%d)</string>
@@ -444,7 +443,6 @@
     <string name="ps_show_all_find">Display the selected origin\'s Discovery if closed</string>
     <string name="update_toc">Update Chapters</string>
     <string name="txt_toc_rule">Text Catalog Rules</string>
-    <string name="select_section_export">Choose some chapters to be exported</string>
     <string name="set_charset">Text encoding</string>
     <string name="swap_sort">Ascending/Descending order</string>
     <string name="sort">Sort Mode</string>
@@ -697,7 +695,6 @@
     <string name="custom_page_key">Set Page-Turning Buttons</string>
     <string name="prev_page_key">Page up button</string>
     <string name="next_page_key">Page down button</string>
-    <string name="no_group">Ungrouped</string>
     <string name="prev_sentence">Prior sentence</string>
     <string name="next_sentence">Next sentence</string>
     <string name="other_folder">Other folder</string>
@@ -967,7 +964,6 @@
     <string name="sync_book_progress_success">Sync progress success</string>
     <string name="create_bookmark_error">Failed to create bookmark</string>
     <string name="single_url">Single URL</string>
-    <string name="export_bookshelf">Export Book List</string>
     <string name="import_bookshelf">Import Book List</string>
     <string name="pre_download">Download in Advance</string>
     <string name="pre_download_m">Pre-download %s pages</string>
@@ -979,8 +975,6 @@
     <string name="background_image_hint">Disabled when 0, enable range from 1 to 25\nThe greater the radius, the stronger the effect of blurring</string>
     <string name="copy_book_url">Copy book URL</string>
     <string name="copy_toc_url">Copy chapters URL</string>
-    <string name="export_folder">Export folder</string>
-    <string name="export_charset">Exported text coding</string>
     <string name="export_to_web_dav">Export to WebDAV</string>
     <string name="reverse_content">Reverse content</string>
     <string name="debug">Debug</string>
@@ -990,7 +984,6 @@
     <string name="image_style_full">Full screen</string>
     <string name="image_style_text">Text adhesion</string>
     <string name="image_style_single">Single page</string>
-    <string name="export_type">Exported file format</string>
     <string name="checkAuthor">Check by author</string>
     <string name="url_already">This URL has subscribed</string>
     <string name="high_brush_title">High screen refresh rate</string>
@@ -1023,9 +1016,6 @@
     <string name="hide_empty_groups">Hide empty groups</string>
     <string name="bookshelf_section_layout">Layout</string>
     <string name="bookshelf_section_badge">Badges &amp; info</string>
-    <string name="export_file_name">Export file name</string>
-    <string name="export_file_name_template_hint">{name} - {author}</string>
-    <string name="export_file_name_template_help">Available variables: {name} title, {author} author, {group} group, {source} source, {remark} remark.\n\nExample: {name} - {author}\nResult: The Three-Body Problem - Liu Cixin\n\nYou can add fixed text before or after variables.</string>
     <string name="reset">Reset</string>
     <string name="theme_config_reset_defaults">Restore default theme configuration</string>
     <string name="theme_config_reset_defaults_summary">Reset appearance settings without affecting saved themes or covers</string>
@@ -1273,17 +1263,13 @@
     <string name="replace_exclude_scope">Exclude range, optional title or source URL</string>
     <string name="format_js_rule">Format Rule (formatJs)</string>
     <string name="adjust_pos">Adjustment position</string>
-    <string name="error_scope_input">Please enter the correct range</string>
     <string name="custom_export">Custom Export</string>
-    <string name="file_contains_number">The number of chapters contained in each file</string>
-    <string name="export_chapter_index">The section index that needs to be exported</string>
     <string name="shrink_database">Shrink Database</string>
     <string name="shrink_database_summary">Reduce the size of the database file</string>
     <string name="sort_desc">Descend order</string>
     <string name="test">Test</string>
     <string name="show_wait_up_count">Display the Number of Pending Updates</string>
     <string name="exit_app">Exit</string>
-    <string name="result_analyzed">Analyzed</string>
     <string name="bookshelf_px_4">Comprehensive</string>
     <string name="bookshelf_px_5">Sort by author</string>
     <string name="effective_replaces">Effective Replacement</string>
@@ -2054,7 +2040,6 @@
     <string name="a11y_next_chapter">Next chapter</string>
     <string name="a11y_grid_columns">Grid columns</string>
     <string name="a11y_switch_layout">Switch layout</string>
-    <string name="a11y_group_filter">Filter by group</string>
     <string name="a11y_parent_folder">Parent folder</string>
     <string name="a11y_previous_result">Previous result</string>
     <string name="a11y_next_result">Next result</string>

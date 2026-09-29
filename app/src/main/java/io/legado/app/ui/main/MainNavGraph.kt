@@ -43,7 +43,6 @@ import io.legado.app.ui.about.AboutScreen
 import io.legado.app.ui.about.AboutViewModel
 import io.legado.app.ui.book.info.BookInfoRouteScreen
 import io.legado.app.ui.book.info.BookInfoViewModel
-import io.legado.app.ui.book.manage.BookshelfManageRouteScreen
 import io.legado.app.ui.book.read.ReadBookController
 import io.legado.app.ui.book.read.ReadBookInitRequest
 import io.legado.app.ui.book.read.ReadBookIntent
@@ -102,9 +101,6 @@ fun MainActivity.mainEntryProvider(
             useRail = useRail,
             onOpenSettings = {
                 onNavigateToRoute(MainRouteSettings)
-            },
-            onNavigateToCache = { groupId ->
-                onNavigateToRoute(MainRouteCache(groupId))
             },
             onOpenBookshelfBook = { book, sharedCoverKey ->
                 if (book.isAudio) {
@@ -212,22 +208,6 @@ fun MainActivity.mainEntryProvider(
 
     entry<MainRouteSettingsThemeManage> {
         ThemeManageRouteScreen(onBackClick = { onNavigateBack() })
-    }
-
-    entry<MainRouteCache> { route ->
-        BookshelfManageRouteScreen(
-            groupId = route.groupId,
-            onBackClick = { onNavigateBack() },
-            onOpenBookInfo = { name, author, bookUrl ->
-                onNavigateToRoute(
-                    MainRouteBookInfo(
-                        name = name,
-                        author = author,
-                        bookUrl = bookUrl
-                    )
-                )
-            }
-        )
     }
 
     entry<MainRouteReadBook>(

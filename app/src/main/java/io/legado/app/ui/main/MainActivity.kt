@@ -104,12 +104,6 @@ open class MainActivity : BaseComposeActivity() {
         fun createIntent(context: Context, configTag: String? = null): Intent =
             MainIntent.createIntent(context, configTag)
 
-        fun createBookshelfManageScreenIntent(context: Context, groupId: Long = -1L): Intent =
-            MainIntent.createBookshelfManageScreenIntent(context, groupId)
-
-        fun createCacheIntent(context: Context, groupId: Long = -1L): Intent =
-            MainIntent.createCacheIntent(context, groupId)
-
         fun createReadBookIntent(
             context: Context,
             bookUrl: String? = null,

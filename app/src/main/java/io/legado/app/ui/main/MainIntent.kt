@@ -7,7 +7,6 @@ import io.legado.app.ui.config.ConfigTag
 object MainIntent {
     const val EXTRA_START_ROUTE = "startRoute"
     internal const val EXTRA_ROUTE_HOME_AS_PARENT = "routeHomeAsParent"
-    const val EXTRA_CACHE_GROUP_ID = "extra_cache_group_id"
     const val EXTRA_BOOK_NAME = "name"
     const val EXTRA_BOOK_AUTHOR = "author"
     const val EXTRA_BOOK_URL = "bookUrl"
@@ -37,21 +36,6 @@ object MainIntent {
             putExtra(EXTRA_START_ROUTE, routeForConfigTag(configTag))
         }
     }
-
-    fun createBookshelfManageScreenIntent(
-        context: Context,
-        groupId: Long = -1L
-    ): Intent {
-        return createLauncherIntent(context).apply {
-            putExtra(EXTRA_START_ROUTE, MainRouteConst.ROUTE_CACHE)
-            putExtra(EXTRA_CACHE_GROUP_ID, groupId)
-        }
-    }
-
-    fun createCacheIntent(
-        context: Context,
-        groupId: Long = -1L
-    ): Intent = createBookshelfManageScreenIntent(context, groupId)
 
     fun createReadBookIntent(
         context: Context,

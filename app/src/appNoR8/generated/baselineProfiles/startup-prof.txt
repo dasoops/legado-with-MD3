@@ -22702,7 +22702,6 @@ HSPLio/legado/app/ui/book/info/BookInfoSheetsKt$$ExternalSyntheticLambda33;-><in
 Lio/legado/app/ui/book/info/BookInfoSheetsKt$$ExternalSyntheticLambda44;
 HSPLio/legado/app/ui/book/info/BookInfoSheetsKt$$ExternalSyntheticLambda44;-><init>(ZLjava/util/List;JLkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function1;I)V
 Lio/legado/app/ui/book/info/BookInfoViewModel;
-Lio/legado/app/ui/book/manage/BookshelfManageScreenViewModel;
 Lio/legado/app/ui/book/manga/ReadMangaViewModel;
 Lio/legado/app/ui/book/read/BaseReadBookActivity;
 Lio/legado/app/ui/book/read/ReadBookActivity;
@@ -22741,7 +22740,6 @@ Lio/legado/app/ui/config/bookshelfConfig/BookshelfConfig$$ExternalSyntheticLambd
 HSPLio/legado/app/ui/config/bookshelfConfig/BookshelfConfig$$ExternalSyntheticLambda0;-><init>()V
 Lio/legado/app/ui/config/bookshelfConfig/BookshelfConfig$$ExternalSyntheticLambda1;
 HSPLio/legado/app/ui/config/bookshelfConfig/BookshelfConfig$$ExternalSyntheticLambda1;-><init>()V
-Lio/legado/app/ui/config/bookshelfConfig/BookshelfManageScreenConfig;
 Lio/legado/app/ui/config/coverConfig/CoverConfigViewModel;
 Lio/legado/app/ui/config/downloadCacheConfig/DownloadCacheConfigViewModel;
 Lio/legado/app/ui/config/otherConfig/OtherConfigViewModel;
@@ -23033,7 +23031,6 @@ HSPLio/legado/app/ui/main/MainActivity$Content$lambda$1$0$$inlined$entry$default
 Lio/legado/app/ui/main/MainActivity$MainRoute;
 Lio/legado/app/ui/main/MainActivity$MainRouteBookCacheManage;
 Lio/legado/app/ui/main/MainActivity$MainRouteBookInfo;
-Lio/legado/app/ui/main/MainActivity$MainRouteCache;
 Lio/legado/app/ui/main/MainActivity$MainRouteExploreShow;
 Lio/legado/app/ui/main/MainActivity$MainRouteHome;
 HSPLio/legado/app/ui/main/MainActivity$MainRouteHome;->$r8$lambda$fKyrtua1x2IAR-0pTofzw0L6PME()Lkotlinx/serialization/KSerializer;

@@ -2,13 +2,9 @@ package io.legado.app.ui.main.bookshelf
 
 import android.content.ClipData
 import android.content.res.Configuration
-import android.net.Uri
 import androidx.activity.compose.BackHandler
-import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.PredictiveBackHandler
 import androidx.activity.compose.ReportDrawnWhen
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.AnimatedVisibilityScope
@@ -56,12 +52,10 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.CloudDownload
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.GridView
-import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Link
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Save
 import androidx.compose.material.icons.filled.SelectAll
-import androidx.compose.material.icons.filled.UploadFile
 import androidx.compose.material.icons.filled.Wifi
 import androidx.compose.material.icons.outlined.ViewCarousel
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -120,11 +114,9 @@ import io.legado.app.ui.widget.components.button.series.ToggleStyle
 import io.legado.app.ui.widget.components.card.NormalCard
 import io.legado.app.ui.widget.components.card.TextCard
 import io.legado.app.ui.widget.components.divider.PillHeaderDivider
-import io.legado.app.ui.widget.components.filePicker.FilePickerSheet
 import io.legado.app.ui.widget.components.icon.AppIcons
 import io.legado.app.ui.widget.components.lazylist.FastScrollLazyVerticalGrid
 import io.legado.app.ui.widget.components.list.TopFloatingStickyItem
-import io.legado.app.ui.widget.components.log.AppLogSheet
 import io.legado.app.ui.widget.components.menuItem.RoundDropdownMenu
 import io.legado.app.ui.widget.components.menuItem.RoundDropdownMenuItem
 import io.legado.app.ui.widget.components.progressIndicator.AppCircularProgressIndicator
@@ -157,7 +149,6 @@ fun BookshelfRouteScreen(
     onScrollToTopRequestHandled: (Long) -> Unit = {},
     onBookClick: (BookShelfItem, String?) -> Unit,
     onBookLongClick: (book: BookShelfItem, sharedCoverKey: String?) -> Unit,
-    onNavigateToCache: (Long) -> Unit,
     sharedTransitionScope: SharedTransitionScope? = null,
     animatedVisibilityScope: AnimatedVisibilityScope? = null,
 ) {
@@ -174,7 +165,6 @@ fun BookshelfRouteScreen(
         onScrollToTopRequestHandled = onScrollToTopRequestHandled,
         onBookClick = onBookClick,
         onBookLongClick = onBookLongClick,
-        onNavigateToCache = onNavigateToCache,
         sharedTransitionScope = sharedTransitionScope,
         animatedVisibilityScope = animatedVisibilityScope,
     )
@@ -196,7 +186,6 @@ fun BookshelfScreen(
     onScrollToTopRequestHandled: (Long) -> Unit = {},
     onBookClick: (BookShelfItem, String?) -> Unit,
     onBookLongClick: (book: BookShelfItem, sharedCoverKey: String?) -> Unit,
-    onNavigateToCache: (Long) -> Unit,
     sharedTransitionScope: SharedTransitionScope? = null,
     animatedVisibilityScope: AnimatedVisibilityScope? = null,
 ) {
@@ -230,13 +219,6 @@ fun BookshelfScreen(
             }
         }
     }
-
-    val exportLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.CreateDocument("application/json"),
-        onResult = { uri ->
-            uri?.let { onIntent(BookshelfIntent.ExportToUri(it, uiState.items)) }
-        }
-    )
 
     val activeOverlay = uiState.activeOverlay
     val showGroupMenu = activeOverlay == BookshelfOverlay.GroupMenu
@@ -476,33 +458,6 @@ fun BookshelfScreen(
                                         dismiss()
                                     },
                                     leadingIcon = { Icon(Icons.Default.Edit, null) }
-                                )
-                                RoundDropdownMenuItem(
-                                    text = stringResource(R.string.bookshelf_management),
-                                    onClick = {
-                                        val groupId =
-                                            uiState.groups.getOrNull(uiState.selectedGroupIndex)?.groupId
-                                                ?: -1L
-                                        onNavigateToCache(groupId)
-                                        dismiss()
-                                    },
-                                    leadingIcon = { Icon(Icons.Default.Bookmarks, null) }
-                                )
-                                RoundDropdownMenuItem(
-                                    text = stringResource(R.string.export_bookshelf),
-                                    onClick = {
-                                        onIntent(BookshelfIntent.ShowOverlay(BookshelfOverlay.ExportSheet))
-                                        dismiss()
-                                    },
-                                    leadingIcon = { Icon(Icons.Default.UploadFile, null) }
-                                )
-                                RoundDropdownMenuItem(
-                                    text = stringResource(R.string.log),
-                                    onClick = {
-                                        onIntent(BookshelfIntent.ShowOverlay(BookshelfOverlay.LogSheet))
-                                        dismiss()
-                                    },
-                                    leadingIcon = { Icon(Icons.Default.History, null) }
                                 )
                             }
                         }
@@ -1001,7 +956,6 @@ fun BookshelfScreen(
         allGroups = allGroups,
         allTags = allTags,
         selectedBookUrls = selectedBookUrls,
-        exportLauncher = exportLauncher,
         clearSelection = clearSelection
     )
 }
@@ -1070,7 +1024,6 @@ private fun BookshelfOverlays(
     allGroups: List<BookGroup>,
     allTags: List<String>,
     selectedBookUrls: Set<String>,
-    exportLauncher: ManagedActivityResultLauncher<String, Uri?>,
     clearSelection: () -> Unit
 ) {
     BookshelfConfigSheet(
@@ -1110,21 +1063,6 @@ private fun BookshelfOverlays(
         tags = allTags.toImmutableList(),
         onDismissRequest = { onIntent(BookshelfIntent.DismissOverlay) },
         onConfirm = { tags -> onIntent(BookshelfIntent.AddTags(selectedBookUrls, tags)) }
-    )
-
-    FilePickerSheet(
-        show = activeOverlay == BookshelfOverlay.ExportSheet,
-        onDismissRequest = { onIntent(BookshelfIntent.DismissOverlay) },
-        title = stringResource(R.string.export_bookshelf),
-        onSelectSysDir = {
-            onIntent(BookshelfIntent.DismissOverlay)
-            exportLauncher.launch("bookshelf.json")
-        }
-    )
-
-    AppLogSheet(
-        show = activeOverlay == BookshelfOverlay.LogSheet,
-        onDismissRequest = { onIntent(BookshelfIntent.DismissOverlay) }
     )
 
     if (uiState.isLoading) {

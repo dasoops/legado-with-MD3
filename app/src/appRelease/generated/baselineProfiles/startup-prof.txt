@@ -30207,9 +30207,6 @@ SPLio/legado/app/domain/usecase/ExploreBooksUseCase$Companion;-><init>(Lkotlin/j
 Lio/legado/app/domain/usecase/ExploreKindUiUseCase;
 SPLio/legado/app/domain/usecase/ExploreKindUiUseCase;-><clinit>()V
 SPLio/legado/app/domain/usecase/ExploreKindUiUseCase;-><init>(Lio/legado/app/data/dao/BookSourceDao;)V
-Lio/legado/app/domain/usecase/ExportBookshelfUseCase;
-SPLio/legado/app/domain/usecase/ExportBookshelfUseCase;-><clinit>()V
-SPLio/legado/app/domain/usecase/ExportBookshelfUseCase;-><init>(Landroid/content/Context;Lio/legado/app/data/repository/BookRepository;)V
 Lio/legado/app/domain/usecase/GenerateChapterSummaryUseCase;
 PLio/legado/app/domain/usecase/GenerateChapterSummaryUseCase;-><clinit>()V
 PLio/legado/app/domain/usecase/GenerateChapterSummaryUseCase;-><init>(Lio/legado/app/domain/gateway/AiProfileGateway;Lio/legado/app/domain/usecase/AiToolAwareGenerationUseCase;Lio/legado/app/domain/gateway/AiArtifactGateway;Lio/legado/app/domain/usecase/AiTaskManager;)V
@@ -31426,7 +31423,6 @@ Lio/legado/app/ui/book/knowledge/BookEventDetailViewModel;
 Lio/legado/app/ui/book/knowledge/BookEventListViewModel;
 Lio/legado/app/ui/book/knowledge/BookKnowledgeDetailViewModel;
 Lio/legado/app/ui/book/knowledge/BookKnowledgeListViewModel;
-Lio/legado/app/ui/book/manage/BookshelfManageScreenViewModel;
 Lio/legado/app/ui/book/manga/ReadMangaViewModel;
 PLio/legado/app/ui/book/read/ActionMenuItem;-><clinit>()V
 PLio/legado/app/ui/book/read/ActionMenuItem;-><init>(ILjava/lang/String;Landroid/graphics/drawable/Drawable;Landroid/content/Intent;I)V
@@ -33117,7 +33113,6 @@ Lio/legado/app/ui/config/backupConfig/BackupRestoreOptionSheetsKt$$ExternalSynth
 SPLio/legado/app/ui/config/backupConfig/BackupRestoreOptionSheetsKt$$ExternalSyntheticLambda2;-><init>(Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;)V
 Lio/legado/app/ui/config/backupConfig/BackupRestoreOptionSheetsKt$$ExternalSyntheticLambda3;
 SPLio/legado/app/ui/config/backupConfig/BackupRestoreOptionSheetsKt$$ExternalSyntheticLambda3;-><init>(ZLkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;I)V
-Lio/legado/app/ui/config/bookshelfConfig/BookshelfManageScreenConfig;
 Lio/legado/app/ui/config/coverConfig/CoverAlbumManageViewModel;
 Lio/legado/app/ui/config/coverConfig/CoverConfigViewModel;
 Lio/legado/app/ui/config/customTheme/CustomThemeViewModel;
@@ -33824,7 +33819,6 @@ Lio/legado/app/ui/main/MainRouteBookInfo;
 Lio/legado/app/ui/main/MainRouteBookKnowledgeDetail;
 Lio/legado/app/ui/main/MainRouteBookKnowledgeList;
 Lio/legado/app/ui/main/MainRouteBookVoiceCasting;
-Lio/legado/app/ui/main/MainRouteCache;
 Lio/legado/app/ui/main/MainRouteCloudTtsEngines;
 Lio/legado/app/ui/main/MainRouteExploreShow;
 Lio/legado/app/ui/main/MainRouteHighlightTagRule;
@@ -34578,7 +34572,6 @@ SPLio/legado/app/ui/main/bookshelf/BookshelfUiState;->isRefreshing()Z
 SPLio/legado/app/ui/main/bookshelf/BookshelfUiState;->isSearch()Z
 Lio/legado/app/ui/main/bookshelf/BookshelfViewModel;
 SPLio/legado/app/ui/main/bookshelf/BookshelfViewModel;-><clinit>()V
-SPLio/legado/app/ui/main/bookshelf/BookshelfViewModel;-><init>(Landroid/app/Application;Lio/legado/app/data/repository/BookRepository;Lio/legado/app/data/repository/BookGroupRepository;Lio/legado/app/data/repository/BookSourceRepository;Lio/legado/app/data/repository/BookshelfRepository;Lio/legado/app/data/repository/UploadRepository;Lio/legado/app/domain/usecase/BatchCacheDownloadUseCase;Lio/legado/app/domain/usecase/UpdateBooksGroupUseCase;Lio/legado/app/domain/usecase/RefreshTocUseCase;Lio/legado/app/domain/usecase/AddBookUseCase;Lio/legado/app/domain/usecase/ImportBookshelfUseCase;Lio/legado/app/domain/usecase/ExportBookshelfUseCase;Lio/legado/app/domain/gateway/BookshelfSettingsGateway;Lio/legado/app/domain/gateway/AppShellSettingsGateway;Lio/legado/app/domain/gateway/ThemeSettingsGateway;)V
 SPLio/legado/app/ui/main/bookshelf/BookshelfViewModel;->access$buildTitle(Lio/legado/app/ui/main/bookshelf/BookshelfViewModel;IZZZLjava/lang/String;I)Ljava/lang/String;
 SPLio/legado/app/ui/main/bookshelf/BookshelfViewModel;->access$computeHiddenGroupIds(Lio/legado/app/ui/main/bookshelf/BookshelfViewModel;Ljava/util/List;Ljava/util/Map;Ljava/util/Map;)Ljava/util/Set;
 SPLio/legado/app/ui/main/bookshelf/BookshelfViewModel;->access$filterBooks(Lio/legado/app/ui/main/bookshelf/BookshelfViewModel;Ljava/util/List;Ljava/lang/String;Z)Ljava/util/List;

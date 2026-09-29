@@ -1,7 +1,6 @@
 package io.legado.app.ui.main.bookshelf
 
 import android.app.Application
-import android.net.Uri
 import androidx.lifecycle.viewModelScope
 import io.legado.app.R
 import io.legado.app.base.BaseViewModel
@@ -10,11 +9,9 @@ import io.legado.app.data.repository.BookGroupRepository
 import io.legado.app.data.repository.BookRepository
 import io.legado.app.data.repository.BookshelfRepository
 import io.legado.app.domain.model.BookTags
-import io.legado.app.domain.usecase.ExportBookshelfUseCase
 import io.legado.app.domain.gateway.BookshelfSettingsGateway
 import io.legado.app.domain.gateway.AppShellSettingsGateway
 import io.legado.app.domain.gateway.ThemeSettingsGateway
-import io.legado.app.exception.NoStackTraceException
 import io.legado.app.ui.config.themeConfig.TagColorPair
 import io.legado.app.utils.move
 import io.legado.app.utils.GSON
@@ -47,7 +44,6 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import java.io.File
 import java.util.concurrent.ConcurrentHashMap
 
 class BookshelfViewModel(
@@ -55,7 +51,6 @@ class BookshelfViewModel(
     private val bookRepository: BookRepository,
     private val bookGroupRepository: BookGroupRepository,
     private val bookshelfRepository: BookshelfRepository,
-    private val exportBookshelfUseCase: ExportBookshelfUseCase,
     private val bookshelfSettingsGateway: BookshelfSettingsGateway,
     private val appShellSettingsGateway: AppShellSettingsGateway,
     private val themeSettingsGateway: ThemeSettingsGateway,
@@ -505,7 +500,6 @@ class BookshelfViewModel(
             is BookshelfIntent.MoveDragging -> moveDraggingBook(intent.from, intent.to, intent.books)
             BookshelfIntent.FinishDragging -> finishDraggingBooks()
             BookshelfIntent.ScrollToTop -> gotoTop()
-            is BookshelfIntent.ExportToUri -> exportToUri(intent.uri, intent.books)
             is BookshelfIntent.UpdateSetting -> viewModelScope.launch {
                 bookshelfSettingsGateway.update(intent.transform)
             }
@@ -729,27 +723,6 @@ class BookshelfViewModel(
 
     fun gotoTop() {
         _scrollTrigger.tryEmit(Unit)
-    }
-
-    fun exportToUri(uri: Uri, items: List<BookUiItem>) {
-        execute {
-            exportBookshelfUseCase.exportToUri(uri, items).getOrThrow()
-        }.onSuccess {
-            _effects.tryEmit(BookshelfEffect.ShowSnackbar("导出成功"))
-        }.onError {
-            _effects.tryEmit(BookshelfEffect.ShowSnackbar("导出失败\n${it.localizedMessage}"))
-        }
-    }
-
-    fun exportBookshelf(items: List<BookUiItem>?, success: (file: File) -> Unit) {
-        execute {
-            items ?: throw NoStackTraceException("书籍不能为空")
-            exportBookshelfUseCase.exportToFile(items).getOrThrow()
-        }.onSuccess {
-            success(it)
-        }.onError {
-            showMessage("导出书籍出错\n${it.localizedMessage}")
-        }
     }
 
     private fun BookShelfItem.matchesSearchKey(searchKey: String): Boolean {
