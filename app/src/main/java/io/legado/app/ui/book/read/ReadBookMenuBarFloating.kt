@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Bookmark
-import androidx.compose.material.icons.filled.BugReport
 import androidx.compose.material.icons.filled.CleanHands
 import androidx.compose.material.icons.filled.Extension
 import androidx.compose.material.icons.filled.Image
@@ -224,14 +223,6 @@ internal fun OverflowDropdownMenu(
             PillDivider()
         }
 
-        RoundDropdownMenuItem(
-            text = stringResource(R.string.log),
-            leadingIcon = menuIcon(Icons.Default.BugReport),
-            onClick = {
-                dismiss()
-                onIntent(ReadBookIntent.ShowSheet(ReadBookSheet.AppLog))
-            },
-        )
         RoundDropdownMenuItem(
             text = stringResource(R.string.config_btn),
             leadingIcon = menuIcon(Icons.Default.Extension),
