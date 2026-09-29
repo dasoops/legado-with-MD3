@@ -12,12 +12,15 @@ import androidx.compose.animation.SizeTransform
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -44,6 +47,7 @@ import io.legado.app.ui.widget.components.card.ReorderableSelectionItem
 import io.legado.app.ui.widget.components.menuItem.RoundDropdownMenu
 import io.legado.app.ui.widget.components.menuItem.RoundDropdownMenuItem
 import io.legado.app.ui.widget.components.modalBottomSheet.AppModalBottomSheet
+import io.legado.app.ui.widget.components.text.AppText
 import io.legado.app.utils.move
 import io.legado.app.utils.takePersistablePermissionSafely
 import org.koin.androidx.compose.koinViewModel
@@ -226,6 +230,11 @@ fun GroupManageSheet(
                 ) {
                     items(listData, key = { it.groupId }) { group ->
                         val manageNameInfo = remember(group) { group.getManageName(context) }
+                        val typeLabel = when {
+                            group.isLocalDirectory -> R.string.group_type_directory
+                            group.isTag -> R.string.group_type_tag
+                            else -> R.string.group_type_builtin
+                        }
                         ReorderableSelectionItem(
                             state = reorderableState,
                             key = group.groupId,
@@ -237,6 +246,7 @@ fun GroupManageSheet(
                             },
                             title = group.groupName.ifBlank { manageNameInfo.suffix.orEmpty() },
                             subtitle = manageNameInfo.suffix?.takeIf { it != group.groupName },
+                            leadingContent = { GroupTypeTag(stringResource(typeLabel)) },
                             isEnabled = group.show,
                             containerColor = LegadoTheme.colorScheme.onSheetContent,
                             onEnabledChange = { isChecked ->
@@ -260,4 +270,17 @@ fun GroupManageSheet(
         }
 
     }
+}
+
+@Composable
+private fun GroupTypeTag(label: String) {
+    AppText(
+        text = label,
+        style = LegadoTheme.typography.labelSmall,
+        color = LegadoTheme.colorScheme.onSecondaryContainer,
+        maxLines = 1,
+        modifier = Modifier
+            .background(LegadoTheme.colorScheme.secondaryContainer, RoundedCornerShape(4.dp))
+            .padding(horizontal = 6.dp, vertical = 2.dp),
+    )
 }
