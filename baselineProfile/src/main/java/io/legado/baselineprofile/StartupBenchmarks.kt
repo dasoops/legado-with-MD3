@@ -2,9 +2,9 @@ package io.legado.baselineprofile
 
 import androidx.benchmark.macro.BaselineProfileMode
 import androidx.benchmark.macro.CompilationMode
+import androidx.benchmark.macro.FrameTimingMetric
 import androidx.benchmark.macro.StartupMode
 import androidx.benchmark.macro.StartupTimingMetric
-import androidx.benchmark.macro.FrameTimingMetric
 import androidx.benchmark.macro.junit4.MacrobenchmarkRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.LargeTest
@@ -39,7 +39,6 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 @LargeTest
 class StartupBenchmarks {
-
     @get:Rule
     val rule = MacrobenchmarkRule()
 
@@ -47,12 +46,12 @@ class StartupBenchmarks {
     fun startupCompilationNone() = benchmark(CompilationMode.None())
 
     @Test
-    fun startupCompilationBaselineProfiles() =
-        benchmark(CompilationMode.Partial(BaselineProfileMode.Require))
+    fun startupCompilationBaselineProfiles() = benchmark(CompilationMode.Partial(BaselineProfileMode.Require))
 
     private fun benchmark(compilationMode: CompilationMode) {
-        val packageName = InstrumentationRegistry.getArguments().getString("targetAppId")
-            ?: "io.legado.app"
+        val packageName =
+            InstrumentationRegistry.getArguments().getString("targetAppId")
+                ?: "io.legado.app"
 
         rule.measureRepeated(
             packageName = packageName,
@@ -65,7 +64,7 @@ class StartupBenchmarks {
             },
             measureBlock = {
                 startActivityAndWait()
-            }
+            },
         )
     }
 }

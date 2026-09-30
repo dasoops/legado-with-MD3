@@ -36,7 +36,6 @@ jsonPath = "3.0.0"
 # 若要升级请确保相关代码不会受此变更影响（如AnalyzeByJSoup.kt、JsoupXpath库等）
 intellijMarkdown = "0.7.12"
 jsoup = "1.16.2"
-jsoupxpath = "2.5.5"
 coroutines = "1.11.0"
 kotlinxDatetime = "0.8.0"
 lifecycleViewmodelCompose = "2.11.0"
@@ -200,7 +199,6 @@ flexbox = { module = "com.google.android.flexbox:flexbox", version.ref = "flexbo
 gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
 json-path = { module = "com.jayway.jsonpath:json-path", version.ref = "jsonPath" }
 jsoup = { module = "org.jsoup:jsoup", version.ref = "jsoup" }
-jsoupxpath = { module = "cn.wanghaomiao:JsoupXpath", version.ref = "jsoupxpath" }
 intellij-markdown = { module = "org.jetbrains:markdown-jvm", version.ref = "intellijMarkdown" }
 junit = { module = "junit:junit", version = "4.13.2" }
 kotlinx-coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "coroutines" }

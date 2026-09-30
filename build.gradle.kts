@@ -37,13 +37,13 @@ abstract class VerifyConfigArchitectureTask : DefaultTask() {
             RegexOption.MULTILINE,
         )
         val appDbDaoAccess = Regex(
-            """(?:\bappDb|io\.legado\.app\.data\.appDb)\.[A-Za-z0-9_]*Dao\b"""
+            """(?:\bappDb|io\.legado\.app\.data\.appDb)\.[A-Za-z0-9_]*Dao\b""",
         )
         val readBookConfigWrite = Regex(
-            """\bReadBookConfig\.[a-z_][A-Za-z0-9_]*(?:\.[a-z_][A-Za-z0-9_]*)?\s*="""
+            """\bReadBookConfig\.[a-z_][A-Za-z0-9_]*(?:\.[a-z_][A-Za-z0-9_]*)?\s*=""",
         )
         val readBookConfigMutationCall = Regex(
-            """\bReadBookConfig\.durConfig\.set[A-Za-z0-9_]*\s*\("""
+            """\bReadBookConfig\.durConfig\.set[A-Za-z0-9_]*\s*\(""",
         )
         // 上面两条都按 `ReadBookConfig.` 前缀找，成员 import 之后的裸写一个都看不见：
         // `import io.legado.app.help.config.ReadBookConfig.durConfig`（含 as 别名）之后
@@ -64,6 +64,7 @@ abstract class VerifyConfigArchitectureTask : DefaultTask() {
             "io/legado/app/data/repository/ReadStyleConfigStore.kt",
             "io/legado/app/data/repository/ReadBookStyleConfigRepository.kt",
             "io/legado/app/di/appModule.kt",
+            "io/legado/app/di/AppModule.kt",
         )
         // R4.7：Config 的值字段已是 val，字段写入由编译器拦；剩下的唯一写入口是
         // ReadStyleConfigStore 的列表操作。它是 Koin 单例，谁 inject 谁就能绕过 gateway
@@ -73,9 +74,10 @@ abstract class VerifyConfigArchitectureTask : DefaultTask() {
             "io/legado/app/data/repository/ReadBookStyleConfigRepository.kt",
             "io/legado/app/help/config/ReadBookConfig.kt",
             "io/legado/app/di/appModule.kt",
+            "io/legado/app/di/AppModule.kt",
         )
         val settingsUpdateDeclaration = Regex(
-            """\b(?:class|interface|object|typealias)\s+[A-Za-z0-9_]*SettingsUpdate\b"""
+            """\b(?:class|interface|object|typealias)\s+[A-Za-z0-9_]*SettingsUpdate\b""",
         )
         val updateAllDeclaration = Regex("""\bfun\s+(?:<[^>\n]+>\s*)?updateAll\s*\(""")
         val injectedConfigFiles = setOf(
@@ -89,13 +91,16 @@ abstract class VerifyConfigArchitectureTask : DefaultTask() {
             val relativePath = file.relativeTo(sourceRootDir).invariantSeparatorsPath
             val displayPath = "app/src/main/java/$relativePath"
 
-            if ("prefDelegate" in text || "prefStateDelegate" in text ||
+            if ("prefDelegate" in text ||
+                "prefStateDelegate" in text ||
                 "Snapshot.withMutableSnapshot" in text
             ) {
                 violations += "$displayPath: 禁止 Snapshot 配置桥"
             }
-            if ((relativePath.startsWith("io/legado/app/data/") ||
-                    relativePath.startsWith("io/legado/app/domain/")) &&
+            if ((
+                    relativePath.startsWith("io/legado/app/data/") ||
+                        relativePath.startsWith("io/legado/app/domain/")
+                    ) &&
                 forbiddenConfigImport.containsMatchIn(text)
             ) {
                 violations += "$displayPath: data/domain 禁止导入全局 Config"
@@ -106,18 +111,23 @@ abstract class VerifyConfigArchitectureTask : DefaultTask() {
                 violations += "$displayPath: Composable 禁止读取兼容 Config"
             }
             if (file.name.endsWith("Config.kt") &&
-                ("mutableStateOf(" in text || "Snapshot.withMutableSnapshot" in text ||
-                    "import androidx.compose.runtime.State" in text ||
-                    "import androidx.compose.runtime.MutableState" in text)
+                (
+                    "mutableStateOf(" in text ||
+                        "Snapshot.withMutableSnapshot" in text ||
+                        "import androidx.compose.runtime.State" in text ||
+                        "import androidx.compose.runtime.MutableState" in text
+                    )
             ) {
                 violations += "$displayPath: 配置门面禁止持有 Compose State"
             }
             if (relativePath !=
                 "io/legado/app/data/repository/ReadBookStyleConfigRepository.kt" &&
-                (readBookConfigWrite.containsMatchIn(text) ||
-                    readBookConfigMutationCall.containsMatchIn(text) ||
-                    readBookConfigMemberImport.containsMatchIn(text) ||
-                    readBookConfigBareWrite.containsMatchIn(text))
+                (
+                    readBookConfigWrite.containsMatchIn(text) ||
+                        readBookConfigMutationCall.containsMatchIn(text) ||
+                        readBookConfigMemberImport.containsMatchIn(text) ||
+                        readBookConfigBareWrite.containsMatchIn(text)
+                    )
             ) {
                 violations += "$displayPath: ReadBookConfig 写入必须经过 ReadStyleGateway"
             }
@@ -235,7 +245,7 @@ tasks.named<Delete>("clean") {
 }
 
 val verifyConfigArchitecture = tasks.register<VerifyConfigArchitectureTask>(
-    "verifyConfigArchitecture"
+    "verifyConfigArchitecture",
 ) {
     group = "verification"
     description = "禁止配置架构回退、UI 层(ViewModel 及其它)新增 DAO 直连和新增旧偏好调用"
@@ -260,14 +270,14 @@ val verifyConfigArchitecture = tasks.register<VerifyConfigArchitectureTask>(
             "io/legado/app/ui/config/otherConfig/OtherConfigViewModel.kt" to 1,
             "io/legado/app/ui/replace/ReplaceRuleViewModel.kt" to 2,
             "io/legado/app/utils/ContextExtensions.kt" to 12,
-        )
+        ),
     )
     legacyDaoInjectionBaseline.set(
         mapOf(
             // R2.1 已清零：ReadBookViewModel 的书籍/目录读写全部经 BookRepository。
             // 保留 0 值条目让棘轮继续盯着这个文件——新增一处直连就报红。
             "io/legado/app/ui/book/read/ReadBookViewModel.kt" to 0,
-        )
+        ),
     )
     // 非 ViewModel 的 UI 层文件直连 DAO 的历史债，只冻结不修复；
     // 清理时逐条下调/删除。护栏会自动要求"减少了就下调基线"，防止回退。
@@ -277,7 +287,7 @@ val verifyConfigArchitecture = tasks.register<VerifyConfigArchitectureTask>(
             // 护栏缺席期间 main 新增（整书页码估算），随合并冻结
             "io/legado/app/ui/book/read/pageestimate/ExactChapterPageCountStore.kt" to 3,
             "io/legado/app/ui/main/MainNavGraph.kt" to 2,
-        )
+        ),
     )
 }
 
