@@ -292,7 +292,6 @@
     <string name="intro_show">Description:%s</string>
     <string name="intro_show_null">Description: no introduction</string>
     <string name="open_from_other">Open external book</string>
-    <string name="origin_show">%s</string>
     <string name="import_replace_rule">Import replace rules</string>
     <string name="import_replace_rule_on_line">Import online rules</string>
     <string name="check_update_interval">Check interval for updates</string>
@@ -432,7 +431,6 @@
     <string name="new_version">New version</string>
     <string name="download_update">Download updates</string>
     <string name="tip_margin_change">Margin adjustment</string>
-    <string name="allow_update">Enable update</string>
     <string name="disable_update">Disable update</string>
     <string name="need_more_time_load_content">When the body length is too long, it may take more time to load the text.</string>
     <string name="revert_selection">Inverse</string>
@@ -785,7 +783,6 @@
     <string name="reduce">Minus</string>
     <string name="plus">Plus</string>
     <string name="system_typeface">System typeface</string>
-    <string name="delete_book_file">Delete source file</string>
     <string name="text_default">Default</string>
     <string name="default1">Default-1</string>
     <string name="default2">Default-2</string>
@@ -973,8 +970,6 @@
     <string name="background_image_blurring">Background image blurring</string>
     <string name="background_image_blurring_radius">Blurring radius</string>
     <string name="background_image_hint">Disabled when 0, enable range from 1 to 25\nThe greater the radius, the stronger the effect of blurring</string>
-    <string name="copy_book_url">Copy book URL</string>
-    <string name="copy_toc_url">Copy chapters URL</string>
     <string name="export_to_web_dav">Export to WebDAV</string>
     <string name="reverse_content">Reverse content</string>
     <string name="debug">Debug</string>
@@ -1030,7 +1025,6 @@
     <string name="need_login">Require Login</string>
     <string name="anti_alias">Anti-Aliasing</string>
     <string name="pref_anti_alias_summary">Anti-Aliasing when draw picture</string>
-    <string name="related_books">Related Books(relatedBooks)</string>
     <string name="clipboard_empty">Clipboard is empty</string>
     <string name="invalid_format">Invalid format</string>
     <string name="regex_is_empty">Regex is empty</string>
@@ -1039,8 +1033,6 @@
     <string name="export_success">export success</string>
     <string name="path">path</string>
     <string name="copy_play_url">Copy Play URL</string>
-    <string name="set_source_variable">Set source variable</string>
-    <string name="set_book_variable">Set book variable</string>
     <string name="summary">summary</string>
     <string name="cover_config">Cover Config</string>
     <string name="cover_config_summary">Generic Cover Rules and Default Cover Style</string>
@@ -1053,7 +1045,6 @@
     <string name="chapter_pay">pay</string>
     <string name="double_page_horizontal">Tablet/Landscape Dual Page</string>
     <string name="full_screen">full screen</string>
-    <string name="open_fun">open function</string>
     <string name="use_browser_open">Is it opened in an external browser?</string>
     <string name="cannot_open_url">This URL cannot be opened directly</string>
     <string name="see">see</string>
@@ -1098,7 +1089,6 @@
     <string name="copy_all">Copy all</string>
     <string name="auto_complete">Automatic completion</string>
     <string name="is_event_listener">EventListener</string>
-    <string name="custom_button">Custom Button</string>
     <string name="rule_call_back">callBackJs</string>
     <string name="custom_tip">Custom tip</string>
     <string name="custom_tip_template_hint">Use placeholders like {BookName}, {ChapterTitle}&#8230;</string>
@@ -1134,12 +1124,10 @@
     <string name="all_bookmark">All bookmarks</string>
     <string name="book_type_different">Different types of books</string>
     <string name="timeout_millisecond">Timed out milliseconds</string>
-    <string name="file_not_supported">Continue to open although %1$s is not supported ?</string>
     <string name="import_theme">Import theme</string>
     <string name="import_txt_toc_rule">Import txt directory rules</string>
     <string name="auto_save_cookie">CookieJar</string>
     <string name="cookie">Clear cookie</string>
-    <string name="download_and_import_file">Import online book files</string>
     <string name="upload_book_success">Upload Success</string>
     <string name="upload_book_fail">Upload Fail</string>
     <string name="download_book_success">Download Success</string>
@@ -1237,7 +1225,6 @@
     <string name="sure_upload">Remote WebDAV URL exists, Continue?</string>
     <string name="unsupport_archivefile_entry">Cannot find supported files in archive</string>
     <string name="no_books_dir">There is no book save location set!</string>
-    <string name="delete_alert">Delete Alert</string>
     <string name="no_book_found_bookshelf">No book found in bookshelf, import again ?</string>
     <string name="archive_not_found">Can not find archive selected, continue to download ?</string>
     <string name="privacy_policy">User Privacy and Agreement</string>
@@ -1586,7 +1573,6 @@
     <string name="text_typeface">Font Style</string>
     <string name="shadow_typeface">Shadow Style</string>
     <string name="long_click_to_custom">Long Tap to Customize</string>
-    <string name="source_custom_button_long_action">Long-press action</string>
     <string name="text_shadow_set">Shadow Settings</string>
     <string name="paragraph_typeface">Paragraph Style</string>
     <string name="same_name_book">A book with the same name already exists</string>

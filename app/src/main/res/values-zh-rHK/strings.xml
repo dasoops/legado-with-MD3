@@ -209,7 +209,6 @@
     <string name="intro_show">簡介: %s</string>
     <string name="intro_show_null">簡介: 暫無簡介</string>
     <string name="open_from_other">打開外部書籍</string>
-    <string name="origin_show">%s</string>
     <string name="import_replace_rule">導入替換規則</string>
     <string name="import_replace_rule_on_line">導入在線規則</string>
     <string name="check_update_interval">檢查更新間隔</string>
@@ -345,7 +344,6 @@
     <string name="new_version">新版本</string>
     <string name="download_update">下載更新</string>
     <string name="tip_margin_change">Tip 邊距跟隨邊距調整</string>
-    <string name="allow_update">允許更新</string>
     <string name="disable_update">禁止更新</string>
     <string name="need_more_time_load_content">正文长度过长时，加载正文可能会花费更多时间</string>
     <string name="revert_selection">反選</string>
@@ -627,7 +625,6 @@
     <string name="reduce">減</string>
     <string name="plus">加</string>
     <string name="system_typeface">系統內置字體樣式</string>
-    <string name="delete_book_file">刪除源文件</string>
     <string name="text_default">默认</string>
     <string name="default1">預設一</string>
     <string name="default2">預設二</string>
@@ -761,8 +758,6 @@
     <string name="empty_msg_import_book">點擊右上角資料夾圖示,選擇資料夾</string>
     <string name="scan_folder">智能掃描</string>
     <string name="import_file_name">導入文件名</string>
-    <string name="copy_book_url">複製書籍URL</string>
-    <string name="copy_toc_url">複製目錄URL</string>
     <string name="no_book">冇書</string>
     <string name="keep_original_name">保留原名</string>
     <string name="click_regional_config">點擊區域設定</string>
@@ -841,8 +836,6 @@
     <string name="export_success">導出成功</string>
     <string name="path">路徑</string>
     <string name="copy_play_url">複製播放Url</string>
-    <string name="set_source_variable">設置源變量</string>
-    <string name="set_book_variable">設置書籍變量</string>
     <string name="summary">注釋</string>
     <string name="cover_config">封面設置</string>
     <string name="cover_config_summary">通用封面规则及默认封面样式</string>
@@ -855,7 +848,6 @@
     <string name="chapter_pay">購買</string>
     <string name="double_page_horizontal">平板/橫屏雙頁</string>
     <string name="full_screen">全屏</string>
-    <string name="open_fun">打開方式</string>
     <string name="use_browser_open">是否使用外部瀏覽器打開?</string>
     <string name="see">查看</string>
     <string name="search_content_size">搜索結果</string>
@@ -911,12 +903,10 @@
     <string name="all_bookmark">所有书签</string>
     <string name="book_type_different">书籍类型不一样</string>
     <string name="timeout_millisecond">超时毫秒数</string>
-    <string name="file_not_supported">文件%1$s 不受支持，是否继续打开？</string>
     <string name="import_theme">导入主题</string>
     <string name="import_txt_toc_rule">导入txt目录规则</string>
     <string name="auto_save_cookie">CookieJar</string>
     <string name="cookie">清除cookie</string>
-    <string name="download_and_import_file">导入在线书籍文件</string>
     <string name="upload_book_success">Upload Success</string>
     <string name="upload_book_fail">Upload Fail</string>
     <string name="download_book_success">Download Success</string>
@@ -1008,7 +998,6 @@
     <string name="sure_upload">远程webDav链接已存在，是否继续</string>
     <string name="unsupport_archivefile_entry">压缩文件内没有支持的文件</string>
     <string name="no_books_dir">没有设置书籍保存位置!</string>
-    <string name="delete_alert">删除提醒</string>
     <string name="no_book_found_bookshelf">未在书架上找到所选书籍, 是否重新导入？</string>
     <string name="archive_not_found">未能在书籍保存目录找到压缩文件，是否重新导入？</string>
     <string name="privacy_policy">用户隐私与协议</string>
@@ -1355,7 +1344,6 @@
     <string name="cover_url">封面 URL</string>
     <string name="current_effective_contrast">目前有效值：%1$s</string>
     <string name="custom">自訂</string>
-    <string name="custom_button">自訂按鈕</string>
     <string name="custom_mode">自訂模式</string>
     <string name="custom_regex">自訂規則</string>
     <string name="custom_tip">自訂範本</string>
@@ -1535,7 +1523,6 @@
     <string name="locate_current_reading">跳轉到目前閱讀位置</string>
     <string name="login_error">登錄失敗</string>
     <string name="long_click_to_custom">長按自訂</string>
-    <string name="source_custom_button_long_action">長按操作</string>
     <string name="long_press_group">長按分組</string>
     <string name="manage_tag_colors">管理標籤顏色</string>
     <string name="manga">漫畫</string>
@@ -1669,7 +1656,6 @@
     <string name="reduce_stutter">減少進入閲讀介面時的卡頓，但會增加書籍載入時間。</string>
     <string name="refreshing">刷新中</string>
     <string name="regex_enabled">已啟用正則</string>
-    <string name="related_books">相關書籍（relatedBooks）</string>
     <string name="release_to_refresh">釋放刷新</string>
     <string name="reload">重新載入</string>
     <string name="latest_chapter_info">最新章節：%1$s</string>

@@ -4,14 +4,7 @@ import android.net.Uri
 import androidx.compose.runtime.Stable
 import io.legado.app.data.entities.Book
 import io.legado.app.data.entities.BookChapter
-import io.legado.app.data.entities.BookSource
-import io.legado.app.data.entities.SearchBook
 import io.legado.app.data.entities.readRecord.ReadRecordTimelineDay
-import io.legado.app.ui.widget.components.variable.VariableEditorUiState
-import kotlinx.collections.immutable.ImmutableList
-import kotlinx.collections.immutable.persistentListOf
-
-const val READER_RESULT_DELETED = 100
 
 @Stable
 data class HighlightedTag(
@@ -23,7 +16,6 @@ data class BookInfoUiState(
     val book: BookInfoBookUi? = null,
     val hasChapters: Boolean = false,
     val tocLoadFailed: Boolean = false,
-    val webFiles: List<BookInfoWebFile> = emptyList(),
     val highlightedTags: List<HighlightedTag> = emptyList(),
     val kindLabels: List<String> = emptyList(),
     val groupNames: String? = null,
@@ -31,14 +23,8 @@ data class BookInfoUiState(
     val readRecordTotalTime: Long = 0L,
     val readRecordTimelineDays: List<ReadRecordTimelineDay> = emptyList(),
     val inBookshelf: Boolean = false,
-    val bookSource: BookSource? = null,
-    val bookSourceUi: BookInfoSourceUi? = null,
-    val relatedBooks: ImmutableList<RelatedBooksUi> = persistentListOf(),
     val isTocLoading: Boolean = false,
     val isBusy: Boolean = false,
-    val deleteAlertEnabled: Boolean = true,
-    val deleteOriginal: Boolean = false,
-    val showAppLogSheet: Boolean = false,
     val sheet: BookInfoSheet = BookInfoSheet.None,
     val dialog: BookInfoDialog? = null,
     val bookInfoFollowCoverColor: Boolean = true,
@@ -55,13 +41,8 @@ data class BookInfoBookUi(
     val name: String,
     val author: String,
     val realAuthor: String,
-    val origin: String,
-    val originName: String,
     val coverPath: String?,
-    val group: Long,
     val isLocal: Boolean,
-    val type: Int,
-    val canUpdate: Boolean,
     val durChapterTitle: String?,
     val latestChapterTitle: String?,
     val totalChapterNum: Int,
@@ -71,90 +52,31 @@ data class BookInfoBookUi(
     val intro: String?,
 )
 
-@Stable
-data class BookInfoSourceUi(
-    val sourceUrl: String,
-    val hasCustomButton: Boolean,
-)
-
 sealed interface BookInfoSheet {
     data object None : BookInfoSheet
-    data object CoverPicker : BookInfoSheet
     data object GroupPicker : BookInfoSheet
     data object ReadRecord : BookInfoSheet
-    data class WebFiles(val openAfterImport: Boolean) : BookInfoSheet
-    data class ArchiveEntries(
-        val archiveUri: Uri,
-        val entries: List<String>,
-        val openAfterImport: Boolean,
-    ) : BookInfoSheet
-    data class Variable(val editor: VariableEditorUiState) : BookInfoSheet
 }
 
 sealed interface BookInfoDialog {
-    data class DeleteBook(val isLocal: Boolean) : BookInfoDialog
     data class EditRemark(val remark: String?) : BookInfoDialog
     data class PhotoPreview(val path: String) : BookInfoDialog
-    data class UnsupportedWebFile(
-        val webFile: BookInfoWebFile,
-        val openAfterImport: Boolean,
-    ) : BookInfoDialog
 }
-
-data class BookInfoWebFile(
-    val url: String,
-    val name: String,
-) {
-    override fun toString(): String = name
-}
-
-data class RelatedBooksUi(
-    val key: String,
-    val title: String,
-    val url: String,
-    val resolvedUrl: String,
-    val books: ImmutableList<SearchBook>,
-)
 
 sealed interface BookInfoIntent {
     data object DismissSheet : BookInfoIntent
     data object DismissDialog : BookInfoIntent
-    data object DismissAppLogSheet : BookInfoIntent
-    data class UpdateVariable(val value: String) : BookInfoIntent
-    data object SaveVariable : BookInfoIntent
     data class MenuAction(val action: BookInfoMenuAction) : BookInfoIntent
-    data class AuthorClick(val longClick: Boolean) : BookInfoIntent
-    data class BookNameClick(val longClick: Boolean) : BookInfoIntent
-    data object OriginClick : BookInfoIntent
     data object ReadClick : BookInfoIntent
     data object OpenLocalBookExternally : BookInfoIntent
     data object TocClick : BookInfoIntent
-    data object CoverClick : BookInfoIntent
-    data object CoverLongClick : BookInfoIntent
+    data object CoverPreviewClick : BookInfoIntent
     data object GroupClick : BookInfoIntent
     data object ReadRecordClick : BookInfoIntent
     data object RemarkClick : BookInfoIntent
     data class SaveCover(val path: String) : BookInfoIntent
-    data class ConfirmDelete(val deleteOriginal: Boolean) : BookInfoIntent
     data class UpdateRemark(val remark: String) : BookInfoIntent
     data class AddTags(val tags: Set<String>) : BookInfoIntent
-    data class SelectCover(val coverUrl: String) : BookInfoIntent
-
-    data class SelectWebFile(
-        val webFile: BookInfoWebFile,
-        val openAfterImport: Boolean,
-    ) : BookInfoIntent
-    data class OpenUnsupportedWebFile(
-        val webFile: BookInfoWebFile,
-    ) : BookInfoIntent
-    data class SelectArchiveEntry(
-        val archiveUri: Uri,
-        val entryName: String,
-        val openAfterImport: Boolean,
-    ) : BookInfoIntent
-
-    data class RelatedBookClick(val book: SearchBook) : BookInfoIntent
-    data class SetDefaultBookTreeUri(val value: String) : BookInfoIntent
 
     /** 简介 HTML 图片长按。 */
     data class IntroImageLongClick(val source: String) : BookInfoIntent
@@ -175,44 +97,14 @@ sealed interface BookInfoEffect {
         val inBookshelf: Boolean,
         val chapterChanged: Boolean,
     ) : BookInfoEffect
-    data object OpenSelectBooksDir : BookInfoEffect
-    data class OpenFile(val uri: Uri, val mimeType: String) : BookInfoEffect
     data class OpenLocalBookExternally(val uri: Uri) : BookInfoEffect
-    data class RunSourceCallback(
-        val event: String,
-        val source: BookSource?,
-        val book: Book,
-        val action: BookInfoCallbackAction,
-    ) : BookInfoEffect
-    data class NavigateToBookInfo(
-        val name: String?,
-        val author: String?,
-        val bookUrl: String,
-        val origin: String?,
-        val coverPath: String?,
-    ) : BookInfoEffect
-}
-
-sealed interface BookInfoCallbackAction {
-    data class ShareText(val chooserTitle: String, val text: String) : BookInfoCallbackAction
-    data class CopyText(val text: String) : BookInfoCallbackAction
-    data object ClearCache : BookInfoCallbackAction
-    data object None : BookInfoCallbackAction
+    data object ClearCache : BookInfoEffect
 }
 
 enum class BookInfoMenuAction {
-    CustomButton,
     Edit,
-    Share,
     Refresh,
     ReadRecord,
     Top,
-    SetSourceVariable,
-    SetBookVariable,
-    CopyBookUrl,
-    CopyTocUrl,
-    ToggleCanUpdate,
-    ToggleDeleteAlert,
     ClearCache,
-    ShowLog,
 }

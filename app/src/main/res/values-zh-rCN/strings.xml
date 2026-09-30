@@ -262,7 +262,6 @@
     <string name="intro_show">简介：%s</string>
     <string name="intro_show_null">简介：暂无简介</string>
     <string name="open_from_other">打开外部书籍</string>
-    <string name="origin_show">%s</string>
     <string name="import_replace_rule">导入替换规则</string>
     <string name="import_replace_rule_on_line">导入在线规则</string>
     <string name="check_update_interval">检查更新间隔</string>
@@ -402,7 +401,6 @@
     <string name="new_version">新版本</string>
     <string name="download_update">下载更新</string>
     <string name="tip_margin_change">提示边距跟随页边距调整</string>
-    <string name="allow_update">允许更新</string>
     <string name="disable_update">禁止更新</string>
     <string name="need_more_time_load_content">正文长度过长时，加载正文可能会花费更多时间</string>
     <string name="revert_selection">反选</string>
@@ -752,7 +750,6 @@
     <string name="reduce">减</string>
     <string name="plus">加</string>
     <string name="system_typeface">系统内置字体样式</string>
-    <string name="delete_book_file">删除源文件</string>
     <string name="text_default">默认</string>
     <string name="default1">预设一</string>
     <string name="default2">预设二</string>
@@ -906,8 +903,6 @@
     <string name="empty_msg_import_book">点击右上角文件夹图标，选择文件夹</string>
     <string name="scan_folder">智能扫描</string>
     <string name="import_file_name">导入文件名</string>
-    <string name="copy_book_url">拷贝书籍 URL</string>
-    <string name="copy_toc_url">拷贝目录 URL</string>
     <string name="no_book">没有书籍</string>
     <string name="keep_original_name">保留原名</string>
     <string name="click_regional_config">点击区域设置</string>
@@ -988,7 +983,6 @@
     <string name="need_login">需要登录</string>
     <string name="anti_alias">抗锯齿</string>
     <string name="pref_anti_alias_summary">绘制图片时抗锯齿</string>
-    <string name="related_books">关联书籍（relatedBooks）</string>
     <string name="clipboard_empty">剪贴板没有内容</string>
     <string name="invalid_format">格式不正确</string>
     <string name="regex_is_empty">正则表达式为空</string>
@@ -999,8 +993,6 @@
     <string name="export_success">导出成功</string>
     <string name="path">路径</string>
     <string name="copy_play_url">拷贝播放 URL</string>
-    <string name="set_source_variable">设置源变量</string>
-    <string name="set_book_variable">设置书籍变量</string>
     <string name="summary">注释</string>
     <string name="cover_config">封面设置</string>
     <string name="cover_config_summary">通用封面规则及默认封面样式</string>
@@ -1013,7 +1005,6 @@
     <string name="chapter_pay">购买</string>
     <string name="double_page_horizontal">平板/横屏双页</string>
     <string name="full_screen">全屏</string>
-    <string name="open_fun">打开方式</string>
     <string name="use_browser_open">是否使用外部浏览器打开？</string>
     <string name="cannot_open_url">该URL无法直接打开</string>
     <string name="see">查看</string>
@@ -1075,12 +1066,10 @@
     <string name="all_bookmark">所有书签</string>
     <string name="book_type_different">书籍类型不一样</string>
     <string name="timeout_millisecond">超时毫秒数</string>
-    <string name="file_not_supported">文件 %1$s 不受支持，是否继续打开？</string>
     <string name="import_theme">导入主题</string>
     <string name="import_txt_toc_rule">导入 TXT 目录规则</string>
     <string name="auto_save_cookie">CookieJar</string>
     <string name="cookie">清除 Cookie</string>
-    <string name="download_and_import_file">导入在线书籍文件</string>
     <string name="upload_book_success">上传成功</string>
     <string name="upload_book_fail">上传失败</string>
     <string name="download_book_success">下载成功</string>
@@ -1177,7 +1166,6 @@
     <string name="sure_upload">远程 WebDav 链接已存在，是否继续</string>
     <string name="unsupport_archivefile_entry">压缩文件内没有支持的文件</string>
     <string name="no_books_dir">没有设置书籍保存位置!</string>
-    <string name="delete_alert">删除提醒</string>
     <string name="no_book_found_bookshelf">未在书架上找到所选书籍, 是否重新导入？</string>
     <string name="archive_not_found">未能在书籍保存目录找到压缩文件，是否重新导入？</string>
     <string name="privacy_policy">用户隐私与协议</string>
@@ -1534,7 +1522,6 @@
     <string name="text_typeface">字体样式</string>
     <string name="shadow_typeface">阴影样式</string>
     <string name="long_click_to_custom">长按自定义</string>
-    <string name="source_custom_button_long_action">长按操作</string>
     <string name="text_shadow_set">阴影设置</string>
     <string name="paragraph_typeface">段落样式</string>
     <string name="same_name_book">已有相同书籍</string>
@@ -1971,7 +1958,6 @@
     <string name="export_complete">导出完成</string>
     <string name="download_no_storage_permission">下载出错,没有存储权限</string>
     <string name="already_in_download_list">已在下载列表</string>
-    <string name="custom_button">自定义按钮</string>
     <string name="is_event_listener">EventListener</string>
     <string name="rule_call_back">callBackJs</string>
     <string name="custom_tip">自定义模板</string>

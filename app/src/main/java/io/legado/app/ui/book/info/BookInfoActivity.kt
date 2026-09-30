@@ -35,15 +35,6 @@ class BookInfoActivity : BaseComposeActivity() {
                     )
                 )
             },
-            onNavigateToBookInfo = { name, author, bookUrl, origin, coverPath ->
-                startActivity<BookInfoActivity> {
-                    putExtra("bookUrl", bookUrl)
-                    putExtra("name", name)
-                    putExtra("author", author)
-                    putExtra("origin", origin)
-                    putExtra("coverPath", coverPath)
-                }
-            },
         )
     }
 

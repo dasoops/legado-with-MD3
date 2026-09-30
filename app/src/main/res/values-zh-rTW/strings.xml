@@ -211,7 +211,6 @@
     <string name="intro_show">簡介：%s</string>
     <string name="intro_show_null">簡介：暫無簡介</string>
     <string name="open_from_other">打開外部書籍</string>
-    <string name="origin_show">%s</string>
     <string name="import_replace_rule">匯入取代規則</string>
     <string name="import_replace_rule_on_line">匯入線上規則</string>
     <string name="check_update_interval">檢查更新間隔</string>
@@ -347,7 +346,6 @@
     <string name="new_version">新版本</string>
     <string name="download_update">下載更新</string>
     <string name="tip_margin_change">Tip邊距跟隨邊距調整</string>
-    <string name="allow_update">允許更新</string>
     <string name="disable_update">禁止更新</string>
     <string name="need_more_time_load_content">正文長度過長時，載入正文可能會花費更多時間</string>
     <string name="revert_selection">反選</string>
@@ -636,7 +634,6 @@
     <string name="reduce">減</string>
     <string name="plus">加</string>
     <string name="system_typeface">系統內建字體樣式</string>
-    <string name="delete_book_file">刪除來源文件</string>
     <string name="text_default">默认</string>
     <string name="default1">預設一</string>
     <string name="default2">預設二</string>
@@ -765,8 +762,6 @@
     <string name="empty_msg_import_book">點擊右上角資料夾圖示，選擇資料夾</string>
     <string name="scan_folder">智慧掃描</string>
     <string name="import_file_name">匯入檔案名</string>
-    <string name="copy_book_url">複製書籍URL</string>
-    <string name="copy_toc_url">複製目錄URL</string>
     <string name="no_book">沒有書籍</string>
     <string name="keep_original_name">保留原名</string>
     <string name="click_regional_config">點擊區域設定</string>
@@ -844,8 +839,6 @@
     <string name="export_success">匯出成功</string>
     <string name="path">路徑</string>
     <string name="copy_play_url">複製播放Url</string>
-    <string name="set_source_variable">設定源變數</string>
-    <string name="set_book_variable">設定書籍變數</string>
     <string name="summary">注釋</string>
     <string name="cover_config">封面設定</string>
     <string name="cover_config_summary">通用封面規則及預設封面樣式</string>
@@ -858,7 +851,6 @@
     <string name="chapter_pay">購買</string>
     <string name="double_page_horizontal">平板/橫屏雙頁</string>
     <string name="full_screen">全屏</string>
-    <string name="open_fun">打開方式</string>
     <string name="use_browser_open">是否使用外部瀏覽器打開？</string>
     <string name="see">查看</string>
     <string name="open">打開</string>
@@ -914,12 +906,10 @@
     <string name="all_bookmark">所有書籤</string>
     <string name="book_type_different">書籍類型不一樣</string>
     <string name="timeout_millisecond">超時毫秒數</string>
-    <string name="file_not_supported">文件%1$s 不受支援，是否繼續打開？</string>
     <string name="import_theme">匯入主題</string>
     <string name="import_txt_toc_rule">匯入txt目錄規則</string>
     <string name="auto_save_cookie">CookieJar</string>
     <string name="cookie">清除cookie</string>
-    <string name="download_and_import_file">匯入線上書籍文件</string>
     <string name="upload_book_success">上傳成功</string>
     <string name="upload_book_fail">上傳失敗</string>
     <string name="download_book_success">下載成功</string>
@@ -1011,7 +1001,6 @@
     <string name="sure_upload">远程webDav链接已存在，是否继续</string>
     <string name="unsupport_archivefile_entry">压缩文件内没有支持的文件</string>
     <string name="no_books_dir">没有设置书籍保存位置!</string>
-    <string name="delete_alert">删除提醒</string>
     <string name="no_book_found_bookshelf">未在书架上找到所选书籍, 是否重新导入？</string>
     <string name="archive_not_found">未能在书籍保存目录找到压缩文件，是否重新导入？</string>
     <string name="privacy_policy">用户隐私与协议</string>
@@ -1383,7 +1372,6 @@
     <string name="image_style_single">單頁</string>
     <string name="color">顏色</string>
     <string name="reset_to_body_color">重置為正文顏色</string>
-    <string name="related_books">相關書籍（relatedBooks）</string>
     <string name="clipboard_empty">剪貼簿為空</string>
     <string name="invalid_format">無效格式</string>
     <string name="regex_is_empty">正則表達式為空</string>
@@ -1396,7 +1384,6 @@
     <string name="hide_all">全部隱藏</string>
 
     <string name="is_event_listener">事件監聽器</string>
-    <string name="custom_button">自訂按鈕</string>
     <string name="rule_call_back">回呼 JS（callBackJs）</string>
     <string name="custom_tip">自訂範本</string>
     <string name="custom_tip_template_hint">使用佔位符，如 {BookName}、{ChapterTitle}…</string>
@@ -1648,7 +1635,6 @@
     <string name="text_typeface">字體樣式</string>
     <string name="shadow_typeface">陰影樣式</string>
     <string name="long_click_to_custom">長按自訂</string>
-    <string name="source_custom_button_long_action">長按操作</string>
     <string name="text_shadow_set">陰影設定</string>
     <string name="paragraph_typeface">段落樣式</string>
     <string name="same_name_book">已存在同名書籍</string>
