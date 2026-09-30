@@ -90,6 +90,7 @@ lyricViewx = "1.3.2"
 uiautomator = "2.4.0"
 benchmarkMacroJunit4 = "1.4.1"
 baselineprofile = "1.4.1"
+spotless = "8.10.1"
 profileinstaller = "1.4.1"
 [libraries]
 
@@ -249,3 +250,4 @@ ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 room = { id = "androidx.room", version.ref = "room" }
 
 baselineprofile = { id = "androidx.baselineprofile", version.ref = "baselineprofile" }
+spotless = { id = "com.diffplug.spotless", version.ref = "spotless" }

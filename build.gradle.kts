@@ -1,3 +1,6 @@
+import com.diffplug.gradle.spotless.SpotlessExtension
+import com.diffplug.spotless.LineEnding
+
 @DisableCachingByDefault(because = "架构验证任务没有输出文件")
 abstract class VerifyConfigArchitectureTask : DefaultTask() {
 
@@ -205,9 +208,29 @@ plugins {
     alias(libs.plugins.room) apply false
     alias(libs.plugins.android.test) apply false
     alias(libs.plugins.baselineprofile) apply false
+    alias(libs.plugins.spotless)
 }
 
-tasks.register<Delete>("clean") {
+configure<SpotlessExtension> {
+    lineEndings = LineEnding.UNIX
+    kotlin {
+        target("**/*.kt")
+        targetExclude("**/build/**", "**/.gradle/**", "**/.kotlin/**", "**/.git/**")
+        ktlint("1.8.0")
+    }
+    kotlinGradle {
+        target("**/*.gradle.kts")
+        targetExclude("**/build/**", "**/.gradle/**", "**/.kotlin/**", "**/.git/**")
+        ktlint("1.8.0")
+    }
+    java {
+        target("**/*.java")
+        targetExclude("**/build/**", "**/.gradle/**", "**/.kotlin/**", "**/.git/**")
+        googleJavaFormat("1.28.0")
+    }
+}
+
+tasks.named<Delete>("clean") {
     delete(rootProject.layout.buildDirectory)
 }
 
