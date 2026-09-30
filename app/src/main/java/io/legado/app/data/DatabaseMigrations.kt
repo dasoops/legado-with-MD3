@@ -6,7 +6,6 @@ import androidx.room.migration.AutoMigrationSpec
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 import io.legado.app.constant.AppConst
-import io.legado.app.constant.BookSourceType
 import io.legado.app.constant.BookType
 
 object DatabaseMigrations {
@@ -25,6 +24,7 @@ object DatabaseMigrations {
             migration_102_103, migration_105_106,
             migration_110_111,
             Migration_111_112(),
+            migration_112_113,
         )
     }
 
@@ -34,7 +34,7 @@ object DatabaseMigrations {
             db.execSQL(
                 """CREATE TABLE txtTocRules(id INTEGER NOT NULL, 
                     name TEXT NOT NULL, rule TEXT NOT NULL, serialNumber INTEGER NOT NULL, 
-                    enable INTEGER NOT NULL, PRIMARY KEY (id))"""
+                    enable INTEGER NOT NULL, PRIMARY KEY (id))""",
             )
         }
     }
@@ -60,7 +60,7 @@ object DatabaseMigrations {
                     `latestChapterTitle` TEXT, `latestChapterTime` INTEGER NOT NULL, `lastCheckTime` INTEGER NOT NULL, `lastCheckCount` INTEGER NOT NULL, 
                     `totalChapterNum` INTEGER NOT NULL, `durChapterTitle` TEXT, `durChapterIndex` INTEGER NOT NULL, `durChapterPos` INTEGER NOT NULL, 
                     `durChapterTime` INTEGER NOT NULL, `wordCount` TEXT, `canUpdate` INTEGER NOT NULL, `order` INTEGER NOT NULL, 
-                    `originOrder` INTEGER NOT NULL, `useReplaceRule` INTEGER NOT NULL, `variable` TEXT, PRIMARY KEY(`bookUrl`))"""
+                    `originOrder` INTEGER NOT NULL, `useReplaceRule` INTEGER NOT NULL, `variable` TEXT, PRIMARY KEY(`bookUrl`))""",
             )
             db.execSQL("INSERT INTO books_new select * from books ")
             db.execSQL("DROP TABLE books")
@@ -91,7 +91,7 @@ object DatabaseMigrations {
         override fun migrate(db: SupportSQLiteDatabase) {
             db.execSQL(
                 """CREATE TABLE IF NOT EXISTS `readRecordNew` (`androidId` TEXT NOT NULL, `bookName` TEXT NOT NULL, `readTime` INTEGER NOT NULL, 
-                    PRIMARY KEY(`androidId`, `bookName`))"""
+                    PRIMARY KEY(`androidId`, `bookName`))""",
             )
             db.execSQL("INSERT INTO readRecordNew(androidId, bookName, readTime) select '${AppConst.androidId}' as androidId, bookName, readTime from readRecord")
             db.execSQL("DROP TABLE readRecord")
@@ -119,14 +119,14 @@ object DatabaseMigrations {
                     `group` INTEGER NOT NULL, `latestChapterTitle` TEXT, `latestChapterTime` INTEGER NOT NULL, `lastCheckTime` INTEGER NOT NULL, 
                     `lastCheckCount` INTEGER NOT NULL, `totalChapterNum` INTEGER NOT NULL, `durChapterTitle` TEXT, `durChapterIndex` INTEGER NOT NULL, 
                     `durChapterPos` INTEGER NOT NULL, `durChapterTime` INTEGER NOT NULL, `wordCount` TEXT, `canUpdate` INTEGER NOT NULL, 
-                    `order` INTEGER NOT NULL, `originOrder` INTEGER NOT NULL, `variable` TEXT, `readConfig` TEXT, PRIMARY KEY(`bookUrl`))"""
+                    `order` INTEGER NOT NULL, `originOrder` INTEGER NOT NULL, `variable` TEXT, `readConfig` TEXT, PRIMARY KEY(`bookUrl`))""",
             )
             db.execSQL(
                 """INSERT INTO books_new select `bookUrl`, `tocUrl`, `origin`, `originName`, `name`, `author`, `kind`, `customTag`, `coverUrl`, 
                     `customCoverUrl`, `intro`, `customIntro`, `charset`, `type`, `group`, `latestChapterTitle`, `latestChapterTime`, `lastCheckTime`, 
                     `lastCheckCount`, `totalChapterNum`, `durChapterTitle`, `durChapterIndex`, `durChapterPos`, `durChapterTime`, `wordCount`, `canUpdate`, 
                     `order`, `originOrder`, `variable`, null
-                    from books"""
+                    from books""",
             )
             db.execSQL("DROP TABLE books")
             db.execSQL("ALTER TABLE books_new RENAME TO books")
@@ -152,7 +152,7 @@ object DatabaseMigrations {
             db.execSQL(
                 """CREATE TABLE IF NOT EXISTS `sourceSubs` 
                     (`id` INTEGER NOT NULL, `name` TEXT NOT NULL, `url` TEXT NOT NULL, `type` INTEGER NOT NULL, `customOrder` INTEGER NOT NULL, 
-                    PRIMARY KEY(`id`))"""
+                    PRIMARY KEY(`id`))""",
             )
         }
     }
@@ -161,7 +161,7 @@ object DatabaseMigrations {
         override fun migrate(db: SupportSQLiteDatabase) {
             db.execSQL(
                 """CREATE TABLE IF NOT EXISTS `ruleSubs` (`id` INTEGER NOT NULL, `name` TEXT NOT NULL, `url` TEXT NOT NULL, `type` INTEGER NOT NULL, 
-                    `customOrder` INTEGER NOT NULL, `autoUpdate` INTEGER NOT NULL, `update` INTEGER NOT NULL, PRIMARY KEY(`id`))"""
+                    `customOrder` INTEGER NOT NULL, `autoUpdate` INTEGER NOT NULL, `update` INTEGER NOT NULL, PRIMARY KEY(`id`))""",
             )
             db.execSQL(" insert into `ruleSubs` select *, 0, 0 from `sourceSubs` ")
             db.execSQL("DROP TABLE `sourceSubs`")
@@ -174,12 +174,12 @@ object DatabaseMigrations {
             db.execSQL(
                 """CREATE TABLE IF NOT EXISTS `bookmarks1` (`time` INTEGER NOT NULL, `bookUrl` TEXT NOT NULL, `bookName` TEXT NOT NULL, 
                         `bookAuthor` TEXT NOT NULL, `chapterIndex` INTEGER NOT NULL, `chapterPos` INTEGER NOT NULL, `chapterName` TEXT NOT NULL, 
-                        `bookText` TEXT NOT NULL, `content` TEXT NOT NULL, PRIMARY KEY(`time`))"""
+                        `bookText` TEXT NOT NULL, `content` TEXT NOT NULL, PRIMARY KEY(`time`))""",
             )
             db.execSQL(
                 """insert into `bookmarks1` 
                         select `time`, `bookUrl`, `bookName`, `bookAuthor`, `chapterIndex`, `pageIndex`, `chapterName`, '', `content` 
-                        from bookmarks"""
+                        from bookmarks""",
             )
             db.execSQL(" DROP TABLE `bookmarks` ")
             db.execSQL(" ALTER TABLE bookmarks1 RENAME TO bookmarks ")
@@ -209,7 +209,7 @@ object DatabaseMigrations {
                     CREATE TABLE IF NOT EXISTS `epubChapters` 
                     (`bookUrl` TEXT NOT NULL, `href` TEXT NOT NULL, `parentHref` TEXT, 
                     PRIMARY KEY(`bookUrl`, `href`), FOREIGN KEY(`bookUrl`) REFERENCES `books`(`bookUrl`) ON UPDATE NO ACTION ON DELETE CASCADE )
-                """
+                """,
             )
             db.execSQL("CREATE INDEX IF NOT EXISTS `index_epubChapters_bookUrl` ON `epubChapters` (`bookUrl`)")
             db.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS `index_epubChapters_bookUrl_href` ON `epubChapters` (`bookUrl`, `href`)")
@@ -222,7 +222,7 @@ object DatabaseMigrations {
             db.execSQL(
                 """
                     CREATE TABLE IF NOT EXISTS `readRecord` (`deviceId` TEXT NOT NULL, `bookName` TEXT NOT NULL, `readTime` INTEGER NOT NULL, PRIMARY KEY(`deviceId`, `bookName`))
-                """
+                """,
             )
             db.execSQL("insert into readRecord (deviceId, bookName, readTime) select androidId, bookName, readTime from readRecord1")
         }
@@ -243,12 +243,12 @@ object DatabaseMigrations {
                     `bookName` TEXT NOT NULL, `bookAuthor` TEXT NOT NULL, `chapterIndex` INTEGER NOT NULL, 
                     `chapterPos` INTEGER NOT NULL, `chapterName` TEXT NOT NULL, `bookText` TEXT NOT NULL, 
                     `content` TEXT NOT NULL, PRIMARY KEY(`time`))
-                """
+                """,
             )
             db.execSQL(
                 """
                     CREATE INDEX IF NOT EXISTS `index_bookmarks_bookName_bookAuthor` ON `bookmarks` (`bookName`, `bookAuthor`)
-                """
+                """,
             )
             db.execSQL(
                 """
@@ -256,7 +256,7 @@ object DatabaseMigrations {
                     select time, ifNull(b.name, bookName) bookName, ifNull(b.author, bookAuthor) bookAuthor, 
                     chapterIndex, chapterPos, chapterName, bookText, content from bookmarks_old o
                     left join books b on o.bookUrl = b.bookUrl
-                """
+                """,
             )
         }
     }
@@ -342,7 +342,7 @@ object DatabaseMigrations {
                     `lastRead` INTEGER NOT NULL DEFAULT 0,
                     PRIMARY KEY(`deviceId`, `bookName`, `bookAuthor`)
                 )
-                """
+                """,
             )
             db.execSQL(
                 """
@@ -364,7 +364,7 @@ object DatabaseMigrations {
                     rr.readTime,
                     rr.lastRead
                 FROM readRecord_old rr
-                """
+                """,
             )
             db.execSQL("DROP TABLE readRecord_old")
 
@@ -382,7 +382,7 @@ object DatabaseMigrations {
                     `lastReadTime` INTEGER NOT NULL DEFAULT 0,
                     PRIMARY KEY(`deviceId`, `bookName`, `bookAuthor`, `date`)
                 )
-                """
+                """,
             )
             db.execSQL(
                 """
@@ -409,7 +409,7 @@ object DatabaseMigrations {
                     rd.firstReadTime,
                     rd.lastReadTime
                 FROM readRecordDetail_old rd
-                """
+                """,
             )
             db.execSQL("DROP TABLE readRecordDetail_old")
 
@@ -425,7 +425,7 @@ object DatabaseMigrations {
                     `endTime` INTEGER NOT NULL,
                     `words` INTEGER NOT NULL
                 )
-                """
+                """,
             )
             db.execSQL(
                 """
@@ -449,7 +449,7 @@ object DatabaseMigrations {
                     rs.endTime,
                     rs.words
                 FROM readRecordSession_old rs
-                """
+                """,
             )
             db.execSQL("DROP TABLE readRecordSession_old")
         }
@@ -463,46 +463,44 @@ object DatabaseMigrations {
             db.execSQL(
                 """
                 update books set type = ${BookType.audio}
-                where type = ${BookSourceType.audio}
-            """.trimIndent()
+                where type = 1
+                """.trimIndent(),
             )
             db.execSQL(
                 """
                 update books set type = ${BookType.image}
-                where type = ${BookSourceType.image}
-            """.trimIndent()
+                where type = 2
+                """.trimIndent(),
             )
             db.execSQL(
                 """
                 update books set type = ${BookType.webFile}
-                where type = ${BookSourceType.file}
-            """.trimIndent()
+                where type = 3
+                """.trimIndent(),
             )
             db.execSQL(
                 """
                 update books set type = ${BookType.text}
-                where type = ${BookSourceType.default}
-            """.trimIndent()
+                where type = 0
+                """.trimIndent(),
             )
             db.execSQL(
                 """
                 update books set type = type | ${BookType.local}
                 where origin like '${BookType.localTag}%' or origin like '${BookType.webDavTag}%'
-            """.trimIndent()
+                """.trimIndent(),
             )
         }
-
     }
-
 
     @Suppress("ClassName")
     @DeleteColumn(
         tableName = "book_sources",
-        columnName = "enabledReview"
+        columnName = "enabledReview",
     )
     class Migration_64_65 : AutoMigrationSpec
 
-    //已在书架的书没有 listIntro, 搜索缓存里还留着的就补回去(缓存只保留一天, 补不到的回落到 intro)
+    // 已在书架的书没有 listIntro, 搜索缓存里还留着的就补回去(缓存只保留一天, 补不到的回落到 intro)
     @Suppress("ClassName")
     class Migration_100_101 : AutoMigrationSpec {
 
@@ -513,7 +511,7 @@ object DatabaseMigrations {
                     select intro from searchBooks where searchBooks.bookUrl = books.bookUrl
                 )
                 where listIntro is null
-            """.trimIndent()
+                """.trimIndent(),
             )
         }
     }
@@ -575,12 +573,12 @@ object DatabaseMigrations {
         // 仅删除仍依赖旧普通分组的书; 同时属于合法本地目录分组的书必须保留.
         db.execSQL(
             "DELETE FROM books " +
-                    "WHERE (`group` & $ordinaryMask) != 0 " +
-                    "AND (`group` & $localDirectoryMask) = 0"
+                "WHERE (`group` & $ordinaryMask) != 0 " +
+                "AND (`group` & $localDirectoryMask) = 0",
         )
         db.execSQL(
             "UPDATE books SET `group` = `group` & ~($ordinaryMask) " +
-                    "WHERE (`group` & $ordinaryMask) != 0"
+                "WHERE (`group` & $ordinaryMask) != 0",
         )
         db.execSQL("DELETE FROM book_groups WHERE $ordinaryWhere")
     }
@@ -609,13 +607,13 @@ object DatabaseMigrations {
                     `enable` INTEGER NOT NULL,
                     PRIMARY KEY(`id`)
                 )
-                """.trimIndent()
+                """.trimIndent(),
             )
             db.execSQL(
                 """
                 INSERT INTO txtTocRules_new (id, name, chapterRule, volumeRule, example, serialNumber, enable)
                 SELECT id, name, rule, '', example, serialNumber, enable FROM txtTocRules
-                """.trimIndent()
+                """.trimIndent(),
             )
             db.execSQL("DROP TABLE txtTocRules")
             db.execSQL("ALTER TABLE txtTocRules_new RENAME TO txtTocRules")
@@ -654,7 +652,7 @@ object DatabaseMigrations {
                     lastRead INTEGER NOT NULL DEFAULT 0,
                     PRIMARY KEY(deviceId, bookName, bookAuthor)
                 )
-                """.trimIndent()
+                """.trimIndent(),
             )
             db.execSQL(
                 """
@@ -669,7 +667,7 @@ object DatabaseMigrations {
                     FROM readRecord rr
                 )
                 GROUP BY bookName, canonicalAuthor
-                """.trimIndent()
+                """.trimIndent(),
             )
             db.execSQL("DROP TABLE readRecord")
             db.execSQL("ALTER TABLE readRecord_migrated RENAME TO readRecord")
@@ -687,7 +685,7 @@ object DatabaseMigrations {
                     lastReadTime INTEGER NOT NULL DEFAULT 0,
                     PRIMARY KEY(deviceId, bookName, bookAuthor, date)
                 )
-                """.trimIndent()
+                """.trimIndent(),
             )
             db.execSQL(
                 """
@@ -708,7 +706,7 @@ object DatabaseMigrations {
                     FROM readRecordDetail rd
                 )
                 GROUP BY bookName, canonicalAuthor, date
-                """.trimIndent()
+                """.trimIndent(),
             )
             db.execSQL("DROP TABLE readRecordDetail")
             db.execSQL("ALTER TABLE readRecordDetail_migrated RENAME TO readRecordDetail")
@@ -724,7 +722,7 @@ object DatabaseMigrations {
                     endTime INTEGER NOT NULL,
                     words INTEGER NOT NULL
                 )
-                """.trimIndent()
+                """.trimIndent(),
             )
             db.execSQL(
                 """
@@ -741,7 +739,7 @@ object DatabaseMigrations {
                     FROM readRecordSession rs
                 )
                 GROUP BY bookName, canonicalAuthor, startTime, endTime
-                """.trimIndent()
+                """.trimIndent(),
             )
             db.execSQL("DROP TABLE readRecordSession")
             db.execSQL("ALTER TABLE readRecordSession_migrated RENAME TO readRecordSession")
@@ -764,6 +762,87 @@ object DatabaseMigrations {
             db.execSQL("DELETE FROM readRecordSession")
             db.execSQL("DELETE FROM readRecordDetail")
             db.execSQL("DELETE FROM readRecord")
+        }
+    }
+
+    private val migration_112_113 = object : Migration(112, 113) {
+        override fun migrate(db: SupportSQLiteDatabase) {
+            db.execSQL("DROP TABLE IF EXISTS ai_memory")
+            db.execSQL("DROP TABLE IF EXISTS ai_chat_messages")
+            db.execSQL("DROP TABLE IF EXISTS ai_chat_conversations")
+            db.execSQL("DROP TABLE IF EXISTS ai_artifacts")
+            db.execSQL("DROP TABLE IF EXISTS ai_prompt_presets")
+            db.execSQL("DROP TABLE IF EXISTS ai_task_presets")
+            db.execSQL("DROP TABLE IF EXISTS ai_model_profiles")
+            db.execSQL("DROP TABLE IF EXISTS ai_provider_profiles")
+            db.execSQL("DROP TABLE IF EXISTS book_outline_nodes")
+            db.execSQL("DROP TABLE IF EXISTS book_knowledge_entries")
+            db.execSQL("DROP TABLE IF EXISTS book_character_relations")
+            db.execSQL("DROP TABLE IF EXISTS book_character_events")
+            db.execSQL("DROP TABLE IF EXISTS book_character_profiles")
+            db.execSQL("DROP TABLE IF EXISTS chapter_speech_segments")
+            db.execSQL("DROP TABLE IF EXISTS chapter_speech_analysis")
+            db.execSQL("DROP TABLE IF EXISTS book_voice_bindings")
+            db.execSQL("DROP TABLE IF EXISTS read_aloud_voices")
+            db.execSQL("DROP VIEW IF EXISTS book_sources_part")
+            db.execSQL("DROP TABLE IF EXISTS searchBooks")
+            db.execSQL("DROP TABLE IF EXISTS search_keywords")
+            db.execSQL("DROP TABLE IF EXISTS ruleSubs")
+            db.execSQL("DROP TABLE IF EXISTS homepage_modules")
+            db.execSQL("DROP TABLE IF EXISTS homepage_custom_sets")
+            db.execSQL("DROP TABLE IF EXISTS book_sources")
+
+            db.execSQL(
+                """
+                CREATE TABLE book_content_processes_new (
+                    id TEXT NOT NULL,
+                    bookUrl TEXT NOT NULL,
+                    chapterIndex INTEGER,
+                    kind TEXT NOT NULL,
+                    stage TEXT NOT NULL,
+                    target TEXT NOT NULL,
+                    anchorJson TEXT NOT NULL,
+                    actionJson TEXT NOT NULL,
+                    styleJson TEXT,
+                    source TEXT NOT NULL,
+                    enabled INTEGER NOT NULL,
+                    sortOrder INTEGER NOT NULL,
+                    status INTEGER NOT NULL,
+                    schemaVersion INTEGER NOT NULL,
+                    createdAt INTEGER NOT NULL,
+                    updatedAt INTEGER NOT NULL,
+                    PRIMARY KEY(id)
+                )
+                """.trimIndent(),
+            )
+            db.execSQL(
+                """
+                INSERT INTO book_content_processes_new(
+                    id, bookUrl, chapterIndex, kind, stage, target, anchorJson,
+                    actionJson, styleJson, source, enabled, sortOrder, status,
+                    schemaVersion, createdAt, updatedAt
+                )
+                SELECT id, bookUrl, chapterIndex,
+                    CASE
+                        WHEN kind IN ('ai_clean', 'ai_rewrite') THEN 'manual_replacement'
+                        ELSE kind
+                    END,
+                    stage, target, anchorJson, actionJson, styleJson,
+                    CASE WHEN source = 'ai' THEN 'user' ELSE source END,
+                    enabled, sortOrder, status, schemaVersion, createdAt, updatedAt
+                FROM book_content_processes
+                """.trimIndent(),
+            )
+            db.execSQL("DROP TABLE book_content_processes")
+            db.execSQL("ALTER TABLE book_content_processes_new RENAME TO book_content_processes")
+            db.execSQL(
+                "CREATE INDEX index_book_content_processes_bookUrl_chapterIndex_enabled_sortOrder " +
+                    "ON book_content_processes(bookUrl, chapterIndex, enabled, sortOrder)",
+            )
+            db.execSQL(
+                "CREATE INDEX index_book_content_processes_bookUrl_kind " +
+                    "ON book_content_processes(bookUrl, kind)",
+            )
         }
     }
 }

@@ -7,84 +7,46 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.sqlite.db.SupportSQLiteDatabase
-import io.legado.app.data.dao.AiArtifactDao
-import io.legado.app.data.dao.AiChatDao
-import io.legado.app.data.dao.AiMemoryDao
-import io.legado.app.data.dao.AiProfileDao
-import io.legado.app.data.dao.AiPromptPresetDao
 import io.legado.app.data.dao.BookChapterDao
 import io.legado.app.data.dao.BookContentProcessDao
 import io.legado.app.data.dao.BookDao
 import io.legado.app.data.dao.BookGroupDao
-import io.legado.app.data.dao.BookKnowledgeDao
 import io.legado.app.data.dao.BookMarkingDao
-import io.legado.app.data.dao.BookSourceDao
 import io.legado.app.data.dao.BookmarkDao
 import io.legado.app.data.dao.CacheDao
-import io.legado.app.data.dao.ChapterSpeechDao
 import io.legado.app.data.dao.CookieDao
 import io.legado.app.data.dao.ExactChapterPageCountDao
 import io.legado.app.data.dao.HighlightRuleDao
 import io.legado.app.data.dao.HighlightTagRuleDao
-import io.legado.app.data.dao.HomepageCustomSetDao
-import io.legado.app.data.dao.HomepageModuleDao
 import io.legado.app.data.dao.KeyboardAssistsDao
-import io.legado.app.data.dao.ReadAloudVoiceDao
 import io.legado.app.data.dao.ReadRecordDao
 import io.legado.app.data.dao.ReplaceRuleDao
-import io.legado.app.data.dao.RuleSubDao
-import io.legado.app.data.dao.SearchBookDao
 import io.legado.app.data.dao.SearchContentHistoryDao
-import io.legado.app.data.dao.SearchKeywordDao
 import io.legado.app.data.dao.ServerDao
 import io.legado.app.data.dao.TxtTocRuleDao
-import io.legado.app.data.entities.AiArtifact
-import io.legado.app.data.entities.AiChatConversation
-import io.legado.app.data.entities.AiChatMessage
-import io.legado.app.data.entities.AiMemory
-import io.legado.app.data.entities.AiModelProfile
-import io.legado.app.data.entities.AiPromptPreset
-import io.legado.app.data.entities.AiProviderProfile
-import io.legado.app.data.entities.AiTaskPreset
 import io.legado.app.data.entities.Book
 import io.legado.app.data.entities.BookChapter
-import io.legado.app.data.entities.BookCharacterEvent
-import io.legado.app.data.entities.BookCharacterProfile
-import io.legado.app.data.entities.BookCharacterRelation
 import io.legado.app.data.entities.BookContentProcess
 import io.legado.app.data.entities.BookGroup
-import io.legado.app.data.entities.BookKnowledgeEntry
 import io.legado.app.data.entities.BookMarking
-import io.legado.app.data.entities.BookOutlineNode
-import io.legado.app.data.entities.BookSource
-import io.legado.app.data.entities.BookSourcePart
-import io.legado.app.data.entities.BookVoiceBindingEntity
 import io.legado.app.data.entities.Bookmark
 import io.legado.app.data.entities.Cache
-import io.legado.app.data.entities.ChapterSpeechAnalysisEntity
-import io.legado.app.data.entities.ChapterSpeechSegmentEntity
 import io.legado.app.data.entities.Cookie
 import io.legado.app.data.entities.ExactChapterPageCountEntity
 import io.legado.app.data.entities.HighlightRule
 import io.legado.app.data.entities.HighlightTagRule
-import io.legado.app.data.entities.HomepageCustomSet
-import io.legado.app.data.entities.HomepageModule
 import io.legado.app.data.entities.KeyboardAssist
-import io.legado.app.data.entities.ReadAloudVoiceEntity
 import io.legado.app.data.entities.ReplaceRule
-import io.legado.app.data.entities.RuleSub
-import io.legado.app.data.entities.SearchBook
 import io.legado.app.data.entities.SearchContentHistory
-import io.legado.app.data.entities.SearchKeyword
 import io.legado.app.data.entities.Server
 import io.legado.app.data.entities.TxtTocRule
 import io.legado.app.data.entities.readRecord.ReadRecord
 import io.legado.app.data.entities.readRecord.ReadRecordDetail
 import io.legado.app.data.entities.readRecord.ReadRecordSession
 import io.legado.app.help.DefaultData
+import java.util.Locale
 import org.intellij.lang.annotations.Language
 import splitties.init.appCtx
-import java.util.Locale
 
 val appDb by lazy {
     Room.databaseBuilder(appCtx, AppDatabase::class.java, AppDatabase.DATABASE_NAME)
@@ -96,24 +58,20 @@ val appDb by lazy {
 }
 
 @Database(
-    version = 112,
+    version = 113,
     exportSchema = true,
-    entities = [Book::class, BookGroup::class, BookSource::class, BookChapter::class,
-        ReplaceRule::class, SearchBook::class, SearchKeyword::class, Cookie::class,
+    entities = [
+        Book::class, BookGroup::class, BookChapter::class,
+        ReplaceRule::class, Cookie::class,
         Bookmark::class, ReadRecordDetail::class, ReadRecordSession::class,
         TxtTocRule::class, ReadRecord::class, Cache::class,
-        RuleSub::class, KeyboardAssist::class, Server::class,
-        SearchContentHistory::class, HomepageModule::class, HomepageCustomSet::class,
-        HighlightRule::class, AiProviderProfile::class, AiModelProfile::class,
-        AiTaskPreset::class, AiArtifact::class, AiChatConversation::class,
-        AiChatMessage::class, AiMemory::class, HighlightTagRule::class,
-        BookContentProcess::class, AiPromptPreset::class, BookCharacterProfile::class,
-        BookCharacterEvent::class, BookCharacterRelation::class, BookKnowledgeEntry::class,
-        BookOutlineNode::class, ReadAloudVoiceEntity::class, BookVoiceBindingEntity::class,
-        ChapterSpeechAnalysisEntity::class, ChapterSpeechSegmentEntity::class,
+        KeyboardAssist::class, Server::class,
+        SearchContentHistory::class,
+        HighlightRule::class, HighlightTagRule::class,
+        BookContentProcess::class,
         ExactChapterPageCountEntity::class,
-        BookMarking::class],
-    views = [BookSourcePart::class],
+        BookMarking::class,
+    ],
     autoMigrations = [
         AutoMigration(from = 43, to = 44),
         AutoMigration(from = 44, to = 45),
@@ -180,49 +138,34 @@ val appDb by lazy {
         AutoMigration(from = 107, to = 108, spec = DatabaseMigrations.Migration_107_108::class),
         AutoMigration(from = 108, to = 109, spec = DatabaseMigrations.Migration_108_109::class),
         // book_groups 新增可空列 pattern(高级分组正则)
-        AutoMigration(from = 109, to = 110)
-    ]
+        AutoMigration(from = 109, to = 110),
+    ],
 )
 abstract class AppDatabase : RoomDatabase() {
 
     abstract val bookDao: BookDao
     abstract val bookGroupDao: BookGroupDao
-    abstract val bookSourceDao: BookSourceDao
     abstract val bookChapterDao: BookChapterDao
     abstract val bookContentProcessDao: BookContentProcessDao
-    abstract val bookKnowledgeDao: BookKnowledgeDao
-    abstract val readAloudVoiceDao: ReadAloudVoiceDao
-    abstract val chapterSpeechDao: ChapterSpeechDao
     abstract val replaceRuleDao: ReplaceRuleDao
-    abstract val searchBookDao: SearchBookDao
-    abstract val searchKeywordDao: SearchKeywordDao
     abstract val bookmarkDao: BookmarkDao
     abstract val bookMarkingDao: BookMarkingDao
     abstract val cookieDao: CookieDao
     abstract val txtTocRuleDao: TxtTocRuleDao
     abstract val readRecordDao: ReadRecordDao
     abstract val cacheDao: CacheDao
-    abstract val ruleSubDao: RuleSubDao
     abstract val exactChapterPageCountDao: ExactChapterPageCountDao
     abstract val keyboardAssistsDao: KeyboardAssistsDao
     abstract val serverDao: ServerDao
     abstract val searchContentHistoryDao: SearchContentHistoryDao
-    abstract val homepageModuleDao: HomepageModuleDao
-    abstract val homepageCustomSetDao: HomepageCustomSetDao
     abstract val highlightRuleDao: HighlightRuleDao
     abstract val highlightTagRuleDao: HighlightTagRuleDao
-    abstract val aiProfileDao: AiProfileDao
-    abstract val aiArtifactDao: AiArtifactDao
-    abstract val aiChatDao: AiChatDao
-    abstract val aiMemoryDao: AiMemoryDao
-    abstract val aiPromptPresetDao: AiPromptPresetDao
 
     companion object {
 
         const val DATABASE_NAME = "legado.db"
 
         const val BOOK_TABLE_NAME = "books"
-        const val BOOK_SOURCE_TABLE_NAME = "book_sources"
 
         val dbCallback = object : Callback() {
 
@@ -238,10 +181,6 @@ abstract class AppDatabase : RoomDatabase() {
                     where not exists (select * from book_groups where groupId = ${BookGroup.IdAll})
                 """.trimIndent()
                 db.execSQL(insertBookGroupAllSql)
-                @Language("sql")
-                val upBookSourceLoginUiSql =
-                    "update book_sources set loginUi = null where loginUi = 'null'"
-                db.execSQL(upBookSourceLoginUiSql)
                 db.query("select * from keyboardAssists order by serialNo").use {
                     if (it.count == 0) {
                         DefaultData.keyboardAssists.forEach { keyboardAssist ->
@@ -254,14 +193,12 @@ abstract class AppDatabase : RoomDatabase() {
                             db.insert(
                                 "keyboardAssists",
                                 SQLiteDatabase.CONFLICT_REPLACE,
-                                contentValues
+                                contentValues,
                             )
                         }
                     }
                 }
             }
         }
-
     }
-
 }
