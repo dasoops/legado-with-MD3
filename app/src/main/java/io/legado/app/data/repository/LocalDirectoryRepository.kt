@@ -174,10 +174,10 @@ internal fun relativeDirectoryOf(rootUri: String, bookUrl: String): List<String>
 }
 
 /**
- * 本地目录分组的书籍目录标签: 取所选目录之下的相对子目录, 并剔除与分组同名者.
- * 所选目录名本身即分组名, 作为标签只会与分组重复, 因此不生成.
+ * 本地目录分组的书籍目录标签: 以所选目录名为起点, 追加其下的相对子目录.
+ * 目录名和子目录可能重复, 由 editable 统一去重.
  */
 internal fun directoryTagsOf(rootUri: String, rootName: String?, bookUrl: String): List<String> =
     BookTags.editable(
-        relativeDirectoryOf(rootUri, bookUrl).filter { it != rootName }
+        listOfNotNull(rootName) + relativeDirectoryOf(rootUri, bookUrl)
     )

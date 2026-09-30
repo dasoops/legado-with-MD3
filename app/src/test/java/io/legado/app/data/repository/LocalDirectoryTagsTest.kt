@@ -12,17 +12,20 @@ import org.robolectric.annotation.Config
 class LocalDirectoryTagsTest {
 
     @Test
-    fun `目录标签剔除与分组同名的所选目录并保留相对子目录`() {
-        val root = "file:///home/Awork/Novel"
-        // aaa.txt 直接位于所选目录 Novel, 标签与分组同名, 不再生成
+    fun `目录根文件使用所选目录名作为标签`() {
+        val root = "file:///mnt/Awork/Books"
         assertEquals(
-            emptyList<String>(),
-            directoryTagsOf(root, "Novel", "/home/Awork/Novel/aaa.txt")
+            listOf("Books"),
+            directoryTagsOf(root, "Books", "/mnt/Awork/Books/a.txt")
         )
-        // ggg/c.txt 仅在 Novel 之下, 保留相对子目录 ggg
+    }
+
+    @Test
+    fun `上级目录分组包含根目录名和相对子目录且自动去重`() {
+        val root = "file:///mnt/Awork"
         assertEquals(
-            listOf("ggg"),
-            directoryTagsOf(root, "Novel", "/home/Awork/Novel/ggg/c.txt")
+            listOf("Awork", "Books"),
+            directoryTagsOf(root, "Awork", "/mnt/Awork/Books/a.txt")
         )
     }
 
