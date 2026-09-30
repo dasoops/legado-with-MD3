@@ -2,7 +2,9 @@ package io.legado.app.data.repository
 
 import android.app.Application
 import androidx.room.Room
+import io.legado.app.constant.BookType
 import io.legado.app.data.AppDatabase
+import io.legado.app.data.entities.BookChapter
 import io.legado.app.data.entities.Book
 import io.legado.app.data.entities.BookGroup
 import io.legado.app.domain.model.BookGroupUpdate
@@ -11,6 +13,8 @@ import io.legado.app.domain.model.NewBookGroup
 import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -198,6 +202,85 @@ class BookGroupMutationRepositoryTest {
 
         assertTrue(database.bookGroupDao.all.isEmpty())
         assertEquals(0L, database.bookDao.getBook(book.bookUrl)?.group)
+    }
+
+    @Test
+    fun `删除本地目录分组时移除仅属于该来源的本地书籍`() = runBlocking {
+        val group = BookGroup(
+            groupId = 1L,
+            groupName = "Books",
+            localDirectoryUri = "file:///Books",
+        )
+        val book = Book(
+            bookUrl = "book-1",
+            type = BookType.text or BookType.local,
+            group = group.groupId,
+        )
+        database.bookGroupDao.insert(group)
+        database.bookDao.insert(book)
+        database.bookChapterDao.insert(BookChapter(url = "chapter-1", bookUrl = book.bookUrl))
+
+        repository.deleteGroup(group.groupId)
+
+        assertTrue(database.bookGroupDao.all.isEmpty())
+        assertNull(database.bookDao.getBook(book.bookUrl))
+        assertEquals(0, database.bookChapterDao.getChapterCount(book.bookUrl))
+    }
+
+    @Test
+    fun `重叠本地目录分组删除时保留仍有其他目录来源的书籍`() = runBlocking {
+        val child = BookGroup(
+            groupId = 1L,
+            groupName = "Child",
+            localDirectoryUri = "file:///Books/Child",
+        )
+        val parent = BookGroup(
+            groupId = 2L,
+            groupName = "Books",
+            localDirectoryUri = "file:///Books",
+        )
+        val book = Book(
+            bookUrl = "book-1",
+            type = BookType.text or BookType.local,
+            group = child.groupId or parent.groupId,
+        )
+        database.bookGroupDao.insert(child, parent)
+        database.bookDao.insert(book)
+
+        repository.deleteGroup(child.groupId)
+
+        assertEquals(listOf(parent.groupId), database.bookGroupDao.all.map { it.groupId })
+        assertEquals(parent.groupId, database.bookDao.getBook(book.bookUrl)?.group)
+
+        repository.deleteGroup(parent.groupId)
+
+        assertNull(database.bookDao.getBook(book.bookUrl))
+    }
+
+    @Test
+    fun `删除本地目录分组不因高级分组位保留书籍`() = runBlocking {
+        val local = BookGroup(
+            groupId = 1L,
+            groupName = "Books",
+            localDirectoryUri = "file:///Books",
+        )
+        val advanced = BookGroup(
+            groupId = 2L,
+            groupName = "Advanced",
+            pattern = "author=Author",
+        )
+        val book = Book(
+            bookUrl = "book-1",
+            type = BookType.text or BookType.local,
+            group = local.groupId or advanced.groupId,
+        )
+        database.bookGroupDao.insert(local, advanced)
+        database.bookDao.insert(book)
+
+        repository.deleteGroup(local.groupId)
+
+        assertNotNull(database.bookGroupDao.getByID(advanced.groupId))
+        assertNull(database.bookDao.getBook(book.bookUrl))
     }
 
     @Test

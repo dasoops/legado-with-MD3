@@ -49,6 +49,22 @@ class BookGroupMutationRepository(
     override suspend fun deleteGroup(groupId: Long) {
         database.withTransaction {
             val group = database.bookGroupDao.getByID(groupId) ?: return@withTransaction
+            if (group.isLocalDirectory) {
+                val remainingLocalDirectoryMask = database.bookGroupDao.all
+                    .asSequence()
+                    .filter { it.isLocalDirectory && it.groupId != groupId }
+                    .fold(0L) { mask, remainingGroup -> mask or remainingGroup.groupId }
+                val booksToDelete = database.bookDao.getLocalBooksOnlyInGroup(
+                    groupId = groupId,
+                    remainingLocalDirectoryMask = remainingLocalDirectoryMask,
+                )
+                booksToDelete.forEach { book ->
+                    database.bookChapterDao.delByBook(book.bookUrl)
+                }
+                if (booksToDelete.isNotEmpty()) {
+                    database.bookDao.delete(*booksToDelete.toTypedArray())
+                }
+            }
             database.bookDao.removeGroup(groupId)
             database.bookGroupDao.delete(group)
         }
