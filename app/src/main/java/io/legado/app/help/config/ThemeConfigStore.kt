@@ -6,14 +6,14 @@ import android.util.DisplayMetrics
 import androidx.annotation.Keep
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.graphics.toColorInt
-import io.legado.app.domain.gateway.AppShellSettingsGateway
-import io.legado.app.domain.gateway.ThemeSettingsGateway
-import io.legado.app.ui.book.read.ConfigUpdateAction
-import io.legado.app.ui.book.read.ReadConfigUpdateBus
 import io.legado.app.R
 import io.legado.app.constant.PreferKey
 import io.legado.app.constant.Theme
+import io.legado.app.domain.gateway.AppShellSettingsGateway
+import io.legado.app.domain.gateway.ThemeSettingsGateway
 import io.legado.app.help.DefaultData
+import io.legado.app.ui.book.read.ConfigUpdateAction
+import io.legado.app.ui.book.read.ReadConfigUpdateBus
 import io.legado.app.utils.BitmapUtils
 import io.legado.app.utils.FileUtils
 import io.legado.app.utils.GSON
@@ -29,14 +29,14 @@ import io.legado.app.utils.isNightMode
 import io.legado.app.utils.printOnDebug
 import io.legado.app.utils.stackBlur
 import io.legado.app.utils.sysConfiguration
+import java.io.File
 import org.koin.core.context.GlobalContext
 import splitties.init.appCtx
-import java.io.File
 
 @Keep
 object ThemeConfigStore {
-    const val configFileName = "themeConfig.json"
-    val configFilePath = FileUtils.getPath(appCtx.filesDir, configFileName)
+    const val CONFIG_FILE_NAME = "themeConfig.json"
+    val configFilePath = FileUtils.getPath(appCtx.filesDir, CONFIG_FILE_NAME)
 
     private val themeSettingsGateway: ThemeSettingsGateway
         get() = GlobalContext.get().get()
@@ -93,14 +93,12 @@ object ThemeConfigStore {
         val bgCfg = when (getTheme()) {
             Theme.Light -> Pair(
                 theme.backgroundImageLight,
-                theme.backgroundImageBlurring
+                theme.backgroundImageBlurring,
             )
-
             Theme.Dark -> Pair(
                 theme.backgroundImageDark,
-                theme.backgroundImageDarkBlurring
+                theme.backgroundImageDarkBlurring,
             )
-
             else -> null
         } ?: return null
         if (bgCfg.first.isNullOrBlank()) return null
@@ -227,7 +225,7 @@ object ThemeConfigStore {
             backgroundColor = "#${background.hexString}",
             bottomBackground = "#${bBackground.hexString}",
             backgroundImgPath = bgImgPath,
-            backgroundImgBlur = bgImgBlur
+            backgroundImgBlur = bgImgBlur,
         )
     }
 
@@ -235,12 +233,12 @@ object ThemeConfigStore {
         val primary =
             context.getPrefInt(
                 PreferKey.cNPrimary,
-                context.getCompatColor(R.color.md_blue_grey_600)
+                context.getCompatColor(R.color.md_blue_grey_600),
             )
         val accent =
             context.getPrefInt(
                 PreferKey.cNAccent,
-                context.getCompatColor(R.color.md_deep_orange_800)
+                context.getCompatColor(R.color.md_deep_orange_800),
             )
         val background =
             context.getPrefInt(PreferKey.cNBackground, context.getCompatColor(R.color.md_grey_900))
@@ -257,7 +255,7 @@ object ThemeConfigStore {
             backgroundColor = "#${background.hexString}",
             bottomBackground = "#${bBackground.hexString}",
             backgroundImgPath = bgImgPath,
-            backgroundImgBlur = bgImgBlur
+            backgroundImgBlur = bgImgBlur,
         )
     }
 
@@ -270,24 +268,22 @@ object ThemeConfigStore {
         var backgroundColor: String,
         var bottomBackground: String,
         var backgroundImgPath: String?,
-        var backgroundImgBlur: Int
+        var backgroundImgBlur: Int,
     ) {
 
-        override fun hashCode(): Int {
-            return GSON.toJson(this).hashCode()
-        }
+        override fun hashCode(): Int = GSON.toJson(this).hashCode()
 
         override fun equals(other: Any?): Boolean {
             other ?: return false
             if (other is Config) {
-                return other.themeName == themeName
-                        && other.isNightTheme == isNightTheme
-                        && other.primaryColor == primaryColor
-                        && other.accentColor == accentColor
-                        && other.backgroundColor == backgroundColor
-                        && other.bottomBackground == bottomBackground
-                        && other.backgroundImgPath == backgroundImgPath
-                        && other.backgroundImgBlur == backgroundImgBlur
+                return other.themeName == themeName &&
+                    other.isNightTheme == isNightTheme &&
+                    other.primaryColor == primaryColor &&
+                    other.accentColor == accentColor &&
+                    other.backgroundColor == backgroundColor &&
+                    other.bottomBackground == bottomBackground &&
+                    other.backgroundImgPath == backgroundImgPath &&
+                    other.backgroundImgBlur == backgroundImgBlur
             }
             return false
         }
@@ -300,9 +296,7 @@ object ThemeConfigStore {
             "backgroundColor" to backgroundColor,
             "bottomBackground" to bottomBackground,
             "backgroundImgPath" to backgroundImgPath,
-            "backgroundImgBlur" to backgroundImgBlur
+            "backgroundImgBlur" to backgroundImgBlur,
         )
-
     }
-
 }

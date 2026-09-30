@@ -9,11 +9,12 @@ object ReadRecordIdentity {
     fun author(value: String): String = normalize(value)
 
     /** 生成跨恢复、合并流程复用的稳定身份键。 */
-    fun key(bookName: String, author: String): String =
-        "${bookName(bookName)}\u0000${author(author)}"
+    fun key(
+        bookName: String,
+        author: String,
+    ): String = "${bookName(bookName)}\u0000${author(author)}"
 
-    private fun normalize(value: String): String =
-        value.replace(WHITESPACE, " ").trim()
+    private fun normalize(value: String): String = value.replace(WHITESPACE, " ").trim()
 
     private val WHITESPACE = Regex("[\\p{Z}\\s]+")
 }

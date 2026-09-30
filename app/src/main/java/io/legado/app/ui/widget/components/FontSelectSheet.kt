@@ -40,18 +40,19 @@ fun FontSelectSheet(
     emptyText: String? = null,
 ) {
     val context = LocalContext.current
-    val selectedFontName = remember(selectedFontPath) {
-        selectedFontPath?.let {
-            runCatching {
-                val uri = it.toUri()
-                if (uri.isContentScheme()) {
-                    DocumentFile.fromSingleUri(context, uri)?.name
-                } else {
-                    File(uri.path ?: it).name
-                }
-            }.getOrNull()
+    val selectedFontName =
+        remember(selectedFontPath) {
+            selectedFontPath?.let {
+                runCatching {
+                    val uri = it.toUri()
+                    if (uri.isContentScheme()) {
+                        DocumentFile.fromSingleUri(context, uri)?.name
+                    } else {
+                        File(uri.path ?: it).name
+                    }
+                }.getOrNull()
+            }
         }
-    }
     var showTypefaceMenu by remember { mutableStateOf(false) }
 
     AppModalBottomSheet(
@@ -89,7 +90,8 @@ fun FontSelectSheet(
             MediumTonalButton(
                 onClick = onOpenFolderPicker,
                 icon = folderIcon,
-                contentDescription = folderContentDescription
+                contentDescription =
+                folderContentDescription
                     ?: stringResource(R.string.select_folder),
             )
         },

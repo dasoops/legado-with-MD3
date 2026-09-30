@@ -2,24 +2,28 @@ package io.legado.app.help
 
 import io.legado.app.data.entities.ReplaceRule
 import io.legado.app.exception.NoStackTraceException
-import io.legado.app.utils.*
+import io.legado.app.utils.GSON
+import io.legado.app.utils.fromJsonObject
+import io.legado.app.utils.jsonPath
+import io.legado.app.utils.readBool
+import io.legado.app.utils.readInt
+import io.legado.app.utils.readLong
+import io.legado.app.utils.readString
 
 object ReplaceAnalyzer {
 
-    fun jsonToReplaceRules(json: String): Result<MutableList<ReplaceRule>> {
-        return kotlin.runCatching {
-            val replaceRules = mutableListOf<ReplaceRule>()
-            val items: List<Map<String, Any>> = jsonPath.parse(json).read("$")
-            for (item in items) {
-                val jsonItem = jsonPath.parse(item)
-                jsonToReplaceRule(jsonItem.jsonString()).getOrThrow().let {
-                    if (it.isValid()) {
-                        replaceRules.add(it)
-                    }
+    fun jsonToReplaceRules(json: String): Result<MutableList<ReplaceRule>> = kotlin.runCatching {
+        val replaceRules = mutableListOf<ReplaceRule>()
+        val items: List<Map<String, Any>> = jsonPath.parse(json).read("$")
+        for (item in items) {
+            val jsonItem = jsonPath.parse(item)
+            jsonToReplaceRule(jsonItem.jsonString()).getOrThrow().let {
+                if (it.isValid()) {
+                    replaceRules.add(it)
                 }
             }
-            replaceRules
         }
+        replaceRules
     }
 
     fun jsonToReplaceRule(json: String): Result<ReplaceRule> {
@@ -43,5 +47,4 @@ object ReplaceAnalyzer {
             return@runCatching replaceRule
         }
     }
-
 }

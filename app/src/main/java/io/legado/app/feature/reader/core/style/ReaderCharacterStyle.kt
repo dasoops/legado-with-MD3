@@ -1,7 +1,7 @@
 package io.legado.app.feature.reader.core.style
 
-import io.legado.app.feature.reader.core.model.ReaderUnderline
 import io.legado.app.feature.reader.core.model.ReaderTextBackgroundImage
+import io.legado.app.feature.reader.core.model.ReaderUnderline
 
 enum class ReaderStyleTarget { ALL, TITLE, BODY }
 
@@ -24,8 +24,11 @@ data class ReaderStyleRange(
     val style: ReaderCharacterStyle,
     val priority: Int = 0,
 ) {
-    fun contains(position: Int, isTitle: Boolean): Boolean =
-        position in start until endExclusive && when (target) {
+    fun contains(
+        position: Int,
+        isTitle: Boolean,
+    ): Boolean = position in start until endExclusive &&
+        when (target) {
             ReaderStyleTarget.ALL -> true
             ReaderStyleTarget.TITLE -> isTitle
             ReaderStyleTarget.BODY -> !isTitle
@@ -33,9 +36,15 @@ data class ReaderStyleRange(
 }
 
 object ReaderCharacterStyleResolver {
-    fun resolve(ranges: List<ReaderStyleRange>, position: Int, isTitle: Boolean): ReaderCharacterStyle? =
-        ranges.withIndex().asSequence()
-            .filter { it.value.contains(position, isTitle) }
-            .maxWithOrNull(compareBy<IndexedValue<ReaderStyleRange>> { it.value.priority }.thenBy { it.index })
-            ?.value?.style
+    fun resolve(
+        ranges: List<ReaderStyleRange>,
+        position: Int,
+        isTitle: Boolean,
+    ): ReaderCharacterStyle? = ranges
+        .withIndex()
+        .asSequence()
+        .filter { it.value.contains(position, isTitle) }
+        .maxWithOrNull(compareBy<IndexedValue<ReaderStyleRange>> { it.value.priority }.thenBy { it.index })
+        ?.value
+        ?.style
 }

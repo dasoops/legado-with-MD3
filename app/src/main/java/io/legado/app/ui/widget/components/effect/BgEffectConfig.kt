@@ -1,7 +1,6 @@
 package io.legado.app.ui.widget.components.effect
 
 object BgEffectConfig {
-
     class Config(
         val points: FloatArray,
         val colors1: FloatArray,
@@ -25,153 +24,173 @@ object BgEffectConfig {
     private val CM_D = floatArrayOf(0.25f, 0.15f, 0.28f, 1.0f) // 暗色过渡
 
     // OS3 配色组合 (A/B/C 三阶段循环实现流光感)
-    private val COLORS_L_A = floatArrayOf(
-        C1_L[0],
-        C1_L[1],
-        C1_L[2],
-        C1_L[3],
-        C2_L[0],
-        C2_L[1],
-        C2_L[2],
-        C2_L[3],
-        C3_L[0],
-        C3_L[1],
-        C3_L[2],
-        C3_L[3],
-        CM_L[0],
-        CM_L[1],
-        CM_L[2],
-        CM_L[3]
-    )
-    private val COLORS_L_B = floatArrayOf(
-        C2_L[0],
-        C2_L[1],
-        C2_L[2],
-        C2_L[3],
-        C3_L[0],
-        C3_L[1],
-        C3_L[2],
-        C3_L[3],
-        CM_L[0],
-        CM_L[1],
-        CM_L[2],
-        CM_L[3],
-        C1_L[0],
-        C1_L[1],
-        C1_L[2],
-        C1_L[3]
-    )
-    private val COLORS_L_C = floatArrayOf(
-        C3_L[0],
-        C3_L[1],
-        C3_L[2],
-        C3_L[3],
-        CM_L[0],
-        CM_L[1],
-        CM_L[2],
-        CM_L[3],
-        C1_L[0],
-        C1_L[1],
-        C1_L[2],
-        C1_L[3],
-        C2_L[0],
-        C2_L[1],
-        C2_L[2],
-        C2_L[3]
-    )
+    private val COLORS_L_A =
+        floatArrayOf(
+            C1_L[0],
+            C1_L[1],
+            C1_L[2],
+            C1_L[3],
+            C2_L[0],
+            C2_L[1],
+            C2_L[2],
+            C2_L[3],
+            C3_L[0],
+            C3_L[1],
+            C3_L[2],
+            C3_L[3],
+            CM_L[0],
+            CM_L[1],
+            CM_L[2],
+            CM_L[3],
+        )
+    private val COLORS_L_B =
+        floatArrayOf(
+            C2_L[0],
+            C2_L[1],
+            C2_L[2],
+            C2_L[3],
+            C3_L[0],
+            C3_L[1],
+            C3_L[2],
+            C3_L[3],
+            CM_L[0],
+            CM_L[1],
+            CM_L[2],
+            CM_L[3],
+            C1_L[0],
+            C1_L[1],
+            C1_L[2],
+            C1_L[3],
+        )
+    private val COLORS_L_C =
+        floatArrayOf(
+            C3_L[0],
+            C3_L[1],
+            C3_L[2],
+            C3_L[3],
+            CM_L[0],
+            CM_L[1],
+            CM_L[2],
+            CM_L[3],
+            C1_L[0],
+            C1_L[1],
+            C1_L[2],
+            C1_L[3],
+            C2_L[0],
+            C2_L[1],
+            C2_L[2],
+            C2_L[3],
+        )
 
-    private val COLORS_D_A = floatArrayOf(
-        C1_D[0],
-        C1_D[1],
-        C1_D[2],
-        C1_D[3],
-        C2_D[0],
-        C2_D[1],
-        C2_D[2],
-        C2_D[3],
-        C3_D[0],
-        C3_D[1],
-        C3_D[2],
-        C3_D[3],
-        CM_D[0],
-        CM_D[1],
-        CM_D[2],
-        CM_D[3]
-    )
-    private val COLORS_D_B = floatArrayOf(
-        C2_D[0],
-        C2_D[1],
-        C2_D[2],
-        C2_D[3],
-        C3_D[0],
-        C3_D[1],
-        C3_D[2],
-        C3_D[3],
-        CM_D[0],
-        CM_D[1],
-        CM_D[2],
-        CM_D[3],
-        C1_D[0],
-        C1_D[1],
-        C1_D[2],
-        C1_D[3]
-    )
-    private val COLORS_D_C = floatArrayOf(
-        C3_D[0],
-        C3_D[1],
-        C3_D[2],
-        C3_D[3],
-        CM_D[0],
-        CM_D[1],
-        CM_D[2],
-        CM_D[3],
-        C1_D[0],
-        C1_D[1],
-        C1_D[2],
-        C1_D[3],
-        C2_D[0],
-        C2_D[1],
-        C2_D[2],
-        C2_D[3]
-    )
+    private val COLORS_D_A =
+        floatArrayOf(
+            C1_D[0],
+            C1_D[1],
+            C1_D[2],
+            C1_D[3],
+            C2_D[0],
+            C2_D[1],
+            C2_D[2],
+            C2_D[3],
+            C3_D[0],
+            C3_D[1],
+            C3_D[2],
+            C3_D[3],
+            CM_D[0],
+            CM_D[1],
+            CM_D[2],
+            CM_D[3],
+        )
+    private val COLORS_D_B =
+        floatArrayOf(
+            C2_D[0],
+            C2_D[1],
+            C2_D[2],
+            C2_D[3],
+            C3_D[0],
+            C3_D[1],
+            C3_D[2],
+            C3_D[3],
+            CM_D[0],
+            CM_D[1],
+            CM_D[2],
+            CM_D[3],
+            C1_D[0],
+            C1_D[1],
+            C1_D[2],
+            C1_D[3],
+        )
+    private val COLORS_D_C =
+        floatArrayOf(
+            C3_D[0],
+            C3_D[1],
+            C3_D[2],
+            C3_D[3],
+            CM_D[0],
+            CM_D[1],
+            CM_D[2],
+            CM_D[3],
+            C1_D[0],
+            C1_D[1],
+            C1_D[2],
+            C1_D[3],
+            C2_D[0],
+            C2_D[1],
+            C2_D[2],
+            C2_D[3],
+        )
 
     // OS3 Configs (参数完全对齐原版 OS3)
-    private val OS3_PHONE_LIGHT = Config(
-        points = floatArrayOf(
-            0.8f,
-            0.2f,
-            1.0f,
-            0.8f,
-            0.9f,
-            1.0f,
-            0.2f,
-            0.9f,
-            1.0f,
-            0.2f,
-            0.2f,
-            1.0f
-        ),
-        colors1 = COLORS_L_A, colors2 = COLORS_L_B, colors3 = COLORS_L_C,
-        colorInterpPeriod = 5.0f, lightOffset = 0.1f, saturateOffset = 0.2f, pointOffset = 0.2f
-    )
-    private val OS3_PHONE_DARK = Config(
-        points = floatArrayOf(
-            0.8f,
-            0.2f,
-            1.0f,
-            0.8f,
-            0.9f,
-            1.0f,
-            0.2f,
-            0.9f,
-            1.0f,
-            0.2f,
-            0.2f,
-            1.0f
-        ),
-        colors1 = COLORS_D_A, colors2 = COLORS_D_B, colors3 = COLORS_D_C,
-        colorInterpPeriod = 8.0f, lightOffset = 0.0f, saturateOffset = 0.17f, pointOffset = 0.4f
-    )
+    private val OS3_PHONE_LIGHT =
+        Config(
+            points =
+            floatArrayOf(
+                0.8f,
+                0.2f,
+                1.0f,
+                0.8f,
+                0.9f,
+                1.0f,
+                0.2f,
+                0.9f,
+                1.0f,
+                0.2f,
+                0.2f,
+                1.0f,
+            ),
+            colors1 = COLORS_L_A,
+            colors2 = COLORS_L_B,
+            colors3 = COLORS_L_C,
+            colorInterpPeriod = 5.0f,
+            lightOffset = 0.1f,
+            saturateOffset = 0.2f,
+            pointOffset = 0.2f,
+        )
+    private val OS3_PHONE_DARK =
+        Config(
+            points =
+            floatArrayOf(
+                0.8f,
+                0.2f,
+                1.0f,
+                0.8f,
+                0.9f,
+                1.0f,
+                0.2f,
+                0.9f,
+                1.0f,
+                0.2f,
+                0.2f,
+                1.0f,
+            ),
+            colors1 = COLORS_D_A,
+            colors2 = COLORS_D_B,
+            colors3 = COLORS_D_C,
+            colorInterpPeriod = 8.0f,
+            lightOffset = 0.0f,
+            saturateOffset = 0.17f,
+            pointOffset = 0.4f,
+        )
 
     internal fun get(
         deviceType: DeviceType,

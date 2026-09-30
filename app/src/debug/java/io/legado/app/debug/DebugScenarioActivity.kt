@@ -14,7 +14,6 @@ import io.legado.app.data.appDb
 import io.legado.app.data.entities.Book
 import io.legado.app.data.entities.BookChapter
 import io.legado.app.data.entities.BookGroup
-import io.legado.app.data.entities.BookSource
 import io.legado.app.help.book.BookHelp
 import io.legado.app.help.config.AppConfigStore
 import io.legado.app.ui.config.ConfigTag
@@ -25,15 +24,15 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 class DebugScenarioActivity : AppCompatActivity() {
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val fixtureId = intent.getStringExtra(EXTRA_FIXTURE)
         val sessionId = intent.getStringExtra(EXTRA_SESSION).orEmpty()
         val entry = intent.getStringExtra(EXTRA_ENTRY) ?: ENTRY_READER
-        val preferencesJson = intent.getStringExtra(EXTRA_PREFERENCES_B64)?.let {
-            String(android.util.Base64.decode(it, android.util.Base64.DEFAULT), Charsets.UTF_8)
-        }
+        val preferencesJson =
+            intent.getStringExtra(EXTRA_PREFERENCES_B64)?.let {
+                String(android.util.Base64.decode(it, android.util.Base64.DEFAULT), Charsets.UTF_8)
+            }
         if (fixtureId == null || !FIXTURE_ID.matches(fixtureId)) {
             fail(sessionId, "invalid fixture ID")
             return
@@ -50,20 +49,25 @@ class DebugScenarioActivity : AppCompatActivity() {
                 bookUrl
             }.onSuccess { bookUrl ->
                 Log.i(LOG_TAG, "[session=$sessionId] FIXTURE_READY fixture=$fixtureId entry=$entry")
-                val targetIntent = when (entry) {
-                    ENTRY_BOOKSHELF -> {
-                        AppConfigStore.putString(PreferKey.defaultHomePage, ENTRY_BOOKSHELF)
-                        AppConfigStore.putLong(PreferKey.saveTabPosition, BookGroup.IdAll)
-                        MainIntent.createHomeIntent(this@DebugScenarioActivity)
+                val targetIntent =
+                    when (entry) {
+                        ENTRY_BOOKSHELF -> {
+                            AppConfigStore.putString(PreferKey.defaultHomePage, ENTRY_BOOKSHELF)
+                            AppConfigStore.putLong(PreferKey.saveTabPosition, BookGroup.IdAll)
+                            MainIntent.createHomeIntent(this@DebugScenarioActivity)
+                        }
+                        ENTRY_THEME_CONFIG -> {
+                            MainIntent.createIntent(
+                                this@DebugScenarioActivity,
+                                ConfigTag.THEME_CONFIG,
+                            )
+                        }
+                        else -> {
+                            MainIntent.createReadBookIntent(this@DebugScenarioActivity, bookUrl)
+                        }
                     }
-                    ENTRY_THEME_CONFIG -> MainIntent.createIntent(
-                        this@DebugScenarioActivity,
-                        ConfigTag.THEME_CONFIG,
-                    )
-                    else -> MainIntent.createReadBookIntent(this@DebugScenarioActivity, bookUrl)
-                }
                 startActivity(
-                    targetIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
+                    targetIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK),
                 )
             }.onFailure { error ->
                 fail(sessionId, "fixture import failed", error)
@@ -72,92 +76,90 @@ class DebugScenarioActivity : AppCompatActivity() {
     }
 
     private suspend fun installFixture(fixtureId: String): String {
-        val fixture = assets.open("debug-fixtures/$fixtureId.json").bufferedReader().use {
-            GSON.fromJson(it, DebugFixture::class.java)
-        }
+        val fixture =
+            assets.open("debug-fixtures/$fixtureId.json").bufferedReader().use {
+                GSON.fromJson(it, DebugFixture::class.java)
+            }
         require(fixture.schemaVersion == 1) { "unsupported fixture schema" }
         require(fixture.id == fixtureId) { "fixture ID mismatch" }
         require(fixture.resetPolicy == "replace") { "unsupported reset policy" }
         require(fixture.chapters.isNotEmpty()) { "fixture must contain chapters" }
         require(fixture.book.startChapter in fixture.chapters.indices) { "invalid start chapter" }
 
-        val pageAnim = when (fixture.book.pageMode) {
-            "simulation" -> PageAnim.simulationPageAnim
-            else -> error("unsupported page mode: ${fixture.book.pageMode}")
-        }
-        val chapters = fixture.chapters.mapIndexed { index, chapter ->
-            require(chapter.repeat in 1..1000) { "invalid repeat for chapter $index" }
-            BookChapter(
-                url = "${fixture.book.bookUrl}/chapter/$index",
-                title = chapter.title,
-                baseUrl = fixture.book.bookUrl,
+        val pageAnim =
+            when (fixture.book.pageMode) {
+                "simulation" -> PageAnim.simulationPageAnim
+                else -> error("unsupported page mode: ${fixture.book.pageMode}")
+            }
+        val chapters =
+            fixture.chapters.mapIndexed { index, chapter ->
+                require(chapter.repeat in 1..1000) { "invalid repeat for chapter $index" }
+                BookChapter(
+                    url = "${fixture.book.bookUrl}/chapter/$index",
+                    title = chapter.title,
+                    baseUrl = fixture.book.bookUrl,
+                    bookUrl = fixture.book.bookUrl,
+                    index = index,
+                )
+            }
+        val book =
+            Book(
                 bookUrl = fixture.book.bookUrl,
-                index = index,
+                tocUrl = "${fixture.book.bookUrl}/toc",
+                origin = DEBUG_ORIGIN,
+                originName = "Legado Debug Fixture",
+                name = fixture.book.name,
+                author = fixture.book.author,
+                type = BookType.text,
+                totalChapterNum = chapters.size,
+                durChapterTitle = chapters[fixture.book.startChapter].title,
+                durChapterIndex = fixture.book.startChapter,
+                durChapterPos = fixture.book.startPosition,
+                durChapterTime = System.currentTimeMillis(),
+                canUpdate = false,
+                readConfig = Book.ReadConfig(pageAnim = pageAnim),
             )
-        }
-        val book = Book(
-            bookUrl = fixture.book.bookUrl,
-            tocUrl = "${fixture.book.bookUrl}/toc",
-            origin = DEBUG_ORIGIN,
-            originName = "Legado Debug Fixture",
-            name = fixture.book.name,
-            author = fixture.book.author,
-            type = BookType.text,
-            totalChapterNum = chapters.size,
-            durChapterTitle = chapters[fixture.book.startChapter].title,
-            durChapterIndex = fixture.book.startChapter,
-            durChapterPos = fixture.book.startPosition,
-            durChapterTime = System.currentTimeMillis(),
-            canUpdate = false,
-            readConfig = Book.ReadConfig(pageAnim = pageAnim),
-        )
 
         appDb.withTransaction {
-            appDb.bookSourceDao.insert(
-                BookSource(
-                    bookSourceUrl = DEBUG_ORIGIN,
-                    bookSourceName = "Legado Debug Fixture",
-                    enabled = false,
-                    enabledExplore = false,
-                )
-            )
             appDb.bookDao.getBook(book.bookUrl)?.let { appDb.bookDao.delete(it) }
             appDb.bookDao.insert(book)
             appDb.bookChapterDao.insert(*chapters.toTypedArray())
         }
         chapters.forEachIndexed { index, chapter ->
             val definition = fixture.chapters[index]
-            val paragraphReview = definition.paragraphReviewFixture?.let {
-                DebugParagraphReviewFixture.createTag(assets, it)
-            }
+            val paragraphReview =
+                definition.paragraphReviewFixture?.let {
+                    DebugParagraphReviewFixture.createTag(assets, it)
+                }
             if (paragraphReview != null) {
                 AppConfigStore.putAll(
                     mapOf(
                         PreferKey.enableReview to false,
                         PreferKey.clickImgWay to "0",
-                    )
+                    ),
                 )
             }
-            val content = buildString {
-                if (paragraphReview == null) {
-                    appendLine(definition.readyMarker)
-                    repeat(definition.repeat) { paragraphIndex ->
-                        append(paragraphIndex + 1)
-                        append(". ")
-                        appendLine(definition.paragraph)
-                    }
-                } else {
-                    append(definition.readyMarker)
-                    append(" 1. ")
-                    append(definition.paragraph)
-                    appendLine(paragraphReview)
-                    repeat(definition.repeat - 1) { paragraphIndex ->
-                        append(paragraphIndex + 2)
-                        append(". ")
-                        appendLine(definition.paragraph)
+            val content =
+                buildString {
+                    if (paragraphReview == null) {
+                        appendLine(definition.readyMarker)
+                        repeat(definition.repeat) { paragraphIndex ->
+                            append(paragraphIndex + 1)
+                            append(". ")
+                            appendLine(definition.paragraph)
+                        }
+                    } else {
+                        append(definition.readyMarker)
+                        append(" 1. ")
+                        append(definition.paragraph)
+                        appendLine(paragraphReview)
+                        repeat(definition.repeat - 1) { paragraphIndex ->
+                            append(paragraphIndex + 2)
+                            append(". ")
+                            appendLine(definition.paragraph)
+                        }
                     }
                 }
-            }
             BookHelp.saveText(book, chapter, content)
         }
         return book.bookUrl
@@ -170,7 +172,10 @@ class DebugScenarioActivity : AppCompatActivity() {
      * accepted; they land in the AppConfigStore overlay and are read
      * synchronously by the relaunched Activity in this process.
      */
-    private fun applyPreferences(json: String?, sessionId: String) {
+    private fun applyPreferences(
+        json: String?,
+        sessionId: String,
+    ) {
         if (json.isNullOrBlank()) return
         val type = object : TypeToken<Map<String, Any?>>() {}.type
         val preferences: Map<String, Any?> = GSON.fromJson(json, type) ?: emptyMap()
@@ -187,7 +192,11 @@ class DebugScenarioActivity : AppCompatActivity() {
         }
     }
 
-    private fun fail(sessionId: String, message: String, error: Throwable? = null) {
+    private fun fail(
+        sessionId: String,
+        message: String,
+        error: Throwable? = null,
+    ) {
         Log.e(LOG_TAG, "[session=$sessionId] FIXTURE_ERROR $message", error)
         finishAffinity()
     }
@@ -227,11 +236,12 @@ class DebugScenarioActivity : AppCompatActivity() {
         const val ENTRY_READER = "reader"
         const val ENTRY_BOOKSHELF = "bookshelf"
         const val ENTRY_THEME_CONFIG = "theme_config"
-        val SUPPORTED_ENTRIES = setOf(
-            ENTRY_READER,
-            ENTRY_BOOKSHELF,
-            ENTRY_THEME_CONFIG,
-        )
+        val SUPPORTED_ENTRIES =
+            setOf(
+                ENTRY_READER,
+                ENTRY_BOOKSHELF,
+                ENTRY_THEME_CONFIG,
+            )
         val FIXTURE_ID = Regex("[a-z0-9][a-z0-9-]*")
     }
 }

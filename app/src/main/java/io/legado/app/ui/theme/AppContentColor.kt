@@ -9,11 +9,11 @@ import top.yukonga.miuix.kmp.theme.LocalContentColor as MiuixLocalContentColor
 @Composable
 fun ProvideAppContentColor(
     contentColor: Color,
-    content: @Composable () -> Unit
+    content: @Composable () -> Unit,
 ) {
     CompositionLocalProvider(
         MaterialLocalContentColor provides contentColor,
         MiuixLocalContentColor provides contentColor,
-        content = content
+        content = content,
     )
 }

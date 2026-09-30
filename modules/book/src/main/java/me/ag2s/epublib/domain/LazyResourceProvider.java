@@ -8,5 +8,5 @@ import java.io.InputStream;
  */
 public interface LazyResourceProvider {
 
-    InputStream getResourceStream(String href) throws IOException;
+  InputStream getResourceStream(String href) throws IOException;
 }

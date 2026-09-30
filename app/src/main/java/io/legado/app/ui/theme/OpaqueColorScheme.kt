@@ -20,9 +20,10 @@ fun rememberOpaqueColorScheme(): ColorScheme {
     val hasImageBg = themeSettings.hasBackgroundImage(isDark)
     val paletteStyle = themeSettings.paletteStyle
     val materialVersion = themeSettings.materialVersion
-    val seedColorInt = currentTheme.seedColor
-        .takeUnless { it == Color.Unspecified }
-        ?.toArgb()
+    val seedColorInt =
+        currentTheme.seedColor
+            .takeUnless { it == Color.Unspecified }
+            ?.toArgb()
 
     return remember(
         context,
@@ -33,7 +34,7 @@ fun rememberOpaqueColorScheme(): ColorScheme {
         hasImageBg,
         paletteStyle,
         materialVersion,
-        seedColorInt
+        seedColorInt,
     ) {
         if (appThemeMode != AppThemeMode.Transparent) {
             currentTheme.colorScheme
@@ -46,7 +47,7 @@ fun rememberOpaqueColorScheme(): ColorScheme {
                 paletteStyle = paletteStyle,
                 materialVersion = materialVersion,
                 forceOpaque = true,
-                customSeedColor = seedColorInt
+                customSeedColor = seedColorInt,
             )
         }
     }

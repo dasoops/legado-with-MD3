@@ -8,7 +8,9 @@ sealed interface BookmarkTargetVerdict {
     data object Match : BookmarkTargetVerdict
 
     /** 创建于其他书源（源指纹 != 当前源），章节定位很可能偏移。 */
-    data class SourceChanged(val storedBookUrl: String) : BookmarkTargetVerdict
+    data class SourceChanged(
+        val storedBookUrl: String,
+    ) : BookmarkTargetVerdict
 
     /** 目标章节标题与存储的不符（同源目录重排，或换源后章节错位）。 */
     data object TitleMismatch : BookmarkTargetVerdict
@@ -21,7 +23,6 @@ sealed interface BookmarkTargetVerdict {
  * 源里的坐标，可能偏移。校验结果决定是否弹「仍跳转」确认框。
  */
 class VerifyBookmarkTargetUseCase {
-
     /**
      * @param currentBookUrl      当前书源（当前书行 url）
      * @param targetChapterTitle  当前目录里目标章节的标题（调用方按 chapterIndex 解析，

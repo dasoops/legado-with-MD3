@@ -32,38 +32,44 @@ object LegacyReaderStyleRangeMapper {
         val titleText = source.semanticTitle
         rules.filter(HighlightRule::enabled).forEachIndexed { index, rule ->
             val regex = runCatching { Regex(rule.pattern) }.getOrNull() ?: return@forEachIndexed
-            val targets = when (rule.targetScope) {
-                HighlightRule.TARGET_TITLE -> listOf(titleText to ReaderStyleTarget.TITLE)
-                HighlightRule.TARGET_BODY -> listOf(bodyText to ReaderStyleTarget.BODY)
-                else -> listOf(titleText to ReaderStyleTarget.TITLE, bodyText to ReaderStyleTarget.BODY)
-            }
+            val targets =
+                when (rule.targetScope) {
+                    HighlightRule.TARGET_TITLE -> listOf(titleText to ReaderStyleTarget.TITLE)
+                    HighlightRule.TARGET_BODY -> listOf(bodyText to ReaderStyleTarget.BODY)
+                    else -> listOf(titleText to ReaderStyleTarget.TITLE, bodyText to ReaderStyleTarget.BODY)
+                }
             targets.forEach { (text, target) ->
                 regex.findAll(text).forEach { match ->
-                    result += ReaderStyleRange(
-                        start = match.range.first,
-                        endExclusive = match.range.last + 1,
-                        target = target,
-                        style = rule.toReaderStyle(),
-                        priority = index,
-                    )
+                    result +=
+                        ReaderStyleRange(
+                            start = match.range.first,
+                            endExclusive = match.range.last + 1,
+                            target = target,
+                            style = rule.toReaderStyle(),
+                            priority = index,
+                        )
                 }
             }
         }
-        processes.asSequence()
+        processes
+            .asSequence()
             .filter { it.enabled && it.status == BookContentProcess.STATUS_ACTIVE && it.isUserMarking() }
             .forEachIndexed { index, process ->
-                val anchor = GSON.fromJsonObject<TextProcessAnchor>(process.anchorJson).getOrNull()
-                    ?: return@forEachIndexed
-                val markingStyle = GSON.fromJsonObject<TextProcessStyle>(process.styleJson).getOrNull()
-                    ?: return@forEachIndexed
+                val anchor =
+                    GSON.fromJsonObject<TextProcessAnchor>(process.anchorJson).getOrNull()
+                        ?: return@forEachIndexed
+                val markingStyle =
+                    GSON.fromJsonObject<TextProcessStyle>(process.styleJson).getOrNull()
+                        ?: return@forEachIndexed
                 val range = BookContentProcessEngine.resolveRange(bodyText, anchor) ?: return@forEachIndexed
-                result += ReaderStyleRange(
-                    start = range.first,
-                    endExclusive = range.last + 1,
-                    target = ReaderStyleTarget.BODY,
-                    style = markingStyle.toReaderStyle(process.id.removePrefix("mark:")),
-                    priority = 10_000 + index,
-                )
+                result +=
+                    ReaderStyleRange(
+                        start = range.first,
+                        endExclusive = range.last + 1,
+                        target = ReaderStyleTarget.BODY,
+                        style = markingStyle.toReaderStyle(process.id.removePrefix("mark:")),
+                        priority = 10_000 + index,
+                    )
             }
         return result
     }
@@ -72,28 +78,42 @@ object LegacyReaderStyleRangeMapper {
         val chars = CharArray(source.characterCount) { '\n' }
         source.blocks.forEach { block ->
             when (block) {
-                is ReaderChapterSourceBlock.Text -> if (!block.isTitle) {
-                    chars.writeText(block.chapterPosition, block.value)
-                }
-                is ReaderChapterSourceBlock.Image -> chars.setOrNull(block.chapterPosition, '\uFFFC')
-                is ReaderChapterSourceBlock.Paragraph -> block.items.forEach { item ->
-                    when (item) {
-                        is ReaderChapterInlineSource.Text -> chars.writeText(item.chapterPosition, item.value)
-                        is ReaderChapterInlineSource.Image -> chars.setOrNull(item.chapterPosition, '\uFFFC')
-                        is ReaderChapterInlineSource.BlankLine -> Unit
+                is ReaderChapterSourceBlock.Text -> {
+                    if (!block.isTitle) {
+                        chars.writeText(block.chapterPosition, block.value)
                     }
                 }
-                is ReaderChapterSourceBlock.Html, is ReaderChapterSourceBlock.PageBreak -> Unit
+                is ReaderChapterSourceBlock.Image -> {
+                    chars.setOrNull(block.chapterPosition, '\uFFFC')
+                }
+                is ReaderChapterSourceBlock.Paragraph -> {
+                    block.items.forEach { item ->
+                        when (item) {
+                            is ReaderChapterInlineSource.Text -> chars.writeText(item.chapterPosition, item.value)
+                            is ReaderChapterInlineSource.Image -> chars.setOrNull(item.chapterPosition, '\uFFFC')
+                            is ReaderChapterInlineSource.BlankLine -> Unit
+                        }
+                    }
+                }
+                is ReaderChapterSourceBlock.Html, is ReaderChapterSourceBlock.PageBreak -> {
+                    Unit
+                }
             }
         }
         return chars.concatToString()
     }
 
-    private fun CharArray.setOrNull(index: Int, value: Char) {
+    private fun CharArray.setOrNull(
+        index: Int,
+        value: Char,
+    ) {
         if (index in indices) this[index] = value
     }
 
-    private fun CharArray.writeText(start: Int, text: String) {
+    private fun CharArray.writeText(
+        start: Int,
+        text: String,
+    ) {
         if (start !in indices || text.isEmpty()) return
         val count = minOf(text.length, size - start)
         for (offset in 0 until count) this[start + offset] = text[offset]
@@ -102,7 +122,8 @@ object LegacyReaderStyleRangeMapper {
     private fun HighlightRule.toReaderStyle() = ReaderCharacterStyle(
         colorArgb = textColor,
         backgroundArgb = bgColor,
-        underline = underlineMode.takeIf { it != 0 }?.let {
+        underline =
+        underlineMode.takeIf { it != 0 }?.let {
             ReaderUnderline(
                 mode = it,
                 // 兜底跟随正文色：旧 `TextLine.drawStyledUnderlines` 的
@@ -127,10 +148,14 @@ object LegacyReaderStyleRangeMapper {
         fontWeight = fontWeight.takeIf { it != 400 },
         italic = isItalic,
         fontSizeOffsetPx = fontSizeOffset.toFloat().spToPx(),
-        backgroundImage = bgImage?.takeIf(String::isNotBlank)?.let {
-            val automatic = if (manualNineSlice) null else {
-                ReaderTextBackgroundLoader.nineSliceFractions(it)
-            }
+        backgroundImage =
+        bgImage?.takeIf(String::isNotBlank)?.let {
+            val automatic =
+                if (manualNineSlice) {
+                    null
+                } else {
+                    ReaderTextBackgroundLoader.nineSliceFractions(it)
+                }
             ReaderTextBackgroundImage(
                 source = it,
                 fit = bgImageFit,
@@ -149,7 +174,8 @@ object LegacyReaderStyleRangeMapper {
     private fun TextProcessStyle.toReaderStyle(markingId: String) = ReaderCharacterStyle(
         colorArgb = textColor,
         backgroundArgb = bgColor,
-        underline = underlineMode.takeIf { it != 0 }?.let {
+        underline =
+        underlineMode.takeIf { it != 0 }?.let {
             ReaderUnderline(
                 mode = it,
                 // 兜底跟随正文色：旧 `TextLine.drawStyledUnderlines` 的
@@ -169,9 +195,7 @@ object LegacyReaderStyleRangeMapper {
         markingId = markingId,
     )
 
-    private fun BookContentProcess.isUserMarking(): Boolean =
-        kind == BookContentProcess.KIND_USER_UNDERLINE || kind == BookContentProcess.KIND_USER_HIGHLIGHT
+    private fun BookContentProcess.isUserMarking(): Boolean = kind == BookContentProcess.KIND_USER_UNDERLINE || kind == BookContentProcess.KIND_USER_HIGHLIGHT
 
-    private fun backgroundImageSize(path: String): Pair<Int, Int> =
-        ReaderTextBackgroundLoader.dimensions(path)
+    private fun backgroundImageSize(path: String): Pair<Int, Int> = ReaderTextBackgroundLoader.dimensions(path)
 }

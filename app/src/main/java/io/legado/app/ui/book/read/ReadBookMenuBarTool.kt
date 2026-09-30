@@ -139,11 +139,12 @@ private fun ReadMenuLiquidSlider(
             .semantics {
                 accessibilityLabel?.let { contentDescription = it }
                 accessibilityValue?.let { stateDescription = it }
-                progressBarRangeInfo = ProgressBarRangeInfo(
-                    current = value.coerceIn(valueRange),
-                    range = valueRange,
-                    steps = steps,
-                )
+                progressBarRangeInfo =
+                    ProgressBarRangeInfo(
+                        current = value.coerceIn(valueRange),
+                        range = valueRange,
+                        steps = steps,
+                    )
                 if (!enabled) {
                     disabled()
                 }
@@ -182,11 +183,12 @@ private fun ReadMenuLiquidSlider(
                     },
                     onDrag = { _, dragAmount ->
                         val delta = range * (dragAmount.x / trackWidth)
-                        val nextValue = if (isLtr) {
-                            (targetValue + delta).coerceIn(valueRange)
-                        } else {
-                            (targetValue - delta).coerceIn(valueRange)
-                        }
+                        val nextValue =
+                            if (isLtr) {
+                                (targetValue + delta).coerceIn(valueRange)
+                            } else {
+                                (targetValue - delta).coerceIn(valueRange)
+                            }
                         updateValue(nextValue)
                         onValueChange(nextValue)
                     },
@@ -199,11 +201,12 @@ private fun ReadMenuLiquidSlider(
             }
         }
 
-        val progress = if (range == 0f) {
-            0f
-        } else {
-            ((dampedDragAnimation.value - rangeStart) / range).coerceIn(0f, 1f)
-        }
+        val progress =
+            if (range == 0f) {
+                0f
+            } else {
+                ((dampedDragAnimation.value - rangeStart) / range).coerceIn(0f, 1f)
+            }
 
         Box(Modifier.layerBackdrop(trackBackdrop)) {
             Box(
@@ -223,8 +226,7 @@ private fun ReadMenuLiquidSlider(
                         onDrawSurface = {
                             drawRect(trackColor.copy(alpha = enabledAlpha))
                         },
-                    )
-                    .pointerInput(enabled, animationScope, isLtr, trackWidth) {
+                    ).pointerInput(enabled, animationScope, isLtr, trackWidth) {
                         if (!enabled) return@pointerInput
                         detectTapGestures { position ->
                             val delta = range * (position.x / trackWidth)
@@ -235,8 +237,7 @@ private fun ReadMenuLiquidSlider(
                             onValueChange(targetValue)
                             onValueCommit?.invoke(targetValue) ?: onValueChangeFinished?.invoke()
                         }
-                    }
-                    .height(6f.dp)
+                    }.height(6f.dp)
                     .fillMaxWidth(),
             )
             Box(
@@ -261,11 +262,11 @@ private fun ReadMenuLiquidSlider(
                     translationX =
                         (-size.width / 2f + trackWidth * progress)
                             .coerceIn(-size.width / 4f, trackWidth - size.width * 3f / 4f) *
-                                if (isLtr) 1f else -1f
-                }
-                .then(if (enabled) dampedDragAnimation.modifier else Modifier)
+                        if (isLtr) 1f else -1f
+                }.then(if (enabled) dampedDragAnimation.modifier else Modifier)
                 .drawBackdrop(
-                    backdrop = rememberCombinedBackdrop(
+                    backdrop =
+                    rememberCombinedBackdrop(
                         backdrop,
                         rememberBackdrop(trackBackdrop) { drawBackdrop ->
                             val pressProgress = dampedDragAnimation.pressProgress
@@ -315,8 +316,7 @@ private fun ReadMenuLiquidSlider(
                         val pressProgress = dampedDragAnimation.pressProgress
                         drawRect(thumbColor.copy(alpha = 1f - pressProgress))
                     },
-                )
-                .size(40f.dp, 24f.dp),
+                ).size(40f.dp, 24f.dp),
         )
     }
 }
@@ -331,14 +331,15 @@ internal fun ToolButtonItem(
     labelColor: Color,
     modifier: Modifier = Modifier,
 ) {
-    val badgeCount = when (button.id) {
-        "replace_badge" -> state.effectiveReplaceCount
-        else -> 0
-    }
+    val badgeCount =
+        when (button.id) {
+            "replace_badge" -> state.effectiveReplaceCount
+            else -> 0
+        }
 
     Column(
         modifier = modifier,
-        horizontalAlignment = Alignment.CenterHorizontally
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         ReadMenuGlassButtonSurface(
             onClick = button.onClick,
@@ -360,12 +361,14 @@ internal fun ToolButtonItem(
             Spacer(Modifier.height(2.dp))
             Text(
                 text = button.description,
-                style = LegadoTheme.typography.labelSmall.copy(
-                    shadow = menuTextShadow
+                style =
+                LegadoTheme.typography.labelSmall.copy(
+                    shadow = menuTextShadow,
                 ),
                 color = labelColor,
                 maxLines = 1,
-                modifier = Modifier.wrapContentWidth(
+                modifier =
+                Modifier.wrapContentWidth(
                     align = Alignment.CenterHorizontally,
                     unbounded = true,
                 ),
@@ -396,7 +399,8 @@ private fun ToolButtonContent(
                 model = button.customIconPath,
                 contentDescription = null,
                 contentScale = ContentScale.Crop,
-                modifier = Modifier
+                modifier =
+                Modifier
                     .size(36.dp)
                     .clip(CircleShape),
             )
@@ -404,13 +408,13 @@ private fun ToolButtonContent(
         if (badgeCount > 0) {
             Text(
                 text = badgeCount.toString(),
-                modifier = Modifier
+                modifier =
+                Modifier
                     .align(Alignment.TopEnd)
                     .background(
                         LegadoTheme.colorScheme.error,
                         RoundedCornerShape(8.dp),
-                    )
-                    .padding(horizontal = 4.dp, vertical = 1.dp),
+                    ).padding(horizontal = 4.dp, vertical = 1.dp),
                 style = LegadoTheme.typography.labelSmall,
                 color = LegadoTheme.colorScheme.onError,
             )
@@ -435,65 +439,64 @@ internal fun loadToolButtons(
     onIntent: (ReadBookIntent) -> Unit,
 ): List<ToolButtonDef> {
     val customIcons = state.menuConfig.readMenuCustomIcons
+
     fun ReadMenuButtonInfo.toButton(
         isActive: Boolean = false,
         onLongClick: (() -> Unit)? = null,
         onClick: () -> Unit,
-    ): ToolButtonDef {
-        return ToolButtonDef(id, icon, label, customIcons[id], isActive, onClick, onLongClick)
-    }
+    ): ToolButtonDef = ToolButtonDef(id, icon, label, customIcons[id], isActive, onClick, onLongClick)
 
     val infoMap = readMenuButtonInfos(context).associateBy { it.id }
-    val allButtons = listOf(
-        infoMap.getValue("search").toButton {
-            onIntent(ReadBookIntent.OpenSearch(null))
-        },
-        infoMap.getValue("catalog").toButton {
-            onIntent(ReadBookIntent.OpenChapterList)
-        },
-        infoMap.getValue("setting").toButton {
-            onIntent(ReadBookIntent.OpenReadMenuRoute(ReadBookMenuRoute.ReadStyle))
-        },
-        infoMap.getValue("addBookmark").toButton {
-            onIntent(ReadBookIntent.AddBookmark)
-        },
-        infoMap.getValue("theme").toButton {
-            onIntent(ReadBookIntent.ToggleDayNight)
-        },
-        infoMap.getValue("eye_protection").toButton(
-            isActive = eyeProtectionEnabled,
-            onLongClick = { onIntent(ReadBookIntent.ShowSheet(ReadBookSheet.EyeProtection)) },
-        ) {
-            onIntent(ReadBookIntent.ToggleEyeProtection)
-        },
-        infoMap.getValue("prev_chapter").toButton {
-            onIntent(ReadBookIntent.PrevChapter)
-        },
-        infoMap.getValue("next_chapter").toButton {
-            onIntent(ReadBookIntent.NextChapter)
-        },
-        infoMap.getValue("replace").toButton(
-        ) {
-            onIntent(ReadBookIntent.ShowSheet(ReadBookSheet.TextProcessing))
-        },
-        infoMap.getValue("replace_badge").toButton {
-            onIntent(ReadBookIntent.ShowSheet(ReadBookSheet.TextProcessing))
-        },
-        infoMap.getValue("auto_page").toButton(isActive = state.isAutoPage) {
-            if (state.isAutoPage) {
-                onIntent(ReadBookIntent.OpenReadMenuRoute(ReadBookMenuRoute.AutoRead))
-            } else {
-                onIntent(ReadBookIntent.ToggleAutoPage)
-                onIntent(ReadBookIntent.HideMenu)
-            }
-        },
-        infoMap.getValue("refresh_current").toButton {
-            onIntent(ReadBookIntent.RefreshCurrentChapter)
-        },
-        infoMap.getValue("more_actions").toButton {
-            onIntent(ReadBookIntent.ShowSheet(ReadBookSheet.MoreActions))
-        },
-    )
+    val allButtons =
+        listOf(
+            infoMap.getValue("search").toButton {
+                onIntent(ReadBookIntent.OpenSearch(null))
+            },
+            infoMap.getValue("catalog").toButton {
+                onIntent(ReadBookIntent.OpenChapterList)
+            },
+            infoMap.getValue("setting").toButton {
+                onIntent(ReadBookIntent.OpenReadMenuRoute(ReadBookMenuRoute.ReadStyle))
+            },
+            infoMap.getValue("addBookmark").toButton {
+                onIntent(ReadBookIntent.AddBookmark)
+            },
+            infoMap.getValue("theme").toButton {
+                onIntent(ReadBookIntent.ToggleDayNight)
+            },
+            infoMap.getValue("eye_protection").toButton(
+                isActive = eyeProtectionEnabled,
+                onLongClick = { onIntent(ReadBookIntent.ShowSheet(ReadBookSheet.EyeProtection)) },
+            ) {
+                onIntent(ReadBookIntent.ToggleEyeProtection)
+            },
+            infoMap.getValue("prev_chapter").toButton {
+                onIntent(ReadBookIntent.PrevChapter)
+            },
+            infoMap.getValue("next_chapter").toButton {
+                onIntent(ReadBookIntent.NextChapter)
+            },
+            infoMap.getValue("replace").toButton {
+                onIntent(ReadBookIntent.ShowSheet(ReadBookSheet.TextProcessing))
+            },
+            infoMap.getValue("replace_badge").toButton {
+                onIntent(ReadBookIntent.ShowSheet(ReadBookSheet.TextProcessing))
+            },
+            infoMap.getValue("auto_page").toButton(isActive = state.isAutoPage) {
+                if (state.isAutoPage) {
+                    onIntent(ReadBookIntent.OpenReadMenuRoute(ReadBookMenuRoute.AutoRead))
+                } else {
+                    onIntent(ReadBookIntent.ToggleAutoPage)
+                    onIntent(ReadBookIntent.HideMenu)
+                }
+            },
+            infoMap.getValue("refresh_current").toButton {
+                onIntent(ReadBookIntent.RefreshCurrentChapter)
+            },
+            infoMap.getValue("more_actions").toButton {
+                onIntent(ReadBookIntent.ShowSheet(ReadBookSheet.MoreActions))
+            },
+        )
 
     val allMap = allButtons.associateBy { it.id }
     return state.menuConfig.bottomBarButtons

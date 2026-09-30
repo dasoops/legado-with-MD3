@@ -6,13 +6,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import io.legado.app.ui.theme.LegadoTheme
 import io.legado.app.ui.theme.ThemeResolver
-import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.basic.Text as MiuixText
+import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 @Composable
 fun AdaptiveTitle(
     text: String,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     val composeEngine = LegadoTheme.composeEngine
     if (ThemeResolver.isMiuixEngine(composeEngine)) {
@@ -27,7 +27,7 @@ fun AdaptiveTitle(
             text = text,
             style = LegadoTheme.typography.labelLarge,
             color = MaterialTheme.colorScheme.primary,
-            modifier = modifier
+            modifier = modifier,
         )
     }
 }

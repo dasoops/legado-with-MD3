@@ -22,14 +22,14 @@ class ReadSettingsRepository(
     private val settingsRepository: SettingsRepository,
     private val preferencesFlow: StateFlow<Preferences> = AppConfigStore.preferencesFlow,
 ) : ReadSettingsGateway {
-
     override val currentSettings: ReadSettings
         get() = preferencesFlow.value.toReadSettings()
 
-    override val settings: Flow<ReadSettings> = preferencesFlow
-        .map { preferences ->
-            preferences.toReadSettings()
-        }
+    override val settings: Flow<ReadSettings> =
+        preferencesFlow
+            .map { preferences ->
+                preferences.toReadSettings()
+            }
 
     val preferences: Flow<ReadPreferences> = settings
 
@@ -41,289 +41,207 @@ class ReadSettingsRepository(
         )
     }
 
-    suspend fun setScreenOrientation(value: String) =
-        settingsRepository.putString(PreferKey.screenOrientation, value)
+    suspend fun setScreenOrientation(value: String) = settingsRepository.putString(PreferKey.screenOrientation, value)
 
-    suspend fun setKeepLight(value: String) =
-        settingsRepository.putString(PreferKey.keepLight, value)
+    suspend fun setKeepLight(value: String) = settingsRepository.putString(PreferKey.keepLight, value)
 
-    suspend fun setHideStatusBar(value: Boolean) =
-        settingsRepository.putBoolean(PreferKey.hideStatusBar, value)
+    suspend fun setHideStatusBar(value: Boolean) = settingsRepository.putBoolean(PreferKey.hideStatusBar, value)
 
-    suspend fun setHideNavigationBar(value: Boolean) =
-        settingsRepository.putBoolean(PreferKey.hideNavigationBar, value)
+    suspend fun setHideNavigationBar(value: Boolean) = settingsRepository.putBoolean(PreferKey.hideNavigationBar, value)
 
-    suspend fun setPaddingDisplayCutouts(value: Boolean) =
-        settingsRepository.putBoolean(PreferKey.paddingDisplayCutouts, value)
+    suspend fun setPaddingDisplayCutouts(value: Boolean) = settingsRepository.putBoolean(PreferKey.paddingDisplayCutouts, value)
 
-    suspend fun setTitleBarMode(value: String) =
-        settingsRepository.putString(PreferKey.titleBarMode, value)
+    suspend fun setTitleBarMode(value: String) = settingsRepository.putString(PreferKey.titleBarMode, value)
 
-    suspend fun setMenuAlpha(value: Int) =
-        settingsRepository.putInt(PreferKey.menuAlpha, value)
+    suspend fun setMenuAlpha(value: Int) = settingsRepository.putInt(PreferKey.menuAlpha, value)
 
-    suspend fun setReadBodyToLh(value: Boolean) =
-        settingsRepository.putBoolean(PreferKey.readBodyToLh, value)
+    suspend fun setReadBodyToLh(value: Boolean) = settingsRepository.putBoolean(PreferKey.readBodyToLh, value)
 
-    suspend fun setTextFullJustify(value: Boolean) =
-        settingsRepository.putBoolean(PreferKey.textFullJustify, value)
+    suspend fun setTextFullJustify(value: Boolean) = settingsRepository.putBoolean(PreferKey.textFullJustify, value)
 
-    suspend fun setTextBottomJustify(value: Boolean) =
-        settingsRepository.putBoolean(PreferKey.textBottomJustify, value)
+    suspend fun setTextBottomJustify(value: Boolean) = settingsRepository.putBoolean(PreferKey.textBottomJustify, value)
 
-    suspend fun setAdaptSpecialStyle(value: Boolean) =
-        settingsRepository.putBoolean(PreferKey.adaptSpecialStyle, value)
+    suspend fun setAdaptSpecialStyle(value: Boolean) = settingsRepository.putBoolean(PreferKey.adaptSpecialStyle, value)
 
-    suspend fun setUseZhLayout(value: Boolean) =
-        settingsRepository.putBoolean(PreferKey.useZhLayout, value)
+    suspend fun setUseZhLayout(value: Boolean) = settingsRepository.putBoolean(PreferKey.useZhLayout, value)
 
-    suspend fun setShowBrightnessView(value: String) =
-        settingsRepository.putString(PreferKey.showBrightnessView, value)
+    suspend fun setShowBrightnessView(value: String) = settingsRepository.putString(PreferKey.showBrightnessView, value)
 
-    suspend fun setBrightnessVwPos(value: String) =
-        settingsRepository.putString(PreferKey.brightnessVwPos, value)
+    suspend fun setBrightnessVwPos(value: String) = settingsRepository.putString(PreferKey.brightnessVwPos, value)
 
-    suspend fun setReadBrightness(value: Int) =
-        settingsRepository.putInt(PreferKey.brightness, value)
+    suspend fun setReadBrightness(value: Int) = settingsRepository.putInt(PreferKey.brightness, value)
 
-    suspend fun setBrightnessAuto(value: Boolean) =
-        settingsRepository.putBoolean(PreferKey.brightnessAuto, value)
+    suspend fun setBrightnessAuto(value: Boolean) = settingsRepository.putBoolean(PreferKey.brightnessAuto, value)
 
-    suspend fun setUseUnderline(value: Boolean) =
-        settingsRepository.putBoolean(PreferKey.useUnderline, value)
+    suspend fun setUseUnderline(value: Boolean) = settingsRepository.putBoolean(PreferKey.useUnderline, value)
 
-    suspend fun setReadSliderMode(value: String) =
-        settingsRepository.putString(PreferKey.readSliderMode, value)
+    suspend fun setReadSliderMode(value: String) = settingsRepository.putString(PreferKey.readSliderMode, value)
 
-    suspend fun setDoubleHorizontalPage(value: String) =
-        settingsRepository.putString(PreferKey.doublePageHorizontal, value)
+    suspend fun setDoubleHorizontalPage(value: String) = settingsRepository.putString(PreferKey.doublePageHorizontal, value)
 
-    suspend fun setProgressBarBehavior(value: String) =
-        settingsRepository.putString(PreferKey.progressBarBehavior, value)
+    suspend fun setProgressBarBehavior(value: String) = settingsRepository.putString(PreferKey.progressBarBehavior, value)
 
-    suspend fun setMouseWheelPage(value: Boolean) =
-        settingsRepository.putBoolean(PreferKey.mouseWheelPage, value)
+    suspend fun setMouseWheelPage(value: Boolean) = settingsRepository.putBoolean(PreferKey.mouseWheelPage, value)
 
-    suspend fun setVolumeKeyPage(value: Boolean) =
-        settingsRepository.putBoolean(PreferKey.volumeKeyPage, value)
+    suspend fun setVolumeKeyPage(value: Boolean) = settingsRepository.putBoolean(PreferKey.volumeKeyPage, value)
 
-    suspend fun setKeyPageOnLongPress(value: Boolean) =
-        settingsRepository.putBoolean(PreferKey.keyPageOnLongPress, value)
+    suspend fun setKeyPageOnLongPress(value: Boolean) = settingsRepository.putBoolean(PreferKey.keyPageOnLongPress, value)
 
-    suspend fun setPageTouchSlop(value: Int) =
-        settingsRepository.putInt(PreferKey.pageTouchSlop, value)
+    suspend fun setPageTouchSlop(value: Int) = settingsRepository.putInt(PreferKey.pageTouchSlop, value)
 
-    suspend fun setSliderVibrator(value: Boolean) =
-        settingsRepository.putBoolean(PreferKey.sliderVibrator, value)
+    suspend fun setSliderVibrator(value: Boolean) = settingsRepository.putBoolean(PreferKey.sliderVibrator, value)
 
-    suspend fun setUseNewTocSheet(value: Boolean) =
-        settingsRepository.putBoolean(PreferKey.useNewTocSheet, value)
+    suspend fun setUseNewTocSheet(value: Boolean) = settingsRepository.putBoolean(PreferKey.useNewTocSheet, value)
 
-    suspend fun setMaxLengthWithNoToc(value: Int) =
-        settingsRepository.putInt(PreferKey.maxLengthWithNoToc, value)
+    suspend fun setMaxLengthWithNoToc(value: Int) = settingsRepository.putInt(PreferKey.maxLengthWithNoToc, value)
 
-    suspend fun setSelectVibrator(value: Boolean) =
-        settingsRepository.putBoolean(PreferKey.selectVibrator, value)
+    suspend fun setSelectVibrator(value: Boolean) = settingsRepository.putBoolean(PreferKey.selectVibrator, value)
 
-    suspend fun setAutoSuggestDayNight(value: Boolean) =
-        settingsRepository.putBoolean(PreferKey.autoSuggestDayNight, value)
+    suspend fun setAutoSuggestDayNight(value: Boolean) = settingsRepository.putBoolean(PreferKey.autoSuggestDayNight, value)
 
-    suspend fun setReadingAnchorEnabled(value: Boolean) =
-        settingsRepository.putBoolean(PreferKey.readingAnchorEnabled, value)
+    suspend fun setReadingAnchorEnabled(value: Boolean) = settingsRepository.putBoolean(PreferKey.readingAnchorEnabled, value)
 
-    suspend fun setSelectText(value: Boolean) =
-        settingsRepository.putBoolean(PreferKey.selectText, value)
+    suspend fun setSelectText(value: Boolean) = settingsRepository.putBoolean(PreferKey.selectText, value)
 
-    suspend fun setNoAnimScrollPage(value: Boolean) =
-        settingsRepository.putBoolean(PreferKey.noAnimScrollPage, value)
+    suspend fun setNoAnimScrollPage(value: Boolean) = settingsRepository.putBoolean(PreferKey.noAnimScrollPage, value)
 
-    suspend fun setClickImgWay(value: String) =
-        settingsRepository.putString(PreferKey.clickImgWay, value)
+    suspend fun setClickImgWay(value: String) = settingsRepository.putString(PreferKey.clickImgWay, value)
 
-    suspend fun setOptimizeRender(value: Boolean) =
-        settingsRepository.putBoolean(PreferKey.optimizeRender, value)
+    suspend fun setOptimizeRender(value: Boolean) = settingsRepository.putBoolean(PreferKey.optimizeRender, value)
 
-    suspend fun setDisableReturnKey(value: Boolean) =
-        settingsRepository.putBoolean(PreferKey.disableReturnKey, value)
+    suspend fun setDisableReturnKey(value: Boolean) = settingsRepository.putBoolean(PreferKey.disableReturnKey, value)
 
-    suspend fun setExpandTextMenu(value: Boolean) =
-        settingsRepository.putBoolean(PreferKey.expandTextMenu, value)
+    suspend fun setExpandTextMenu(value: Boolean) = settingsRepository.putBoolean(PreferKey.expandTextMenu, value)
 
-    suspend fun setShowSelectMenuIcon(value: Boolean) =
-        settingsRepository.putBoolean(PreferKey.showSelectMenuIcon, value)
+    suspend fun setShowSelectMenuIcon(value: Boolean) = settingsRepository.putBoolean(PreferKey.showSelectMenuIcon, value)
 
-    suspend fun setShowReadTitleAddition(value: Boolean) =
-        settingsRepository.putBoolean(PreferKey.showReadTitleAddition, value)
+    suspend fun setShowReadTitleAddition(value: Boolean) = settingsRepository.putBoolean(PreferKey.showReadTitleAddition, value)
 
-    suspend fun setAutoReadSpeed(value: Int) =
-        settingsRepository.putInt(PreferKey.autoReadSpeed, value)
+    suspend fun setAutoReadSpeed(value: Int) = settingsRepository.putInt(PreferKey.autoReadSpeed, value)
 
-    suspend fun setSystemTypefaces(value: Int) =
-        settingsRepository.putInt(PreferKey.systemTypefaces, value)
+    suspend fun setSystemTypefaces(value: Int) = settingsRepository.putInt(PreferKey.systemTypefaces, value)
 
-    suspend fun setPreDownloadNum(value: Int) =
-        settingsRepository.putInt(PreferKey.preDownloadNum, value)
+    suspend fun setPreDownloadNum(value: Int) = settingsRepository.putInt(PreferKey.preDownloadNum, value)
 
-    suspend fun setPageKeys(prevKeys: String, nextKeys: String) {
+    suspend fun setPageKeys(
+        prevKeys: String,
+        nextKeys: String,
+    ) {
         settingsRepository.putStrings(
             mapOf(
                 PreferKey.prevKeys to prevKeys,
-                PreferKey.nextKeys to nextKeys
-            )
+                PreferKey.nextKeys to nextKeys,
+            ),
         )
     }
 
-    suspend fun setTocUiUseReplace(value: Boolean) =
-        settingsRepository.putBoolean(PreferKey.tocUiUseReplace, value)
+    suspend fun setTocUiUseReplace(value: Boolean) = settingsRepository.putBoolean(PreferKey.tocUiUseReplace, value)
 
-    suspend fun setTocCountWords(value: Boolean) =
-        settingsRepository.putBoolean(PreferKey.tocCountWords, value)
+    suspend fun setTocCountWords(value: Boolean) = settingsRepository.putBoolean(PreferKey.tocCountWords, value)
 
-    suspend fun setReadStyleSelect(value: Int) =
-        settingsRepository.putInt(PreferKey.readStyleSelect, value)
+    suspend fun setReadStyleSelect(value: Int) = settingsRepository.putInt(PreferKey.readStyleSelect, value)
 
-    suspend fun setComicStyleSelect(value: Int) =
-        settingsRepository.putInt(PreferKey.comicStyleSelect, value)
+    suspend fun setComicStyleSelect(value: Int) = settingsRepository.putInt(PreferKey.comicStyleSelect, value)
 
-    suspend fun setShareLayout(value: Boolean) =
-        settingsRepository.putBoolean(PreferKey.shareLayout, value)
+    suspend fun setShareLayout(value: Boolean) = settingsRepository.putBoolean(PreferKey.shareLayout, value)
 
-    suspend fun setReadBarStyleFollowPage(value: Boolean) =
-        settingsRepository.putBoolean(PreferKey.readBarStyleFollowPage, value)
+    suspend fun setReadBarStyleFollowPage(value: Boolean) = settingsRepository.putBoolean(PreferKey.readBarStyleFollowPage, value)
 
-    suspend fun setReadBarStyle(value: Int) =
-        settingsRepository.putInt(PreferKey.readBarStyle, value.coerceIn(0, 2))
+    suspend fun setReadBarStyle(value: Int) = settingsRepository.putInt(PreferKey.readBarStyle, value.coerceIn(0, 2))
 
-    suspend fun setClickAction(key: String, value: Int) =
-        settingsRepository.putInt(key, value)
+    suspend fun setClickAction(
+        key: String,
+        value: Int,
+    ) = settingsRepository.putInt(key, value)
 
-    suspend fun setFontFolder(value: String) =
-        settingsRepository.putString(PreferKey.fontFolder, value)
+    suspend fun setFontFolder(value: String) = settingsRepository.putString(PreferKey.fontFolder, value)
 
-    suspend fun setReadMenuBgColor(value: Int) =
-        settingsRepository.putInt(PreferKey.readMenuBgColor, value)
+    suspend fun setReadMenuBgColor(value: Int) = settingsRepository.putInt(PreferKey.readMenuBgColor, value)
 
-    suspend fun setReadMenuAccentColor(value: Int) =
-        settingsRepository.putInt(PreferKey.readMenuAccentColor, value)
+    suspend fun setReadMenuAccentColor(value: Int) = settingsRepository.putInt(PreferKey.readMenuAccentColor, value)
 
-    suspend fun setReadMenuContainerColor(value: Int) =
-        settingsRepository.putInt(PreferKey.readMenuContainerColor, value)
+    suspend fun setReadMenuContainerColor(value: Int) = settingsRepository.putInt(PreferKey.readMenuContainerColor, value)
 
-    suspend fun setReadMenuBgColorNight(value: Int) =
-        settingsRepository.putInt(PreferKey.readMenuBgColorNight, value)
+    suspend fun setReadMenuBgColorNight(value: Int) = settingsRepository.putInt(PreferKey.readMenuBgColorNight, value)
 
-    suspend fun setReadMenuAccentColorNight(value: Int) =
-        settingsRepository.putInt(PreferKey.readMenuAccentColorNight, value)
+    suspend fun setReadMenuAccentColorNight(value: Int) = settingsRepository.putInt(PreferKey.readMenuAccentColorNight, value)
 
-    suspend fun setReadMenuContainerColorNight(value: Int) =
-        settingsRepository.putInt(PreferKey.readMenuContainerColorNight, value)
+    suspend fun setReadMenuContainerColorNight(value: Int) = settingsRepository.putInt(PreferKey.readMenuContainerColorNight, value)
 
-    suspend fun setReadMenuTextColor(value: Int) =
-        settingsRepository.putInt(PreferKey.readMenuTextColor, value)
+    suspend fun setReadMenuTextColor(value: Int) = settingsRepository.putInt(PreferKey.readMenuTextColor, value)
 
-    suspend fun setReadMenuTextColorNight(value: Int) =
-        settingsRepository.putInt(PreferKey.readMenuTextColorNight, value)
+    suspend fun setReadMenuTextColorNight(value: Int) = settingsRepository.putInt(PreferKey.readMenuTextColorNight, value)
 
-    suspend fun setReadMenuColorMode(value: Int) =
-        settingsRepository.putInt(PreferKey.readMenuColorMode, value.coerceIn(0, 1))
+    suspend fun setReadMenuColorMode(value: Int) = settingsRepository.putInt(PreferKey.readMenuColorMode, value.coerceIn(0, 1))
 
-    suspend fun setReadMenuIconShowText(value: Boolean) =
-        settingsRepository.putBoolean(PreferKey.readMenuIconShowText, value)
+    suspend fun setReadMenuIconShowText(value: Boolean) = settingsRepository.putBoolean(PreferKey.readMenuIconShowText, value)
 
-    suspend fun setReadMenuIconStyle(value: Int) =
-        settingsRepository.putInt(PreferKey.readMenuIconStyle, value.coerceIn(0, 2))
+    suspend fun setReadMenuIconStyle(value: Int) = settingsRepository.putInt(PreferKey.readMenuIconStyle, value.coerceIn(0, 2))
 
-    suspend fun setTitleBarIconStyle(value: Int) =
-        settingsRepository.putInt(PreferKey.titleBarIconStyle, value.coerceIn(0, 2))
+    suspend fun setTitleBarIconStyle(value: Int) = settingsRepository.putInt(PreferKey.titleBarIconStyle, value.coerceIn(0, 2))
 
-    suspend fun setReadMenuIconItemsPerRow(value: Int) =
-        settingsRepository.putInt(PreferKey.readMenuIconItemsPerRow, value.coerceIn(2, 8))
+    suspend fun setReadMenuIconItemsPerRow(value: Int) = settingsRepository.putInt(PreferKey.readMenuIconItemsPerRow, value.coerceIn(2, 8))
 
-    suspend fun setReadMenuIconRowCount(value: Int) =
-        settingsRepository.putInt(PreferKey.readMenuIconRowCount, value.coerceIn(1, 2))
+    suspend fun setReadMenuIconRowCount(value: Int) = settingsRepository.putInt(PreferKey.readMenuIconRowCount, value.coerceIn(1, 2))
 
-    suspend fun setReadMenuBottomCornerRadius(value: Int) =
-        settingsRepository.putInt(PreferKey.readMenuBottomCornerRadius, value.coerceIn(0, 32))
+    suspend fun setReadMenuBottomCornerRadius(value: Int) = settingsRepository.putInt(PreferKey.readMenuBottomCornerRadius, value.coerceIn(0, 32))
 
-    suspend fun setReadMenuFloatingBottomBar(value: Boolean) =
-        settingsRepository.putBoolean(PreferKey.readMenuFloatingBottomBar, value)
+    suspend fun setReadMenuFloatingBottomBar(value: Boolean) = settingsRepository.putBoolean(PreferKey.readMenuFloatingBottomBar, value)
 
-    suspend fun setReadMenuTopBarBlurMode(value: Int) =
-        settingsRepository.putInt(PreferKey.readMenuTopBarBlurMode, value.coerceIn(0, 2))
+    suspend fun setReadMenuTopBarBlurMode(value: Int) = settingsRepository.putInt(PreferKey.readMenuTopBarBlurMode, value.coerceIn(0, 2))
 
-    suspend fun setReadMenuBottomBarBlurMode(value: Int) =
-        settingsRepository.putInt(PreferKey.readMenuBottomBarBlurMode, value.coerceIn(0, 2))
+    suspend fun setReadMenuBottomBarBlurMode(value: Int) = settingsRepository.putInt(PreferKey.readMenuBottomBarBlurMode, value.coerceIn(0, 2))
 
-    suspend fun setReadMenuTopBarLiquidGlassButtons(value: Boolean) =
-        settingsRepository.putBoolean(PreferKey.readMenuTopBarLiquidGlassButtons, value)
+    suspend fun setReadMenuTopBarLiquidGlassButtons(value: Boolean) = settingsRepository.putBoolean(PreferKey.readMenuTopBarLiquidGlassButtons, value)
 
-    suspend fun setReadMenuTopBarMergeButtons(value: Boolean) =
-        settingsRepository.putBoolean(PreferKey.readMenuTopBarMergeButtons, value)
+    suspend fun setReadMenuTopBarMergeButtons(value: Boolean) = settingsRepository.putBoolean(PreferKey.readMenuTopBarMergeButtons, value)
 
-    suspend fun setReadMenuTopBarTitleCapsule(value: Boolean) =
-        settingsRepository.putBoolean(PreferKey.readMenuTopBarTitleCapsule, value)
+    suspend fun setReadMenuTopBarTitleCapsule(value: Boolean) = settingsRepository.putBoolean(PreferKey.readMenuTopBarTitleCapsule, value)
 
-    suspend fun setReadMenuBottomBarLiquidGlassButtons(value: Boolean) =
-        settingsRepository.putBoolean(PreferKey.readMenuBottomBarLiquidGlassButtons, value)
+    suspend fun setReadMenuBottomBarLiquidGlassButtons(value: Boolean) = settingsRepository.putBoolean(PreferKey.readMenuBottomBarLiquidGlassButtons, value)
 
-    suspend fun setReadMenuFloatingIconLiquidGlass(value: Boolean) =
-        settingsRepository.putBoolean(PreferKey.readMenuFloatingIconLiquidGlass, value)
+    suspend fun setReadMenuFloatingIconLiquidGlass(value: Boolean) = settingsRepository.putBoolean(PreferKey.readMenuFloatingIconLiquidGlass, value)
 
-    suspend fun setReadMenuTopBarBlurStyle(value: Int) =
-        settingsRepository.putInt(PreferKey.readMenuTopBarBlurStyle, value.coerceIn(0, 1))
+    suspend fun setReadMenuTopBarBlurStyle(value: Int) = settingsRepository.putInt(PreferKey.readMenuTopBarBlurStyle, value.coerceIn(0, 1))
 
-    suspend fun setReadMenuBottomBarBlurStyle(value: Int) =
-        settingsRepository.putInt(PreferKey.readMenuBottomBarBlurStyle, value.coerceIn(0, 1))
+    suspend fun setReadMenuBottomBarBlurStyle(value: Int) = settingsRepository.putInt(PreferKey.readMenuBottomBarBlurStyle, value.coerceIn(0, 1))
 
-    suspend fun setReadMenuBlurRadius(value: Int) =
-        settingsRepository.putInt(PreferKey.readMenuBlurRadius, value.coerceIn(0, 32))
+    suspend fun setReadMenuBlurRadius(value: Int) = settingsRepository.putInt(PreferKey.readMenuBlurRadius, value.coerceIn(0, 32))
 
-    suspend fun setReadMenuBlurAlpha(value: Int) =
-        settingsRepository.putInt(PreferKey.readMenuBlurAlpha, value.coerceIn(0, 100))
+    suspend fun setReadMenuBlurAlpha(value: Int) = settingsRepository.putInt(PreferKey.readMenuBlurAlpha, value.coerceIn(0, 100))
 
-    suspend fun setReadMenuBlurColor(value: Int) =
-        settingsRepository.putInt(PreferKey.readMenuBlurColor, value)
+    suspend fun setReadMenuBlurColor(value: Int) = settingsRepository.putInt(PreferKey.readMenuBlurColor, value)
 
-    suspend fun setReadMenuBlurColorNight(value: Int) =
-        settingsRepository.putInt(PreferKey.readMenuBlurColorNight, value)
+    suspend fun setReadMenuBlurColorNight(value: Int) = settingsRepository.putInt(PreferKey.readMenuBlurColorNight, value)
 
-    suspend fun setReadMenuPaletteStyle(value: String) =
-        settingsRepository.putString(PreferKey.readMenuPaletteStyle, value)
+    suspend fun setReadMenuPaletteStyle(value: String) = settingsRepository.putString(PreferKey.readMenuPaletteStyle, value)
 
-    suspend fun setReadMenuLensRadius(value: Float) =
-        settingsRepository.putFloat(PreferKey.readMenuLensRadius, value.coerceIn(0f, 48f))
+    suspend fun setReadMenuLensRadius(value: Float) = settingsRepository.putFloat(PreferKey.readMenuLensRadius, value.coerceIn(0f, 48f))
 
-    suspend fun setReadMenuBorderWidth(value: Int) =
-        settingsRepository.putInt(PreferKey.readMenuBorderWidth, value.coerceIn(0, 4))
+    suspend fun setReadMenuBorderWidth(value: Int) = settingsRepository.putInt(PreferKey.readMenuBorderWidth, value.coerceIn(0, 4))
 
-    suspend fun setReadMenuBorderColor(value: Int) =
-        settingsRepository.putInt(PreferKey.readMenuBorderColor, value)
+    suspend fun setReadMenuBorderColor(value: Int) = settingsRepository.putInt(PreferKey.readMenuBorderColor, value)
 
-    suspend fun setReadMenuBorderColorNight(value: Int) =
-        settingsRepository.putInt(PreferKey.readMenuBorderColorNight, value)
+    suspend fun setReadMenuBorderColorNight(value: Int) = settingsRepository.putInt(PreferKey.readMenuBorderColorNight, value)
 
-    suspend fun setReadMenuCustomIcons(value: String) =
-        settingsRepository.putString(PreferKey.readMenuCustomIcons, value)
+    suspend fun setReadMenuCustomIcons(value: String) = settingsRepository.putString(PreferKey.readMenuCustomIcons, value)
 
-    suspend fun setTitleBarCustomIcons(value: String) =
-        settingsRepository.putString(PreferKey.titleBarCustomIcons, value)
+    suspend fun setTitleBarCustomIcons(value: String) = settingsRepository.putString(PreferKey.titleBarCustomIcons, value)
 
-    suspend fun setTitleBarIconPosition(value: Int) =
-        settingsRepository.putInt(PreferKey.titleBarIconPosition, value.coerceIn(0, 3))
+    suspend fun setTitleBarIconPosition(value: Int) = settingsRepository.putInt(PreferKey.titleBarIconPosition, value.coerceIn(0, 3))
 
-    suspend fun setShowTitleBarIcons(value: Boolean) =
-        settingsRepository.putBoolean(PreferKey.showTitleBarIcons, value)
+    suspend fun setShowTitleBarIcons(value: Boolean) = settingsRepository.putBoolean(PreferKey.showTitleBarIcons, value)
 
-    suspend fun setShowMenuIcon(value: Boolean) =
-        settingsRepository.putBoolean(PreferKey.showMenuIcon, value)
+    suspend fun setShowMenuIcon(value: Boolean) = settingsRepository.putBoolean(PreferKey.showMenuIcon, value)
 
-    suspend fun setTitleBarCompact(value: Boolean) =
-        settingsRepository.putBoolean(PreferKey.titleBarCompact, value)
+    suspend fun setTitleBarCompact(value: Boolean) = settingsRepository.putBoolean(PreferKey.titleBarCompact, value)
 
-    suspend fun setChineseConverterType(value: Int) =
-        settingsRepository.putInt(PreferKey.chineseConverterType, value)
+    suspend fun setChineseConverterType(value: Int) = settingsRepository.putInt(PreferKey.chineseConverterType, value)
 
-    suspend fun setStyleSelect(isComic: Boolean, value: Int) {
+    suspend fun setStyleSelect(
+        isComic: Boolean,
+        value: Int,
+    ) {
         if (isComic) {
             setComicStyleSelect(value)
         } else {
@@ -416,21 +334,23 @@ class ReadSettingsRepository(
             readMenuIconRowCount = compatDsValue(Keys.ReadMenuIconRowCount, 1),
             readMenuBottomCornerRadius = compatDsValue(Keys.ReadMenuBottomCornerRadius, 32),
             readMenuFloatingBottomBar = compatDsValue(Keys.ReadMenuFloatingBottomBar, true),
-            readMenuTopBarBlurMode = compatDsValue(Keys.ReadMenuTopBarBlurMode, ReadMenuBlurMode.None),
-            readMenuBottomBarBlurMode = compatDsValue(Keys.ReadMenuBottomBarBlurMode, ReadMenuBlurMode.None),
+            readMenuTopBarBlurMode = compatDsValue(Keys.ReadMenuTopBarBlurMode, ReadMenuBlurMode.NONE),
+            readMenuBottomBarBlurMode = compatDsValue(Keys.ReadMenuBottomBarBlurMode, ReadMenuBlurMode.NONE),
             readMenuTopBarLiquidGlassButtons = compatDsValue(Keys.ReadMenuTopBarLiquidGlassButtons, false),
             readMenuTopBarMergeButtons = compatDsValue(Keys.ReadMenuTopBarMergeButtons, false),
             readMenuTopBarTitleCapsule = compatDsValue(Keys.ReadMenuTopBarTitleCapsule, false),
             readMenuBottomBarLiquidGlassButtons = compatDsValue(Keys.ReadMenuBottomBarLiquidGlassButtons, false),
-            readMenuFloatingIconLiquidGlass = compatDsValue(
+            readMenuFloatingIconLiquidGlass =
+            compatDsValue(
                 Keys.ReadMenuFloatingIconLiquidGlass,
-                false
+                false,
             ),
-            readMenuTopBarBlurStyle = compatDsValue(
+            readMenuTopBarBlurStyle =
+            compatDsValue(
                 Keys.ReadMenuTopBarBlurStyle,
-                ReadMenuBlurStyle.Solid
+                ReadMenuBlurStyle.SOLID,
             ),
-            readMenuBottomBarBlurStyle = compatDsValue(Keys.ReadMenuBottomBarBlurStyle, ReadMenuBlurStyle.Solid),
+            readMenuBottomBarBlurStyle = compatDsValue(Keys.ReadMenuBottomBarBlurStyle, ReadMenuBlurStyle.SOLID),
             readMenuBlurRadius = compatDsValue(Keys.ReadMenuBlurRadius, 24),
             readMenuBlurAlpha = compatDsValue(Keys.ReadMenuBlurAlpha, 85),
             readMenuBlurColor = compatDsValue(Keys.ReadMenuBlurColor, 0),

@@ -6,5 +6,6 @@ import kotlinx.coroutines.flow.Flow
 interface HomepageSettingsGateway {
     val currentSettings: HomepageSettings
     val settings: Flow<HomepageSettings>
+
     suspend fun setHiddenSourceUrlsJson(value: String)
 }

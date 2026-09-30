@@ -5,13 +5,12 @@ import android.graphics.Picture
 import android.graphics.RenderNode
 import android.os.Build
 import androidx.annotation.RequiresApi
-import io.legado.app.utils.objectpool.synchronized
 import io.legado.app.utils.canvasrecorder.pools.PicturePool
 import io.legado.app.utils.canvasrecorder.pools.RenderNodePool
+import io.legado.app.utils.objectpool.synchronized
 
 @RequiresApi(Build.VERSION_CODES.Q)
 class CanvasRecorderApi29Impl : BaseCanvasRecorder() {
-
     private var renderNode: RenderNode? = null
     private var picture: Picture? = null
 
@@ -33,7 +32,10 @@ class CanvasRecorderApi29Impl : BaseCanvasRecorder() {
         renderNode!!.endRecording()
     }
 
-    override fun beginRecording(width: Int, height: Int): Canvas {
+    override fun beginRecording(
+        width: Int,
+        height: Int,
+    ): Canvas {
         init()
         renderNode!!.setPosition(0, 0, width, height)
         return picture!!.beginRecording(width, height)
@@ -72,5 +74,4 @@ class CanvasRecorderApi29Impl : BaseCanvasRecorder() {
         private val picturePool = PicturePool().synchronized()
         private val renderNodePool = RenderNodePool().synchronized()
     }
-
 }

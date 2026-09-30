@@ -8,8 +8,8 @@ import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.hazeEffect
 import dev.chrisbanes.haze.hazeSource
 import dev.chrisbanes.haze.materials.ExperimentalHazeMaterialsApi
-import io.legado.app.ui.theme.hazeStyle.HazeLegado
 import io.legado.app.ui.theme.ThemeResolver
+import io.legado.app.ui.theme.hazeStyle.HazeLegado
 import io.legado.app.ui.widget.components.GlassDefaults
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
@@ -18,7 +18,7 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme
  */
 @Composable
 fun Modifier.responsiveHazeSource(state: HazeState): Modifier = this.then(
-    if (LocalAppUiConfiguration.current.theme.enableBlur) Modifier.hazeSource(state) else Modifier
+    if (LocalAppUiConfiguration.current.theme.enableBlur) Modifier.hazeSource(state) else Modifier,
 )
 
 /**
@@ -26,52 +26,58 @@ fun Modifier.responsiveHazeSource(state: HazeState): Modifier = this.then(
  */
 @OptIn(ExperimentalHazeMaterialsApi::class)
 @Composable
-fun Modifier.responsiveHazeEffect(
-    state: HazeState
-): Modifier {
+fun Modifier.responsiveHazeEffect(state: HazeState): Modifier {
     val themeSettings = LocalAppUiConfiguration.current.theme
     val enableBlur = themeSettings.enableBlur
     val enableProgressiveBlur = themeSettings.enableProgressiveBlur
     val composeEngine = LegadoTheme.composeEngine
-    val containerColor = GlassDefaults.secondaryColorOr {
-        if (ThemeResolver.isMiuixEngine(composeEngine)) MiuixTheme.colorScheme.surface
-        else MaterialTheme.colorScheme.surface
-    }
+    val containerColor =
+        GlassDefaults.secondaryColorOr {
+            if (ThemeResolver.isMiuixEngine(composeEngine)) {
+                MiuixTheme.colorScheme.surface
+            } else {
+                MaterialTheme.colorScheme.surface
+            }
+        }
 
     if (!enableBlur) return this
 
-    val style = HazeLegado.custom(
-        containerColor = containerColor,
-        blurRadius = themeSettings.topBarBlurRadius,
-        blurAlpha = themeSettings.topBarBlurAlpha
-    )
+    val style =
+        HazeLegado.custom(
+            containerColor = containerColor,
+            blurRadius = themeSettings.topBarBlurRadius,
+            blurAlpha = themeSettings.topBarBlurAlpha,
+        )
 
     return this.hazeEffect(
         state = state,
-        style = style
+        style = style,
     ) {
-        progressive = if (enableProgressiveBlur) {
-            HazeProgressive.verticalGradient(
-                startIntensity = 1f,
-                endIntensity = 0f
-            )
-        } else {
-            null
-        }
+        progressive =
+            if (enableProgressiveBlur) {
+                HazeProgressive.verticalGradient(
+                    startIntensity = 1f,
+                    endIntensity = 0f,
+                )
+            } else {
+                null
+            }
     }
 }
 
 @OptIn(ExperimentalHazeMaterialsApi::class)
 @Composable
-fun Modifier.responsiveHazeEffectFixedStyle(
-    state: HazeState
-): Modifier {
+fun Modifier.responsiveHazeEffectFixedStyle(state: HazeState): Modifier {
     val enableBlur = LocalAppUiConfiguration.current.theme.enableBlur
     val composeEngine = LegadoTheme.composeEngine
-    val containerColor = GlassDefaults.secondaryColorOr {
-        if (ThemeResolver.isMiuixEngine(composeEngine)) MiuixTheme.colorScheme.surface
-        else MaterialTheme.colorScheme.surface
-    }
+    val containerColor =
+        GlassDefaults.secondaryColorOr {
+            if (ThemeResolver.isMiuixEngine(composeEngine)) {
+                MiuixTheme.colorScheme.surface
+            } else {
+                MaterialTheme.colorScheme.surface
+            }
+        }
 
     if (!enableBlur) return this
 
@@ -79,12 +85,12 @@ fun Modifier.responsiveHazeEffectFixedStyle(
 
     return this.hazeEffect(
         state = state,
-        style = style
+        style = style,
     ) {
         progressive =
             HazeProgressive.verticalGradient(
                 startIntensity = 1f,
-                endIntensity = 0f
+                endIntensity = 0f,
             )
     }
 }
@@ -97,15 +103,19 @@ fun Modifier.responsiveHazeEffectFixedStyle(
 fun Modifier.regularHazeEffect(state: HazeState): Modifier {
     val enableBlur = LocalAppUiConfiguration.current.theme.enableBlur
     val composeEngine = LegadoTheme.composeEngine
-    val containerColor = GlassDefaults.secondaryColorOr {
-        if (ThemeResolver.isMiuixEngine(composeEngine)) MiuixTheme.colorScheme.surface
-        else MaterialTheme.colorScheme.surface
-    }
+    val containerColor =
+        GlassDefaults.secondaryColorOr {
+            if (ThemeResolver.isMiuixEngine(composeEngine)) {
+                MiuixTheme.colorScheme.surface
+            } else {
+                MaterialTheme.colorScheme.surface
+            }
+        }
 
     if (!enableBlur) return this
 
     return this.hazeEffect(
         state = state,
-        style = HazeLegado.ultraThin(containerColor = containerColor)
+        style = HazeLegado.ultraThin(containerColor = containerColor),
     )
 }

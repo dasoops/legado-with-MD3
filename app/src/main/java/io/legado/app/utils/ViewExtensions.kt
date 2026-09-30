@@ -40,25 +40,22 @@ import androidx.core.view.marginBottom
 import androidx.core.view.updateLayoutParams
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager.widget.ViewPager
-import io.legado.app.help.GlideImageGetter
 import io.legado.app.domain.gateway.AppShellSettingsGateway
+import io.legado.app.help.GlideImageGetter
 import io.legado.app.lib.theme.TintHelper
 import io.legado.app.utils.canvasrecorder.CanvasRecorder
 import io.legado.app.utils.canvasrecorder.record
+import java.lang.reflect.Field
 import org.koin.core.context.GlobalContext
 import splitties.systemservices.inputMethodManager
 import splitties.views.bottomPadding
 import splitties.views.topPadding
-import java.lang.reflect.Field
 
-
-private tailrec fun getCompatActivity(context: Context?): AppCompatActivity? {
-    return when (context) {
-        is AppCompatActivity -> context
-        is androidx.appcompat.view.ContextThemeWrapper -> getCompatActivity(context.baseContext)
-        is android.view.ContextThemeWrapper -> getCompatActivity(context.baseContext)
-        else -> null
-    }
+private tailrec fun getCompatActivity(context: Context?): AppCompatActivity? = when (context) {
+    is AppCompatActivity -> context
+    is androidx.appcompat.view.ContextThemeWrapper -> getCompatActivity(context.baseContext)
+    is android.view.ContextThemeWrapper -> getCompatActivity(context.baseContext)
+    else -> null
 }
 
 val View.activity: AppCompatActivity?
@@ -88,14 +85,14 @@ fun View.disableAutoFill() = run {
 
 fun View.applyTint(
     @ColorInt color: Int,
-    isDark: Boolean = isNightTheme()
+    isDark: Boolean = isNightTheme(),
 ) {
     TintHelper.setTintAuto(this, color, false, isDark)
 }
 
 fun View.applyBackgroundTint(
     @ColorInt color: Int,
-    isDark: Boolean = isNightTheme()
+    isDark: Boolean = isNightTheme(),
 ) {
     if (background == null) {
         setBackgroundColor(color)
@@ -104,17 +101,25 @@ fun View.applyBackgroundTint(
     }
 }
 
-fun RecyclerView.setEdgeEffectColor(@ColorInt color: Int) {
-    edgeEffectFactory = object : RecyclerView.EdgeEffectFactory() {
-        override fun createEdgeEffect(view: RecyclerView, direction: Int): EdgeEffect {
-            val edgeEffect = super.createEdgeEffect(view, direction)
-            edgeEffect.color = color
-            return edgeEffect
+fun RecyclerView.setEdgeEffectColor(
+    @ColorInt color: Int,
+) {
+    edgeEffectFactory =
+        object : RecyclerView.EdgeEffectFactory() {
+            override fun createEdgeEffect(
+                view: RecyclerView,
+                direction: Int,
+            ): EdgeEffect {
+                val edgeEffect = super.createEdgeEffect(view, direction)
+                edgeEffect.color = color
+                return edgeEffect
+            }
         }
-    }
 }
 
-fun ViewPager.setEdgeEffectColor(@ColorInt color: Int) {
+fun ViewPager.setEdgeEffectColor(
+    @ColorInt color: Int,
+) {
     try {
         val clazz = ViewPager::class.java
         for (name in arrayOf("mLeftEdge", "mRightEdge")) {
@@ -165,27 +170,29 @@ fun View.visible(visible: Boolean) {
     }
 }
 
-fun View.screenshot(bitmap: Bitmap? = null, canvas: Canvas? = null): Bitmap? {
-    return if (width > 0 && height > 0) {
-        val screenshot = if (bitmap != null && bitmap.width == width && bitmap.height == height) {
+fun View.screenshot(
+    bitmap: Bitmap? = null,
+    canvas: Canvas? = null,
+): Bitmap? = if (width > 0 && height > 0) {
+    val screenshot =
+        if (bitmap != null && bitmap.width == width && bitmap.height == height) {
             bitmap.eraseColor(Color.TRANSPARENT)
             bitmap
         } else {
             bitmap?.recycle()
             createBitmap(width, height)
         }
-        val c = canvas ?: Canvas()
-        c.setBitmap(screenshot)
-        c.save()
-        c.translate(-scrollX.toFloat(), -scrollY.toFloat())
-        this.draw(c)
-        c.restore()
-        c.setBitmap(null)
-        screenshot.prepareToDraw()
-        screenshot
-    } else {
-        null
-    }
+    val c = canvas ?: Canvas()
+    c.setBitmap(screenshot)
+    c.save()
+    c.translate(-scrollX.toFloat(), -scrollY.toFloat())
+    this.draw(c)
+    c.restore()
+    c.setBitmap(null)
+    screenshot.prepareToDraw()
+    screenshot
+} else {
+    null
 }
 
 fun View.screenshot(picture: Picture) {
@@ -247,7 +254,10 @@ fun TextView.setHtml(html: String) {
 }
 
 @SuppressLint("ObsoleteSdkInt")
-fun TextView.setHtml(html: String, imageGetter: GlideImageGetter?) {
+fun TextView.setHtml(
+    html: String,
+    imageGetter: GlideImageGetter?,
+) {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
         text = Html.fromHtml(html, Html.FROM_HTML_MODE_COMPACT, imageGetter, null)
     } else {
@@ -263,14 +273,18 @@ fun TextView.setTextIfNotEqual(charSequence: CharSequence?) {
 }
 
 @SuppressLint("RestrictedApi")
-fun PopupMenu.show(x: Int, y: Int) {
-    kotlin.runCatching {
-        val field: Field = this.javaClass.getDeclaredField("mPopup")
-        field.isAccessible = true
-        (field.get(this) as MenuPopupHelper).show(x, y)
-    }.onFailure {
-        it.printOnDebug()
-    }
+fun PopupMenu.show(
+    x: Int,
+    y: Int,
+) {
+    kotlin
+        .runCatching {
+            val field: Field = this.javaClass.getDeclaredField("mPopup")
+            field.isAccessible = true
+            (field.get(this) as MenuPopupHelper).show(x, y)
+        }.onFailure {
+            it.printOnDebug()
+        }
 }
 
 fun View.shouldHideSoftInput(event: MotionEvent): Boolean {
@@ -313,7 +327,9 @@ fun View.applyNavigationBarMargin(withInitialMargin: Boolean = false) {
     }
 }
 
-fun View.setBackgroundKeepPadding(@DrawableRes backgroundResId: Int) {
+fun View.setBackgroundKeepPadding(
+    @DrawableRes backgroundResId: Int,
+) {
     val paddingLeft = paddingLeft
     val paddingTop = paddingTop
     val paddingRight = paddingRight
@@ -322,9 +338,7 @@ fun View.setBackgroundKeepPadding(@DrawableRes backgroundResId: Int) {
     setPadding(paddingLeft, paddingTop, paddingRight, paddingBottom)
 }
 
-fun View.canScroll(direction: Int): Boolean {
-    return canScrollVertically(direction) || canScrollHorizontally(direction)
-}
+fun View.canScroll(direction: Int): Boolean = canScrollVertically(direction) || canScrollHorizontally(direction)
 
 private val requestLayoutBroken =
     Build.VERSION.SDK_INT in Build.VERSION_CODES.O..Build.VERSION_CODES.Q

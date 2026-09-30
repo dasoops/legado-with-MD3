@@ -22,7 +22,7 @@ import androidx.room.PrimaryKey
     tableName = "book_marks",
     indices = [
         Index(value = ["bookUrl", "chapterIndex"]),
-    ]
+    ],
 )
 data class BookMarking(
     @PrimaryKey

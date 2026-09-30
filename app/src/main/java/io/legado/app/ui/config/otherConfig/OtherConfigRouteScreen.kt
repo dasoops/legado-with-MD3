@@ -36,17 +36,19 @@ fun OtherConfigRouteScreen(
     val state = viewModel.uiState.collectAsStateWithLifecycle().value
     var password by remember { mutableStateOf("") }
 
-    val notificationPermissionLauncher = rememberLauncherForActivityResult(
-        ActivityResultContracts.RequestPermission()
-    ) { }
-    val selectDocTree = rememberLauncherForActivityResult(
-        ActivityResultContracts.OpenDocumentTree()
-    ) { uri ->
-        uri?.let {
-            it.takePersistablePermissionSafely(context)
-            viewModel.onIntent(OtherConfigIntent.DefaultBookTreeUriChanged(it.toString()))
+    val notificationPermissionLauncher =
+        rememberLauncherForActivityResult(
+            ActivityResultContracts.RequestPermission(),
+        ) { }
+    val selectDocTree =
+        rememberLauncherForActivityResult(
+            ActivityResultContracts.OpenDocumentTree(),
+        ) { uri ->
+            uri?.let {
+                it.takePersistablePermissionSafely(context)
+                viewModel.onIntent(OtherConfigIntent.DefaultBookTreeUriChanged(it.toString()))
+            }
         }
-    }
 
     LaunchedEffect(viewModel, context) {
         viewModel.effects.collectLatest { effect ->
@@ -61,7 +63,9 @@ fun OtherConfigRouteScreen(
                 OtherConfigEffect.RequestBatteryPermission -> {
                     (context as? Activity)?.let(SystemUtils::ignoreBatteryOptimization)
                 }
-                OtherConfigEffect.OpenSystemDirectory -> selectDocTree.launch(null)
+                OtherConfigEffect.OpenSystemDirectory -> {
+                    selectDocTree.launch(null)
+                }
             }
         }
     }

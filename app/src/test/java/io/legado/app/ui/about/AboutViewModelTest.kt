@@ -21,7 +21,6 @@ import splitties.init.injectAsAppCtx
 @RunWith(RobolectricTestRunner::class)
 @Config(application = Application::class, sdk = [35])
 class AboutViewModelTest {
-
     private lateinit var application: Application
 
     @Before
@@ -53,7 +52,9 @@ class AboutViewModelTest {
         }
     }
 
-    private class FakeOtherSettingsGateway(initialVariant: String) : OtherSettingsGateway {
+    private class FakeOtherSettingsGateway(
+        initialVariant: String,
+    ) : OtherSettingsGateway {
         private val state = MutableStateFlow(OtherSettings(updateToVariant = initialVariant))
 
         override val currentSettings: OtherSettings get() = state.value

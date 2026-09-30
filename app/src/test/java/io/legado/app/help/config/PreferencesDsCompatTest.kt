@@ -12,17 +12,17 @@ import org.junit.Assert.assertNull
 import org.junit.Test
 
 class PreferencesDsCompatTest {
-
     @Test
     fun `按目标类型直接读取`() {
-        val prefs = mutablePreferencesOf(
-            intPreferencesKey("i") to 5,
-            booleanPreferencesKey("b") to true,
-            longPreferencesKey("l") to 7L,
-            floatPreferencesKey("f") to 1.5f,
-            stringPreferencesKey("s") to "hello",
-            stringSetPreferencesKey("set") to setOf("a", "b"),
-        )
+        val prefs =
+            mutablePreferencesOf(
+                intPreferencesKey("i") to 5,
+                booleanPreferencesKey("b") to true,
+                longPreferencesKey("l") to 7L,
+                floatPreferencesKey("f") to 1.5f,
+                stringPreferencesKey("s") to "hello",
+                stringSetPreferencesKey("set") to setOf("a", "b"),
+            )
         assertEquals(5, prefs.compatDsInt("i"))
         assertEquals(true, prefs.compatDsBoolean("b"))
         assertEquals(7L, prefs.compatDsLong("l"))
@@ -33,12 +33,13 @@ class PreferencesDsCompatTest {
 
     @Test
     fun `string 形式的历史值可解析为目标类型`() {
-        val prefs = mutablePreferencesOf(
-            stringPreferencesKey("i") to "5",
-            stringPreferencesKey("b") to "true",
-            stringPreferencesKey("l") to "7",
-            stringPreferencesKey("f") to "1.5",
-        )
+        val prefs =
+            mutablePreferencesOf(
+                stringPreferencesKey("i") to "5",
+                stringPreferencesKey("b") to "true",
+                stringPreferencesKey("l") to "7",
+                stringPreferencesKey("f") to "1.5",
+            )
         assertEquals(5, prefs.compatDsInt("i"))
         assertEquals(true, prefs.compatDsBoolean("b"))
         assertEquals(7L, prefs.compatDsLong("l"))
@@ -54,9 +55,10 @@ class PreferencesDsCompatTest {
 
     @Test
     fun `缺失或无法解析的值返回 null 而不抛异常`() {
-        val prefs = mutablePreferencesOf(
-            stringPreferencesKey("garbage") to "not a number",
-        )
+        val prefs =
+            mutablePreferencesOf(
+                stringPreferencesKey("garbage") to "not a number",
+            )
         assertNull(prefs.compatDsInt("absent"))
         assertNull(prefs.compatDsInt("garbage"))
         assertNull(prefs.compatDsBoolean("garbage"))
@@ -65,15 +67,16 @@ class PreferencesDsCompatTest {
 
     @Test
     fun `增强的类型转换测试`() {
-        val prefs = mutablePreferencesOf(
-            intPreferencesKey("i1") to 1,
-            intPreferencesKey("i0") to 0,
-            intPreferencesKey("i9") to 9,
-            stringPreferencesKey("s1") to "1",
-            stringPreferencesKey("s0") to "0",
-            booleanPreferencesKey("b") to true,
-            floatPreferencesKey("f") to 3.14f
-        )
+        val prefs =
+            mutablePreferencesOf(
+                intPreferencesKey("i1") to 1,
+                intPreferencesKey("i0") to 0,
+                intPreferencesKey("i9") to 9,
+                stringPreferencesKey("s1") to "1",
+                stringPreferencesKey("s0") to "0",
+                booleanPreferencesKey("b") to true,
+                floatPreferencesKey("f") to 3.14f,
+            )
         // Number/Boolean to String
         assertEquals("1", prefs.compatDsString("i1"))
         assertEquals("true", prefs.compatDsString("b"))
@@ -133,10 +136,11 @@ class PreferencesDsCompatTest {
 
     @Test
     fun `compatDsValue 按默认值类型兼容读取并在缺失时回退`() {
-        val prefs = mutablePreferencesOf(
-            stringPreferencesKey("int") to "7",
-            intPreferencesKey("boolean") to 1,
-        )
+        val prefs =
+            mutablePreferencesOf(
+                stringPreferencesKey("int") to "7",
+                intPreferencesKey("boolean") to 1,
+            )
 
         assertEquals(7, prefs.compatDsValue(intPreferencesKey("int"), 0))
         assertEquals(true, prefs.compatDsValue(booleanPreferencesKey("boolean"), false))

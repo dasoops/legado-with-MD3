@@ -97,26 +97,27 @@ class PageCurlGeometryTest {
     fun simulationCurlRevealsTheSafeSnapContinuouslyFromTheTouchedCorner() {
         assertEquals(
             1000f,
-            ReaderCurlTouchPolicy.revealX(ReaderTurnDirection.NEXT, 960f, 1000f, 0f)
+            ReaderCurlTouchPolicy.revealX(ReaderTurnDirection.NEXT, 960f, 1000f, 0f),
         )
         assertEquals(
             980f,
-            ReaderCurlTouchPolicy.revealX(ReaderTurnDirection.NEXT, 960f, 1000f, .5f)
+            ReaderCurlTouchPolicy.revealX(ReaderTurnDirection.NEXT, 960f, 1000f, .5f),
         )
         assertEquals(
             40f,
-            ReaderCurlTouchPolicy.revealX(ReaderTurnDirection.PREVIOUS, 80f, 1000f, .5f)
+            ReaderCurlTouchPolicy.revealX(ReaderTurnDirection.PREVIOUS, 80f, 1000f, .5f),
         )
     }
 
     @Test
     fun cancelledPreviousCurlReturnsPastTheLeftEdge() {
         assertEquals(
-            -1000f, ReaderCurlTouchPolicy.settledX(
+            -1000f,
+            ReaderCurlTouchPolicy.settledX(
                 ReaderTurnDirection.PREVIOUS,
                 committed = false,
                 pageWidth = 1000f,
-            )
+            ),
         )
     }
 

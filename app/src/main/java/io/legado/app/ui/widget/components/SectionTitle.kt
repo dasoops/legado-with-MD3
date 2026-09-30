@@ -15,7 +15,8 @@ fun SectionTitle(title: String) {
     Text(
         text = title,
         style = LegadoTheme.typography.labelMediumEmphasized,
-        modifier = Modifier
+        modifier =
+        Modifier
             .fillMaxWidth()
             .padding(vertical = 8.dp),
         textAlign = TextAlign.Center,

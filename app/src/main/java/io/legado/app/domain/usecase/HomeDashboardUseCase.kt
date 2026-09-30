@@ -5,6 +5,7 @@ import io.legado.app.domain.model.DEFAULT_DAILY_READING_GOAL_MINUTES
 import io.legado.app.domain.model.HomeDashboard
 import io.legado.app.domain.model.HomeDashboardSection
 import io.legado.app.domain.model.MAX_DAILY_READING_GOAL_MINUTES
+import kotlin.time.Clock
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
@@ -17,17 +18,16 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.atStartOfDayIn
 import kotlinx.datetime.plus
 import kotlinx.datetime.toLocalDateTime
-import kotlin.time.Clock
 
 class HomeDashboardUseCase(
     private val gateway: HomeDashboardGateway,
     private val clock: Clock,
 ) {
-
     @OptIn(ExperimentalCoroutinesApi::class)
     fun observe(): Flow<HomeDashboard> {
-        val todayReadTime = currentDate()
-            .flatMapLatest(gateway::observeReadTime)
+        val todayReadTime =
+            currentDate()
+                .flatMapLatest(gateway::observeReadTime)
 
         return combine(
             gateway.observeTotalReadBooks(),
@@ -40,7 +40,8 @@ class HomeDashboardUseCase(
                 totalReadBooks = totalBooks,
                 totalReadTimeMillis = totalTime,
                 todayReadTimeMillis = todayTime,
-                dailyGoalMinutes = dailyGoal.coerceIn(
+                dailyGoalMinutes =
+                dailyGoal.coerceIn(
                     1,
                     MAX_DAILY_READING_GOAL_MINUTES,
                 ),
@@ -51,15 +52,13 @@ class HomeDashboardUseCase(
 
     suspend fun updateDailyGoal(minutes: Int) {
         gateway.updateDailyGoal(
-            minutes.coerceIn(1, MAX_DAILY_READING_GOAL_MINUTES)
+            minutes.coerceIn(1, MAX_DAILY_READING_GOAL_MINUTES),
         )
     }
 
-    fun observeSelectedSourceSetUrl(): Flow<String?> =
-        gateway.observeSelectedSourceSetUrl()
+    fun observeSelectedSourceSetUrl(): Flow<String?> = gateway.observeSelectedSourceSetUrl()
 
-    fun observeVisibleSections(): Flow<Set<HomeDashboardSection>> =
-        gateway.observeVisibleSections()
+    fun observeVisibleSections(): Flow<Set<HomeDashboardSection>> = gateway.observeVisibleSections()
 
     suspend fun updateSelectedSourceSetUrl(sourceUrl: String) {
         gateway.updateSelectedSourceSetUrl(sourceUrl)
@@ -74,12 +73,16 @@ class HomeDashboardUseCase(
             val now = clock.now()
             val zone = TimeZone.currentSystemDefault()
             emit(now.toLocalDateTime(zone).date.toString())
-            val nextDay = now.toLocalDateTime(zone).date
-                .plus(DatePeriod(days = 1))
-                .atStartOfDayIn(zone)
+            val nextDay =
+                now
+                    .toLocalDateTime(zone)
+                    .date
+                    .plus(DatePeriod(days = 1))
+                    .atStartOfDayIn(zone)
             delay(
-                (nextDay - now).inWholeMilliseconds
-                    .coerceAtLeast(MIN_DATE_REFRESH_DELAY_MILLIS)
+                (nextDay - now)
+                    .inWholeMilliseconds
+                    .coerceAtLeast(MIN_DATE_REFRESH_DELAY_MILLIS),
             )
         }
     }.distinctUntilChanged()

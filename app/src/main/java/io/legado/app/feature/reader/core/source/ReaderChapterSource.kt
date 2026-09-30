@@ -27,7 +27,9 @@ sealed interface ReaderChapterSourceBlock {
         val semanticLength: Int = value.length,
     ) : ReaderChapterSourceBlock
 
-    data class PageBreak(override val chapterPosition: Int) : ReaderChapterSourceBlock
+    data class PageBreak(
+        override val chapterPosition: Int,
+    ) : ReaderChapterSourceBlock
 }
 
 sealed interface ReaderChapterInlineSource {
@@ -38,8 +40,15 @@ sealed interface ReaderChapterInlineSource {
         override val chapterPosition: Int,
         val style: ReaderInlineSourceStyle = ReaderInlineSourceStyle(),
     ) : ReaderChapterInlineSource
-    data class Image(val source: String, override val chapterPosition: Int) : ReaderChapterInlineSource
-    data class BlankLine(override val chapterPosition: Int) : ReaderChapterInlineSource
+
+    data class Image(
+        val source: String,
+        override val chapterPosition: Int,
+    ) : ReaderChapterInlineSource
+
+    data class BlankLine(
+        override val chapterPosition: Int,
+    ) : ReaderChapterInlineSource
 }
 
 data class ReaderInlineSourceStyle(
@@ -76,8 +85,11 @@ data class ReaderChapterSource(
 
     /** Highlight rules use the displayed segments, including inserted paragraph separators. */
     val semanticTitle: String
-        get() = blocks.filterIsInstance<ReaderChapterSourceBlock.Text>()
-            .filter { it.isTitle }.joinToString("") { "${it.value}\n" }
+        get() =
+            blocks
+                .filterIsInstance<ReaderChapterSourceBlock.Text>()
+                .filter { it.isTitle }
+                .joinToString("") { "${it.value}\n" }
 }
 
 fun interface ReaderHtmlSemanticTextResolver {

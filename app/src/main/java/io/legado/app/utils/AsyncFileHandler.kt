@@ -4,8 +4,9 @@ import io.legado.app.help.globalExecutor
 import java.util.logging.FileHandler
 import java.util.logging.LogRecord
 
-class AsyncFileHandler(pattern: String) : FileHandler(pattern) {
-
+class AsyncFileHandler(
+    pattern: String,
+) : FileHandler(pattern) {
     override fun publish(record: LogRecord?) {
         if (!isLoggable(record)) {
             return
@@ -14,5 +15,4 @@ class AsyncFileHandler(pattern: String) : FileHandler(pattern) {
             super.publish(record)
         }
     }
-
 }

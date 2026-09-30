@@ -4,7 +4,8 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
 enum class HeatmapMode {
-    COUNT, TIME
+    COUNT,
+    TIME,
 }
 
 data class HeatmapConfig(
@@ -13,7 +14,7 @@ data class HeatmapConfig(
     val cellSpacing: Dp = 4.dp,
     val cornerRadius: Dp = 4.dp,
     val gradientWidth: Dp = 16.dp,
-    val legendSize: Dp = 12.dp
+    val legendSize: Dp = 12.dp,
 ) {
     val interactiveCellSize: Dp
         get() = maxOf(cellSize, touchTargetSize)

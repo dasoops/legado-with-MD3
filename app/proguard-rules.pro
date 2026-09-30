@@ -72,9 +72,6 @@
 -keep class io.legado.app.data.repository.GoogleTranslateResponse{*;}
 -keep class io.legado.app.data.repository.GoogleSentence{*;}
 -keep class io.legado.app.data.repository.GoogleSpell{*;}
--keep class io.legado.app.data.repository.OpenAIResponse{*;}
--keep class io.legado.app.data.repository.OpenAIChoice{*;}
--keep class io.legado.app.data.repository.OpenAIMessage{*;}
 # 缓存 Cookie
 -keep class **.help.http.CookieStore{*;}
 -keep class **.help.CacheManager{*;}
@@ -113,11 +110,6 @@
 -keep class androidx.documentfile.provider.TreeDocumentFile {
     <init>(...);
 }
-
-# JsoupXpath
--keep,allowobfuscation class * implements org.seimicrawler.xpath.core.AxisSelector{*;}
--keep,allowobfuscation class * implements org.seimicrawler.xpath.core.NodeTest{*;}
--keep,allowobfuscation class * implements org.seimicrawler.xpath.core.Function{*;}
 
 ## JSOUP
 -keep class org.jsoup.**{*;}

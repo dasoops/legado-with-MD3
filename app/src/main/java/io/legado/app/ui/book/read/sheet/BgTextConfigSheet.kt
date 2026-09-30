@@ -6,13 +6,13 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
@@ -70,12 +70,18 @@ fun BgTextConfigSheet(
     val styleName = styleConfig.styleName
     val darkStatusIcon = styleConfig.darkStatusIcon
     val bgAlpha = styleConfig.bgAlpha
-    val dayBgColor = if (styleConfig.bgType == 0) {
-        runCatching { styleConfig.bgStr.toColorInt() }.getOrDefault(0xFFEEEEEE.toInt())
-    } else 0
-    val nightBgColor = if (styleConfig.bgTypeNight == 0) {
-        runCatching { styleConfig.bgStrNight.toColorInt() }.getOrDefault(0xFF000000.toInt())
-    } else 0
+    val dayBgColor =
+        if (styleConfig.bgType == 0) {
+            runCatching { styleConfig.bgStr.toColorInt() }.getOrDefault(0xFFEEEEEE.toInt())
+        } else {
+            0
+        }
+    val nightBgColor =
+        if (styleConfig.bgTypeNight == 0) {
+            runCatching { styleConfig.bgStrNight.toColorInt() }.getOrDefault(0xFF000000.toInt())
+        } else {
+            0
+        }
     val dayBgImage = if (styleConfig.bgType != 0) styleConfig.bgStr else null
     val nightBgImage = if (styleConfig.bgTypeNight != 0) styleConfig.bgStrNight else null
 
@@ -94,7 +100,8 @@ fun BgTextConfigSheet(
         contentWindowInsets = { WindowInsets.navigationBars },
     ) {
         Column(
-            modifier = Modifier
+            modifier =
+            Modifier
                 .fillMaxWidth()
                 .padding(bottom = 16.dp)
                 .verticalScroll(rememberScrollState()),
@@ -193,7 +200,14 @@ fun BgTextConfigSheet(
         val initialColor = if (colorPickerIsNight) nightBgColor else dayBgColor
         ColorPickerSheet(
             show = showColorPicker,
-            initialColor = if (initialColor != 0) initialColor else if (colorPickerIsNight) 0xFF000000.toInt() else 0xFFEEEEEE.toInt(),
+            initialColor =
+            if (initialColor != 0) {
+                initialColor
+            } else if (colorPickerIsNight) {
+                0xFF000000.toInt()
+            } else {
+                0xFFEEEEEE.toInt()
+            },
             onDismissRequest = { showColorPicker = false },
             onColorSelected = { color ->
                 if (colorPickerIsNight) {
@@ -207,7 +221,6 @@ fun BgTextConfigSheet(
             },
         )
     }
-
 
     TextListInputDialog(
         show = showEditNameDialog,
@@ -229,42 +242,48 @@ fun BgTextConfigSheet(
         title = stringResource(R.string.restore),
         content = {
             presets.forEachIndexed { index, preset ->
-                val bgColor = runCatching { preset.bgStr.toColorInt() }
-                    .getOrDefault(0xFFEEEEEE.toInt())
-                val textColor = runCatching { preset.curTextColor() }
-                    .getOrDefault(0xFF000000.toInt())
+                val bgColor =
+                    runCatching { preset.bgStr.toColorInt() }
+                        .getOrDefault(0xFFEEEEEE.toInt())
+                val textColor =
+                    runCatching { preset.curTextColor() }
+                        .getOrDefault(0xFF000000.toInt())
                 NormalCard(
                     onClick = {
                         onIntent(ReadBookIntent.ApplyPresetTheme(index))
                         showPresetDialog = false
                     },
-                    modifier = Modifier
+                    modifier =
+                    Modifier
                         .fillMaxWidth()
                         .padding(vertical = 4.dp),
                 ) {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier
+                        modifier =
+                        Modifier
                             .fillMaxWidth()
                             .padding(horizontal = 16.dp, vertical = 12.dp),
                     ) {
                         Box(
-                            modifier = Modifier
+                            modifier =
+                            Modifier
                                 .size(24.dp)
                                 .clip(CircleShape)
-                                .background(Color(bgColor))
+                                .background(Color(bgColor)),
                         )
                         Spacer(Modifier.width(8.dp))
                         Box(
-                            modifier = Modifier
+                            modifier =
+                            Modifier
                                 .size(24.dp)
                                 .clip(CircleShape)
-                                .background(Color(textColor))
+                                .background(Color(textColor)),
                         )
                         Spacer(Modifier.width(12.dp))
                         AppText(
-                            text = preset.name.ifBlank { "预设${index}" },
-                            style = LegadoTheme.typography.labelMediumEmphasized
+                            text = preset.name.ifBlank { "预设$index" },
+                            style = LegadoTheme.typography.labelMediumEmphasized,
                         )
                     }
                 }
@@ -285,12 +304,20 @@ private fun ActionCard(
     NormalCard(
         onClick = if (enabled) onClick else null,
         modifier = modifier,
-        containerColor = if (enabled) LegadoTheme.colorScheme.surfaceContainerLow else LegadoTheme.colorScheme.surfaceContainerLow.copy(alpha = 0.5f),
+        containerColor =
+        if (enabled) {
+            LegadoTheme.colorScheme.surfaceContainerLow
+        } else {
+            LegadoTheme.colorScheme.surfaceContainerLow.copy(
+                alpha = 0.5f,
+            )
+        },
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center,
-            modifier = Modifier
+            modifier =
+            Modifier
                 .fillMaxWidth()
                 .height(56.dp),
         ) {

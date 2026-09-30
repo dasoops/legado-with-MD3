@@ -7,21 +7,22 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class BookRestorePlannerTest {
-
     @Test
     fun `same normalized local file is restored into existing record`() {
         val existing = localBook("/storage/emulated/0/Books/book.txt", progress = 1)
         val restored = localBook("/sdcard/Books/book.txt", progress = 8)
 
-        val plan = plan(
-            restoredBooks = listOf(restored),
-            existingBooks = listOf(existing),
-            existingLocations = setOf(existing.bookUrl, restored.bookUrl),
-            normalizedLocations = mapOf(
-                existing.bookUrl to "/storage/emulated/0/Books/book.txt",
-                restored.bookUrl to "/storage/emulated/0/Books/book.txt",
-            ),
-        )
+        val plan =
+            plan(
+                restoredBooks = listOf(restored),
+                existingBooks = listOf(existing),
+                existingLocations = setOf(existing.bookUrl, restored.bookUrl),
+                normalizedLocations =
+                mapOf(
+                    existing.bookUrl to "/storage/emulated/0/Books/book.txt",
+                    restored.bookUrl to "/storage/emulated/0/Books/book.txt",
+                ),
+            )
 
         assertEquals(listOf(existing.bookUrl), plan.booksToUpsert.map { it.bookUrl })
         assertEquals(8, plan.booksToUpsert.single().durChapterIndex)
@@ -33,11 +34,12 @@ class BookRestorePlannerTest {
         val existing = localBook("/current/Books/book.txt", progress = 1)
         val restored = localBook("/old-device/Books/book.txt", progress = 8)
 
-        val plan = plan(
-            restoredBooks = listOf(restored),
-            existingBooks = listOf(existing),
-            existingLocations = setOf(existing.bookUrl),
-        )
+        val plan =
+            plan(
+                restoredBooks = listOf(restored),
+                existingBooks = listOf(existing),
+                existingLocations = setOf(existing.bookUrl),
+            )
 
         assertEquals(listOf(existing.bookUrl), plan.booksToUpsert.map { it.bookUrl })
         assertEquals(8, plan.booksToUpsert.single().durChapterIndex)
@@ -50,11 +52,12 @@ class BookRestorePlannerTest {
         val current = localBook("/current/Books/book.txt", progress = 2)
         val restored = localBook(stale.bookUrl, progress = 8)
 
-        val plan = plan(
-            restoredBooks = listOf(restored),
-            existingBooks = listOf(stale, current),
-            existingLocations = setOf(current.bookUrl),
-        )
+        val plan =
+            plan(
+                restoredBooks = listOf(restored),
+                existingBooks = listOf(stale, current),
+                existingLocations = setOf(current.bookUrl),
+            )
 
         assertEquals(listOf(current.bookUrl), plan.booksToUpsert.map { it.bookUrl })
         assertEquals(listOf(stale.bookUrl), plan.booksToDelete.map { it.bookUrl })
@@ -65,11 +68,12 @@ class BookRestorePlannerTest {
         val stale = localBook("/old-device/Books/book.txt", progress = 1)
         val current = localBook("/current/Books/book.txt", progress = 8)
 
-        val plan = plan(
-            restoredBooks = listOf(stale, current),
-            existingBooks = emptyList(),
-            existingLocations = setOf(current.bookUrl),
-        )
+        val plan =
+            plan(
+                restoredBooks = listOf(stale, current),
+                existingBooks = emptyList(),
+                existingLocations = setOf(current.bookUrl),
+            )
 
         assertEquals(listOf(current.bookUrl), plan.booksToInsert.map { it.bookUrl })
         assertTrue(plan.booksToUpdate.isEmpty())
@@ -81,11 +85,12 @@ class BookRestorePlannerTest {
         val existing = localBook("/Books/edition-a/book.txt", progress = 1)
         val restored = localBook("/Books/edition-b/book.txt", progress = 8)
 
-        val plan = plan(
-            restoredBooks = listOf(restored),
-            existingBooks = listOf(existing),
-            existingLocations = setOf(existing.bookUrl, restored.bookUrl),
-        )
+        val plan =
+            plan(
+                restoredBooks = listOf(restored),
+                existingBooks = listOf(existing),
+                existingLocations = setOf(existing.bookUrl, restored.bookUrl),
+            )
 
         assertEquals(listOf(restored.bookUrl), plan.booksToUpsert.map { it.bookUrl })
         assertTrue(plan.booksToDelete.isEmpty())
@@ -96,12 +101,13 @@ class BookRestorePlannerTest {
         val existing = Book(bookUrl = "https://source-a/book", name = "斗破苍穹", author = "天蚕土豆")
         val restored = Book(bookUrl = "https://source-b/book", name = "斗破苍穹", author = "天蚕土豆")
 
-        val plan = planBookRestore(
-            restoredBooks = listOf(restored),
-            existingBooks = listOf(existing),
-            ignoreLocalBook = false,
-            locationStatus = { LocalBookLocationStatus.Missing },
-        )
+        val plan =
+            planBookRestore(
+                restoredBooks = listOf(restored),
+                existingBooks = listOf(existing),
+                ignoreLocalBook = false,
+                locationStatus = { LocalBookLocationStatus.Missing },
+            )
 
         assertEquals(listOf(restored.bookUrl), plan.booksToUpsert.map { it.bookUrl })
         assertTrue(plan.booksToDelete.isEmpty())
@@ -112,12 +118,13 @@ class BookRestorePlannerTest {
         val existing = localBook("/current/Books/book.txt", progress = 1)
         val restored = localBook("/old-device/Books/book.txt", progress = 8)
 
-        val plan = planBookRestore(
-            restoredBooks = listOf(restored),
-            existingBooks = listOf(existing),
-            ignoreLocalBook = true,
-            locationStatus = { LocalBookLocationStatus.Available },
-        )
+        val plan =
+            planBookRestore(
+                restoredBooks = listOf(restored),
+                existingBooks = listOf(existing),
+                ignoreLocalBook = true,
+                locationStatus = { LocalBookLocationStatus.Available },
+            )
 
         assertTrue(plan.booksToUpsert.isEmpty())
         assertTrue(plan.booksToDelete.isEmpty())
@@ -129,18 +136,19 @@ class BookRestorePlannerTest {
         val available = localBook("content://local/books/book.txt", progress = 2)
         val restored = localBook(offline.bookUrl, progress = 8)
 
-        val plan = planBookRestore(
-            restoredBooks = listOf(restored),
-            existingBooks = listOf(offline, available),
-            ignoreLocalBook = false,
-            locationStatus = {
-                when (it) {
-                    available.bookUrl -> LocalBookLocationStatus.Available
-                    else -> LocalBookLocationStatus.Unknown
-                }
-            },
-            normalizeLocation = { it },
-        )
+        val plan =
+            planBookRestore(
+                restoredBooks = listOf(restored),
+                existingBooks = listOf(offline, available),
+                ignoreLocalBook = false,
+                locationStatus = {
+                    when (it) {
+                        available.bookUrl -> LocalBookLocationStatus.Available
+                        else -> LocalBookLocationStatus.Unknown
+                    }
+                },
+                normalizeLocation = { it },
+            )
 
         assertEquals(listOf(offline.bookUrl), plan.booksToUpdate.map { it.bookUrl })
         assertTrue(plan.booksToDelete.isEmpty())
@@ -151,21 +159,19 @@ class BookRestorePlannerTest {
         existingBooks: List<Book>,
         existingLocations: Set<String>,
         normalizedLocations: Map<String, String> = emptyMap(),
-    ): BookRestorePlan {
-        return planBookRestore(
-            restoredBooks = restoredBooks,
-            existingBooks = existingBooks,
-            ignoreLocalBook = false,
-            locationStatus = {
-                if (it in existingLocations) {
-                    LocalBookLocationStatus.Available
-                } else {
-                    LocalBookLocationStatus.Missing
-                }
-            },
-            normalizeLocation = { normalizedLocations[it] ?: it },
-        )
-    }
+    ): BookRestorePlan = planBookRestore(
+        restoredBooks = restoredBooks,
+        existingBooks = existingBooks,
+        ignoreLocalBook = false,
+        locationStatus = {
+            if (it in existingLocations) {
+                LocalBookLocationStatus.Available
+            } else {
+                LocalBookLocationStatus.Missing
+            }
+        },
+        normalizeLocation = { normalizedLocations[it] ?: it },
+    )
 
     private fun localBook(
         bookUrl: String,

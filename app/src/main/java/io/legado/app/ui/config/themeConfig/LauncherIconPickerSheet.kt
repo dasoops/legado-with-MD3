@@ -50,7 +50,7 @@ fun LauncherIconPickerSheet(
     show: Boolean,
     selectedValue: String,
     onDismissRequest: () -> Unit,
-    onValueChange: (String) -> Unit
+    onValueChange: (String) -> Unit,
 ) {
     val context = LocalContext.current
     val icons = LauncherIcons.list
@@ -58,54 +58,54 @@ fun LauncherIconPickerSheet(
     AppModalBottomSheet(
         show = show,
         onDismissRequest = onDismissRequest,
-        title = stringResource(R.string.change_icon)
+        title = stringResource(R.string.change_icon),
     ) {
         Column(
-            modifier = Modifier
+            modifier =
+            Modifier
                 .fillMaxWidth()
-                .padding(bottom = 24.dp)
+                .padding(bottom = 24.dp),
         ) {
-
             LazyVerticalGrid(
                 columns = GridCells.Fixed(3),
                 contentPadding = PaddingValues(horizontal = 16.dp),
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
+                verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
                 items(icons, key = { it.value }) { item ->
 
                     val isSelected = item.value == selectedValue
-                    val drawable = remember(item.resId) {
-                        context.getCompatDrawable(item.resId)
-                    }
+                    val drawable =
+                        remember(item.resId) {
+                            context.getCompatDrawable(item.resId)
+                        }
 
                     Box(
-                        modifier = Modifier
+                        modifier =
+                        Modifier
                             .aspectRatio(1f)
                             .clip(MaterialTheme.shapes.large)
                             .background(
-                                if (isSelected)
+                                if (isSelected) {
                                     LegadoTheme.colorScheme.secondaryContainer
-                                else
+                                } else {
                                     LegadoTheme.colorScheme.surfaceContainer
-                            )
-                            .then(
+                                },
+                            ).then(
                                 if (isSelected) {
                                     Modifier.border(
                                         width = 2.dp,
                                         color = LegadoTheme.colorScheme.primary,
-                                        shape = MaterialTheme.shapes.large
+                                        shape = MaterialTheme.shapes.large,
                                     )
                                 } else {
                                     Modifier
-                                }
-                            )
-                            .clickable {
+                                },
+                            ).clickable {
                                 onValueChange(item.value)
                                 onDismissRequest()
-                            }
-                            .padding(16.dp),
-                        contentAlignment = Alignment.Center
+                            }.padding(16.dp),
+                        contentAlignment = Alignment.Center,
                     ) {
                         AndroidView(
                             factory = { ctx ->
@@ -116,7 +116,7 @@ fun LauncherIconPickerSheet(
                             update = { imageView ->
                                 imageView.setImageDrawable(drawable)
                             },
-                            modifier = Modifier.size(48.dp)
+                            modifier = Modifier.size(48.dp),
                         )
                     }
                 }
@@ -131,69 +131,67 @@ data class LauncherIconItem(
     val value: String,
     val label: String,
     val resId: Int,
-    val component: ComponentName
+    val component: ComponentName,
 )
 
 object LauncherIcons {
+    val list =
+        listOf(
+            LauncherIconItem(
+                value = "ic_launcher",
+                label = "iconMain",
+                resId = R.mipmap.ic_launcher,
+                component = ComponentName(appCtx, LauncherW::class.java),
+            ),
+            LauncherIconItem(
+                value = "launcherw",
+                label = "iconWhite",
+                resId = R.mipmap.launcherw,
+                component = ComponentName(appCtx, LauncherW::class.java),
+            ),
+            LauncherIconItem(
+                value = "launcher0",
+                label = "icon0",
+                resId = R.mipmap.launcher0,
+                component = ComponentName(appCtx, Launcher0::class.java),
+            ),
+            LauncherIconItem(
+                value = "launcher1",
+                label = "icon1",
+                resId = R.mipmap.launcher1,
+                component = ComponentName(appCtx, Launcher1::class.java),
+            ),
+            LauncherIconItem(
+                value = "launcher2",
+                label = "icon2",
+                resId = R.mipmap.launcher2,
+                component = ComponentName(appCtx, Launcher2::class.java),
+            ),
+            LauncherIconItem(
+                value = "launcher3",
+                label = "icon3",
+                resId = R.mipmap.launcher3,
+                component = ComponentName(appCtx, Launcher3::class.java),
+            ),
+            LauncherIconItem(
+                value = "launcher4",
+                label = "icon4",
+                resId = R.mipmap.launcher4,
+                component = ComponentName(appCtx, Launcher4::class.java),
+            ),
+            LauncherIconItem(
+                value = "launcher5",
+                label = "icon5",
+                resId = R.mipmap.launcher5,
+                component = ComponentName(appCtx, Launcher5::class.java),
+            ),
+            LauncherIconItem(
+                value = "launcher6",
+                label = "icon6",
+                resId = R.mipmap.launcher6,
+                component = ComponentName(appCtx, Launcher6::class.java),
+            ),
+        )
 
-    val list = listOf(
-        LauncherIconItem(
-            value = "ic_launcher",
-            label = "iconMain",
-            resId = R.mipmap.ic_launcher,
-            component = ComponentName(appCtx, LauncherW::class.java)
-        ),
-        LauncherIconItem(
-            value = "launcherw",
-            label = "iconWhite",
-            resId = R.mipmap.launcherw,
-            component = ComponentName(appCtx, LauncherW::class.java)
-        ),
-        LauncherIconItem(
-            value = "launcher0",
-            label = "icon0",
-            resId = R.mipmap.launcher0,
-            component = ComponentName(appCtx, Launcher0::class.java)
-        ),
-        LauncherIconItem(
-            value = "launcher1",
-            label = "icon1",
-            resId = R.mipmap.launcher1,
-            component = ComponentName(appCtx, Launcher1::class.java)
-        ),
-        LauncherIconItem(
-            value = "launcher2",
-            label = "icon2",
-            resId = R.mipmap.launcher2,
-            component = ComponentName(appCtx, Launcher2::class.java)
-        ),
-        LauncherIconItem(
-            value = "launcher3",
-            label = "icon3",
-            resId = R.mipmap.launcher3,
-            component = ComponentName(appCtx, Launcher3::class.java)
-        ),
-        LauncherIconItem(
-            value = "launcher4",
-            label = "icon4",
-            resId = R.mipmap.launcher4,
-            component = ComponentName(appCtx, Launcher4::class.java)
-        ),
-        LauncherIconItem(
-            value = "launcher5",
-            label = "icon5",
-            resId = R.mipmap.launcher5,
-            component = ComponentName(appCtx, Launcher5::class.java)
-        ),
-        LauncherIconItem(
-            value = "launcher6",
-            label = "icon6",
-            resId = R.mipmap.launcher6,
-            component = ComponentName(appCtx, Launcher6::class.java)
-        ),
-    )
-
-    fun find(value: String?): LauncherIconItem? {
-        return list.find { it.value == value }
-    }
+    fun find(value: String?): LauncherIconItem? = list.find { it.value == value }
 }

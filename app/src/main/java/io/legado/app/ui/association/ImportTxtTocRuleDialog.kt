@@ -14,7 +14,6 @@ import io.legado.app.base.adapter.RecyclerAdapter
 import io.legado.app.data.entities.TxtTocRule
 import io.legado.app.databinding.DialogRecyclerViewBinding
 import io.legado.app.databinding.ItemSourceImportBinding
-//import io.legado.app.lib.theme.primaryColor
 import io.legado.app.ui.widget.dialog.CodeDialog
 import io.legado.app.ui.widget.dialog.WaitDialog
 import io.legado.app.utils.GSON
@@ -22,8 +21,8 @@ import io.legado.app.utils.gone
 import io.legado.app.utils.setLayout
 import io.legado.app.utils.showDialogFragment
 import io.legado.app.utils.viewbindingdelegate.viewBinding
-import org.koin.androidx.viewmodel.ext.android.viewModel
 import io.legado.app.utils.visible
+import org.koin.androidx.viewmodel.ext.android.viewModel
 import splitties.views.onClick
 
 class ImportTxtTocRuleDialog() : BaseDialogFragment(R.layout.dialog_recycler_view) {
@@ -53,9 +52,9 @@ class ImportTxtTocRuleDialog() : BaseDialogFragment(R.layout.dialog_recycler_vie
 
     @SuppressLint("NotifyDataSetChanged")
     override fun onFragmentCreated(view: View, savedInstanceState: Bundle?) {
-        //binding.toolBar.setBackgroundColor(primaryColor)
+        // binding.toolBar.setBackgroundColor(primaryColor)
         binding.toolBar.setTitle(R.string.import_txt_toc_rule)
-        //binding.rotateLoading.visible()
+        // binding.rotateLoading.visible()
         binding.recyclerView.layoutManager = LinearLayoutManager(requireContext())
         binding.recyclerView.adapter = adapter
         binding.tvCancel.visible()
@@ -114,13 +113,13 @@ class ImportTxtTocRuleDialog() : BaseDialogFragment(R.layout.dialog_recycler_vie
             binding.tvFooterLeft.text = getString(
                 R.string.select_cancel_count,
                 viewModel.selectCount,
-                viewModel.allSources.size
+                viewModel.allSources.size,
             )
         } else {
             binding.tvFooterLeft.text = getString(
                 R.string.select_all_count,
                 viewModel.selectCount,
-                viewModel.allSources.size
+                viewModel.allSources.size,
             )
         }
     }
@@ -128,15 +127,13 @@ class ImportTxtTocRuleDialog() : BaseDialogFragment(R.layout.dialog_recycler_vie
     inner class SourcesAdapter(context: Context) :
         RecyclerAdapter<TxtTocRule, ItemSourceImportBinding>(context) {
 
-        override fun getViewBinding(parent: ViewGroup): ItemSourceImportBinding {
-            return ItemSourceImportBinding.inflate(inflater, parent, false)
-        }
+        override fun getViewBinding(parent: ViewGroup): ItemSourceImportBinding = ItemSourceImportBinding.inflate(inflater, parent, false)
 
         override fun convert(
             holder: ItemViewHolder,
             binding: ItemSourceImportBinding,
             item: TxtTocRule,
-            payloads: MutableList<Any>
+            payloads: MutableList<Any>,
         ) {
             binding.apply {
                 cbSourceName.isChecked = viewModel.selectStatus[holder.layoutPosition]
@@ -169,12 +166,11 @@ class ImportTxtTocRuleDialog() : BaseDialogFragment(R.layout.dialog_recycler_vie
                         CodeDialog(
                             GSON.toJson(source),
                             disableEdit = false,
-                            requestId = holder.layoutPosition.toString()
-                        )
+                            requestId = holder.layoutPosition.toString(),
+                        ),
                     )
                 }
             }
         }
-
     }
 }

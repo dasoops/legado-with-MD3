@@ -22,21 +22,21 @@ import io.legado.app.ui.theme.colorScheme.WHColorScheme
 import io.legado.app.ui.theme.colorScheme.YuukaColorScheme
 
 object ThemeEngine {
-
-    private val predefinedColorSchemes: Map<AppThemeMode, BaseColorScheme> = mapOf(
-        AppThemeMode.GR to GRColorScheme,
-        AppThemeMode.Lemon to LemonColorScheme,
-        AppThemeMode.WH to WHColorScheme,
-        AppThemeMode.Elink to ElinkColorScheme,
-        AppThemeMode.Sora to SoraColorScheme,
-        AppThemeMode.August to AugustColorScheme,
-        AppThemeMode.Carlotta to CarlottaColorScheme,
-        AppThemeMode.Koharu to KoharuColorScheme,
-        AppThemeMode.Yuuka to YuukaColorScheme,
-        AppThemeMode.Phoebe to PhoebeColorScheme,
-        AppThemeMode.Mujika to MujikaColorScheme,
-        AppThemeMode.Transparent to TransparentColorScheme,
-    )
+    private val predefinedColorSchemes: Map<AppThemeMode, BaseColorScheme> =
+        mapOf(
+            AppThemeMode.GR to GRColorScheme,
+            AppThemeMode.Lemon to LemonColorScheme,
+            AppThemeMode.WH to WHColorScheme,
+            AppThemeMode.Elink to ElinkColorScheme,
+            AppThemeMode.Sora to SoraColorScheme,
+            AppThemeMode.August to AugustColorScheme,
+            AppThemeMode.Carlotta to CarlottaColorScheme,
+            AppThemeMode.Koharu to KoharuColorScheme,
+            AppThemeMode.Yuuka to YuukaColorScheme,
+            AppThemeMode.Phoebe to PhoebeColorScheme,
+            AppThemeMode.Mujika to MujikaColorScheme,
+            AppThemeMode.Transparent to TransparentColorScheme,
+        )
 
     fun getColorScheme(
         context: Context,
@@ -50,15 +50,16 @@ object ThemeEngine {
         customContrast: String? = null,
     ): ColorScheme {
         val resolvedMode = resolveMode(mode = mode, forceOpaque = forceOpaque)
-        val baseColorScheme = resolveBaseColorScheme(
-            context = context,
-            mode = resolvedMode,
-            darkTheme = darkTheme,
-            paletteStyle = paletteStyle,
-            materialVersion = materialVersion,
-            customSeedColor = customSeedColor,
-            customContrast = customContrast,
-        )
+        val baseColorScheme =
+            resolveBaseColorScheme(
+                context = context,
+                mode = resolvedMode,
+                darkTheme = darkTheme,
+                paletteStyle = paletteStyle,
+                materialVersion = materialVersion,
+                customSeedColor = customSeedColor,
+                customContrast = customContrast,
+            )
 
         return baseColorScheme
             .applyAmoledIfNeeded(darkTheme = darkTheme, isAmoled = isAmoled)
@@ -67,13 +68,11 @@ object ThemeEngine {
 
     private fun resolveMode(
         mode: AppThemeMode,
-        forceOpaque: Boolean
-    ): AppThemeMode {
-        return if (forceOpaque && mode == AppThemeMode.Transparent) {
-            AppThemeMode.WH
-        } else {
-            mode
-        }
+        forceOpaque: Boolean,
+    ): AppThemeMode = if (forceOpaque && mode == AppThemeMode.Transparent) {
+        AppThemeMode.WH
+    } else {
+        mode
     }
 
     private fun resolveBaseColorScheme(
@@ -102,7 +101,7 @@ object ThemeEngine {
 
     private fun resolveDynamicColorScheme(
         context: Context,
-        darkTheme: Boolean
+        darkTheme: Boolean,
     ): ColorScheme {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
             return GRColorScheme.getColorScheme(darkTheme)
@@ -123,28 +122,29 @@ object ThemeEngine {
             seed = seedColor,
             style = style,
             colorSpec = colorSpec,
-            contrastLevel = ThemeResolver.resolveContrastLevel(
-                customContrast ?: "Default"
+            contrastLevel =
+            ThemeResolver.resolveContrastLevel(
+                customContrast ?: "Default",
             ),
         ).getColorScheme(darkTheme)
     }
 
     private fun ColorScheme.applyAmoledIfNeeded(
         darkTheme: Boolean,
-        isAmoled: Boolean
+        isAmoled: Boolean,
     ): ColorScheme {
         if (!darkTheme || !isAmoled) return this
         return copy(
             surface = Color.Black,
             background = Color.Black,
             surfaceContainerLow = Color(0xFF0A0A0A),
-            surfaceContainer = Color(0xFF121212)
+            surfaceContainer = Color(0xFF121212),
         )
     }
 
     private fun ColorScheme.applyTransparentIfNeeded(
         mode: AppThemeMode,
-        forceOpaque: Boolean
+        forceOpaque: Boolean,
     ): ColorScheme {
         if (forceOpaque || mode != AppThemeMode.Transparent) return this
         return copy(

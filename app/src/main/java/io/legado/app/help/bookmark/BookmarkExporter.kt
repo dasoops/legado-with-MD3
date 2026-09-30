@@ -9,24 +9,25 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
 object BookmarkExporter {
+    fun formatToMarkdown(
+        bookName: String,
+        author: String?,
+        bookmarks: List<Bookmark>,
+    ): String = buildString {
+        append("# $bookName\n")
+        if (!author.isNullOrBlank()) append("作者：$author\n")
+        append("\n---\n\n")
 
-    fun formatToMarkdown(bookName: String, author: String?, bookmarks: List<Bookmark>): String {
-        return buildString {
-            append("# $bookName\n")
-            if (!author.isNullOrBlank()) append("作者：$author\n")
-            append("\n---\n\n")
-
-            bookmarks.forEach {
-                append("#### ${it.chapterName}\n")
-                if (it.bookText.isNotEmpty()) {
-                    val quotedText = it.bookText.replace("\n", "\n> ")
-                    append("> $quotedText\n\n")
-                }
-                if (it.content.isNotBlank()) {
-                    append("${it.content}\n\n")
-                }
-                append("---\n\n")
+        bookmarks.forEach {
+            append("#### ${it.chapterName}\n")
+            if (it.bookText.isNotEmpty()) {
+                val quotedText = it.bookText.replace("\n", "\n> ")
+                append("> $quotedText\n\n")
             }
+            if (it.content.isNotBlank()) {
+                append("${it.content}\n\n")
+            }
+            append("---\n\n")
         }
     }
 
@@ -36,7 +37,7 @@ object BookmarkExporter {
         bookmarks: List<Bookmark>,
         isMd: Boolean,
         bookName: String = "",
-        author: String? = ""
+        author: String? = "",
     ) = withContext(Dispatchers.IO) {
         context.contentResolver.openOutputStream(fileUri)?.use { outputStream ->
             if (isMd) {

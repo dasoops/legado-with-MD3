@@ -5,5 +5,5 @@ data class Skeleton(
     val name: String,
     val numFrag: Int,
     val offset: Int,
-    val length: Int
+    val length: Int,
 )

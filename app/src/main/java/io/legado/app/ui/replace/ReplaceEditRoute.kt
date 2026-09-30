@@ -1,8 +1,8 @@
 package io.legado.app.ui.replace
 
 import androidx.navigation3.runtime.NavKey
-import kotlinx.serialization.Serializable
 import kotlin.uuid.Uuid
+import kotlinx.serialization.Serializable
 
 @Serializable
 object ReplaceRuleRoute : NavKey
@@ -15,5 +15,5 @@ data class ReplaceEditRoute(
     val scope: String? = null,
     val isScopeTitle: Boolean = false,
     val isScopeContent: Boolean = false,
-    val sessionId: String = Uuid.random().toString()
+    val sessionId: String = Uuid.random().toString(),
 ) : NavKey

@@ -10,7 +10,11 @@ import java.util.concurrent.atomic.AtomicInteger
  */
 internal object ReaderPerfTrace {
     private val nextAsyncCookie = AtomicInteger()
-    inline fun <T> section(name: String, block: () -> T): T {
+
+    inline fun <T> section(
+        name: String,
+        block: () -> T,
+    ): T {
         Trace.beginSection("reader.$name")
         return try {
             block()
@@ -19,7 +23,10 @@ internal object ReaderPerfTrace {
         }
     }
 
-    suspend fun <T> suspendSection(name: String, block: suspend () -> T): T {
+    suspend fun <T> suspendSection(
+        name: String,
+        block: suspend () -> T,
+    ): T {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) return block()
         val cookie = nextAsyncCookie.incrementAndGet()
         Trace.beginAsyncSection("reader.$name", cookie)

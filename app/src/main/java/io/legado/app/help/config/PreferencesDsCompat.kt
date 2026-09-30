@@ -17,14 +17,9 @@ import androidx.datastore.preferences.core.stringSetPreferencesKey
  *
  * 注意：依赖 [Preferences.Key] 的 equals/hashCode 只比较 name（datastore 既有行为，
  * 也是同名不同类型 key 会互相覆盖的原因），因此用任意类型的 key 都能取到该 name 下的原始值。
+ * 返回 Any? 避免插入 checkcast. 不使用 asMap(), 因为热路径不能每次防御性复制整个 map.
  */
 
-/**
- * 取 key 对应的原始存储值（不做类型断言）。
- * Key 按 name 判等，用 string 类型的 key 即可取到该 name 下任意类型的原始值；
- * 返回位置声明为 Any? 使编译器不插入 checkcast，存储类型不匹配也不会抛 ClassCastException。
- * 不可用 asMap() 实现：datastore 的 asMap() 每次调用都会防御性复制整个 map，读是热路径。
- */
 fun Preferences.rawPrefValue(key: String): Any? = this[stringPreferencesKey(key)]
 
 fun Preferences.compatDsString(key: String): String? = when (val raw = rawPrefValue(key)) {
@@ -67,7 +62,9 @@ fun Preferences.compatDsFloat(key: String): Float? = when (val raw = rawPrefValu
 }
 
 fun Preferences.compatDsStringSet(key: String): Set<String>? = when (val raw = rawPrefValue(key)) {
-    is Set<*> -> @Suppress("UNCHECKED_CAST") (raw as Set<String>)
+    is Set<*> ->
+        @Suppress("UNCHECKED_CAST")
+        (raw as Set<String>)
     else -> null
 }
 
@@ -78,16 +75,15 @@ fun Preferences.compatDsStringSet(key: String): Set<String>? = when (val raw = r
  * 兼容规则。调用方必须传入非空、可识别类型的默认值。
  */
 @Suppress("UNCHECKED_CAST")
-fun <T : Any> Preferences.compatDsValue(key: Preferences.Key<T>, defaultValue: T): T =
-    when (defaultValue) {
-        is String -> (compatDsString(key.name) ?: defaultValue) as T
-        is Int -> (compatDsInt(key.name) ?: defaultValue) as T
-        is Boolean -> (compatDsBoolean(key.name) ?: defaultValue) as T
-        is Long -> (compatDsLong(key.name) ?: defaultValue) as T
-        is Float -> (compatDsFloat(key.name) ?: defaultValue) as T
-        is Set<*> -> (compatDsStringSet(key.name) ?: defaultValue) as T
-        else -> defaultValue
-    }
+fun <T : Any> Preferences.compatDsValue(key: Preferences.Key<T>, defaultValue: T): T = when (defaultValue) {
+    is String -> (compatDsString(key.name) ?: defaultValue) as T
+    is Int -> (compatDsInt(key.name) ?: defaultValue) as T
+    is Boolean -> (compatDsBoolean(key.name) ?: defaultValue) as T
+    is Long -> (compatDsLong(key.name) ?: defaultValue) as T
+    is Float -> (compatDsFloat(key.name) ?: defaultValue) as T
+    is Set<*> -> (compatDsStringSet(key.name) ?: defaultValue) as T
+    else -> defaultValue
+}
 
 /**
  * 按 value 的运行时类型写入对应类型的 key；value 为 null 表示移除。
@@ -101,8 +97,10 @@ fun MutablePreferences.setPrefValue(key: String, value: Any?) {
         is Boolean -> this[booleanPreferencesKey(key)] = value
         is Long -> this[longPreferencesKey(key)] = value
         is Float -> this[floatPreferencesKey(key)] = value
-        is Set<*> -> @Suppress("UNCHECKED_CAST") {
-            this[stringSetPreferencesKey(key)] = value as Set<String>
-        }
+        is Set<*> ->
+            @Suppress("UNCHECKED_CAST")
+            {
+                this[stringSetPreferencesKey(key)] = value as Set<String>
+            }
     }
 }

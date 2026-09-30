@@ -13,9 +13,8 @@ import kotlin.properties.ReadOnlyProperty
 import kotlin.reflect.KProperty
 
 public abstract class ViewBindingProperty<in R : Any, T : ViewBinding>(
-    private val viewBinder: (R) -> T
+    private val viewBinder: (R) -> T,
 ) : ReadOnlyProperty<R, T> {
-
     private var viewBinding: T? = null
     private val lifecycleObserver = ClearOnDestroyLifecycleObserver()
     private var thisRef: R? = null
@@ -23,7 +22,10 @@ public abstract class ViewBindingProperty<in R : Any, T : ViewBinding>(
     protected abstract fun getLifecycleOwner(thisRef: R): LifecycleOwner
 
     @MainThread
-    public override fun getValue(thisRef: R, property: KProperty<*>): T {
+    public override fun getValue(
+        thisRef: R,
+        property: KProperty<*>,
+    ): T {
         viewBinding?.let { return it }
 
         this.thisRef = thisRef
@@ -45,13 +47,11 @@ public abstract class ViewBindingProperty<in R : Any, T : ViewBinding>(
     }
 
     private inner class ClearOnDestroyLifecycleObserver : DefaultLifecycleObserver {
-
         @MainThread
         override fun onDestroy(owner: LifecycleOwner): Unit = clear()
     }
 
     private companion object {
-
         private val mainHandler = Handler(Looper.getMainLooper())
     }
 }

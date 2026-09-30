@@ -7,18 +7,11 @@ import kotlinx.coroutines.flow.Flow
 class BookGroupRepository(
     private val bookGroupDao: BookGroupDao,
 ) {
+    fun flowAll(): Flow<List<BookGroup>> = bookGroupDao.flowAll()
 
-    fun flowAll(): Flow<List<BookGroup>> {
-        return bookGroupDao.flowAll()
-    }
+    fun flowSelect(): Flow<List<BookGroup>> = bookGroupDao.flowSelect()
 
-    fun flowSelect(): Flow<List<BookGroup>> {
-        return bookGroupDao.flowSelect()
-    }
-
-    fun flowShow(): Flow<List<BookGroup>> {
-        return bookGroupDao.flowShow()
-    }
+    fun flowShow(): Flow<List<BookGroup>> = bookGroupDao.flowShow()
 
     suspend fun upsert(vararg bookGroup: BookGroup) {
         bookGroupDao.upsert(*bookGroup)
@@ -32,25 +25,15 @@ class BookGroupRepository(
         bookGroupDao.delete(*bookGroup)
     }
 
-    suspend fun getUnusedId(): Long {
-        return bookGroupDao.getUnusedId()
-    }
+    suspend fun getUnusedId(): Long = bookGroupDao.getUnusedId()
 
-    fun getMaxOrder(): Int {
-        return bookGroupDao.maxOrder
-    }
+    fun getMaxOrder(): Int = bookGroupDao.maxOrder
 
-    suspend fun getByID(id: Long): BookGroup? {
-        return bookGroupDao.getByID(id)
-    }
+    suspend fun getByID(id: Long): BookGroup? = bookGroupDao.getByID(id)
 
-    suspend fun getIdsSum(): Long {
-        return bookGroupDao.idsSum
-    }
+    suspend fun getIdsSum(): Long = bookGroupDao.idsSum
 
-    suspend fun getGroupNames(id: Long): List<String> {
-        return bookGroupDao.getGroupNames(id).distinct()
-    }
+    suspend fun getGroupNames(id: Long): List<String> = bookGroupDao.getGroupNames(id).distinct()
 
     suspend fun clearCover(groupId: Long) {
         bookGroupDao.clearCover(groupId)

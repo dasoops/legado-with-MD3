@@ -9,12 +9,13 @@ import io.legado.app.R
 import io.legado.app.ui.main.MainActivity
 
 object ShortCuts {
-
     private fun buildBookShelfShortCutInfo(context: Context): ShortcutInfoCompat {
-        val bookShelfIntent = MainActivity.createHomeIntent(context).apply {
-            action = Intent.ACTION_VIEW
-        }
-        return ShortcutInfoCompat.Builder(context, "bookshelf")
+        val bookShelfIntent =
+            MainActivity.createHomeIntent(context).apply {
+                action = Intent.ACTION_VIEW
+            }
+        return ShortcutInfoCompat
+            .Builder(context, "bookshelf")
             .setShortLabel(context.getString(R.string.bookshelf))
             .setLongLabel(context.getString(R.string.bookshelf))
             .setIcon(IconCompat.createWithResource(context, R.mipmap.ic_st_book))
@@ -23,13 +24,16 @@ object ShortCuts {
     }
 
     private fun buildReadBookShortCutInfo(context: Context): ShortcutInfoCompat {
-        val bookShelfIntent = MainActivity.createHomeIntent(context).apply {
-            action = Intent.ACTION_VIEW
-        }
-        val readBookIntent = MainActivity.createReadBookIntent(context).apply {
-            action = Intent.ACTION_VIEW
-        }
-        return ShortcutInfoCompat.Builder(context, "lastRead")
+        val bookShelfIntent =
+            MainActivity.createHomeIntent(context).apply {
+                action = Intent.ACTION_VIEW
+            }
+        val readBookIntent =
+            MainActivity.createReadBookIntent(context).apply {
+                action = Intent.ACTION_VIEW
+            }
+        return ShortcutInfoCompat
+            .Builder(context, "lastRead")
             .setShortLabel(context.getString(R.string.last_read))
             .setLongLabel(context.getString(R.string.last_read))
             .setIcon(IconCompat.createWithResource(context, R.mipmap.ic_st_rec))
@@ -39,11 +43,11 @@ object ShortCuts {
 
     fun buildShortCuts(context: Context) {
         ShortcutManagerCompat.setDynamicShortcuts(
-            context, listOf(
+            context,
+            listOf(
                 buildReadBookShortCutInfo(context),
-                buildBookShelfShortCutInfo(context)
-            )
+                buildBookShelfShortCutInfo(context),
+            ),
         )
     }
-
 }

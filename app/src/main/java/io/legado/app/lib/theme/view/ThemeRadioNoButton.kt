@@ -5,13 +5,14 @@ import android.util.AttributeSet
 import androidx.appcompat.widget.TooltipCompat
 import com.google.android.material.radiobutton.MaterialRadioButton
 import io.legado.app.R
-//import io.legado.app.lib.theme.accentColor
-//import io.legado.app.lib.theme.bottomBackground
-//import io.legado.app.lib.theme.getPrimaryTextColor
+// import io.legado.app.lib.theme.accentColor
+// import io.legado.app.lib.theme.bottomBackground
+// import io.legado.app.lib.theme.getPrimaryTextColor
 
-class ThemeRadioNoButton(context: Context, attrs: AttributeSet) :
-    MaterialRadioButton(context, attrs) {
-
+class ThemeRadioNoButton(
+    context: Context,
+    attrs: AttributeSet,
+) : MaterialRadioButton(context, attrs) {
     private val isBottomBackground: Boolean
 
     init {
@@ -72,7 +73,5 @@ class ThemeRadioNoButton(context: Context, attrs: AttributeSet) :
 //                )
 //            }
 //        }
-
     }
-
 }

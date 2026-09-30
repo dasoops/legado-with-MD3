@@ -36,10 +36,10 @@ import io.legado.app.ui.widget.components.menuItem.RoundDropdownMenuItem
 import io.legado.app.ui.widget.components.sliderAccessibility
 import top.yukonga.miuix.kmp.basic.BasicComponent
 import top.yukonga.miuix.kmp.basic.BasicComponentDefaults
+import top.yukonga.miuix.kmp.basic.Slider as MiuixSlider
 import top.yukonga.miuix.kmp.preference.ArrowPreference
 import top.yukonga.miuix.kmp.preference.SwitchPreference
 import top.yukonga.miuix.kmp.preference.WindowDropdownPreference
-import top.yukonga.miuix.kmp.basic.Slider as MiuixSlider
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -52,7 +52,7 @@ fun CompactDropdownSettingItem(
     imageVector: ImageVector? = null,
     color: Color? = LegadoTheme.colorScheme.onSheetContent,
     cornerRadius: androidx.compose.ui.unit.Dp = 8.dp,
-    onValueChange: (String) -> Unit
+    onValueChange: (String) -> Unit,
 ) {
     if (ThemeResolver.isMiuixEngine(composeEngine)) {
         val selectedIndex = entryValues.indexOf(selectedValue).coerceAtLeast(0)
@@ -63,17 +63,18 @@ fun CompactDropdownSettingItem(
             summary = description,
             items = spinnerItems,
             selectedIndex = selectedIndex,
-            startAction = imageVector?.let { icon ->
+            startAction =
+            imageVector?.let { icon ->
                 {
                     Icon(
                         imageVector = icon,
-                        contentDescription = null
+                        contentDescription = null,
                     )
                 }
             },
             onSelectedIndexChange = { index ->
                 onValueChange(entryValues[index])
-            }
+            },
         )
     } else {
         val currentEntry =
@@ -92,7 +93,7 @@ fun CompactDropdownSettingItem(
                     verticalPadding = 4.dp,
                     text = currentEntry,
                     backgroundColor = MaterialTheme.colorScheme.surfaceContainer,
-                    contentColor = MaterialTheme.colorScheme.onSurface
+                    contentColor = MaterialTheme.colorScheme.onSurface,
                 )
             },
             dropdownMenu = { onDismiss ->
@@ -103,18 +104,21 @@ fun CompactDropdownSettingItem(
                             onValueChange(entryValues[index])
                             onDismiss()
                         },
-                        trailingIcon = if (selectedValue == entryValues[index]) {
+                        trailingIcon =
+                        if (selectedValue == entryValues[index]) {
                             {
                                 Icon(
                                     Icons.Default.Check,
                                     contentDescription = null,
-                                    modifier = Modifier.size(18.dp)
+                                    modifier = Modifier.size(18.dp),
                                 )
                             }
-                        } else null
+                        } else {
+                            null
+                        },
                     )
                 }
-            }
+            },
         )
     }
 }
@@ -130,7 +134,7 @@ fun CompactSliderSettingItem(
     imageVector: ImageVector? = null,
     color: Color? = LegadoTheme.colorScheme.onSheetContent,
     cornerRadius: androidx.compose.ui.unit.Dp = 8.dp,
-    onValueChange: (Float) -> Unit
+    onValueChange: (Float) -> Unit,
 ) {
     var expanded by remember { mutableStateOf(false) }
 
@@ -149,16 +153,17 @@ fun CompactSliderSettingItem(
                         value = value,
                         displayValue = displayValue,
                         valueRange = valueRange,
-                        onValueChange = onValueChange
+                        onValueChange = onValueChange,
                     )
-                }
+                },
             )
 
             AnimatedVisibility(visible = expanded) {
                 Column(
-                    modifier = Modifier
+                    modifier =
+                    Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 8.dp)
+                        .padding(horizontal = 16.dp, vertical = 8.dp),
                 ) {
                     MiuixSlider(
                         value = sliderValue,
@@ -171,12 +176,13 @@ fun CompactSliderSettingItem(
                         },
                         valueRange = valueRange,
                         steps = steps,
-                        modifier = Modifier
+                        modifier =
+                        Modifier
                             .fillMaxWidth()
                             .sliderAccessibility(
                                 label = title,
                                 value = sliderAccessibilityValue,
-                            )
+                            ),
                     )
                 }
             }
@@ -195,7 +201,7 @@ fun CompactSliderSettingItem(
                     value = value,
                     displayValue = displayValue,
                     valueRange = valueRange,
-                    onValueChange = onValueChange
+                    onValueChange = onValueChange,
                 )
             },
             expandContent = {
@@ -210,14 +216,15 @@ fun CompactSliderSettingItem(
                     },
                     valueRange = valueRange,
                     steps = steps,
-                    modifier = Modifier
+                    modifier =
+                    Modifier
                         .fillMaxWidth()
                         .sliderAccessibility(
                             label = title,
                             value = sliderAccessibilityValue,
-                        )
+                        ),
                 )
-            }
+            },
         )
     }
 
@@ -238,7 +245,7 @@ fun CompactSwitchSettingItem(
     color: Color? = LegadoTheme.colorScheme.onSheetContent,
     cornerRadius: androidx.compose.ui.unit.Dp = 8.dp,
     enabled: Boolean = true,
-    onCheckedChange: (Boolean) -> Unit
+    onCheckedChange: (Boolean) -> Unit,
 ) {
     if (ThemeResolver.isMiuixEngine(composeEngine)) {
         SwitchPreference(
@@ -262,14 +269,15 @@ fun CompactSwitchSettingItem(
             onClick = { if (enabled) onCheckedChange(!checked) },
             trailingContent = {
                 Switch(
-                    modifier = Modifier
+                    modifier =
+                    Modifier
                         .scale(0.8f)
                         .clearAndSetSemantics { },
                     checked = checked,
                     onCheckedChange = onCheckedChange,
-                    enabled = enabled
+                    enabled = enabled,
                 )
-            }
+            },
         )
     }
 }
@@ -282,14 +290,14 @@ fun CompactClickableSettingItem(
     color: Color? = LegadoTheme.colorScheme.onSheetContent,
     cornerRadius: androidx.compose.ui.unit.Dp = 8.dp,
     trailingContent: (@Composable () -> Unit)? = null,
-    onClick: () -> Unit
+    onClick: () -> Unit,
 ) {
     if (ThemeResolver.isMiuixEngine(composeEngine)) {
         ArrowPreference(
             title = title,
             summary = description,
             insideMargin = BasicComponentDefaults.InsideMargin,
-            onClick = onClick
+            onClick = onClick,
         )
     } else {
         SettingItem(
@@ -298,14 +306,15 @@ fun CompactClickableSettingItem(
             imageVector = imageVector,
             color = color,
             cornerRadius = cornerRadius,
-            trailingContent = trailingContent ?: {
+            trailingContent =
+            trailingContent ?: {
                 Icon(
                     imageVector = Icons.Default.ChevronRight,
                     contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             },
-            onClick = onClick
+            onClick = onClick,
         )
     }
 }

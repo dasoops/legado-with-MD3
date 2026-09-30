@@ -6,7 +6,6 @@ import org.junit.Assert.assertEquals
 import org.junit.Test
 
 class AppShellSettingsMappingTest {
-
     @Test
     fun `AppShell 26 键写读映射逐字段对应`() {
         appShellMappingSamples().forEach { expected ->
@@ -20,17 +19,18 @@ class AppShellSettingsMappingTest {
 
     @Test
     fun `导航可见性与默认首页通过真实原子路径单批写入`() {
-        val values = captureAtomicUpdateValues(
-            current = AppShellSettings(showHome = true, defaultHomePage = "home"),
-            read = { it.toAppShellSettings() },
-            toPrefMap = AppShellSettings::toPrefMap,
-            transform = {
-                it.copy(
-                    showHome = false,
-                    defaultHomePage = "bookshelf",
-                )
-            },
-        )
+        val values =
+            captureAtomicUpdateValues(
+                current = AppShellSettings(showHome = true, defaultHomePage = "home"),
+                read = { it.toAppShellSettings() },
+                toPrefMap = AppShellSettings::toPrefMap,
+                transform = {
+                    it.copy(
+                        showHome = false,
+                        defaultHomePage = "bookshelf",
+                    )
+                },
+            )
 
         assertEquals(
             mapOf(
@@ -43,26 +43,27 @@ class AppShellSettingsMappingTest {
 }
 
 private fun appShellMappingSamples(): List<AppShellSettings> {
-    val base = AppShellSettings(
-        themeMode = "theme-mode",
-        fontScale = 13,
-        composeEngine = "compose-engine",
-        tabletInterface = "tablet-interface",
-        labelVisibilityMode = "label-mode",
-        defaultHomePage = "default-page",
-        mainNavigationOrder = "navigation-order",
-        navIconHome = "icon-home",
-        navIconBookshelf = "icon-bookshelf",
-        navIconExplore = "icon-explore",
-        navIconRss = "icon-rss",
-        navIconMy = "icon-my",
-        navIconHomeSelected = "icon-home-selected",
-        navIconBookshelfSelected = "icon-bookshelf-selected",
-        navIconExploreSelected = "icon-explore-selected",
-        navIconRssSelected = "icon-rss-selected",
-        navIconMySelected = "icon-my-selected",
-        launcherIcon = "launcher-icon",
-    )
+    val base =
+        AppShellSettings(
+            themeMode = "theme-mode",
+            fontScale = 13,
+            composeEngine = "compose-engine",
+            tabletInterface = "tablet-interface",
+            labelVisibilityMode = "label-mode",
+            defaultHomePage = "default-page",
+            mainNavigationOrder = "navigation-order",
+            navIconHome = "icon-home",
+            navIconBookshelf = "icon-bookshelf",
+            navIconExplore = "icon-explore",
+            navIconRss = "icon-rss",
+            navIconMy = "icon-my",
+            navIconHomeSelected = "icon-home-selected",
+            navIconBookshelfSelected = "icon-bookshelf-selected",
+            navIconExploreSelected = "icon-explore-selected",
+            navIconRssSelected = "icon-rss-selected",
+            navIconMySelected = "icon-my-selected",
+            launcherIcon = "launcher-icon",
+        )
     return listOf(
         base,
         base.copy(showHome = false),

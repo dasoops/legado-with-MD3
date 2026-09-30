@@ -14,11 +14,10 @@ data class ReaderEmphasisUnderlineRun(
 )
 
 /** Restores the legacy whole-line underline used for search hits. */
-fun ReaderPage.emphasisUnderlineRuns(): List<ReaderEmphasisUnderlineRun> =
-    underlineRuns(
-        styleSelector = { line -> line.firstNotNullOfOrNull(ReaderElement.Text::emphasisUnderline) },
-        isHit = { it.emphasisUnderline != null },
-    )
+fun ReaderPage.emphasisUnderlineRuns(): List<ReaderEmphasisUnderlineRun> = underlineRuns(
+    styleSelector = { line -> line.firstNotNullOfOrNull(ReaderElement.Text::emphasisUnderline) },
+    isHit = { it.emphasisUnderline != null },
+)
 
 /**
  * 运行期命中（搜索结果）的整行下划线，命中判定由调用方提供。
@@ -31,15 +30,16 @@ fun ReaderPage.emphasisUnderlineRuns(): List<ReaderEmphasisUnderlineRun> =
 fun ReaderPage.emphasisUnderlineRunsFor(
     style: ReaderEmphasisUnderline,
     isHit: (ReaderElement.Text) -> Boolean,
-): List<ReaderEmphasisUnderlineRun> =
-    underlineRuns(styleSelector = { style }, isHit = isHit)
+): List<ReaderEmphasisUnderlineRun> = underlineRuns(styleSelector = { style }, isHit = isHit)
 
 private fun ReaderPage.underlineRuns(
     styleSelector: (List<ReaderElement.Text>) -> ReaderEmphasisUnderline?,
     isHit: (ReaderElement.Text) -> Boolean,
 ): List<ReaderEmphasisUnderlineRun> {
-    val lines = elements.filterIsInstance<ReaderElement.Text>()
-        .groupBy { it.bounds.top to it.bounds.bottom }
+    val lines =
+        elements
+            .filterIsInstance<ReaderElement.Text>()
+            .groupBy { it.bounds.top to it.bounds.bottom }
     return lines.values.mapNotNull { line ->
         if (line.none(isHit)) return@mapNotNull null
         val style = styleSelector(line) ?: return@mapNotNull null

@@ -27,16 +27,19 @@ import io.legado.app.ui.widget.components.divider.SettingItemDivider
 import io.legado.app.ui.widget.components.title.AdaptiveTitle
 import top.yukonga.miuix.kmp.basic.Card as MiuixCard
 
-val LocalSplicedColumnGroupState = compositionLocalOf { SplicedColumnGroupState(
-    enableItemDivider = false,
-    currentIndex = { 0 },
-    incrementIndex = { }
-) }
+val LocalSplicedColumnGroupState =
+    compositionLocalOf {
+        SplicedColumnGroupState(
+            enableItemDivider = false,
+            currentIndex = { 0 },
+            incrementIndex = { },
+        )
+    }
 
 data class SplicedColumnGroupState(
     val enableItemDivider: Boolean,
     val currentIndex: () -> Int,
-    val incrementIndex: () -> Unit
+    val incrementIndex: () -> Unit,
 )
 
 @Composable
@@ -48,62 +51,69 @@ fun SplicedColumnGroup(
     val composeEngine = LegadoTheme.composeEngine
     val themeSettings = LocalAppUiConfiguration.current.theme
     val enableItemDivider = themeSettings.enableItemDivider
-    val cornerRadius = when {
-        themeSettings.disableSplicedColumnGroupCornerRadius -> 0.dp
-        themeSettings.overrideBaseCardCornerRadius -> themeSettings.baseCardCornerRadius.dp
-        else -> 16.dp
-    }
-    val border = if (themeSettings.overrideBaseCardBorder) {
-        val configuredColor = if (LegadoTheme.isDark) {
-            themeSettings.baseCardBorderColorNight
-        } else {
-            themeSettings.baseCardBorderColor
+    val cornerRadius =
+        when {
+            themeSettings.disableSplicedColumnGroupCornerRadius -> 0.dp
+            themeSettings.overrideBaseCardCornerRadius -> themeSettings.baseCardCornerRadius.dp
+            else -> 16.dp
         }
-        BorderStroke(
-            themeSettings.baseCardBorderWidth.dp,
-            configuredColor.takeIf { it != 0 }?.let(::Color)
-                ?: LegadoTheme.colorScheme.outlineVariant
-        )
-    } else {
-        null
-    }
+    val border =
+        if (themeSettings.overrideBaseCardBorder) {
+            val configuredColor =
+                if (LegadoTheme.isDark) {
+                    themeSettings.baseCardBorderColorNight
+                } else {
+                    themeSettings.baseCardBorderColor
+                }
+            BorderStroke(
+                themeSettings.baseCardBorderWidth.dp,
+                configuredColor.takeIf { it != 0 }?.let(::Color)
+                    ?: LegadoTheme.colorScheme.outlineVariant,
+            )
+        } else {
+            null
+        }
     val currentIndex = remember { mutableIntStateOf(0) }
 
-    val groupState = remember(enableItemDivider) {
-        SplicedColumnGroupState(
-            enableItemDivider = enableItemDivider,
-            currentIndex = { currentIndex.intValue },
-            incrementIndex = { currentIndex.intValue++ }
-        )
-    }
+    val groupState =
+        remember(enableItemDivider) {
+            SplicedColumnGroupState(
+                enableItemDivider = enableItemDivider,
+                currentIndex = { currentIndex.intValue },
+                incrementIndex = { currentIndex.intValue++ },
+            )
+        }
 
     Column(modifier = modifier.padding(top = 8.dp, bottom = 8.dp)) {
         if (title.isNotEmpty()) {
             AdaptiveTitle(
                 text = title,
-                modifier = Modifier.padding(start = 16.dp, bottom = 8.dp)
+                modifier = Modifier.padding(start = 16.dp, bottom = 8.dp),
             )
         }
 
         CompositionLocalProvider(LocalSplicedColumnGroupState provides groupState) {
             if (ThemeResolver.isMiuixEngine(composeEngine)) {
                 MiuixCard(
-                    modifier = Modifier.then(
+                    modifier =
+                    Modifier.then(
                         border?.let { Modifier.border(it, RoundedCornerShape(cornerRadius)) }
-                            ?: Modifier
+                            ?: Modifier,
                     ),
                     cornerRadius = cornerRadius,
                 ) {
                     Box(
-                        modifier = Modifier
+                        modifier =
+                        Modifier
                             .fillMaxWidth()
                             .animateContentSize()
-                            .clip(RoundedCornerShape(cornerRadius))
+                            .clip(RoundedCornerShape(cornerRadius)),
                     ) {
                         Spacer(
-                            modifier = Modifier
+                            modifier =
+                            Modifier
                                 .matchParentSize()
-                                .appContainerBackground(AppContainerBackgroundType.Large)
+                                .appContainerBackground(AppContainerBackgroundType.Large),
                         )
                         Column(modifier = Modifier.fillMaxWidth()) {
                             currentIndex.intValue = 0
@@ -113,19 +123,21 @@ fun SplicedColumnGroup(
                 }
             } else {
                 Box(
-                    modifier = Modifier
+                    modifier =
+                    Modifier
                         .fillMaxWidth()
                         .animateContentSize()
-                        .clip(RoundedCornerShape(cornerRadius))
+                        .clip(RoundedCornerShape(cornerRadius)),
                 ) {
                     Spacer(
-                        modifier = Modifier
+                        modifier =
+                        Modifier
                             .matchParentSize()
-                            .appContainerBackground(AppContainerBackgroundType.Large)
+                            .appContainerBackground(AppContainerBackgroundType.Large),
                     )
                     Column(
                         modifier = Modifier.fillMaxWidth(),
-                        verticalArrangement = Arrangement.spacedBy(2.dp)
+                        verticalArrangement = Arrangement.spacedBy(2.dp),
                     ) {
                         currentIndex.intValue = 0
                         items()
@@ -148,7 +160,7 @@ fun SplicedColumnDivider() {
 @Composable
 fun SettingItemWithDivider(
     modifier: Modifier = Modifier,
-    content: @Composable ColumnScope.() -> Unit
+    content: @Composable ColumnScope.() -> Unit,
 ) {
     val groupState = LocalSplicedColumnGroupState.current
     if (groupState.enableItemDivider && groupState.currentIndex() > 0) {

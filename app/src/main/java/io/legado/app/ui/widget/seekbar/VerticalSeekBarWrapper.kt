@@ -7,22 +7,27 @@ import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
-
 import androidx.core.view.ViewCompat
 import kotlin.math.max
 
-class VerticalSeekBarWrapper @JvmOverloads constructor(
+class VerticalSeekBarWrapper
+@JvmOverloads
+constructor(
     context: Context,
-    attrs: AttributeSet? = null
+    attrs: AttributeSet? = null,
 ) : FrameLayout(context, attrs) {
-
     private val childSeekBar: VerticalSeekBar?
         get() {
             val child = if (childCount > 0) getChildAt(0) else null
             return if (child is VerticalSeekBar) child else null
         }
 
-    override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
+    override fun onSizeChanged(
+        w: Int,
+        h: Int,
+        oldw: Int,
+        oldh: Int,
+    ) {
         if (useViewRotation()) {
             onSizeChangedUseViewRotation(w, h, oldw, oldh)
         } else {
@@ -31,7 +36,12 @@ class VerticalSeekBarWrapper @JvmOverloads constructor(
     }
 
     @SuppressLint("RtlHardcoded")
-    private fun onSizeChangedTraditionalRotation(w: Int, h: Int, oldw: Int, oldh: Int) {
+    private fun onSizeChangedTraditionalRotation(
+        w: Int,
+        h: Int,
+        oldw: Int,
+        oldh: Int,
+    ) {
         val seekBar = childSeekBar
 
         if (seekBar != null) {
@@ -49,12 +59,12 @@ class VerticalSeekBarWrapper @JvmOverloads constructor(
             seekBar.measure(
                 MeasureSpec.makeMeasureSpec(
                     max(0, w - hPadding),
-                    MeasureSpec.AT_MOST
+                    MeasureSpec.AT_MOST,
                 ),
                 MeasureSpec.makeMeasureSpec(
                     max(0, h - vPadding),
-                    MeasureSpec.EXACTLY
-                )
+                    MeasureSpec.EXACTLY,
+                ),
             )
 
             lp.gravity = Gravity.TOP or Gravity.LEFT
@@ -65,7 +75,12 @@ class VerticalSeekBarWrapper @JvmOverloads constructor(
         super.onSizeChanged(w, h, oldw, oldh)
     }
 
-    private fun onSizeChangedUseViewRotation(w: Int, h: Int, oldw: Int, oldh: Int) {
+    private fun onSizeChangedUseViewRotation(
+        w: Int,
+        h: Int,
+        oldw: Int,
+        oldh: Int,
+    ) {
         val seekBar = childSeekBar
 
         if (seekBar != null) {
@@ -74,12 +89,12 @@ class VerticalSeekBarWrapper @JvmOverloads constructor(
             seekBar.measure(
                 MeasureSpec.makeMeasureSpec(
                     max(0, h - vPadding),
-                    MeasureSpec.EXACTLY
+                    MeasureSpec.EXACTLY,
                 ),
                 MeasureSpec.makeMeasureSpec(
                     max(0, w - hPadding),
-                    MeasureSpec.AT_MOST
-                )
+                    MeasureSpec.AT_MOST,
+                ),
             )
         }
 
@@ -87,7 +102,10 @@ class VerticalSeekBarWrapper @JvmOverloads constructor(
         super.onSizeChanged(w, h, oldw, oldh)
     }
 
-    override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
+    override fun onMeasure(
+        widthMeasureSpec: Int,
+        heightMeasureSpec: Int,
+    ) {
         val seekBar = childSeekBar
         val widthMode = MeasureSpec.getMode(widthMeasureSpec)
         val heightMode = MeasureSpec.getMode(heightMeasureSpec)
@@ -125,13 +143,16 @@ class VerticalSeekBarWrapper @JvmOverloads constructor(
         }
     }
 
-    /*package*/
+    // package
     internal fun applyViewRotation() {
         applyViewRotation(width, height)
     }
 
     @Suppress("DEPRECATION")
-    private fun applyViewRotation(w: Int, h: Int) {
+    private fun applyViewRotation(
+        w: Int,
+        h: Int,
+    ) {
         val seekBar = childSeekBar
 
         if (seekBar != null) {

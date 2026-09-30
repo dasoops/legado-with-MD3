@@ -57,10 +57,11 @@ fun ReadStyleContent(
     val scope = rememberCoroutineScope()
     val pagerState = rememberPagerState(pageCount = { 2 })
     var currentPage by remember { mutableIntStateOf(0) }
-    val childPagerNestedScrollConnection = rememberPagerFlingPassThroughConnection(
-        state = pagerState,
-        orientation = Orientation.Horizontal,
-    )
+    val childPagerNestedScrollConnection =
+        rememberPagerFlingPassThroughConnection(
+            state = pagerState,
+            orientation = Orientation.Horizontal,
+        )
 
     val pageHeights = remember { mutableStateMapOf<Int, Int>() }
     val animatedHeight by rememberPagerAnimatedHeight(pagerState, pageHeights)
@@ -73,61 +74,68 @@ fun ReadStyleContent(
     }
 
     Column(
-        modifier = modifier
+        modifier =
+        modifier
             .fillMaxWidth(),
     ) {
         HorizontalPager(
             state = pagerState,
             verticalAlignment = Alignment.Top,
             pageNestedScrollConnection = childPagerNestedScrollConnection,
-            modifier = Modifier
+            modifier =
+            Modifier
                 .weight(1f, fill = false)
                 .clipToBounds()
                 .pagerHeight(animatedHeight),
         ) { page ->
             Box(
-                modifier = Modifier
+                modifier =
+                Modifier
                     .fillMaxWidth()
                     .onSizeChanged { size ->
                         pageHeights[page] = size.height
-                    }
+                    },
             ) {
                 when (page) {
-                    0 -> GlobalThemePage(
-                        onToggleDayNight = onToggleDayNight,
-                        eyeProtectionEnabled = eyeProtectionEnabled,
-                        onOpenBgTextConfig = onOpenBgTextConfig,
-                        onOpenTypographyConfig = onOpenTypographyConfig,
-                        onOpenPaddingConfig = onOpenPaddingConfig,
-                        onShareLayoutChange = { shareLayout ->
-                            onIntent(ReadBookIntent.UpdateConfig(ConfigUpdate.ShareLayout(shareLayout)))
-                        },
-                        onStyleSelect = { index ->
-                            onIntent(ReadBookIntent.UpdateConfig(ConfigUpdate.StyleSelect(index)))
-                        },
-                        modifier = Modifier.padding(horizontal = 16.dp),
-                        onIntent = onIntent,
-                        styleConfig = styleConfig,
-                        preferences = preferences,
-                    )
-
-                    1 -> SystemMenuPage(
-                        preferences = preferences,
-                        styleConfig = styleConfig,
-                        customIcons = readMenuCustomIcons,
-                        bottomBarButtons = bottomBarButtons,
-                        onIntent = onIntent,
-                    )
+                    0 -> {
+                        GlobalThemePage(
+                            onToggleDayNight = onToggleDayNight,
+                            eyeProtectionEnabled = eyeProtectionEnabled,
+                            onOpenBgTextConfig = onOpenBgTextConfig,
+                            onOpenTypographyConfig = onOpenTypographyConfig,
+                            onOpenPaddingConfig = onOpenPaddingConfig,
+                            onShareLayoutChange = { shareLayout ->
+                                onIntent(ReadBookIntent.UpdateConfig(ConfigUpdate.ShareLayout(shareLayout)))
+                            },
+                            onStyleSelect = { index ->
+                                onIntent(ReadBookIntent.UpdateConfig(ConfigUpdate.StyleSelect(index)))
+                            },
+                            modifier = Modifier.padding(horizontal = 16.dp),
+                            onIntent = onIntent,
+                            styleConfig = styleConfig,
+                            preferences = preferences,
+                        )
+                    }
+                    1 -> {
+                        SystemMenuPage(
+                            preferences = preferences,
+                            styleConfig = styleConfig,
+                            customIcons = readMenuCustomIcons,
+                            bottomBarButtons = bottomBarButtons,
+                            onIntent = onIntent,
+                        )
+                    }
                 }
             }
         }
 
-        val tabTitles = listOf(
-            stringResource(R.string.read_config_global_theme),
-            stringResource(R.string.read_config_menu_system),
-            stringResource(R.string.information),
-            stringResource(R.string.more_setting),
-        )
+        val tabTitles =
+            listOf(
+                stringResource(R.string.read_config_global_theme),
+                stringResource(R.string.read_config_menu_system),
+                stringResource(R.string.information),
+                stringResource(R.string.more_setting),
+            )
         CardTabRow(
             tabTitles = tabTitles,
             selectedTabIndex = currentPage,
@@ -137,12 +145,16 @@ fun ReadStyleContent(
                         scope.launch {
                             pagerState.animateScrollToPage(
                                 page = index,
-                                animationSpec = tween(durationMillis = 300, easing = FastOutSlowInEasing)
+                                animationSpec = tween(durationMillis = 300, easing = FastOutSlowInEasing),
                             )
                         }
                     }
-                    2 -> onOpenInformationConfig()
-                    3 -> onOpenMoreConfig()
+                    2 -> {
+                        onOpenInformationConfig()
+                    }
+                    3 -> {
+                        onOpenMoreConfig()
+                    }
                 }
             },
             modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 8.dp),

@@ -3,6 +3,7 @@ package io.legado.app.ui.book.read
 import android.content.Context
 import android.net.Uri
 import android.provider.OpenableColumns
+import androidx.core.graphics.ColorUtils as AndroidColorUtils
 import androidx.core.graphics.toColorInt
 import io.legado.app.R
 import io.legado.app.constant.AppLog
@@ -19,14 +20,13 @@ import io.legado.app.domain.model.settings.isEyeProtectionConfigured
 import io.legado.app.model.ReadSessionState
 import io.legado.app.utils.hexString
 import io.legado.app.utils.postEvent
+import java.io.FileNotFoundException
+import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import java.io.FileNotFoundException
-import kotlin.time.Duration.Companion.milliseconds
-import androidx.core.graphics.ColorUtils as AndroidColorUtils
 
 /**
  * 阅读样式域（R2.2 续批）：字体、取色、背景图、样式方案导入导出、日夜切换与其提醒、护眼。
@@ -49,7 +49,6 @@ class ReadStyleDelegate(
     private val appShellSettingsGateway: AppShellSettingsGateway,
     private val themeSettingsGateway: ThemeSettingsGateway,
 ) {
-
     interface Host {
         val uiState: ReadBookUiState
 
@@ -90,10 +89,12 @@ class ReadStyleDelegate(
 
     fun selectSystemTypeface(index: Int) = selectSystemTypeface(ReadStyleStringKey.TextFont, index)
 
-    fun selectTitleSystemTypeface(index: Int) =
-        selectSystemTypeface(ReadStyleStringKey.TitleFont, index)
+    fun selectTitleSystemTypeface(index: Int) = selectSystemTypeface(ReadStyleStringKey.TitleFont, index)
 
-    private fun selectSystemTypeface(key: ReadStyleStringKey, index: Int) {
+    private fun selectSystemTypeface(
+        key: ReadStyleStringKey,
+        index: Int,
+    ) {
         readStyleGateway.updateCurrentStyle(stringMutation(key, ""))
         scope.launch(start = CoroutineStart.UNDISPATCHED) {
             readSettingsRepository.setSystemTypefaces(index)
@@ -153,7 +154,10 @@ class ReadStyleDelegate(
         }
     }
 
-    fun applyBackgroundImageForMode(uri: Uri, isNight: Boolean) {
+    fun applyBackgroundImageForMode(
+        uri: Uri,
+        isNight: Boolean,
+    ) {
         withStyleFileOperation("选择阅读背景图失败") {
             val path = saveBackgroundImage(uri)
             readStyleGateway.setCurrentBackgroundImageForMode(path, isNight)
@@ -164,8 +168,9 @@ class ReadStyleDelegate(
 
     fun importConfig(uri: Uri) {
         withStyleFileOperation("导入阅读样式失败") {
-            val bytes = context.contentResolver.openInputStream(uri)?.use { it.readBytes() }
-                ?: throw FileNotFoundException(uri.toString())
+            val bytes =
+                context.contentResolver.openInputStream(uri)?.use { it.readBytes() }
+                    ?: throw FileNotFoundException(uri.toString())
             readStyleGateway.importCurrentStyle(bytes)
             // 旧 View 导入配置 = [1, 2, 5]。
             emitConfigUpdate(
@@ -204,20 +209,20 @@ class ReadStyleDelegate(
                     AppLog.put(logTag, throwable)
                     host.emitEffect(
                         ReadBookEffect.LongToast(
-                            throwable.localizedMessage ?: context.getString(R.string.error)
-                        )
+                            throwable.localizedMessage ?: context.getString(R.string.error),
+                        ),
                     )
                 }
         }
     }
 
-    private fun queryDisplayName(uri: Uri): String? {
-        return context.contentResolver.query(
+    private fun queryDisplayName(uri: Uri): String? = context.contentResolver
+        .query(
             uri,
             arrayOf(OpenableColumns.DISPLAY_NAME),
             null,
             null,
-            null
+            null,
         )?.use { cursor ->
             if (cursor.moveToFirst()) {
                 val index = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
@@ -226,48 +231,46 @@ class ReadStyleDelegate(
                 null
             }
         }
-    }
 
     // --- 取色 ---
 
-    fun colorSelected(dialogId: Int, color: Int) {
+    fun colorSelected(
+        dialogId: Int,
+        color: Int,
+    ) {
         when (dialogId) {
             ReadBookColorPickerIds.SHADOW_COLOR -> {
                 readStyleGateway.updateCurrentStyle(colorMutation(ReadStyleColorKey.Shadow, color))
                 emitRepaintTextActions()
             }
-
             ReadBookColorPickerIds.TEXT_COLOR -> {
                 readStyleGateway.updateCurrentStyle(colorMutation(ReadStyleColorKey.Text, color))
                 emitRepaintTextActions()
                 postActionBarUpdateIfFollowingPage()
             }
-
             ReadBookColorPickerIds.TEXT_ACCENT_COLOR -> {
                 readStyleGateway.updateCurrentStyle(
-                    colorMutation(ReadStyleColorKey.TextAccent, color)
+                    colorMutation(ReadStyleColorKey.TextAccent, color),
                 )
                 emitRepaintTextActions()
                 postActionBarUpdateIfFollowingPage()
             }
-
             ReadBookColorPickerIds.BG_COLOR -> {
                 readStyleGateway.updateCurrentStyle(
-                    ReadStyleMutation.Background(0, "#${color.hexString}")
+                    ReadStyleMutation.Background(0, "#${color.hexString}"),
                 )
                 emitConfigUpdate(ConfigUpdateAction.UpdateBackground)
                 postActionBarUpdateIfFollowingPage()
             }
-
-            ReadBookColorPickerIds.TIP_HEADER_COLOR ->
+            ReadBookColorPickerIds.TIP_HEADER_COLOR -> {
                 updateTipColor(ReadStyleColorKey.TipHeader, color)
-
-            ReadBookColorPickerIds.TIP_FOOTER_COLOR ->
+            }
+            ReadBookColorPickerIds.TIP_FOOTER_COLOR -> {
                 updateTipColor(ReadStyleColorKey.TipFooter, color)
-
-            ReadBookColorPickerIds.TIP_DIVIDER_COLOR ->
+            }
+            ReadBookColorPickerIds.TIP_DIVIDER_COLOR -> {
                 updateTipColor(ReadStyleColorKey.TipDivider, color)
-
+            }
             ReadBookColorPickerIds.TITLE_COLOR -> {
                 readStyleGateway.updateCurrentStyle(colorMutation(ReadStyleColorKey.Title, color))
                 emitConfigUpdate(
@@ -275,27 +278,27 @@ class ReadStyleDelegate(
                     ConfigUpdateAction.ReloadContent,
                 )
             }
-
             ReadBookColorPickerIds.MENU_BG_COLOR -> {
                 scope.launch { readSettingsRepository.setReadMenuBgColor(color) }
                 postEvent(EventBus.UPDATE_READ_ACTION_BAR, true)
             }
-
             ReadBookColorPickerIds.MENU_ACCENT_COLOR -> {
                 scope.launch { readSettingsRepository.setReadMenuAccentColor(color) }
                 postEvent(EventBus.UPDATE_READ_ACTION_BAR, true)
             }
-
             ReadBookColorPickerIds.UNDERLINE_COLOR -> {
                 readStyleGateway.updateCurrentStyle(
-                    colorMutation(ReadStyleColorKey.Underline, color)
+                    colorMutation(ReadStyleColorKey.Underline, color),
                 )
                 emitRepaintTextActions()
             }
         }
     }
 
-    private fun updateTipColor(key: ReadStyleColorKey, color: Int) {
+    private fun updateTipColor(
+        key: ReadStyleColorKey,
+        color: Int,
+    ) {
         readStyleGateway.updateCurrentStyle(colorMutation(key, color))
         postEvent(EventBus.TIP_COLOR, "")
         emitConfigUpdate(ConfigUpdateAction.UpdateStyle)
@@ -331,11 +334,12 @@ class ReadStyleDelegate(
             appShellSettingsGateway.update { it.copy(themeMode = nextMode) }
         }
         host.updateState {
-            val newActiveReminder = if (it.activeReminder?.type is ReminderType.DayNightReminder) {
-                null
-            } else {
-                it.activeReminder
-            }
+            val newActiveReminder =
+                if (it.activeReminder?.type is ReminderType.DayNightReminder) {
+                    null
+                } else {
+                    it.activeReminder
+                }
             it.copy(activeReminder = newActiveReminder)
         }
         // 排版值没变但解析后的生效值变了（颜色按模式取），经 gateway 统一重新发布，
@@ -357,8 +361,7 @@ class ReadStyleDelegate(
         hasDismissedLightReminder = false
     }
 
-    fun isDayNightSwitchCoolingDown(): Boolean =
-        System.currentTimeMillis() - lastSwitchDayNightReminderTime < REMINDER_COOLDOWN_MS
+    fun isDayNightSwitchCoolingDown(): Boolean = System.currentTimeMillis() - lastSwitchDayNightReminderTime < REMINDER_COOLDOWN_MS
 
     /**
      * 环境光变化时判断要不要提示切换日夜。
@@ -368,20 +371,24 @@ class ReadStyleDelegate(
         if (
             !readSettingsRepository.currentSettings.autoSuggestDayNight ||
             isDayNightSwitchCoolingDown()
-        ) return
+        ) {
+            return
+        }
         val isNight = host.isNightTheme
         val styleConfig = host.uiState.styleConfig
         if (!isNight && lux <= DARK_LUX_THRESHOLD) {
             if (hasDismissedDarkReminder) return
             val bgType = styleConfig.bgType
-            val isLightBg = if (bgType == 0) {
-                val colorInt = runCatching { styleConfig.bgStr.toColorInt() }
-                    .getOrDefault(0xFFEEEEEE.toInt())
-                isReadBgLight(colorInt)
-            } else {
-                val meanColor = ReadSessionState.backgroundMeanColor
-                if (meanColor != 0) isReadBgLight(meanColor) else true
-            }
+            val isLightBg =
+                if (bgType == 0) {
+                    val colorInt =
+                        runCatching { styleConfig.bgStr.toColorInt() }
+                            .getOrDefault(0xFFEEEEEE.toInt())
+                    isReadBgLight(colorInt)
+                } else {
+                    val meanColor = ReadSessionState.backgroundMeanColor
+                    if (meanColor != 0) isReadBgLight(meanColor) else true
+                }
             if (isLightBg) {
                 lastSwitchDayNightReminderTime = System.currentTimeMillis()
                 showReminder(
@@ -390,20 +397,22 @@ class ReadStyleDelegate(
                         actionText = context.getString(R.string.switch_action),
                         actionIntent = ReadBookIntent.ToggleDayNight,
                         type = ReminderType.DayNightReminder(targetIsNight = true),
-                    )
+                    ),
                 )
             }
         } else if (isNight && lux >= BRIGHT_LUX_THRESHOLD) {
             if (hasDismissedLightReminder) return
             val bgTypeNight = styleConfig.bgTypeNight
-            val isDarkBg = if (bgTypeNight == 0) {
-                val colorInt = runCatching { styleConfig.bgStrNight.toColorInt() }
-                    .getOrDefault(0xFF000000.toInt())
-                !isReadBgLight(colorInt)
-            } else {
-                val meanColor = ReadSessionState.backgroundMeanColor
-                if (meanColor != 0) !isReadBgLight(meanColor) else true
-            }
+            val isDarkBg =
+                if (bgTypeNight == 0) {
+                    val colorInt =
+                        runCatching { styleConfig.bgStrNight.toColorInt() }
+                            .getOrDefault(0xFF000000.toInt())
+                    !isReadBgLight(colorInt)
+                } else {
+                    val meanColor = ReadSessionState.backgroundMeanColor
+                    if (meanColor != 0) !isReadBgLight(meanColor) else true
+                }
             if (isDarkBg) {
                 lastSwitchDayNightReminderTime = System.currentTimeMillis()
                 showReminder(
@@ -412,7 +421,7 @@ class ReadStyleDelegate(
                         actionText = context.getString(R.string.switch_action),
                         actionIntent = ReadBookIntent.ToggleDayNight,
                         type = ReminderType.DayNightReminder(targetIsNight = false),
-                    )
+                    ),
                 )
             }
         }
@@ -449,7 +458,7 @@ class ReadStyleDelegate(
         host.updateState { it.copy(activeReminder = null) }
         if (reminderQueue.isNotEmpty()) {
             scope.launch {
-                //延迟一下，让上一个提醒的动画结束
+                // 延迟一下，让上一个提醒的动画结束
                 delay(500.milliseconds)
                 if (host.uiState.activeReminder == null && reminderQueue.isNotEmpty()) {
                     val next = reminderQueue.removeFirst()
@@ -466,14 +475,15 @@ class ReadStyleDelegate(
             themeSettingsGateway.settings.collect { settings ->
                 host.updateState {
                     it.copy(
-                        eyeProtection = EyeProtectionUiState(
+                        eyeProtection =
+                        EyeProtectionUiState(
                             enabled = settings.eyeProtectionEnabled,
                             intensity = settings.colorTemperature,
                             autoNight = settings.eyeProtectionAutoNight,
                             schedule = settings.eyeProtectionSchedule,
                             startTime = settings.eyeProtectionStartTime,
                             endTime = settings.eyeProtectionEndTime,
-                        )
+                        ),
                     )
                 }
             }

@@ -8,17 +8,13 @@ import android.view.View
 import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.core.view.ViewCompat
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
-import androidx.core.view.ViewCompat
 import androidx.preference.PreferenceViewHolder
 import io.legado.app.R
-//import io.legado.app.lib.theme.accentColor
-//import io.legado.app.lib.theme.bottomBackground
-//import io.legado.app.lib.theme.getPrimaryTextColor
-//import io.legado.app.lib.theme.getSecondaryTextColor
-import splitties.views.onLongClick
 import kotlin.math.roundToInt
+import splitties.views.onLongClick
 
 open class Preference(context: Context, attrs: AttributeSet?) :
     androidx.preference.Preference(context, attrs) {
@@ -45,7 +41,7 @@ open class Preference(context: Context, attrs: AttributeSet?) :
             viewId: Int? = null,
             weightWidth: Int = 0,
             weightHeight: Int = 0,
-            isBottomBackground: Boolean = false
+            isBottomBackground: Boolean = false,
         ): T? {
             if (viewHolder == null) return null
             ViewCompat.setScreenReaderFocusable(viewHolder.itemView, true)
@@ -70,7 +66,7 @@ open class Preference(context: Context, attrs: AttributeSet?) :
             if (iconView is ImageView) {
                 iconView.isVisible = icon != null
                 iconView.setImageDrawable(icon)
-               // iconView.setColorFilter(context.primaryColor)
+                // iconView.setColorFilter(context.primaryColor)
             }
 
             if (weightLayoutRes != null && weightLayoutRes != 0 && viewId != null && viewId != 0) {
@@ -85,20 +81,24 @@ open class Preference(context: Context, attrs: AttributeSet?) :
                         lay.addView(childView)
                         lay.isVisible = true
                         v = lay.findViewById(viewId)
-                    } else
+                    } else {
                         needRequestLayout = true
+                    }
 
                     if (weightWidth > 0 || weightHeight > 0) {
                         val lp = lay.layoutParams
-                        if (weightHeight > 0)
+                        if (weightHeight > 0) {
                             lp.height =
                                 (context.resources.displayMetrics.density * weightHeight).roundToInt()
-                        if (weightWidth > 0)
+                        }
+                        if (weightWidth > 0) {
                             lp.width =
                                 (context.resources.displayMetrics.density * weightWidth).roundToInt()
+                        }
                         lay.layoutParams = lp
-                    } else if (needRequestLayout)
+                    } else if (needRequestLayout) {
                         v.requestLayout()
+                    }
 
                     return v
                 }
@@ -106,7 +106,6 @@ open class Preference(context: Context, attrs: AttributeSet?) :
 
             return null
         }
-
     }
 
     override fun onBindViewHolder(holder: PreferenceViewHolder) {
@@ -121,13 +120,16 @@ open class Preference(context: Context, attrs: AttributeSet?) :
 
     open fun onBindView(holder: PreferenceViewHolder) {
         bindView<View>(
-            context, holder, icon, title, summary,
-            isBottomBackground = isBottomBackground
+            context,
+            holder,
+            icon,
+            title,
+            summary,
+            isBottomBackground = isBottomBackground,
         )
     }
 
     fun onLongClick(listener: (preference: Preference) -> Boolean) {
         onLongClick = listener
     }
-
 }

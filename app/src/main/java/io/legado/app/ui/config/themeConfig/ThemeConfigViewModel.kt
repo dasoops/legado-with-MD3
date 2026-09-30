@@ -20,6 +20,10 @@ import io.legado.app.utils.MD5Utils
 import io.legado.app.utils.externalFiles
 import io.legado.app.utils.inputStream
 import io.legado.app.utils.openInputStream
+import java.io.File
+import java.io.FileOutputStream
+import kotlin.coroutines.cancellation.CancellationException
+import kotlin.uuid.Uuid
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -32,10 +36,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import splitties.init.appCtx
-import java.io.File
-import java.io.FileOutputStream
-import kotlin.uuid.Uuid
-import kotlin.coroutines.cancellation.CancellationException
 
 class ThemeConfigViewModel(
     private val appShellSettingsGateway: AppShellSettingsGateway,
@@ -44,13 +44,13 @@ class ThemeConfigViewModel(
     private val themeSettingsGateway: ThemeSettingsGateway,
     private val labSettingsGateway: LabSettingsGateway,
 ) : ViewModel() {
-
-    private val _uiState = MutableStateFlow(
-        ThemeConfigUiState(
-            appShell = appShellSettingsGateway.currentSettings,
-            theme = themeSettingsGateway.currentSettings,
+    private val _uiState =
+        MutableStateFlow(
+            ThemeConfigUiState(
+                appShell = appShellSettingsGateway.currentSettings,
+                theme = themeSettingsGateway.currentSettings,
+            ),
         )
-    )
     val uiState = _uiState.asStateFlow()
 
     private val _effects = MutableSharedFlow<ThemeConfigEffect>(extraBufferCapacity = 16)
@@ -85,99 +85,176 @@ class ThemeConfigViewModel(
 
     fun onIntent(intent: ThemeConfigIntent) {
         when (intent) {
-            is ThemeConfigIntent.UpdateTheme -> updateTheme(intent.transform)
-            is ThemeConfigIntent.ShowSheet ->
+            is ThemeConfigIntent.UpdateTheme -> {
+                updateTheme(intent.transform)
+            }
+            is ThemeConfigIntent.ShowSheet -> {
                 _uiState.update { it.copy(activeSheet = intent.sheet) }
-            ThemeConfigIntent.DismissSheet ->
+            }
+            ThemeConfigIntent.DismissSheet -> {
                 _uiState.update { it.copy(activeSheet = null) }
-            is ThemeConfigIntent.ShowDialog ->
+            }
+            is ThemeConfigIntent.ShowDialog -> {
                 _uiState.update { it.copy(activeDialog = intent.dialog) }
-            ThemeConfigIntent.DismissDialog ->
+            }
+            ThemeConfigIntent.DismissDialog -> {
                 _uiState.update { it.copy(activeDialog = null) }
-            ThemeConfigIntent.ResetDefaults -> resetDefaults()
-            is ThemeConfigIntent.SelectTheme -> selectTheme(intent.value)
-            is ThemeConfigIntent.SetThemeMode -> updateAppShell(
-                transform = { it.copy(themeMode = intent.value) },
-                effect = ThemeConfigEffect.ApplyDayNight,
-            )
-            is ThemeConfigIntent.SetComposeEngine -> updateAppShell {
-                it.copy(composeEngine = intent.value)
             }
-            is ThemeConfigIntent.SetPredictiveBackEnabled -> updateAppShell {
-                it.copy(predictiveBackEnabled = intent.enabled)
+            ThemeConfigIntent.ResetDefaults -> {
+                resetDefaults()
             }
-            is ThemeConfigIntent.SetFontScale -> updateAppShell {
-                it.copy(fontScale = intent.value)
+            is ThemeConfigIntent.SelectTheme -> {
+                selectTheme(intent.value)
             }
-            is ThemeConfigIntent.SetShowStatusBar -> updateAppShell(
-                transform = { it.copy(showStatusBar = intent.visible) },
-                effect = ThemeConfigEffect.NotifyMain,
-            )
-            is ThemeConfigIntent.SetSwipeAnimation -> updateAppShell {
-                it.copy(swipeAnimation = intent.enabled)
-            }
-            is ThemeConfigIntent.SetShowBottomView -> updateAppShell {
-                it.copy(showBottomView = intent.visible)
-            }
-            is ThemeConfigIntent.SetUseFloatingBottomBar -> updateAppShell {
-                it.copy(useFloatingBottomBar = intent.enabled)
-            }
-            is ThemeConfigIntent.SetUseFloatingBottomBarLiquidGlass -> updateAppShell {
-                it.copy(useFloatingBottomBarLiquidGlass = intent.enabled)
-            }
-            is ThemeConfigIntent.SetTabletInterface -> updateAppShell {
-                it.copy(tabletInterface = intent.value)
-            }
-            is ThemeConfigIntent.SetLabelVisibilityMode -> updateAppShell {
-                it.copy(labelVisibilityMode = intent.value)
-            }
-            is ThemeConfigIntent.SetMiuixMonet -> setMiuixMonet(intent.enabled)
-            is ThemeConfigIntent.SetDynamicColors -> setDynamicColors(intent.enabled)
-            is ThemeConfigIntent.SetBlurEnabled -> setBlurEnabled(intent.enabled)
-            is ThemeConfigIntent.SetMainDestinationVisible -> setMainDestinationVisible(intent)
-            is ThemeConfigIntent.SetMainNavigationOrder -> updateAppShell {
-                it.copy(mainNavigationOrder = intent.routes)
-            }
-            is ThemeConfigIntent.SetDefaultHomePage -> updateAppShell {
-                it.copy(defaultHomePage = intent.route)
-            }
-            is ThemeConfigIntent.SelectLauncherIcon -> selectLauncherIcon(intent.value)
-            is ThemeConfigIntent.SelectNavigationIcon -> selectNavigationIcon(intent)
-            is ThemeConfigIntent.RequestNavigationIcon -> _effects.tryEmit(
-                ThemeConfigEffect.OpenNavigationIcon(intent.destination)
-            )
-            is ThemeConfigIntent.RequestBackgroundImage -> _effects.tryEmit(
-                ThemeConfigEffect.OpenBackgroundImage(intent.dark)
-            )
-            is ThemeConfigIntent.SelectBackground -> setBackground(intent.uri, intent.dark)
-            is ThemeConfigIntent.RemoveBackground -> removeBackground(intent.dark)
-            is ThemeConfigIntent.RequestContainerBackgroundImage -> _effects.tryEmit(ThemeConfigEffect.OpenContainerBackgroundImage(intent.target, intent.dark))
-            is ThemeConfigIntent.SelectContainerBackground -> setContainerBackground(
-                uriString = intent.uri,
-                target = intent.target,
-                dark = intent.dark,
-            )
-            is ThemeConfigIntent.RemoveContainerBackground -> removeContainerBackground(
-                target = intent.target,
-                dark = intent.dark,
-            )
-            is ThemeConfigIntent.SelectAppFont -> setAppFont(intent.file)
-            ThemeConfigIntent.ClearAppFont -> clearAppFont()
-            is ThemeConfigIntent.SetFontFolder -> viewModelScope.launch {
-                readSettingsGateway.update { it.copy(fontFolder = intent.path) }
-            }
-            ThemeConfigIntent.RequestFontFolder -> _effects.tryEmit(ThemeConfigEffect.OpenFontFolder)
-            is ThemeConfigIntent.RequestTimePicker -> _uiState.update {
-                it.copy(
-                    activeDialog = ThemeConfigDialog.TimePicker(
-                        field = intent.field,
-                        currentValue = intent.currentValue,
-                    )
+            is ThemeConfigIntent.SetThemeMode -> {
+                updateAppShell(
+                    transform = { it.copy(themeMode = intent.value) },
+                    effect = ThemeConfigEffect.ApplyDayNight,
                 )
             }
-            is ThemeConfigIntent.SetTime -> setTime(intent.field, intent.value)
-            ThemeConfigIntent.DismissRefactorTip -> updateTheme {
-                it.copy(showRefactorTip = false)
+            is ThemeConfigIntent.SetComposeEngine -> {
+                updateAppShell {
+                    it.copy(composeEngine = intent.value)
+                }
+            }
+            is ThemeConfigIntent.SetPredictiveBackEnabled -> {
+                updateAppShell {
+                    it.copy(predictiveBackEnabled = intent.enabled)
+                }
+            }
+            is ThemeConfigIntent.SetFontScale -> {
+                updateAppShell {
+                    it.copy(fontScale = intent.value)
+                }
+            }
+            is ThemeConfigIntent.SetShowStatusBar -> {
+                updateAppShell(
+                    transform = { it.copy(showStatusBar = intent.visible) },
+                    effect = ThemeConfigEffect.NotifyMain,
+                )
+            }
+            is ThemeConfigIntent.SetSwipeAnimation -> {
+                updateAppShell {
+                    it.copy(swipeAnimation = intent.enabled)
+                }
+            }
+            is ThemeConfigIntent.SetShowBottomView -> {
+                updateAppShell {
+                    it.copy(showBottomView = intent.visible)
+                }
+            }
+            is ThemeConfigIntent.SetUseFloatingBottomBar -> {
+                updateAppShell {
+                    it.copy(useFloatingBottomBar = intent.enabled)
+                }
+            }
+            is ThemeConfigIntent.SetUseFloatingBottomBarLiquidGlass -> {
+                updateAppShell {
+                    it.copy(useFloatingBottomBarLiquidGlass = intent.enabled)
+                }
+            }
+            is ThemeConfigIntent.SetTabletInterface -> {
+                updateAppShell {
+                    it.copy(tabletInterface = intent.value)
+                }
+            }
+            is ThemeConfigIntent.SetLabelVisibilityMode -> {
+                updateAppShell {
+                    it.copy(labelVisibilityMode = intent.value)
+                }
+            }
+            is ThemeConfigIntent.SetMiuixMonet -> {
+                setMiuixMonet(intent.enabled)
+            }
+            is ThemeConfigIntent.SetDynamicColors -> {
+                setDynamicColors(intent.enabled)
+            }
+            is ThemeConfigIntent.SetBlurEnabled -> {
+                setBlurEnabled(intent.enabled)
+            }
+            is ThemeConfigIntent.SetMainDestinationVisible -> {
+                setMainDestinationVisible(intent)
+            }
+            is ThemeConfigIntent.SetMainNavigationOrder -> {
+                updateAppShell {
+                    it.copy(mainNavigationOrder = intent.routes)
+                }
+            }
+            is ThemeConfigIntent.SetDefaultHomePage -> {
+                updateAppShell {
+                    it.copy(defaultHomePage = intent.route)
+                }
+            }
+            is ThemeConfigIntent.SelectLauncherIcon -> {
+                selectLauncherIcon(intent.value)
+            }
+            is ThemeConfigIntent.SelectNavigationIcon -> {
+                selectNavigationIcon(intent)
+            }
+            is ThemeConfigIntent.RequestNavigationIcon -> {
+                _effects.tryEmit(
+                    ThemeConfigEffect.OpenNavigationIcon(intent.destination),
+                )
+            }
+            is ThemeConfigIntent.RequestBackgroundImage -> {
+                _effects.tryEmit(
+                    ThemeConfigEffect.OpenBackgroundImage(intent.dark),
+                )
+            }
+            is ThemeConfigIntent.SelectBackground -> {
+                setBackground(intent.uri, intent.dark)
+            }
+            is ThemeConfigIntent.RemoveBackground -> {
+                removeBackground(intent.dark)
+            }
+            is ThemeConfigIntent.RequestContainerBackgroundImage -> {
+                _effects.tryEmit(ThemeConfigEffect.OpenContainerBackgroundImage(intent.target, intent.dark))
+            }
+            is ThemeConfigIntent.SelectContainerBackground -> {
+                setContainerBackground(
+                    uriString = intent.uri,
+                    target = intent.target,
+                    dark = intent.dark,
+                )
+            }
+            is ThemeConfigIntent.RemoveContainerBackground -> {
+                removeContainerBackground(
+                    target = intent.target,
+                    dark = intent.dark,
+                )
+            }
+            is ThemeConfigIntent.SelectAppFont -> {
+                setAppFont(intent.file)
+            }
+            ThemeConfigIntent.ClearAppFont -> {
+                clearAppFont()
+            }
+            is ThemeConfigIntent.SetFontFolder -> {
+                viewModelScope.launch {
+                    readSettingsGateway.update { it.copy(fontFolder = intent.path) }
+                }
+            }
+            ThemeConfigIntent.RequestFontFolder -> {
+                _effects.tryEmit(ThemeConfigEffect.OpenFontFolder)
+            }
+            is ThemeConfigIntent.RequestTimePicker -> {
+                _uiState.update {
+                    it.copy(
+                        activeDialog =
+                        ThemeConfigDialog.TimePicker(
+                            field = intent.field,
+                            currentValue = intent.currentValue,
+                        ),
+                    )
+                }
+            }
+            is ThemeConfigIntent.SetTime -> {
+                setTime(intent.field, intent.value)
+            }
+            ThemeConfigIntent.DismissRefactorTip -> {
+                updateTheme {
+                    it.copy(showRefactorTip = false)
+                }
             }
         }
     }
@@ -210,8 +287,7 @@ class ThemeConfigViewModel(
                 currentTheme.largeContainerBackgroundImageDark,
                 currentTheme.itemBackgroundImageLight,
                 currentTheme.itemBackgroundImageDark,
-            )
-                .filterNotNull()
+            ).filterNotNull()
                 .map(::File)
                 .filter { it.absolutePath.startsWith(appCtx.externalFiles.absolutePath) }
                 .forEach { it.delete() }
@@ -257,7 +333,8 @@ class ThemeConfigViewModel(
             themeSettingsGateway.update {
                 it.copy(
                     useMiuixMonet = enabled,
-                    appTheme = if (enabled && it.appTheme != "0" && it.appTheme != "12") {
+                    appTheme =
+                    if (enabled && it.appTheme != "0" && it.appTheme != "12") {
                         "0"
                     } else {
                         it.appTheme
@@ -277,7 +354,8 @@ class ThemeConfigViewModel(
             themeSettingsGateway.update {
                 it.copy(
                     enableBlur = enabled,
-                    enableProgressiveBlur = if (enabled) {
+                    enableProgressiveBlur =
+                    if (enabled) {
                         it.enableProgressiveBlur
                     } else {
                         false
@@ -288,12 +366,13 @@ class ThemeConfigViewModel(
     }
 
     private fun setMainDestinationVisible(intent: ThemeConfigIntent.SetMainDestinationVisible) {
-        val transform: (AppShellSettings) -> AppShellSettings = when (intent.route) {
-            MainDestination.Home.route -> { current ->
-                current.copy(showHome = intent.visible)
+        val transform: (AppShellSettings) -> AppShellSettings =
+            when (intent.route) {
+                MainDestination.Home.route -> { current ->
+                    current.copy(showHome = intent.visible)
+                }
+                else -> return
             }
-            else -> return
-        }
         viewModelScope.launch {
             appShellSettingsGateway.update(transform)
         }
@@ -309,33 +388,34 @@ class ThemeConfigViewModel(
     private fun selectNavigationIcon(intent: ThemeConfigIntent.SelectNavigationIcon) {
         val current = appShellSettingsGateway.currentSettings
         val oldPath = current.navIconPath(intent.destination)
-        val transform: (AppShellSettings) -> AppShellSettings = when (intent.destination) {
-            MainDestination.Home.route -> { settings ->
-                settings.copy(navIconHome = intent.path)
+        val transform: (AppShellSettings) -> AppShellSettings =
+            when (intent.destination) {
+                MainDestination.Home.route -> { settings ->
+                    settings.copy(navIconHome = intent.path)
+                }
+                MainDestination.Bookshelf.route -> { settings ->
+                    settings.copy(navIconBookshelf = intent.path)
+                }
+                MainDestination.My.route -> { settings ->
+                    settings.copy(navIconMy = intent.path)
+                }
+                "${MainDestination.Home.route}:selected" -> { settings ->
+                    settings.copy(navIconHomeSelected = intent.path)
+                }
+                "${MainDestination.Bookshelf.route}:selected" -> { settings ->
+                    settings.copy(navIconBookshelfSelected = intent.path)
+                }
+                "${MainDestination.My.route}:selected" -> { settings ->
+                    settings.copy(navIconMySelected = intent.path)
+                }
+                else -> return
             }
-            MainDestination.Bookshelf.route -> { settings ->
-                settings.copy(navIconBookshelf = intent.path)
-            }
-            MainDestination.My.route -> { settings ->
-                settings.copy(navIconMy = intent.path)
-            }
-            "${MainDestination.Home.route}:selected" -> { settings ->
-                settings.copy(navIconHomeSelected = intent.path)
-            }
-            "${MainDestination.Bookshelf.route}:selected" -> { settings ->
-                settings.copy(navIconBookshelfSelected = intent.path)
-            }
-
-            "${MainDestination.My.route}:selected" -> { settings ->
-                settings.copy(navIconMySelected = intent.path)
-            }
-            else -> return
-        }
         viewModelScope.launch(Dispatchers.IO) {
             runCatching {
                 // 文件按内容摘要命名，多个槽位可能引用同一文件；
                 // 只有不再被任何槽位引用时才删除，避免误删共享图片。
-                if (oldPath.isNotEmpty() && oldPath != intent.path &&
+                if (oldPath.isNotEmpty() &&
+                    oldPath != intent.path &&
                     current.navIconFileUsage(oldPath) <= 1
                 ) {
                     File(oldPath).delete()
@@ -368,7 +448,10 @@ class ThemeConfigViewModel(
         navIconMySelected,
     ).count { it == path }
 
-    private fun setTime(field: ThemeTimeField, value: String) {
+    private fun setTime(
+        field: ThemeTimeField,
+        value: String,
+    ) {
         updateTheme {
             when (field) {
                 ThemeTimeField.EyeProtectionStart -> it.copy(eyeProtectionStartTime = value)
@@ -377,7 +460,10 @@ class ThemeConfigViewModel(
         }
     }
 
-    private fun setBackground(uriString: String, dark: Boolean) {
+    private fun setBackground(
+        uriString: String,
+        dark: Boolean,
+    ) {
         viewModelScope.launch(Dispatchers.IO) {
             runCatching {
                 val preferenceKey = if (dark) PreferKey.bgImageN else PreferKey.bgImage
@@ -396,35 +482,45 @@ class ThemeConfigViewModel(
     ) {
         viewModelScope.launch(Dispatchers.IO) {
             runCatching {
-                val folderName = buildString {
-                    append("container_background/")
-                    append(if (target == ContainerBackgroundTarget.LargeContainer) "large" else "item")
-                    append(if (dark) "_dark" else "_light")
-                }
+                val folderName =
+                    buildString {
+                        append("container_background/")
+                        append(if (target == ContainerBackgroundTarget.LargeContainer) "large" else "item")
+                        append(if (dark) "_dark" else "_light")
+                    }
                 val newPath = copyBackgroundImage(uriString, folderName)
-                val oldPath = when (target) {
-                    ContainerBackgroundTarget.LargeContainer -> if (dark) {
-                        _uiState.value.theme.largeContainerBackgroundImageDark
-                    } else {
-                        _uiState.value.theme.largeContainerBackgroundImageLight
+                val oldPath =
+                    when (target) {
+                        ContainerBackgroundTarget.LargeContainer -> {
+                            if (dark) {
+                                _uiState.value.theme.largeContainerBackgroundImageDark
+                            } else {
+                                _uiState.value.theme.largeContainerBackgroundImageLight
+                            }
+                        }
+                        ContainerBackgroundTarget.Item -> {
+                            if (dark) {
+                                _uiState.value.theme.itemBackgroundImageDark
+                            } else {
+                                _uiState.value.theme.itemBackgroundImageLight
+                            }
+                        }
                     }
-                    ContainerBackgroundTarget.Item -> if (dark) {
-                        _uiState.value.theme.itemBackgroundImageDark
-                    } else {
-                        _uiState.value.theme.itemBackgroundImageLight
-                    }
-                }
                 themeSettingsGateway.update { theme ->
                     when (target) {
-                        ContainerBackgroundTarget.LargeContainer -> if (dark) {
-                            theme.copy(largeContainerBackgroundImageDark = newPath)
-                        } else {
-                            theme.copy(largeContainerBackgroundImageLight = newPath)
+                        ContainerBackgroundTarget.LargeContainer -> {
+                            if (dark) {
+                                theme.copy(largeContainerBackgroundImageDark = newPath)
+                            } else {
+                                theme.copy(largeContainerBackgroundImageLight = newPath)
+                            }
                         }
-                        ContainerBackgroundTarget.Item -> if (dark) {
-                            theme.copy(itemBackgroundImageDark = newPath)
-                        } else {
-                            theme.copy(itemBackgroundImageLight = newPath)
+                        ContainerBackgroundTarget.Item -> {
+                            if (dark) {
+                                theme.copy(itemBackgroundImageDark = newPath)
+                            } else {
+                                theme.copy(itemBackgroundImageLight = newPath)
+                            }
                         }
                     }
                 }
@@ -433,14 +529,18 @@ class ThemeConfigViewModel(
         }
     }
 
-    private fun copyBackgroundImage(uriString: String, folderName: String): String {
+    private fun copyBackgroundImage(
+        uriString: String,
+        folderName: String,
+    ): String {
         val uri = Uri.parse(uriString)
         val fileDoc = FileDoc.fromUri(uri, false)
-        val suffix = if (fileDoc.name.endsWith(".9.png", ignoreCase = true)) {
-            "9.png"
-        } else {
-            fileDoc.name.substringAfterLast(".", "jpg")
-        }
+        val suffix =
+            if (fileDoc.name.endsWith(".9.png", ignoreCase = true)) {
+                "9.png"
+            } else {
+                fileDoc.name.substringAfterLast(".", "jpg")
+            }
         val md5 = uri.inputStream(appCtx).getOrThrow().use(MD5Utils::md5Encode)
         val file = File(File(appCtx.externalFiles, folderName), "$md5.$suffix")
         if (!file.exists()) {
@@ -460,19 +560,23 @@ class ThemeConfigViewModel(
             var oldPath: String? = null
             themeSettingsGateway.update { theme ->
                 when (target) {
-                    ContainerBackgroundTarget.LargeContainer -> if (dark) {
-                        oldPath = theme.largeContainerBackgroundImageDark
-                        theme.copy(largeContainerBackgroundImageDark = null)
-                    } else {
-                        oldPath = theme.largeContainerBackgroundImageLight
-                        theme.copy(largeContainerBackgroundImageLight = null)
+                    ContainerBackgroundTarget.LargeContainer -> {
+                        if (dark) {
+                            oldPath = theme.largeContainerBackgroundImageDark
+                            theme.copy(largeContainerBackgroundImageDark = null)
+                        } else {
+                            oldPath = theme.largeContainerBackgroundImageLight
+                            theme.copy(largeContainerBackgroundImageLight = null)
+                        }
                     }
-                    ContainerBackgroundTarget.Item -> if (dark) {
-                        oldPath = theme.itemBackgroundImageDark
-                        theme.copy(itemBackgroundImageDark = null)
-                    } else {
-                        oldPath = theme.itemBackgroundImageLight
-                        theme.copy(itemBackgroundImageLight = null)
+                    ContainerBackgroundTarget.Item -> {
+                        if (dark) {
+                            oldPath = theme.itemBackgroundImageDark
+                            theme.copy(itemBackgroundImageDark = null)
+                        } else {
+                            oldPath = theme.itemBackgroundImageLight
+                            theme.copy(itemBackgroundImageLight = null)
+                        }
                     }
                 }
             }
@@ -480,7 +584,10 @@ class ThemeConfigViewModel(
         }
     }
 
-    private fun deleteOwnedBackground(oldPath: String?, newPath: String?) {
+    private fun deleteOwnedBackground(
+        oldPath: String?,
+        newPath: String?,
+    ) {
         if (oldPath == null || oldPath == newPath) return
         File(oldPath)
             .takeIf { it.absolutePath.startsWith(appCtx.externalFiles.absolutePath) }
@@ -491,46 +598,56 @@ class ThemeConfigViewModel(
         viewModelScope.launch(Dispatchers.IO) { updateBackgroundPath(dark, null) }
     }
 
-    private suspend fun updateBackgroundPath(dark: Boolean, newPath: String?) {
-        val oldPath = if (dark) {
-            _uiState.value.theme.backgroundImageDark
-        } else {
-            _uiState.value.theme.backgroundImageLight
-        }
+    private suspend fun updateBackgroundPath(
+        dark: Boolean,
+        newPath: String?,
+    ) {
+        val oldPath =
+            if (dark) {
+                _uiState.value.theme.backgroundImageDark
+            } else {
+                _uiState.value.theme.backgroundImageLight
+            }
         deleteOwnedBackground(oldPath, newPath)
         themeSettingsGateway.update {
-            if (dark) it.copy(backgroundImageDark = newPath)
-            else it.copy(backgroundImageLight = newPath)
+            if (dark) {
+                it.copy(backgroundImageDark = newPath)
+            } else {
+                it.copy(backgroundImageLight = newPath)
+            }
         }
     }
 
     private fun setAppFont(fileDoc: FileDoc) {
         launchFontJob {
-            val extension = fileDoc.name.substringAfterLast('.', "ttf")
-                .lowercase()
-                .takeIf { it.matches(Regex("[a-z0-9]{1,8}")) }
-                ?: "ttf"
+            val extension =
+                fileDoc.name
+                    .substringAfterLast('.', "ttf")
+                    .lowercase()
+                    .takeIf { it.matches(Regex("[a-z0-9]{1,8}")) }
+                    ?: "ttf"
             val fontDir = appFontDir()
             val temp = File(fontDir, "app_font_${Uuid.random()}.tmp")
-            val target = try {
-                fileDoc.openInputStream().getOrThrow().use { input ->
-                    FileOutputStream(temp).use(input::copyTo)
-                }
-                // 以内容摘要命名：同一字体无论导入多少次都指向同一路径，
-                // 既不会留下重复副本，字体缓存也能按路径命中。
-                val digest = temp.inputStream().use(MD5Utils::md5Encode)
-                File(fontDir, "app_font_$digest.$extension").also { target ->
-                    if (target.isFile) {
-                        temp.delete()
-                    } else if (!temp.renameTo(target)) {
-                        temp.copyTo(target, overwrite = true)
-                        temp.delete()
+            val target =
+                try {
+                    fileDoc.openInputStream().getOrThrow().use { input ->
+                        FileOutputStream(temp).use(input::copyTo)
                     }
+                    // 以内容摘要命名：同一字体无论导入多少次都指向同一路径，
+                    // 既不会留下重复副本，字体缓存也能按路径命中。
+                    val digest = temp.inputStream().use(MD5Utils::md5Encode)
+                    File(fontDir, "app_font_$digest.$extension").also { target ->
+                        if (target.isFile) {
+                            temp.delete()
+                        } else if (!temp.renameTo(target)) {
+                            temp.copyTo(target, overwrite = true)
+                            temp.delete()
+                        }
+                    }
+                } catch (e: Throwable) {
+                    temp.delete()
+                    throw e
                 }
-            } catch (e: Throwable) {
-                temp.delete()
-                throw e
-            }
             // 复制期间可能已被新的选择或清除取代，此时不能写回路径。
             ensureActive()
             themeSettingsGateway.update { it.copy(appFontPath = target.absolutePath) }
@@ -551,11 +668,12 @@ class ThemeConfigViewModel(
      */
     private fun launchFontJob(block: suspend CoroutineScope.() -> Unit) {
         val previous = fontJob
-        fontJob = viewModelScope.launch(Dispatchers.IO) {
-            previous?.cancelAndJoin()
-            runCatching { block() }
-                .onFailure { if (it !is CancellationException) it.printStackTrace() }
-        }
+        fontJob =
+            viewModelScope.launch(Dispatchers.IO) {
+                previous?.cancelAndJoin()
+                runCatching { block() }
+                    .onFailure { if (it !is CancellationException) it.printStackTrace() }
+            }
     }
 
     private fun appFontDir() = File(appCtx.filesDir, "fonts").apply { mkdirs() }

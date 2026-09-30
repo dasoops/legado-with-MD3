@@ -1,7 +1,6 @@
 package io.legado.app.help.coroutine
 
 internal interface CoroutineContainer {
-
     fun add(coroutine: Coroutine<*>): Boolean
 
     fun addAll(vararg coroutines: Coroutine<*>): Boolean
@@ -11,5 +10,4 @@ internal interface CoroutineContainer {
     fun delete(coroutine: Coroutine<*>): Boolean
 
     fun clear()
-
 }

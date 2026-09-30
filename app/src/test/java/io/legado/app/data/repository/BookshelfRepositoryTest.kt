@@ -5,10 +5,13 @@ import org.junit.Assert.assertEquals
 import org.junit.Test
 
 class BookshelfRepositoryTest {
-
     private val repository = BookshelfRepository()
 
-    private fun book(url: String, durChapterTime: Long = 0L, order: Int = 0) = BookShelfItem(
+    private fun book(
+        url: String,
+        durChapterTime: Long = 0L,
+        order: Int = 0,
+    ) = BookShelfItem(
         bookUrl = url,
         name = url,
         author = "",
@@ -49,11 +52,12 @@ class BookshelfRepositoryTest {
 
     @Test
     fun `手动排序按 order`() {
-        val books = listOf(
-            book("a", order = 3),
-            book("b", order = 1),
-            book("c", order = 2),
-        )
+        val books =
+            listOf(
+                book("a", order = 3),
+                book("b", order = 1),
+                book("c", order = 2),
+            )
 
         val sorted = repository.sortBooks(books, sort = 3, sortOrder = 0)
 

@@ -1,11 +1,11 @@
 package io.legado.app.utils
 
+import java.io.File
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
-import java.io.File
 
 /**
  * R4.2 —— 排版配置的写盘必须原子。
@@ -15,7 +15,6 @@ import java.io.File
  * （`ReadStyleConfigStore.save()` 与 `ReadStyleSaveQueue`）还会并发落到同一个文件上。
  */
 class FileUtilsAtomicWriteTest {
-
     @get:Rule
     val folder = TemporaryFolder()
 

@@ -27,9 +27,8 @@ data class BookGroup(
     @ColumnInfo(defaultValue = "0")
     var isPrivate: Boolean = false,
     var localDirectoryUri: String? = null,
-    var pattern: String? = null
+    var pattern: String? = null,
 ) : Parcelable {
-
     val isTag: Boolean get() = groupId < -100 && groupId != Long.MIN_VALUE
 
     val isLocalDirectory: Boolean get() = !localDirectoryUri.isNullOrBlank()
@@ -51,42 +50,37 @@ data class BookGroup(
 
     data class GroupNameInfo(
         val groupName: String,
-        val suffix: String? = null
+        val suffix: String? = null,
     )
 
-    fun getManageName(context: Context): GroupNameInfo {
-        return when (groupId) {
-            IdAll -> GroupNameInfo(groupName, context.getString(R.string.all))
-            IdLocal -> GroupNameInfo(groupName, context.getString(R.string.local))
-            IdLocalNone -> GroupNameInfo(groupName, context.getString(R.string.local_no_group))
-            IdText -> GroupNameInfo(groupName, context.getString(R.string.noval))
-            IdReading -> GroupNameInfo(groupName, context.getString(R.string.is_reading))
-            IdUnread -> GroupNameInfo(groupName, context.getString(R.string.is_unread))
-            IdReadFinished -> GroupNameInfo(groupName, context.getString(R.string.is_read_finished))
-            IdReadFinishedUpdate -> GroupNameInfo(groupName, context.getString(R.string.is_read_finished_update))
-            IdReadFinishedComplete -> GroupNameInfo(groupName, context.getString(R.string.is_read_finished_complete))
-            else -> GroupNameInfo(groupName)
-        }
+    fun getManageName(context: Context): GroupNameInfo = when (groupId) {
+        IdAll -> GroupNameInfo(groupName, context.getString(R.string.all))
+        IdLocal -> GroupNameInfo(groupName, context.getString(R.string.local))
+        IdLocalNone -> GroupNameInfo(groupName, context.getString(R.string.local_no_group))
+        IdText -> GroupNameInfo(groupName, context.getString(R.string.noval))
+        IdReading -> GroupNameInfo(groupName, context.getString(R.string.is_reading))
+        IdUnread -> GroupNameInfo(groupName, context.getString(R.string.is_unread))
+        IdReadFinished -> GroupNameInfo(groupName, context.getString(R.string.is_read_finished))
+        IdReadFinishedUpdate -> GroupNameInfo(groupName, context.getString(R.string.is_read_finished_update))
+        IdReadFinishedComplete -> GroupNameInfo(groupName, context.getString(R.string.is_read_finished_complete))
+        else -> GroupNameInfo(groupName)
     }
 
-    override fun hashCode(): Int {
-        return 31 * groupId.hashCode() + (localDirectoryUri?.hashCode() ?: 0)
-    }
+    override fun hashCode(): Int = 31 * groupId.hashCode() + (localDirectoryUri?.hashCode() ?: 0)
 
     override fun equals(other: Any?): Boolean {
         if (other is BookGroup) {
-            return other.groupId == groupId
-                    && other.groupName == groupName
-                    && other.cover == cover
-                    && other.bookSort == bookSort
-                    && other.enableRefresh == enableRefresh
-                    && other.show == show
-                    && other.order == order
-                    && other.isPrivate == isPrivate
-                    && other.localDirectoryUri == localDirectoryUri
-                    && other.pattern == pattern
+            return other.groupId == groupId &&
+                other.groupName == groupName &&
+                other.cover == cover &&
+                other.bookSort == bookSort &&
+                other.enableRefresh == enableRefresh &&
+                other.show == show &&
+                other.order == order &&
+                other.isPrivate == isPrivate &&
+                other.localDirectoryUri == localDirectoryUri &&
+                other.pattern == pattern
         }
         return false
     }
-
 }

@@ -13,7 +13,9 @@ import io.legado.app.R
 
 object ToolbarUtils {
     @JvmStatic
-    fun MaterialToolbar.setAllIconsColor(@ColorInt color: Int) {
+    fun MaterialToolbar.setAllIconsColor(
+        @ColorInt color: Int,
+    ) {
         // 导航图标
         navigationIcon?.setTint(color)
 

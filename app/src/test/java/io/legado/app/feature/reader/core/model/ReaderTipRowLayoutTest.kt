@@ -4,7 +4,6 @@ import org.junit.Assert.assertEquals
 import org.junit.Test
 
 class ReaderTipRowLayoutTest {
-
     @Test
     fun `row extent includes full font padding instead of nominal text size`() {
         assertEquals(

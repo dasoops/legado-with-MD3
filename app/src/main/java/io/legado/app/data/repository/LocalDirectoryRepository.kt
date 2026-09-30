@@ -15,15 +15,14 @@ import io.legado.app.model.localBook.LocalBook
 import io.legado.app.utils.FileDoc
 import io.legado.app.utils.isContentScheme
 import io.legado.app.utils.list
+import java.io.File
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import splitties.init.appCtx
-import java.io.File
 
 class LocalDirectoryRepository(
     private val bookRepository: BookRepository,
 ) : LocalDirectoryGateway {
-
     override suspend fun directoryName(rootUri: String): String? = withContext(Dispatchers.IO) {
         runCatching {
             val uri = rootUri.toUri()
@@ -34,7 +33,9 @@ class LocalDirectoryRepository(
             }
         }.getOrNull()
             ?.takeIf { it.isNotBlank() }
-            ?: treeDocumentId(rootUri)?.substringAfterLast('/')?.substringAfter(':')
+            ?: treeDocumentId(rootUri)
+                ?.substringAfterLast('/')
+                ?.substringAfter(':')
                 ?.takeIf { it.isNotBlank() }
     }
 
@@ -80,7 +81,10 @@ class LocalDirectoryRepository(
      * 用当前规则刷新书籍的目录标签: 先摘掉旧目录标签, 再补入新目录标签, 保留用户手动标签.
      * 历史导入曾把所选目录名及绝对路径层级写成标签, 会与本地目录分组名重复.
      */
-    internal suspend fun syncDirectoryTags(book: Book, newTags: List<String>) {
+    internal suspend fun syncDirectoryTags(
+        book: Book,
+        newTags: List<String>,
+    ) {
         val oldTags = book.config.directoryTags.orEmpty()
         if (oldTags == newTags) return
         val userTags = BookTags.parse(book.customTag).filterNot { it in oldTags }
@@ -89,11 +93,12 @@ class LocalDirectoryRepository(
         bookRepository.update(book)
     }
 
-    override fun relativeDirectory(rootUri: String, bookUrl: String): List<String> =
-        relativeDirectoryOf(rootUri, bookUrl)
+    override fun relativeDirectory(
+        rootUri: String,
+        bookUrl: String,
+    ): List<String> = relativeDirectoryOf(rootUri, bookUrl)
 
-    private fun treeDocumentId(rootUri: String): String? =
-        runCatching { getTreeDocumentId(rootUri.toUri()) }.getOrNull()
+    private fun treeDocumentId(rootUri: String): String? = runCatching { getTreeDocumentId(rootUri.toUri()) }.getOrNull()
 
     /**
      * 构造根文档。不能用 FileDoc.fromUri(..., true):
@@ -111,13 +116,15 @@ class LocalDirectoryRepository(
                 uri = treeUri,
             )
         }
-        val name = runCatching { DocumentFile.fromTreeUri(appCtx, treeUri)?.name }.getOrNull()
-            ?: getTreeDocumentId(treeUri).substringAfterLast('/').substringAfter(':')
+        val name =
+            runCatching { DocumentFile.fromTreeUri(appCtx, treeUri)?.name }.getOrNull()
+                ?: getTreeDocumentId(treeUri).substringAfterLast('/').substringAfter(':')
         // FileDoc.list 内部用 getDocumentId, 对 tree URI (2 段路径) 会抛 IllegalArgumentException;
         // 转成 document URI (4 段) 后根目录与子目录列举才能正常工作
-        val documentUri = runCatching {
-            DocumentsContract.buildDocumentUriUsingTree(treeUri, getTreeDocumentId(treeUri))
-        }.getOrDefault(treeUri)
+        val documentUri =
+            runCatching {
+                DocumentsContract.buildDocumentUriUsingTree(treeUri, getTreeDocumentId(treeUri))
+            }.getOrDefault(treeUri)
         return FileDoc(name = name, isDir = true, size = 0, lastModified = 0, uri = documentUri)
     }
 
@@ -127,9 +134,10 @@ class LocalDirectoryRepository(
         queue.add(root)
         while (queue.isNotEmpty()) {
             val dir = queue.removeFirst()
-            val children = runCatching { dir.list() }
-                .onFailure { AppLog.put("读取目录失败\n${dir.uri}", it) }
-                .getOrNull() ?: continue
+            val children =
+                runCatching { dir.list() }
+                    .onFailure { AppLog.put("读取目录失败\n${dir.uri}", it) }
+                    .getOrNull() ?: continue
             children.forEach { child ->
                 when {
                     child.name.startsWith(".") -> Unit
@@ -146,16 +154,20 @@ class LocalDirectoryRepository(
  * 计算 bookUrl 相对 rootUri 的目录层级 (不含文件名). 本地目录分组据此生成相对标签,
  * 不能让绝对路径里所选目录之上的层级混入标签.
  */
-internal fun relativeDirectoryOf(rootUri: String, bookUrl: String): List<String> {
+internal fun relativeDirectoryOf(
+    rootUri: String,
+    bookUrl: String,
+): List<String> {
     return runCatching {
         val root = rootUri.toUri()
         if (root.isContentScheme()) {
             val rootId = getTreeDocumentId(root)
             val bookId = getDocumentId(bookUrl.toUri())
-            val relativeId = bookId
-                .takeIf { it.startsWith("$rootId/") }
-                ?.removePrefix("$rootId/")
-                ?: return emptyList()
+            val relativeId =
+                bookId
+                    .takeIf { it.startsWith("$rootId/") }
+                    ?.removePrefix("$rootId/")
+                    ?: return emptyList()
             relativeId
                 .split('/')
                 .dropLast(1)
@@ -164,7 +176,9 @@ internal fun relativeDirectoryOf(rootUri: String, bookUrl: String): List<String>
             val rootPath = root.path ?: return emptyList()
             val bookPath = bookUrl.toUri().path ?: return emptyList()
             // 测试/构建可能运行在 Windows 上, File.relativeTo 的路径分隔符随平台变化.
-            File(bookPath).relativeTo(File(rootPath)).path
+            File(bookPath)
+                .relativeTo(File(rootPath))
+                .path
                 .replace('\\', '/')
                 .split('/')
                 .dropLast(1)
@@ -177,7 +191,10 @@ internal fun relativeDirectoryOf(rootUri: String, bookUrl: String): List<String>
  * 本地目录分组的书籍目录标签: 以所选目录名为起点, 追加其下的相对子目录.
  * 目录名和子目录可能重复, 由 editable 统一去重.
  */
-internal fun directoryTagsOf(rootUri: String, rootName: String?, bookUrl: String): List<String> =
-    BookTags.editable(
-        listOfNotNull(rootName) + relativeDirectoryOf(rootUri, bookUrl)
-    )
+internal fun directoryTagsOf(
+    rootUri: String,
+    rootName: String?,
+    bookUrl: String,
+): List<String> = BookTags.editable(
+    listOfNotNull(rootName) + relativeDirectoryOf(rootUri, bookUrl),
+)

@@ -8,21 +8,19 @@ import androidx.room.PrimaryKey
 data class ReadRecordSession(
     @PrimaryKey(autoGenerate = true)
     val id: Long = 0,
-
     val deviceId: String = "",
     val bookName: String = "",
     @ColumnInfo(defaultValue = "")
     val bookAuthor: String = "",
-
     // 一次阅读的开始/结束
     val startTime: Long = 0,
     val endTime: Long = 0,
-
     // 本次阅读时所在的章节序号（durChapterIndex），用于时间线定位章节标题；不是字数
-    val words: Long = 0
+    val words: Long = 0,
 ) {
     /** 跨设备稳定身份，不依赖 Room 自动生成的数据库行 ID。 */
     val stableFingerprint: String
-        get() = listOf(deviceId, bookName, bookAuthor, startTime, endTime, words)
-            .joinToString("\u0001")
+        get() =
+            listOf(deviceId, bookName, bookAuthor, startTime, endTime, words)
+                .joinToString("\u0001")
 }

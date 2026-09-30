@@ -16,7 +16,10 @@ interface BaseBook : RuleDataInterface {
     var infoHtml: String?
     var tocHtml: String?
 
-    override fun putVariable(key: String, value: String?): Boolean {
+    override fun putVariable(
+        key: String,
+        value: String?,
+    ): Boolean {
         if (super.putVariable(key, value)) {
             variable = GSON.toJson(variableMap)
         }
@@ -27,17 +30,16 @@ interface BaseBook : RuleDataInterface {
         putVariable("custom", value)
     }
 
-    fun getCustomVariable(): String {
-        return getVariable("custom")
-    }
+    fun getCustomVariable(): String = getVariable("custom")
 
-    override fun putBigVariable(key: String, value: String?) {
+    override fun putBigVariable(
+        key: String,
+        value: String?,
+    ) {
         RuleBigDataHelp.putBookVariable(bookUrl, key, value)
     }
 
-    override fun getBigVariable(key: String): String? {
-        return RuleBigDataHelp.getBookVariable(bookUrl, key)
-    }
+    override fun getBigVariable(key: String): String? = RuleBigDataHelp.getBookVariable(bookUrl, key)
 
     fun getKindList(): List<String> {
         val kindList = arrayListOf<String>()

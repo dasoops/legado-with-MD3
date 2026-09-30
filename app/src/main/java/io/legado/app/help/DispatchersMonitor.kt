@@ -2,7 +2,7 @@ package io.legado.app.help
 
 import io.legado.app.domain.gateway.OtherSettingsGateway
 import io.legado.app.utils.LogUtils
-import org.koin.core.context.GlobalContext
+import java.util.concurrent.Executors
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers.Default
@@ -17,18 +17,18 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.selects.onTimeout
 import kotlinx.coroutines.selects.select
 import kotlinx.coroutines.withContext
-import java.util.concurrent.Executors
+import org.koin.core.context.GlobalContext
 
 object DispatchersMonitor {
-
     private const val TAG = "DispatchersMonitor"
 
     private val otherGateway by lazy { GlobalContext.get().get<OtherSettingsGateway>() }
 
     private val dispatcher by lazy {
-        Executors.newSingleThreadExecutor {
-            Thread(it, TAG)
-        }.asCoroutineDispatcher()
+        Executors
+            .newSingleThreadExecutor {
+                Thread(it, TAG)
+            }.asCoroutineDispatcher()
     }
 
     private val scope = CoroutineScope(dispatcher)
@@ -46,17 +46,18 @@ object DispatchersMonitor {
     @OptIn(ExperimentalCoroutinesApi::class)
     private fun monitor(dispatcher: CoroutineDispatcher) {
         scope.launch {
-            while (isActive) select {
-                launch {
-                    withContext(dispatcher) {
-                        delay(3000)
+            while (isActive) {
+                select {
+                    launch {
+                        withContext(dispatcher) {
+                            delay(3000)
+                        }
+                    }.onJoin {}
+                    onTimeout(5000) {
+                        LogUtils.d(TAG, "Dispatcher $dispatcher is timed out waiting for for 5000ms.")
                     }
-                }.onJoin {}
-                onTimeout(5000) {
-                    LogUtils.d(TAG, "Dispatcher $dispatcher is timed out waiting for for 5000ms.")
                 }
             }
         }
     }
-
 }

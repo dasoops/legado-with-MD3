@@ -31,7 +31,8 @@ fun ReadBookSearchBar(
     // The side result controls belong to the search menu, not merely to search mode.
     // Keeping them tied to searchMenuVisible prevents them from lingering after the menu is
     // dismissed and mirrors ReadBookMenuBar's visibility contract.
-    val searchVisible = state.isShowingSearchResult &&
+    val searchVisible =
+        state.isShowingSearchResult &&
             state.searchMenuVisible &&
             !state.menuVisible
     val hasResults = state.searchResultList.isNotEmpty()
@@ -44,7 +45,8 @@ fun ReadBookSearchBar(
             visible = searchVisible && hasResults && currentIndex > 0,
             enter = fadeIn(),
             exit = fadeOut(),
-            modifier = Modifier
+            modifier =
+            Modifier
                 .align(Alignment.CenterStart)
                 .padding(start = 16.dp),
         ) {
@@ -69,7 +71,8 @@ fun ReadBookSearchBar(
             visible = searchVisible && hasResults && currentIndex < totalResults - 1,
             enter = fadeIn(),
             exit = fadeOut(),
-            modifier = Modifier
+            modifier =
+            Modifier
                 .align(Alignment.CenterEnd)
                 .padding(end = 16.dp),
         ) {

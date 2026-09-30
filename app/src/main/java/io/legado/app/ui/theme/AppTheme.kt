@@ -21,7 +21,7 @@ import top.yukonga.miuix.kmp.theme.ColorSchemeMode
 fun AppTheme(
     configuration: AppUiConfiguration,
     darkTheme: Boolean = configuration.isDarkTheme,
-    content: @Composable () -> Unit
+    content: @Composable () -> Unit,
 ) {
     CompositionLocalProvider(LocalAppUiConfiguration provides configuration) {
         if (LocalInspectionMode.current) {
@@ -36,7 +36,7 @@ fun AppTheme(
 @Composable
 private fun AppThemePreview(
     darkTheme: Boolean,
-    content: @Composable () -> Unit
+    content: @Composable () -> Unit,
 ) {
     val colorScheme = if (darkTheme) darkColorScheme() else lightColorScheme()
     val themeColors = LegadoThemeMode(
@@ -46,7 +46,7 @@ private fun AppThemePreview(
         paletteStyle = PaletteStyle.TonalSpot,
         themeMode = if (darkTheme) ColorSchemeMode.Dark else ColorSchemeMode.Light,
         useDynamicColor = false,
-        composeEngine = "material"
+        composeEngine = "material",
     )
     CompositionLocalProvider(
         LocalLegadoThemeColors provides themeColors,
@@ -54,7 +54,7 @@ private fun AppThemePreview(
         MaterialThemeWrapper(
             themeColors = themeColors,
             customFontFamily = null,
-            content = content
+            content = content,
         )
     }
 }
@@ -64,12 +64,12 @@ private fun AppThemePreview(
 private fun AppThemeActual(
     configuration: AppUiConfiguration,
     darkTheme: Boolean,
-    content: @Composable () -> Unit
+    content: @Composable () -> Unit,
 ) {
     val appShellSettings = configuration.appShell
     val themeSettings = configuration.theme
     val context = LocalContext.current
-    
+
     // 1. 获取基础配置
     val appThemeMode = ThemeResolver.resolveThemeMode(themeSettings.appTheme)
     val effectiveDarkTheme = darkTheme
@@ -110,7 +110,7 @@ private fun AppThemeActual(
                 backgroundColor = if (customColors.background != 0) Color(customColors.background) else Color(0xFFFEF7FF),
                 primaryFontColor = if (customColors.primaryText != 0) Color(customColors.primaryText) else Color(0xFF1C1B1F),
                 secondaryFontColor = if (customColors.secondaryText != 0) Color(customColors.secondaryText) else Color(0xFF49454F),
-                labelContainerColor = if (customColors.labelContainer != 0) Color(customColors.labelContainer) else Color(0xFFF7F2FA)
+                labelContainerColor = if (customColors.labelContainer != 0) Color(customColors.labelContainer) else Color(0xFFF7F2FA),
             )
             generateColorScheme(userPalette, effectiveDarkTheme)
         } else {
@@ -130,7 +130,11 @@ private fun AppThemeActual(
 
     // 5. 确定种子颜色
     val themeSeedColor = remember(
-        appThemeMode, colorScheme.primary, effectiveDarkTheme, customPrimary, customNightPrimary
+        appThemeMode,
+        colorScheme.primary,
+        effectiveDarkTheme,
+        customPrimary,
+        customNightPrimary,
     ) {
         if (appThemeMode == AppThemeMode.Custom) {
             val seed = if (effectiveDarkTheme) customNightPrimary else customPrimary
@@ -145,8 +149,12 @@ private fun AppThemeActual(
     // 这样"跟随系统"和"深色"在系统深色下产生相等的 LegadoThemeMode，
     // staticCompositionLocalOf 不会触发全树重组
     val themeColors = remember(
-        colorScheme, effectiveDarkTheme, themeSeedColor, paletteStyleValue, composeEngine,
-        appThemeMode
+        colorScheme,
+        effectiveDarkTheme,
+        themeSeedColor,
+        paletteStyleValue,
+        composeEngine,
+        appThemeMode,
     ) {
         val paletteStyle = ThemeResolver.resolvePaletteStyle(paletteStyleValue)
         val colorSchemeMode =
@@ -158,7 +166,7 @@ private fun AppThemeActual(
             paletteStyle = paletteStyle,
             themeMode = colorSchemeMode,
             useDynamicColor = appThemeMode == AppThemeMode.Dynamic,
-            composeEngine = composeEngine
+            composeEngine = composeEngine,
         )
     }
 
@@ -171,13 +179,13 @@ private fun AppThemeActual(
             MiuixThemeWrapper(
                 themeColors = themeColors,
                 customFontFamily = customFontFamily,
-                content = content
+                content = content,
             )
         } else {
             MaterialThemeWrapper(
                 themeColors = themeColors,
                 customFontFamily = customFontFamily,
-                content = content
+                content = content,
             )
         }
     }

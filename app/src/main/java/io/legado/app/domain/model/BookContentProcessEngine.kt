@@ -6,7 +6,6 @@ import io.legado.app.utils.fromJsonObject
 import kotlin.math.abs
 
 object BookContentProcessEngine {
-
     data class ApplyResult(
         val text: String,
         val effectiveProcesses: List<BookContentProcess>,
@@ -26,55 +25,62 @@ object BookContentProcessEngine {
                 it.enabled &&
                     it.status == BookContentProcess.STATUS_ACTIVE &&
                     it.stage == BookContentProcess.STAGE_CONTENT
-            }
-            .forEach { process ->
+            }.forEach { process ->
                 if (process.kind == BookContentProcess.KIND_USER_UNDERLINE ||
                     process.kind == BookContentProcess.KIND_USER_HIGHLIGHT
                 ) {
                     // 用户划线/高亮标记：不改文本。锚点能在正文里解析到说明标记仍有效，
                     // 计入 effectiveProcesses 供渲染层把样式应用到区间。
-                    val anchor = GSON.fromJsonObject<TextProcessAnchor>(process.anchorJson)
-                        .getOrNull()
-                        ?: return@forEach
+                    val anchor =
+                        GSON
+                            .fromJsonObject<TextProcessAnchor>(process.anchorJson)
+                            .getOrNull()
+                            ?: return@forEach
                     if (findTargetRange(output, anchor) != null) {
                         effectiveProcesses.add(process)
                     }
                     return@forEach
                 }
-                val anchor = GSON.fromJsonObject<TextProcessAnchor>(process.anchorJson)
-                    .getOrNull()
-                    ?: return@forEach
-                val action = GSON.fromJsonObject<TextProcessAction>(process.actionJson)
-                    .getOrNull()
-                    ?: return@forEach
+                val anchor =
+                    GSON
+                        .fromJsonObject<TextProcessAnchor>(process.anchorJson)
+                        .getOrNull()
+                        ?: return@forEach
+                val action =
+                    GSON
+                        .fromJsonObject<TextProcessAction>(process.actionJson)
+                        .getOrNull()
+                        ?: return@forEach
                 val range = findTargetRange(output, anchor) ?: return@forEach
-                val next = when (action.type) {
-                    TextProcessAction.TYPE_REPLACE -> {
-                        output.replaceRange(
-                            range,
-                            normalizeProcessText(action.replacement.orEmpty())
-                        )
+                val next =
+                    when (action.type) {
+                        TextProcessAction.TYPE_REPLACE -> {
+                            output.replaceRange(
+                                range,
+                                normalizeProcessText(action.replacement.orEmpty()),
+                            )
+                        }
+                        TextProcessAction.TYPE_DELETE -> {
+                            output.removeRange(range)
+                        }
+                        TextProcessAction.TYPE_INSERT_BEFORE -> {
+                            output.replaceRange(
+                                range.first,
+                                range.first,
+                                normalizeProcessText(action.text.orEmpty()),
+                            )
+                        }
+                        TextProcessAction.TYPE_INSERT_AFTER -> {
+                            output.replaceRange(
+                                range.last + 1,
+                                range.last + 1,
+                                normalizeProcessText(action.text.orEmpty()),
+                            )
+                        }
+                        else -> {
+                            output
+                        }
                     }
-
-                    TextProcessAction.TYPE_DELETE -> output.removeRange(range)
-                    TextProcessAction.TYPE_INSERT_BEFORE -> {
-                        output.replaceRange(
-                            range.first,
-                            range.first,
-                            normalizeProcessText(action.text.orEmpty())
-                        )
-                    }
-
-                    TextProcessAction.TYPE_INSERT_AFTER -> {
-                        output.replaceRange(
-                            range.last + 1,
-                            range.last + 1,
-                            normalizeProcessText(action.text.orEmpty())
-                        )
-                    }
-
-                    else -> output
-                }
                 if (next != output) {
                     output = next
                     effectiveProcesses.add(process)
@@ -87,27 +93,28 @@ object BookContentProcessEngine {
      * 在给定正文里解析锚点对应的字符区间，供渲染层把用户划线/高亮应用到该区间。
      * 容错：按文本匹配 + 就近章节位置取最近命中，跨空白归一化。
      */
-    fun resolveRange(content: String, anchor: TextProcessAnchor): IntRange? =
-        findTargetRange(content, anchor)
+    fun resolveRange(
+        content: String,
+        anchor: TextProcessAnchor,
+    ): IntRange? = findTargetRange(content, anchor)
 
-    fun normalizeProcessText(text: String): String {
-        return text.lines()
-            .joinToString("\n") { line ->
-                line.trim { it.code <= 0x20 || it == '　' }
-            }
-            .trim()
-    }
+    fun normalizeProcessText(text: String): String = text
+        .lines()
+        .joinToString("\n") { line ->
+            line.trim { it.code <= 0x20 || it == '　' }
+        }.trim()
 
     private fun findTargetRange(
         content: String,
         anchor: TextProcessAnchor,
     ): IntRange? {
-        val candidates = listOf(
-            anchor.selectedText,
-            normalizeProcessText(anchor.selectedText),
-        ).map { it.trim() }
-            .filter { it.isNotEmpty() }
-            .distinct()
+        val candidates =
+            listOf(
+                anchor.selectedText,
+                normalizeProcessText(anchor.selectedText),
+            ).map { it.trim() }
+                .filter { it.isNotEmpty() }
+                .distinct()
 
         val approximatePosition = anchor.chapterPosition ?: 0
         for (candidate in candidates) {
@@ -120,11 +127,12 @@ object BookContentProcessEngine {
         for (candidate in candidates) {
             val normalizedCandidate = normalizeForMatching(candidate).text
             if (normalizedCandidate.isEmpty()) continue
-            val range = findClosestNormalizedOccurrence(
-                normalizedContent = normalizedContent,
-                normalizedSelectedText = normalizedCandidate,
-                approximatePosition = approximatePosition,
-            )
+            val range =
+                findClosestNormalizedOccurrence(
+                    normalizedContent = normalizedContent,
+                    normalizedSelectedText = normalizedCandidate,
+                    approximatePosition = approximatePosition,
+                )
             if (range != null) return range
         }
         return null
@@ -142,9 +150,7 @@ object BookContentProcessEngine {
         return NormalizedText(normalized.toString(), sourceIndices)
     }
 
-    private fun Char.isProcessWhitespace(): Boolean {
-        return isWhitespace() || this == '　'
-    }
+    private fun Char.isProcessWhitespace(): Boolean = isWhitespace() || this == '　'
 
     private fun findClosestNormalizedOccurrence(
         normalizedContent: NormalizedText,

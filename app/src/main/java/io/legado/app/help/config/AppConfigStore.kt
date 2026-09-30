@@ -5,6 +5,9 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.emptyPreferences
 import io.legado.app.data.repository.dataStore
+import io.legado.app.utils.LogUtils
+import io.legado.app.utils.stackTraceStr
+import java.io.IOException
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -18,10 +21,6 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import java.io.IOException
-
-import io.legado.app.utils.LogUtils
-import io.legado.app.utils.stackTraceStr
 
 /**
  * "settings" DataStore 的进程内内存快照层，设置读取的唯一同步入口。
@@ -74,8 +73,7 @@ object AppConfigStore {
         }
     }
 
-    private fun requireCore(): PendingOverlayCore =
-        checkNotNull(core) { "AppConfigStore 未初始化，应在 App.onCreate 首行调用 init()" }
+    private fun requireCore(): PendingOverlayCore = checkNotNull(core) { "AppConfigStore 未初始化，应在 App.onCreate 首行调用 init()" }
 
     /** 当前生效的设置快照（DataStore 落盘状态 + 未落盘写入叠加） */
     val preferences: Preferences get() = requireCore().preferencesFlow.value
@@ -103,8 +101,7 @@ object AppConfigStore {
     fun putAll(values: Map<String, Any?>) = requireCore().putAll(values)
 
     /** 批量写入并等待 DataStore edit 完成；失败会回滚 overlay 并向调用方抛出。 */
-    suspend fun putAllAndAwait(values: Map<String, Any?>) =
-        requireCore().putAllAndAwait(values)
+    suspend fun putAllAndAwait(values: Map<String, Any?>) = requireCore().putAllAndAwait(values)
 
     /**
      * 基于当前生效快照原子更新设置。
@@ -133,8 +130,7 @@ object AppConfigStore {
     fun observeLong(key: String): Flow<Long?> = observe { it.compatDsLong(key) }
     fun observeFloat(key: String): Flow<Float?> = observe { it.compatDsFloat(key) }
 
-    private inline fun <T> observe(crossinline read: (Preferences) -> T?): Flow<T?> =
-        preferencesFlow.map { read(it) }.distinctUntilChanged()
+    private inline fun <T> observe(crossinline read: (Preferences) -> T?): Flow<T?> = preferencesFlow.map { read(it) }.distinctUntilChanged()
 }
 
 /**
@@ -157,8 +153,8 @@ internal class PendingOverlayCore(
     private val lock = Any()
     private var snapshot: Preferences = initial
     private val pending = LinkedHashMap<String, PendingWrite>()
-    private val _preferences = MutableStateFlow(initial)
-    val preferencesFlow: StateFlow<Preferences> get() = _preferences
+    private val preferences = MutableStateFlow(initial)
+    val preferencesFlow: StateFlow<Preferences> get() = preferences
 
     private class PendingWrite(val value: Any?)
 
@@ -236,7 +232,7 @@ internal class PendingOverlayCore(
         toPrefMap: (T) -> Map<String, Any?>,
         transform: (T) -> T,
     ): Map<String, Any?> {
-        val current = read(_preferences.value)
+        val current = read(preferences.value)
         val previous = toPrefMap(current)
         return toPrefMap(transform(current)).filter { (key, value) -> previous[key] != value }
     }
@@ -294,11 +290,11 @@ internal class PendingOverlayCore(
 
     private fun rebuild() {
         if (pending.isEmpty()) {
-            _preferences.value = snapshot
+            preferences.value = snapshot
             return
         }
         val prefs = snapshot.toMutablePreferences()
         pending.forEach { (key, write) -> prefs.setPrefValue(key, write.value) }
-        _preferences.value = prefs.toPreferences()
+        preferences.value = prefs.toPreferences()
     }
 }

@@ -11,7 +11,6 @@ import io.legado.app.data.entities.HighlightRule
 
 @Dao
 interface HighlightRuleDao {
-
     @Query("SELECT * FROM highlightRules ORDER BY position ASC")
     fun getAll(): List<HighlightRule>
 

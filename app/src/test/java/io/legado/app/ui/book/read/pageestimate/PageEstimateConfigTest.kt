@@ -5,24 +5,24 @@ import org.junit.Assert.assertNotEquals
 import org.junit.Test
 
 class PageEstimateConfigTest {
-
-    private val config = PageEstimateConfig(
-        readerType = 0,
-        textSizePx = 32f,
-        textHeightPx = 38f,
-        lineSpacingPx = 8f,
-        paragraphSpacingPx = 4f,
-        titleTextSizePx = 42f,
-        titleTextHeightPx = 48f,
-        titleLineSpacingPx = 8f,
-        titleTopSpacingPx = 16f,
-        titleBottomSpacingPx = 12f,
-        endPaddingPx = 20f,
-        contentWidthPx = 1080,
-        contentHeightPx = 1920,
-        fontKey = "font-a",
-        contentKey = "rule-a",
-    )
+    private val config =
+        PageEstimateConfig(
+            readerType = 0,
+            textSizePx = 32f,
+            textHeightPx = 38f,
+            lineSpacingPx = 8f,
+            paragraphSpacingPx = 4f,
+            titleTextSizePx = 42f,
+            titleTextHeightPx = 48f,
+            titleLineSpacingPx = 8f,
+            titleTopSpacingPx = 16f,
+            titleBottomSpacingPx = 12f,
+            endPaddingPx = 20f,
+            contentWidthPx = 1080,
+            contentHeightPx = 1920,
+            fontKey = "font-a",
+            contentKey = "rule-a",
+        )
 
     @Test
     fun `layout signature is stable for equal configuration`() {
@@ -37,7 +37,6 @@ class PageEstimateConfigTest {
         assertNotEquals(config.layoutSignature, changed.layoutSignature)
         assertEquals(config.calibrationBucket, changed.calibrationBucket)
     }
-
 
     @Test
     fun `title segmentation invalidates exact pages and calibration`() {

@@ -45,10 +45,10 @@ import io.legado.app.ui.widget.components.icon.AppIcons
 import io.legado.app.ui.widget.components.menuItem.RoundDropdownMenu
 import io.legado.app.ui.widget.components.menuItem.RoundDropdownMenuItem
 import io.legado.app.ui.widget.components.text.AppText
-import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.basic.FloatingToolbar as MiuixFloatingToolbar
 import top.yukonga.miuix.kmp.basic.Icon as MiuixIcon
 import top.yukonga.miuix.kmp.basic.IconButton as MiuixIconButton
+import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 data class SelectionActions(
     val primaryAction: ActionItem,
@@ -61,7 +61,7 @@ data class SelectionActions(
 data class ActionItem(
     val text: String,
     val icon: ImageVector = Icons.Default.ExpandMore,
-    val onClick: () -> Unit
+    val onClick: () -> Unit,
 )
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
@@ -71,50 +71,51 @@ fun SelectionBottomBar(
     onSelectAll: () -> Unit,
     onSelectInvert: () -> Unit,
     primaryAction: ActionItem,
-    secondaryActions: List<ActionItem>
+    secondaryActions: List<ActionItem>,
 ) {
     var showMenu by remember { mutableStateOf(false) }
     val isMiuix = ThemeResolver.isMiuixEngine(LegadoTheme.composeEngine)
     val selectAllDescription = stringResource(R.string.select_all)
     val invertSelectionDescription = stringResource(R.string.invert_selection)
     val moreActionsDescription = stringResource(R.string.more_menu)
-    val safeModifier = modifier.windowInsetsPadding(
-        WindowInsets.navigationBars
-            .union(WindowInsets.tappableElement)
-            .union(WindowInsets.ime)
-    )
+    val safeModifier =
+        modifier.windowInsetsPadding(
+            WindowInsets.navigationBars
+                .union(WindowInsets.tappableElement)
+                .union(WindowInsets.ime),
+        )
 
     if (isMiuix) {
         MiuixFloatingToolbar(
-            modifier = safeModifier
+            modifier = safeModifier,
         ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
-                modifier = Modifier.padding(8.dp)
+                modifier = Modifier.padding(8.dp),
             ) {
                 MiuixIconButton(onClick = onSelectAll) {
                     MiuixIcon(
                         imageVector = Icons.Default.SelectAll,
-                        contentDescription = selectAllDescription
+                        contentDescription = selectAllDescription,
                     )
                 }
                 MiuixIconButton(onClick = onSelectInvert) {
                     MiuixIcon(
                         imageVector = Icons.Default.Refresh,
-                        contentDescription = invertSelectionDescription
+                        contentDescription = invertSelectionDescription,
                     )
                 }
 
                 MiuixIconButton(
                     onClick = primaryAction.onClick,
                     backgroundColor = MiuixTheme.colorScheme.secondaryContainer,
-                    minWidth = 64.dp
+                    minWidth = 64.dp,
                 ) {
                     MiuixIcon(
                         imageVector = primaryAction.icon,
                         contentDescription = primaryAction.text,
-                        tint = MiuixTheme.colorScheme.onSecondaryContainer
+                        tint = MiuixTheme.colorScheme.onSecondaryContainer,
                     )
                 }
 
@@ -123,12 +124,12 @@ fun SelectionBottomBar(
                         MiuixIconButton(onClick = { showMenu = true }) {
                             MiuixIcon(
                                 imageVector = AppIcons.MoreVert,
-                                contentDescription = moreActionsDescription
+                                contentDescription = moreActionsDescription,
                             )
                         }
                         RoundDropdownMenu(
                             expanded = showMenu,
-                            onDismissRequest = { showMenu = false }
+                            onDismissRequest = { showMenu = false },
                         ) {
                             secondaryActions.forEach { action ->
                                 RoundDropdownMenuItem(
@@ -136,7 +137,7 @@ fun SelectionBottomBar(
                                     onClick = {
                                         action.onClick()
                                         showMenu = false
-                                    }
+                                    },
                                 )
                             }
                         }
@@ -152,13 +153,13 @@ fun SelectionBottomBar(
                 IconButton(onClick = onSelectAll) {
                     AppIcon(
                         imageVector = Icons.Default.SelectAll,
-                        contentDescription = selectAllDescription
+                        contentDescription = selectAllDescription,
                     )
                 }
                 IconButton(onClick = onSelectInvert) {
                     AppIcon(
                         imageVector = Icons.Default.Refresh,
-                        contentDescription = invertSelectionDescription
+                        contentDescription = invertSelectionDescription,
                     )
                 }
             },
@@ -168,12 +169,12 @@ fun SelectionBottomBar(
                         IconButton(onClick = { showMenu = true }) {
                             AppIcon(
                                 imageVector = AppIcons.MoreVert,
-                                contentDescription = moreActionsDescription
+                                contentDescription = moreActionsDescription,
                             )
                         }
                         RoundDropdownMenu(
                             expanded = showMenu,
-                            onDismissRequest = { showMenu = false }
+                            onDismissRequest = { showMenu = false },
                         ) {
                             secondaryActions.forEach { action ->
                                 RoundDropdownMenuItem(
@@ -181,7 +182,7 @@ fun SelectionBottomBar(
                                     onClick = {
                                         action.onClick()
                                         showMenu = false
-                                    }
+                                    },
                                 )
                             }
                         }
@@ -190,8 +191,9 @@ fun SelectionBottomBar(
             },
             content = {
                 TooltipBox(
-                    positionProvider = TooltipDefaults.rememberTooltipPositionProvider(
-                        TooltipAnchorPosition.Above
+                    positionProvider =
+                    TooltipDefaults.rememberTooltipPositionProvider(
+                        TooltipAnchorPosition.Above,
                     ),
                     tooltip = { ProvideAppDensity { PlainTooltip { AppText(primaryAction.text) } } },
                     state = rememberTooltipState(),
@@ -199,18 +201,19 @@ fun SelectionBottomBar(
                     FilledIconButton(
                         modifier = Modifier.width(64.dp),
                         onClick = primaryAction.onClick,
-                        colors = IconButtonDefaults.filledIconButtonColors(
+                        colors =
+                        IconButtonDefaults.filledIconButtonColors(
                             containerColor = LegadoTheme.colorScheme.secondaryContainer,
                             contentColor = LegadoTheme.colorScheme.onSecondaryContainer,
                         ),
                     ) {
                         AppIcon(
                             imageVector = primaryAction.icon,
-                            contentDescription = primaryAction.text
+                            contentDescription = primaryAction.text,
                         )
                     }
                 }
-            }
+            },
         )
     }
 }

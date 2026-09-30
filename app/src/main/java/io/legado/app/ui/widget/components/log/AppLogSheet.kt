@@ -33,7 +33,7 @@ import java.util.Date
 @Composable
 fun AppLogSheet(
     show: Boolean,
-    onDismissRequest: () -> Unit
+    onDismissRequest: () -> Unit,
 ) {
     var logs by remember { mutableStateOf(emptyList<LogEntry>()) }
     var showDetail by remember { mutableStateOf<String?>(null) }
@@ -55,16 +55,16 @@ fun AppLogSheet(
                     logs = emptyList()
                 },
                 icon = Icons.Default.DeleteSweep,
-                contentDescription = stringResource(R.string.clear)
+                contentDescription = stringResource(R.string.clear),
             )
-        }
+        },
     ) {
         if (logs.isEmpty()) {
-            EmptyMessage(modifier = Modifier.fillMaxWidth(),message = stringResource(R.string.no_logs))
+            EmptyMessage(modifier = Modifier.fillMaxWidth(), message = stringResource(R.string.no_logs))
         } else {
             LazyColumn(
                 modifier = Modifier.fillMaxWidth(),
-                contentPadding = PaddingValues(bottom = 16.dp)
+                contentPadding = PaddingValues(bottom = 16.dp),
             ) {
                 items(logs) { item ->
                     LogItem(item) {
@@ -79,7 +79,7 @@ fun AppLogSheet(
         show = showDetail != null,
         title = "Log",
         content = showDetail.orEmpty(),
-        onDismissRequest = { showDetail = null }
+        onDismissRequest = { showDetail = null },
     )
 }
 
@@ -90,17 +90,16 @@ private data class LogEntry(
     val content: String get() = message
 }
 
-private fun loadAllLogs(): List<LogEntry> {
-    return AppLog.logs.map { (time, message, throwable) ->
-        LogEntry(
-            time = time,
-            message = if (throwable == null) {
-                message
-            } else {
-                "$message\n${throwable.stackTraceToString()}"
-            }
-        )
-    }
+private fun loadAllLogs(): List<LogEntry> = AppLog.logs.map { (time, message, throwable) ->
+    LogEntry(
+        time = time,
+        message =
+        if (throwable == null) {
+            message
+        } else {
+            "$message\n${throwable.stackTraceToString()}"
+        },
+    )
 }
 
 private fun clearAllLogs() {
@@ -110,20 +109,22 @@ private fun clearAllLogs() {
 @Composable
 private fun LogItem(
     item: LogEntry,
-    onClick: () -> Unit
+    onClick: () -> Unit,
 ) {
     Column(
-        modifier = Modifier
+        modifier =
+        Modifier
             .fillMaxWidth()
             .clickable(onClick = onClick)
-            .padding(16.dp)
+            .padding(16.dp),
     ) {
         AppText(
-            text = buildString {
+            text =
+            buildString {
                 if (item.time > 0) append(LogUtils.logTimeFormat.format(Date(item.time)))
             },
             style = LegadoTheme.typography.labelMedium,
-            color = LegadoTheme.colorScheme.outline
+            color = LegadoTheme.colorScheme.outline,
         )
         AppText(
             text = item.message,

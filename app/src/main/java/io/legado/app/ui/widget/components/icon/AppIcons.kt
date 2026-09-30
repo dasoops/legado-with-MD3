@@ -46,7 +46,6 @@ import top.yukonga.miuix.kmp.icon.extended.Unpin
 import top.yukonga.miuix.kmp.icon.extended.WorldClock
 
 object AppIcons {
-
     private val isMiuix: Boolean
         @Composable
         get() = ThemeResolver.isMiuixEngine(LegadoTheme.composeEngine)
@@ -115,24 +114,27 @@ object AppIcons {
         @Composable
         get() = if (isMiuix) MiuixIcons.Filter else Icons.Outlined.Sell
 
-
-
     @Composable
-    fun mainDestination(destination: MainDestination, selected: Boolean): ImageVector {
-        return when (destination) {
-            MainDestination.Home -> if (isMiuix) {
+    fun mainDestination(
+        destination: MainDestination,
+        selected: Boolean,
+    ): ImageVector = when (destination) {
+        MainDestination.Home -> {
+            if (isMiuix) {
                 MiuixIcons.Regular.ContactsBook
             } else {
                 if (selected) Icons.Default.Home else Icons.Outlined.Home
             }
-
-            MainDestination.Bookshelf -> if (isMiuix) {
+        }
+        MainDestination.Bookshelf -> {
+            if (isMiuix) {
                 if (selected) MiuixIcons.Regular.Notes else MiuixIcons.Regular.Notes
             } else {
                 if (selected) Icons.AutoMirrored.Filled.LibraryBooks else Icons.AutoMirrored.Outlined.LibraryBooks
             }
-
-            MainDestination.My -> if (isMiuix) {
+        }
+        MainDestination.My -> {
+            if (isMiuix) {
                 if (selected) MiuixIcons.Regular.Settings else MiuixIcons.Regular.Settings
             } else {
                 if (selected) Icons.Default.Person else Icons.Outlined.Person

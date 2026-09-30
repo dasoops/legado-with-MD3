@@ -101,9 +101,12 @@ fun CustomTipDialog(
             }
         },
         confirmText = stringResource(R.string.ok),
-        onConfirm = if (isValid) {
+        onConfirm =
+        if (isValid) {
             { onConfirm(template.text) }
-        } else null,
+        } else {
+            null
+        },
         dismissText = stringResource(R.string.cancel),
         onDismiss = onDismissRequest,
     )

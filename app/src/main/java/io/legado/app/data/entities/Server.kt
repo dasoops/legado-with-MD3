@@ -19,16 +19,13 @@ data class Server(
     var name: String = "",
     var type: TYPE = TYPE.WEBDAV,
     var config: String? = null,
-    var sortNumber: Int = 0
+    var sortNumber: Int = 0,
 ) : Parcelable {
-
     enum class TYPE {
-        WEBDAV
+        WEBDAV,
     }
 
-    override fun hashCode(): Int {
-        return id.hashCode()
-    }
+    override fun hashCode(): Int = id.hashCode()
 
     override fun equals(other: Any?): Boolean {
         if (other is Server) {
@@ -43,15 +40,12 @@ data class Server(
         return JSONObject(json)
     }
 
-    fun getWebDavConfig(): WebDavConfig? {
-        return if (type == TYPE.WEBDAV) GSON.fromJsonObject<WebDavConfig>(config).getOrNull() else null
-    }
+    fun getWebDavConfig(): WebDavConfig? = if (type == TYPE.WEBDAV) GSON.fromJsonObject<WebDavConfig>(config).getOrNull() else null
 
     @Parcelize
     data class WebDavConfig(
         var url: String,
         var username: String,
-        var password: String
+        var password: String,
     ) : Parcelable
-
 }

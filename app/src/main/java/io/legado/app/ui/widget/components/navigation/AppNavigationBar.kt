@@ -37,36 +37,40 @@ import io.legado.app.ui.theme.ThemeResolver
 import io.legado.app.ui.theme.regularHazeEffect
 import io.legado.app.ui.widget.components.GlassDefaults
 import io.legado.app.ui.widget.components.text.AnimatedText
-import top.yukonga.miuix.kmp.basic.NavigationBarDisplayMode
-import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.basic.NavigationBar as MiuixNavigationBar
+import top.yukonga.miuix.kmp.basic.NavigationBarDisplayMode
 import top.yukonga.miuix.kmp.basic.NavigationBarItem as MiuixNavigationBarItem
+import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 @Composable
 fun AppNavigationBar(
     modifier: Modifier = Modifier,
     showLabel: Boolean = true,
     alwaysShowLabel: Boolean = true,
-    content: @Composable RowScope.() -> Unit
+    content: @Composable RowScope.() -> Unit,
 ) {
     val isMiuix = ThemeResolver.isMiuixEngine(LegadoTheme.composeEngine)
     val configuration = LocalAppUiConfiguration.current
     val themeSettings = configuration.theme
-    val miuixMode = when {
-        !showLabel -> NavigationBarDisplayMode.IconOnly
-        alwaysShowLabel -> NavigationBarDisplayMode.IconAndText
-        else -> NavigationBarDisplayMode.IconWithSelectedLabel
-    }
+    val miuixMode =
+        when {
+            !showLabel -> NavigationBarDisplayMode.IconOnly
+            alwaysShowLabel -> NavigationBarDisplayMode.IconAndText
+            else -> NavigationBarDisplayMode.IconWithSelectedLabel
+        }
     val opacity = (themeSettings.bottomBarOpacity.coerceIn(0, 100)) / 100f
     val customSecondaryColor = themeSettings.customColors(LegadoTheme.isDark).secondary
-    val hasCustomSecondary = themeSettings.appTheme == "12" &&
-        themeSettings.enableDeepPersonalization && customSecondaryColor != 0
+    val hasCustomSecondary =
+        themeSettings.appTheme == "12" &&
+            themeSettings.enableDeepPersonalization &&
+            customSecondaryColor != 0
     val hazeState = LocalHazeState.current
-    val hazeModifier = if (hazeState != null) {
-        Modifier.regularHazeEffect(hazeState)
-    } else {
-        Modifier
-    }
+    val hazeModifier =
+        if (hazeState != null) {
+            Modifier.regularHazeEffect(hazeState)
+        } else {
+            Modifier
+        }
 
     if (isMiuix) {
         val baseColor =
@@ -75,7 +79,7 @@ fun AppNavigationBar(
             } else {
                 GlassDefaults.glassColor(
                     noBlurColor = MiuixTheme.colorScheme.surface,
-                    blurAlpha = GlassDefaults.TransparentAlpha
+                    blurAlpha = GlassDefaults.TransparentAlpha,
                 )
             }
         val finalColor = baseColor.copy(alpha = (baseColor.alpha * opacity).coerceIn(0f, 1f))
@@ -84,7 +88,7 @@ fun AppNavigationBar(
             modifier = modifier.then(hazeModifier),
             color = finalColor,
             mode = miuixMode,
-            content = content
+            content = content,
         )
     } else {
         val baseColor =
@@ -93,7 +97,7 @@ fun AppNavigationBar(
             } else {
                 GlassDefaults.glassColor(
                     noBlurColor = BottomAppBarDefaults.containerColor,
-                    blurAlpha = GlassDefaults.TransparentAlpha
+                    blurAlpha = GlassDefaults.TransparentAlpha,
                 )
             }
         val finalColor = baseColor.copy(alpha = (baseColor.alpha * opacity).coerceIn(0f, 1f))
@@ -103,16 +107,23 @@ fun AppNavigationBar(
             containerColor = finalColor,
             content = {
                 ShortNavigationBarRowScope.content()
-            }
+            },
         )
     }
 }
 
 private object ShortNavigationBarRowScope : RowScope {
-    override fun Modifier.weight(weight: Float, fill: Boolean): Modifier = this
+    override fun Modifier.weight(
+        weight: Float,
+        fill: Boolean,
+    ): Modifier = this
+
     override fun Modifier.align(alignment: Alignment.Vertical): Modifier = this
+
     override fun Modifier.alignBy(alignmentLine: HorizontalAlignmentLine): Modifier = this
+
     override fun Modifier.alignByBaseline(): Modifier = this
+
     override fun Modifier.alignBy(alignmentLineBlock: (Measured) -> Int): Modifier = this
 }
 
@@ -135,23 +146,25 @@ fun RowScope.AppNavigationBarItem(
 
     if (useCustomIconBox) {
         Box(
-            modifier = modifier
+            modifier =
+            modifier
                 .weight(1f)
                 .fillMaxHeight()
                 .clickable(
                     interactionSource = remember { MutableInteractionSource() },
                     indication = ripple(bounded = false, radius = 32.dp),
-                    onClick = onClick
+                    onClick = onClick,
                 ),
-            contentAlignment = Alignment.Center
+            contentAlignment = Alignment.Center,
         ) {
             if (selected) {
                 Box(
-                    modifier = Modifier
+                    modifier =
+                    Modifier
                         .width(64.dp)
                         .height(32.dp)
                         .clip(RoundedCornerShape(16.dp))
-                        .background(m3IndicatorColor)
+                        .background(m3IndicatorColor),
                 )
             }
             m3Icon()
@@ -171,7 +184,7 @@ fun RowScope.AppNavigationBarItem(
             onClick = onClick,
             icon = iconVector,
             label = labelString,
-            modifier = modifier
+            modifier = modifier,
         )
     } else {
         ShortNavigationBarItem(
@@ -180,11 +193,14 @@ fun RowScope.AppNavigationBarItem(
             modifier = modifier,
             icon = m3Icon,
             colors = ShortNavigationBarItemDefaults.colors(selectedIndicatorColor = m3IndicatorColor),
-            label = if (m3ShowLabel && (m3AlwaysShowLabel || selected)) {
+            label =
+            if (m3ShowLabel && (m3AlwaysShowLabel || selected)) {
                 {
                     AnimatedText(labelString)
                 }
-            } else null
+            } else {
+                null
+            },
         )
     }
 }
@@ -198,11 +214,13 @@ private fun RowScope.MiuixCustomNavigationBarItem(
     showLabel: Boolean,
     icon: @Composable () -> Unit,
 ) {
-    val itemColor = MiuixTheme.colorScheme.onSurfaceContainer.let { color ->
-        if (selected) color else color.copy(alpha = 0.4f)
-    }
+    val itemColor =
+        MiuixTheme.colorScheme.onSurfaceContainer.let { color ->
+            if (selected) color else color.copy(alpha = 0.4f)
+        }
     Column(
-        modifier = modifier
+        modifier =
+        modifier
             .height(64.dp)
             .weight(1f)
             .clickable(

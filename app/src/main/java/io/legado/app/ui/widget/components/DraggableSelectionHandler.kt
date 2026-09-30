@@ -48,21 +48,26 @@ fun <T, ID> DraggableSelectionHandler(
         // item.offset 在 Compose 的 LazyListLayoutInfo 中是相对于“内容区域”开始计算的。
         val adjustedY = offsetY - layoutInfo.beforeContentPadding
 
-        val itemInfo = itemsInfo.fastFirstOrNull { item ->
-            adjustedY >= item.offset && adjustedY <= (item.offset + item.size)
-        } ?: return null
+        val itemInfo =
+            itemsInfo.fastFirstOrNull { item ->
+                adjustedY >= item.offset && adjustedY <= (item.offset + item.size)
+            } ?: return null
 
         @Suppress("UNCHECKED_CAST")
-        val id = try {
-            itemInfo.key as ID
-        } catch (e: Exception) {
-            latestItems.getOrNull(itemInfo.index)?.let { latestIdProvider(it) } ?: return null
-        }
-        
+        val id =
+            try {
+                itemInfo.key as ID
+            } catch (e: Exception) {
+                latestItems.getOrNull(itemInfo.index)?.let { latestIdProvider(it) } ?: return null
+            }
+
         return itemInfo.index to id
     }
 
-    fun applySelection(id: ID, add: Boolean) {
+    fun applySelection(
+        id: ID,
+        add: Boolean,
+    ) {
         val current = latestSelectedIds
         if (add) {
             if (!current.contains(id)) {
@@ -76,7 +81,8 @@ fun <T, ID> DraggableSelectionHandler(
     }
 
     Box(
-        modifier = modifier
+        modifier =
+        modifier
             .pointerInput(listState) {
                 detectTapGestures(
                     onTap = { offset ->
@@ -84,10 +90,9 @@ fun <T, ID> DraggableSelectionHandler(
                             applySelection(id, !latestSelectedIds.contains(id))
                             haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                         }
-                    }
+                    },
                 )
-            }
-            .pointerInput(listState) {
+            }.pointerInput(listState) {
                 detectDragGestures(
                     onDragStart = { offset ->
                         findItemAtOffset(offset.y)?.let { (index, id) ->
@@ -108,8 +113,8 @@ fun <T, ID> DraggableSelectionHandler(
                         if (change.pressed) change.consume()
                     },
                     onDragEnd = { lastProcessedIndex = -1 },
-                    onDragCancel = { lastProcessedIndex = -1 }
+                    onDragCancel = { lastProcessedIndex = -1 },
                 )
-            }
+            },
     )
 }

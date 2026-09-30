@@ -9,24 +9,24 @@ import io.legado.app.help.http.text
 import io.legado.app.utils.GSON
 import io.legado.app.utils.fromJsonArray
 import io.legado.app.utils.fromJsonObject
+import java.time.Instant
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.withTimeoutOrNull
 import okhttp3.Headers
 import okhttp3.Request
-import java.time.Instant
-import java.time.ZoneId
-import java.time.format.DateTimeFormatter
 
 object AppUpdateGitHub : AppUpdate.AppUpdateInterface {
 
     private val otherSettingsGateway get() = org.koin.core.context.GlobalContext.get().get<io.legado.app.domain.gateway.OtherSettingsGateway>()
 
-    private const val repoPath = "dasoops/legado-with-MD3"
-    private const val githubApiBaseUrl = "https://api.github.com/repos/$repoPath/releases"
-    private const val updateManifestBaseUrl =
-        "https://raw.githubusercontent.com/$repoPath/update-manifests"
-    private const val manifestTimeoutMillis = 2500L
+    private const val REPO_PATH = "dasoops/legado-with-MD3"
+    private const val GITHUB_API_BASE_URL = "https://api.github.com/repos/$REPO_PATH/releases"
+    private const val UPDATE_MANIFEST_BASE_URL =
+        "https://raw.githubusercontent.com/$REPO_PATH/update-manifests"
+    private const val MANIFEST_TIMEOUT_MILLIS = 2500L
 
     private val checkVariant: AppVariant
         get() = when (otherSettingsGateway.currentSettings.updateToVariant) {
@@ -49,7 +49,7 @@ object AppUpdateGitHub : AppUpdate.AppUpdateInterface {
             AppVariant.BETA_RELEASE -> listOfNotNull(getManifestRelease(AppVariant.BETA_RELEASE))
             AppVariant.ALL -> listOfNotNull(
                 getManifestRelease(AppVariant.OFFICIAL),
-                getManifestRelease(AppVariant.BETA_RELEASE)
+                getManifestRelease(AppVariant.BETA_RELEASE),
             )
             else -> emptyList()
         }
@@ -64,9 +64,9 @@ object AppUpdateGitHub : AppUpdate.AppUpdateInterface {
             else -> return null
         }
         return try {
-            withTimeoutOrNull(manifestTimeoutMillis) {
+            withTimeoutOrNull(MANIFEST_TIMEOUT_MILLIS) {
                 val response = okHttpClient.newCallResponse {
-                    url("$updateManifestBaseUrl/$channel.json")
+                    url("$UPDATE_MANIFEST_BASE_URL/$channel.json")
                 }
                 response.use {
                     if (!it.isSuccessful) return@withTimeoutOrNull null
@@ -88,10 +88,10 @@ object AppUpdateGitHub : AppUpdate.AppUpdateInterface {
 
     private suspend fun getApiReleases(variant: AppVariant): List<GithubRelease> {
         if (variant == AppVariant.ALL) {
-            val releases = parseReleaseList(getGithubApiBody(githubApiBaseUrl))
+            val releases = parseReleaseList(getGithubApiBody(GITHUB_API_BASE_URL))
             val latestOfficial = try {
                 GSON.fromJsonObject<GithubRelease>(
-                    getGithubApiBody("$githubApiBaseUrl/latest")
+                    getGithubApiBody("$GITHUB_API_BASE_URL/latest"),
                 ).getOrThrow()
             } catch (error: CancellationException) {
                 throw error
@@ -102,15 +102,15 @@ object AppUpdateGitHub : AppUpdate.AppUpdateInterface {
         }
 
         val url = if (variant == AppVariant.OFFICIAL) {
-            "$githubApiBaseUrl/latest"
+            "$GITHUB_API_BASE_URL/latest"
         } else {
-            githubApiBaseUrl
+            GITHUB_API_BASE_URL
         }
         val body = getGithubApiBody(url)
         return when (variant) {
             AppVariant.OFFICIAL -> listOf(
                 GSON.fromJsonObject<GithubRelease>(body)
-                    .getOrElse { throw NoStackTraceException("解析失败 ${it.localizedMessage}") }
+                    .getOrElse { throw NoStackTraceException("解析失败 ${it.localizedMessage}") },
             )
             AppVariant.BETA_RELEASE -> parseReleaseList(body)
                 .filter { it.isPreRelease }
@@ -118,10 +118,8 @@ object AppUpdateGitHub : AppUpdate.AppUpdateInterface {
         }
     }
 
-    private fun parseReleaseList(body: String): List<GithubRelease> {
-        return GSON.fromJsonArray<GithubRelease>(body)
-            .getOrElse { throw NoStackTraceException("解析失败 ${it.localizedMessage}") }
-    }
+    private fun parseReleaseList(body: String): List<GithubRelease> = GSON.fromJsonArray<GithubRelease>(body)
+        .getOrElse { throw NoStackTraceException("解析失败 ${it.localizedMessage}") }
 
     suspend fun getReleaseByTag(tag: String): AppUpdate.UpdateInfo? {
         val manifestRelease = findManifestRelease(tag)
@@ -132,7 +130,7 @@ object AppUpdateGitHub : AppUpdate.AppUpdateInterface {
             tagName = info.versionName,
             updateLog = info.note,
             downloadUrl = info.downloadUrl,
-            fileName = info.name
+            fileName = info.name,
         )
     }
 
@@ -152,7 +150,7 @@ object AppUpdateGitHub : AppUpdate.AppUpdateInterface {
 
     private suspend fun getApiReleaseByTag(tag: String): GithubRelease? {
         val response = okHttpClient.newCallResponse {
-            url("$githubApiBaseUrl/tags/$tag")
+            url("$GITHUB_API_BASE_URL/tags/$tag")
             addGithubApiHeaders()
         }
         response.use {
@@ -206,7 +204,7 @@ object AppUpdateGitHub : AppUpdate.AppUpdateInterface {
                     latest.versionName,
                     latest.note,
                     latest.downloadUrl,
-                    latest.name
+                    latest.name,
                 )
             }
 
@@ -218,7 +216,7 @@ object AppUpdateGitHub : AppUpdate.AppUpdateInterface {
         val major: Int,
         val minor: Int,
         val patch: Int,
-        val preRelease: String? = null
+        val preRelease: String? = null,
     ) : Comparable<SemVer> {
         override fun compareTo(other: SemVer): Int {
             if (major != other.major) return major - other.major
@@ -263,16 +261,14 @@ object AppUpdateGitHub : AppUpdate.AppUpdateInterface {
         }
     }
 
-    fun String.versionCompare(other: String): Int {
-        return SemVer.parse(this).compareTo(SemVer.parse(other))
-    }
+    fun String.versionCompare(other: String): Int = SemVer.parse(this).compareTo(SemVer.parse(other))
 }
 
 internal fun githubApiException(
     code: Int,
     headers: Headers,
     body: String,
-    zoneId: ZoneId = ZoneId.systemDefault()
+    zoneId: ZoneId = ZoneId.systemDefault(),
 ): NoStackTraceException {
     if (code == 403 || code == 429) {
         val retryAfter = headers["Retry-After"]?.toLongOrNull()
@@ -294,7 +290,7 @@ internal fun githubApiException(
         ?.takeIf { it.isNotBlank() }
     return NoStackTraceException(
         detail?.let { "获取新版本出错($code): $it" }
-            ?: "获取新版本出错($code)"
+            ?: "获取新版本出错($code)",
     )
 }
 

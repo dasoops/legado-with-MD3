@@ -1,11 +1,11 @@
 package io.legado.app.ui.book.read.sheet
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -53,7 +53,8 @@ fun EyeProtectionConfigSheet(
         animateContentSize = false,
     ) {
         Column(
-            modifier = Modifier
+            modifier =
+            Modifier
                 .fillMaxWidth()
                 .verticalScroll(rememberScrollState())
                 .padding(bottom = 16.dp),
@@ -74,9 +75,10 @@ fun EyeProtectionConfigSheet(
                 Column {
                     SliderSettingItem(
                         title = stringResource(R.string.eye_protection_intensity),
-                        description = stringResource(
+                        description =
+                        stringResource(
                             R.string.eye_protection_intensity_summary,
-                            intensity
+                            intensity,
                         ),
                         value = intensity.toFloat(),
                         defaultValue = 50f,

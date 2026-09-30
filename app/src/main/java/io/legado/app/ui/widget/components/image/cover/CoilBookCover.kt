@@ -45,28 +45,25 @@ import androidx.compose.ui.unit.dp
 import androidx.core.graphics.withSave
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
+import io.legado.app.model.BookCover as BookCoverModel
 import io.legado.app.ui.theme.LegadoTheme
 import io.legado.app.ui.theme.LocalAppUiConfiguration
 import org.koin.compose.koinInject
-import io.legado.app.model.BookCover as BookCoverModel
 
-private const val SharedCoverRadiusCacheMaxSize = 256
-private const val DefaultCoverPath = "use_default_cover"
+private const val SHARED_COVER_RADIUS_CACHE_MAX_SIZE = 256
+private const val DEFAULT_COVER_PATH = "use_default_cover"
 private val sharedCoverRadiusCache = mutableStateMapOf<String, Dp>()
 
 /**
  * 封面在源页面的圆角缓存读取入口：封面离开源页面（Visible→Visible 定格）时写入，
  * 阅读端 sharedBounds 的起始圆角由它提供，保证转场两端圆角衔接连续。
  */
-internal fun sharedCoverSourceRadius(sharedCoverKey: String?): Dp? =
-    sharedCoverKey?.let { sharedCoverRadiusCache[it] }
+internal fun sharedCoverSourceRadius(sharedCoverKey: String?): Dp? = sharedCoverKey?.let { sharedCoverRadiusCache[it] }
 
 @Composable
-internal fun usesDefaultBookCover(path: String?): Boolean {
-    return LocalAppUiConfiguration.current.cover.useDefaultCover ||
-            path.isNullOrBlank() ||
-            path == DefaultCoverPath
-}
+internal fun usesDefaultBookCover(path: String?): Boolean = LocalAppUiConfiguration.current.cover.useDefaultCover ||
+    path.isNullOrBlank() ||
+    path == DEFAULT_COVER_PATH
 
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
@@ -96,8 +93,8 @@ fun BookCoverImage(
     val coverSettings = LocalAppUiConfiguration.current.cover
 
     val useDefault = (!ignoreUseDefaultCover && coverSettings.useDefaultCover) ||
-            path.isNullOrBlank() ||
-            path == DefaultCoverPath
+        path.isNullOrBlank() ||
+        path == DEFAULT_COVER_PATH
     val finalPath = if (useDefault) null else path
     val defaultCoverPaths =
         if (isNight) coverSettings.defaultCoverDark else coverSettings.defaultCover
@@ -105,7 +102,7 @@ fun BookCoverImage(
     val randomPath = remember(name, author, path, isNight, defaultCoverPaths) {
         BookCoverModel.getRandomDefaultPath(
             seed = name ?: author ?: path ?: "",
-            isNight = isNight
+            isNight = isNight,
         )
     }
 
@@ -135,7 +132,7 @@ fun BookCoverImage(
         (
             isUsingDefaultCover ||
                 (showLoadingPlaceholder && showLoadingDefault)
-        )
+            )
     Box(
         modifier = modifier.then(
             with(sharedTransitionScope) {
@@ -147,8 +144,8 @@ fun BookCoverImage(
                 } else {
                     Modifier
                 }
-            }
-        )
+            },
+        ),
     ) {
         if (showCustomDefault) {
             AsyncImage(
@@ -163,7 +160,7 @@ fun BookCoverImage(
                 contentDescription = null,
                 imageLoader = koinInject(),
                 contentScale = contentScale,
-                modifier = Modifier.fillMaxSize()
+                modifier = Modifier.fillMaxSize(),
             )
         }
 
@@ -174,7 +171,7 @@ fun BookCoverImage(
                 tint = LegadoTheme.colorScheme.secondary,
                 modifier = Modifier
                     .fillMaxSize(0.35f)
-                    .align(Alignment.Center)
+                    .align(Alignment.Center),
             )
         }
 
@@ -208,7 +205,7 @@ fun BookCoverImage(
                     onlineCoverLoadFailed = true
                     onError?.invoke()
                     onLoadFinish?.invoke()
-                }
+                },
             )
         } else {
             LaunchedEffect(Unit) {
@@ -243,8 +240,8 @@ fun CoilBookCover(
     val isNight = LegadoTheme.isDark
 
     val useDefault = (!ignoreUseDefaultCover && coverSettings.useDefaultCover) ||
-            path.isNullOrBlank() ||
-            path == DefaultCoverPath
+        path.isNullOrBlank() ||
+        path == DEFAULT_COVER_PATH
     val finalPath = if (useDefault) null else path
     val defaultCoverPaths =
         if (isNight) coverSettings.defaultCoverDark else coverSettings.defaultCover
@@ -252,7 +249,7 @@ fun CoilBookCover(
     val randomPath = remember(name, author, path, isNight, defaultCoverPaths) {
         BookCoverModel.getRandomDefaultPath(
             seed = name ?: author ?: path ?: "",
-            isNight = isNight
+            isNight = isNight,
         )
     }
 
@@ -270,7 +267,7 @@ fun CoilBookCover(
     val transitionRadius = rememberSharedCoverTransitionRadius(
         sharedCoverKey = sharedCoverKey,
         radius = radius,
-        animatedVisibilityScope = animatedVisibilityScope
+        animatedVisibilityScope = animatedVisibilityScope,
     )
     val shape = remember(transitionRadius) { RoundedCornerShape(transitionRadius) }
 
@@ -283,23 +280,29 @@ fun CoilBookCover(
                         Modifier.sharedBounds(
                             sharedContentState = rememberSharedContentState(sharedCoverKey),
                             animatedVisibilityScope = animatedVisibilityScope,
-                            clipInOverlayDuringTransition = OverlayClip(shape)
+                            clipInOverlayDuringTransition = OverlayClip(shape),
                         )
-                    } else Modifier
-                }
+                    } else {
+                        Modifier
+                    }
+                },
             )
             .then(
                 if (coverSettings.showShadow) {
                     Modifier.shadow(4.dp, shape)
-                } else Modifier
+                } else {
+                    Modifier
+                },
             )
             .background(
                 if (!hasCustomDefault && !isOnlineCoverLoaded) {
                     LegadoTheme.colorScheme.surfaceContainerLow
-                } else Color.Transparent,
-                shape
+                } else {
+                    Color.Transparent
+                },
+                shape,
             )
-            .clip(shape)
+            .clip(shape),
     ) {
         BookCoverImage(
             name = name,
@@ -322,19 +325,17 @@ fun CoilBookCover(
                 onError?.invoke()
                 onLoadFinish?.invoke()
             },
-            sharedCoverKey = sharedCoverKey
+            sharedCoverKey = sharedCoverKey,
         )
-
     }
 }
-
 
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 private fun rememberSharedCoverTransitionRadius(
     sharedCoverKey: String?,
     radius: Dp,
-    animatedVisibilityScope: AnimatedVisibilityScope?
+    animatedVisibilityScope: AnimatedVisibilityScope?,
 ): Dp {
     if (sharedCoverKey == null || animatedVisibilityScope == null) {
         return radius
@@ -343,7 +344,7 @@ private fun rememberSharedCoverTransitionRadius(
     val transition = animatedVisibilityScope.transition
     val startRadius = sharedCoverRadiusCache[sharedCoverKey] ?: radius
     val animatedRadiusValue by transition.animateFloat(
-        label = "book-cover-corner-radius"
+        label = "book-cover-corner-radius",
     ) { state ->
         if (state == EnterExitState.Visible) radius.value else startRadius.value
     }
@@ -352,14 +353,14 @@ private fun rememberSharedCoverTransitionRadius(
         sharedCoverKey,
         radius,
         transition.currentState,
-        transition.targetState
+        transition.targetState,
     ) {
         if (
             transition.currentState == EnterExitState.Visible &&
             transition.targetState == EnterExitState.Visible
         ) {
             sharedCoverRadiusCache[sharedCoverKey] = radius
-            if (sharedCoverRadiusCache.size > SharedCoverRadiusCacheMaxSize) {
+            if (sharedCoverRadiusCache.size > SHARED_COVER_RADIUS_CACHE_MAX_SIZE) {
                 sharedCoverRadiusCache.keys
                     .firstOrNull { it != sharedCoverKey }
                     ?.let(sharedCoverRadiusCache::remove)

@@ -28,7 +28,10 @@ class ReaderPageTransitionTest {
         assertEquals(
             ReaderPageTransitionPolicy.settleDurationMillis(0f, -800f, 800f),
             ReaderPageTransitionPolicy.settleDurationMillis(
-                ReaderTransitionMode.FADE, 0f, -800f, 800f,
+                ReaderTransitionMode.FADE,
+                0f,
+                -800f,
+                800f,
             ),
         )
     }
@@ -38,26 +41,38 @@ class ReaderPageTransitionTest {
         assertEquals(
             360,
             ReaderPageTransitionPolicy.settleDurationMillis(
-                ReaderTransitionMode.FADE, -720f, -800f, 800f,
+                ReaderTransitionMode.FADE,
+                -720f,
+                -800f,
+                800f,
             ),
         )
         assertEquals(
             360,
             ReaderPageTransitionPolicy.settleDurationMillis(
-                ReaderTransitionMode.FADE, -720f, 0f, 800f,
+                ReaderTransitionMode.FADE,
+                -720f,
+                0f,
+                800f,
             ),
         )
         // 非 FADE 模式按剩余位移折算：360 * 80 / 800。
         assertEquals(
             36,
             ReaderPageTransitionPolicy.settleDurationMillis(
-                ReaderTransitionMode.SLIDE, -720f, -800f, 800f,
+                ReaderTransitionMode.SLIDE,
+                -720f,
+                -800f,
+                800f,
             ),
         )
         assertEquals(
             0,
             ReaderPageTransitionPolicy.settleDurationMillis(
-                ReaderTransitionMode.FADE, -800f, -800f, 800f,
+                ReaderTransitionMode.FADE,
+                -800f,
+                -800f,
+                800f,
             ),
         )
     }
@@ -84,12 +99,13 @@ class ReaderPageTransitionTest {
 
     @Test
     fun `drag locks direction and clamps to page extent`() {
-        val transition = ReaderPageTransitionPolicy.drag(
-            deltaPx = -1200f,
-            pageExtentPx = 800f,
-            hasPrevious = true,
-            hasNext = true,
-        )
+        val transition =
+            ReaderPageTransitionPolicy.drag(
+                deltaPx = -1200f,
+                pageExtentPx = 800f,
+                hasPrevious = true,
+                hasNext = true,
+            )
 
         assertEquals(ReaderTurnDirection.NEXT, transition.direction)
         assertEquals(-800f, transition.offsetPx)
@@ -98,12 +114,13 @@ class ReaderPageTransitionTest {
 
     @Test
     fun `drag at chapter boundary does not start`() {
-        val transition = ReaderPageTransitionPolicy.drag(
-            deltaPx = 100f,
-            pageExtentPx = 800f,
-            hasPrevious = false,
-            hasNext = true,
-        )
+        val transition =
+            ReaderPageTransitionPolicy.drag(
+                deltaPx = 100f,
+                pageExtentPx = 800f,
+                hasPrevious = false,
+                hasNext = true,
+            )
 
         assertFalse(transition.dragging)
         assertEquals(ReaderTurnDirection.PREVIOUS, transition.direction)
@@ -137,8 +154,10 @@ class ReaderPageTransitionTest {
 
     @Test
     fun `previous slide keeps incoming page above current like legacy delegate`() {
-        val slide = ReaderPageTransitionPolicy.drag(200f, 800f, true, true)
-            .transforms(ReaderTransitionMode.SLIDE)
+        val slide =
+            ReaderPageTransitionPolicy
+                .drag(200f, 800f, true, true)
+                .transforms(ReaderTransitionMode.SLIDE)
 
         assertEquals(200f, slide.current.translationX)
         assertEquals(-600f, slide.previous?.translationX)
@@ -147,8 +166,10 @@ class ReaderPageTransitionTest {
 
     @Test
     fun `previous cover slides above stationary current page`() {
-        val cover = ReaderPageTransitionPolicy.drag(200f, 800f, true, true)
-            .transforms(ReaderTransitionMode.COVER)
+        val cover =
+            ReaderPageTransitionPolicy
+                .drag(200f, 800f, true, true)
+                .transforms(ReaderTransitionMode.COVER)
         assertEquals(-600f, cover.previous?.translationX)
         assertEquals(0f, cover.current.translationX)
         assertFalse(cover.currentOnTop)
@@ -159,8 +180,10 @@ class ReaderPageTransitionTest {
         assertEquals(ReaderTransitionMode.FADE, ReaderTransitionMode.fromPageAnim(PageAnim.fadePageAnim))
         assertEquals(ReaderTransitionMode.NONE, ReaderTransitionMode.fromPageAnim(PageAnim.noAnim))
         for (delta in listOf(-200f, 200f)) {
-            val fade = ReaderPageTransitionPolicy.drag(delta, 800f, true, true)
-                .transforms(ReaderTransitionMode.FADE)
+            val fade =
+                ReaderPageTransitionPolicy
+                    .drag(delta, 800f, true, true)
+                    .transforms(ReaderTransitionMode.FADE)
             val destination = fade.previous ?: fade.next!!
             assertEquals(0f, destination.translationX)
             assertEquals(0.25f, destination.alpha)

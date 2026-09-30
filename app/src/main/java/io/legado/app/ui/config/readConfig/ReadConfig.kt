@@ -31,11 +31,12 @@ object ReadConfig {
 
     val isEInkMode get() = theme.appTheme == "4"
     val isNightTheme: Boolean
-        get() = when (shell.themeMode) {
-            "1" -> false
-            "2" -> true
-            else -> sysConfiguration.isNightMode
-        }
+        get() =
+            when (shell.themeMode) {
+                "1" -> false
+                "2" -> true
+                else -> sysConfiguration.isNightMode
+            }
     val enableReview get() = BuildConfig.DEBUG && (preferences.compatDsBoolean(PreferKey.enableReview) ?: false)
     val useAntiAlias get() = other.antiAlias
     val systemTypefaces get() = read.systemTypefaces

@@ -29,18 +29,22 @@ import io.legado.app.ui.widget.components.card.GlassCard
 import io.legado.app.ui.widget.components.icon.AppIcon
 import io.legado.app.ui.widget.components.text.AppText
 
-data class StatItem(val label: String, val value: String)
+data class StatItem(
+    val label: String,
+    val value: String,
+)
 
 @Composable
 fun StatsGridCard(
     title: String,
     items: List<StatItem>,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     GlassCard(
-        modifier = modifier
+        modifier =
+        modifier
             .fillMaxWidth()
-            .adaptiveHorizontalPadding(vertical = 8.dp)
+            .adaptiveHorizontalPadding(vertical = 8.dp),
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -48,7 +52,7 @@ fun StatsGridCard(
                     imageVector = Icons.Default.Equalizer,
                     contentDescription = null,
                     tint = LegadoTheme.colorScheme.primary,
-                    modifier = Modifier.size(20.dp)
+                    modifier = Modifier.size(20.dp),
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 AppText(title, style = LegadoTheme.typography.titleMedium)
@@ -59,7 +63,7 @@ fun StatsGridCard(
                 for (i in items.indices step 2) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        horizontalArrangement = Arrangement.spacedBy(12.dp),
                     ) {
                         StatCell(items[i], Modifier.weight(1f))
                         if (i + 1 < items.size) {
@@ -78,31 +82,31 @@ fun StatsGridCard(
 @Composable
 private fun StatCell(
     item: StatItem,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     Column(
         modifier = modifier,
-        horizontalAlignment = Alignment.Start
+        horizontalAlignment = Alignment.Start,
     ) {
         AppText(
             text = item.label,
             style = LegadoTheme.typography.labelSmall,
             color = LegadoTheme.colorScheme.onSurfaceVariant,
-            textAlign = TextAlign.Start
+            textAlign = TextAlign.Start,
         )
         AnimatedContent(
             targetState = item.value,
             transitionSpec = {
                 (fadeIn() + slideInVertically { it / 2 }).togetherWith(fadeOut() + slideOutVertically { -it / 2 })
             },
-            label = "StatValue"
+            label = "StatValue",
         ) { targetValue ->
             AppText(
                 text = targetValue,
                 style = LegadoTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold,
                 color = LegadoTheme.colorScheme.primary,
-                textAlign = TextAlign.Start
+                textAlign = TextAlign.Start,
             )
         }
     }

@@ -15,10 +15,10 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Restore
 import androidx.compose.material.icons.filled.Save
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -96,11 +96,12 @@ fun ColorPickerSheet(
         },
     ) {
         Column(
-            modifier = Modifier
+            modifier =
+            Modifier
                 .fillMaxWidth()
                 .padding(bottom = 16.dp)
                 .verticalScroll(rememberScrollState()),
-            horizontalAlignment = Alignment.CenterHorizontally
+            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             ColorPalette(
                 color = currentColor,
@@ -112,25 +113,26 @@ fun ColorPickerSheet(
                 rows = 8,
                 hueColumns = 12,
                 modifier = Modifier.fillMaxWidth(),
-                showPreview = false
+                showPreview = false,
             )
 
             Spacer(modifier = Modifier.height(32.dp))
 
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
             ) {
                 Box(
-                    modifier = Modifier
+                    modifier =
+                    Modifier
                         .size(40.dp)
                         .clip(RoundedCornerShape(8.dp))
                         .background(currentColor)
                         .border(
                             1.dp,
                             LegadoTheme.colorScheme.outlineVariant,
-                            RoundedCornerShape(8.dp)
-                        )
+                            RoundedCornerShape(8.dp),
+                        ),
                 )
                 Spacer(modifier = Modifier.width(12.dp))
                 AppTextField(
@@ -150,14 +152,14 @@ fun ColorPickerSheet(
                     singleLine = true,
                     isError = isHexInputError,
                     backgroundColor = LegadoTheme.colorScheme.surfaceContainerLow,
-                    keyboardOptions = KeyboardOptions(
+                    keyboardOptions =
+                    KeyboardOptions(
                         capitalization = KeyboardCapitalization.Characters,
                         keyboardType = KeyboardType.Ascii,
-                        imeAction = ImeAction.Done
-                    )
+                        imeAction = ImeAction.Done,
+                    ),
                 )
             }
-
         }
     }
 }
@@ -178,5 +180,4 @@ private fun parseHexColor(input: String): Int? {
     return argb.toLong(16).toInt()
 }
 
-private fun Int.asHexColorString(): String =
-    "#${Integer.toHexString(this).uppercase().padStart(8, '0')}"
+private fun Int.asHexColorString(): String = "#${Integer.toHexString(this).uppercase().padStart(8, '0')}"

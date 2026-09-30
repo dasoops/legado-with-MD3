@@ -11,13 +11,17 @@ class WholeBookPageIndex(
     val isInitialized: Boolean
         get() = cumulativePages != null
 
-    fun initialize(pageCounts: IntArray, exactChapters: Set<Int> = emptySet()) {
+    fun initialize(
+        pageCounts: IntArray,
+        exactChapters: Set<Int> = emptySet(),
+    ) {
         require(pageCounts.size == chapterCount)
         var total = 0
-        cumulativePages = IntArray(chapterCount) { index ->
-            total += pageCounts[index].coerceAtLeast(1)
-            total
-        }
+        cumulativePages =
+            IntArray(chapterCount) { index ->
+                total += pageCounts[index].coerceAtLeast(1)
+                total
+            }
         exactFlags.fill(false)
         exactChapterCount = 0
         exactChapters.forEach { index ->
@@ -30,7 +34,10 @@ class WholeBookPageIndex(
         advanceFirstInexactIndex()
     }
 
-    fun correct(chapterIndex: Int, realPageCount: Int): Boolean {
+    fun correct(
+        chapterIndex: Int,
+        realPageCount: Int,
+    ): Boolean {
         val pages = cumulativePages ?: return false
         if (chapterIndex !in pages.indices) return false
 
@@ -52,7 +59,10 @@ class WholeBookPageIndex(
         return becameExact || delta != 0
     }
 
-    fun updateEstimatedPageCount(chapterIndex: Int, estimatedPageCount: Int): Boolean {
+    fun updateEstimatedPageCount(
+        chapterIndex: Int,
+        estimatedPageCount: Int,
+    ): Boolean {
         val pages = cumulativePages ?: return false
         if (chapterIndex !in pages.indices || exactFlags[chapterIndex]) return false
 
@@ -67,7 +77,10 @@ class WholeBookPageIndex(
         return true
     }
 
-    fun invalidateExact(chapterIndex: Int, estimatedPageCount: Int): Boolean {
+    fun invalidateExact(
+        chapterIndex: Int,
+        estimatedPageCount: Int,
+    ): Boolean {
         val pages = cumulativePages ?: return false
         if (chapterIndex !in pages.indices || !exactFlags[chapterIndex]) return false
 
@@ -93,17 +106,20 @@ class WholeBookPageIndex(
         return pages[chapterIndex] - pageOffset
     }
 
-    fun isExact(chapterIndex: Int): Boolean =
-        chapterIndex in exactFlags.indices && exactFlags[chapterIndex]
+    fun isExact(chapterIndex: Int): Boolean = chapterIndex in exactFlags.indices && exactFlags[chapterIndex]
 
-    fun getState(chapterIndex: Int, localPageIndex: Int): WholeBookPageState? {
+    fun getState(
+        chapterIndex: Int,
+        localPageIndex: Int,
+    ): WholeBookPageState? {
         val pages = cumulativePages ?: return null
         if (chapterIndex !in pages.indices) return null
         val pageOffset = if (chapterIndex == 0) 0 else pages[chapterIndex - 1]
         val chapterPageCount = pages[chapterIndex] - pageOffset
         val totalPages = pages.lastOrNull() ?: return null
         return WholeBookPageState(
-            currentPage = (pageOffset + localPageIndex.coerceAtLeast(0) + 1)
+            currentPage =
+            (pageOffset + localPageIndex.coerceAtLeast(0) + 1)
                 .coerceAtMost(totalPages),
             totalPages = totalPages,
             chapterPage = localPageIndex.coerceAtLeast(0) + 1,

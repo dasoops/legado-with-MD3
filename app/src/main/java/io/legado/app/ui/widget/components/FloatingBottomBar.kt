@@ -68,10 +68,10 @@ import io.legado.app.ui.animation.DampedDragAnimation
 import io.legado.app.ui.animation.InteractiveHighlight
 import io.legado.app.ui.theme.LegadoTheme
 import io.legado.app.ui.theme.LocalAppUiConfiguration
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.launch
 import kotlin.math.abs
 import kotlin.math.sign
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 
 val LocalFloatingBottomBarTabScale = staticCompositionLocalOf { { 1f } }
 
@@ -79,7 +79,7 @@ val LocalFloatingBottomBarTabScale = staticCompositionLocalOf { { 1f } }
 fun RowScope.FloatingBottomBarItem(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
-    content: @Composable ColumnScope.() -> Unit
+    content: @Composable ColumnScope.() -> Unit,
 ) {
     val scale = LocalFloatingBottomBarTabScale.current
     Column(
@@ -90,8 +90,7 @@ fun RowScope.FloatingBottomBarItem(
                 indication = null,
                 role = Role.Tab,
                 onClick = onClick,
-            )
-            .fillMaxHeight()
+            ).fillMaxHeight()
             .weight(1f)
             .graphicsLayer {
                 val currentScale = scale()
@@ -100,7 +99,7 @@ fun RowScope.FloatingBottomBarItem(
             },
         verticalArrangement = Arrangement.spacedBy(1.dp, Alignment.CenterVertically),
         horizontalAlignment = Alignment.CenterHorizontally,
-        content = content
+        content = content,
     )
 }
 
@@ -114,29 +113,32 @@ fun FloatingBottomBar(
     tabsCount: Int,
     isBlurEnabled: Boolean = true,
     hasCustomIcons: Boolean = false,
-    content: @Composable RowScope.() -> Unit
+    content: @Composable RowScope.() -> Unit,
 ) {
     val isInLightTheme = !LegadoTheme.isDark
     val themeSettings = LocalAppUiConfiguration.current.theme
     val customColors = themeSettings.customColors(LegadoTheme.isDark)
-    val hasCustomColors = themeSettings.appTheme == "12" &&
-        themeSettings.enableDeepPersonalization
-    val accentColor = if (hasCustomColors && customColors.primary != 0) {
-        Color(customColors.primary)
-    } else {
-        LegadoTheme.colorScheme.primary
-    }
-    val containerColor = if (hasCustomColors && customColors.secondary != 0) {
-        Color(customColors.secondary).copy(
-            alpha = if (isBlurEnabled) themeSettings.bottomBarBlurAlpha / 100f else 1f
-        )
-    } else if (isBlurEnabled) {
-        LegadoTheme.colorScheme.surfaceContainer.copy(
-            alpha = themeSettings.bottomBarBlurAlpha / 100f
-        )
-    } else {
-        LegadoTheme.colorScheme.surfaceContainer
-    }
+    val hasCustomColors =
+        themeSettings.appTheme == "12" &&
+            themeSettings.enableDeepPersonalization
+    val accentColor =
+        if (hasCustomColors && customColors.primary != 0) {
+            Color(customColors.primary)
+        } else {
+            LegadoTheme.colorScheme.primary
+        }
+    val containerColor =
+        if (hasCustomColors && customColors.secondary != 0) {
+            Color(customColors.secondary).copy(
+                alpha = if (isBlurEnabled) themeSettings.bottomBarBlurAlpha / 100f else 1f,
+            )
+        } else if (isBlurEnabled) {
+            LegadoTheme.colorScheme.surfaceContainer.copy(
+                alpha = themeSettings.bottomBarBlurAlpha / 100f,
+            )
+        } else {
+            LegadoTheme.colorScheme.surfaceContainer
+        }
 
     val tabsBackdrop = rememberLayerBackdrop()
     val density = LocalDensity.current
@@ -168,56 +170,58 @@ fun FloatingBottomBar(
 
     val holder = remember { DampedDragAnimationHolder() }
 
-    val dampedDragAnimation = remember(animationScope, tabsCount, density, isLtr) {
-        DampedDragAnimation(
-            animationScope = animationScope,
-            initialValue = selectedIndex().toFloat(),
-            valueRange = 0f..(tabsCount - 1).toFloat(),
-            visibilityThreshold = 0.001f,
-            initialScale = 1f,
-            pressedScale = 78f / 56f,
-            canDrag = { offset ->
-                val anim = holder.instance ?: return@DampedDragAnimation true
-                if (tabWidthPx == 0f) return@DampedDragAnimation false
+    val dampedDragAnimation =
+        remember(animationScope, tabsCount, density, isLtr) {
+            DampedDragAnimation(
+                animationScope = animationScope,
+                initialValue = selectedIndex().toFloat(),
+                valueRange = 0f..(tabsCount - 1).toFloat(),
+                visibilityThreshold = 0.001f,
+                initialScale = 1f,
+                pressedScale = 78f / 56f,
+                canDrag = { offset ->
+                    val anim = holder.instance ?: return@DampedDragAnimation true
+                    if (tabWidthPx == 0f) return@DampedDragAnimation false
 
-                val currentValue = anim.value
-                val indicatorX = currentValue * tabWidthPx
-                val padding = with(density) { 4.dp.toPx() }
-                val globalTouchX = if (isLtr) {
-                    val touchX = indicatorX + offset.x
-                    padding + touchX
-                } else {
-                    totalWidthPx - padding - tabWidthPx - indicatorX + offset.x
-                }
-                globalTouchX in 0f..totalWidthPx
-            },
-            onDragStarted = {},
-            onDragStopped = {
-                val targetIndex = targetValue.fastRoundToInt().fastCoerceIn(0, tabsCount - 1)
-                currentIndex = targetIndex
-                animateToValue(targetIndex.toFloat())
-                if (targetIndex != selectedIndex()) {
-                    onSelected(targetIndex)
-                } else {
-                    onReselected(targetIndex)
-                }
-                animationScope.launch {
-                    offsetAnimation.animateTo(0f, spring(1f, 300f, 0.5f))
-                }
-            },
-            onDrag = { _, dragAmount ->
-                if (tabWidthPx > 0f) {
-                    updateValue(
-                        (targetValue + dragAmount.x / tabWidthPx * if (isLtr) 1f else -1f)
-                            .fastCoerceIn(0f, (tabsCount - 1).toFloat())
-                    )
-                    animationScope.launch {
-                        offsetAnimation.snapTo(offsetAnimation.value + dragAmount.x)
+                    val currentValue = anim.value
+                    val indicatorX = currentValue * tabWidthPx
+                    val padding = with(density) { 4.dp.toPx() }
+                    val globalTouchX =
+                        if (isLtr) {
+                            val touchX = indicatorX + offset.x
+                            padding + touchX
+                        } else {
+                            totalWidthPx - padding - tabWidthPx - indicatorX + offset.x
+                        }
+                    globalTouchX in 0f..totalWidthPx
+                },
+                onDragStarted = {},
+                onDragStopped = {
+                    val targetIndex = targetValue.fastRoundToInt().fastCoerceIn(0, tabsCount - 1)
+                    currentIndex = targetIndex
+                    animateToValue(targetIndex.toFloat())
+                    if (targetIndex != selectedIndex()) {
+                        onSelected(targetIndex)
+                    } else {
+                        onReselected(targetIndex)
                     }
-                }
-            }
-        ).also { holder.instance = it }
-    }
+                    animationScope.launch {
+                        offsetAnimation.animateTo(0f, spring(1f, 300f, 0.5f))
+                    }
+                },
+                onDrag = { _, dragAmount ->
+                    if (tabWidthPx > 0f) {
+                        updateValue(
+                            (targetValue + dragAmount.x / tabWidthPx * if (isLtr) 1f else -1f)
+                                .fastCoerceIn(0f, (tabsCount - 1).toFloat()),
+                        )
+                        animationScope.launch {
+                            offsetAnimation.snapTo(offsetAnimation.value + dragAmount.x)
+                        }
+                    }
+                },
+            ).also { holder.instance = it }
+        }
 
     LaunchedEffect(selectedIndex, dampedDragAnimation) {
         snapshotFlow { selectedIndex() }.collectLatest { index ->
@@ -238,9 +242,9 @@ fun FloatingBottomBar(
                             } else {
                                 size.width - (dampedDragAnimation.value + 0.5f) * tabWidthPx + panelOffset
                             },
-                            size.height / 2f
+                            size.height / 2f,
                         )
-                    }
+                    },
                 )
             }
         } else {
@@ -249,7 +253,7 @@ fun FloatingBottomBar(
 
     Box(
         modifier = modifier.width(IntrinsicSize.Min),
-        contentAlignment = Alignment.CenterStart
+        contentAlignment = Alignment.CenterStart,
     ) {
         Row(
             Modifier
@@ -257,23 +261,26 @@ fun FloatingBottomBar(
                     totalWidthPx = coords.size.width.toFloat()
                     val contentWidthPx = totalWidthPx - with(density) { 8.dp.toPx() }
                     tabWidthPx = contentWidthPx / tabsCount
-                }
-                .graphicsLayer { translationX = panelOffset }
+                }.graphicsLayer { translationX = panelOffset }
                 .clickable(
                     interactionSource = remember { MutableInteractionSource() },
                     indication = null,
-                    onClick = {}
-                )
-                .drawBackdrop(
+                    onClick = {},
+                ).drawBackdrop(
                     backdrop = backdrop,
                     shape = { ContinuousCapsule },
                     effects = {
                         if (isBlurEnabled) {
                             vibrancy()
-                            blur(themeSettings.bottomBarBlurRadius.toFloat().dp.toPx())
+                            blur(
+                                themeSettings.bottomBarBlurRadius
+                                    .toFloat()
+                                    .dp
+                                    .toPx(),
+                            )
                             lens(
                                 themeSettings.bottomBarLensRadius.dp.toPx(),
-                                themeSettings.bottomBarLensRadius.dp.toPx()
+                                themeSettings.bottomBarLensRadius.dp.toPx(),
                             )
                         }
                     },
@@ -282,7 +289,7 @@ fun FloatingBottomBar(
                     },
                     shadow = {
                         Shadow.Default.copy(
-                            color = Color.Black.copy(if (isInLightTheme) 0.1f else 0.2f)
+                            color = Color.Black.copy(if (isInLightTheme) 0.1f else 0.2f),
                         )
                     },
                     layerBlock = {
@@ -293,19 +300,17 @@ fun FloatingBottomBar(
                             scaleY = scale
                         }
                     },
-                    onDrawSurface = { drawRect(containerColor) }
-                )
-                .then(
+                    onDrawSurface = { drawRect(containerColor) },
+                ).then(
                     if (isBlurEnabled && interactiveHighlight != null) {
                         interactiveHighlight.modifier
                     } else {
                         Modifier
-                    }
-                )
-                .height(64.dp)
+                    },
+                ).height(64.dp)
                 .padding(4.dp),
             verticalAlignment = Alignment.CenterVertically,
-            content = content
+            content = content,
         )
 
         CompositionLocalProvider(
@@ -315,7 +320,7 @@ fun FloatingBottomBar(
                 } else {
                     1f
                 }
-            }
+            },
         ) {
             Row(
                 Modifier
@@ -330,39 +335,46 @@ fun FloatingBottomBar(
                             if (isBlurEnabled) {
                                 val progress = dampedDragAnimation.pressProgress
                                 vibrancy()
-                                blur(themeSettings.bottomBarBlurRadius.toFloat().dp.toPx())
+                                blur(
+                                    themeSettings.bottomBarBlurRadius
+                                        .toFloat()
+                                        .dp
+                                        .toPx(),
+                                )
                                 lens(
                                     themeSettings.bottomBarLensRadius.dp.toPx() * progress,
-                                    themeSettings.bottomBarLensRadius.dp.toPx() * progress
+                                    themeSettings.bottomBarLensRadius.dp.toPx() * progress,
                                 )
                             }
                         },
                         highlight = {
                             Highlight.Default.copy(
-                                alpha = if (isBlurEnabled) {
+                                alpha =
+                                if (isBlurEnabled) {
                                     dampedDragAnimation.pressProgress
                                 } else {
                                     0f
-                                }
+                                },
                             )
                         },
-                        onDrawSurface = { drawRect(containerColor) }
-                    )
-                    .then(
+                        onDrawSurface = { drawRect(containerColor) },
+                    ).then(
                         if (isBlurEnabled && interactiveHighlight != null) {
                             interactiveHighlight.modifier
                         } else {
                             Modifier
-                        }
-                    )
-                    .height(56.dp)
+                        },
+                    ).height(56.dp)
                     .padding(horizontal = 4.dp)
                     .then(
-                        if (hasCustomIcons) Modifier
-                        else Modifier.graphicsLayer(colorFilter = ColorFilter.tint(accentColor))
+                        if (hasCustomIcons) {
+                            Modifier
+                        } else {
+                            Modifier.graphicsLayer(colorFilter = ColorFilter.tint(accentColor))
+                        },
                     ),
                 verticalAlignment = Alignment.CenterVertically,
-                content = content
+                content = content,
             )
         }
 
@@ -375,20 +387,19 @@ fun FloatingBottomBar(
                         val singleTabWidth = contentWidth / tabsCount
                         val progressOffset = dampedDragAnimation.value * singleTabWidth
 
-                        translationX = if (isLtr) {
-                            progressOffset + panelOffset
-                        } else {
-                            -progressOffset + panelOffset
-                        }
-                    }
-                    .then(
+                        translationX =
+                            if (isLtr) {
+                                progressOffset + panelOffset
+                            } else {
+                                -progressOffset + panelOffset
+                            }
+                    }.then(
                         if (isBlurEnabled && interactiveHighlight != null) {
                             interactiveHighlight.gestureModifier
                         } else {
                             Modifier
-                        }
-                    )
-                    .then(dampedDragAnimation.modifier)
+                        },
+                    ).then(dampedDragAnimation.modifier)
                     .drawBackdrop(
                         backdrop = rememberCombinedBackdrop(backdrop, tabsBackdrop),
                         shape = { ContinuousCapsule },
@@ -400,11 +411,12 @@ fun FloatingBottomBar(
                         },
                         highlight = {
                             Highlight.Default.copy(
-                                alpha = if (isBlurEnabled) {
+                                alpha =
+                                if (isBlurEnabled) {
                                     dampedDragAnimation.pressProgress
                                 } else {
                                     0f
-                                }
+                                },
                             )
                         },
                         shadow = {
@@ -413,7 +425,7 @@ fun FloatingBottomBar(
                         innerShadow = {
                             InnerShadow(
                                 radius = 8f.dp * dampedDragAnimation.pressProgress,
-                                alpha = if (isBlurEnabled) dampedDragAnimation.pressProgress else 0f
+                                alpha = if (isBlurEnabled) dampedDragAnimation.pressProgress else 0f,
                             )
                         },
                         layerBlock = {
@@ -429,18 +441,18 @@ fun FloatingBottomBar(
                             val progress =
                                 if (isBlurEnabled) dampedDragAnimation.pressProgress else 0f
                             drawRect(
-                                color = if (isInLightTheme) {
+                                color =
+                                if (isInLightTheme) {
                                     Color.Black.copy(0.1f)
                                 } else {
                                     Color.White.copy(0.1f)
                                 },
-                                alpha = 1f - progress
+                                alpha = 1f - progress,
                             )
                             drawRect(Color.Black.copy(alpha = 0.03f * progress))
-                        }
-                    )
-                    .height(56.dp)
-                    .width(with(density) { ((totalWidthPx - 8.dp.toPx()) / tabsCount).toDp() })
+                        },
+                    ).height(56.dp)
+                    .width(with(density) { ((totalWidthPx - 8.dp.toPx()) / tabsCount).toDp() }),
             )
         }
     }

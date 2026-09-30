@@ -63,15 +63,17 @@ fun ReaderMoreActionsSheet(
     onDismissRequest: () -> Unit,
 ) {
     var editing by remember(show) { mutableStateOf(false) }
+
     fun dispatch(intent: ReadBookIntent) {
         onDismissRequest()
         onIntent(intent)
     }
 
     val specs = moreActionSpecs(state, onIntent, ::dispatch)
-    val config = state.menuConfig.moreActionItems.ifEmpty {
-        MoreActionIds.map { ReadBookButtonConfigItem(it, true) }
-    }
+    val config =
+        state.menuConfig.moreActionItems.ifEmpty {
+            MoreActionIds.map { ReadBookButtonConfigItem(it, true) }
+        }
 
     AppModalBottomSheet(
         show = show,
@@ -94,12 +96,14 @@ fun ReaderMoreActionsSheet(
             )
         } else {
             MoreActionsPager(
-                actions = orderedVisibleActions(config, specs) + MoreActionSpec(
-                    id = "configure_more_actions",
-                    label = stringResource(R.string.more_actions_config),
-                    icon = Icons.Default.Settings,
-                    onClick = { editing = true },
-                ),
+                actions =
+                orderedVisibleActions(config, specs) +
+                    MoreActionSpec(
+                        id = "configure_more_actions",
+                        label = stringResource(R.string.more_actions_config),
+                        icon = Icons.Default.Settings,
+                        onClick = { editing = true },
+                    ),
                 state = state,
                 onIntent = onIntent,
                 dispatch = ::dispatch,
@@ -133,10 +137,11 @@ private fun MoreActionsPager(
         val rowCount = if (actions.size > 4) 2 else 1
         HorizontalPager(
             state = pagerState,
-            modifier = Modifier
+            modifier =
+            Modifier
                 .fillMaxWidth()
                 .height(
-                    itemSize * rowCount + if (rowCount == 2) 24.dp else 16.dp
+                    itemSize * rowCount + if (rowCount == 2) 24.dp else 16.dp,
                 ),
         ) { page ->
             val pageItems = pages[page]
@@ -182,7 +187,8 @@ private fun ActionSquareHost(
             text = action.label,
             selected = action.selected,
             hasMore = hasMore,
-            onClick = if (action.id == "image_style") {
+            onClick =
+            if (action.id == "image_style") {
                 { expanded = true }
             } else {
                 action.onClick
@@ -190,13 +196,14 @@ private fun ActionSquareHost(
             onMoreClick = { expanded = true },
         )
         when (action.id) {
-            "image_style" -> ImageStyleDropdown(
-                expanded = expanded,
-                currentStyle = state.book?.getImageStyle() ?: Book.imgStyleDefault,
-                onDismissRequest = { expanded = false },
-                onIntent = onIntent,
-            )
-
+            "image_style" -> {
+                ImageStyleDropdown(
+                    expanded = expanded,
+                    currentStyle = state.book?.getImageStyle() ?: Book.imgStyleDefault,
+                    onDismissRequest = { expanded = false },
+                    onIntent = onIntent,
+                )
+            }
         }
     }
 }
@@ -209,11 +216,12 @@ private fun MoreActionsConfigContent(
     onSave: (List<ReadBookButtonConfigItem>) -> Unit,
 ) {
     val meta = specs.associateBy { it.id }
-    val entries = items.mapNotNull { item ->
-        meta[item.id]?.let { spec ->
-            ConfigListEntry(item.id, item.enabled, spec.icon, spec.label)
+    val entries =
+        items.mapNotNull { item ->
+            meta[item.id]?.let { spec ->
+                ConfigListEntry(item.id, item.enabled, spec.icon, spec.label)
+            }
         }
-    }
 
     ReorderableConfigList(
         initialEntries = entries,
@@ -232,42 +240,78 @@ private fun moreActionSpecs(
     dispatch: (ReadBookIntent) -> Unit,
 ): List<MoreActionSpec> = listOf(
     MoreActionSpec(
-        "toc_rule", stringResource(R.string.txt_toc_rule), Icons.AutoMirrored.Filled.Toc,
-        applicable = state.isLocalTxt, onClick = { dispatch(ReadBookIntent.MenuTocRegex) }),
+        "toc_rule",
+        stringResource(R.string.txt_toc_rule),
+        Icons.AutoMirrored.Filled.Toc,
+        applicable = state.isLocalTxt,
+        onClick = { dispatch(ReadBookIntent.MenuTocRegex) },
+    ),
     MoreActionSpec(
-        "charset", stringResource(R.string.set_charset), Icons.Default.Translate,
+        "charset",
+        stringResource(R.string.set_charset),
+        Icons.Default.Translate,
         applicable = state.isLocalBook,
-        onClick = { onIntent(ReadBookIntent.ShowSheet(ReadBookSheet.Charset)) }),
+        onClick = { onIntent(ReadBookIntent.ShowSheet(ReadBookSheet.Charset)) },
+    ),
     MoreActionSpec(
-        "add_bookmark", stringResource(R.string.bookmark_add), Icons.Default.Bookmark,
-        onClick = { dispatch(ReadBookIntent.AddBookmark) }),
+        "add_bookmark",
+        stringResource(R.string.bookmark_add),
+        Icons.Default.Bookmark,
+        onClick = { dispatch(ReadBookIntent.AddBookmark) },
+    ),
     MoreActionSpec(
-        "read_style", stringResource(R.string.read_config), Icons.Default.DisplaySettings,
-        onClick = { dispatch(ReadBookIntent.OpenReadMenuRoute(ReadBookMenuRoute.ReadStyle)) }),
+        "read_style",
+        stringResource(R.string.read_config),
+        Icons.Default.DisplaySettings,
+        onClick = { dispatch(ReadBookIntent.OpenReadMenuRoute(ReadBookMenuRoute.ReadStyle)) },
+    ),
     MoreActionSpec(
-        "re_segment", stringResource(R.string.re_segment), Icons.AutoMirrored.Filled.Toc,
-        selected = state.reSegment, onClick = { onIntent(ReadBookIntent.MenuReSegment) }),
+        "re_segment",
+        stringResource(R.string.re_segment),
+        Icons.AutoMirrored.Filled.Toc,
+        selected = state.reSegment,
+        onClick = { onIntent(ReadBookIntent.MenuReSegment) },
+    ),
     MoreActionSpec(
-        "del_ruby", stringResource(R.string.del_ruby_tag), Icons.Default.CleanHands,
-        applicable = state.isEpub, selected = state.delRubyTag,
-        onClick = { onIntent(ReadBookIntent.MenuDelRubyTag) }),
+        "del_ruby",
+        stringResource(R.string.del_ruby_tag),
+        Icons.Default.CleanHands,
+        applicable = state.isEpub,
+        selected = state.delRubyTag,
+        onClick = { onIntent(ReadBookIntent.MenuDelRubyTag) },
+    ),
     MoreActionSpec(
-        "image_style", stringResource(R.string.image_style), Icons.Default.Image,
-        onClick = {}),
+        "image_style",
+        stringResource(R.string.image_style),
+        Icons.Default.Image,
+        onClick = {},
+    ),
     MoreActionSpec(
-        "get_progress", stringResource(R.string.get_book_progress), Icons.Default.Sync,
+        "get_progress",
+        stringResource(R.string.get_book_progress),
+        Icons.Default.Sync,
         applicable = state.isReadingProgressSyncConfigured,
-        onClick = { dispatch(ReadBookIntent.MenuGetProgress) }),
+        onClick = { dispatch(ReadBookIntent.MenuGetProgress) },
+    ),
     MoreActionSpec(
-        "cover_progress", stringResource(R.string.cover_book_progress), Icons.Default.Sync,
+        "cover_progress",
+        stringResource(R.string.cover_book_progress),
+        Icons.Default.Sync,
         applicable = state.isReadingProgressSyncConfigured,
-        onClick = { dispatch(ReadBookIntent.MenuCoverProgress) }),
+        onClick = { dispatch(ReadBookIntent.MenuCoverProgress) },
+    ),
     MoreActionSpec(
-        "bottom_button_config", stringResource(R.string.config_btn), Icons.Default.Settings,
-        onClick = { onIntent(ReadBookIntent.ShowSheet(ReadBookSheet.ToolButtonConfig)) }),
+        "bottom_button_config",
+        stringResource(R.string.config_btn),
+        Icons.Default.Settings,
+        onClick = { onIntent(ReadBookIntent.ShowSheet(ReadBookSheet.ToolButtonConfig)) },
+    ),
     MoreActionSpec(
-        "log", stringResource(R.string.log), Icons.Default.BugReport,
-        onClick = { onIntent(ReadBookIntent.ShowSheet(ReadBookSheet.AppLog)) }),
+        "log",
+        stringResource(R.string.log),
+        Icons.Default.BugReport,
+        onClick = { onIntent(ReadBookIntent.ShowSheet(ReadBookSheet.AppLog)) },
+    ),
 )
 
 @Composable
@@ -287,7 +331,10 @@ private fun ImageStyleDropdown(
             RoundDropdownMenuItem(
                 text = stringResource(label),
                 isSelected = currentStyle == style,
-                onClick = { dismiss(); onIntent(ReadBookIntent.MenuImageStyle(style)) },
+                onClick = {
+                    dismiss()
+                    onIntent(ReadBookIntent.MenuImageStyle(style))
+                },
             )
         }
     }

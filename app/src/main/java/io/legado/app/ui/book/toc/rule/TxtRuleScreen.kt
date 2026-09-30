@@ -63,7 +63,7 @@ fun TxtRuleRouteScreen(
     viewModel: TxtTocRuleViewModel = koinViewModel(),
     initialRule: String? = null,
     onPickRule: ((String) -> Unit)? = null,
-    onBackClick: () -> Unit
+    onBackClick: () -> Unit,
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val importState by viewModel.importState.collectAsStateWithLifecycle()
@@ -92,9 +92,8 @@ fun TxtRuleScreen(
     onPasteRule: () -> TxtTocRule?,
     initialRule: String? = null,
     onPickRule: ((String) -> Unit)? = null,
-    onBackClick: () -> Unit
+    onBackClick: () -> Unit,
 ) {
-
     val context = LocalContext.current
 
     val rules = state.items
@@ -113,10 +112,11 @@ fun TxtRuleScreen(
     var showImportSheet by remember { mutableStateOf(false) }
     var showExportSheet by remember { mutableStateOf(false) }
 
-    val reorderableState = rememberReorderableLazyListState(listState) { from, to ->
-        onIntent(TxtTocRuleIntent.MoveItem(from.index, to.index))
-        hapticFeedback.performHapticFeedback(HapticFeedbackType.SegmentFrequentTick)
-    }
+    val reorderableState =
+        rememberReorderableLazyListState(listState) { from, to ->
+            onIntent(TxtTocRuleIntent.MoveItem(from.index, to.index))
+            hapticFeedback.performHapticFeedback(HapticFeedbackType.SegmentFrequentTick)
+        }
 
     val clipboardManager = LocalClipboard.current
     val snackbarHostState = remember { SnackbarHostState() }
@@ -125,19 +125,20 @@ fun TxtRuleScreen(
         events.collect { event ->
             when (event) {
                 is BaseRuleEvent.ShowSnackbar -> {
-                    val result = snackbarHostState.showSnackbar(
-                        message = event.message,
-                        actionLabel = event.actionLabel,
-                        withDismissAction = true
-                    )
+                    val result =
+                        snackbarHostState.showSnackbar(
+                            message = event.message,
+                            actionLabel = event.actionLabel,
+                            withDismissAction = true,
+                        )
                     if (result == SnackbarResult.ActionPerformed && event.url != null) {
                         clipboardManager.setClipEntry(
                             ClipEntry(
                                 ClipData.newPlainText(
                                     "url",
-                                    event.url
-                                )
-                            )
+                                    event.url,
+                                ),
+                            ),
                         )
                     }
                 }
@@ -153,24 +154,26 @@ fun TxtRuleScreen(
         }
     }
 
-    val importDoc = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.OpenDocument(),
-        onResult = { uri ->
-            uri?.let {
-                context.contentResolver.openInputStream(it)?.use { stream ->
-                    val text = stream.reader().readText()
-                    onIntent(TxtTocRuleIntent.ImportSource(text))
+    val importDoc =
+        rememberLauncherForActivityResult(
+            contract = ActivityResultContracts.OpenDocument(),
+            onResult = { uri ->
+                uri?.let {
+                    context.contentResolver.openInputStream(it)?.use { stream ->
+                        val text = stream.reader().readText()
+                        onIntent(TxtTocRuleIntent.ImportSource(text))
+                    }
                 }
-            }
-        }
-    )
+            },
+        )
 
-    val exportDoc = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.CreateDocument("application/json"),
-        onResult = { uri ->
-            uri?.let { onIntent(TxtTocRuleIntent.ExportSelection(it)) }
-        }
-    )
+    val exportDoc =
+        rememberLauncherForActivityResult(
+            contract = ActivityResultContracts.CreateDocument("application/json"),
+            onResult = { uri ->
+                uri?.let { onIntent(TxtTocRuleIntent.ExportSelection(it)) }
+            },
+        )
 
     SourceInputDialog(
         show = showUrlInput,
@@ -179,7 +182,7 @@ fun TxtRuleScreen(
         onConfirm = {
             showUrlInput = false
             onIntent(TxtTocRuleIntent.ImportSource(it))
-        }
+        },
     )
 
     FilePickerSheet(
@@ -190,9 +193,8 @@ fun TxtRuleScreen(
             showExportSheet = false
             exportDoc.launch("exportDictRule.json")
         },
-        allowExtensions = arrayOf("json")
+        allowExtensions = arrayOf("json"),
     )
-
 
     FilePickerSheet(
         show = showImportSheet,
@@ -206,7 +208,7 @@ fun TxtRuleScreen(
             showUrlInput = true
             showImportSheet = false
         },
-        allowExtensions = arrayOf("json", "txt")
+        allowExtensions = arrayOf("json", "txt"),
     )
 
     BatchImportDialog(
@@ -220,7 +222,7 @@ fun TxtRuleScreen(
         itemTitle = { rule -> rule.name },
         itemSubtitle = { rule ->
             rule.chapterRule.takeIf { it.isNotBlank() }
-        }
+        },
     )
 
     LaunchedEffect(reorderableState.isAnyItemDragging) {
@@ -240,7 +242,7 @@ fun TxtRuleScreen(
             showDeleteRuleDialog = null
         },
         dismissText = stringResource(R.string.cancel),
-        onDismiss = { showDeleteRuleDialog = null }
+        onDismiss = { showDeleteRuleDialog = null },
     )
 
     RuleEditSheet(
@@ -260,12 +262,10 @@ fun TxtRuleScreen(
                     context.toastOnUi(R.string.cannot_empty)
                     return@RuleEditSheet
                 }
-
                 updatedRule.chapterRule.isBlank() -> {
                     context.toastOnUi(R.string.cannot_empty)
                     return@RuleEditSheet
                 }
-
                 runCatching { Regex(updatedRule.chapterRule) }.isFailure -> {
                     context.toastOnUi(R.string.invalid_format)
                     return@RuleEditSheet
@@ -282,7 +282,7 @@ fun TxtRuleScreen(
                 name = r?.name ?: "",
                 rule1 = r?.chapterRule ?: "",
                 rule2 = r?.example ?: "",
-                rule3 = r?.volumeRule ?: ""
+                rule3 = r?.volumeRule ?: "",
             )
         },
         fromFields = { fields, old ->
@@ -290,12 +290,12 @@ fun TxtRuleScreen(
                 name = fields.name,
                 chapterRule = fields.rule1,
                 volumeRule = fields.rule3,
-                example = fields.rule2
+                example = fields.rule2,
             ) ?: TxtTocRule(
                 name = fields.name,
                 chapterRule = fields.rule1,
                 volumeRule = fields.rule3,
-                example = fields.rule2
+                example = fields.rule2,
             )
         },
         showTestButton = true,
@@ -305,20 +305,23 @@ fun TxtRuleScreen(
                 val normalized = example.replace("\r\n", "\n").replace("\r", "\n")
                 val lines = normalized.lines()
                 val fullText = "\n$normalized"
-                val matchRanges = regex.findAll(fullText)
-                    .map { it.range.first..it.range.last + 1 }
-                    .toMutableList()
+                val matchRanges =
+                    regex
+                        .findAll(fullText)
+                        .map { it.range.first..it.range.last + 1 }
+                        .toMutableList()
                 var offset = 1
                 lines.map { line ->
                     val lineStart = offset
                     val lineEnd = offset + line.length
-                    val matched = matchRanges.any { range ->
-                        if (range.first == range.last) {
-                            range.first in lineStart..lineEnd
-                        } else {
-                            range.first < lineEnd && range.last > lineStart
+                    val matched =
+                        matchRanges.any { range ->
+                            if (range.first == range.last) {
+                                range.first in lineStart..lineEnd
+                            } else {
+                                range.first < lineEnd && range.last > lineStart
+                            }
                         }
-                    }
                     offset = lineEnd + 1
                     TestLineResult(line = line, matched = matched, matchResult = if (matched) line else null)
                 }
@@ -327,7 +330,8 @@ fun TxtRuleScreen(
     )
 
     RuleListScaffold(
-        title = if (isPickMode) {
+        title =
+        if (isPickMode) {
             stringResource(R.string.select_toc_rule)
         } else {
             stringResource(R.string.txt_toc_rule)
@@ -342,7 +346,8 @@ fun TxtRuleScreen(
         onClearSelection = { onIntent(TxtTocRuleIntent.ClearSelection) },
         onSelectAll = { onIntent(TxtTocRuleIntent.SelectAll) },
         onSelectInvert = { onIntent(TxtTocRuleIntent.InvertSelection) },
-        selectionSecondaryActions = listOf(
+        selectionSecondaryActions =
+        listOf(
             ActionItem(text = stringResource(R.string.enable), onClick = {
                 onIntent(TxtTocRuleIntent.EnableSelection)
             }),
@@ -351,7 +356,8 @@ fun TxtRuleScreen(
             }),
             ActionItem(
                 text = stringResource(R.string.export),
-                onClick = { showExportSheet = true })
+                onClick = { showExportSheet = true },
+            ),
         ),
         onDeleteSelected = { ids ->
             @Suppress("UNCHECKED_CAST")
@@ -366,47 +372,58 @@ fun TxtRuleScreen(
         dropDownMenuContent = { dismiss ->
             RoundDropdownMenuItem(
                 text = stringResource(R.string.import_str),
-                onClick = { showImportSheet = true; dismiss() }
+                onClick = {
+                    showImportSheet = true
+                    dismiss()
+                },
             )
             RoundDropdownMenuItem(
                 text = stringResource(R.string.import_built_in_rules),
-                onClick = { onIntent(TxtTocRuleIntent.ImportBuiltInRules); dismiss() }
+                onClick = {
+                    onIntent(TxtTocRuleIntent.ImportBuiltInRules)
+                    dismiss()
+                },
             )
-        }
+        },
     ) { paddingValues ->
         Box(
-            modifier = Modifier
-                .fillMaxSize()
+            modifier =
+            Modifier
+                .fillMaxSize(),
         ) {
             FastScrollLazyColumn(
                 modifier = Modifier.fillMaxSize(),
                 state = listState,
-                contentPadding = adaptiveContentPadding(
+                contentPadding =
+                adaptiveContentPadding(
                     top = paddingValues.calculateTopPadding(),
-                    bottom = 120.dp
+                    bottom = 120.dp,
                 ),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
+                verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 items(rules, key = { it.id }) { item ->
 
-                    val isItemHighLighted = if (isPickMode) {
-                        item.rule.chapterRule == initialRule
-                    } else {
-                        selectedIds.contains(item.id)
-                    }
-                    val enabledState = stringResource(
-                        if (item.isEnabled) R.string.enabled else R.string.disabled
-                    )
-                    val itemDescription = listOfNotNull(
-                        item.name,
-                        item.example.takeIf { it.isNotBlank() },
-                        enabledState,
-                        if (!isPickMode && !inSelectionMode) {
-                            stringResource(R.string.a11y_long_press_reorder)
+                    val isItemHighLighted =
+                        if (isPickMode) {
+                            item.rule.chapterRule == initialRule
                         } else {
-                            null
+                            selectedIds.contains(item.id)
                         }
-                    ).joinToString()
+                    val enabledState =
+                        stringResource(
+                            if (item.isEnabled) R.string.enabled else R.string.disabled,
+                        )
+                    val itemDescription =
+                        listOfNotNull(
+                            item.name,
+                            item.example.takeIf { it.isNotBlank() },
+                            enabledState,
+                            if (!isPickMode && !inSelectionMode) {
+                                stringResource(R.string.a11y_long_press_reorder)
+                            } else {
+                                null
+                            },
+                        ).joinToString()
 
                     ReorderableSelectionItem(
                         state = reorderableState,
@@ -431,22 +448,27 @@ fun TxtRuleScreen(
                             onIntent(TxtTocRuleIntent.SetRuleEnabled(item.rule, enabled))
                         },
                         contentDescription = itemDescription,
-                        enableSwitchContentDescription = stringResource(
+                        enableSwitchContentDescription =
+                        stringResource(
                             R.string.a11y_rule_enabled_switch,
-                            item.name
+                            item.name,
                         ),
                         editContentDescription = stringResource(R.string.a11y_edit_named, item.name),
-                        onClickEdit = { editingRule = item.rule; showEditSheet = true },
+                        onClickEdit = {
+                            editingRule = item.rule
+                            showEditSheet = true
+                        },
                         trailingAction = {
                             SmallPlainButton(
                                 onClick = { showDeleteRuleDialog = item.rule },
                                 icon = AppIcons.Delete,
-                                contentDescription = stringResource(
+                                contentDescription =
+                                stringResource(
                                     R.string.a11y_delete_named,
-                                    item.name
-                                )
+                                    item.name,
+                                ),
                             )
-                        }
+                        },
                     )
                 }
             }
@@ -457,10 +479,11 @@ fun TxtRuleScreen(
                     selectedIds = selectedIds,
                     onSelectionChange = { onIntent(TxtTocRuleIntent.SetSelection(it)) },
                     idProvider = { it.id },
-                    modifier = Modifier
+                    modifier =
+                    Modifier
                         .fillMaxHeight()
                         .width(60.dp)
-                        .align(Alignment.TopStart)
+                        .align(Alignment.TopStart),
                 )
             }
         }

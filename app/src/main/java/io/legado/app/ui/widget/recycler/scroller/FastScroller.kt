@@ -1,6 +1,5 @@
 package io.legado.app.ui.widget.recycler.scroller
 
-//import io.legado.app.lib.theme.accentColor
 import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
 import android.annotation.SuppressLint
@@ -33,7 +32,6 @@ import io.legado.app.R
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.roundToInt
-
 
 @Suppress("SameParameterValue")
 class FastScroller : LinearLayout {
@@ -80,7 +78,7 @@ class FastScroller : LinearLayout {
                         }
                     }
                     RecyclerView.SCROLL_STATE_IDLE -> if (mFadeScrollbar && !mHandleView.isSelected) {
-                        handler.postDelayed(mScrollbarHider, sScrollbarHideDelay.toLong())
+                        handler.postDelayed(mScrollbarHider, SCROLLBAR_HIDE_DELAY.toLong())
                     }
                 }
             }
@@ -96,7 +94,7 @@ class FastScroller : LinearLayout {
     constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int = 0) : super(
         context,
         attrs,
-        defStyleAttr
+        defStyleAttr,
     ) {
         layout(context, attrs)
         layoutParams = generateLayoutParams(attrs)
@@ -116,25 +114,26 @@ class FastScroller : LinearLayout {
         when (viewGroup) {
             is ConstraintLayout -> {
                 val constraintSet = ConstraintSet()
+
                 @IdRes val layoutId = id
                 constraintSet.clone(viewGroup)
                 constraintSet.connect(
                     layoutId,
                     ConstraintSet.TOP,
                     recyclerViewId,
-                    ConstraintSet.TOP
+                    ConstraintSet.TOP,
                 )
                 constraintSet.connect(
                     layoutId,
                     ConstraintSet.BOTTOM,
                     recyclerViewId,
-                    ConstraintSet.BOTTOM
+                    ConstraintSet.BOTTOM,
                 )
                 constraintSet.connect(
                     layoutId,
                     ConstraintSet.END,
                     recyclerViewId,
-                    ConstraintSet.END
+                    ConstraintSet.END,
                 )
                 constraintSet.applyTo(viewGroup)
                 val layoutParams = layoutParams as ConstraintLayout.LayoutParams
@@ -325,7 +324,7 @@ class FastScroller : LinearLayout {
                 requestDisallowInterceptTouchEvent(false)
                 setHandleSelected(false)
                 if (mFadeScrollbar) {
-                    handler.postDelayed(mScrollbarHider, sScrollbarHideDelay.toLong())
+                    handler.postDelayed(mScrollbarHider, SCROLLBAR_HIDE_DELAY.toLong())
                 }
                 hideBubble()
                 if (mFastScrollStateChangeListener != null) {
@@ -347,7 +346,7 @@ class FastScroller : LinearLayout {
             val itemCount = adapter.itemCount
             val proportion: Float = when {
                 mHandleView.y == 0f -> 0f
-                mHandleView.y + mHandleHeight >= mViewHeight - sTrackSnapRange -> 1f
+                mHandleView.y + mHandleHeight >= mViewHeight - TRACK_SNAP_RANGE -> 1f
                 else -> y / mViewHeight.toFloat()
             }
             var scrolledItemCount = (proportion * itemCount).roundToInt()
@@ -384,7 +383,7 @@ class FastScroller : LinearLayout {
         val bubbleY = getValueInRange(
             0,
             mViewHeight - mBubbleHeight - mHandleHeight / 2,
-            (y - mBubbleHeight).toInt()
+            (y - mBubbleHeight).toInt(),
         )
         val handleY =
             getValueInRange(0, mViewHeight - mHandleHeight, (y - mHandleHeight / 2).toInt())
@@ -412,9 +411,7 @@ class FastScroller : LinearLayout {
         return false
     }
 
-    private fun isViewVisible(view: View?): Boolean {
-        return view != null && view.isVisible
-    }
+    private fun isViewVisible(view: View?): Boolean = view != null && view.isVisible
 
     private fun cancelAnimation(animator: ViewPropertyAnimator?) {
         animator?.cancel()
@@ -424,7 +421,7 @@ class FastScroller : LinearLayout {
         if (!isViewVisible(mBubbleView)) {
             mBubbleView.visibility = View.VISIBLE
             mBubbleAnimator = mBubbleView.animate().alpha(1f)
-                .setDuration(sBubbleAnimDuration.toLong())
+                .setDuration(BUBBLE_ANIM_DURATION.toLong())
                 .setListener(object : AnimatorListenerAdapter() {
 
                     // adapter required for new alpha value to stick
@@ -435,7 +432,7 @@ class FastScroller : LinearLayout {
     private fun hideBubble() {
         if (isViewVisible(mBubbleView)) {
             mBubbleAnimator = mBubbleView.animate().alpha(0f)
-                .setDuration(sBubbleAnimDuration.toLong())
+                .setDuration(BUBBLE_ANIM_DURATION.toLong())
                 .setListener(object : AnimatorListenerAdapter() {
                     override fun onAnimationEnd(animation: Animator) {
                         super.onAnimationEnd(animation)
@@ -461,7 +458,7 @@ class FastScroller : LinearLayout {
                 mScrollbar.translationX = transX
                 mScrollbar.visibility = View.VISIBLE
                 mScrollbarAnimator = mScrollbar.animate().translationX(0f).alpha(1f)
-                    .setDuration(sScrollbarAnimDuration.toLong())
+                    .setDuration(SCROLLBAR_ANIM_DURATION.toLong())
                     .setListener(object : AnimatorListenerAdapter() {
 
                         // adapter required for new alpha value to stick
@@ -474,7 +471,7 @@ class FastScroller : LinearLayout {
         val transX =
             resources.getDimensionPixelSize(R.dimen.fastscroll_scrollbar_padding_end).toFloat()
         mScrollbarAnimator = mScrollbar.animate().translationX(transX).alpha(0f)
-            .setDuration(sScrollbarAnimDuration.toLong())
+            .setDuration(SCROLLBAR_ANIM_DURATION.toLong())
             .setListener(object : AnimatorListenerAdapter() {
                 override fun onAnimationEnd(animation: Animator) {
                     super.onAnimationEnd(animation)
@@ -543,10 +540,9 @@ class FastScroller : LinearLayout {
     }
 
     companion object {
-        private const val sBubbleAnimDuration = 100
-        private const val sScrollbarAnimDuration = 300
-        private const val sScrollbarHideDelay = 1000
-        private const val sTrackSnapRange = 5
+        private const val BUBBLE_ANIM_DURATION = 100
+        private const val SCROLLBAR_ANIM_DURATION = 300
+        private const val SCROLLBAR_HIDE_DELAY = 1000
+        private const val TRACK_SNAP_RANGE = 5
     }
-
 }

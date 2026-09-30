@@ -11,18 +11,28 @@ private const val TEXT_COLOR = 0xff123456.toInt()
 
 class ReaderPageTest {
     @Test fun hitTestingUsesImmutableElementBounds() {
-        val text = ReaderElement.Text(
-            bounds = ReaderRect(10f, 20f, 30f, 40f),
-            baselinePx = 35f,
-            value = "阅",
-            style = ReaderTextStyle(colorArgb = 0xff000000.toInt(), fontSizePx = 20f),
-            selected = false,
-            emphasized = false,
-            chapterPosition = 12,
-        )
-        val page = ReaderPage(
-            ReaderPageId(1, 2), "chapter", "text", 100, 200, 20f, 180f, listOf(text), 1,
-        )
+        val text =
+            ReaderElement.Text(
+                bounds = ReaderRect(10f, 20f, 30f, 40f),
+                baselinePx = 35f,
+                value = "阅",
+                style = ReaderTextStyle(colorArgb = 0xff000000.toInt(), fontSizePx = 20f),
+                selected = false,
+                emphasized = false,
+                chapterPosition = 12,
+            )
+        val page =
+            ReaderPage(
+                ReaderPageId(1, 2),
+                "chapter",
+                "text",
+                100,
+                200,
+                20f,
+                180f,
+                listOf(text),
+                1,
+            )
         assertEquals(text, page.elementAt(20f, 30f))
         assertNull(page.elementAt(5f, 30f))
     }

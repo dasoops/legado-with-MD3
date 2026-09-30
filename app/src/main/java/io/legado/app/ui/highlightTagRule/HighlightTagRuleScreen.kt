@@ -41,8 +41,8 @@ import io.legado.app.ui.widget.components.button.series.SmallPlainButton
 import io.legado.app.ui.widget.components.card.ReorderableSelectionItem
 import io.legado.app.ui.widget.components.filePicker.FilePickerSheet
 import io.legado.app.ui.widget.components.icon.AppIcons
-import io.legado.app.ui.widget.components.importComponents.BatchImportDialog
 import io.legado.app.ui.widget.components.importComponents.BaseImportUiState
+import io.legado.app.ui.widget.components.importComponents.BatchImportDialog
 import io.legado.app.ui.widget.components.importComponents.SourceInputDialog
 import io.legado.app.ui.widget.components.lazylist.FastScrollLazyColumn
 import io.legado.app.ui.widget.components.menuItem.RoundDropdownMenuItem
@@ -55,7 +55,7 @@ import sh.calvin.reorderable.rememberReorderableLazyListState
 @Composable
 fun HighlightTagRuleRouteScreen(
     viewModel: HighlightTagRuleViewModel = koinViewModel(),
-    onBackClick: () -> Unit
+    onBackClick: () -> Unit,
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val importState by viewModel.importState.collectAsStateWithLifecycle()
@@ -82,7 +82,6 @@ fun HighlightTagRuleScreen(
     onPasteRule: () -> HighlightTagRule?,
     onBackClick: () -> Unit,
 ) {
-
     val context = LocalContext.current
 
     val rules = state.items
@@ -100,11 +99,11 @@ fun HighlightTagRuleScreen(
     var showImportSheet by remember { mutableStateOf(false) }
     var showExportSheet by remember { mutableStateOf(false) }
 
-
-    val reorderableState = rememberReorderableLazyListState(listState) { from, to ->
-        onIntent(HighlightTagRuleIntent.MoveItem(from.index, to.index))
-        hapticFeedback.performHapticFeedback(HapticFeedbackType.SegmentFrequentTick)
-    }
+    val reorderableState =
+        rememberReorderableLazyListState(listState) { from, to ->
+            onIntent(HighlightTagRuleIntent.MoveItem(from.index, to.index))
+            hapticFeedback.performHapticFeedback(HapticFeedbackType.SegmentFrequentTick)
+        }
 
     val clipboardManager = LocalClipboard.current
     val snackbarHostState = remember { SnackbarHostState() }
@@ -113,19 +112,20 @@ fun HighlightTagRuleScreen(
         events.collect { event ->
             when (event) {
                 is BaseRuleEvent.ShowSnackbar -> {
-                    val result = snackbarHostState.showSnackbar(
-                        message = event.message,
-                        actionLabel = event.actionLabel,
-                        withDismissAction = true
-                    )
+                    val result =
+                        snackbarHostState.showSnackbar(
+                            message = event.message,
+                            actionLabel = event.actionLabel,
+                            withDismissAction = true,
+                        )
                     if (result == SnackbarResult.ActionPerformed && event.url != null) {
                         clipboardManager.setClipEntry(
                             ClipEntry(
                                 ClipData.newPlainText(
                                     "url",
-                                    event.url
-                                )
-                            )
+                                    event.url,
+                                ),
+                            ),
                         )
                     }
                 }
@@ -136,30 +136,33 @@ fun HighlightTagRuleScreen(
     LaunchedEffect(effects) {
         effects.collect { effect ->
             when (effect) {
-                is HighlightTagRuleEffect.ShowMessage ->
+                is HighlightTagRuleEffect.ShowMessage -> {
                     snackbarHostState.showSnackbar(effect.message)
+                }
             }
         }
     }
 
-    val importDoc = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.OpenDocument(),
-        onResult = { uri ->
-            uri?.let {
-                context.contentResolver.openInputStream(it)?.use { stream ->
-                    val text = stream.reader().readText()
-                    onIntent(HighlightTagRuleIntent.ImportSource(text))
+    val importDoc =
+        rememberLauncherForActivityResult(
+            contract = ActivityResultContracts.OpenDocument(),
+            onResult = { uri ->
+                uri?.let {
+                    context.contentResolver.openInputStream(it)?.use { stream ->
+                        val text = stream.reader().readText()
+                        onIntent(HighlightTagRuleIntent.ImportSource(text))
+                    }
                 }
-            }
-        }
-    )
+            },
+        )
 
-    val exportDoc = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.CreateDocument("application/json"),
-        onResult = { uri ->
-            uri?.let { onIntent(HighlightTagRuleIntent.ExportSelection(it)) }
-        }
-    )
+    val exportDoc =
+        rememberLauncherForActivityResult(
+            contract = ActivityResultContracts.CreateDocument("application/json"),
+            onResult = { uri ->
+                uri?.let { onIntent(HighlightTagRuleIntent.ExportSelection(it)) }
+            },
+        )
 
     SourceInputDialog(
         show = showUrlInput,
@@ -168,7 +171,7 @@ fun HighlightTagRuleScreen(
         onConfirm = {
             showUrlInput = false
             onIntent(HighlightTagRuleIntent.ImportSource(it))
-        }
+        },
     )
 
     FilePickerSheet(
@@ -179,9 +182,8 @@ fun HighlightTagRuleScreen(
             showExportSheet = false
             exportDoc.launch("exportHighlightTagRule.json")
         },
-        allowExtensions = arrayOf("json")
+        allowExtensions = arrayOf("json"),
     )
-
 
     FilePickerSheet(
         show = showImportSheet,
@@ -195,7 +197,7 @@ fun HighlightTagRuleScreen(
             showUrlInput = true
             showImportSheet = false
         },
-        allowExtensions = arrayOf("json", "txt")
+        allowExtensions = arrayOf("json", "txt"),
     )
 
     BatchImportDialog(
@@ -207,7 +209,7 @@ fun HighlightTagRuleScreen(
         onUpdateItem = { index, rule -> onIntent(HighlightTagRuleIntent.UpdateImportItem(index, rule)) },
         onConfirm = { onIntent(HighlightTagRuleIntent.SaveImportedRules) },
         itemTitle = { rule -> rule.title.ifBlank { rule.pattern } },
-        itemSubtitle = { rule -> rule.pattern.takeIf { it.isNotBlank() } }
+        itemSubtitle = { rule -> rule.pattern.takeIf { it.isNotBlank() } },
     )
 
     LaunchedEffect(reorderableState.isAnyItemDragging) {
@@ -227,7 +229,7 @@ fun HighlightTagRuleScreen(
             showDeleteRuleDialog = null
         },
         dismissText = stringResource(R.string.cancel),
-        onDismiss = { showDeleteRuleDialog = null }
+        onDismiss = { showDeleteRuleDialog = null },
     )
 
     HighlightTagRuleEditSheet(
@@ -243,7 +245,7 @@ fun HighlightTagRuleScreen(
             editingRule = null
         },
         onCopy = { onIntent(HighlightTagRuleIntent.CopyRule(it)) },
-        onPaste = onPasteRule
+        onPaste = onPasteRule,
     )
 
     RuleListScaffold(
@@ -260,7 +262,8 @@ fun HighlightTagRuleScreen(
         onSelectInvert = {
             onIntent(HighlightTagRuleIntent.InvertSelection)
         },
-        selectionSecondaryActions = listOf(
+        selectionSecondaryActions =
+        listOf(
             ActionItem(text = stringResource(R.string.enable), onClick = {
                 onIntent(HighlightTagRuleIntent.EnableSelection)
             }),
@@ -269,7 +272,8 @@ fun HighlightTagRuleScreen(
             }),
             ActionItem(
                 text = stringResource(R.string.export),
-                onClick = { showExportSheet = true })
+                onClick = { showExportSheet = true },
+            ),
         ),
         onDeleteSelected = { ids ->
             @Suppress("UNCHECKED_CAST")
@@ -284,37 +288,44 @@ fun HighlightTagRuleScreen(
         dropDownMenuContent = { dismiss ->
             RoundDropdownMenuItem(
                 text = stringResource(R.string.import_str),
-                onClick = { showImportSheet = true; dismiss() }
+                onClick = {
+                    showImportSheet = true
+                    dismiss()
+                },
             )
-        }
+        },
     ) { paddingValues ->
         Box(
-            modifier = Modifier
-                .fillMaxSize()
+            modifier =
+            Modifier
+                .fillMaxSize(),
         ) {
             FastScrollLazyColumn(
                 modifier = Modifier.fillMaxSize(),
                 state = listState,
-                contentPadding = adaptiveContentPadding(
+                contentPadding =
+                adaptiveContentPadding(
                     top = paddingValues.calculateTopPadding(),
-                    bottom = 120.dp
+                    bottom = 120.dp,
                 ),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
+                verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 items(rules, key = { it.id }) { item ->
-                    val enabledState = stringResource(
-                        if (item.isEnabled) R.string.enabled else R.string.disabled
-                    )
-                    val itemDescription = listOfNotNull(
-                        item.displayName,
-                        item.pattern.takeIf { it.isNotBlank() },
-                        enabledState,
-                        if (!inSelectionMode) {
-                            stringResource(R.string.a11y_long_press_reorder)
-                        } else {
-                            null
-                        }
-                    ).joinToString()
+                    val enabledState =
+                        stringResource(
+                            if (item.isEnabled) R.string.enabled else R.string.disabled,
+                        )
+                    val itemDescription =
+                        listOfNotNull(
+                            item.displayName,
+                            item.pattern.takeIf { it.isNotBlank() },
+                            enabledState,
+                            if (!inSelectionMode) {
+                                stringResource(R.string.a11y_long_press_reorder)
+                            } else {
+                                null
+                            },
+                        ).joinToString()
                     ReorderableSelectionItem(
                         state = reorderableState,
                         key = item.id,
@@ -333,25 +344,31 @@ fun HighlightTagRuleScreen(
                             onIntent(HighlightTagRuleIntent.SetRuleEnabled(item.rule, enabled))
                         },
                         contentDescription = itemDescription,
-                        enableSwitchContentDescription = stringResource(
+                        enableSwitchContentDescription =
+                        stringResource(
                             R.string.a11y_rule_enabled_switch,
-                            item.displayName
+                            item.displayName,
                         ),
-                        editContentDescription = stringResource(
+                        editContentDescription =
+                        stringResource(
                             R.string.a11y_edit_named,
-                            item.displayName
+                            item.displayName,
                         ),
-                        onClickEdit = { editingRule = item.rule; showEditSheet = true },
+                        onClickEdit = {
+                            editingRule = item.rule
+                            showEditSheet = true
+                        },
                         trailingAction = {
                             SmallPlainButton(
                                 onClick = { showDeleteRuleDialog = item.rule },
                                 icon = AppIcons.Delete,
-                                contentDescription = stringResource(
+                                contentDescription =
+                                stringResource(
                                     R.string.a11y_delete_named,
-                                    item.displayName
-                                )
+                                    item.displayName,
+                                ),
                             )
-                        }
+                        },
                     )
                 }
             }
@@ -362,10 +379,11 @@ fun HighlightTagRuleScreen(
                     selectedIds = selectedIds,
                     onSelectionChange = { onIntent(HighlightTagRuleIntent.SetSelection(it)) },
                     idProvider = { it.id },
-                    modifier = Modifier
+                    modifier =
+                    Modifier
                         .fillMaxHeight()
                         .width(60.dp)
-                        .align(Alignment.TopStart)
+                        .align(Alignment.TopStart),
                 )
             }
         }

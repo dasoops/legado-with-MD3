@@ -8,7 +8,6 @@ import org.junit.Before
 import org.junit.Test
 
 class TocTitleCacheTest {
-
     @Before
     @After
     fun clearCache() {
@@ -41,6 +40,6 @@ class TocTitleCacheTest {
         rulesFingerprint = 1,
         chineseConverterType = 0,
         chapterCount = 1,
-        chaptersFingerprint = chaptersFingerprint
+        chaptersFingerprint = chaptersFingerprint,
     )
 }

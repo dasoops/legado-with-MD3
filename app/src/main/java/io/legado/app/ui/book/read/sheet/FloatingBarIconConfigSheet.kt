@@ -82,7 +82,8 @@ private fun ButtonIconConfigSheet(
         title = title,
     ) {
         Column(
-            modifier = Modifier
+            modifier =
+            Modifier
                 .fillMaxWidth()
                 .padding(bottom = 16.dp),
         ) {

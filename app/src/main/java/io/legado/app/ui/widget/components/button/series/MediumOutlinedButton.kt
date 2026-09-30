@@ -16,7 +16,7 @@ fun MediumOutlinedButton(
     selected: Boolean = false,
     icon: ImageVector? = null,
     text: String? = null,
-    contentDescription: String? = null
+    contentDescription: String? = null,
 ) {
     SeriesButton(
         onClick = onClick,
@@ -25,7 +25,7 @@ fun MediumOutlinedButton(
         selected = selected,
         onLongClick = onLongClick,
         size = if (text == null) MediumSeriesIconButtonSize else null,
-        style = SeriesIconButtonStyle.Outlined
+        style = SeriesIconButtonStyle.Outlined,
     ) { contentColor ->
         SeriesButtonContent(
             icon = icon,
@@ -35,7 +35,7 @@ fun MediumOutlinedButton(
             textStyle = LegadoTheme.typography.labelMedium,
             contentColor = contentColor,
             padding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
-            spacing = 8.dp
+            spacing = 8.dp,
         )
     }
 }

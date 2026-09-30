@@ -10,15 +10,15 @@ import org.junit.Assert.assertEquals
 import org.junit.Test
 
 class Phase2SettingsMappingTest {
-
     @Test
     fun `导入书籍设置写读映射往返恒等并支持删除 nullable 键`() {
-        val settings = ImportBookSettings(
-            importBookPath = "content://books",
-            bookImportFileName = "name-rule",
-            localBookImportSort = 2,
-            remoteServerId = 42L,
-        )
+        val settings =
+            ImportBookSettings(
+                importBookPath = "content://books",
+                bookImportFileName = "name-rule",
+                localBookImportSort = 2,
+                remoteServerId = 42L,
+            )
         assertRoundTrips(
             samples = listOf(settings),
             toPrefMap = ImportBookSettings::toPrefMap,
@@ -39,14 +39,15 @@ class Phase2SettingsMappingTest {
     @Test
     fun `下载缓存设置写读映射往返恒等`() {
         assertRoundTrips(
-            samples = listOf(
+            samples =
+            listOf(
                 DownloadCacheSettings(
                     bitmapCacheSize = 61,
                     imageRetainNum = 7,
                     preDownloadNum = 13,
                     threadCount = 5,
                     userAgent = "phase-2-agent",
-                )
+                ),
             ),
             toPrefMap = DownloadCacheSettings::toPrefMap,
             fromPreferences = Preferences::toDownloadCacheSettings,
@@ -55,14 +56,16 @@ class Phase2SettingsMappingTest {
 
     @Test
     fun `书籍导出设置写读映射覆盖每个布尔字段`() {
-        val base = BookExportSettings(
-            bookExportFileName = "book-{name}",
-            episodeExportFileName = "episode-{index}",
-            exportCharset = "GB18030",
-            exportType = 3,
-        )
+        val base =
+            BookExportSettings(
+                bookExportFileName = "book-{name}",
+                episodeExportFileName = "episode-{index}",
+                exportCharset = "GB18030",
+                exportType = 3,
+            )
         assertRoundTrips(
-            samples = listOf(
+            samples =
+            listOf(
                 base,
                 base.copy(exportUseReplace = false),
                 base.copy(exportToWebDav = true),
@@ -78,18 +81,20 @@ class Phase2SettingsMappingTest {
 
     @Test
     fun `封面设置写读映射覆盖每个布尔字段`() {
-        val base = CoverSettings(
-            textColor = 0xFF112233.toInt(),
-            shadowColor = 0xFF223344.toInt(),
-            textColorDark = 0xFF334455.toInt(),
-            shadowColorDark = 0xFF445566.toInt(),
-            infoOrientation = "1",
-            exploreFilterState = 3,
-            defaultCover = "content://cover/light",
-            defaultCoverDark = "content://cover/dark",
-        )
+        val base =
+            CoverSettings(
+                textColor = 0xFF112233.toInt(),
+                shadowColor = 0xFF223344.toInt(),
+                textColorDark = 0xFF334455.toInt(),
+                shadowColorDark = 0xFF445566.toInt(),
+                infoOrientation = "1",
+                exploreFilterState = 3,
+                defaultCover = "content://cover/light",
+                defaultCoverDark = "content://cover/dark",
+            )
         assertRoundTrips(
-            samples = listOf(
+            samples =
+            listOf(
                 base,
                 base.copy(loadOnlyOnWifi = true),
                 base.copy(useDefaultCover = true),

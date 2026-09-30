@@ -19,22 +19,26 @@ data class ExploreRule(
     override var updateTime: String? = null,
     override var bookUrl: String? = null,
     override var coverUrl: String? = null,
-    override var wordCount: String? = null
-) : BookListRule, Parcelable {
-
+    override var wordCount: String? = null,
+) : BookListRule,
+    Parcelable {
     companion object {
-
-        val jsonDeserializer = JsonDeserializer<ExploreRule?> { json, _, _ ->
-            when {
-                json.isJsonObject -> INITIAL_GSON.fromJson(json, ExploreRule::class.java)
-                json.isJsonPrimitive -> INITIAL_GSON.fromJson(
-                    json.asString,
-                    ExploreRule::class.java
-                )
-                else -> null
+        val jsonDeserializer =
+            JsonDeserializer<ExploreRule?> { json, _, _ ->
+                when {
+                    json.isJsonObject -> {
+                        INITIAL_GSON.fromJson(json, ExploreRule::class.java)
+                    }
+                    json.isJsonPrimitive -> {
+                        INITIAL_GSON.fromJson(
+                            json.asString,
+                            ExploreRule::class.java,
+                        )
+                    }
+                    else -> {
+                        null
+                    }
+                }
             }
-        }
-
     }
-
 }

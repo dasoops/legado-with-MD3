@@ -13,8 +13,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import io.legado.app.ui.theme.LegadoTheme
-import kotlinx.coroutines.delay
 import kotlin.time.Duration.Companion.milliseconds
+import kotlinx.coroutines.delay
 
 @Composable
 fun SmallAnimatedButton(
@@ -30,7 +30,7 @@ fun SmallAnimatedButton(
     containerColor: Color? = null,
     selectedContainerColor: Color = LegadoTheme.colorScheme.primaryContainer,
     selectedContentColor: Color = LegadoTheme.colorScheme.onPrimaryContainer,
-    contentDescription: String? = null
+    contentDescription: String? = null,
 ) {
     var showText by remember { mutableStateOf(false) }
     val currentIcon = if (checked) (iconChecked ?: icon)!! else icon!!
@@ -58,7 +58,7 @@ fun SmallAnimatedButton(
         contentColor = contentColor,
         containerColor = containerColor,
         selectedContainerColor = selectedContainerColor,
-        selectedContentColor = selectedContentColor
+        selectedContentColor = selectedContentColor,
     ) { contentColor ->
         SeriesAnimatedButtonContent(
             icon = currentIcon,
@@ -69,7 +69,7 @@ fun SmallAnimatedButton(
             textStyle = LegadoTheme.typography.labelSmall,
             contentColor = contentColor,
             padding = PaddingValues(horizontal = 8.dp, vertical = 6.dp),
-            spacing = 6.dp
+            spacing = 6.dp,
         )
     }
 }

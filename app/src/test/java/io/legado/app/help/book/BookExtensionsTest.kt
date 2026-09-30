@@ -6,13 +6,13 @@ import org.junit.Assert.assertEquals
 import org.junit.Test
 
 class BookExtensionsTest {
-
     @Test
     fun displayTags_keepsCustomAndSourceTagsSeparateAndDeduplicated() {
-        val book = Book(
-            kind = "奇幻,连载",
-            customTag = "收藏,奇幻",
-        )
+        val book =
+            Book(
+                kind = "奇幻,连载",
+                customTag = "收藏,奇幻",
+            )
 
         assertEquals(listOf("奇幻", "连载"), book.getSourceTagList())
         assertEquals(listOf("收藏", "奇幻"), book.getCustomTagList())
@@ -23,25 +23,27 @@ class BookExtensionsTest {
 
     @Test
     fun parseHighlightedTags_ordersMatchesByRuleOrder() {
-        val rules = listOf(
-            HighlightTagRule(
-                id = 2,
-                title = "次要",
-                pattern = "动作",
-                order = 1,
-            ),
-            HighlightTagRule(
-                id = 1,
-                title = "优先",
-                pattern = "奇幻",
-                order = 0,
-            ),
-        )
+        val rules =
+            listOf(
+                HighlightTagRule(
+                    id = 2,
+                    title = "次要",
+                    pattern = "动作",
+                    order = 1,
+                ),
+                HighlightTagRule(
+                    id = 1,
+                    title = "优先",
+                    pattern = "奇幻",
+                    order = 0,
+                ),
+            )
 
-        val (highlighted, regular) = parseHighlightedTags(
-            kindLabels = listOf("动作", "普通", "奇幻"),
-            rules = rules,
-        )
+        val (highlighted, regular) =
+            parseHighlightedTags(
+                kindLabels = listOf("动作", "普通", "奇幻"),
+                rules = rules,
+            )
 
         assertEquals(listOf("优先", "次要"), highlighted.map { it.title })
         assertEquals(listOf(listOf("奇幻"), listOf("动作")), highlighted.map { it.matchedLabels })

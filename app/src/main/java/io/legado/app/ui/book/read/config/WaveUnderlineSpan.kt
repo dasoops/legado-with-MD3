@@ -15,7 +15,6 @@ class WaveUnderlineSpan(
     private val underlineWidth: Float = 1f,
     private val underlineOffset: Float = 6f,
 ) : ReplacementSpan() {
-
     private val offsetPx = underlineOffset.toInt().dpToPx()
     private val waveAmplitude = 3.dpToPx().toFloat()
     private val extraSpace = offsetPx + waveAmplitude.toInt()
@@ -25,7 +24,7 @@ class WaveUnderlineSpan(
         text: CharSequence,
         start: Int,
         end: Int,
-        fm: Paint.FontMetricsInt?
+        fm: Paint.FontMetricsInt?,
     ): Int {
         if (fm != null) {
             val metrics = paint.fontMetricsInt
@@ -46,7 +45,7 @@ class WaveUnderlineSpan(
         top: Int,
         y: Int,
         bottom: Int,
-        paint: Paint
+        paint: Paint,
     ) {
         val textStr = text.subSequence(start, end).toString()
         paint.color = textColor
@@ -55,12 +54,13 @@ class WaveUnderlineSpan(
         val width = paint.measureText(text, start, end)
         val lineY = y + offsetPx
         val waveLength = 12.dpToPx().toFloat()
-        val wavePaint = Paint(paint).apply {
-            color = underlineColor
-            style = Paint.Style.STROKE
-            strokeWidth = underlineWidth.dpToPx()
-            isAntiAlias = true
-        }
+        val wavePaint =
+            Paint(paint).apply {
+                color = underlineColor
+                style = Paint.Style.STROKE
+                strokeWidth = underlineWidth.dpToPx()
+                isAntiAlias = true
+            }
         val path = Path().apply { moveTo(x, lineY.toFloat()) }
         var currentX = x
         val endX = x + width

@@ -8,18 +8,40 @@ import org.junit.Assert.assertEquals
 import org.junit.Test
 
 class ReaderIndentTest {
-    private val shaper = ReaderTextShaper { text -> GlyphClusters(text.map(Char::toString), text.map {
-        when (it) { 'A' -> 5f; ',' -> 3f; else -> 10f }
-    }) }
-    private val style = ReaderChapterMeasureStyle(ReaderTextStyle(0, 10f), ReaderTextStyle(0, 10f),
-        2, ReaderTextAlignment.START, ReaderTextAlignment.START)
+    private val shaper =
+        ReaderTextShaper { text ->
+            GlyphClusters(
+                text.map(Char::toString),
+                text.map {
+                    when (it) {
+                        'A' -> 5f
+                        ',' -> 3f
+                        else -> 10f
+                    }
+                },
+            )
+        }
+    private val style =
+        ReaderChapterMeasureStyle(
+            ReaderTextStyle(0, 10f),
+            ReaderTextStyle(0, 10f),
+            2,
+            ReaderTextAlignment.START,
+            ReaderTextAlignment.START,
+        )
     private val config = ReaderPaginationConfig(0, "", 47, 100, 0f, 0f, 0f, 0f, 10f, 8f)
 
-    private suspend fun layout(text: String, style: ReaderChapterMeasureStyle = this.style): List<ReaderElement.Text> {
+    private suspend fun layout(
+        text: String,
+        style: ReaderChapterMeasureStyle = this.style,
+    ): List<ReaderElement.Text> {
         val source = ReaderChapterSourceParser.parse(0, "", listOf(text), false, false)
-        val measured = ReaderChapterBlockMeasurer(shaper, shaper, { null }).measure(source, style)
-            as ReaderChapterMeasureResult.Success
-        return ReaderPaginator.paginateBlocks(measured.blocks, config).flatMap { it.elements }
+        val measured =
+            ReaderChapterBlockMeasurer(shaper, shaper, { null }).measure(source, style)
+                as ReaderChapterMeasureResult.Success
+        return ReaderPaginator
+            .paginateBlocks(measured.blocks, config)
+            .flatMap { it.elements }
             .filterIsInstance<ReaderElement.Text>()
     }
 
@@ -52,12 +74,20 @@ class ReaderIndentTest {
 
     @Test fun textAfterAStandaloneImageInTheSameParagraphIsNotIndentedAgain() = runBlocking {
         val source = ReaderChapterSourceParser.parse(0, "", listOf("A<img src=\"cover\">甲"), false, false)
-        val measured = ReaderChapterBlockMeasurer(shaper, shaper, { ReaderImageDimensions(100f, 100f) })
-            .measure(source, style) as ReaderChapterMeasureResult.Success
+        val measured =
+            ReaderChapterBlockMeasurer(shaper, shaper, { ReaderImageDimensions(100f, 100f) })
+                .measure(source, style) as ReaderChapterMeasureResult.Success
         val paragraphs = measured.blocks.filterIsInstance<ReaderMeasuredBlock.InlineParagraph>()
         assertEquals(2, paragraphs.size)
         assertEquals(20f, paragraphs.first().indentWidthPx!!, 0f)
         assertEquals(0f, paragraphs.last().indentWidthPx!!, 0f)
-        assertEquals(2, paragraphs.last().items.first().chapterPosition)
+        assertEquals(
+            2,
+            paragraphs
+                .last()
+                .items
+                .first()
+                .chapterPosition,
+        )
     }
 }

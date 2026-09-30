@@ -9,8 +9,10 @@ import androidx.preference.PreferenceViewHolder
 import io.legado.app.R
 import java.io.File
 
-class ImagePreviewPreference(context: Context, attrs: AttributeSet) : Preference(context, attrs) {
-
+class ImagePreviewPreference(
+    context: Context,
+    attrs: AttributeSet,
+) : Preference(context, attrs) {
     private var preview: ImageView? = null
 
     init {
@@ -20,13 +22,18 @@ class ImagePreviewPreference(context: Context, attrs: AttributeSet) : Preference
 
     override fun onBindViewHolder(holder: PreferenceViewHolder) {
         super.onBindViewHolder(holder)
-        val v = bindView<ImageView>(
-            context, holder, icon, title, summary,
-            widgetLayoutResource,
-            R.id.preview,
-            50,
-            50
-        )
+        val v =
+            bindView<ImageView>(
+                context,
+                holder,
+                icon,
+                title,
+                summary,
+                widgetLayoutResource,
+                R.id.preview,
+                50,
+                50,
+            )
 
         preview = v
         updatePreview()

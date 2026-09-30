@@ -31,13 +31,19 @@ internal fun String.base64ToByteArray(): ByteArray {
     // Hutool Base64.decode 对缺失 "=" 填充、url-safe(-/_)、空白等输入宽容，与 beta.17 之前
     // 应用内统一走 Hutool 解码的行为逐字节一致。Kotlin kotlin.io.encoding.Base64 为严格填充，
     // 会对未对齐 4 倍数的输入抛 "The padding option is set to PRESENT..."(见书源取章名回归)。
-    return cn.hutool.core.codec.Base64.decode(replace("\\s".toRegex(), ""))
+    return cn.hutool.core.codec.Base64
+        .decode(replace("\\s".toRegex(), ""))
 }
 
-internal fun digest(algorithm: String, data: ByteArray): ByteArray =
-    MessageDigest.getInstance(algorithm).digest(data)
+internal fun digest(
+    algorithm: String,
+    data: ByteArray,
+): ByteArray = MessageDigest.getInstance(algorithm).digest(data)
 
-internal fun digest(algorithm: String, input: InputStream): ByteArray {
+internal fun digest(
+    algorithm: String,
+    input: InputStream,
+): ByteArray {
     val messageDigest = MessageDigest.getInstance(algorithm)
     val buffer = ByteArray(DEFAULT_BUFFER_SIZE)
     while (true) {
@@ -48,7 +54,11 @@ internal fun digest(algorithm: String, input: InputStream): ByteArray {
     return messageDigest.digest()
 }
 
-internal fun hmac(algorithm: String, key: ByteArray, data: ByteArray): ByteArray {
+internal fun hmac(
+    algorithm: String,
+    key: ByteArray,
+    data: ByteArray,
+): ByteArray {
     val mac = Mac.getInstance(algorithm)
     mac.init(SecretKeySpec(key, algorithm))
     return mac.doFinal(data)

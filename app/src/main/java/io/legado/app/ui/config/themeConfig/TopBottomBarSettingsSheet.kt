@@ -30,8 +30,7 @@ fun TopBottomBarSettingsSheet(
     onDismissRequest: () -> Unit,
     onIntent: (ThemeConfigIntent) -> Unit,
 ) {
-    fun updateTheme(transform: (ThemeSettings) -> ThemeSettings) =
-        onIntent(ThemeConfigIntent.UpdateTheme(transform))
+    fun updateTheme(transform: (ThemeSettings) -> ThemeSettings) = onIntent(ThemeConfigIntent.UpdateTheme(transform))
 
     AppModalBottomSheet(
         show = show,
@@ -39,12 +38,13 @@ fun TopBottomBarSettingsSheet(
         title = stringResource(R.string.top_bottom_bar_settings),
     ) {
         Column(
-            modifier = Modifier
+            modifier =
+            Modifier
                 .fillMaxWidth()
                 .heightIn(max = 560.dp)
                 .verticalScroll(rememberScrollState())
                 .padding(bottom = 24.dp),
-            verticalArrangement = Arrangement.spacedBy(4.dp)
+            verticalArrangement = Arrangement.spacedBy(4.dp),
         ) {
             if (!isMiuixEngine) {
                 CompactSwitchSettingItem(
@@ -147,9 +147,10 @@ fun TopBottomBarSettingsSheet(
             } else if (!isMiuixEngine) {
                 SliderSettingItem(
                     title = stringResource(R.string.top_bar_opacity),
-                    description = stringResource(
+                    description =
+                    stringResource(
                         R.string.top_bar_opacity_summary,
-                        theme.topBarOpacity
+                        theme.topBarOpacity,
                     ),
                     value = theme.topBarOpacity.toFloat(),
                     defaultValue = 100f,
@@ -160,9 +161,10 @@ fun TopBottomBarSettingsSheet(
                 )
                 SliderSettingItem(
                     title = stringResource(R.string.bottom_bar_opacity),
-                    description = stringResource(
+                    description =
+                    stringResource(
                         R.string.bottom_bar_opacity_summary,
-                        theme.bottomBarOpacity
+                        theme.bottomBarOpacity,
                     ),
                     value = theme.bottomBarOpacity.toFloat(),
                     defaultValue = 100f,

@@ -23,19 +23,24 @@ fun Modifier.reorderAccessibility(
     val moveDownLabel = stringResource(R.string.a11y_move_down)
     return semantics {
         description?.let { contentDescription = it }
-        customActions = buildList {
-            if (index > 0) {
-                add(CustomAccessibilityAction(moveUpLabel) {
-                    onMove(index, index - 1)
-                    true
-                })
+        customActions =
+            buildList {
+                if (index > 0) {
+                    add(
+                        CustomAccessibilityAction(moveUpLabel) {
+                            onMove(index, index - 1)
+                            true
+                        },
+                    )
+                }
+                if (index < itemCount - 1) {
+                    add(
+                        CustomAccessibilityAction(moveDownLabel) {
+                            onMove(index, index + 1)
+                            true
+                        },
+                    )
+                }
             }
-            if (index < itemCount - 1) {
-                add(CustomAccessibilityAction(moveDownLabel) {
-                    onMove(index, index + 1)
-                    true
-                })
-            }
-        }
     }
 }

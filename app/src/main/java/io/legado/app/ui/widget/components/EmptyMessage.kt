@@ -37,25 +37,32 @@ fun EmptyMessage(
     buttonText: String? = null,
     buttonImageVector: ImageVector = AppIcons.Search,
     onButtonClick: (() -> Unit)? = null,
-    faces: List<String> = listOf(
-        "(；′⌒`)", "(つ﹏⊂)", "(•̀ᴗ•́)و", "(๑•́ ₃ •̀๑)",
-        "(눈‸눈)", "(ಥ﹏ಥ)", "(｡•́︿•̀｡)"
-    ),
+    faces: List<String> =
+        listOf(
+            "(；′⌒`)",
+            "(つ﹏⊂)",
+            "(•̀ᴗ•́)و",
+            "(๑•́ ₃ •̀๑)",
+            "(눈‸눈)",
+            "(ಥ﹏ಥ)",
+            "(｡•́︿•̀｡)",
+        ),
     faceTextSize: TextUnit = 32.sp,
-    onFaceClick: (() -> Unit)? = null
+    onFaceClick: (() -> Unit)? = null,
 ) {
     var currentFace by remember { mutableStateOf(faces.random()) }
 
     Column(
-        modifier = modifier
+        modifier =
+        modifier
             .wrapContentSize()
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(8.dp)
+        verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         AnimatedContent(
             targetState = isLoading,
-            label = "LoadingStateAnimation"
+            label = "LoadingStateAnimation",
         ) { loading ->
             if (loading) {
                 AppContainedLoadingIndicator()
@@ -64,11 +71,12 @@ fun EmptyMessage(
                     text = currentFace,
                     fontSize = faceTextSize,
                     textAlign = TextAlign.Center,
-                    modifier = Modifier
+                    modifier =
+                    Modifier
                         .clickable {
                             currentFace = faces.random()
                             onFaceClick?.invoke()
-                        }
+                        },
                 )
             }
         }
@@ -79,7 +87,7 @@ fun EmptyMessage(
             textAlign = TextAlign.Center,
             maxLines = 2,
             softWrap = true,
-            modifier = Modifier.widthIn(max = 240.dp)
+            modifier = Modifier.widthIn(max = 240.dp),
         )
 
         if (buttonText != null && onButtonClick != null) {
@@ -87,7 +95,7 @@ fun EmptyMessage(
             SmallTonalButton(
                 onClick = onButtonClick,
                 text = buttonText,
-                icon = buttonImageVector
+                icon = buttonImageVector,
             )
         }
     }
@@ -101,12 +109,18 @@ fun EmptyMessage(
     buttonText: String? = null,
     buttonImageVector: ImageVector = AppIcons.Search,
     onButtonClick: (() -> Unit)? = null,
-    faces: List<String> = listOf(
-        "(；′⌒`)", "(つ﹏⊂)", "(•̀ᴗ•́)و", "(๑•́ ₃ •̀๑)",
-        "(눈‸눈)", "(ಥ﹏ಥ)", "(｡•́︿•̀｡)"
-    ),
+    faces: List<String> =
+        listOf(
+            "(；′⌒`)",
+            "(つ﹏⊂)",
+            "(•̀ᴗ•́)و",
+            "(๑•́ ₃ •̀๑)",
+            "(눈‸눈)",
+            "(ಥ﹏ಥ)",
+            "(｡•́︿•̀｡)",
+        ),
     faceTextSize: TextUnit = 32.sp,
-    onFaceClick: (() -> Unit)? = null
+    onFaceClick: (() -> Unit)? = null,
 ) {
     val message = stringResource(id = messageResId)
     EmptyMessage(
@@ -118,6 +132,6 @@ fun EmptyMessage(
         onButtonClick = onButtonClick,
         faces = faces,
         faceTextSize = faceTextSize,
-        onFaceClick = onFaceClick
+        onFaceClick = onFaceClick,
     )
 }

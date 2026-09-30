@@ -10,7 +10,6 @@ import android.os.Environment
 import android.provider.DocumentsContract
 import android.provider.MediaStore
 import androidx.core.provider.DocumentsContractCompat
-
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
@@ -24,8 +23,11 @@ object RealPathUtil {
      */
     private var filePathUri: Uri? = null
 
-    fun getPath(context: Context, uri: Uri): String? {
-        //check here to KITKAT or new version
+    fun getPath(
+        context: Context,
+        uri: Uri,
+    ): String? {
+        // check here to KITKAT or new version
         @SuppressLint("ObsoleteSdkInt")
         val isKitKat = Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT
         filePathUri = uri
@@ -40,11 +42,12 @@ object RealPathUtil {
                 }
             } else if (isDownloadsDocument(uri)) {
                 val id = DocumentsContract.getDocumentId(uri)
-                val contentUri = ContentUris.withAppendedId(
-                    Uri.parse("content://downloads/public_downloads"),
-                    java.lang.Long.valueOf(id)
-                )
-                //return getDataColumn(context, uri, null, null);
+                val contentUri =
+                    ContentUris.withAppendedId(
+                        Uri.parse("content://downloads/public_downloads"),
+                        java.lang.Long.valueOf(id),
+                    )
+                // return getDataColumn(context, uri, null, null);
                 return getDataColumn(context, contentUri, null, null)
             } else if (isMediaDocument(uri)) {
                 val docId = DocumentsContract.getDocumentId(uri)
@@ -55,11 +58,9 @@ object RealPathUtil {
                     "image" -> {
                         contentUri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI
                     }
-
                     "video" -> {
                         contentUri = MediaStore.Video.Media.EXTERNAL_CONTENT_URI
                     }
-
                     "audio" -> {
                         contentUri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
                     }
@@ -78,8 +79,11 @@ object RealPathUtil {
                 }
             }
         } else if ("content".equals(uri.scheme, ignoreCase = true)) { // Return the remote address
-            return if (isGooglePhotosUri(uri)) uri.lastPathSegment
-            else getDataColumn(context, uri, null, null)
+            return if (isGooglePhotosUri(uri)) {
+                uri.lastPathSegment
+            } else {
+                getDataColumn(context, uri, null, null)
+            }
         } else if ("file".equals(uri.scheme, ignoreCase = true)) {
             return uri.path
         }
@@ -113,14 +117,17 @@ object RealPathUtil {
      * @return The value of the _data column, which is typically a file path.
      */
     private fun getDataColumn(
-        context: Context, uri: Uri?, selection: String?,
-        selectionArgs: Array<String>?
+        context: Context,
+        uri: Uri?,
+        selection: String?,
+        selectionArgs: Array<String>?,
     ): String? {
         var cursor: Cursor? = null
         val column = "_data"
-        val projection = arrayOf(
-            column
-        )
+        val projection =
+            arrayOf(
+                column,
+            )
         try {
             cursor =
                 context.contentResolver.query(uri!!, projection, selection, selectionArgs, null)
@@ -155,31 +162,23 @@ object RealPathUtil {
      * @param uri The Uri to check.
      * @return Whether the Uri authority is ExternalStorageProvider.
      */
-    private fun isExternalStorageDocument(uri: Uri): Boolean {
-        return "com.android.externalstorage.documents" == uri.authority
-    }
+    private fun isExternalStorageDocument(uri: Uri): Boolean = "com.android.externalstorage.documents" == uri.authority
 
     /**
      * @param uri The Uri to check.
      * @return Whether the Uri authority is DownloadsProvider.
      */
-    private fun isDownloadsDocument(uri: Uri): Boolean {
-        return "com.android.providers.downloads.documents" == uri.authority
-    }
+    private fun isDownloadsDocument(uri: Uri): Boolean = "com.android.providers.downloads.documents" == uri.authority
 
     /**
      * @param uri The Uri to check.
      * @return Whether the Uri authority is MediaProvider.
      */
-    private fun isMediaDocument(uri: Uri): Boolean {
-        return "com.android.providers.media.documents" == uri.authority
-    }
+    private fun isMediaDocument(uri: Uri): Boolean = "com.android.providers.media.documents" == uri.authority
 
     /**
      * @param uri The Uri to check.
      * @return Whether the Uri authority is Google Photos.
      */
-    private fun isGooglePhotosUri(uri: Uri): Boolean {
-        return "com.google.android.apps.photos.content" == uri.authority
-    }
+    private fun isGooglePhotosUri(uri: Uri): Boolean = "com.google.android.apps.photos.content" == uri.authority
 }

@@ -6,7 +6,6 @@ import org.junit.Assert.assertNull
 import org.junit.Test
 
 class TimePickerDialogTest {
-
     @Test
     fun `时间值在非拉丁数字语言下仍使用 ASCII 格式`() {
         val original = Locale.getDefault()

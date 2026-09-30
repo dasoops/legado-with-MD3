@@ -17,10 +17,14 @@ data class DirectoryBook(
 @Stable
 sealed interface LocalDirectoryNode {
     @Stable
-    data class Folder(val name: String) : LocalDirectoryNode
+    data class Folder(
+        val name: String,
+    ) : LocalDirectoryNode
 
     @Stable
-    data class Book(val item: DirectoryBook) : LocalDirectoryNode
+    data class Book(
+        val item: DirectoryBook,
+    ) : LocalDirectoryNode
 }
 
 @Stable
@@ -35,13 +39,27 @@ data class LocalDirectoryUiState(
 
 sealed interface LocalDirectoryIntent {
     data object Initialize : LocalDirectoryIntent
+
     data object Refresh : LocalDirectoryIntent
-    data class EnterFolder(val name: String) : LocalDirectoryIntent
-    data class NavigateToLevel(val index: Int) : LocalDirectoryIntent
+
+    data class EnterFolder(
+        val name: String,
+    ) : LocalDirectoryIntent
+
+    data class NavigateToLevel(
+        val index: Int,
+    ) : LocalDirectoryIntent
+
     data object NavigateBack : LocalDirectoryIntent
-    data class SearchChange(val key: String, val isSearch: Boolean) : LocalDirectoryIntent
+
+    data class SearchChange(
+        val key: String,
+        val isSearch: Boolean,
+    ) : LocalDirectoryIntent
 }
 
 sealed interface LocalDirectoryEffect {
-    data class ShowToast(val message: String) : LocalDirectoryEffect
+    data class ShowToast(
+        val message: String,
+    ) : LocalDirectoryEffect
 }

@@ -22,9 +22,8 @@ class KF8Book(
     pdbFile: PDBFile,
     headers: MobiEntryHeaders,
     kf8BoundaryOffset: Int,
-    resourceStart: Int
+    resourceStart: Int,
 ) : MobiBook(pdbFile, headers, kf8BoundaryOffset, resourceStart) {
-
     private var fdstTableStarts: IntArray? = null
     private var fdstTableEnds: IntArray? = null
     private lateinit var skelTable: List<Skeleton>
@@ -50,6 +49,7 @@ class KF8Book(
         if (toc == null) {
             return
         }
+
         fun fmap(item: TOC) {
             val index = getIndexByHref(item.href)
             if (index == -1) return
@@ -91,15 +91,16 @@ class KF8Book(
         return getIndexByFID(pos.fid)
     }
 
-    private fun getIndexByFID(fid: Int): Int {
-        return sections.indexOfFirst {
-            it.frags.any { frag ->
-                frag.index == fid
-            }
+    private fun getIndexByFID(fid: Int): Int = sections.indexOfFirst {
+        it.frags.any { frag ->
+            frag.index == fid
         }
     }
 
-    fun getTextByHref(href: String, nextHref: String): String {
+    fun getTextByHref(
+        href: String,
+        nextHref: String,
+    ): String {
         val pos = parsePosURI(href) ?: return ""
         val nextPos = parsePosURI(nextHref) ?: return ""
         val index = getIndexByFID(pos.fid)
@@ -126,21 +127,22 @@ class KF8Book(
             val offset = skel.length + frag.offset
             skeleton.copyInto(
                 skeleton,
-                insertOffset + frag.length -
-                        (if (isFirstFrag) pos.offset else 0) -
-                        (if (isLastFrag) lastFragDroppedLength else 0),
+                insertOffset +
+                    frag.length -
+                    (if (isFirstFrag) pos.offset else 0) -
+                    (if (isLastFrag) lastFragDroppedLength else 0),
                 insertOffset,
-                skeleton.size - leftBytes
+                skeleton.size - leftBytes,
             )
             raw.copyInto(
                 skeleton,
                 insertOffset,
                 offset + if (isFirstFrag) pos.offset else 0,
-                offset + frag.length - if (isLastFrag) lastFragDroppedLength else 0
+                offset + frag.length - if (isLastFrag) lastFragDroppedLength else 0,
             )
             leftBytes -= frag.length -
-                    (if (isFirstFrag) pos.offset else 0) -
-                    (if (isLastFrag && index == nextIndex) nextPos.offset else 0)
+                (if (isFirstFrag) pos.offset else 0) -
+                (if (isLastFrag && index == nextIndex) nextPos.offset else 0)
             if (isFirstFrag) {
                 droppedFragsLength += pos.offset
             }
@@ -164,7 +166,7 @@ class KF8Book(
                 skeleton,
                 insertOffset + frag.length,
                 insertOffset,
-                skeleton.size - leftBytes
+                skeleton.size - leftBytes,
             )
             raw.copyInto(skeleton, insertOffset, offset, offset + frag.length)
             leftBytes -= frag.length
@@ -172,7 +174,10 @@ class KF8Book(
         return String(skeleton, charset)
     }
 
-    private fun getRaw(offset: Int, len: Int): ByteArray {
+    private fun getRaw(
+        offset: Int,
+        len: Int,
+    ): ByteArray {
         val inputStream = getTextRecordInputStream()
         val byteArray = ByteArray(len)
         inputStream.skip(offset.toLong())
@@ -182,6 +187,7 @@ class KF8Book(
 
     private fun processNCX() {
         val ncx = getNCX() ?: return
+
         fun fmap(item: NCX): TOC {
             val (fid, off) = item.pos!!
             val href = makePosURI(fid, off)
@@ -190,54 +196,60 @@ class KF8Book(
         toc = ncx.map(::fmap)
     }
 
-    private fun makePosURI(fid: Int, off: Int): String {
+    private fun makePosURI(
+        fid: Int,
+        off: Int,
+    ): String {
         val encodedFid = fid.toString(32).uppercase(Locale.ROOT).padStart(4, '0')
         val encodedOff = off.toString(32).uppercase(Locale.ROOT).padStart(10, '0')
         return "kindle:pos:fid:$encodedFid:off:$encodedOff"
     }
 
     private fun processSections() {
-        sections = skelTable.fold(arrayListOf()) { arr, skel ->
-            val last = arr.lastOrNull()
-            val index = arr.size
-            val fragStart = last?.fragEnd ?: 0
-            val fragEnd = fragStart + skel.numFrag
-            val frags = fragTable.slice(fragStart..<fragEnd)
-            val length = skel.length + frags.sumOf { it.length }
-            val totalLength = (last?.totalLength ?: 0) + length
-            val href = frags.firstOrNull()?.let { makePosURI(it.index, 0) } ?: ""
-            val section = KF8Section(index, skel, frags, fragEnd, length, totalLength, href)
-            last?.next = section
-            arr.add(section)
-            arr
-        }
+        sections =
+            skelTable.fold(arrayListOf()) { arr, skel ->
+                val last = arr.lastOrNull()
+                val index = arr.size
+                val fragStart = last?.fragEnd ?: 0
+                val fragEnd = fragStart + skel.numFrag
+                val frags = fragTable.slice(fragStart..<fragEnd)
+                val length = skel.length + frags.sumOf { it.length }
+                val totalLength = (last?.totalLength ?: 0) + length
+                val href = frags.firstOrNull()?.let { makePosURI(it.index, 0) } ?: ""
+                val section = KF8Section(index, skel, frags, fragEnd, length, totalLength, href)
+                last?.next = section
+                arr.add(section)
+                arr
+            }
     }
 
     private fun readFragTable() {
         val fragData = getIndexData(kf8.frag)
-        fragTable = fragData.table.map { indexEntry ->
-            val tagMap = indexEntry.tagMap
-            Fragment(
-                indexEntry.label.toInt(),
-                fragData.cncx[tagMap[2].tagValues[0]],
-                tagMap[4].tagValues[0],
-                tagMap[6].tagValues[0],
-                tagMap[6].tagValues[1]
-            )
-        }
+        fragTable =
+            fragData.table.map { indexEntry ->
+                val tagMap = indexEntry.tagMap
+                Fragment(
+                    indexEntry.label.toInt(),
+                    fragData.cncx[tagMap[2].tagValues[0]],
+                    tagMap[4].tagValues[0],
+                    tagMap[6].tagValues[0],
+                    tagMap[6].tagValues[1],
+                )
+            }
     }
 
     private fun readSkelTable() {
-        skelTable = getIndexData(kf8.skel).table.mapIndexed { index, indexEntry ->
-            val tagMap = indexEntry.tagMap
-            Skeleton(
-                index,
-                indexEntry.label,
-                tagMap[1].tagValues[0],
-                tagMap[6].tagValues[0],
-                tagMap[6].tagValues[1],
-            )
-        }
+        skelTable =
+            getIndexData(kf8.skel).table.mapIndexed { index, indexEntry ->
+                val tagMap = indexEntry.tagMap
+                Skeleton(
+                    index,
+                    indexEntry.label,
+                    tagMap[1].tagValues[0],
+                    tagMap[6].tagValues[0],
+                    tagMap[6].tagValues[1],
+                )
+            }
     }
 
     private fun readFdstTable() {
@@ -268,5 +280,4 @@ class KF8Book(
         val kindleResourceRegex =
             "kindle:(flow|embed):(\\w+)(?:\\?mime=(\\w+/[-+.\\w]+))?".toRegex()
     }
-
 }

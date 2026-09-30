@@ -11,7 +11,6 @@ import kotlinx.coroutines.withContext
 class BookMarkingRepository(
     private val dao: BookMarkingDao,
 ) : BookMarkingGateway {
-
     override fun flowAll(): Flow<List<BookMarking>> = dao.flowAll().flowOn(Dispatchers.IO)
 
     override suspend fun getByBook(
@@ -35,7 +34,10 @@ class BookMarkingRepository(
         dao.upsert(bookMarking)
     }
 
-    override suspend fun setEnabled(id: String, enabled: Boolean) = withContext(Dispatchers.IO) {
+    override suspend fun setEnabled(
+        id: String,
+        enabled: Boolean,
+    ) = withContext(Dispatchers.IO) {
         dao.setEnabled(id, enabled)
     }
 

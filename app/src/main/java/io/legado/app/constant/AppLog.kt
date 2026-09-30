@@ -9,7 +9,6 @@ import org.koin.core.context.GlobalContext
 import splitties.init.appCtx
 
 object AppLog {
-
     private val otherGateway by lazy { GlobalContext.get().get<OtherSettingsGateway>() }
 
     private val mLogs = arrayListOf<Triple<Long, String, Throwable?>>()
@@ -17,7 +16,11 @@ object AppLog {
     val logs get() = mLogs.toList()
 
     @Synchronized
-    fun put(message: String?, throwable: Throwable? = null, toast: Boolean = false) {
+    fun put(
+        message: String?,
+        throwable: Throwable? = null,
+        toast: Boolean = false,
+    ) {
         message ?: return
         if (toast) {
             appCtx.toastOnUi(message)
@@ -38,7 +41,11 @@ object AppLog {
     }
 
     @Synchronized
-    fun putNotSave(message: String?, throwable: Throwable? = null, toast: Boolean = false) {
+    fun putNotSave(
+        message: String?,
+        throwable: Throwable? = null,
+        toast: Boolean = false,
+    ) {
         message ?: return
         if (toast) {
             appCtx.toastOnUi(message)
@@ -58,10 +65,12 @@ object AppLog {
         mLogs.clear()
     }
 
-    fun putDebug(message: String?, throwable: Throwable? = null) {
+    fun putDebug(
+        message: String?,
+        throwable: Throwable? = null,
+    ) {
         if (otherGateway.currentSettings.recordLog) {
             put(message, throwable)
         }
     }
-
 }

@@ -15,17 +15,11 @@ import androidx.core.content.ContextCompat
 
 @Suppress("unused")
 object Selector {
-    fun shapeBuild(): ShapeSelector {
-        return ShapeSelector()
-    }
+    fun shapeBuild(): ShapeSelector = ShapeSelector()
 
-    fun colorBuild(): ColorSelector {
-        return ColorSelector()
-    }
+    fun colorBuild(): ColorSelector = ColorSelector()
 
-    fun drawableBuild(): DrawableSelector {
-        return DrawableSelector()
-    }
+    fun drawableBuild(): DrawableSelector = DrawableSelector()
 
     /**
      * 形状ShapeSelector
@@ -34,22 +28,21 @@ object Selector {
      * created at 2017/12/11 22:26
      */
     class ShapeSelector {
-
-        private var mShape: Int = 0               //the shape of background
-        private var mDefaultBgColor: Int = 0      //default background color
-        private var mDisabledBgColor: Int = 0     //state_enabled = false
-        private var mPressedBgColor: Int = 0      //state_pressed = true
-        private var mSelectedBgColor: Int = 0     //state_selected = true
-        private var mFocusedBgColor: Int = 0      //state_focused = true
-        private var mCheckedBgColor: Int = 0      //state_checked = true
-        private var mStrokeWidth: Int = 0         //stroke width in pixel
-        private var mDefaultStrokeColor: Int = 0  //default stroke color
-        private var mDisabledStrokeColor: Int = 0 //state_enabled = false
-        private var mPressedStrokeColor: Int = 0  //state_pressed = true
-        private var mSelectedStrokeColor: Int = 0 //state_selected = true
-        private var mFocusedStrokeColor: Int = 0  //state_focused = true
-        private var mCheckedStrokeColor: Int = 0  //state_checked = true
-        private var mCornerRadius: Int = 0        //corner radius
+        private var mShape: Int = 0 // the shape of background
+        private var mDefaultBgColor: Int = 0 // default background color
+        private var mDisabledBgColor: Int = 0 // state_enabled = false
+        private var mPressedBgColor: Int = 0 // state_pressed = true
+        private var mSelectedBgColor: Int = 0 // state_selected = true
+        private var mFocusedBgColor: Int = 0 // state_focused = true
+        private var mCheckedBgColor: Int = 0 // state_checked = true
+        private var mStrokeWidth: Int = 0 // stroke width in pixel
+        private var mDefaultStrokeColor: Int = 0 // default stroke color
+        private var mDisabledStrokeColor: Int = 0 // state_enabled = false
+        private var mPressedStrokeColor: Int = 0 // state_pressed = true
+        private var mSelectedStrokeColor: Int = 0 // state_selected = true
+        private var mFocusedStrokeColor: Int = 0 // state_focused = true
+        private var mCheckedStrokeColor: Int = 0 // state_checked = true
+        private var mCornerRadius: Int = 0 // corner radius
 
         private var hasSetDisabledBgColor = false
         private var hasSetPressedBgColor = false
@@ -67,12 +60,12 @@ object Selector {
             GradientDrawable.RECTANGLE,
             GradientDrawable.OVAL,
             GradientDrawable.LINE,
-            GradientDrawable.RING
+            GradientDrawable.RING,
         )
         private annotation class Shape
 
         init {
-            //initialize default values
+            // initialize default values
             mShape = GradientDrawable.RECTANGLE
             mDefaultBgColor = Color.TRANSPARENT
             mDisabledBgColor = Color.TRANSPARENT
@@ -88,103 +81,141 @@ object Selector {
             mCornerRadius = 0
         }
 
-        fun setShape(@Shape shape: Int): ShapeSelector {
+        fun setShape(
+            @Shape shape: Int,
+        ): ShapeSelector {
             mShape = shape
             return this
         }
 
-        fun setDefaultBgColor(@ColorInt color: Int): ShapeSelector {
+        fun setDefaultBgColor(
+            @ColorInt color: Int,
+        ): ShapeSelector {
             mDefaultBgColor = color
-            if (!hasSetDisabledBgColor)
+            if (!hasSetDisabledBgColor) {
                 mDisabledBgColor = color
-            if (!hasSetPressedBgColor)
+            }
+            if (!hasSetPressedBgColor) {
                 mPressedBgColor = color
-            if (!hasSetSelectedBgColor)
+            }
+            if (!hasSetSelectedBgColor) {
                 mSelectedBgColor = color
-            if (!hasSetFocusedBgColor)
+            }
+            if (!hasSetFocusedBgColor) {
                 mFocusedBgColor = color
+            }
             return this
         }
 
-        fun setDisabledBgColor(@ColorInt color: Int): ShapeSelector {
+        fun setDisabledBgColor(
+            @ColorInt color: Int,
+        ): ShapeSelector {
             mDisabledBgColor = color
             hasSetDisabledBgColor = true
             return this
         }
 
-        fun setPressedBgColor(@ColorInt color: Int): ShapeSelector {
+        fun setPressedBgColor(
+            @ColorInt color: Int,
+        ): ShapeSelector {
             mPressedBgColor = color
             hasSetPressedBgColor = true
             return this
         }
 
-        fun setSelectedBgColor(@ColorInt color: Int): ShapeSelector {
+        fun setSelectedBgColor(
+            @ColorInt color: Int,
+        ): ShapeSelector {
             mSelectedBgColor = color
             hasSetSelectedBgColor = true
             return this
         }
 
-        fun setFocusedBgColor(@ColorInt color: Int): ShapeSelector {
+        fun setFocusedBgColor(
+            @ColorInt color: Int,
+        ): ShapeSelector {
             mFocusedBgColor = color
             hasSetPressedBgColor = true
             return this
         }
 
-        fun setCheckedBgColor(@ColorInt color: Int): ShapeSelector {
+        fun setCheckedBgColor(
+            @ColorInt color: Int,
+        ): ShapeSelector {
             mCheckedBgColor = color
             hasSetCheckedBgColor = true
             return this
         }
 
-        fun setStrokeWidth(@Dimension width: Int): ShapeSelector {
+        fun setStrokeWidth(
+            @Dimension width: Int,
+        ): ShapeSelector {
             mStrokeWidth = width
             return this
         }
 
-        fun setDefaultStrokeColor(@ColorInt color: Int): ShapeSelector {
+        fun setDefaultStrokeColor(
+            @ColorInt color: Int,
+        ): ShapeSelector {
             mDefaultStrokeColor = color
-            if (!hasSetDisabledStrokeColor)
+            if (!hasSetDisabledStrokeColor) {
                 mDisabledStrokeColor = color
-            if (!hasSetPressedStrokeColor)
+            }
+            if (!hasSetPressedStrokeColor) {
                 mPressedStrokeColor = color
-            if (!hasSetSelectedStrokeColor)
+            }
+            if (!hasSetSelectedStrokeColor) {
                 mSelectedStrokeColor = color
-            if (!hasSetFocusedStrokeColor)
+            }
+            if (!hasSetFocusedStrokeColor) {
                 mFocusedStrokeColor = color
+            }
             return this
         }
 
-        fun setDisabledStrokeColor(@ColorInt color: Int): ShapeSelector {
+        fun setDisabledStrokeColor(
+            @ColorInt color: Int,
+        ): ShapeSelector {
             mDisabledStrokeColor = color
             hasSetDisabledStrokeColor = true
             return this
         }
 
-        fun setPressedStrokeColor(@ColorInt color: Int): ShapeSelector {
+        fun setPressedStrokeColor(
+            @ColorInt color: Int,
+        ): ShapeSelector {
             mPressedStrokeColor = color
             hasSetPressedStrokeColor = true
             return this
         }
 
-        fun setSelectedStrokeColor(@ColorInt color: Int): ShapeSelector {
+        fun setSelectedStrokeColor(
+            @ColorInt color: Int,
+        ): ShapeSelector {
             mSelectedStrokeColor = color
             hasSetSelectedStrokeColor = true
             return this
         }
 
-        fun setCheckedStrokeColor(@ColorInt color: Int): ShapeSelector {
+        fun setCheckedStrokeColor(
+            @ColorInt color: Int,
+        ): ShapeSelector {
             mCheckedStrokeColor = color
             hasSetCheckedStrokeColor = true
             return this
         }
 
-        fun setFocusedStrokeColor(@ColorInt color: Int): ShapeSelector {
+        fun setFocusedStrokeColor(
+            @ColorInt color: Int,
+        ): ShapeSelector {
             mFocusedStrokeColor = color
             hasSetFocusedStrokeColor = true
             return this
         }
 
-        fun setCornerRadius(@Dimension radius: Int): ShapeSelector {
+        fun setCornerRadius(
+            @Dimension radius: Int,
+        ): ShapeSelector {
             mCornerRadius = radius
             return this
         }
@@ -192,64 +223,91 @@ object Selector {
         fun create(): StateListDrawable {
             val selector = StateListDrawable()
 
-            //enabled = false
+            // enabled = false
             if (hasSetDisabledBgColor || hasSetDisabledStrokeColor) {
-                val disabledShape = getItemShape(
-                    mShape, mCornerRadius,
-                    mDisabledBgColor, mStrokeWidth, mDisabledStrokeColor
-                )
+                val disabledShape =
+                    getItemShape(
+                        mShape,
+                        mCornerRadius,
+                        mDisabledBgColor,
+                        mStrokeWidth,
+                        mDisabledStrokeColor,
+                    )
                 selector.addState(intArrayOf(-android.R.attr.state_enabled), disabledShape)
             }
 
-            //pressed = true
+            // pressed = true
             if (hasSetPressedBgColor || hasSetPressedStrokeColor) {
-                val pressedShape = getItemShape(
-                    mShape, mCornerRadius,
-                    mPressedBgColor, mStrokeWidth, mPressedStrokeColor
-                )
+                val pressedShape =
+                    getItemShape(
+                        mShape,
+                        mCornerRadius,
+                        mPressedBgColor,
+                        mStrokeWidth,
+                        mPressedStrokeColor,
+                    )
                 selector.addState(intArrayOf(android.R.attr.state_pressed), pressedShape)
             }
 
-            //selected = true
+            // selected = true
             if (hasSetSelectedBgColor || hasSetSelectedStrokeColor) {
-                val selectedShape = getItemShape(
-                    mShape, mCornerRadius,
-                    mSelectedBgColor, mStrokeWidth, mSelectedStrokeColor
-                )
+                val selectedShape =
+                    getItemShape(
+                        mShape,
+                        mCornerRadius,
+                        mSelectedBgColor,
+                        mStrokeWidth,
+                        mSelectedStrokeColor,
+                    )
                 selector.addState(intArrayOf(android.R.attr.state_selected), selectedShape)
             }
 
-            //focused = true
+            // focused = true
             if (hasSetFocusedBgColor || hasSetFocusedStrokeColor) {
-                val focusedShape = getItemShape(
-                    mShape, mCornerRadius,
-                    mFocusedBgColor, mStrokeWidth, mFocusedStrokeColor
-                )
+                val focusedShape =
+                    getItemShape(
+                        mShape,
+                        mCornerRadius,
+                        mFocusedBgColor,
+                        mStrokeWidth,
+                        mFocusedStrokeColor,
+                    )
                 selector.addState(intArrayOf(android.R.attr.state_focused), focusedShape)
             }
 
-            //checked = true
+            // checked = true
             if (hasSetCheckedBgColor || hasSetCheckedStrokeColor) {
-                val checkedShape = getItemShape(
-                    mShape, mCornerRadius,
-                    mCheckedBgColor, mStrokeWidth, mCheckedStrokeColor
-                )
+                val checkedShape =
+                    getItemShape(
+                        mShape,
+                        mCornerRadius,
+                        mCheckedBgColor,
+                        mStrokeWidth,
+                        mCheckedStrokeColor,
+                    )
                 selector.addState(intArrayOf(android.R.attr.state_checked), checkedShape)
             }
 
-            //default
-            val defaultShape = getItemShape(
-                mShape, mCornerRadius,
-                mDefaultBgColor, mStrokeWidth, mDefaultStrokeColor
-            )
+            // default
+            val defaultShape =
+                getItemShape(
+                    mShape,
+                    mCornerRadius,
+                    mDefaultBgColor,
+                    mStrokeWidth,
+                    mDefaultStrokeColor,
+                )
             selector.addState(intArrayOf(), defaultShape)
 
             return selector
         }
 
         private fun getItemShape(
-            shape: Int, cornerRadius: Int,
-            solidColor: Int, strokeWidth: Int, strokeColor: Int
+            shape: Int,
+            cornerRadius: Int,
+            solidColor: Int,
+            strokeWidth: Int,
+            strokeColor: Int,
         ): GradientDrawable {
             val drawable = GradientDrawable()
             drawable.shape = shape
@@ -268,7 +326,6 @@ object Selector {
      */
     @Suppress("MemberVisibilityCanBePrivate")
     class DrawableSelector {
-
         private var mDefaultDrawable: Drawable? = null
         private var mDisabledDrawable: Drawable? = null
         private var mPressedDrawable: Drawable? = null
@@ -286,14 +343,18 @@ object Selector {
 
         fun setDefaultDrawable(drawable: Drawable?): DrawableSelector {
             mDefaultDrawable = drawable
-            if (!hasSetDisabledDrawable)
+            if (!hasSetDisabledDrawable) {
                 mDisabledDrawable = drawable
-            if (!hasSetPressedDrawable)
+            }
+            if (!hasSetPressedDrawable) {
                 mPressedDrawable = drawable
-            if (!hasSetSelectedDrawable)
+            }
+            if (!hasSetSelectedDrawable) {
                 mSelectedDrawable = drawable
-            if (!hasSetFocusedDrawable)
+            }
+            if (!hasSetFocusedDrawable) {
                 mFocusedDrawable = drawable
+            }
             return this
         }
 
@@ -323,37 +384,46 @@ object Selector {
 
         fun create(): StateListDrawable {
             val selector = StateListDrawable()
-            if (hasSetDisabledDrawable)
+            if (hasSetDisabledDrawable) {
                 selector.addState(intArrayOf(-android.R.attr.state_enabled), mDisabledDrawable)
-            if (hasSetPressedDrawable)
+            }
+            if (hasSetPressedDrawable) {
                 selector.addState(intArrayOf(android.R.attr.state_pressed), mPressedDrawable)
-            if (hasSetSelectedDrawable)
+            }
+            if (hasSetSelectedDrawable) {
                 selector.addState(intArrayOf(android.R.attr.state_selected), mSelectedDrawable)
-            if (hasSetFocusedDrawable)
+            }
+            if (hasSetFocusedDrawable) {
                 selector.addState(intArrayOf(android.R.attr.state_focused), mFocusedDrawable)
+            }
             selector.addState(intArrayOf(), mDefaultDrawable)
             return selector
         }
 
-        fun setDefaultDrawable(context: Context, @DrawableRes drawableRes: Int): DrawableSelector {
-            return setDefaultDrawable(ContextCompat.getDrawable(context, drawableRes))
-        }
+        fun setDefaultDrawable(
+            context: Context,
+            @DrawableRes drawableRes: Int,
+        ): DrawableSelector = setDefaultDrawable(ContextCompat.getDrawable(context, drawableRes))
 
-        fun setDisabledDrawable(context: Context, @DrawableRes drawableRes: Int): DrawableSelector {
-            return setDisabledDrawable(ContextCompat.getDrawable(context, drawableRes))
-        }
+        fun setDisabledDrawable(
+            context: Context,
+            @DrawableRes drawableRes: Int,
+        ): DrawableSelector = setDisabledDrawable(ContextCompat.getDrawable(context, drawableRes))
 
-        fun setPressedDrawable(context: Context, @DrawableRes drawableRes: Int): DrawableSelector {
-            return setPressedDrawable(ContextCompat.getDrawable(context, drawableRes))
-        }
+        fun setPressedDrawable(
+            context: Context,
+            @DrawableRes drawableRes: Int,
+        ): DrawableSelector = setPressedDrawable(ContextCompat.getDrawable(context, drawableRes))
 
-        fun setSelectedDrawable(context: Context, @DrawableRes drawableRes: Int): DrawableSelector {
-            return setSelectedDrawable(ContextCompat.getDrawable(context, drawableRes))
-        }
+        fun setSelectedDrawable(
+            context: Context,
+            @DrawableRes drawableRes: Int,
+        ): DrawableSelector = setSelectedDrawable(ContextCompat.getDrawable(context, drawableRes))
 
-        fun setFocusedDrawable(context: Context, @DrawableRes drawableRes: Int): DrawableSelector {
-            return setFocusedDrawable(ContextCompat.getDrawable(context, drawableRes))
-        }
+        fun setFocusedDrawable(
+            context: Context,
+            @DrawableRes drawableRes: Int,
+        ): DrawableSelector = setFocusedDrawable(ContextCompat.getDrawable(context, drawableRes))
     }
 
     /**
@@ -363,7 +433,6 @@ object Selector {
      * created at 2017/12/11 22:26
      */
     class ColorSelector {
-
         private var mDefaultColor: Int = 0
         private var mDisabledColor: Int = 0
         private var mPressedColor: Int = 0
@@ -385,58 +454,75 @@ object Selector {
             mFocusedColor = Color.BLACK
         }
 
-        fun setDefaultColor(@ColorInt color: Int): ColorSelector {
+        fun setDefaultColor(
+            @ColorInt color: Int,
+        ): ColorSelector {
             mDefaultColor = color
-            if (!hasSetDisabledColor)
+            if (!hasSetDisabledColor) {
                 mDisabledColor = color
-            if (!hasSetPressedColor)
+            }
+            if (!hasSetPressedColor) {
                 mPressedColor = color
-            if (!hasSetSelectedColor)
+            }
+            if (!hasSetSelectedColor) {
                 mSelectedColor = color
-            if (!hasSetFocusedColor)
+            }
+            if (!hasSetFocusedColor) {
                 mFocusedColor = color
+            }
             return this
         }
 
-        fun setDisabledColor(@ColorInt color: Int): ColorSelector {
+        fun setDisabledColor(
+            @ColorInt color: Int,
+        ): ColorSelector {
             mDisabledColor = color
             hasSetDisabledColor = true
             return this
         }
 
-        fun setPressedColor(@ColorInt color: Int): ColorSelector {
+        fun setPressedColor(
+            @ColorInt color: Int,
+        ): ColorSelector {
             mPressedColor = color
             hasSetPressedColor = true
             return this
         }
 
-        fun setSelectedColor(@ColorInt color: Int): ColorSelector {
+        fun setSelectedColor(
+            @ColorInt color: Int,
+        ): ColorSelector {
             mSelectedColor = color
             hasSetSelectedColor = true
             return this
         }
 
-        fun setFocusedColor(@ColorInt color: Int): ColorSelector {
+        fun setFocusedColor(
+            @ColorInt color: Int,
+        ): ColorSelector {
             mFocusedColor = color
             hasSetFocusedColor = true
             return this
         }
 
-        fun setCheckedColor(@ColorInt color: Int): ColorSelector {
+        fun setCheckedColor(
+            @ColorInt color: Int,
+        ): ColorSelector {
             mCheckedColor = color
             hasSetCheckedColor = true
             return this
         }
 
         fun create(): ColorStateList {
-            val colors = intArrayOf(
-                if (hasSetDisabledColor) mDisabledColor else mDefaultColor,
-                if (hasSetPressedColor) mPressedColor else mDefaultColor,
-                if (hasSetSelectedColor) mSelectedColor else mDefaultColor,
-                if (hasSetFocusedColor) mFocusedColor else mDefaultColor,
-                if (hasSetCheckedColor) mCheckedColor else mDefaultColor,
-                mDefaultColor
-            )
+            val colors =
+                intArrayOf(
+                    if (hasSetDisabledColor) mDisabledColor else mDefaultColor,
+                    if (hasSetPressedColor) mPressedColor else mDefaultColor,
+                    if (hasSetSelectedColor) mSelectedColor else mDefaultColor,
+                    if (hasSetFocusedColor) mFocusedColor else mDefaultColor,
+                    if (hasSetCheckedColor) mCheckedColor else mDefaultColor,
+                    mDefaultColor,
+                )
             val states = arrayOfNulls<IntArray>(6)
             states[0] = intArrayOf(-android.R.attr.state_enabled)
             states[1] = intArrayOf(android.R.attr.state_pressed)

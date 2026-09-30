@@ -2,19 +2,18 @@ package io.legado.app.ui.widget.components.settingItem
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.disabled
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import io.legado.app.ui.theme.LegadoTheme
 import io.legado.app.ui.theme.ThemeResolver
 import io.legado.app.ui.widget.components.AdaptiveSwitch
 import io.legado.app.ui.widget.components.SplicedColumnDivider
 import top.yukonga.miuix.kmp.preference.SwitchPreference
-
 
 @Composable
 fun SwitchSettingItem(
@@ -24,7 +23,7 @@ fun SwitchSettingItem(
     imageVector: ImageVector? = null,
     color: Color? = null,
     enabled: Boolean = true,
-    onCheckedChange: (Boolean) -> Unit
+    onCheckedChange: (Boolean) -> Unit,
 ) {
     val composeEngine = LegadoTheme.composeEngine
     SplicedColumnDivider()
@@ -54,9 +53,9 @@ fun SwitchSettingItem(
                     checked = checked,
                     onCheckedChange = onCheckedChange,
                     enabled = enabled,
-                    includeStateSemantics = false
+                    includeStateSemantics = false,
                 )
-            }
+            },
         )
     }
 }

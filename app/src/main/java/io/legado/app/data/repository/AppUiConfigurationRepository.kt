@@ -20,28 +20,29 @@ class AppUiConfigurationRepository internal constructor(
     processScope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Default),
     initialSystemDarkTheme: Boolean = false,
 ) : AppUiConfigurationGateway {
-
     private val systemDarkTheme = MutableStateFlow(initialSystemDarkTheme)
 
-    private val initialConfiguration = preferencesFlow.value.toAppUiConfiguration(
-        language = appLocaleGateway.currentLanguage,
-        isSystemDarkTheme = initialSystemDarkTheme,
-    )
+    private val initialConfiguration =
+        preferencesFlow.value.toAppUiConfiguration(
+            language = appLocaleGateway.currentLanguage,
+            isSystemDarkTheme = initialSystemDarkTheme,
+        )
 
     override val currentConfiguration: AppUiConfiguration
         get() = configuration.value
 
-    override val configuration: StateFlow<AppUiConfiguration> = combine(
-        appLocaleGateway.language,
-        preferencesFlow,
-        systemDarkTheme,
-    ) { language, preferences, isSystemDarkTheme ->
-        preferences.toAppUiConfiguration(language, isSystemDarkTheme)
-    }.stateIn(
-        scope = processScope,
-        started = SharingStarted.Eagerly,
-        initialValue = initialConfiguration,
-    )
+    override val configuration: StateFlow<AppUiConfiguration> =
+        combine(
+            appLocaleGateway.language,
+            preferencesFlow,
+            systemDarkTheme,
+        ) { language, preferences, isSystemDarkTheme ->
+            preferences.toAppUiConfiguration(language, isSystemDarkTheme)
+        }.stateIn(
+            scope = processScope,
+            started = SharingStarted.Eagerly,
+            initialValue = initialConfiguration,
+        )
 
     override fun synchronizeSystemDarkTheme(isDarkTheme: Boolean) {
         systemDarkTheme.value = isDarkTheme
@@ -51,11 +52,10 @@ class AppUiConfigurationRepository internal constructor(
 internal fun Preferences.toAppUiConfiguration(
     language: String,
     isSystemDarkTheme: Boolean,
-): AppUiConfiguration =
-    AppUiConfiguration(
-        language = language,
-        appShell = toAppShellSettings(),
-        theme = toThemeSettings(),
-        cover = toCoverSettings(),
-        isSystemDarkTheme = isSystemDarkTheme,
-    )
+): AppUiConfiguration = AppUiConfiguration(
+    language = language,
+    appShell = toAppShellSettings(),
+    theme = toThemeSettings(),
+    cover = toCoverSettings(),
+    isSystemDarkTheme = isSystemDarkTheme,
+)

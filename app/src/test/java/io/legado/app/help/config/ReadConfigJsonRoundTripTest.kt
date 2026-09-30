@@ -19,27 +19,27 @@ import org.junit.Test
  * 本测试要验的是 Kotlin `val` + 反射写入这件事本身，与自定义适配器无关。
  */
 class ReadConfigJsonRoundTripTest {
-
     private val gson = Gson()
 
     @Test
     fun `非默认值能完整往返`() {
-        val original = ReadBookConfig.Config(
-            name = "夜读",
-            textSize = 33,
-            letterSpacing = 0.42f,
-            lineSpacingExtra = 27,
-            textItalic = true,
-            underline = true,
-            underlineHeight = 3,
-            paragraphIndent = "  ",
-            textFont = "/sdcard/fonts/x.ttf",
-            tipHeaderLeft = 9,
-            tipFooterRight = 14,
-            bgType = 2,
-            bgStr = "/sdcard/bg/a.jpg",
-            bgAlpha = 66,
-        )
+        val original =
+            ReadBookConfig.Config(
+                name = "夜读",
+                textSize = 33,
+                letterSpacing = 0.42f,
+                lineSpacingExtra = 27,
+                textItalic = true,
+                underline = true,
+                underlineHeight = 3,
+                paragraphIndent = "  ",
+                textFont = "/sdcard/fonts/x.ttf",
+                tipHeaderLeft = 9,
+                tipFooterRight = 14,
+                bgType = 2,
+                bgStr = "/sdcard/bg/a.jpg",
+                bgAlpha = 66,
+            )
 
         val restored = gson.fromJson(gson.toJson(original), ReadBookConfig.Config::class.java)
 
@@ -54,11 +54,12 @@ class ReadConfigJsonRoundTripTest {
     fun `私有的模式相关字段也能往返`() {
         // textColor / textColorNight / pageAnim / darkStatusIcon 是 private 构造参数，
         // 只能经由 withCurXxx 写、getXxx 读——但它们同样要落盘。
-        val json = """
+        val json =
+            """
             {"name":"x","textColor":"#112233","textColorNight":"#445566",
              "textColorEInk":"#778899","pageAnim":3,"pageAnimEInk":1,
              "darkStatusIcon":false,"darkStatusIconNight":true}
-        """.trimIndent()
+            """.trimIndent()
 
         val restored = gson.fromJson(json, ReadBookConfig.Config::class.java)
 
@@ -89,10 +90,14 @@ class ReadConfigJsonRoundTripTest {
         // curTextColor() 本身要经 Koin 取主题网关，JVM 单测起不来，所以用反射模拟
         // 「ensureColorInts 已经跑过」的状态，直接断言 copy 出来的实例缓存是空的。
         val config = ReadBookConfig.Config(name = "x")
-        val cacheField = ReadBookConfig.Config::class.java.getDeclaredField("textColorInt")
-            .apply { isAccessible = true }
-        val initFlagField = ReadBookConfig.Config::class.java.getDeclaredField("initColorInt")
-            .apply { isAccessible = true }
+        val cacheField =
+            ReadBookConfig.Config::class.java
+                .getDeclaredField("textColorInt")
+                .apply { isAccessible = true }
+        val initFlagField =
+            ReadBookConfig.Config::class.java
+                .getDeclaredField("initColorInt")
+                .apply { isAccessible = true }
         cacheField.setInt(config, 0x123456)
         initFlagField.setBoolean(config, true)
 

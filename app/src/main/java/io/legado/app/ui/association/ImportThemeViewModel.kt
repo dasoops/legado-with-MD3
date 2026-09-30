@@ -23,8 +23,9 @@ import io.legado.app.utils.isUri
 import io.legado.app.utils.readText
 import splitties.init.appCtx
 
-class ImportThemeViewModel(app: Application) : BaseViewModel(app) {
-
+class ImportThemeViewModel(
+    app: Application,
+) : BaseViewModel(app) {
     val errorLiveData = MutableLiveData<String>()
     val successLiveData = MutableLiveData<Int>()
 
@@ -83,45 +84,53 @@ class ImportThemeViewModel(app: Application) : BaseViewModel(app) {
                     allSources.add(it)
                 }
             }
-
-            text.isJsonArray() -> GSON.fromJsonArray<ThemeConfigStore.Config>(text).getOrThrow()
-                .let { items ->
-                    allSources.addAll(items)
-                }
+            text.isJsonArray() -> {
+                GSON
+                    .fromJsonArray<ThemeConfigStore.Config>(text)
+                    .getOrThrow()
+                    .let { items ->
+                        allSources.addAll(items)
+                    }
+            }
             text.isAbsUrl() -> {
                 importSourceUrl(text)
             }
             text.isUri() -> {
                 importSourceAwait(text.toUri().readText(appCtx))
             }
-            else -> throw NoStackTraceException(context.getString(R.string.wrong_format))
+            else -> {
+                throw NoStackTraceException(context.getString(R.string.wrong_format))
+            }
         }
     }
 
     private suspend fun importSourceUrl(url: String) {
-        okHttpClient.newCallResponseBody {
-            if (url.endsWith("#requestWithoutUA")) {
-                url(url.substringBeforeLast("#requestWithoutUA"))
-                header(AppConst.UA_NAME, "null")
-            } else {
-                url(url)
+        okHttpClient
+            .newCallResponseBody {
+                if (url.endsWith("#requestWithoutUA")) {
+                    url(url.substringBeforeLast("#requestWithoutUA"))
+                    header(AppConst.UA_NAME, "null")
+                } else {
+                    url(url)
+                }
+            }.decompressed()
+            .text()
+            .let {
+                importSourceAwait(it)
             }
-        }.decompressed().text().let {
-            importSourceAwait(it)
-        }
     }
 
     private fun comparisonSource() {
         execute {
             allSources.forEach { config ->
-                val source = ThemeConfigStore.configList.find {
-                    it.themeName == config.themeName
-                }
+                val source =
+                    ThemeConfigStore.configList.find {
+                        it.themeName == config.themeName
+                    }
                 checkSources.add(source)
                 selectStatus.add(source == null || source != config)
             }
             successLiveData.postValue(allSources.size)
         }
     }
-
 }

@@ -72,12 +72,10 @@ data class LegadoColorScheme(
     val tertiaryFixedDim: Color,
     val onTertiaryFixed: Color,
     val onTertiaryFixedVariant: Color,
-
     val cardContainer: Color,
     val onCardContainer: Color,
     val onSheetContent: Color,
     val cardPrimaryContainer: Color,
-
     /** 输入框背景色覆盖；未配置时由当前主题引擎提供默认色 */
     val surfaceInput: Color,
 )
@@ -89,50 +87,48 @@ data class LegadoTypography(
     val headlineMediumEmphasized: TextStyle,
     val headlineSmall: TextStyle,
     val headlineSmallEmphasized: TextStyle,
-
     val titleLarge: TextStyle,
     val titleLargeEmphasized: TextStyle,
     val titleMedium: TextStyle,
     val titleMediumEmphasized: TextStyle,
     val titleSmall: TextStyle,
     val titleSmallEmphasized: TextStyle,
-
-
     val bodyLarge: TextStyle,
     val bodyLargeEmphasized: TextStyle,
     val bodyMedium: TextStyle,
     val bodyMediumEmphasized: TextStyle,
     val bodySmall: TextStyle,
     val bodySmallEmphasized: TextStyle,
-
     val labelLarge: TextStyle,
     val labelLargeEmphasized: TextStyle,
     val labelMedium: TextStyle,
     val labelMediumEmphasized: TextStyle,
     val labelSmall: TextStyle,
     val labelSmallEmphasized: TextStyle,
+)
 
-    )
+val LocalLegadoColorScheme =
+    staticCompositionLocalOf<LegadoColorScheme> {
+        error("No ColorScheme provided")
+    }
 
-val LocalLegadoColorScheme = staticCompositionLocalOf<LegadoColorScheme> {
-    error("No ColorScheme provided")
-}
+val LocalLegadoTypography =
+    staticCompositionLocalOf<LegadoTypography> {
+        error("No Typography provided")
+    }
 
-val LocalLegadoTypography = staticCompositionLocalOf<LegadoTypography> {
-    error("No Typography provided")
-}
-
-val LocalLegadoThemeColors = staticCompositionLocalOf {
-    LegadoThemeMode(
-        colorScheme = lightColorScheme(),
-        isDark = false,
-        seedColor = Color.Unspecified,
-        paletteStyle = PaletteStyle.TonalSpot,
-        themeMode = ColorSchemeMode.System,
-        useDynamicColor = true,
-        composeEngine = "material"
-    )
-}
+val LocalLegadoThemeColors =
+    staticCompositionLocalOf {
+        LegadoThemeMode(
+            colorScheme = lightColorScheme(),
+            isDark = false,
+            seedColor = Color.Unspecified,
+            paletteStyle = PaletteStyle.TonalSpot,
+            themeMode = ColorSchemeMode.System,
+            useDynamicColor = true,
+            composeEngine = "material",
+        )
+    }
 
 val LocalHazeState = compositionLocalOf<HazeState?> { null }
 
@@ -140,7 +136,6 @@ val LocalHazeState = compositionLocalOf<HazeState?> { null }
 val LocalTopBarBackdrop = compositionLocalOf<Backdrop?> { null }
 
 object LegadoTheme {
-
     val colorScheme: LegadoColorScheme
         @Composable
         @ReadOnlyComposable
@@ -180,5 +175,4 @@ object LegadoTheme {
         @Composable
         @ReadOnlyComposable
         get() = LocalLegadoTypography.current
-
 }

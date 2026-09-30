@@ -26,23 +26,24 @@ fun OptionSheet(
     show: Boolean,
     onDismissRequest: () -> Unit,
     title: String,
-    content: @Composable RowScope.() -> Unit
+    content: @Composable RowScope.() -> Unit,
 ) {
     AppModalBottomSheet(
         show = show,
         title = title,
-        onDismissRequest = onDismissRequest
+        onDismissRequest = onDismissRequest,
     ) {
         Column(
-            modifier = Modifier
+            modifier =
+            Modifier
                 .fillMaxWidth(),
-            horizontalAlignment = Alignment.CenterHorizontally
+            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             FlowRow(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp),
-                maxItemsInEachRow = 2
+                maxItemsInEachRow = 2,
             ) {
                 content()
             }
@@ -55,32 +56,33 @@ fun OptionSheet(
 fun RowScope.OptionCard(
     icon: ImageVector,
     text: String,
-    onClick: () -> Unit
+    onClick: () -> Unit,
 ) {
     NormalCard(
         onClick = onClick,
-        modifier = Modifier
+        modifier =
+        Modifier
             .weight(1f)
             .height(100.dp),
         cornerRadius = 12.dp,
-        containerColor = LegadoTheme.colorScheme.onSheetContent
+        containerColor = LegadoTheme.colorScheme.onSheetContent,
     ) {
         Column(
             modifier = Modifier.fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
+            verticalArrangement = Arrangement.Center,
         ) {
             AppIcon(
                 imageVector = icon,
                 contentDescription = null,
                 modifier = Modifier.size(32.dp),
-                tint = LegadoTheme.colorScheme.primary
+                tint = LegadoTheme.colorScheme.primary,
             )
             Spacer(modifier = Modifier.height(8.dp))
             AppText(
                 text = text,
                 style = LegadoTheme.typography.labelMedium,
-                maxLines = 1
+                maxLines = 1,
             )
         }
     }

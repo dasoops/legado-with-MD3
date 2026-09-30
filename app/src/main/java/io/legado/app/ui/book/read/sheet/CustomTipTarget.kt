@@ -21,10 +21,14 @@ internal enum class CustomTipTarget {
     HEADER_RIGHT,
     FOOTER_LEFT,
     FOOTER_MIDDLE,
-    FOOTER_RIGHT;
+    FOOTER_RIGHT,
+    ;
 
     /** 通过 ViewModel 派发 [ConfigUpdate]，由 gateway 管线持久化到 [ReadBookConfig]。 */
-    fun applyTemplate(template: String, onIntent: (ReadBookIntent) -> Unit) {
+    fun applyTemplate(
+        template: String,
+        onIntent: (ReadBookIntent) -> Unit,
+    ) {
         onIntent(ReadBookIntent.UpdateConfig(configUpdate(template)))
     }
 

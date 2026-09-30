@@ -1,7 +1,5 @@
 package io.legado.app.help.glide
 
-import io.legado.app.data.appDb
-
 import com.bumptech.glide.Priority
 import com.bumptech.glide.load.DataSource
 import com.bumptech.glide.load.HttpException
@@ -9,12 +7,14 @@ import com.bumptech.glide.load.Options
 import com.bumptech.glide.load.data.DataFetcher
 import com.bumptech.glide.load.model.GlideUrl
 import com.bumptech.glide.util.ContentLengthInputStream
-import io.legado.app.data.entities.BaseSource
 import io.legado.app.exception.NoStackTraceException
 import io.legado.app.help.http.addHeaders
 import io.legado.app.help.http.okHttpClient
 import io.legado.app.model.analyzeRule.AnalyzeUrl
 import io.legado.app.utils.isWifiConnect
+import java.io.ByteArrayInputStream
+import java.io.IOException
+import java.io.InputStream
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import okhttp3.Call
@@ -22,20 +22,15 @@ import okhttp3.Request
 import okhttp3.Response
 import okhttp3.ResponseBody
 import splitties.init.appCtx
-import java.io.ByteArrayInputStream
-import java.io.IOException
-import java.io.InputStream
-
 
 class OkHttpStreamFetcher(
     private val url: GlideUrl,
     private val options: Options,
-) :
-    DataFetcher<InputStream>, okhttp3.Callback {
+) : DataFetcher<InputStream>,
+    okhttp3.Callback {
     private var stream: InputStream? = null
     private var responseBody: ResponseBody? = null
     private var callback: DataFetcher.DataCallback<in InputStream>? = null
-    private var source: BaseSource? = null
     private val coroutineContext = SupervisorJob()
     private val coroutineScope = CoroutineScope(coroutineContext)
     private lateinit var analyzedUrl: GlideUrl
@@ -48,7 +43,10 @@ class OkHttpStreamFetcher(
         private val failUrl = hashSetOf<String>()
     }
 
-    override fun loadData(priority: Priority, callback: DataFetcher.DataCallback<in InputStream>) {
+    override fun loadData(
+        priority: Priority,
+        callback: DataFetcher.DataCallback<in InputStream>,
+    ) {
         if (failUrl.contains(url.toStringUrl())) {
             callback.onLoadFailed(NoStackTraceException("跳过加载失败的图片"))
             return
@@ -59,21 +57,18 @@ class OkHttpStreamFetcher(
             return
         }
 
-        options.get(OkHttpModelLoader.sourceOriginOption)?.let { sourceUrl ->
-            source = appDb.bookSourceDao.getBookSource(sourceUrl)
-        }
-
         this.callback = callback
 
-        analyzedUrl = AnalyzeUrl(
-            url.toString(),
-            source = source,
-            coroutineContext = coroutineContext
-        ).getGlideUrl()
+        analyzedUrl =
+            AnalyzeUrl(
+                url.toString(),
+                coroutineContext = coroutineContext,
+            ).getGlideUrl()
 
-        val requestBuilder = Request.Builder()
-            .url(analyzedUrl.toStringUrl())
-            .tag(BaseSource::class.java, source)
+        val requestBuilder =
+            Request
+                .Builder()
+                .url(analyzedUrl.toStringUrl())
         requestBuilder.addHeaders(analyzedUrl.headers)
         val request: Request = requestBuilder.build()
         dataSource = DataSource.REMOTE
@@ -95,19 +90,21 @@ class OkHttpStreamFetcher(
         coroutineContext.cancel()
     }
 
-    override fun getDataClass(): Class<InputStream> {
-        return InputStream::class.java
-    }
+    override fun getDataClass(): Class<InputStream> = InputStream::class.java
 
-    override fun getDataSource(): DataSource {
-        return dataSource
-    }
+    override fun getDataSource(): DataSource = dataSource
 
-    override fun onFailure(call: Call, e: IOException) {
+    override fun onFailure(
+        call: Call,
+        e: IOException,
+    ) {
         callback?.onLoadFailed(e)
     }
 
-    override fun onResponse(call: Call, response: Response) {
+    override fun onResponse(
+        call: Call,
+        response: Response,
+    ) {
         responseBody = response.body
         if (!response.isSuccessful) {
             failUrl.add(url.toStringUrl())
@@ -123,11 +120,13 @@ class OkHttpStreamFetcher(
             callback?.onLoadFailed(NoStackTraceException("封面二次解密失败"))
         } else {
             val contentLength: Long =
-                if (inputStream is ByteArrayInputStream) inputStream.available().toLong()
-                else responseBody!!.contentLength()
+                if (inputStream is ByteArrayInputStream) {
+                    inputStream.available().toLong()
+                } else {
+                    responseBody!!.contentLength()
+                }
             stream = ContentLengthInputStream.obtain(inputStream, contentLength)
             callback?.onDataReady(stream)
         }
     }
-
 }

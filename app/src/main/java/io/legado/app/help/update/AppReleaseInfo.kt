@@ -13,15 +13,14 @@ data class AppReleaseInfo(
     val name: String,
     val downloadUrl: String,
     val assetUrl: String,
-    val versionName: String
+    val versionName: String,
 )
 
 enum class AppVariant {
     OFFICIAL,
     BETA_RELEASE,
     ALL,
-    UNKNOWN;
-
+    UNKNOWN,
 }
 
 @Keep
@@ -34,11 +33,9 @@ data class GithubRelease(
     val tagName: String,
     val name: String?,
     @SerializedName("created_at")
-    val createdAt: String?
+    val createdAt: String?,
 ) {
-    fun gitReleaseToAppReleaseInfo(
-        supportedAbis: List<String> = Build.SUPPORTED_ABIS.asList()
-    ): List<AppReleaseInfo> {
+    fun gitReleaseToAppReleaseInfo(supportedAbis: List<String> = Build.SUPPORTED_ABIS.asList()): List<AppReleaseInfo> {
         assets ?: throw NoStackTraceException("获取新版本出错")
 
         val version = tagName
@@ -47,24 +44,26 @@ data class GithubRelease(
     }
 }
 
-private val releaseAbis = listOf(
-    "arm64-v8a",
-    "armeabi-v7a",
-    "x86_64",
-    "armeabi",
-    "x86"
-)
+private val releaseAbis =
+    listOf(
+        "arm64-v8a",
+        "armeabi-v7a",
+        "x86_64",
+        "armeabi",
+        "x86",
+    )
 
 internal fun selectCompatibleAssets(
     assets: List<Asset>,
-    supportedAbis: List<String>
+    supportedAbis: List<String>,
 ): List<Asset> {
     val validAssets = assets.filter { it.isValid }
 
     supportedAbis.forEach { supportedAbi ->
-        val matchingAssets = validAssets.filter { asset ->
-            asset.releaseAbi.equals(supportedAbi, ignoreCase = true)
-        }
+        val matchingAssets =
+            validAssets.filter { asset ->
+                asset.releaseAbi.equals(supportedAbi, ignoreCase = true)
+            }
         if (matchingAssets.isNotEmpty()) return matchingAssets
     }
 
@@ -87,12 +86,16 @@ data class Asset(
     val id: Int,
     val name: String,
     val state: String,
-    val url: String
+    val url: String,
 ) {
     val isValid: Boolean
         get() = (contentType == "application/vnd.android.package-archive") && (state == "uploaded")
 
-    fun assetToAppReleaseInfo(preRelease: Boolean, note: String, version: String): AppReleaseInfo {
+    fun assetToAppReleaseInfo(
+        preRelease: Boolean,
+        note: String,
+        version: String,
+    ): AppReleaseInfo {
         val instant = Instant.parse(createdAt)
         val timestamp: Long = instant.toEpochMilli()
         val appVariant = if (preRelease) AppVariant.BETA_RELEASE else AppVariant.OFFICIAL
@@ -104,7 +107,7 @@ data class Asset(
             name = name,
             downloadUrl = apkUrl,
             assetUrl = url,
-            versionName = version
+            versionName = version,
         )
     }
 }

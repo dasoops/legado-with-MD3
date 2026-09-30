@@ -22,7 +22,7 @@ fun SmallPlainButton(
     selected: Boolean = false,
     icon: ImageVector? = null,
     text: String? = null,
-    contentDescription: String? = null
+    contentDescription: String? = null,
 ) {
     SeriesButton(
         onClick = onClick,
@@ -33,7 +33,7 @@ fun SmallPlainButton(
         size = if (text == null) smallContainerSize() else null,
         enforceMinimumInteractiveSize = false,
         shape = SmallButtonShape,
-        contentColor = LegadoTheme.colorScheme.onSurfaceVariant
+        contentColor = LegadoTheme.colorScheme.onSurfaceVariant,
     ) { contentColor ->
         SeriesButtonContent(
             icon = icon,
@@ -43,7 +43,7 @@ fun SmallPlainButton(
             textStyle = LegadoTheme.typography.labelMedium,
             contentColor = contentColor,
             padding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
-            spacing = 4.dp
+            spacing = 4.dp,
         )
     }
 }

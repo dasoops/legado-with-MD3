@@ -4,7 +4,6 @@ import android.graphics.Paint
 import io.legado.app.utils.objectpool.BaseSafeObjectPool
 
 object PaintPool : BaseSafeObjectPool<Paint>(8) {
-
     private val emptyPaint = Paint()
 
     override fun create(): Paint = Paint()
@@ -13,5 +12,4 @@ object PaintPool : BaseSafeObjectPool<Paint>(8) {
         target.set(emptyPaint)
         super.recycle(target)
     }
-
 }

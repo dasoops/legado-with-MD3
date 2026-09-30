@@ -9,8 +9,10 @@ import kotlinx.coroutines.withContext
 import splitties.init.appCtx
 
 class BackupRestoreRepository : BackupRestoreGateway {
-
-    override suspend fun backup(path: String?, mode: String) {
+    override suspend fun backup(
+        path: String?,
+        mode: String,
+    ) {
         withContext(IO) {
             Backup.backupLocked(appCtx, path, mode)
         }

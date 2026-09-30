@@ -44,16 +44,18 @@ fun BookInfoRouteScreen(
     val lifecycleOwner = LocalLifecycleOwner.current
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
-    val tocActivityResult = rememberLauncherForActivityResult(TocActivityResult()) {
-        viewModel.onTocResult(it)
-    }
-    val infoEditResult = rememberLauncherForActivityResult(
-        StartActivityContract(BookInfoEditActivity::class.java)
-    ) {
-        if (it.resultCode == Activity.RESULT_OK) {
-            viewModel.onInfoEdited()
+    val tocActivityResult =
+        rememberLauncherForActivityResult(TocActivityResult()) {
+            viewModel.onTocResult(it)
         }
-    }
+    val infoEditResult =
+        rememberLauncherForActivityResult(
+            StartActivityContract(BookInfoEditActivity::class.java),
+        ) {
+            if (it.resultCode == Activity.RESULT_OK) {
+                viewModel.onInfoEdited()
+            }
+        }
 
     LaunchedEffect(bookUrl, name, author, origin, coverPath, viewModel) {
         viewModel.initData(
@@ -61,17 +63,17 @@ fun BookInfoRouteScreen(
             name = name,
             author = author,
             origin = origin,
-            coverPath = coverPath
+            coverPath = coverPath,
         )
     }
 
-
     DisposableEffect(lifecycleOwner, viewModel) {
-        val observer = LifecycleEventObserver { _, event ->
-            if (event == Lifecycle.Event.ON_RESUME) {
-                viewModel.refreshShelfState()
+        val observer =
+            LifecycleEventObserver { _, event ->
+                if (event == Lifecycle.Event.ON_RESUME) {
+                    viewModel.refreshShelfState()
+                }
             }
-        }
         lifecycleOwner.lifecycle.addObserver(observer)
         onDispose {
             lifecycleOwner.lifecycle.removeObserver(observer)
@@ -81,17 +83,17 @@ fun BookInfoRouteScreen(
     LaunchedEffect(viewModel, activity) {
         viewModel.effects.collectLatest { effect ->
             when (effect) {
-                is BookInfoEffect.ShowMessage -> context.toastOnUi(effect.message)
+                is BookInfoEffect.ShowMessage -> {
+                    context.toastOnUi(effect.message)
+                }
                 is BookInfoEffect.Finish -> {
                     onFinish(effect.resultCode, effect.afterTransition)
                 }
-
                 is BookInfoEffect.OpenBookInfoEdit -> {
                     infoEditResult.launch {
                         putExtra("bookUrl", effect.bookUrl)
                     }
                 }
-
                 is BookInfoEffect.OpenReader -> {
                     onOpenReader(
                         effect.book.bookUrl,
@@ -99,18 +101,25 @@ fun BookInfoRouteScreen(
                         effect.chapterChanged,
                     )
                 }
-
-                is BookInfoEffect.OpenToc -> tocActivityResult.launch(effect.bookUrl)
-                is BookInfoEffect.OpenLocalBookExternally -> activity.openFileUri(effect.uri)
-                BookInfoEffect.ClearCache -> viewModel.clearCache()
+                is BookInfoEffect.OpenToc -> {
+                    tocActivityResult.launch(effect.bookUrl)
+                }
+                is BookInfoEffect.OpenLocalBookExternally -> {
+                    activity.openFileUri(effect.uri)
+                }
+                BookInfoEffect.ClearCache -> {
+                    viewModel.clearCache()
+                }
             }
         }
     }
 
     BookInfoScreen(
         state = uiState,
-        tags = viewModel.tagNames
-            .collectAsStateWithLifecycle(persistentListOf<String>()).value,
+        tags =
+        viewModel.tagNames
+            .collectAsStateWithLifecycle(persistentListOf<String>())
+            .value,
         onIntent = viewModel::onIntent,
         onBack = onBack,
         sharedTransitionScope = sharedTransitionScope,

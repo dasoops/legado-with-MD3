@@ -100,15 +100,17 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 import top.yukonga.miuix.kmp.basic.FloatingActionButton
+import top.yukonga.miuix.kmp.basic.NavigationRail as MiuixNavigationRail
 import top.yukonga.miuix.kmp.basic.NavigationRailDefaults
+import top.yukonga.miuix.kmp.basic.NavigationRailItem as MiuixNavigationRailItem
 import top.yukonga.miuix.kmp.basic.NavigationRailValue
 import top.yukonga.miuix.kmp.basic.rememberNavigationRailState
-import top.yukonga.miuix.kmp.basic.NavigationRail as MiuixNavigationRail
-import top.yukonga.miuix.kmp.basic.NavigationRailItem as MiuixNavigationRailItem
 
 @OptIn(
-    ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class,
-    ExperimentalFoundationApi::class, ExperimentalSharedTransitionApi::class
+    ExperimentalMaterial3Api::class,
+    ExperimentalMaterial3ExpressiveApi::class,
+    ExperimentalFoundationApi::class,
+    ExperimentalSharedTransitionApi::class,
 )
 @Composable
 fun MainScreen(
@@ -118,7 +120,14 @@ fun MainScreen(
     useRail: Boolean,
     onOpenSettings: () -> Unit,
     onOpenBookshelfBook: (BookShelfItem, String?) -> Unit,
-    onNavigateToBookInfo: (name: String, author: String, bookUrl: String, origin: String?, coverPath: String?, sharedCoverKey: String?) -> Unit,
+    onNavigateToBookInfo: (
+        name: String,
+        author: String,
+        bookUrl: String,
+        origin: String?,
+        coverPath: String?,
+        sharedCoverKey: String?,
+    ) -> Unit,
     onNavigateToBackupSettings: () -> Unit,
     onNavigateToReadRecord: () -> Unit,
     onNavigateToReadRecordOverview: () -> Unit,
@@ -134,54 +143,73 @@ fun MainScreen(
         effects.collectLatest { effect ->
             when (effect) {
                 is MainEffect.StartActivity -> {
-                    context.startActivity(Intent(context, effect.destination).apply {
-                        effect.configTag?.let { putExtra("configTag", it) }
-                    })
+                    context.startActivity(
+                        Intent(context, effect.destination).apply {
+                            effect.configTag?.let { putExtra("configTag", it) }
+                        },
+                    )
                 }
-
-                MainEffect.ExitApp -> (context as? ComponentActivity)?.finish()
-                MainEffect.NavigateToReadRecord -> onNavigateToReadRecord()
-                MainEffect.NavigateToHighlightTagRule -> onNavigateToHighlightTagRule()
-                MainEffect.NavigateToAbout -> onNavigateToAbout()
+                MainEffect.ExitApp -> {
+                    (context as? ComponentActivity)?.finish()
+                }
+                MainEffect.NavigateToReadRecord -> {
+                    onNavigateToReadRecord()
+                }
+                MainEffect.NavigateToHighlightTagRule -> {
+                    onNavigateToHighlightTagRule()
+                }
+                MainEffect.NavigateToAbout -> {
+                    onNavigateToAbout()
+                }
             }
         }
     }
 
     val hazeState = remember { HazeState() }
-    val customSecondaryColor = if (LegadoTheme.isDark) {
-        mainUiState.secondaryThemeColorNight.takeIf { it != 0 }
-            ?: mainUiState.secondaryThemeColor
-    } else {
-        mainUiState.secondaryThemeColor
-    }
-    val floatingBarSurfaceColor = if (mainUiState.deepPersonalizationActive && customSecondaryColor != 0) {
-        Color(customSecondaryColor)
-    } else {
-        LegadoTheme.colorScheme.surface
-    }
-    val floatingBarBackdrop = rememberLayerBackdrop {
-        drawRect(floatingBarSurfaceColor)
-        drawContent()
-    }
+    val customSecondaryColor =
+        if (LegadoTheme.isDark) {
+            mainUiState.secondaryThemeColorNight.takeIf { it != 0 }
+                ?: mainUiState.secondaryThemeColor
+        } else {
+            mainUiState.secondaryThemeColor
+        }
+    val floatingBarSurfaceColor =
+        if (mainUiState.deepPersonalizationActive && customSecondaryColor != 0) {
+            Color(customSecondaryColor)
+        } else {
+            LegadoTheme.colorScheme.surface
+        }
+    val floatingBarBackdrop =
+        rememberLayerBackdrop {
+            drawRect(floatingBarSurfaceColor)
+            drawContent()
+        }
     val destinations = mainUiState.destinations
 
-    val initialPage = remember(destinations, mainUiState.defaultHomePage) {
-        val index = destinations.indexOfFirst {
-            it.route == mainUiState.defaultHomePage
+    val initialPage =
+        remember(destinations, mainUiState.defaultHomePage) {
+            val index =
+                destinations.indexOfFirst {
+                    it.route == mainUiState.defaultHomePage
+                }
+            if (index != -1) index else 0
         }
-        if (index != -1) index else 0
-    }
     val pagerState = rememberPagerState(initialPage = initialPage) { destinations.size }
-    val pagerNestedScrollConnection = rememberPagerFlingPassThroughConnection(
-        state = pagerState,
-        orientation = Orientation.Horizontal,
-    )
+    val pagerNestedScrollConnection =
+        rememberPagerFlingPassThroughConnection(
+            state = pagerState,
+            orientation = Orientation.Horizontal,
+        )
     var bookshelfScrollToTopRequest by remember { mutableLongStateOf(0L) }
+
     fun requestBookshelfScrollToTop() {
         bookshelfScrollToTopRequest++
     }
 
-    fun handleMainDestinationClick(index: Int, destination: MainDestination) {
+    fun handleMainDestinationClick(
+        index: Int,
+        destination: MainDestination,
+    ) {
         if (
             destination == MainDestination.Bookshelf &&
             pagerState.currentPage == index &&
@@ -203,29 +231,35 @@ fun MainScreen(
     val isUnlabeled = labelVisibilityMode == "unlabeled"
     val useFloatingBottomBar =
         !useRail && mainUiState.showBottomView && mainUiState.useFloatingBottomBar
-    val useLiquidGlass = useFloatingBottomBar &&
+    val useLiquidGlass =
+        useFloatingBottomBar &&
             mainUiState.useFloatingBottomBarLiquidGlass &&
             Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
     val alwaysShowLabel = labelVisibilityMode == "labeled"
     val showLabel = !isUnlabeled
 
-    val navState = rememberWideNavigationRailState(
-        initialValue = if (mainUiState.navExtended)
-            WideNavigationRailValue.Expanded
-        else
-            WideNavigationRailValue.Collapsed
-    )
+    val navState =
+        rememberWideNavigationRailState(
+            initialValue =
+            if (mainUiState.navExtended) {
+                WideNavigationRailValue.Expanded
+            } else {
+                WideNavigationRailValue.Collapsed
+            },
+        )
 
     Row(modifier = Modifier.fillMaxSize()) {
         if (useRail && mainUiState.showBottomView) {
             if (ThemeResolver.isMiuixEngine(LegadoTheme.composeEngine)) {
-                val miuixNavState = rememberNavigationRailState(
-                    initialValue = if (mainUiState.navExtended) {
-                        NavigationRailValue.Expanded
-                    } else {
-                        NavigationRailValue.Collapsed
-                    }
-                )
+                val miuixNavState =
+                    rememberNavigationRailState(
+                        initialValue =
+                        if (mainUiState.navExtended) {
+                            NavigationRailValue.Expanded
+                        } else {
+                            NavigationRailValue.Collapsed
+                        },
+                    )
                 LaunchedEffect(miuixNavState.currentValue) {
                     onIntent(MainUiIntent.SetNavigationRailExpanded(miuixNavState.isExpanded))
                 }
@@ -239,11 +273,11 @@ fun MainScreen(
                         val destinationLabel = stringResource(destination.labelId)
                         Box {
                             MiuixNavigationRailItem(
-                                modifier = Modifier
+                                modifier =
+                                Modifier
                                     .semantics(mergeDescendants = true) {
                                         contentDescription = destinationLabel
-                                    }
-                                    .then(
+                                    }.then(
                                         if (destination == MainDestination.Bookshelf) {
                                             Modifier.combinedClickable(
                                                 interactionSource = remember { MutableInteractionSource() },
@@ -251,15 +285,17 @@ fun MainScreen(
                                                 onClick = {
                                                     handleMainDestinationClick(
                                                         index,
-                                                        destination
+                                                        destination,
                                                     )
                                                 },
                                                 onLongClick = {
                                                     haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                                                     showGroupMenu = true
-                                                }
+                                                },
                                             )
-                                        } else Modifier
+                                        } else {
+                                            Modifier
+                                        },
                                     ),
                                 selected = selected,
                                 onClick = { handleMainDestinationClick(index, destination) },
@@ -274,95 +310,109 @@ fun MainScreen(
                                         if (pagerState.currentPage != index) {
                                             pagerState.scrollToPage(index)
                                         }
-                                    }
+                                    },
                                 )
                             }
                         }
                     }
                 }
-            } else WideNavigationRail(
-                state = navState,
-                header = {
-                    val expanded = navState.targetValue == WideNavigationRailValue.Expanded
+            } else {
+                WideNavigationRail(
+                    state = navState,
+                    header = {
+                        val expanded = navState.targetValue == WideNavigationRailValue.Expanded
 
-                    Column {
-                        IconButton(
-                            modifier = Modifier.padding(start = 24.dp),
-                            onClick = {
-                                coroutineScope.launch {
-                                    val targetExpanded = !expanded
-                                    if (targetExpanded) navState.expand()
-                                    else navState.collapse()
-                                    onIntent(MainUiIntent.SetNavigationRailExpanded(targetExpanded))
-                                }
-                            }
-                        ) {
-                            Icon(
-                                if (expanded)
-                                    Icons.AutoMirrored.Filled.MenuOpen
-                                else
-                                    Icons.Default.Menu,
-                                contentDescription = stringResource(
-                                    if (expanded) R.string.collapse else R.string.expand
-                                )
-                            )
-                        }
-                    }
-                }
-            ) {
-                destinations.forEachIndexed { index, destination ->
-                    val selected = pagerState.targetPage == index
-                    var showGroupMenu by remember { mutableStateOf(false) }
-                    val haptic = LocalHapticFeedback.current
-                    val destinationLabel = stringResource(destination.labelId)
-
-                    WideNavigationRailItem(
-                        modifier = Modifier.semantics(mergeDescendants = true) {
-                            contentDescription = destinationLabel
-                        },
-                        railExpanded = navState.targetValue == WideNavigationRailValue.Expanded,
-                        selected = selected,
-                        onClick = {
-                            handleMainDestinationClick(index, destination)
-                        },
-                        icon = {
-                            Box {
-                                NavigationIcon(
-                                    destination = destination,
-                                    selected = selected,
-                                    customIconPath = mainUiState.customIconPath(destination),
-                                    modifier = if (destination == MainDestination.Bookshelf) {
-                                        Modifier.combinedClickable(
-                                            interactionSource = remember { MutableInteractionSource() },
-                                            indication = null,
-                                            onClick = {
-                                                handleMainDestinationClick(index, destination)
-                                            },
-                                            onLongClick = {
-                                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                                showGroupMenu = true
-                                            }
-                                        )
-                                    } else Modifier
-                                )
-
-                                if (destination == MainDestination.Bookshelf && showGroupMenu) {
-                                    BookshelfRailGroupMenuRoute(
-                                        expanded = showGroupMenu,
-                                        onDismissRequest = { showGroupMenu = false },
-                                        onBeforeSelectGroup = {
-                                            if (pagerState.currentPage != index) {
-                                                pagerState.scrollToPage(index)
-                                            }
+                        Column {
+                            IconButton(
+                                modifier = Modifier.padding(start = 24.dp),
+                                onClick = {
+                                    coroutineScope.launch {
+                                        val targetExpanded = !expanded
+                                        if (targetExpanded) {
+                                            navState.expand()
+                                        } else {
+                                            navState.collapse()
                                         }
-                                    )
-                                }
+                                        onIntent(MainUiIntent.SetNavigationRailExpanded(targetExpanded))
+                                    }
+                                },
+                            ) {
+                                Icon(
+                                    if (expanded) {
+                                        Icons.AutoMirrored.Filled.MenuOpen
+                                    } else {
+                                        Icons.Default.Menu
+                                    },
+                                    contentDescription =
+                                    stringResource(
+                                        if (expanded) R.string.collapse else R.string.expand,
+                                    ),
+                                )
                             }
-                        },
-                        label = if (labelVisibilityMode != "unlabeled") {
-                            { AppText(stringResource(destination.labelId)) }
-                        } else null
-                    )
+                        }
+                    },
+                ) {
+                    destinations.forEachIndexed { index, destination ->
+                        val selected = pagerState.targetPage == index
+                        var showGroupMenu by remember { mutableStateOf(false) }
+                        val haptic = LocalHapticFeedback.current
+                        val destinationLabel = stringResource(destination.labelId)
+
+                        WideNavigationRailItem(
+                            modifier =
+                            Modifier.semantics(mergeDescendants = true) {
+                                contentDescription = destinationLabel
+                            },
+                            railExpanded = navState.targetValue == WideNavigationRailValue.Expanded,
+                            selected = selected,
+                            onClick = {
+                                handleMainDestinationClick(index, destination)
+                            },
+                            icon = {
+                                Box {
+                                    NavigationIcon(
+                                        destination = destination,
+                                        selected = selected,
+                                        customIconPath = mainUiState.customIconPath(destination),
+                                        modifier =
+                                        if (destination == MainDestination.Bookshelf) {
+                                            Modifier.combinedClickable(
+                                                interactionSource = remember { MutableInteractionSource() },
+                                                indication = null,
+                                                onClick = {
+                                                    handleMainDestinationClick(index, destination)
+                                                },
+                                                onLongClick = {
+                                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                                    showGroupMenu = true
+                                                },
+                                            )
+                                        } else {
+                                            Modifier
+                                        },
+                                    )
+
+                                    if (destination == MainDestination.Bookshelf && showGroupMenu) {
+                                        BookshelfRailGroupMenuRoute(
+                                            expanded = showGroupMenu,
+                                            onDismissRequest = { showGroupMenu = false },
+                                            onBeforeSelectGroup = {
+                                                if (pagerState.currentPage != index) {
+                                                    pagerState.scrollToPage(index)
+                                                }
+                                            },
+                                        )
+                                    }
+                                }
+                            },
+                            label =
+                            if (labelVisibilityMode != "unlabeled") {
+                                { AppText(stringResource(destination.labelId)) }
+                            } else {
+                                null
+                            },
+                        )
+                    }
                 }
             }
         }
@@ -373,7 +423,7 @@ fun MainScreen(
                 if (!useRail && mainUiState.showBottomView && !useFloatingBottomBar) {
                     AppNavigationBar(
                         showLabel = showLabel,
-                        alwaysShowLabel = alwaysShowLabel
+                        alwaysShowLabel = alwaysShowLabel,
                     ) {
                         destinations.forEachIndexed { index, destination ->
                             val selected = pagerState.targetPage == index
@@ -382,7 +432,8 @@ fun MainScreen(
                                 mainUiState.selectedCustomIconPath(destination)
                             val destinationLabel = stringResource(destination.labelId)
                             AppNavigationBarItem(
-                                modifier = Modifier.semantics(mergeDescendants = true) {
+                                modifier =
+                                Modifier.semantics(mergeDescendants = true) {
                                     contentDescription = destinationLabel
                                 },
                                 selected = selected,
@@ -395,127 +446,142 @@ fun MainScreen(
                                     NavigationIcon(
                                         destination = destination,
                                         selected = selected,
-                                        customIconPath = if (selected) {
+                                        customIconPath =
+                                        if (selected) {
                                             selectedCustomIconPath.ifEmpty { customIconPath }
-                                        } else customIconPath,
+                                        } else {
+                                            customIconPath
+                                        },
                                     )
                                 },
-                                m3IndicatorColor = GlassDefaults.glassColor(
+                                m3IndicatorColor =
+                                GlassDefaults.glassColor(
                                     noBlurColor = LegadoTheme.colorScheme.secondaryContainer,
-                                    blurAlpha = GlassDefaults.ThickBlurAlpha
+                                    blurAlpha = GlassDefaults.ThickBlurAlpha,
                                 ),
                                 m3ShowLabel = showLabel,
                                 m3AlwaysShowLabel = alwaysShowLabel,
                                 useCustomIcon =
-                                    customIconPath.isNotEmpty() || selectedCustomIconPath.isNotEmpty(),
+                                customIconPath.isNotEmpty() || selectedCustomIconPath.isNotEmpty(),
                             )
                         }
                     }
                 }
             },
-            contentWindowInsets = WindowInsets(0)
+            contentWindowInsets = WindowInsets(0),
         ) { _ ->
             Box(
-                modifier = Modifier.fillMaxSize()
+                modifier = Modifier.fillMaxSize(),
             ) {
                 Box(
-                    modifier = Modifier.then(
+                    modifier =
+                    Modifier.then(
                         if (useLiquidGlass) {
                             Modifier
                                 .hazeSource(hazeState)
                                 .layerBackdrop(floatingBarBackdrop)
                         } else {
                             Modifier
-                        }
-                    )
+                        },
+                    ),
                 ) {
                     HorizontalPager(
                         state = pagerState,
                         pageNestedScrollConnection = pagerNestedScrollConnection,
-                        modifier = Modifier
+                        modifier =
+                        Modifier
                             .fillMaxSize()
                             .then(
                                 with(sharedTransitionScope) {
                                     if (this != null) Modifier.skipToLookaheadSize() else Modifier
-                                }
+                                },
                             ),
                         userScrollEnabled = true,
-                        beyondViewportPageCount = 4
+                        beyondViewportPageCount = 4,
                     ) { page ->
                         val destination = destinations.getOrNull(page) ?: return@HorizontalPager
-                        val pageLifecycleOwner = rememberMainPageLifecycleOwner(
-                            isActive = page == pagerState.currentPage
-                        )
+                        val pageLifecycleOwner =
+                            rememberMainPageLifecycleOwner(
+                                isActive = page == pagerState.currentPage,
+                            )
                         CompositionLocalProvider(LocalLifecycleOwner provides pageLifecycleOwner) {
                             when (destination) {
-                            MainDestination.Home -> HomeRouteScreen(
-                                onOpenBook = { book ->
-                                    context.startActivityForBook(book)
-                                },
-                                onOpenBackupSettings = onNavigateToBackupSettings,
-                                onNavigateToReadRecord = onNavigateToReadRecord,
-                                onNavigateToReadRecordOverview = onNavigateToReadRecordOverview,
-                                sharedTransitionScope = sharedTransitionScope,
-                                animatedVisibilityScope = animatedVisibilityScope,
-                            )
-
-                            MainDestination.Bookshelf -> BookshelfRouteScreen(
-                                scrollToTopRequest = bookshelfScrollToTopRequest,
-                                onScrollToTopRequestHandled = { handledRequest ->
-                                    if (bookshelfScrollToTopRequest == handledRequest) {
-                                        bookshelfScrollToTopRequest = 0L
-                                    }
-                                },
-                                onBookClick = { book, sharedCoverKey ->
-                                    onOpenBookshelfBook(book, sharedCoverKey)
-                                },
-                                onBookLongClick = { book, sharedCoverKey ->
-                                    onNavigateToBookInfo(
-                                        book.name,
-                                        book.author,
-                                        book.bookUrl,
-                                        book.origin,
-                                        book.getDisplayCover(),
-                                        sharedCoverKey
+                                MainDestination.Home -> {
+                                    HomeRouteScreen(
+                                        onOpenBook = { book ->
+                                            context.startActivityForBook(book)
+                                        },
+                                        onOpenBackupSettings = onNavigateToBackupSettings,
+                                        onNavigateToReadRecord = onNavigateToReadRecord,
+                                        onNavigateToReadRecordOverview = onNavigateToReadRecordOverview,
+                                        sharedTransitionScope = sharedTransitionScope,
+                                        animatedVisibilityScope = animatedVisibilityScope,
                                     )
-                                },
-                                sharedTransitionScope = sharedTransitionScope,
-                                animatedVisibilityScope = animatedVisibilityScope,
-                            )
-
-                            MainDestination.My -> MyRouteScreen(
-                                onOpenSettings = onOpenSettings,
-                                onNavigate = { event ->
-                                    when (event) {
-                                        PrefClickEvent.OpenReadRecord -> onNavigateToReadRecord()
-                                        else -> onIntent(MainUiIntent.HandlePreferenceClick(event))
-                                    }
                                 }
-                            )
-                        }
+                                MainDestination.Bookshelf -> {
+                                    BookshelfRouteScreen(
+                                        scrollToTopRequest = bookshelfScrollToTopRequest,
+                                        onScrollToTopRequestHandled = { handledRequest ->
+                                            if (bookshelfScrollToTopRequest == handledRequest) {
+                                                bookshelfScrollToTopRequest = 0L
+                                            }
+                                        },
+                                        onBookClick = { book, sharedCoverKey ->
+                                            onOpenBookshelfBook(book, sharedCoverKey)
+                                        },
+                                        onBookLongClick = { book, sharedCoverKey ->
+                                            onNavigateToBookInfo(
+                                                book.name,
+                                                book.author,
+                                                book.bookUrl,
+                                                book.origin,
+                                                book.getDisplayCover(),
+                                                sharedCoverKey,
+                                            )
+                                        },
+                                        sharedTransitionScope = sharedTransitionScope,
+                                        animatedVisibilityScope = animatedVisibilityScope,
+                                    )
+                                }
+                                MainDestination.My -> {
+                                    MyRouteScreen(
+                                        onOpenSettings = onOpenSettings,
+                                        onNavigate = { event ->
+                                            when (event) {
+                                                PrefClickEvent.OpenReadRecord -> onNavigateToReadRecord()
+                                                else -> onIntent(MainUiIntent.HandlePreferenceClick(event))
+                                            }
+                                        },
+                                    )
+                                }
+                            }
                         }
                     }
                 }
 
                 if (!useRail && mainUiState.showBottomView && useFloatingBottomBar) {
-                    Box(modifier = Modifier
-                        .align(Alignment.BottomCenter)
-                        .fillMaxWidth()
+                    Box(
+                        modifier =
+                        Modifier
+                            .align(Alignment.BottomCenter)
+                            .fillMaxWidth(),
                     ) {
                         FloatingBottomBar(
-                            modifier = Modifier
+                            modifier =
+                            Modifier
                                 .align(Alignment.BottomCenter)
                                 .clickable(
                                     interactionSource = remember { MutableInteractionSource() },
                                     indication = null,
-                                    onClick = {}
-                                )
-                                .padding(
+                                    onClick = {},
+                                ).padding(
                                     start = 16.dp,
                                     end = 16.dp,
-                                    bottom = 12.dp + WindowInsets.navigationBars
-                                        .asPaddingValues()
-                                        .calculateBottomPadding()
+                                    bottom =
+                                    12.dp +
+                                        WindowInsets.navigationBars
+                                            .asPaddingValues()
+                                            .calculateBottomPadding(),
                                 ),
                             selectedIndex = { pagerState.targetPage },
                             onSelected = { index ->
@@ -531,10 +597,11 @@ fun MainScreen(
                             backdrop = floatingBarBackdrop,
                             tabsCount = destinations.size,
                             isBlurEnabled = useLiquidGlass,
-                            hasCustomIcons = destinations.any { dest ->
+                            hasCustomIcons =
+                            destinations.any { dest ->
                                 mainUiState.customIconPath(dest).isNotEmpty() ||
-                                        mainUiState.selectedCustomIconPath(dest).isNotEmpty()
-                            }
+                                    mainUiState.selectedCustomIconPath(dest).isNotEmpty()
+                            },
                         ) {
                             destinations.forEachIndexed { index, destination ->
                                 val selected = pagerState.targetPage == index
@@ -546,25 +613,29 @@ fun MainScreen(
                                     onClick = {
                                         handleMainDestinationClick(index, destination)
                                     },
-                                    modifier = Modifier
+                                    modifier =
+                                    Modifier
                                         .defaultMinSize(minWidth = 76.dp)
                                         .semantics(mergeDescendants = true) {
                                             contentDescription = destinationLabel
-                                        }
+                                        },
                                 ) {
                                     NavigationIcon(
                                         destination = destination,
-                                        customIconPath = if (selected) {
+                                        customIconPath =
+                                        if (selected) {
                                             selectedCustomIconPath.ifEmpty { customIconPath }
-                                        } else customIconPath,
-                                        selected = selected
+                                        } else {
+                                            customIconPath
+                                        },
+                                        selected = selected,
                                     )
                                     if (showLabel && (alwaysShowLabel || selected)) {
                                         AppText(
                                             text = stringResource(destination.labelId),
                                             style = MaterialTheme.typography.labelSmall,
                                             maxLines = 1,
-                                            overflow = TextOverflow.Ellipsis
+                                            overflow = TextOverflow.Ellipsis,
                                         )
                                     }
                                 }
@@ -584,9 +655,10 @@ private fun rememberMainPageLifecycleOwner(isActive: Boolean): LifecycleOwner {
     val owner = remember(parentLifecycle) { MainPageLifecycleOwner() }
 
     DisposableEffect(parentLifecycle) {
-        val observer = LifecycleEventObserver { _, _ ->
-            owner.update(parentLifecycle.currentState, currentActive)
-        }
+        val observer =
+            LifecycleEventObserver { _, _ ->
+                owner.update(parentLifecycle.currentState, currentActive)
+            }
         parentLifecycle.addObserver(observer)
         owner.update(parentLifecycle.currentState, currentActive)
         onDispose {
@@ -603,19 +675,22 @@ private fun rememberMainPageLifecycleOwner(isActive: Boolean): LifecycleOwner {
 }
 
 private class MainPageLifecycleOwner : LifecycleOwner {
-
     private val registry = LifecycleRegistry(this)
 
     override val lifecycle: Lifecycle = registry
 
-    fun update(parentState: Lifecycle.State, isActive: Boolean) {
-        registry.currentState = when {
-            parentState == Lifecycle.State.DESTROYED -> Lifecycle.State.DESTROYED
-            parentState == Lifecycle.State.INITIALIZED -> Lifecycle.State.INITIALIZED
-            parentState == Lifecycle.State.CREATED -> Lifecycle.State.CREATED
-            isActive -> parentState
-            else -> Lifecycle.State.STARTED
-        }
+    fun update(
+        parentState: Lifecycle.State,
+        isActive: Boolean,
+    ) {
+        registry.currentState =
+            when {
+                parentState == Lifecycle.State.DESTROYED -> Lifecycle.State.DESTROYED
+                parentState == Lifecycle.State.INITIALIZED -> Lifecycle.State.INITIALIZED
+                parentState == Lifecycle.State.CREATED -> Lifecycle.State.CREATED
+                isActive -> parentState
+                else -> Lifecycle.State.STARTED
+            }
     }
 
     fun destroy() {
@@ -628,7 +703,7 @@ private fun BookshelfRailGroupMenuRoute(
     expanded: Boolean,
     onDismissRequest: () -> Unit,
     onBeforeSelectGroup: suspend () -> Unit,
-    viewModel: BookshelfViewModel = koinViewModel()
+    viewModel: BookshelfViewModel = koinViewModel(),
 ) {
     val groupState by viewModel.groupSelectorState.collectAsStateWithLifecycle()
     BookshelfRailGroupMenu(
@@ -638,7 +713,8 @@ private fun BookshelfRailGroupMenuRoute(
         onSelectGroup = { groupId ->
             onBeforeSelectGroup()
             viewModel.onIntent(
-                io.legado.app.ui.main.bookshelf.BookshelfIntent.ChangeGroup(groupId)
+                io.legado.app.ui.main.bookshelf.BookshelfIntent
+                    .ChangeGroup(groupId),
             )
         },
     )
@@ -655,7 +731,7 @@ private fun BookshelfRailGroupMenu(
 
     RoundDropdownMenu(
         expanded = expanded,
-        onDismissRequest = onDismissRequest
+        onDismissRequest = onDismissRequest,
     ) { dismiss ->
         state.groups.forEachIndexed { groupIndex, group ->
             RoundDropdownMenuItem(
@@ -671,10 +747,10 @@ private fun BookshelfRailGroupMenu(
                         Icon(
                             Icons.Default.Check,
                             null,
-                            modifier = Modifier.size(18.dp)
+                            modifier = Modifier.size(18.dp),
                         )
                     }
-                }
+                },
             )
         }
     }
@@ -685,13 +761,13 @@ private fun NavigationIcon(
     destination: MainDestination,
     selected: Boolean,
     customIconPath: String,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     if (customIconPath.isNotEmpty()) {
         AsyncImage(
             model = customIconPath,
             contentDescription = null,
-            modifier = modifier.size(40.dp)
+            modifier = modifier.size(40.dp),
         )
     } else {
         val icon = AppIcons.mainDestination(destination, selected)

@@ -5,7 +5,6 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class BackupConfigSecurityTest {
-
     @Test
     fun `local password and migration marker are never exported`() {
         assertTrue(LocalPreferencesKeys.PASSWORD.name in alwaysIgnoredPreferenceKeys)

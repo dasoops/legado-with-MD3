@@ -87,9 +87,8 @@ fun TextActionSelectionMenu(
     onDismiss: () -> Unit,
     onItemClick: (ActionMenuItem) -> Unit,
     onOpenQuickMarking: () -> Boolean,
-    onOpenManage: () -> Unit
+    onOpenManage: () -> Unit,
 ) {
-
     var retainedMenuState by remember { mutableStateOf(menuState) }
     SideEffect {
         if (menuState != null) retainedMenuState = menuState
@@ -129,17 +128,18 @@ fun TextActionSelectionMenu(
 
     val density = localDensity.density
     val shadowPaddingPx = with(localDensity) { menuShadowPadding.roundToPx() }
-    val positionProvider = remember(displayedMenuState, density, shadowPaddingPx) {
-        TextMenuPositionProvider(
-            density = density,
-            startX = displayedMenuState.startX,
-            startTopY = displayedMenuState.startTopY,
-            startBottomY = displayedMenuState.startBottomY,
-            endX = displayedMenuState.endX,
-            endBottomY = displayedMenuState.endBottomY,
-            shadowPadding = shadowPaddingPx,
-        )
-    }
+    val positionProvider =
+        remember(displayedMenuState, density, shadowPaddingPx) {
+            TextMenuPositionProvider(
+                density = density,
+                startX = displayedMenuState.startX,
+                startTopY = displayedMenuState.startTopY,
+                startBottomY = displayedMenuState.startBottomY,
+                endX = displayedMenuState.endX,
+                endBottomY = displayedMenuState.endBottomY,
+                shadowPadding = shadowPaddingPx,
+            )
+        }
 
     Popup(
         popupPositionProvider = positionProvider,
@@ -147,14 +147,14 @@ fun TextActionSelectionMenu(
             showMoreMenu = false
             onDismiss()
         },
-        properties = PopupProperties(
+        properties =
+        PopupProperties(
             focusable = false,
             dismissOnBackPress = !showMoreMenu,
             dismissOnClickOutside = !showMoreMenu,
-        )
+        ),
     ) {
         ProvideAppDensity {
-
             AnimatedVisibility(
                 visibleState = visibilityState,
                 enter = SelectionMenuMotion.enter(),
@@ -176,7 +176,7 @@ fun TextActionSelectionMenu(
                                     onManageClick = {
                                         onDismiss()
                                         onOpenManage()
-                                    }
+                                    },
                                 )
                             }
                         }
@@ -185,23 +185,23 @@ fun TextActionSelectionMenu(
                     val quickMenuScale by animateFloatAsState(
                         targetValue = if (showMoreMenu) 0.96f else 1f,
                         animationSpec = tween(durationMillis = 400),
-                        label = "quickMenuScale"
+                        label = "quickMenuScale",
                     )
                     val quickMenuAlpha by animateFloatAsState(
                         targetValue = if (showMoreMenu) 0.82f else 1f,
                         animationSpec = tween(durationMillis = 360),
-                        label = "quickMenuAlpha"
+                        label = "quickMenuAlpha",
                     )
 
                     Box(
-                        modifier = Modifier
+                        modifier =
+                        Modifier
                             .graphicsLayer {
                                 scaleX = quickMenuScale
                                 scaleY = quickMenuScale
                                 alpha = quickMenuAlpha
                                 transformOrigin = TransformOrigin(1f, 0.5f)
-                            }
-                            .padding(menuShadowPadding),
+                            }.padding(menuShadowPadding),
                     ) {
                         Column(modifier = Modifier.width(menuCardWidth)) {
                             NormalCard(
@@ -220,7 +220,7 @@ fun TextActionSelectionMenu(
                                     onSettingsClick = {
                                         onDismiss()
                                         onOpenManage()
-                                    }
+                                    },
                                 )
                             }
                         }
@@ -231,43 +231,50 @@ fun TextActionSelectionMenu(
     }
 
     val anchor = moreMenuAnchor
-    if (!expandTextMenu && anchor != null &&
+    if (!expandTextMenu &&
+        anchor != null &&
         (moreVisibilityState.currentState || moreVisibilityState.targetState)
     ) {
-        val morePositionProvider = remember(anchor, density, windowLocation[0], windowLocation[1]) {
-            MoreMenuPositionProvider(
-                density = density,
-                anchorOnScreen = anchor,
-                windowXOnScreen = windowLocation[0],
-                windowYOnScreen = windowLocation[1],
-                shadowPadding = shadowPaddingPx,
-            )
-        }
+        val morePositionProvider =
+            remember(anchor, density, windowLocation[0], windowLocation[1]) {
+                MoreMenuPositionProvider(
+                    density = density,
+                    anchorOnScreen = anchor,
+                    windowXOnScreen = windowLocation[0],
+                    windowYOnScreen = windowLocation[1],
+                    shadowPadding = shadowPaddingPx,
+                )
+            }
         Popup(
             popupPositionProvider = morePositionProvider,
             onDismissRequest = {
                 showMoreMenu = false
                 onDismiss()
             },
-            properties = PopupProperties(
+            properties =
+            PopupProperties(
                 focusable = false,
                 dismissOnBackPress = true,
                 dismissOnClickOutside = true,
-            )
+            ),
         ) {
             ProvideAppDensity {
                 AnimatedVisibility(
                     visibleState = moreVisibilityState,
-                    enter = fadeIn(animationSpec = tween(360)) + scaleIn(
-                        initialScale = 0.94f,
-                        transformOrigin = TransformOrigin(1f, 0.5f),
-                        animationSpec = tween(400),
-                    ),
-                    exit = fadeOut(animationSpec = tween(240)) + scaleOut(
-                        targetScale = 0.96f,
-                        transformOrigin = TransformOrigin(1f, 0.5f),
-                        animationSpec = tween(280),
-                    ),
+                    enter =
+                    fadeIn(animationSpec = tween(360)) +
+                        scaleIn(
+                            initialScale = 0.94f,
+                            transformOrigin = TransformOrigin(1f, 0.5f),
+                            animationSpec = tween(400),
+                        ),
+                    exit =
+                    fadeOut(animationSpec = tween(240)) +
+                        scaleOut(
+                            targetScale = 0.96f,
+                            transformOrigin = TransformOrigin(1f, 0.5f),
+                            animationSpec = tween(280),
+                        ),
                 ) {
                     Box(
                         modifier = Modifier.padding(menuShadowPadding),
@@ -286,7 +293,7 @@ fun TextActionSelectionMenu(
                                 onManageClick = {
                                     onDismiss()
                                     onOpenManage()
-                                }
+                                },
                             )
                         }
                     }
@@ -301,14 +308,15 @@ private fun MultiLineMenuView(
     items: List<ActionMenuItem>,
     showIcons: Boolean,
     onItemClick: (ActionMenuItem) -> Unit,
-    onManageClick: () -> Unit
+    onManageClick: () -> Unit,
 ) {
     FlowRow(
-        modifier = Modifier
+        modifier =
+        Modifier
             .heightIn(max = 300.dp)
             .verticalScroll(rememberScrollState()),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
-        verticalArrangement = Arrangement.spacedBy(0.dp)
+        verticalArrangement = Arrangement.spacedBy(0.dp),
     ) {
         items.forEach { item ->
             QuickMenuItem(
@@ -320,21 +328,22 @@ private fun MultiLineMenuView(
         }
 
         Row(
-            modifier = Modifier
+            modifier =
+            Modifier
                 .clickable(onClick = onManageClick)
                 .padding(horizontal = 16.dp, vertical = 12.dp),
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             Icon(
                 imageVector = Icons.Default.Settings,
                 contentDescription = stringResource(R.string.edit_menu_items),
                 tint = LegadoTheme.colorScheme.onSurface,
-                modifier = Modifier.size(16.dp)
+                modifier = Modifier.size(16.dp),
             )
             Spacer(modifier = Modifier.width(6.dp))
             AppText(
                 text = stringResource(R.string.edit_menu_items),
-                style = LegadoTheme.typography.labelSmallEmphasized
+                style = LegadoTheme.typography.labelSmallEmphasized,
             )
         }
     }
@@ -348,11 +357,11 @@ private fun QuickMenuView(
     onItemClick: (ActionMenuItem) -> Unit,
     onMoreClick: () -> Unit,
     onMoreAnchorChanged: (IntRect) -> Unit,
-    onSettingsClick: () -> Unit
+    onSettingsClick: () -> Unit,
 ) {
     Row(
         modifier = Modifier.wrapContentWidth(),
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = Alignment.CenterVertically,
     ) {
         LazyRow(
             modifier = Modifier.weight(1f, fill = false),
@@ -374,13 +383,15 @@ private fun QuickMenuView(
         if (items.isNotEmpty()) {
             VerticalDivider(
                 color = LegadoTheme.colorScheme.outlineVariant.copy(alpha = 0.4f),
-                modifier = Modifier
+                modifier =
+                Modifier
                     .height(20.dp)
-                    .width(1.dp)
+                    .width(1.dp),
             )
         }
         Box(
-            modifier = Modifier
+            modifier =
+            Modifier
                 .onGloballyPositioned { coordinates ->
                     val position = coordinates.positionOnScreen()
                     onMoreAnchorChanged(
@@ -389,18 +400,17 @@ private fun QuickMenuView(
                             top = position.y.roundToInt(),
                             right = position.x.roundToInt() + coordinates.size.width,
                             bottom = position.y.roundToInt() + coordinates.size.height,
-                        )
+                        ),
                     )
-                }
-                .clickable(onClick = if (hasMore) onMoreClick else onSettingsClick)
+                }.clickable(onClick = if (hasMore) onMoreClick else onSettingsClick)
                 .padding(start = 12.dp, end = 16.dp, top = 12.dp, bottom = 12.dp),
-            contentAlignment = Alignment.Center
+            contentAlignment = Alignment.Center,
         ) {
             Icon(
                 imageVector = if (hasMore) Icons.Default.MoreVert else Icons.Default.Settings,
                 contentDescription = stringResource(if (hasMore) R.string.more_menu else R.string.setting),
                 tint = LegadoTheme.colorScheme.onSurface,
-                modifier = Modifier.size(16.dp)
+                modifier = Modifier.size(16.dp),
             )
         }
     }
@@ -416,7 +426,8 @@ private fun QuickMenuItem(
     verticalPadding: androidx.compose.ui.unit.Dp = 12.dp,
 ) {
     Column(
-        modifier = Modifier
+        modifier =
+        Modifier
             .clickable(onClick = onClick)
             .padding(
                 start = startPadding,
@@ -440,8 +451,9 @@ private fun QuickMenuItem(
             AsyncImage(
                 model = item.iconDrawable,
                 contentDescription = item.title,
-                modifier = Modifier
-                    .size(16.dp)
+                modifier =
+                Modifier
+                    .size(16.dp),
             )
 
             Spacer(modifier = Modifier.height(3.dp))
@@ -449,7 +461,7 @@ private fun QuickMenuItem(
         AppText(
             text = item.title,
             style = LegadoTheme.typography.labelMedium,
-            maxLines = 1
+            maxLines = 1,
         )
     }
 }
@@ -460,42 +472,46 @@ private fun MoreMenuView(
     showIcons: Boolean,
     onItemClick: (ActionMenuItem) -> Unit,
     onBack: () -> Unit,
-    onManageClick: () -> Unit
+    onManageClick: () -> Unit,
 ) {
     val scrollState = rememberScrollState()
 
     Column(
-        modifier = Modifier
-            .width(IntrinsicSize.Max)
+        modifier =
+        Modifier
+            .width(IntrinsicSize.Max),
     ) {
         Box(
-            modifier = Modifier
+            modifier =
+            Modifier
                 .fillMaxWidth()
                 .clickable(onClick = onBack)
                 .padding(start = 16.dp, end = 16.dp, top = 12.dp, bottom = 8.dp),
-            contentAlignment = Alignment.CenterStart
+            contentAlignment = Alignment.CenterStart,
         ) {
             Icon(
                 imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                 contentDescription = stringResource(R.string.back),
                 tint = LegadoTheme.colorScheme.onSurface,
-                modifier = Modifier.size(20.dp)
+                modifier = Modifier.size(20.dp),
             )
         }
 
         HorizontalDivider(
             color = LegadoTheme.colorScheme.outlineVariant.copy(alpha = 0.4f),
-            modifier = Modifier
+            modifier =
+            Modifier
                 .height(1.dp)
                 .fillMaxWidth(0.8f)
-                .align(Alignment.CenterHorizontally)
+                .align(Alignment.CenterHorizontally),
         )
 
         Column(
-            modifier = Modifier
+            modifier =
+            Modifier
                 .heightIn(max = 240.dp)
                 .verticalScroll(scrollState)
-                .fillMaxWidth()
+                .fillMaxWidth(),
         ) {
             items.forEach { item ->
                 MoreMenuItem(item = item, showIcon = showIcons, onClick = { onItemClick(item) })
@@ -504,30 +520,33 @@ private fun MoreMenuView(
 
         HorizontalDivider(
             color = LegadoTheme.colorScheme.outlineVariant.copy(alpha = 0.4f),
-            modifier = Modifier
+            modifier =
+            Modifier
                 .height(1.dp)
                 .fillMaxWidth(0.8f)
-                .align(Alignment.CenterHorizontally)
+                .align(Alignment.CenterHorizontally),
         )
 
         Row(
-            modifier = Modifier
+            modifier =
+            Modifier
                 .fillMaxWidth()
                 .clickable(onClick = onManageClick)
                 .padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 12.dp),
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             Icon(
                 imageVector = Icons.Default.Settings,
                 contentDescription = stringResource(R.string.edit_menu_items),
                 tint = LegadoTheme.colorScheme.onSurface,
-                modifier = Modifier
-                    .size(20.dp)
+                modifier =
+                Modifier
+                    .size(20.dp),
             )
             Spacer(modifier = Modifier.width(12.dp))
             AppText(
                 text = stringResource(R.string.edit_menu_items),
-                style = LegadoTheme.typography.labelMedium
+                style = LegadoTheme.typography.labelMedium,
             )
         }
     }
@@ -537,14 +556,15 @@ private fun MoreMenuView(
 private fun MoreMenuItem(
     item: ActionMenuItem,
     showIcon: Boolean,
-    onClick: () -> Unit
+    onClick: () -> Unit,
 ) {
     Row(
-        modifier = Modifier
+        modifier =
+        Modifier
             .fillMaxWidth()
             .clickable(onClick = onClick)
             .padding(horizontal = 16.dp, vertical = 12.dp),
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = Alignment.CenterVertically,
     ) {
         val builtInIcon = if (showIcon) item.builtInIcon() else null
         if (builtInIcon != null) {
@@ -559,14 +579,15 @@ private fun MoreMenuItem(
             AsyncImage(
                 model = item.iconDrawable,
                 contentDescription = item.title,
-                modifier = Modifier
-                    .size(20.dp)
+                modifier =
+                Modifier
+                    .size(20.dp),
             )
             Spacer(modifier = Modifier.width(12.dp))
         }
         AppText(
             text = item.title,
-            style = LegadoTheme.typography.labelMedium
+            style = LegadoTheme.typography.labelMedium,
         )
     }
 }
@@ -584,7 +605,6 @@ private fun ActionMenuItem.builtInIcon(): ImageVector? = when (id) {
     else -> null
 }
 
-
 private class MoreMenuPositionProvider(
     private val density: Float,
     private val anchorOnScreen: IntRect,
@@ -599,33 +619,37 @@ private class MoreMenuPositionProvider(
         popupContentSize: IntSize,
     ): IntOffset {
         val margin = (16 * density).roundToInt()
-        val anchor = IntRect(
-            left = anchorOnScreen.left - windowXOnScreen,
-            top = anchorOnScreen.top - windowYOnScreen,
-            right = anchorOnScreen.right - windowXOnScreen,
-            bottom = anchorOnScreen.bottom - windowYOnScreen,
-        )
-        val x = (anchor.right - popupContentSize.width + shadowPadding).coerceIn(
-            margin - shadowPadding,
-            (windowSize.width - popupContentSize.width - margin + shadowPadding)
-                .coerceAtLeast(margin - shadowPadding),
-        )
+        val anchor =
+            IntRect(
+                left = anchorOnScreen.left - windowXOnScreen,
+                top = anchorOnScreen.top - windowYOnScreen,
+                right = anchorOnScreen.right - windowXOnScreen,
+                bottom = anchorOnScreen.bottom - windowYOnScreen,
+            )
+        val x =
+            (anchor.right - popupContentSize.width + shadowPadding).coerceIn(
+                margin - shadowPadding,
+                (windowSize.width - popupContentSize.width - margin + shadowPadding)
+                    .coerceAtLeast(margin - shadowPadding),
+            )
         val spaceBelow = windowSize.height - anchor.top - margin + shadowPadding
         val spaceAbove = anchor.bottom - margin + shadowPadding
-        val preferredY = if (
-            popupContentSize.height <= spaceBelow || spaceBelow >= spaceAbove
-        ) {
-            // The first row covers the three-dot button and the menu expands downward.
-            anchor.top - shadowPadding
-        } else {
-            // Near the bottom edge, expand upward with the last row over the button.
-            anchor.bottom - popupContentSize.height + shadowPadding
-        }
-        val y = preferredY.coerceIn(
-            margin - shadowPadding,
-            (windowSize.height - popupContentSize.height - margin + shadowPadding)
-                .coerceAtLeast(margin - shadowPadding),
-        )
+        val preferredY =
+            if (
+                popupContentSize.height <= spaceBelow || spaceBelow >= spaceAbove
+            ) {
+                // The first row covers the three-dot button and the menu expands downward.
+                anchor.top - shadowPadding
+            } else {
+                // Near the bottom edge, expand upward with the last row over the button.
+                anchor.bottom - popupContentSize.height + shadowPadding
+            }
+        val y =
+            preferredY.coerceIn(
+                margin - shadowPadding,
+                (windowSize.height - popupContentSize.height - margin + shadowPadding)
+                    .coerceAtLeast(margin - shadowPadding),
+            )
         return IntOffset(x, y)
     }
 }
@@ -644,7 +668,7 @@ internal class TextMenuPositionProvider(
         anchorBounds: IntRect,
         windowSize: IntSize,
         layoutDirection: LayoutDirection,
-        popupContentSize: IntSize
+        popupContentSize: IntSize,
     ): IntOffset {
         val x: Int
         val y: Int
@@ -660,17 +684,19 @@ internal class TextMenuPositionProvider(
         // 仅阅读区域最顶部 10% 的选区优先在下方展开；其余位置遵循原本“有上方空间
         // 就放上方”的策略，避免菜单在普通位置不必要地遮挡后文。
         val preferBelowForTopSelection = startTopY < windowSize.height / 10
-        val isSpaceEnoughBelowSelection = windowSize.height - endBottomY >
+        val isSpaceEnoughBelowSelection =
+            windowSize.height - endBottomY >
                 cardHeight + textMargin + cursorHandleClearance + marginVertical
 
         if (placeOppositeHalf) {
             x = startX - shadowPadding
             val selectionCenterY = (startTopY + endBottomY) / 2
-            y = if (selectionCenterY < windowSize.height / 2) {
-                endBottomY + cursorHandleClearance + textMargin - shadowPadding
-            } else {
-                startTopY - popupContentSize.height + shadowPadding - textMargin
-            }
+            y =
+                if (selectionCenterY < windowSize.height / 2) {
+                    endBottomY + cursorHandleClearance + textMargin - shadowPadding
+                } else {
+                    startTopY - popupContentSize.height + shadowPadding - textMargin
+                }
         } else if (!preferBelowForTopSelection && isSpaceEnoughAtTop) {
             x = startX - shadowPadding
             y = startTopY - popupContentSize.height + shadowPadding - textMargin
@@ -688,16 +714,18 @@ internal class TextMenuPositionProvider(
 
         val minX = marginHorizontal - shadowPadding
         val minY = marginVertical - shadowPadding
-        val finalX = x.coerceIn(
-            minX,
-            (windowSize.width - popupContentSize.width - marginHorizontal + shadowPadding)
-                .coerceAtLeast(minX),
-        )
-        val finalY = y.coerceIn(
-            minY,
-            (windowSize.height - popupContentSize.height - marginVertical + shadowPadding)
-                .coerceAtLeast(minY),
-        )
+        val finalX =
+            x.coerceIn(
+                minX,
+                (windowSize.width - popupContentSize.width - marginHorizontal + shadowPadding)
+                    .coerceAtLeast(minX),
+            )
+        val finalY =
+            y.coerceIn(
+                minY,
+                (windowSize.height - popupContentSize.height - marginVertical + shadowPadding)
+                    .coerceAtLeast(minY),
+            )
 
         return IntOffset(finalX, finalY)
     }

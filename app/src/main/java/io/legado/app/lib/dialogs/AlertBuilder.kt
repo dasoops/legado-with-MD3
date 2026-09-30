@@ -26,7 +26,9 @@ interface AlertBuilder<out D : DialogInterface> {
 
     fun setIcon(icon: Drawable)
 
-    fun setIcon(@DrawableRes iconResource: Int)
+    fun setIcon(
+        @DrawableRes iconResource: Int,
+    )
 
     fun setCustomTitle(customTitle: View)
 
@@ -34,22 +36,34 @@ interface AlertBuilder<out D : DialogInterface> {
 
     fun setCancelable(isCancelable: Boolean)
 
-    fun positiveButton(buttonText: String, onClicked: ((dialog: DialogInterface) -> Unit)? = null)
+    fun positiveButton(
+        buttonText: String,
+        onClicked: ((dialog: DialogInterface) -> Unit)? = null,
+    )
+
     fun positiveButton(
         @StringRes buttonTextResource: Int,
-        onClicked: ((dialog: DialogInterface) -> Unit)? = null
+        onClicked: ((dialog: DialogInterface) -> Unit)? = null,
     )
 
-    fun negativeButton(buttonText: String, onClicked: ((dialog: DialogInterface) -> Unit)? = null)
+    fun negativeButton(
+        buttonText: String,
+        onClicked: ((dialog: DialogInterface) -> Unit)? = null,
+    )
+
     fun negativeButton(
         @StringRes buttonTextResource: Int,
-        onClicked: ((dialog: DialogInterface) -> Unit)? = null
+        onClicked: ((dialog: DialogInterface) -> Unit)? = null,
     )
 
-    fun neutralButton(buttonText: String, onClicked: ((dialog: DialogInterface) -> Unit)? = null)
+    fun neutralButton(
+        buttonText: String,
+        onClicked: ((dialog: DialogInterface) -> Unit)? = null,
+    )
+
     fun neutralButton(
         @StringRes buttonTextResource: Int,
-        onClicked: ((dialog: DialogInterface) -> Unit)? = null
+        onClicked: ((dialog: DialogInterface) -> Unit)? = null,
     )
 
     fun onCancelled(handler: (dialog: DialogInterface) -> Unit)
@@ -60,29 +74,29 @@ interface AlertBuilder<out D : DialogInterface> {
 
     fun items(
         items: List<CharSequence>,
-        onItemSelected: (dialog: DialogInterface, index: Int) -> Unit
+        onItemSelected: (dialog: DialogInterface, index: Int) -> Unit,
     )
 
     fun <T> items(
         items: List<T>,
-        onItemSelected: (dialog: DialogInterface, item: T, index: Int) -> Unit
+        onItemSelected: (dialog: DialogInterface, item: T, index: Int) -> Unit,
     )
 
     fun multiChoiceItems(
         items: Array<String>,
         checkedItems: BooleanArray,
-        onClick: (dialog: DialogInterface, which: Int, isChecked: Boolean) -> Unit
+        onClick: (dialog: DialogInterface, which: Int, isChecked: Boolean) -> Unit,
     )
 
     fun singleChoiceItems(
         items: Array<String>,
         checkedItem: Int = 0,
-        onClick: ((dialog: DialogInterface, which: Int) -> Unit)? = null
+        onClick: ((dialog: DialogInterface, which: Int) -> Unit)? = null,
     )
 
     fun build(): D
-    fun show(): D
 
+    fun show(): D
 
     fun customTitle(view: () -> View) {
         setCustomTitle(view())
@@ -92,15 +106,11 @@ interface AlertBuilder<out D : DialogInterface> {
         setCustomView(view())
     }
 
-    fun okButton(handler: ((dialog: DialogInterface) -> Unit)? = null) =
-        positiveButton(android.R.string.ok, handler)
+    fun okButton(handler: ((dialog: DialogInterface) -> Unit)? = null) = positiveButton(android.R.string.ok, handler)
 
-    fun cancelButton(handler: ((dialog: DialogInterface) -> Unit)? = null) =
-        negativeButton(android.R.string.cancel, handler)
+    fun cancelButton(handler: ((dialog: DialogInterface) -> Unit)? = null) = negativeButton(android.R.string.cancel, handler)
 
-    fun yesButton(handler: ((dialog: DialogInterface) -> Unit)? = null) =
-        positiveButton(R.string.yes, handler)
+    fun yesButton(handler: ((dialog: DialogInterface) -> Unit)? = null) = positiveButton(R.string.yes, handler)
 
-    fun noButton(handler: ((dialog: DialogInterface) -> Unit)? = null) =
-        negativeButton(R.string.no, handler)
+    fun noButton(handler: ((dialog: DialogInterface) -> Unit)? = null) = negativeButton(R.string.no, handler)
 }

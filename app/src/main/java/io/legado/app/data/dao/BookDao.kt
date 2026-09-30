@@ -10,7 +10,6 @@ import androidx.room.Update
 import io.legado.app.constant.BookType
 import io.legado.app.data.entities.Book
 import io.legado.app.data.entities.BookGroup
-import io.legado.app.data.entities.BookSource
 import io.legado.app.help.book.isNotShelf
 import io.legado.app.ui.main.bookshelf.BookShelfItem
 import kotlinx.coroutines.flow.Flow
@@ -18,7 +17,7 @@ import kotlinx.coroutines.flow.map
 
 data class GroupBookCount(
     val groupId: Long,
-    val count: Int
+    val count: Int,
 )
 
 private const val PRIVATE_GROUP_MASK =
@@ -32,45 +31,42 @@ private const val PUBLIC_BOOK_FILTER =
 
 @Dao
 interface BookDao {
-
     @Query("UPDATE books SET customTag = :tags WHERE bookUrl = :bookUrl")
-    fun updateCustomTag(bookUrl: String, tags: String)
+    fun updateCustomTag(
+        bookUrl: String,
+        tags: String,
+    )
 
-
-    fun flowByGroup(groupId: Long): Flow<List<Book>> {
-        return when (groupId) {
-            BookGroup.IdRoot -> flowRoot()
-            BookGroup.IdAll -> flowAll()
-            BookGroup.IdLocal -> flowLocal()
-            BookGroup.IdLocalNone -> flowLocalNoGroup()
-            BookGroup.IdText -> flowText()
-            BookGroup.IdUnread -> flowUnread()
-            BookGroup.IdReading -> flowReading()
-            BookGroup.IdReadFinished -> flowReadFinished()
-            BookGroup.IdReadFinishedUpdate -> flowReadFinishedUpdate()
-            BookGroup.IdReadFinishedComplete -> flowReadFinishedComplete()
-            else -> flowByUserGroup(groupId)
-        }.map { list ->
-            list.filterNot { it.isNotShelf }
-        }
+    fun flowByGroup(groupId: Long): Flow<List<Book>> = when (groupId) {
+        BookGroup.IdRoot -> flowRoot()
+        BookGroup.IdAll -> flowAll()
+        BookGroup.IdLocal -> flowLocal()
+        BookGroup.IdLocalNone -> flowLocalNoGroup()
+        BookGroup.IdText -> flowText()
+        BookGroup.IdUnread -> flowUnread()
+        BookGroup.IdReading -> flowReading()
+        BookGroup.IdReadFinished -> flowReadFinished()
+        BookGroup.IdReadFinishedUpdate -> flowReadFinishedUpdate()
+        BookGroup.IdReadFinishedComplete -> flowReadFinishedComplete()
+        else -> flowByUserGroup(groupId)
+    }.map { list ->
+        list.filterNot { it.isNotShelf }
     }
 
-    fun flowBookShelfByGroup(groupId: Long): Flow<List<BookShelfItem>> {
-        return when (groupId) {
-            BookGroup.IdRoot -> flowBookShelfRoot()
-            BookGroup.IdAll -> flowBookShelf()
-            BookGroup.IdLocal -> flowBookShelfLocal()
-            BookGroup.IdLocalNone -> flowBookShelfLocalNoGroup()
-            BookGroup.IdText -> flowBookShelfText()
-            BookGroup.IdUnread -> flowBookShelfUnread()
-            BookGroup.IdReading -> flowBookShelfReading()
-            BookGroup.IdReadFinished -> flowBookShelfReadFinished()
-            BookGroup.IdReadFinishedUpdate -> flowBookShelfReadFinishedUpdate()
-            BookGroup.IdReadFinishedComplete -> flowBookShelfReadFinishedComplete()
-            else -> flowBookShelfByUserGroup(groupId)
-        }.map { list ->
-            list.filterNot { it.isNotShelf }
-        }
+    fun flowBookShelfByGroup(groupId: Long): Flow<List<BookShelfItem>> = when (groupId) {
+        BookGroup.IdRoot -> flowBookShelfRoot()
+        BookGroup.IdAll -> flowBookShelf()
+        BookGroup.IdLocal -> flowBookShelfLocal()
+        BookGroup.IdLocalNone -> flowBookShelfLocalNoGroup()
+        BookGroup.IdText -> flowBookShelfText()
+        BookGroup.IdUnread -> flowBookShelfUnread()
+        BookGroup.IdReading -> flowBookShelfReading()
+        BookGroup.IdReadFinished -> flowBookShelfReadFinished()
+        BookGroup.IdReadFinishedUpdate -> flowBookShelfReadFinishedUpdate()
+        BookGroup.IdReadFinishedComplete -> flowBookShelfReadFinishedComplete()
+        else -> flowBookShelfByUserGroup(groupId)
+    }.map { list ->
+        list.filterNot { it.isNotShelf }
     }
 
     @Query(
@@ -79,7 +75,7 @@ interface BookDao {
         and type & ${BookType.local} = 0
         and ($PUBLIC_GROUP_MASK & `group`) = 0
         and $PUBLIC_BOOK_FILTER
-        """
+        """,
     )
     fun flowRoot(): Flow<List<Book>>
 
@@ -114,7 +110,7 @@ interface BookDao {
         and type & ${BookType.local} = 0
         and ($PUBLIC_GROUP_MASK & `group`) = 0
         and $PUBLIC_BOOK_FILTER
-        """
+        """,
     )
     fun flowBookShelfRoot(): Flow<List<BookShelfItem>>
 
@@ -153,7 +149,7 @@ interface BookDao {
     FROM books
     WHERE $PUBLIC_BOOK_FILTER
     ORDER BY durChapterTime DESC
-"""
+""",
     )
     fun flowBookShelf(): Flow<List<BookShelfItem>>
 
@@ -189,7 +185,7 @@ interface BookDao {
         FROM books 
         WHERE type & ${BookType.local} > 0
         AND $PUBLIC_BOOK_FILTER
-        """
+        """,
     )
     fun flowBookShelfLocal(): Flow<List<BookShelfItem>>
 
@@ -197,7 +193,7 @@ interface BookDao {
         """
         select * from books where type & ${BookType.local} > 0
         and ((SELECT sum(groupId) FROM book_groups where groupId > 0 AND NULLIF(TRIM(COALESCE(localDirectoryUri, '')), '') IS NOT NULL) & `group`) = 0
-        """
+        """,
     )
     fun flowLocalNoGroup(): Flow<List<Book>>
 
@@ -231,11 +227,13 @@ interface BookDao {
         where type & ${BookType.local} > 0
         and ($PUBLIC_GROUP_MASK & `group`) = 0
         and $PUBLIC_BOOK_FILTER
-        """
+        """,
     )
     fun flowBookShelfLocalNoGroup(): Flow<List<BookShelfItem>>
 
-    @Query("SELECT * FROM books WHERE (`group` & :group) > 0 AND (:group <= 0 OR EXISTS (SELECT 1 FROM book_groups WHERE groupId = :group AND NULLIF(TRIM(COALESCE(localDirectoryUri, '')), '') IS NOT NULL))")
+    @Query(
+        "SELECT * FROM books WHERE (`group` & :group) > 0 AND (:group <= 0 OR EXISTS (SELECT 1 FROM book_groups WHERE groupId = :group AND NULLIF(TRIM(COALESCE(localDirectoryUri, '')), '') IS NOT NULL))",
+    )
     fun flowByUserGroup(group: Long): Flow<List<Book>>
 
     @Query(
@@ -271,12 +269,12 @@ interface BookDao {
             WHERE groupId = :group AND NULLIF(TRIM(COALESCE(localDirectoryUri, '')), '') IS NOT NULL
         )
         AND ((SELECT isPrivate FROM book_groups WHERE groupId = :group) = 1 OR $PUBLIC_BOOK_FILTER)
-        """
+        """,
     )
     fun flowBookShelfByUserGroup(group: Long): Flow<List<BookShelfItem>>
 
     @Query(
-        "SELECT * FROM books WHERE name like '%'||:key||'%' or author like '%'||:key||'%' or originName like '%'||:key||'%'"
+        "SELECT * FROM books WHERE name like '%'||:key||'%' or author like '%'||:key||'%' or originName like '%'||:key||'%'",
     )
     fun flowSearch(key: String): Flow<List<Book>>
 
@@ -310,7 +308,7 @@ interface BookDao {
         WHERE (name like '%'||:key||'%' or author like '%'||:key||'%' or originName like '%'||:key||'%'
             or kind like '%'||:key||'%' or customTag like '%'||:key||'%')
         AND $PUBLIC_BOOK_FILTER
-        """
+        """,
     )
     fun flowBookShelfSearch(key: String): Flow<List<BookShelfItem>>
 
@@ -346,7 +344,7 @@ interface BookDao {
         FROM books 
         WHERE durChapterIndex = 0 AND durChapterPos = 0
         AND $PUBLIC_BOOK_FILTER
-        """
+        """,
     )
     fun flowBookShelfUnread(): Flow<List<BookShelfItem>>
 
@@ -382,12 +380,12 @@ interface BookDao {
         FROM books 
         WHERE totalChapterNum > 0 AND durChapterIndex >= totalChapterNum - 1
         AND $PUBLIC_BOOK_FILTER
-        """
+        """,
     )
     fun flowBookShelfReadFinished(): Flow<List<BookShelfItem>>
 
     @Query(
-        """SELECT * FROM books WHERE totalChapterNum > 0 AND durChapterIndex >= totalChapterNum - 1 AND canUpdate = 1"""
+        """SELECT * FROM books WHERE totalChapterNum > 0 AND durChapterIndex >= totalChapterNum - 1 AND canUpdate = 1""",
     )
     fun flowReadFinishedUpdate(): Flow<List<Book>>
 
@@ -420,12 +418,12 @@ interface BookDao {
         FROM books 
         WHERE totalChapterNum > 0 AND durChapterIndex >= totalChapterNum - 1 AND canUpdate = 1
         AND $PUBLIC_BOOK_FILTER
-        """
+        """,
     )
     fun flowBookShelfReadFinishedUpdate(): Flow<List<BookShelfItem>>
 
     @Query(
-        """SELECT * FROM books WHERE totalChapterNum > 0 AND durChapterIndex >= totalChapterNum - 1 AND canUpdate = 0"""
+        """SELECT * FROM books WHERE totalChapterNum > 0 AND durChapterIndex >= totalChapterNum - 1 AND canUpdate = 0""",
     )
     fun flowReadFinishedComplete(): Flow<List<Book>>
 
@@ -458,7 +456,7 @@ interface BookDao {
         FROM books 
         WHERE totalChapterNum > 0 AND durChapterIndex >= totalChapterNum - 1 AND canUpdate = 0
         AND $PUBLIC_BOOK_FILTER
-        """
+        """,
     )
     fun flowBookShelfReadFinishedComplete(): Flow<List<BookShelfItem>>
 
@@ -494,7 +492,7 @@ interface BookDao {
         FROM books 
         WHERE totalChapterNum > 0 AND durChapterIndex > 0 AND durChapterIndex < totalChapterNum - 1
         AND $PUBLIC_BOOK_FILTER
-        """
+        """,
     )
     fun flowBookShelfReading(): Flow<List<BookShelfItem>>
 
@@ -530,7 +528,7 @@ interface BookDao {
         FROM books 
         WHERE type & ${BookType.text} > 0
         AND $PUBLIC_BOOK_FILTER
-        """
+        """,
     )
     fun flowBookShelfText(): Flow<List<BookShelfItem>>
 
@@ -550,7 +548,10 @@ interface BookDao {
     fun flowGetBook(bookUrl: String): Flow<Book?>
 
     @Query("SELECT * FROM books WHERE name = :name and author = :author")
-    fun getBook(name: String, author: String): Book?
+    fun getBook(
+        name: String,
+        author: String,
+    ): Book?
 
     @Query(
         """
@@ -559,17 +560,18 @@ interface BookDao {
             AND type & ${BookType.notShelf} = 0
         ORDER BY durChapterTime DESC
         LIMIT 1
-        """
+        """,
     )
-    fun getShelfBookConflict(name: String, author: String): Book?
-
-    @Query("""select distinct bs.* from books, book_sources bs 
-        where origin == bookSourceUrl and origin not like '${BookType.localTag}%' 
-        and origin not like '${BookType.webDavTag}%'""")
-    fun getAllUseBookSource(): List<BookSource>
+    fun getShelfBookConflict(
+        name: String,
+        author: String,
+    ): Book?
 
     @Query("SELECT * FROM books WHERE name = :name and origin = :origin")
-    fun getBookByOrigin(name: String, origin: String): Book?
+    fun getBookByOrigin(
+        name: String,
+        origin: String,
+    ): Book?
 
     @get:Query("select count(bookUrl) from books where (SELECT sum(groupId) FROM book_groups)")
     val noGroupSize: Int
@@ -605,11 +607,14 @@ interface BookDao {
     fun has(bookUrl: String): Boolean
 
     @Query("select exists(select 1 from books where name = :name and author = :author)")
-    fun has(name: String, author: String): Boolean
+    fun has(
+        name: String,
+        author: String,
+    ): Boolean
 
     @Query(
         """select exists(select 1 from books where type & ${BookType.local} > 0 
-        and (originName = :fileName or (origin != '${BookType.localTag}' and origin like '%' || :fileName)))"""
+        and (originName = :fileName or (origin != '${BookType.localTag}' and origin like '%' || :fileName)))""",
     )
     fun hasFile(fileName: String): Boolean
 
@@ -626,7 +631,10 @@ interface BookDao {
     fun deleteAll()
 
     @Transaction
-    fun replace(oldBook: Book, newBook: Book) {
+    fun replace(
+        oldBook: Book,
+        newBook: Book,
+    ) {
         delete(oldBook)
         insert(newBook)
     }
@@ -640,15 +648,26 @@ interface BookDao {
     }
 
     @Query("update books set durChapterPos = :pos where bookUrl = :bookUrl")
-    fun upProgress(bookUrl: String, pos: Int)
+    fun upProgress(
+        bookUrl: String,
+        pos: Int,
+    )
 
     @Query(
-        """update books set lastCheckCount = 0, durChapterIndex = :durChapterIndex, durChapterPos = :durChapterPos, durChapterTime = :durChapterTime where bookUrl = :bookUrl"""
+        """update books set lastCheckCount = 0, durChapterIndex = :durChapterIndex, durChapterPos = :durChapterPos, durChapterTime = :durChapterTime where bookUrl = :bookUrl""",
     )
-    fun upReadProgress(bookUrl: String, durChapterIndex: Int, durChapterPos: Int, durChapterTime: Long)
+    fun upReadProgress(
+        bookUrl: String,
+        durChapterIndex: Int,
+        durChapterPos: Int,
+        durChapterTime: Long,
+    )
 
     @Query("update books set `group` = :newGroupId where `group` = :oldGroupId")
-    fun upGroup(oldGroupId: Long, newGroupId: Long)
+    fun upGroup(
+        oldGroupId: Long,
+        newGroupId: Long,
+    )
 
     @Query("update books set `group` = `group` - :group where `group` & :group > 0")
     fun removeGroup(group: Long)
@@ -659,7 +678,7 @@ interface BookDao {
         WHERE type & ${BookType.local} > 0
         AND (`group` & :groupId) > 0
         AND (`group` & :remainingLocalDirectoryMask) = 0
-        """
+        """,
     )
     fun getLocalBooksOnlyInGroup(
         groupId: Long,
@@ -692,7 +711,7 @@ interface BookDao {
         UNION ALL SELECT ${BookGroup.IdReadFinished}, COUNT(*) FROM books WHERE totalChapterNum > 0 AND durChapterIndex >= totalChapterNum - 1 AND $PUBLIC_BOOK_FILTER
         UNION ALL SELECT ${BookGroup.IdReadFinishedUpdate}, COUNT(*) FROM books WHERE totalChapterNum > 0 AND durChapterIndex >= totalChapterNum - 1 AND canUpdate = 1 AND $PUBLIC_BOOK_FILTER
         UNION ALL SELECT ${BookGroup.IdReadFinishedComplete}, COUNT(*) FROM books WHERE totalChapterNum > 0 AND durChapterIndex >= totalChapterNum - 1 AND canUpdate = 0 AND $PUBLIC_BOOK_FILTER
-        """
+        """,
     )
     fun flowSystemGroupCounts(): Flow<List<GroupBookCount>>
 
@@ -705,26 +724,24 @@ interface BookDao {
             WHERE groupId = :groupId AND NULLIF(TRIM(COALESCE(localDirectoryUri, '')), '') IS NOT NULL
         ))
         AND ((SELECT isPrivate FROM book_groups WHERE groupId = :groupId) = 1 OR $PUBLIC_BOOK_FILTER)
-        """
+        """,
     )
     fun flowUserGroupBookCount(groupId: Long): Flow<Int>
 
-    fun flowGroupPreview(groupId: Long): Flow<List<BookShelfItem>> {
-        return when (groupId) {
-            BookGroup.IdRoot -> flowBookShelfRootPreview()
-            BookGroup.IdAll -> flowBookShelfPreview()
-            BookGroup.IdLocal -> flowBookShelfLocalPreview()
-            BookGroup.IdLocalNone -> flowBookShelfLocalNoGroupPreview()
-            BookGroup.IdText -> flowBookShelfTextPreview()
-            BookGroup.IdUnread -> flowBookShelfUnreadPreview()
-            BookGroup.IdReading -> flowBookShelfReadingPreview()
-            BookGroup.IdReadFinished -> flowBookShelfReadFinishedPreview()
-            BookGroup.IdReadFinishedUpdate -> flowBookShelfReadFinishedUpdatePreview()
-            BookGroup.IdReadFinishedComplete -> flowBookShelfReadFinishedCompletePreview()
-            else -> flowBookShelfPreviewByUserGroup(groupId)
-        }.map { list ->
-            list.filterNot { it.isNotShelf }
-        }
+    fun flowGroupPreview(groupId: Long): Flow<List<BookShelfItem>> = when (groupId) {
+        BookGroup.IdRoot -> flowBookShelfRootPreview()
+        BookGroup.IdAll -> flowBookShelfPreview()
+        BookGroup.IdLocal -> flowBookShelfLocalPreview()
+        BookGroup.IdLocalNone -> flowBookShelfLocalNoGroupPreview()
+        BookGroup.IdText -> flowBookShelfTextPreview()
+        BookGroup.IdUnread -> flowBookShelfUnreadPreview()
+        BookGroup.IdReading -> flowBookShelfReadingPreview()
+        BookGroup.IdReadFinished -> flowBookShelfReadFinishedPreview()
+        BookGroup.IdReadFinishedUpdate -> flowBookShelfReadFinishedUpdatePreview()
+        BookGroup.IdReadFinishedComplete -> flowBookShelfReadFinishedCompletePreview()
+        else -> flowBookShelfPreviewByUserGroup(groupId)
+    }.map { list ->
+        list.filterNot { it.isNotShelf }
     }
 
     @Query(
@@ -739,7 +756,7 @@ interface BookDao {
         WHERE $PUBLIC_BOOK_FILTER
         ORDER BY durChapterTime DESC
         LIMIT 10
-        """
+        """,
     )
     fun flowBookShelfPreview(): Flow<List<BookShelfItem>>
 
@@ -757,7 +774,7 @@ interface BookDao {
             AND $PUBLIC_BOOK_FILTER
         ORDER BY durChapterTime DESC
         LIMIT 10
-        """
+        """,
     )
     fun flowBookShelfRootPreview(): Flow<List<BookShelfItem>>
 
@@ -774,7 +791,7 @@ interface BookDao {
             AND $PUBLIC_BOOK_FILTER
         ORDER BY durChapterTime DESC
         LIMIT 10
-        """
+        """,
     )
     fun flowBookShelfLocalPreview(): Flow<List<BookShelfItem>>
 
@@ -792,7 +809,7 @@ interface BookDao {
             AND $PUBLIC_BOOK_FILTER
         ORDER BY durChapterTime DESC
         LIMIT 10
-        """
+        """,
     )
     fun flowBookShelfLocalNoGroupPreview(): Flow<List<BookShelfItem>>
 
@@ -809,7 +826,7 @@ interface BookDao {
             AND $PUBLIC_BOOK_FILTER
         ORDER BY durChapterTime DESC
         LIMIT 10
-        """
+        """,
     )
     fun flowBookShelfTextPreview(): Flow<List<BookShelfItem>>
 
@@ -826,7 +843,7 @@ interface BookDao {
             AND $PUBLIC_BOOK_FILTER
         ORDER BY durChapterTime DESC
         LIMIT 10
-        """
+        """,
     )
     fun flowBookShelfUnreadPreview(): Flow<List<BookShelfItem>>
 
@@ -843,7 +860,7 @@ interface BookDao {
             AND $PUBLIC_BOOK_FILTER
         ORDER BY durChapterTime DESC
         LIMIT 10
-        """
+        """,
     )
     fun flowBookShelfReadingPreview(): Flow<List<BookShelfItem>>
 
@@ -860,7 +877,7 @@ interface BookDao {
             AND $PUBLIC_BOOK_FILTER
         ORDER BY durChapterTime DESC
         LIMIT 10
-        """
+        """,
     )
     fun flowBookShelfReadFinishedPreview(): Flow<List<BookShelfItem>>
 
@@ -877,7 +894,7 @@ interface BookDao {
             AND $PUBLIC_BOOK_FILTER
         ORDER BY durChapterTime DESC
         LIMIT 10
-        """
+        """,
     )
     fun flowBookShelfReadFinishedUpdatePreview(): Flow<List<BookShelfItem>>
 
@@ -894,7 +911,7 @@ interface BookDao {
             AND $PUBLIC_BOOK_FILTER
         ORDER BY durChapterTime DESC
         LIMIT 10
-        """
+        """,
     )
     fun flowBookShelfReadFinishedCompletePreview(): Flow<List<BookShelfItem>>
 
@@ -915,7 +932,7 @@ interface BookDao {
             AND ((SELECT isPrivate FROM book_groups WHERE groupId = :groupId) = 1 OR $PUBLIC_BOOK_FILTER)
         ORDER BY durChapterTime DESC
         LIMIT 10
-        """
+        """,
     )
     fun flowBookShelfPreviewByUserGroup(groupId: Long): Flow<List<BookShelfItem>>
 }

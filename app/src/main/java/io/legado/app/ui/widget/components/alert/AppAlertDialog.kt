@@ -53,21 +53,23 @@ fun AppAlertDialog(
                 ProvideAppDensity {
                     if (content != null) {
                         Column(
-                            modifier = Modifier
+                            modifier =
+                            Modifier
                                 .fillMaxWidth()
                                 .padding(top = 12.dp)
-                                .verticalScroll(rememberScrollState())
+                                .verticalScroll(rememberScrollState()),
                         ) {
                             content()
                         }
                     }
 
                     Row(
-                        modifier = Modifier
+                        modifier =
+                        Modifier
                             .fillMaxWidth()
                             .padding(top = 24.dp),
                         horizontalArrangement = Arrangement.spacedBy(12.dp),
-                        verticalAlignment = Alignment.CenterVertically
+                        verticalAlignment = Alignment.CenterVertically,
                     ) {
                         if (onDismiss != null) {
                             SecondaryButton(
@@ -75,7 +77,7 @@ fun AppAlertDialog(
                                 modifier = Modifier.weight(1f),
                                 onClick = {
                                     onDismiss()
-                                }
+                                },
                             )
                         }
 
@@ -85,12 +87,12 @@ fun AppAlertDialog(
                                 modifier = Modifier.weight(1f),
                                 onClick = {
                                     onConfirm()
-                                }
+                                },
                             )
                         }
                     }
                 }
-            }
+            },
         )
     } else {
         if (show) {
@@ -106,13 +108,13 @@ fun AppAlertDialog(
                 text = {
                     ProvideAppDensity {
                         Column(
-                            modifier = Modifier.verticalScroll(rememberScrollState())
+                            modifier = Modifier.verticalScroll(rememberScrollState()),
                         ) {
                             if (text != null) {
                                 SelectionContainer {
                                     Text(
                                         text = text,
-                                        modifier = Modifier.padding(bottom = if (content != null) 16.dp else 0.dp)
+                                        modifier = Modifier.padding(bottom = if (content != null) 16.dp else 0.dp),
                                     )
                                 }
                             }
@@ -127,7 +129,7 @@ fun AppAlertDialog(
                         ProvideAppDensity {
                             PrimaryButton(
                                 onClick = onConfirm,
-                                text = confirmText
+                                text = confirmText,
                             )
                         }
                     }
@@ -139,11 +141,11 @@ fun AppAlertDialog(
                                 onClick = {
                                     onDismiss()
                                 },
-                                text = dismissText
+                                text = dismissText,
                             )
                         }
                     }
-                }
+                },
             )
         }
     }
@@ -165,7 +167,7 @@ fun <T> AppAlertDialog(
     dismissText: String = "取消",
     onDismiss: (() -> Unit)? = null,
     modifier: Modifier = Modifier,
-    content: (@Composable (T) -> Unit)? = null
+    content: (@Composable (T) -> Unit)? = null,
 ) {
     var cachedData by remember { mutableStateOf(data) }
 
@@ -177,7 +179,7 @@ fun <T> AppAlertDialog(
     if (currentData != null) {
         val currentText = text ?: textProvider?.invoke(currentData)
         var lastValidText by remember { mutableStateOf(currentText) }
-        
+
         if (currentText != null) {
             lastValidText = currentText
         }
@@ -192,7 +194,7 @@ fun <T> AppAlertDialog(
             onConfirm = onConfirm?.let { { it(currentData) } },
             dismissText = dismissText,
             onDismiss = onDismiss,
-            content = content?.let { { it(currentData) } }
+            content = content?.let { { it(currentData) } },
         )
     }
 }

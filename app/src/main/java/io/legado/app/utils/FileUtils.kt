@@ -3,11 +3,25 @@ package io.legado.app.utils
 import android.os.Environment
 import android.webkit.MimeTypeMap
 import androidx.annotation.IntDef
-import splitties.init.appCtx
-import java.io.*
+import java.io.ByteArrayOutputStream
+import java.io.Closeable
+import java.io.File
+import java.io.FileFilter
+import java.io.FileInputStream
+import java.io.FileOutputStream
+import java.io.FileWriter
+import java.io.IOException
+import java.io.InputStream
+import java.io.OutputStream
+import java.io.UnsupportedEncodingException
 import java.nio.charset.Charset
 import java.text.SimpleDateFormat
-import java.util.*
+import java.util.ArrayList
+import java.util.Calendar
+import java.util.Collections
+import java.util.Comparator
+import java.util.Locale
+import splitties.init.appCtx
 
 @Suppress("unused", "MemberVisibilityCanBePrivate")
 object FileUtils {
@@ -57,7 +71,7 @@ object FileUtils {
 
     fun createFolderIfNotExist(filePath: String): File {
         val file = File(filePath)
-        //如果文件夹不存在，就创建它
+        // 如果文件夹不存在，就创建它
         if (!file.exists()) {
             file.mkdirs()
         }
@@ -69,11 +83,11 @@ object FileUtils {
         val file = File(filePath)
         try {
             if (!file.exists()) {
-                //创建父类文件夹
+                // 创建父类文件夹
                 file.parent?.let {
                     createFolderIfNotExist(it)
                 }
-                //创建文件
+                // 创建文件
                 file.createNewFile()
             }
         } catch (e: IOException) {
@@ -85,11 +99,11 @@ object FileUtils {
     fun createFileWithReplace(filePath: String): File {
         val file = File(filePath)
         if (!file.exists()) {
-            //创建父类文件夹
+            // 创建父类文件夹
             file.parent?.let {
                 createFolderIfNotExist(it)
             }
-            //创建文件
+            // 创建文件
             file.createNewFile()
         } else {
             file.delete()
@@ -121,9 +135,7 @@ object FileUtils {
         return path.toString()
     }
 
-    fun getCachePath(): String {
-        return appCtx.externalCache.absolutePath
-    }
+    fun getCachePath(): String = appCtx.externalCache.absolutePath
 
     fun getSdCardPath(): String {
         var sdCardDirectory = Environment.getExternalStorageDirectory().absolutePath
@@ -169,7 +181,6 @@ object FileUtils {
             c.close()
         } catch (ignored: IOException) {
         }
-
     }
 
     /**
@@ -178,7 +189,8 @@ object FileUtils {
     @JvmOverloads
     fun listDirs(
         startDirPath: String,
-        excludeDirs: Array<String>? = null, @SortType sortType: Int = BY_NAME_ASC
+        excludeDirs: Array<String>? = null,
+        @SortType sortType: Int = BY_NAME_ASC,
     ): Array<File> {
         var excludeDirs1 = excludeDirs
         val dirList = ArrayList<File>()
@@ -186,12 +198,14 @@ object FileUtils {
         if (!startDir.isDirectory) {
             return arrayOf()
         }
-        val dirs = startDir.listFiles(FileFilter { f ->
-            if (f == null) {
-                return@FileFilter false
-            }
-            f.isDirectory
-        }) ?: return arrayOf()
+        val dirs = startDir.listFiles(
+            FileFilter { f ->
+                if (f == null) {
+                    return@FileFilter false
+                }
+                f.isDirectory
+            },
+        ) ?: return arrayOf()
         if (excludeDirs1 == null) {
             excludeDirs1 = arrayOf()
         }
@@ -232,7 +246,7 @@ object FileUtils {
     @JvmOverloads
     fun listDirsAndFiles(
         startDirPath: String,
-        allowExtensions: Array<String>? = null
+        allowExtensions: Array<String>? = null,
     ): Array<File>? {
         val dirs: Array<File>?
         val files: Array<File>? = if (allowExtensions == null) {
@@ -253,23 +267,26 @@ object FileUtils {
     @JvmOverloads
     fun listFiles(
         startDirPath: String,
-        filterPattern: Regex? = null, @SortType sortType: Int = BY_NAME_ASC
+        filterPattern: Regex? = null,
+        @SortType sortType: Int = BY_NAME_ASC,
     ): Array<File> {
         val fileList = ArrayList<File>()
         val f = File(startDirPath)
         if (!f.isDirectory) {
             return arrayOf()
         }
-        val files = f.listFiles(FileFilter { file ->
-            if (file == null) {
-                return@FileFilter false
-            }
-            if (file.isDirectory) {
-                return@FileFilter false
-            }
+        val files = f.listFiles(
+            FileFilter { file ->
+                if (file == null) {
+                    return@FileFilter false
+                }
+                if (file.isDirectory) {
+                    return@FileFilter false
+                }
 
-            filterPattern?.containsMatchIn(file.name) ?: true
-        })
+                filterPattern?.containsMatchIn(file.name) ?: true
+            },
+        )
             ?: return arrayOf()
         for (file in files) {
             fileList.add(file.absoluteFile)
@@ -305,21 +322,20 @@ object FileUtils {
     fun listFiles(startDirPath: String, allowExtensions: Array<String>?): Array<File>? {
         val file = File(startDirPath)
         return file.listFiles { _, name ->
-            //返回当前目录所有以某些扩展名结尾的文件
+            // 返回当前目录所有以某些扩展名结尾的文件
             val extension = getExtension(name)
-            allowExtensions?.contentDeepToString()?.contains(extension) == true
-                    || allowExtensions == null
+            allowExtensions?.contentDeepToString()?.contains(extension) == true ||
+                allowExtensions == null
         }
     }
 
     /**
      * 列出指定目录下的所有文件
      */
-    fun listFiles(startDirPath: String, allowExtension: String?): Array<File>? {
-        return if (allowExtension == null)
-            listFiles(startDirPath, allowExtension = null)
-        else
-            listFiles(startDirPath, arrayOf(allowExtension))
+    fun listFiles(startDirPath: String, allowExtension: String?): Array<File>? = if (allowExtension == null) {
+        listFiles(startDirPath, allowExtension = null)
+    } else {
+        listFiles(startDirPath, arrayOf(allowExtension))
     }
 
     /**
@@ -337,10 +353,10 @@ object FileUtils {
     fun delete(file: File, deleteRootDir: Boolean = false): Boolean {
         var result = false
         if (file.isFile) {
-            //是文件
+            // 是文件
             result = deleteResolveEBUSY(file)
         } else {
-            //是目录
+            // 是目录
             val files = file.listFiles() ?: return false
             if (files.isEmpty()) {
                 result = deleteRootDir && deleteResolveEBUSY(file)
@@ -378,7 +394,9 @@ object FileUtils {
 
         return if (file.exists()) {
             delete(file, deleteRootDir)
-        } else false
+        } else {
+            false
+        }
     }
 
     /**
@@ -413,36 +431,27 @@ object FileUtils {
         } catch (e: Exception) {
             return false
         }
-
     }
 
     /**
      * 移动文件或目录
      */
-    fun move(src: String, tar: String): Boolean {
-        return move(File(src), File(tar))
-    }
+    fun move(src: String, tar: String): Boolean = move(File(src), File(tar))
 
     /**
      * 移动文件或目录
      */
-    fun move(src: File, tar: File): Boolean {
-        return rename(src, tar)
-    }
+    fun move(src: File, tar: File): Boolean = rename(src, tar)
 
     /**
      * 文件重命名
      */
-    fun rename(oldPath: String, newPath: String): Boolean {
-        return rename(File(oldPath), File(newPath))
-    }
+    fun rename(oldPath: String, newPath: String): Boolean = rename(File(oldPath), File(newPath))
 
     /**
      * 文件重命名
      */
-    fun rename(src: File, tar: File): Boolean {
-        return src.renameTo(tar)
-    }
+    fun rename(src: File, tar: File): Boolean = src.renameTo(tar)
 
     /**
      * 读取文本文件, 失败将返回空串
@@ -491,13 +500,10 @@ object FileUtils {
      * 保存文本内容
      */
     @JvmOverloads
-    fun writeText(filepath: String, content: String, charset: String = "utf-8"): Boolean {
-        return try {
-            writeBytes(filepath, content.toByteArray(charset(charset)))
-        } catch (e: UnsupportedEncodingException) {
-            false
-        }
-
+    fun writeText(filepath: String, content: String, charset: String = "utf-8"): Boolean = try {
+        writeBytes(filepath, content.toByteArray(charset(charset)))
+    } catch (e: UnsupportedEncodingException) {
+        false
     }
 
     /**
@@ -532,22 +538,20 @@ object FileUtils {
     /**
      * 保存文件内容
      */
-    fun writeInputStream(file: File, data: InputStream): Boolean {
-        return try {
-            if (!file.exists()) {
-                file.parentFile?.mkdirs()
-                file.createNewFile()
-            }
-            data.use {
-                FileOutputStream(file).use { fos ->
-                    data.copyTo(fos)
-                    fos.flush()
-                }
-            }
-            true
-        } catch (e: IOException) {
-            false
+    fun writeInputStream(file: File, data: InputStream): Boolean = try {
+        if (!file.exists()) {
+            file.parentFile?.mkdirs()
+            file.createNewFile()
         }
+        data.use {
+            FileOutputStream(file).use { fos ->
+                data.copyTo(fos)
+                fos.flush()
+            }
+        }
+        true
+    } catch (e: IOException) {
+        false
     }
 
     /**
@@ -577,7 +581,9 @@ object FileUtils {
         val file = File(path)
         return if (!file.isFile || !file.exists()) {
             0
-        } else file.length()
+        } else {
+            file.length()
+        }
     }
 
     /**
@@ -598,18 +604,15 @@ object FileUtils {
     /**
      * 获取文件名（不包括扩展名）
      */
-    fun getNameExcludeExtension(path: String): String {
-        return try {
-            var fileName = File(path).name
-            val lastIndexOf = fileName.lastIndexOf(".")
-            if (lastIndexOf != -1) {
-                fileName = fileName.substring(0, lastIndexOf)
-            }
-            fileName
-        } catch (e: Exception) {
-            ""
+    fun getNameExcludeExtension(path: String): String = try {
+        var fileName = File(path).name
+        val lastIndexOf = fileName.lastIndexOf(".")
+        if (lastIndexOf != -1) {
+            fileName = fileName.substring(0, lastIndexOf)
         }
-
+        fileName
+    } catch (e: Exception) {
+        ""
     }
 
     /**
@@ -675,33 +678,26 @@ object FileUtils {
     /**
      * 创建多级别的目录
      */
-    fun makeDirs(path: String): Boolean {
-        return makeDirs(File(path))
-    }
+    fun makeDirs(path: String): Boolean = makeDirs(File(path))
 
     /**
      * 创建多级别的目录
      */
-    fun makeDirs(file: File): Boolean {
-        return file.mkdirs()
-    }
+    fun makeDirs(file: File): Boolean = file.mkdirs()
 
     class SortByExtension : Comparator<File> {
 
-        override fun compare(f1: File?, f2: File?): Int {
-            return if (f1 == null || f2 == null) {
-                if (f1 == null) -1 else 1
+        override fun compare(f1: File?, f2: File?): Int = if (f1 == null || f2 == null) {
+            if (f1 == null) -1 else 1
+        } else {
+            if (f1.isDirectory && f2.isFile) {
+                -1
+            } else if (f1.isFile && f2.isDirectory) {
+                1
             } else {
-                if (f1.isDirectory && f2.isFile) {
-                    -1
-                } else if (f1.isFile && f2.isDirectory) {
-                    1
-                } else {
-                    f1.name.compareTo(f2.name, ignoreCase = true)
-                }
+                f1.name.compareTo(f2.name, ignoreCase = true)
             }
         }
-
     }
 
     class SortByName : Comparator<File> {
@@ -738,58 +734,51 @@ object FileUtils {
                 }
             }
         }
-
     }
 
     class SortBySize : Comparator<File> {
 
-        override fun compare(f1: File?, f2: File?): Int {
-            return if (f1 == null || f2 == null) {
-                if (f1 == null) {
-                    -1
-                } else {
-                    1
-                }
+        override fun compare(f1: File?, f2: File?): Int = if (f1 == null || f2 == null) {
+            if (f1 == null) {
+                -1
             } else {
-                if (f1.isDirectory && f2.isFile) {
+                1
+            }
+        } else {
+            if (f1.isDirectory && f2.isFile) {
+                -1
+            } else if (f1.isFile && f2.isDirectory) {
+                1
+            } else {
+                if (f1.length() < f2.length()) {
                     -1
-                } else if (f1.isFile && f2.isDirectory) {
-                    1
                 } else {
-                    if (f1.length() < f2.length()) {
-                        -1
-                    } else {
-                        1
-                    }
+                    1
                 }
             }
         }
-
     }
 
     class SortByTime : Comparator<File> {
 
-        override fun compare(f1: File?, f2: File?): Int {
-            return if (f1 == null || f2 == null) {
-                if (f1 == null) {
-                    -1
-                } else {
-                    1
-                }
+        override fun compare(f1: File?, f2: File?): Int = if (f1 == null || f2 == null) {
+            if (f1 == null) {
+                -1
             } else {
-                if (f1.isDirectory && f2.isFile) {
+                1
+            }
+        } else {
+            if (f1.isDirectory && f2.isFile) {
+                -1
+            } else if (f1.isFile && f2.isDirectory) {
+                1
+            } else {
+                if (f1.lastModified() > f2.lastModified()) {
                     -1
-                } else if (f1.isFile && f2.isDirectory) {
-                    1
                 } else {
-                    if (f1.lastModified() > f2.lastModified()) {
-                        -1
-                    } else {
-                        1
-                    }
+                    1
                 }
             }
         }
-
     }
 }

@@ -22,9 +22,7 @@ import kotlin.math.cos
 import kotlin.math.sin
 import kotlin.math.tanh
 
-fun readerMenuLiquidGlassAvailable(backdrop: Backdrop?): Boolean {
-    return backdrop != null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
-}
+fun readerMenuLiquidGlassAvailable(backdrop: Backdrop?): Boolean = backdrop != null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
 
 @Composable
 fun Modifier.readerMenuLiquidGlass(
@@ -39,11 +37,12 @@ fun Modifier.readerMenuLiquidGlass(
     if (!readerMenuLiquidGlassAvailable(backdrop)) return this
 
     val animationScope = rememberCoroutineScope()
-    val interactiveHighlight = if (interactive) {
-        remember(animationScope) { InteractiveHighlight(animationScope) }
-    } else {
-        null
-    }
+    val interactiveHighlight =
+        if (interactive) {
+            remember(animationScope) { InteractiveHighlight(animationScope) }
+        } else {
+            null
+        }
 
     return drawBackdrop(
         backdrop = backdrop!!,
@@ -57,7 +56,8 @@ fun Modifier.readerMenuLiquidGlass(
         },
         highlight = { Highlight.Default },
         shadow = null,
-        layerBlock = if (interactiveHighlight != null) {
+        layerBlock =
+        if (interactiveHighlight != null) {
             {
                 val width = size.width
                 val height = size.height
@@ -68,25 +68,30 @@ fun Modifier.readerMenuLiquidGlass(
                     val initialDerivative = 0.05f
                     val dragOffset = interactiveHighlight.dragOffset
                     translationX = maxOffset *
-                            tanh(initialDerivative * dragOffset.x / maxOffset) * progress
+                        tanh(initialDerivative * dragOffset.x / maxOffset) *
+                        progress
                     translationY = maxOffset *
-                            tanh(initialDerivative * dragOffset.y / maxOffset) * progress
+                        tanh(initialDerivative * dragOffset.y / maxOffset) *
+                        progress
 
                     val maxDragScale = 4.dp.toPx() / height
                     val offsetAngle = atan2(dragOffset.y, dragOffset.x)
-                    scaleX = scale + maxDragScale *
-                            abs(cos(offsetAngle) * dragOffset.x / size.maxDimension) *
-                            (width / height).coerceAtMost(1f) * progress
-                    scaleY = scale + maxDragScale *
-                            abs(sin(offsetAngle) * dragOffset.y / size.maxDimension) *
-                            (height / width).coerceAtMost(1f) * progress
+                    scaleX = scale +
+                        maxDragScale *
+                        abs(cos(offsetAngle) * dragOffset.x / size.maxDimension) *
+                        (width / height).coerceAtMost(1f) *
+                        progress
+                    scaleY = scale +
+                        maxDragScale *
+                        abs(sin(offsetAngle) * dragOffset.y / size.maxDimension) *
+                        (height / width).coerceAtMost(1f) *
+                        progress
                 }
             }
         } else {
             null
         },
         onDrawSurface = { drawRect(surfaceBrush) },
-    )
-        .then(interactiveHighlight?.modifier ?: Modifier)
+    ).then(interactiveHighlight?.modifier ?: Modifier)
         .then(interactiveHighlight?.gestureModifier ?: Modifier)
 }

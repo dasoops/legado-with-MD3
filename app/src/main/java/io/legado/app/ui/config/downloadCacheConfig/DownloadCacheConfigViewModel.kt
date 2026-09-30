@@ -23,10 +23,10 @@ class DownloadCacheConfigViewModel(
     private val shrinkDatabaseUseCase: ShrinkDatabaseUseCase,
     private val settingsGateway: DownloadCacheSettingsGateway,
 ) : ViewModel() {
-
-    private val _uiState = MutableStateFlow(
-        DownloadCacheConfigUiState(settings = settingsGateway.currentSettings)
-    )
+    private val _uiState =
+        MutableStateFlow(
+            DownloadCacheConfigUiState(settings = settingsGateway.currentSettings),
+        )
     val uiState = _uiState.asStateFlow()
 
     init {
@@ -40,25 +40,33 @@ class DownloadCacheConfigViewModel(
 
     fun onIntent(intent: DownloadCacheConfigIntent) {
         when (intent) {
-            is DownloadCacheConfigIntent.SetThreadCount ->
+            is DownloadCacheConfigIntent.SetThreadCount -> {
                 update { it.copy(threadCount = intent.value) }
-            is DownloadCacheConfigIntent.SetPreDownloadNum ->
+            }
+            is DownloadCacheConfigIntent.SetPreDownloadNum -> {
                 update { it.copy(preDownloadNum = intent.value) }
+            }
             is DownloadCacheConfigIntent.SetBitmapCacheSize -> {
                 viewModelScope.launch {
                     settingsGateway.update { it.copy(bitmapCacheSize = intent.value) }
                     ImageProvider.bitmapLruCache.resize(ImageProvider.cacheSize)
                 }
             }
-            is DownloadCacheConfigIntent.SetImageRetainNum ->
+            is DownloadCacheConfigIntent.SetImageRetainNum -> {
                 update { it.copy(imageRetainNum = intent.value) }
-            is DownloadCacheConfigIntent.SetUserAgent ->
+            }
+            is DownloadCacheConfigIntent.SetUserAgent -> {
                 update { it.copy(userAgent = intent.value) }
-            is DownloadCacheConfigIntent.ShowDialog ->
+            }
+            is DownloadCacheConfigIntent.ShowDialog -> {
                 _uiState.update { it.copy(dialog = intent.dialog) }
-            DownloadCacheConfigIntent.DismissDialog ->
+            }
+            DownloadCacheConfigIntent.DismissDialog -> {
                 _uiState.update { it.copy(dialog = null) }
-            DownloadCacheConfigIntent.ConfirmDialog -> confirmDialog()
+            }
+            DownloadCacheConfigIntent.ConfirmDialog -> {
+                confirmDialog()
+            }
         }
     }
 
@@ -90,7 +98,9 @@ class DownloadCacheConfigViewModel(
                     FileUtils.delete(appCtx.cacheDir.absolutePath)
                     appCtx.externalCacheDir?.deleteRecursively()
                 }
-                DownloadCacheConfigDialog.ShrinkDatabase -> shrinkDatabaseUseCase.execute()
+                DownloadCacheConfigDialog.ShrinkDatabase -> {
+                    shrinkDatabaseUseCase.execute()
+                }
             }
         }
     }

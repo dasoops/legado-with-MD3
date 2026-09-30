@@ -14,7 +14,6 @@ import io.legado.app.constant.AppLog
 import io.legado.app.utils.toastOnUi
 
 class PermissionActivity : AppCompatActivity() {
-
     private var rationaleDialog: AlertDialog? = null
 
     private val settingActivityResult =
@@ -74,9 +73,10 @@ class PermissionActivity : AppCompatActivity() {
             return
         }
         val packageUri = Uri.fromParts("package", packageName, null)
-        val intent = Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION).apply {
-            data = packageUri
-        }
+        val intent =
+            Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION).apply {
+                data = packageUri
+            }
         runCatching {
             settingActivityResult.launch(intent)
         }.getOrElse {
@@ -92,16 +92,15 @@ class PermissionActivity : AppCompatActivity() {
     override fun onRequestPermissionsResult(
         requestCode: Int,
         permissions: Array<String>,
-        grantResults: IntArray
+        grantResults: IntArray,
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         RequestPlugins.sRequestCallback?.onRequestPermissionsResult(
             permissions,
-            grantResults
+            grantResults,
         )
         finish()
     }
-
 
     override fun startActivity(intent: Intent) {
         super.startActivity(intent)
@@ -118,7 +117,7 @@ class PermissionActivity : AppCompatActivity() {
     private fun showSettingDialog(
         permissions: Array<String>,
         rationale: CharSequence?,
-        onOk: () -> Unit
+        onOk: () -> Unit,
     ) {
         rationaleDialog?.dismiss()
         if (rationale.isNullOrEmpty()) {
@@ -126,27 +125,27 @@ class PermissionActivity : AppCompatActivity() {
             return
         }
 
-        rationaleDialog = MaterialAlertDialogBuilder(this)
-            .setTitle(R.string.dialog_title)
-            .setMessage(rationale)
-            .setPositiveButton(R.string.dialog_setting) { _, _ -> onOk() }
-            .setNegativeButton(R.string.dialog_cancel) { _, _ ->
-                RequestPlugins.sRequestCallback?.onRequestPermissionsResult(
-                    permissions, IntArray(0)
-                )
-                finish()
-            }
-            .setOnCancelListener {
-                RequestPlugins.sRequestCallback?.onRequestPermissionsResult(
-                    permissions, IntArray(0)
-                )
-                finish()
-            }
-            .show()
+        rationaleDialog =
+            MaterialAlertDialogBuilder(this)
+                .setTitle(R.string.dialog_title)
+                .setMessage(rationale)
+                .setPositiveButton(R.string.dialog_setting) { _, _ -> onOk() }
+                .setNegativeButton(R.string.dialog_cancel) { _, _ ->
+                    RequestPlugins.sRequestCallback?.onRequestPermissionsResult(
+                        permissions,
+                        IntArray(0),
+                    )
+                    finish()
+                }.setOnCancelListener {
+                    RequestPlugins.sRequestCallback?.onRequestPermissionsResult(
+                        permissions,
+                        IntArray(0),
+                    )
+                    finish()
+                }.show()
     }
 
     companion object {
-
         const val KEY_RATIONALE = "KEY_RATIONALE"
         const val KEY_INPUT_REQUEST_TYPE = "KEY_INPUT_REQUEST_TYPE"
         const val KEY_INPUT_PERMISSIONS_CODE = "KEY_INPUT_PERMISSIONS_CODE"

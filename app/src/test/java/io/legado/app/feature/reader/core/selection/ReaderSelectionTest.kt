@@ -5,21 +5,29 @@ import io.legado.app.feature.reader.core.model.ReaderPage
 import io.legado.app.feature.reader.core.model.ReaderPageId
 import io.legado.app.feature.reader.core.model.ReaderRect
 import io.legado.app.feature.reader.core.model.ReaderTextStyle
+import java.util.Locale
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Test
-import java.util.Locale
 
 class ReaderSelectionTest {
     private val style = ReaderTextStyle(0, 16f)
-    private val page = ReaderPage(
-        ReaderPageId(0, 0), "", "甲乙丙", 100, 100, 0f, 20f,
-        listOf(
-            ReaderElement.Text(ReaderRect(0f, 0f, 10f, 20f), 15f, "甲", style, false, false, chapterPosition = 0),
-            ReaderElement.Text(ReaderRect(10f, 0f, 20f, 20f), 15f, "乙", style, false, false, chapterPosition = 1),
-            ReaderElement.Text(ReaderRect(20f, 0f, 30f, 20f), 15f, "丙", style, false, false, chapterPosition = 2),
-        ), 1L,
-    )
+    private val page =
+        ReaderPage(
+            ReaderPageId(0, 0),
+            "",
+            "甲乙丙",
+            100,
+            100,
+            0f,
+            20f,
+            listOf(
+                ReaderElement.Text(ReaderRect(0f, 0f, 10f, 20f), 15f, "甲", style, false, false, chapterPosition = 0),
+                ReaderElement.Text(ReaderRect(10f, 0f, 20f, 20f), 15f, "乙", style, false, false, chapterPosition = 1),
+                ReaderElement.Text(ReaderRect(20f, 0f, 30f, 20f), 15f, "丙", style, false, false, chapterPosition = 2),
+            ),
+            1L,
+        )
 
     @Test fun reverseSelectionNormalizesAndPreservesTextOrder() {
         val selection = ReaderSelection(0, 2, 0)
@@ -53,23 +61,25 @@ class ReaderSelectionTest {
     @Test fun longPressSelectsTheWholeWordAcrossVisualLines() {
         val values = listOf("read", "er", " ", "canvas")
         var position = 0
-        val elements = values.mapIndexed { index, value ->
-            ReaderElement.Text(
-                bounds = ReaderRect(
-                    if (index == 1) 0f else index * 20f,
-                    if (index == 1) 20f else 0f,
-                    if (index == 1) 20f else index * 20f + 20f,
-                    if (index == 1) 40f else 20f,
-                ),
-                baselinePx = if (index == 1) 35f else 15f,
-                value = value,
-                style = style,
-                selected = false,
-                emphasized = false,
-                chapterPosition = position.also { position += value.length },
-                paragraphIndex = 0,
-            )
-        }
+        val elements =
+            values.mapIndexed { index, value ->
+                ReaderElement.Text(
+                    bounds =
+                    ReaderRect(
+                        if (index == 1) 0f else index * 20f,
+                        if (index == 1) 20f else 0f,
+                        if (index == 1) 20f else index * 20f + 20f,
+                        if (index == 1) 40f else 20f,
+                    ),
+                    baselinePx = if (index == 1) 35f else 15f,
+                    value = value,
+                    style = style,
+                    selected = false,
+                    emphasized = false,
+                    chapterPosition = position.also { position += value.length },
+                    paragraphIndex = 0,
+                )
+            }
         val wrapped = page.copy(text = values.joinToString(""), elements = elements)
 
         val selection = ReaderSelectionPolicy.startWord(wrapped, 5f, 30f, Locale.ENGLISH)!!
@@ -80,15 +90,23 @@ class ReaderSelectionTest {
     }
 
     @Test fun longPressKeepsWordSelectionInsideTheHitParagraph() {
-        val first = page.elements.filterIsInstance<ReaderElement.Text>().map {
-            it.copy(paragraphIndex = 0)
-        }
-        val second = listOf(
-            ReaderElement.Text(
-                ReaderRect(0f, 30f, 20f, 50f), 45f, "word", style, false, false,
-                chapterPosition = 4, paragraphIndex = 1,
-            ),
-        )
+        val first =
+            page.elements.filterIsInstance<ReaderElement.Text>().map {
+                it.copy(paragraphIndex = 0)
+            }
+        val second =
+            listOf(
+                ReaderElement.Text(
+                    ReaderRect(0f, 30f, 20f, 50f),
+                    45f,
+                    "word",
+                    style,
+                    false,
+                    false,
+                    chapterPosition = 4,
+                    paragraphIndex = 1,
+                ),
+            )
         val paragraphs = page.copy(elements = first + second)
 
         val selection = ReaderSelectionPolicy.startWord(paragraphs, 5f, 40f, Locale.ENGLISH)!!
@@ -98,18 +116,30 @@ class ReaderSelectionTest {
 
     @Test
     fun longPressSnapsAcrossLetterSpacingGaps() {
-        val spaced = page.copy(
-            elements = listOf(
-                ReaderElement.Text(
-                    ReaderRect(0f, 0f, 10f, 20f), 15f, "甲", style, false, false,
-                    chapterPosition = 0,
-                ),
-                ReaderElement.Text(
-                    ReaderRect(14f, 0f, 24f, 20f), 15f, "乙", style, false, false,
-                    chapterPosition = 1,
+        val spaced =
+            page.copy(
+                elements =
+                listOf(
+                    ReaderElement.Text(
+                        ReaderRect(0f, 0f, 10f, 20f),
+                        15f,
+                        "甲",
+                        style,
+                        false,
+                        false,
+                        chapterPosition = 0,
+                    ),
+                    ReaderElement.Text(
+                        ReaderRect(14f, 0f, 24f, 20f),
+                        15f,
+                        "乙",
+                        style,
+                        false,
+                        false,
+                        chapterPosition = 1,
+                    ),
                 ),
             )
-        )
 
         val selection = ReaderSelectionPolicy.startWord(spaced, 12f, 10f, Locale.CHINESE)
 
@@ -136,9 +166,14 @@ class ReaderSelectionTest {
         assertEquals(2, continued.focus)
     }
 
-    private val titledPage = page.copy(elements = listOf(
-        ReaderElement.Text(ReaderRect(0f, 30f, 10f, 50f), 45f, "题", style, false, true, chapterPosition = 0),
-    ) + page.elements)
+    private val titledPage =
+        page.copy(
+            elements =
+            listOf(
+                ReaderElement.Text(ReaderRect(0f, 30f, 10f, 50f), 45f, "题", style, false, true, chapterPosition = 0),
+            ) +
+                page.elements,
+        )
 
     @Test fun bodySelectionDoesNotIncludeTitleWithTheSameOffset() {
         val selection = ReaderSelectionPolicy.start(titledPage, 5f, 10f)!!
@@ -187,13 +222,14 @@ class ReaderSelectionTest {
     }
 
     @Test fun copyingPreservesParagraphBreaksButNotVisualLineWraps() {
-        val elements = page.elements.filterIsInstance<ReaderElement.Text>().mapIndexed { index, text ->
-            text.copy(
-                paragraphIndex = if (index < 2) 0 else 1,
-                chapterPosition = if (index < 2) index else 3,
-                bounds = ReaderRect(0f, index * 20f, 10f, (index + 1) * 20f),
-            )
-        }
+        val elements =
+            page.elements.filterIsInstance<ReaderElement.Text>().mapIndexed { index, text ->
+                text.copy(
+                    paragraphIndex = if (index < 2) 0 else 1,
+                    chapterPosition = if (index < 2) index else 3,
+                    bounds = ReaderRect(0f, index * 20f, 10f, (index + 1) * 20f),
+                )
+            }
         val paragraphs = page.copy(elements = elements)
         assertEquals("甲乙\n丙", ReaderSelection(0, 0, 3).selectedText(paragraphs))
         assertEquals("乙\n丙", ReaderSelection(0, 3, 1).selectedText(paragraphs))
@@ -201,17 +237,20 @@ class ReaderSelectionTest {
     }
 
     @Test fun copyingAcrossPagesUsesDocumentOrderAndRemovesBoundaryDuplicates() {
-        val first = page.copy(
-            elements = page.elements.take(2),
-            id = ReaderPageId(0, 0),
-        )
-        val second = page.copy(
-            elements = listOf(
-                page.elements[1],
-                page.elements[2],
-            ),
-            id = ReaderPageId(0, 1),
-        )
+        val first =
+            page.copy(
+                elements = page.elements.take(2),
+                id = ReaderPageId(0, 0),
+            )
+        val second =
+            page.copy(
+                elements =
+                listOf(
+                    page.elements[1],
+                    page.elements[2],
+                ),
+                id = ReaderPageId(0, 1),
+            )
 
         assertEquals("甲乙丙", ReaderSelection(0, 0, 2).selectedText(listOf(second, first)))
     }
@@ -223,19 +262,31 @@ class ReaderSelectionTest {
      */
     @Test
     fun scrollModeSelectionExtendsIntoTheNextChapterPage() {
-        val nextChapter = page.copy(
-            id = ReaderPageId(1, 0),
-            elements = listOf(
-                ReaderElement.Text(
-                    ReaderRect(0f, 0f, 10f, 20f), 15f, "丁", style, false, false,
-                    chapterPosition = 0,
+        val nextChapter =
+            page.copy(
+                id = ReaderPageId(1, 0),
+                elements =
+                listOf(
+                    ReaderElement.Text(
+                        ReaderRect(0f, 0f, 10f, 20f),
+                        15f,
+                        "丁",
+                        style,
+                        false,
+                        false,
+                        chapterPosition = 0,
+                    ),
                 ),
-            ),
-        )
+            )
         val started = ReaderSelectionPolicy.start(page, 25f, 10f)!!
-        val extended = ReaderSelectionPolicy.extend(
-            started, nextChapter, 5f, 10f, allowChapterCrossing = true,
-        )
+        val extended =
+            ReaderSelectionPolicy.extend(
+                started,
+                nextChapter,
+                5f,
+                10f,
+                allowChapterCrossing = true,
+            )
 
         assertEquals(0, extended.startChapterIndex)
         assertEquals(1, extended.endChapterIndex)

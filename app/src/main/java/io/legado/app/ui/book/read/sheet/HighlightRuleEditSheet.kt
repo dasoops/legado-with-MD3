@@ -75,12 +75,12 @@ import io.legado.app.ui.widget.components.settingItem.TinySliderSettingItem
 import io.legado.app.ui.widget.components.settingItem.TinySwitchSettingItem
 import io.legado.app.ui.widget.components.text.AppText
 import io.legado.app.utils.toastOnUi
+import java.io.File
+import kotlin.math.roundToInt
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import splitties.init.appCtx
-import java.io.File
-import kotlin.math.roundToInt
 
 @Composable
 fun HighlightRuleEditSheet(
@@ -107,7 +107,7 @@ fun HighlightRuleEditSheet(
     // Style state
     var textColor by remember(show, rule) {
         mutableIntStateOf(
-            initial.textColor ?: 0xFF63C37D.toInt()
+            initial.textColor ?: 0xFF63C37D.toInt(),
         )
     }
     var hasTextColor by remember(show, rule) { mutableStateOf(initial.textColor != null) }
@@ -116,11 +116,11 @@ fun HighlightRuleEditSheet(
     var hasUnderline by remember(show, rule) { mutableStateOf(initial.underlineMode > 0) }
     var underlineMode by remember(
         show,
-        rule
+        rule,
     ) { mutableIntStateOf(if (initial.underlineMode > 0) initial.underlineMode else 1) }
     var underlineColor by remember(show, rule) {
         mutableIntStateOf(
-            initial.underlineColor ?: 0xFF63C37D.toInt()
+            initial.underlineColor ?: 0xFF63C37D.toInt(),
         )
     }
     var hasUnderlineColor by remember(show, rule) { mutableStateOf(initial.underlineColor != null) }
@@ -128,7 +128,7 @@ fun HighlightRuleEditSheet(
     var underlineOffset by remember(show, rule) { mutableFloatStateOf(initial.underlineOffset) }
     var underlineSvgPath by remember(
         show,
-        rule
+        rule,
     ) { mutableStateOf(initial.underlineSvgPath.orEmpty()) }
     var bgImage by remember(show, rule) { mutableStateOf(initial.bgImage.orEmpty()) }
     var bgImageFit by remember(show, rule) { mutableIntStateOf(initial.bgImageFit) }
@@ -168,7 +168,7 @@ fun HighlightRuleEditSheet(
 
     // File picker for background images (uses OpenDocument to avoid MediaStore transcoding)
     val imagePicker = rememberLauncherForActivityResult(
-        ActivityResultContracts.OpenDocument()
+        ActivityResultContracts.OpenDocument(),
     ) { uri: Uri? ->
         if (uri != null) {
             coroutineScope.launch {
@@ -260,7 +260,7 @@ fun HighlightRuleEditSheet(
                             npTop = npTop,
                             npBottom = npBottom,
                             manualNineSlice = manualNineSlice,
-                        )
+                        ),
                     )
                 },
                 icon = Icons.Default.Done,
@@ -529,15 +529,21 @@ fun HighlightRuleEditSheet(
                 SectionTitle("应用排版")
                 LazyRow(
                     modifier = Modifier.padding(vertical = 4.dp),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
                     // Global toggle
                     item {
                         val selected = configNames.isEmpty()
-                        val bg = if (selected) LegadoTheme.colorScheme.secondaryContainer
-                        else LegadoTheme.colorScheme.surfaceContainerLow
-                        val fg = if (selected) LegadoTheme.colorScheme.onSecondaryContainer
-                        else LegadoTheme.colorScheme.onSurfaceVariant
+                        val bg = if (selected) {
+                            LegadoTheme.colorScheme.secondaryContainer
+                        } else {
+                            LegadoTheme.colorScheme.surfaceContainerLow
+                        }
+                        val fg = if (selected) {
+                            LegadoTheme.colorScheme.onSecondaryContainer
+                        } else {
+                            LegadoTheme.colorScheme.onSurfaceVariant
+                        }
                         NormalCard(
                             onClick = { configNames = emptySet() },
                             containerColor = bg,
@@ -553,14 +559,23 @@ fun HighlightRuleEditSheet(
                     }
                     itemsIndexed(allConfigNames) { _, cn ->
                         val selected = cn in configNames
-                        val bg = if (selected) LegadoTheme.colorScheme.secondaryContainer
-                        else LegadoTheme.colorScheme.surfaceContainerLow
-                        val fg = if (selected) LegadoTheme.colorScheme.onSecondaryContainer
-                        else LegadoTheme.colorScheme.onSurfaceVariant
+                        val bg = if (selected) {
+                            LegadoTheme.colorScheme.secondaryContainer
+                        } else {
+                            LegadoTheme.colorScheme.surfaceContainerLow
+                        }
+                        val fg = if (selected) {
+                            LegadoTheme.colorScheme.onSecondaryContainer
+                        } else {
+                            LegadoTheme.colorScheme.onSurfaceVariant
+                        }
                         NormalCard(
                             onClick = {
-                                configNames = if (selected) configNames - cn
-                                else configNames + cn
+                                configNames = if (selected) {
+                                    configNames - cn
+                                } else {
+                                    configNames + cn
+                                }
                             },
                             containerColor = bg,
                             cornerRadius = 8.dp,
@@ -669,7 +684,7 @@ fun HighlightRuleEditSheet(
     val readSettingsRepository: ReadSettingsRepository = org.koin.compose.koinInject()
     val fontSelectScope = rememberCoroutineScope()
     val fontSelectPreferences by readSettingsRepository.preferences.collectAsStateWithLifecycle(
-        initialValue = null
+        initialValue = null,
     )
     val fontFolderState = remember(fontSelectPreferences) {
         val pref = fontSelectPreferences
@@ -681,11 +696,12 @@ fun HighlightRuleEditSheet(
     }
     val systemTypefaces = stringArrayResource(R.array.system_typefaces)
     val fontFolderLauncher = rememberLauncherForActivityResult(
-        ActivityResultContracts.OpenDocumentTree()
+        ActivityResultContracts.OpenDocumentTree(),
     ) { uri ->
         uri?.let {
             context.contentResolver.takePersistableUriPermission(
-                it, Intent.FLAG_GRANT_READ_URI_PERMISSION
+                it,
+                Intent.FLAG_GRANT_READ_URI_PERMISSION,
             )
             fontSelectScope.launch {
                 readSettingsRepository.setFontFolder(it.toString())
@@ -698,8 +714,14 @@ fun HighlightRuleEditSheet(
         folderState = fontFolderState,
         selectedFontPath = fontPath,
         onDismissRequest = { showFontSelect = false },
-        onSelectFont = { fontPath = it.uri.toString(); showFontSelect = false },
-        onSelectSystemTypeface = { fontPath = ""; showFontSelect = false },
+        onSelectFont = {
+            fontPath = it.uri.toString()
+            showFontSelect = false
+        },
+        onSelectSystemTypeface = {
+            fontPath = ""
+            showFontSelect = false
+        },
         onOpenFolderPicker = { fontFolderLauncher.launch(null) },
         systemTypefaces = systemTypefaces,
     )
@@ -850,7 +872,9 @@ private fun NinePatchEditorDialog(
             val file = File(imagePath)
             if (file.exists()) {
                 BitmapFactory.decodeFile(imagePath)
-            } else null
+            } else {
+                null
+            }
         }.getOrNull()
     }
 
@@ -910,8 +934,10 @@ private fun NinePatchEditorDialog(
                                 detectDragGestures(
                                     onDragStart = { point ->
                                         val rect = nineSlicePreviewRect(
-                                            size.width.toFloat(), size.height.toFloat(),
-                                            bitmap.width.toFloat(), bitmap.height.toFloat(),
+                                            size.width.toFloat(),
+                                            size.height.toFloat(),
+                                            bitmap.width.toFloat(),
+                                            bitmap.height.toFloat(),
                                         )
                                         val candidates = buildList {
                                             if (stretchMode != 2) {
@@ -920,7 +946,11 @@ private fun NinePatchEditorDialog(
                                             }
                                             if (stretchMode != 1) {
                                                 add(NineSliceHandle.TOP to kotlin.math.abs(point.y - (rect.top + rect.height * top)))
-                                                add(NineSliceHandle.BOTTOM to kotlin.math.abs(point.y - (rect.bottom - rect.height * bottom)))
+                                                add(
+                                                    NineSliceHandle.BOTTOM to kotlin.math.abs(
+                                                        point.y - (rect.bottom - rect.height * bottom),
+                                                    ),
+                                                )
                                             }
                                         }
                                         dragHandle = candidates.minByOrNull { it.second }
@@ -930,27 +960,30 @@ private fun NinePatchEditorDialog(
                                     onDragCancel = { dragHandle = null },
                                 ) { change, amount ->
                                     val rect = nineSlicePreviewRect(
-                                        size.width.toFloat(), size.height.toFloat(),
-                                        bitmap.width.toFloat(), bitmap.height.toFloat(),
+                                        size.width.toFloat(),
+                                        size.height.toFloat(),
+                                        bitmap.width.toFloat(),
+                                        bitmap.height.toFloat(),
                                     )
                                     when (dragHandle) {
-                                        NineSliceHandle.LEFT -> left =
-                                            (left + amount.x / rect.width).coerceIn(0f, 0.5f)
-
-                                        NineSliceHandle.RIGHT -> right =
-                                            (right - amount.x / rect.width).coerceIn(0f, 0.5f)
-
-                                        NineSliceHandle.TOP -> top =
-                                            (top + amount.y / rect.height).coerceIn(0f, 0.5f)
-
-                                        NineSliceHandle.BOTTOM -> bottom =
-                                            (bottom - amount.y / rect.height).coerceIn(0f, 0.5f)
-
+                                        NineSliceHandle.LEFT ->
+                                            left =
+                                                (left + amount.x / rect.width).coerceIn(0f, 0.5f)
+                                        NineSliceHandle.RIGHT ->
+                                            right =
+                                                (right - amount.x / rect.width).coerceIn(0f, 0.5f)
+                                        NineSliceHandle.TOP ->
+                                            top =
+                                                (top + amount.y / rect.height).coerceIn(0f, 0.5f)
+                                        NineSliceHandle.BOTTOM ->
+                                            bottom =
+                                                (bottom - amount.y / rect.height).coerceIn(0f, 0.5f)
                                         null -> Unit
                                     }
                                     if (dragHandle != null) change.consume()
                                 }
-                            }) {
+                            },
+                    ) {
                         val canvasWidth = size.width
                         val canvasHeight = size.height
                         val bw = bitmap.width.toFloat()
@@ -990,8 +1023,10 @@ private fun NinePatchEditorDialog(
                         )
                         val radius = 5.dp.toPx()
                         listOf(
-                            Offset(lx, (ty + by) / 2f), Offset(rx, (ty + by) / 2f),
-                            Offset((lx + rx) / 2f, ty), Offset((lx + rx) / 2f, by),
+                            Offset(lx, (ty + by) / 2f),
+                            Offset(rx, (ty + by) / 2f),
+                            Offset((lx + rx) / 2f, ty),
+                            Offset((lx + rx) / 2f, by),
                         ).forEach { drawCircle(lineColor, radius, it) }
                     }
                 }

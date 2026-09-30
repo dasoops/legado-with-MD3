@@ -13,7 +13,6 @@ import splitties.systemservices.powerManager
 
 @Suppress("MemberVisibilityCanBePrivate")
 internal class Request : OnRequestPermissionsResultCallback {
-
     internal val requestTime: Long = System.currentTimeMillis()
     private var requestCode: Int = TYPE_REQUEST_PERMISSION
     private var permissions: ArrayList<String> = ArrayList()
@@ -43,7 +42,9 @@ internal class Request : OnRequestPermissionsResultCallback {
         errorCallback = callback
     }
 
-    fun setRationale(@StringRes resId: Int) {
+    fun setRationale(
+        @StringRes resId: Int,
+    ) {
         rationale = appCtx.getString(resId)
     }
 
@@ -101,7 +102,6 @@ internal class Request : OnRequestPermissionsResultCallback {
                         deniedPermissionList.add(permission)
                     }
                 }
-
                 Permissions.MANAGE_EXTERNAL_STORAGE -> {
                     if (Permissions.isManageExternalStorage()) {
                         if (!Environment.isExternalStorageManager()) {
@@ -109,13 +109,11 @@ internal class Request : OnRequestPermissionsResultCallback {
                         }
                     }
                 }
-
                 Permissions.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS -> {
                     if (!powerManager.isIgnoringBatteryOptimizations(appCtx.packageName)) {
                         deniedPermissionList.add(permission)
                     }
                 }
-
                 else -> {
                     if (
                         ContextCompat.checkSelfPermission(appCtx, permission)
@@ -181,7 +179,7 @@ internal class Request : OnRequestPermissionsResultCallback {
             putExtra(PermissionActivity.KEY_RATIONALE, rationale)
             putExtra(
                 PermissionActivity.KEY_INPUT_REQUEST_TYPE,
-                TYPE_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS
+                TYPE_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS,
             )
             putExtra(PermissionActivity.KEY_INPUT_PERMISSIONS_CODE, requestCode)
             putExtra(PermissionActivity.KEY_INPUT_PERMISSIONS, deniedPermissions)
@@ -190,7 +188,7 @@ internal class Request : OnRequestPermissionsResultCallback {
 
     override fun onRequestPermissionsResult(
         permissions: Array<String>,
-        grantResults: IntArray
+        grantResults: IntArray,
     ) {
         val deniedPermissions = getDeniedPermissions(permissions)
         if (deniedPermissions != null) {
@@ -221,5 +219,4 @@ internal class Request : OnRequestPermissionsResultCallback {
         const val TYPE_REQUEST_NOTIFICATIONS = 4
         const val TYPE_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS = 5
     }
-
 }

@@ -21,9 +21,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import io.legado.app.R
-import io.legado.app.ui.book.read.ReadSheetConfigUiState
 import io.legado.app.ui.book.read.ConfigUpdate
 import io.legado.app.ui.book.read.ReadBookIntent
+import io.legado.app.ui.book.read.ReadSheetConfigUiState
 import io.legado.app.ui.widget.components.dialog.ColorPickerSheet
 import io.legado.app.ui.widget.components.modalBottomSheet.AppModalBottomSheet
 import io.legado.app.ui.widget.components.settingItem.TinyColorSettingItem
@@ -53,7 +53,8 @@ fun UnderlineConfigSheet(
         title = stringResource(R.string.text_underline),
     ) {
         Column(
-            modifier = Modifier
+            modifier =
+            Modifier
                 .fillMaxWidth()
                 .verticalScroll(rememberScrollState())
                 .padding(bottom = 16.dp),
@@ -119,7 +120,8 @@ fun UnderlineConfigSheet(
             Text(
                 text = stringResource(R.string.text_dottedline),
                 style = MaterialTheme.typography.titleSmallEmphasized,
-                modifier = Modifier
+                modifier =
+                Modifier
                     .fillMaxWidth()
                     .padding(vertical = 8.dp),
                 textAlign = TextAlign.Center,

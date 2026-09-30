@@ -38,9 +38,10 @@ fun ScrollbarLazyColumn(
 ) {
     val direction = LocalLayoutDirection.current
     val density = LocalDensity.current
-    val positionOffset = remember(contentPadding) {
-        with(density) { contentPadding.calculateEndPadding(direction).toPx() }
-    }
+    val positionOffset =
+        remember(contentPadding) {
+            with(density) { contentPadding.calculateEndPadding(direction).toPx() }
+        }
     LazyColumn(
         modifier = modifier,
         state = state,

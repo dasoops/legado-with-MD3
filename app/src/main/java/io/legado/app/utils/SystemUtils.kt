@@ -10,10 +10,8 @@ import splitties.init.appCtx
 import splitties.systemservices.displayManager
 import splitties.systemservices.powerManager
 
-
 @Suppress("unused")
 object SystemUtils {
-
     @SuppressLint("ObsoleteSdkInt")
     fun ignoreBatteryOptimization(activity: Activity) {
         if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.M) return
@@ -28,14 +26,11 @@ object SystemUtils {
                 activity.startActivity(intent)
             } catch (ignored: Throwable) {
             }
-
         }
     }
 
-    fun isScreenOn(): Boolean {
-        return displayManager.displays.filterNotNull().any {
-            it.state != Display.STATE_OFF
-        }
+    fun isScreenOn(): Boolean = displayManager.displays.filterNotNull().any {
+        it.state != Display.STATE_OFF
     }
 
     /**

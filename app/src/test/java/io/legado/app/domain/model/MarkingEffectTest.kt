@@ -6,7 +6,6 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class MarkingEffectTest {
-
     @Test
     fun `效果到样式 - 单实线是 mode 1 加线色`() {
         val style = MarkingEffect.SOLID.toStyle(0xFFFF0000.toInt())
@@ -55,23 +54,23 @@ class MarkingEffectTest {
     fun `样式到效果 - 下划线 mode 反推正确`() {
         assertEquals(
             MarkingEffect.SOLID,
-            MarkingEffect.fromStyle(TextProcessStyle(underlineMode = 1))
+            MarkingEffect.fromStyle(TextProcessStyle(underlineMode = 1)),
         )
         assertEquals(
             MarkingEffect.DASHED,
-            MarkingEffect.fromStyle(TextProcessStyle(underlineMode = 2))
+            MarkingEffect.fromStyle(TextProcessStyle(underlineMode = 2)),
         )
         assertEquals(
             MarkingEffect.WAVE,
-            MarkingEffect.fromStyle(TextProcessStyle(underlineMode = 3))
+            MarkingEffect.fromStyle(TextProcessStyle(underlineMode = 3)),
         )
         assertEquals(
             MarkingEffect.STRIKE,
-            MarkingEffect.fromStyle(TextProcessStyle(underlineMode = 6))
+            MarkingEffect.fromStyle(TextProcessStyle(underlineMode = 6)),
         )
         assertEquals(
             MarkingEffect.HIGHLIGHT,
-            MarkingEffect.fromStyle(TextProcessStyle(underlineMode = 7))
+            MarkingEffect.fromStyle(TextProcessStyle(underlineMode = 7)),
         )
     }
 
@@ -79,11 +78,11 @@ class MarkingEffectTest {
     fun `样式到效果 - 背景与字体色反推`() {
         assertEquals(
             MarkingEffect.BG,
-            MarkingEffect.fromStyle(TextProcessStyle(bgColor = 0x33FFD54F.toInt()))
+            MarkingEffect.fromStyle(TextProcessStyle(bgColor = 0x33FFD54F.toInt())),
         )
         assertEquals(
             MarkingEffect.TEXT,
-            MarkingEffect.fromStyle(TextProcessStyle(textColor = 0xFFFF0000.toInt()))
+            MarkingEffect.fromStyle(TextProcessStyle(textColor = 0xFFFF0000.toInt())),
         )
     }
 
@@ -94,7 +93,7 @@ class MarkingEffectTest {
         // mode 4（标题强调条）/ mode 5（SVG）不属于 5x1，回退单实线
         assertEquals(
             MarkingEffect.SOLID,
-            MarkingEffect.fromStyle(TextProcessStyle(underlineMode = 4))
+            MarkingEffect.fromStyle(TextProcessStyle(underlineMode = 4)),
         )
     }
 
@@ -102,15 +101,15 @@ class MarkingEffectTest {
     fun `展示色 - 背景剥 alpha 取底色，下划线取线色`() {
         assertEquals(
             0xFFFFD54F.toInt(),
-            MarkingEffect.colorOf(TextProcessStyle(bgColor = 0x33FFD54F.toInt()))
+            MarkingEffect.colorOf(TextProcessStyle(bgColor = 0x33FFD54F.toInt())),
         )
         assertEquals(
             0xFFFF0000.toInt(),
             MarkingEffect.colorOf(
                 TextProcessStyle(
                     underlineMode = 1,
-                    underlineColor = 0xFFFF0000.toInt()
-                )
+                    underlineColor = 0xFFFF0000.toInt(),
+                ),
             ),
         )
         assertEquals(

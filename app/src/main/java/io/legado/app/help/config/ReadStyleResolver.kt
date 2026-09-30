@@ -15,21 +15,21 @@ import io.legado.app.utils.isNightMode
 import io.legado.app.utils.printOnDebug
 import io.legado.app.utils.resizeAndRecycle
 import io.legado.app.utils.sysConfiguration
-import splitties.init.appCtx
-import org.koin.core.context.GlobalContext
 import java.io.File
+import org.koin.core.context.GlobalContext
+import splitties.init.appCtx
 
 object ReadStyleResolver {
-
     private val shellGateway by lazy { GlobalContext.get().get<AppShellSettingsGateway>() }
     private val themeGateway by lazy { GlobalContext.get().get<ThemeSettingsGateway>() }
 
     private val isNightThemeCompat: Boolean
-        get() = when (shellGateway.currentSettings.themeMode) {
-            "1" -> false
-            "2" -> true
-            else -> sysConfiguration.isNightMode
-        }
+        get() =
+            when (shellGateway.currentSettings.themeMode) {
+                "1" -> false
+                "2" -> true
+                else -> sysConfiguration.isNightMode
+            }
 
     private val isEInkModeCompat: Boolean
         get() = themeGateway.currentSettings.appTheme == "4"
@@ -37,12 +37,12 @@ object ReadStyleResolver {
     enum class ReadStyleMode {
         Day,
         Night,
-        EInk
+        EInk,
     }
 
     data class ReadBackground(
         val type: Int,
-        val value: String
+        val value: String,
     )
 
     fun currentMode(): ReadStyleMode {
@@ -50,65 +50,61 @@ object ReadStyleResolver {
         return resolveReadStyleMode(isEInkModeCompat, isNightTheme)
     }
 
-    fun currentMode(isNightTheme: Boolean): ReadStyleMode {
-        return resolveReadStyleMode(isEInkModeCompat, isNightTheme)
-    }
+    fun currentMode(isNightTheme: Boolean): ReadStyleMode = resolveReadStyleMode(isEInkModeCompat, isNightTheme)
 
-    fun isNightTheme(): Boolean {
-        return ReadSessionState.isDarkThemeOverride ?: isNightThemeCompat
-    }
+    fun isNightTheme(): Boolean = ReadSessionState.isDarkThemeOverride ?: isNightThemeCompat
 
     fun withCurrentBackground(
         config: ReadBookConfig.Config,
         bgType: Int,
-        bg: String
-    ): ReadBookConfig.Config {
-        return when (currentMode()) {
-            ReadStyleMode.EInk -> config.copy(bgTypeEInk = bgType, bgStrEInk = bg)
-            ReadStyleMode.Night -> config.copy(bgTypeNight = bgType, bgStrNight = bg)
-            ReadStyleMode.Day -> config.copy(bgType = bgType, bgStr = bg)
-        }
+        bg: String,
+    ): ReadBookConfig.Config = when (currentMode()) {
+        ReadStyleMode.EInk -> config.copy(bgTypeEInk = bgType, bgStrEInk = bg)
+        ReadStyleMode.Night -> config.copy(bgTypeNight = bgType, bgStrNight = bg)
+        ReadStyleMode.Day -> config.copy(bgType = bgType, bgStr = bg)
     }
 
-    fun currentBackground(config: ReadBookConfig.Config): ReadBackground {
-        return currentBackground(config, currentMode())
-    }
+    fun currentBackground(config: ReadBookConfig.Config): ReadBackground = currentBackground(config, currentMode())
 
     fun currentBackground(
         config: ReadBookConfig.Config,
-        isNightTheme: Boolean
-    ): ReadBackground {
-        return currentBackground(config, currentMode(isNightTheme))
-    }
+        isNightTheme: Boolean,
+    ): ReadBackground = currentBackground(config, currentMode(isNightTheme))
 
     private fun currentBackground(
         config: ReadBookConfig.Config,
-        mode: ReadStyleMode
-    ): ReadBackground {
-        return when (mode) {
-            ReadStyleMode.EInk -> ReadBackground(config.bgTypeEInk, config.bgStrEInk)
-            ReadStyleMode.Night -> ReadBackground(config.bgTypeNight, config.bgStrNight)
-            ReadStyleMode.Day -> ReadBackground(config.bgType, config.bgStr)
-        }
+        mode: ReadStyleMode,
+    ): ReadBackground = when (mode) {
+        ReadStyleMode.EInk -> ReadBackground(config.bgTypeEInk, config.bgStrEInk)
+        ReadStyleMode.Night -> ReadBackground(config.bgTypeNight, config.bgStrNight)
+        ReadStyleMode.Day -> ReadBackground(config.bgType, config.bgStr)
     }
 
-    fun backgroundPath(config: ReadBookConfig.Config, bgIndex: Int): String? {
-        val bgType = when (bgIndex) {
-            0 -> config.bgType
-            1 -> config.bgTypeNight
-            2 -> config.bgTypeEInk
-            else -> error("unknown bgIndex: $bgIndex")
-        }
-        val bgStr = when (bgIndex) {
-            0 -> config.bgStr
-            1 -> config.bgStrNight
-            2 -> config.bgStrEInk
-            else -> error("unknown bgIndex: $bgIndex")
-        }
+    fun backgroundPath(
+        config: ReadBookConfig.Config,
+        bgIndex: Int,
+    ): String? {
+        val bgType =
+            when (bgIndex) {
+                0 -> config.bgType
+                1 -> config.bgTypeNight
+                2 -> config.bgTypeEInk
+                else -> error("unknown bgIndex: $bgIndex")
+            }
+        val bgStr =
+            when (bgIndex) {
+                0 -> config.bgStr
+                1 -> config.bgStrNight
+                2 -> config.bgStrEInk
+                else -> error("unknown bgIndex: $bgIndex")
+            }
         return backgroundPath(bgType, bgStr)
     }
 
-    fun backgroundPath(bgType: Int, bgStr: String): String? {
+    fun backgroundPath(
+        bgType: Int,
+        bgStr: String,
+    ): String? {
         if (bgType != 2) {
             return null
         }
@@ -122,25 +118,21 @@ object ReadStyleResolver {
     fun currentBackgroundDrawable(
         config: ReadBookConfig.Config,
         width: Int,
-        height: Int
-    ): Drawable {
-        return currentBackgroundDrawable(config, width, height, currentMode())
-    }
+        height: Int,
+    ): Drawable = currentBackgroundDrawable(config, width, height, currentMode())
 
     fun currentBackgroundDrawable(
         config: ReadBookConfig.Config,
         width: Int,
         height: Int,
-        isNightTheme: Boolean
-    ): Drawable {
-        return currentBackgroundDrawable(config, width, height, currentMode(isNightTheme))
-    }
+        isNightTheme: Boolean,
+    ): Drawable = currentBackgroundDrawable(config, width, height, currentMode(isNightTheme))
 
     private fun currentBackgroundDrawable(
         config: ReadBookConfig.Config,
         width: Int,
         height: Int,
-        mode: ReadStyleMode
+        mode: ReadStyleMode,
     ): Drawable {
         if (width == 0 || height == 0) {
             return fallbackBackground()
@@ -150,22 +142,29 @@ object ReadStyleResolver {
         val resources = appCtx.resources
         val background = currentBackground(config, mode)
         try {
-            bgDrawable = when (background.type) {
-                0 -> background.value.toColorInt().toDrawable()
-                1 -> {
-                    val path = "bg" + File.separator + background.value
-                    val bitmap = BitmapUtils.decodeAssetsBitmap(appCtx, path, width, height)
-                    bitmap?.resizeAndRecycle(width, height)?.toDrawable(resources)
-                }
-                else -> {
-                    val path = background.value.let {
-                        if (it.contains(File.separator)) it
-                        else FileUtils.getPath(appCtx.externalFiles, "bg", background.value)
+            bgDrawable =
+                when (background.type) {
+                    0 -> {
+                        background.value.toColorInt().toDrawable()
                     }
-                    val bitmap = BitmapUtils.decodeBitmap(path, width, height)
-                    bitmap?.resizeAndRecycle(width, height)?.toDrawable(resources)
+                    1 -> {
+                        val path = "bg" + File.separator + background.value
+                        val bitmap = BitmapUtils.decodeAssetsBitmap(appCtx, path, width, height)
+                        bitmap?.resizeAndRecycle(width, height)?.toDrawable(resources)
+                    }
+                    else -> {
+                        val path =
+                            background.value.let {
+                                if (it.contains(File.separator)) {
+                                    it
+                                } else {
+                                    FileUtils.getPath(appCtx.externalFiles, "bg", background.value)
+                                }
+                            }
+                        val bitmap = BitmapUtils.decodeBitmap(path, width, height)
+                        bitmap?.resizeAndRecycle(width, height)?.toDrawable(resources)
+                    }
                 }
-            }
         } catch (e: OutOfMemoryError) {
             e.printOnDebug()
         } catch (e: Exception) {
@@ -176,22 +175,21 @@ object ReadStyleResolver {
     }
 
     private fun fallbackBackground(): Drawable {
-        val fallbackColor = MaterialColors.getColor(
-            appCtx,
-            com.google.android.material.R.attr.colorSurface,
-            Color.WHITE
-        )
+        val fallbackColor =
+            MaterialColors.getColor(
+                appCtx,
+                com.google.android.material.R.attr.colorSurface,
+                Color.WHITE,
+            )
         return fallbackColor.toDrawable()
     }
 }
 
 internal fun resolveReadStyleMode(
     isEInkMode: Boolean,
-    isNightTheme: Boolean
-): ReadStyleResolver.ReadStyleMode {
-    return when {
-        isEInkMode -> ReadStyleResolver.ReadStyleMode.EInk
-        isNightTheme -> ReadStyleResolver.ReadStyleMode.Night
-        else -> ReadStyleResolver.ReadStyleMode.Day
-    }
+    isNightTheme: Boolean,
+): ReadStyleResolver.ReadStyleMode = when {
+    isEInkMode -> ReadStyleResolver.ReadStyleMode.EInk
+    isNightTheme -> ReadStyleResolver.ReadStyleMode.Night
+    else -> ReadStyleResolver.ReadStyleMode.Day
 }

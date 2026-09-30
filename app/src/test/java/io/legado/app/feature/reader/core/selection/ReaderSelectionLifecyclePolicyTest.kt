@@ -5,13 +5,12 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class ReaderSelectionLifecyclePolicyTest {
-
     @Test
     fun `programmatic page change clears selection tied to old page`() {
         assertTrue(
             ReaderSelectionLifecyclePolicy.shouldClearForPageChange(
                 ReaderPageChangeOrigin.PROGRAMMATIC,
-            )
+            ),
         )
     }
 
@@ -20,7 +19,7 @@ class ReaderSelectionLifecyclePolicyTest {
         assertFalse(
             ReaderSelectionLifecyclePolicy.shouldClearForPageChange(
                 ReaderPageChangeOrigin.SELECTION_DRAG_SCROLL,
-            )
+            ),
         )
     }
 
@@ -38,7 +37,7 @@ class ReaderSelectionLifecyclePolicyTest {
                 menuVisible = true,
                 previousLayoutRevision = 10L,
                 currentLayoutRevision = 11L,
-            )
+            ),
         )
         assertFalse(
             ReaderSelectionLifecyclePolicy.shouldReanchorMenuAfterLayoutChange(
@@ -46,7 +45,7 @@ class ReaderSelectionLifecyclePolicyTest {
                 menuVisible = true,
                 previousLayoutRevision = 10L,
                 currentLayoutRevision = 10L,
-            )
+            ),
         )
         assertFalse(
             ReaderSelectionLifecyclePolicy.shouldReanchorMenuAfterLayoutChange(
@@ -54,7 +53,7 @@ class ReaderSelectionLifecyclePolicyTest {
                 menuVisible = false,
                 previousLayoutRevision = 10L,
                 currentLayoutRevision = 11L,
-            )
+            ),
         )
     }
 }

@@ -5,10 +5,12 @@ import io.legado.app.domain.repository.BookDomainRepository
 
 class DeleteBooksUseCase(
     private val bookRepository: BookDomainRepository,
-    private val localBookGateway: LocalBookGateway
+    private val localBookGateway: LocalBookGateway,
 ) {
-
-    suspend fun execute(bookUrls: Set<String>, deleteOriginal: Boolean): List<String> {
+    suspend fun execute(
+        bookUrls: Set<String>,
+        deleteOriginal: Boolean,
+    ): List<String> {
         if (bookUrls.isEmpty()) return emptyList()
         val books = bookRepository.getDeletableBooks(bookUrls)
         books.forEach { book ->

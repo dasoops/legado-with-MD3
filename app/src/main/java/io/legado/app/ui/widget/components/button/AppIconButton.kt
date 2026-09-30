@@ -22,7 +22,7 @@ fun AppIconButton(
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
     interactionSource: MutableInteractionSource? = null,
-    //M3
+    // M3
     colors: IconButtonColors = IconButtonDefaults.iconButtonColors(),
     shape: Shape = IconButtonDefaults.standardShape,
     // MIUIX
@@ -31,7 +31,7 @@ fun AppIconButton(
     miuixCornerRadius: Dp? = null,
     miuixMinHeight: Dp? = null,
     miuixMinWidth: Dp? = null,
-    content: @Composable () -> Unit
+    content: @Composable () -> Unit,
 ) {
     val isMiuix = ThemeResolver.isMiuixEngine(LegadoTheme.composeEngine)
 
@@ -45,7 +45,7 @@ fun AppIconButton(
             cornerRadius = miuixCornerRadius ?: MiuixIconButtonDefaults.CornerRadius,
             minHeight = miuixMinHeight ?: MiuixIconButtonDefaults.MinHeight,
             minWidth = miuixMinWidth ?: MiuixIconButtonDefaults.MinWidth,
-            content = content
+            content = content,
         )
     } else {
         IconButton(
@@ -55,7 +55,7 @@ fun AppIconButton(
             colors = colors,
             interactionSource = interactionSource,
             shape = shape,
-            content = content
+            content = content,
         )
     }
 }

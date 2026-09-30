@@ -24,8 +24,8 @@ import io.legado.app.ui.widget.components.settingItem.TinyClickableSettingItem
 import io.legado.app.ui.widget.components.settingItem.TinyDropdownSettingItem
 import io.legado.app.ui.widget.components.settingItem.TinySliderSettingItem
 import io.legado.app.ui.widget.components.settingItem.TinySwitchSettingItem
-import org.koin.compose.koinInject
 import kotlin.math.roundToInt
+import org.koin.compose.koinInject
 
 @Composable
 fun MoreConfigSheet(
@@ -40,7 +40,7 @@ fun MoreConfigSheet(
 ) {
     val readSettingsRepository: ReadSettingsRepository = koinInject()
     val preferences by readSettingsRepository.preferences.collectAsStateWithLifecycle(
-        initialValue = ReadPreferences()
+        initialValue = ReadPreferences(),
     )
 
     AppModalBottomSheet(
@@ -49,7 +49,8 @@ fun MoreConfigSheet(
         title = stringResource(R.string.more_setting),
     ) {
         Column(
-            modifier = Modifier
+            modifier =
+            Modifier
                 .fillMaxWidth()
                 .padding(bottom = 16.dp)
                 .verticalScroll(rememberScrollState()),
@@ -84,7 +85,7 @@ fun MoreConfigSheet(
                 },
                 onOpenEyeProtectionConfig = {
                     onIntent(ReadBookIntent.ShowSheet(ReadBookSheet.EyeProtection))
-                }
+                },
             )
 
             // Page control
@@ -178,7 +179,7 @@ private fun ScreenSettings(
     onReadBodyToLhChange: (Boolean) -> Unit,
     onAdaptSpecialStyleChange: (Boolean) -> Unit,
     onUseZhLayoutChange: (Boolean) -> Unit,
-    onOpenEyeProtectionConfig:() -> Unit,
+    onOpenEyeProtectionConfig: () -> Unit,
 ) {
     val screenDirectionEntries = stringArrayResource(R.array.screen_direction_title)
     val screenDirectionValues = stringArrayResource(R.array.screen_direction_value)
@@ -289,7 +290,8 @@ private fun PageControlSettings(
     )
     TinyClickableSettingItem(
         title = stringResource(R.string.bookmark_badge),
-        description = if (preferences.bookmarkBadgeImage.isBlank()) {
+        description =
+        if (preferences.bookmarkBadgeImage.isBlank()) {
             stringResource(R.string.bookmark_badge_default)
         } else {
             stringResource(R.string.bookmark_badge_custom)
@@ -345,7 +347,6 @@ private fun OtherSettings(
         checked = preferences.useNewTocSheet,
         onCheckedChange = onUseNewTocSheetChange,
     )
-
 
     TinySwitchSettingItem(
         title = stringResource(R.string.enable_select_vibrator),

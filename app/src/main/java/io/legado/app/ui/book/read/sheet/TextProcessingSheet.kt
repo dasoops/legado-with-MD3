@@ -240,7 +240,7 @@ private fun ReplaceRulesPage(
                     ReplaceFilter.Effective -> rule.id in effectiveIds
                 }
                 matchesFilter && rule.matches(query)
-            }
+            },
         )
     }
     var filterExpanded by remember { mutableStateOf(false) }
@@ -256,7 +256,7 @@ private fun ReplaceRulesPage(
         if (!reorderState.isAnyItemDragging) {
             lastMove?.let { move ->
                 onIntent(
-                    ReadBookIntent.MoveReplaceRule(move.draggedId, move.anchorId, move.afterAnchor)
+                    ReadBookIntent.MoveReplaceRule(move.draggedId, move.anchorId, move.afterAnchor),
                 )
             }
             lastMove = null
@@ -341,7 +341,7 @@ private fun ReplaceRulesPage(
                                                 move.draggedId,
                                                 move.anchorId,
                                                 move.afterAnchor,
-                                            )
+                                            ),
                                         )
                                     }
                                 }
@@ -394,8 +394,9 @@ private fun ContentProcessesPage(
     var viewingItem by remember { mutableStateOf<ContentProcessItemUi?>(null) }
     val items = remember(state.items, query) {
         state.items.filter {
-            query.isBlank() || it.selectedText.contains(query, true) ||
-                    it.replacementText.contains(query, true)
+            query.isBlank() ||
+                it.selectedText.contains(query, true) ||
+                it.replacementText.contains(query, true)
         }
     }
     Column(modifier = Modifier.fillMaxSize()) {
@@ -410,17 +411,14 @@ private fun ContentProcessesPage(
             state.isLoading -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 AppCircularProgressIndicator()
             }
-
             state.errorMessage != null -> AppText(
                 text = state.errorMessage,
                 color = LegadoTheme.colorScheme.error,
             )
-
             items.isEmpty() -> EmptyMessage(
                 message = stringResource(R.string.content_process_empty),
                 modifier = Modifier.fillMaxWidth(),
             )
-
             else -> LazyColumn(
                 modifier = Modifier.fillMaxSize(),
                 contentPadding = PaddingValues(bottom = 8.dp),
@@ -444,10 +442,10 @@ private fun ContentProcessesPage(
             title = contentProcessTitle(item),
             content = {
                 Column {
-                    AppText(stringResource(R.string.ai_text_clean_before))
+                    AppText(stringResource(R.string.content_process_before))
                     AppText(item.selectedText, modifier = Modifier.padding(bottom = 8.dp))
-                    AppText(stringResource(R.string.ai_text_clean_after))
-                    AppText(item.replacementText.ifEmpty { stringResource(R.string.ai_text_clean_delete) })
+                    AppText(stringResource(R.string.content_process_after))
+                    AppText(item.replacementText.ifEmpty { stringResource(R.string.content_process_delete_selected) })
                 }
             },
             confirmText = stringResource(R.string.ok),
@@ -531,11 +529,13 @@ private fun CompactTextProcessSearch(
             ) {
                 Icon(Icons.Default.Search, null, modifier = Modifier.size(14.dp))
                 Box(Modifier.weight(1f), contentAlignment = Alignment.CenterStart) {
-                    if (query.isEmpty()) AppText(
-                        text = stringResource(R.string.search),
-                        style = LegadoTheme.typography.labelSmall,
-                        color = LegadoTheme.colorScheme.onSurfaceVariant,
-                    )
+                    if (query.isEmpty()) {
+                        AppText(
+                            text = stringResource(R.string.search),
+                            style = LegadoTheme.typography.labelSmall,
+                            color = LegadoTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
                     inner()
                 }
             }
@@ -555,8 +555,11 @@ private fun CompactTextProcessTool(
             .size(32.dp)
             .clip(RoundedCornerShape(10.dp))
             .background(
-                if (selected) LegadoTheme.colorScheme.secondaryContainer
-                else LegadoTheme.colorScheme.surfaceContainerLow
+                if (selected) {
+                    LegadoTheme.colorScheme.secondaryContainer
+                } else {
+                    LegadoTheme.colorScheme.surfaceContainerLow
+                },
             )
             .clickable(onClick = onClick),
         contentAlignment = Alignment.Center,
@@ -566,8 +569,10 @@ private fun CompactTextProcessTool(
 }
 
 private fun ReplaceRuleItemUi.matches(query: String): Boolean = query.isBlank() ||
-        name.contains(query, true) || pattern.contains(query, true) ||
-        replacement.contains(query, true) || group.orEmpty().contains(query, true)
+    name.contains(query, true) ||
+    pattern.contains(query, true) ||
+    replacement.contains(query, true) ||
+    group.orEmpty().contains(query, true)
 
 private val ReplaceRuleItemUi.displayNameGroup: String
     get() = if (group.isNullOrBlank()) name else "$name ($group)"
@@ -583,8 +588,7 @@ private val ReplaceFilter.labelRes: Int
 @Composable
 private fun contentProcessTitle(item: ContentProcessItemUi): String {
     val kind = when (item.kind) {
-        BookContentProcess.KIND_AI_CLEAN -> stringResource(R.string.content_process_ai_clean)
-        BookContentProcess.KIND_AI_REWRITE -> stringResource(R.string.content_process_ai_rewrite)
+        BookContentProcess.KIND_MANUAL_REPLACEMENT -> stringResource(R.string.content_process_manual_replacement)
         BookContentProcess.KIND_USER_UNDERLINE -> stringResource(R.string.content_process_user_underline)
         BookContentProcess.KIND_USER_HIGHLIGHT -> stringResource(R.string.content_process_user_highlight)
         else -> item.kind
@@ -592,8 +596,8 @@ private fun contentProcessTitle(item: ContentProcessItemUi): String {
     val action = when (item.actionType) {
         TextProcessAction.TYPE_DELETE -> stringResource(R.string.content_process_delete_action)
         TextProcessAction.TYPE_INSERT_BEFORE,
-        TextProcessAction.TYPE_INSERT_AFTER -> stringResource(R.string.content_process_insert_action)
-
+        TextProcessAction.TYPE_INSERT_AFTER,
+        -> stringResource(R.string.content_process_insert_action)
         else -> stringResource(R.string.content_process_replace_action)
     }
     return "$kind · $action"

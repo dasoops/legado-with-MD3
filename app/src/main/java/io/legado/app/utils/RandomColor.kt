@@ -1,7 +1,7 @@
 package io.legado.app.utils
 
 import android.graphics.Color
-import java.util.*
+import java.util.Random
 
 @Suppress("unused")
 class RandomColor(alpha: Int, lower: Int, upper: Int) {
@@ -19,7 +19,7 @@ class RandomColor(alpha: Int, lower: Int, upper: Int) {
         setUpper(upper)
     }
 
-    //随机数是前闭  后开
+    // 随机数是前闭  后开
     fun build(): Int {
         val red = getLower() + Random().nextInt(getUpper() - getLower() + 1)
         val green = getLower() + Random().nextInt(getUpper() - getLower() + 1)
@@ -27,9 +27,7 @@ class RandomColor(alpha: Int, lower: Int, upper: Int) {
         return Color.argb(getAlpha(), red, green, blue)
     }
 
-    private fun getAlpha(): Int {
-        return alpha
-    }
+    private fun getAlpha(): Int = alpha
 
     private fun setAlpha(alpha: Int) {
         var alpha1 = alpha
@@ -38,9 +36,7 @@ class RandomColor(alpha: Int, lower: Int, upper: Int) {
         this.alpha = alpha1
     }
 
-    private fun getLower(): Int {
-        return lower
-    }
+    private fun getLower(): Int = lower
 
     private fun setLower(lower: Int) {
         var lower1 = lower
@@ -48,14 +44,11 @@ class RandomColor(alpha: Int, lower: Int, upper: Int) {
         this.lower = lower1
     }
 
-    private fun getUpper(): Int {
-        return upper
-    }
+    private fun getUpper(): Int = upper
 
     private fun setUpper(upper: Int) {
         var upper1 = upper
         if (upper1 > 255) upper1 = 255
         this.upper = upper1
     }
-
 }

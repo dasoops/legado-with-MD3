@@ -25,16 +25,15 @@ object MainIntent {
         }
     }
 
-    fun createHomeIntent(context: Context): Intent {
-        return createLauncherIntent(context).apply {
-            putExtra(EXTRA_START_ROUTE, MainRouteConst.ROUTE_MAIN)
-        }
+    fun createHomeIntent(context: Context): Intent = createLauncherIntent(context).apply {
+        putExtra(EXTRA_START_ROUTE, MainRouteConst.ROUTE_MAIN)
     }
 
-    fun createIntent(context: Context, configTag: String? = null): Intent {
-        return createLauncherIntent(context).apply {
-            putExtra(EXTRA_START_ROUTE, routeForConfigTag(configTag))
-        }
+    fun createIntent(
+        context: Context,
+        configTag: String? = null,
+    ): Intent = createLauncherIntent(context).apply {
+        putExtra(EXTRA_START_ROUTE, routeForConfigTag(configTag))
     }
 
     fun createReadBookIntent(
@@ -42,17 +41,14 @@ object MainIntent {
         bookUrl: String? = null,
         inBookshelf: Boolean = true,
         chapterChanged: Boolean = false,
-    ): Intent {
-        return createLauncherIntent(context).apply {
-            putExtra(EXTRA_START_ROUTE, MainRouteConst.ROUTE_READ_BOOK)
-            bookUrl?.let { putExtra(EXTRA_BOOK_URL, it) }
-            putExtra(EXTRA_IN_BOOKSHELF, inBookshelf)
-            putExtra(EXTRA_CHAPTER_CHANGED, chapterChanged)
-        }
+    ): Intent = createLauncherIntent(context).apply {
+        putExtra(EXTRA_START_ROUTE, MainRouteConst.ROUTE_READ_BOOK)
+        bookUrl?.let { putExtra(EXTRA_BOOK_URL, it) }
+        putExtra(EXTRA_IN_BOOKSHELF, inBookshelf)
+        putExtra(EXTRA_CHAPTER_CHANGED, chapterChanged)
     }
 
-    internal fun shouldOpenRouteWithHomeParent(intent: Intent?): Boolean =
-        intent?.getBooleanExtra(EXTRA_ROUTE_HOME_AS_PARENT, false) == true
+    internal fun shouldOpenRouteWithHomeParent(intent: Intent?): Boolean = intent?.getBooleanExtra(EXTRA_ROUTE_HOME_AS_PARENT, false) == true
 
     fun createBookInfoIntent(
         context: Context,
@@ -60,27 +56,23 @@ object MainIntent {
         author: String? = null,
         bookUrl: String,
         origin: String? = null,
-        coverPath: String? = null
-    ): Intent {
-        return createLauncherIntent(context).apply {
-            putExtra(EXTRA_START_ROUTE, MainRouteConst.ROUTE_BOOK_INFO)
-            putExtra(EXTRA_BOOK_NAME, name)
-            putExtra(EXTRA_BOOK_AUTHOR, author)
-            putExtra(EXTRA_BOOK_URL, bookUrl)
-            putExtra(EXTRA_BOOK_ORIGIN, origin)
-            putExtra(EXTRA_BOOK_COVER, coverPath)
-        }
+        coverPath: String? = null,
+    ): Intent = createLauncherIntent(context).apply {
+        putExtra(EXTRA_START_ROUTE, MainRouteConst.ROUTE_BOOK_INFO)
+        putExtra(EXTRA_BOOK_NAME, name)
+        putExtra(EXTRA_BOOK_AUTHOR, author)
+        putExtra(EXTRA_BOOK_URL, bookUrl)
+        putExtra(EXTRA_BOOK_ORIGIN, origin)
+        putExtra(EXTRA_BOOK_COVER, coverPath)
     }
 
-    private fun routeForConfigTag(configTag: String?): String {
-        return when (configTag) {
-            ConfigTag.OTHER_CONFIG -> MainRouteConst.ROUTE_SETTINGS_OTHER
-            ConfigTag.READ_CONFIG -> MainRouteConst.ROUTE_SETTINGS_READ
-            ConfigTag.COVER_CONFIG -> MainRouteConst.ROUTE_SETTINGS_COVER
-            ConfigTag.THEME_CONFIG -> MainRouteConst.ROUTE_SETTINGS_THEME
-            ConfigTag.BACKUP_CONFIG -> MainRouteConst.ROUTE_SETTINGS_BACKUP
-            ConfigTag.DOWNLOAD_CACHE_CONFIG -> MainRouteConst.ROUTE_SETTINGS_DOWNLOAD_CACHE
-            else -> MainRouteConst.ROUTE_SETTINGS
-        }
+    private fun routeForConfigTag(configTag: String?): String = when (configTag) {
+        ConfigTag.OTHER_CONFIG -> MainRouteConst.ROUTE_SETTINGS_OTHER
+        ConfigTag.READ_CONFIG -> MainRouteConst.ROUTE_SETTINGS_READ
+        ConfigTag.COVER_CONFIG -> MainRouteConst.ROUTE_SETTINGS_COVER
+        ConfigTag.THEME_CONFIG -> MainRouteConst.ROUTE_SETTINGS_THEME
+        ConfigTag.BACKUP_CONFIG -> MainRouteConst.ROUTE_SETTINGS_BACKUP
+        ConfigTag.DOWNLOAD_CACHE_CONFIG -> MainRouteConst.ROUTE_SETTINGS_DOWNLOAD_CACHE
+        else -> MainRouteConst.ROUTE_SETTINGS
     }
 }

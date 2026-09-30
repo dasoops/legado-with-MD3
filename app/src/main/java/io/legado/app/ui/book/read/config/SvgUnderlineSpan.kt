@@ -14,13 +14,12 @@ class SvgUnderlineSpan(
     private val underlineWidth: Float = 1f,
     private val svgPath: String,
 ) : ReplacementSpan() {
-
     override fun getSize(
         paint: Paint,
         text: CharSequence,
         start: Int,
         end: Int,
-        fm: Paint.FontMetricsInt?
+        fm: Paint.FontMetricsInt?,
     ): Int {
         if (fm != null) {
             val metrics = paint.fontMetricsInt
@@ -41,12 +40,13 @@ class SvgUnderlineSpan(
         top: Int,
         y: Int,
         bottom: Int,
-        paint: Paint
+        paint: Paint,
     ) {
         val textStr = text.subSequence(start, end).toString()
-        val textPaint = Paint(paint).apply {
-            color = textColor
-        }
+        val textPaint =
+            Paint(paint).apply {
+                color = textColor
+            }
         canvas.drawText(textStr, x, y.toFloat(), textPaint)
 
         if (svgPath.isNotBlank()) {
@@ -57,12 +57,13 @@ class SvgUnderlineSpan(
                 val baseY = 50f
                 val lineY = y + 6.dpToPx()
 
-                val underlinePaint = Paint(paint).apply {
-                    color = underlineColor
-                    strokeWidth = underlineWidth.dpToPx()
-                    style = Paint.Style.STROKE
-                    isAntiAlias = true
-                }
+                val underlinePaint =
+                    Paint(paint).apply {
+                        color = underlineColor
+                        strokeWidth = underlineWidth.dpToPx()
+                        style = Paint.Style.STROKE
+                        isAntiAlias = true
+                    }
 
                 canvas.save()
                 canvas.translate(x, lineY - baseY)

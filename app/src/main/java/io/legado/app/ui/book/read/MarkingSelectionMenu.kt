@@ -85,26 +85,29 @@ fun MarkingSelectionMenu(
     val opensBelow = (menuState.startTopY + menuState.endBottomY) / 2f < windowSize.height / 2f
     val transformOrigin = TransformOrigin(0.5f, if (opensBelow) 0f else 1f)
     val shadowPadding = 12.dp
-    val positionProvider = remember(menuState, density.density) {
-        TextMenuPositionProvider(
-            density = density.density,
-            startX = menuState.startX,
-            startTopY = menuState.startTopY,
-            startBottomY = menuState.startBottomY,
-            endX = menuState.endX,
-            endBottomY = menuState.endBottomY,
-            shadowPadding = with(density) { shadowPadding.roundToPx() },
-            placeOppositeHalf = true,
-        )
-    }
+    val positionProvider =
+        remember(menuState, density.density) {
+            TextMenuPositionProvider(
+                density = density.density,
+                startX = menuState.startX,
+                startTopY = menuState.startTopY,
+                startBottomY = menuState.startBottomY,
+                endX = menuState.endX,
+                endBottomY = menuState.endBottomY,
+                shadowPadding = with(density) { shadowPadding.roundToPx() },
+                placeOppositeHalf = true,
+            )
+        }
 
-    val storedStyle = remember(state.editing?.styleJson, lastMarkingStyle) {
-        GSON.fromJsonObject<TextProcessStyle>(state.editing?.styleJson ?: lastMarkingStyle)
-            .getOrNull() ?: MarkingEffect.BG.toStyle(MarkingEffect.DEFAULT_COLOR)
-    }
+    val storedStyle =
+        remember(state.editing?.styleJson, lastMarkingStyle) {
+            GSON
+                .fromJsonObject<TextProcessStyle>(state.editing?.styleJson ?: lastMarkingStyle)
+                .getOrNull() ?: MarkingEffect.BG.toStyle(MarkingEffect.DEFAULT_COLOR)
+        }
     var style by remember(state.selection, state.editing?.id, storedStyle) {
         mutableStateOf(
-            storedStyle
+            storedStyle,
         )
     }
     var selectedEffect by remember(state.selection, state.editing?.id, storedStyle) {
@@ -116,12 +119,12 @@ fun MarkingSelectionMenu(
     var useRules by remember(state.selection, state.editing?.id) { mutableStateOf(false) }
     var selectedRuleId by remember(state.selection, state.editing?.id) {
         mutableStateOf<String?>(
-            null
+            null,
         )
     }
     var note by remember(
         state.selection,
-        state.editing?.id
+        state.editing?.id,
     ) { mutableStateOf(state.editing?.note.orEmpty()) }
     var noteInitialized by remember(state.selection, state.editing?.id) { mutableStateOf(false) }
     var noteDirty by remember(state.selection, state.editing?.id) { mutableStateOf(false) }
@@ -170,7 +173,8 @@ fun MarkingSelectionMenu(
         onDismissRequest = {
             if (!showColorPicker) requestDismiss()
         },
-        properties = PopupProperties(
+        properties =
+        PopupProperties(
             focusable = true,
             dismissOnBackPress = true,
             dismissOnClickOutside = true,
@@ -190,7 +194,8 @@ fun MarkingSelectionMenu(
                         cornerRadius = 16.dp,
                     ) {
                         Column(
-                            modifier = Modifier
+                            modifier =
+                            Modifier
                                 .heightIn(max = maxHeight)
                                 .verticalScroll(rememberScrollState())
                                 .padding(horizontal = 10.dp, vertical = 12.dp),
@@ -250,7 +255,8 @@ fun MarkingSelectionMenu(
                                     note = it
                                     noteDirty = true
                                 },
-                                modifier = Modifier
+                                modifier =
+                                Modifier
                                     .fillMaxWidth()
                                     .heightIn(min = 88.dp),
                                 placeholder = { AppText(stringResource(R.string.bookmark_mark_note_hint)) },
@@ -258,12 +264,13 @@ fun MarkingSelectionMenu(
 
                             if (state.editing != null) {
                                 SmallOutlinedButton(
-                                    modifier = Modifier
+                                    modifier =
+                                    Modifier
                                         .align(Alignment.End),
                                     icon = Icons.Outlined.Delete,
                                     text = stringResource(R.string.bookmark_mark_delete_note),
                                     contentDescription = null,
-                                    onClick = onDelete
+                                    onClick = onDelete,
                                 )
                             }
                         }
@@ -312,7 +319,8 @@ private fun MarkingColorRow(
         }
         items(MarkingMenuColors, key = { it }) { color ->
             Box(
-                modifier = Modifier
+                modifier =
+                Modifier
                     .size(26.dp)
                     .clip(CircleShape)
                     .background(Color(color))
@@ -350,13 +358,13 @@ private fun RoundIconButton(
     onClick: () -> Unit,
 ) {
     Box(
-        modifier = Modifier
+        modifier =
+        Modifier
             .size(26.dp)
             .clip(CircleShape)
             .background(
-                if (selected) LegadoTheme.colorScheme.secondaryContainer else Color.Transparent
-            )
-            .border(1.dp, LegadoTheme.colorScheme.outlineVariant, CircleShape)
+                if (selected) LegadoTheme.colorScheme.secondaryContainer else Color.Transparent,
+            ).border(1.dp, LegadoTheme.colorScheme.outlineVariant, CircleShape)
             .clickable(enabled = enabled, onClick = onClick),
         contentAlignment = Alignment.Center,
     ) {
@@ -375,7 +383,8 @@ private fun MarkingEffectTile(
     onClick: () -> Unit,
 ) {
     Column(
-        modifier = Modifier
+        modifier =
+        Modifier
             .clip(RoundedCornerShape(12.dp))
             .background(if (selected) LegadoTheme.colorScheme.secondaryContainer else Color.Transparent)
             .clickable(onClick = onClick)
@@ -396,58 +405,71 @@ private fun MarkingEffectTile(
 private fun MarkingEffectIcon(effect: MarkingEffect) {
     val foreground = LegadoTheme.colorScheme.onSurface
     when (effect) {
-        MarkingEffect.SOLID -> Icon(
-            imageVector = Icons.Outlined.FormatUnderlined,
-            contentDescription = null,
-            modifier = Modifier.size(23.dp),
-        )
-
-        MarkingEffect.BG -> Icon(
-            imageVector = Icons.Outlined.FormatColorFill,
-            contentDescription = null,
-            tint = foreground,
-            modifier = Modifier.size(23.dp),
-        )
-
-        MarkingEffect.TEXT -> Icon(
-            imageVector = Icons.Outlined.FormatColorText,
-            contentDescription = null,
-            tint = foreground,
-            modifier = Modifier.size(23.dp),
-        )
-
-        MarkingEffect.WAVE -> Icon(
-            imageVector = Icons.Outlined.Waves,
-            contentDescription = null,
-            tint = foreground,
-            modifier = Modifier.size(23.dp),
-        )
-
-        MarkingEffect.DASHED -> Icon(
-            imageVector = Icons.Outlined.MoreHoriz,
-            contentDescription = null,
-            tint = foreground,
-            modifier = Modifier.size(23.dp),
-        )
-
-        MarkingEffect.STRIKE -> Icon(
-            imageVector = Icons.Outlined.StrikethroughS,
-            contentDescription = null,
-            modifier = Modifier.size(23.dp),
-        )
-
-        MarkingEffect.HIGHLIGHT -> Icon(
-            imageVector = Icons.Outlined.Highlight,
-            contentDescription = null,
-            modifier = Modifier.size(23.dp),
-        )
+        MarkingEffect.SOLID -> {
+            Icon(
+                imageVector = Icons.Outlined.FormatUnderlined,
+                contentDescription = null,
+                modifier = Modifier.size(23.dp),
+            )
+        }
+        MarkingEffect.BG -> {
+            Icon(
+                imageVector = Icons.Outlined.FormatColorFill,
+                contentDescription = null,
+                tint = foreground,
+                modifier = Modifier.size(23.dp),
+            )
+        }
+        MarkingEffect.TEXT -> {
+            Icon(
+                imageVector = Icons.Outlined.FormatColorText,
+                contentDescription = null,
+                tint = foreground,
+                modifier = Modifier.size(23.dp),
+            )
+        }
+        MarkingEffect.WAVE -> {
+            Icon(
+                imageVector = Icons.Outlined.Waves,
+                contentDescription = null,
+                tint = foreground,
+                modifier = Modifier.size(23.dp),
+            )
+        }
+        MarkingEffect.DASHED -> {
+            Icon(
+                imageVector = Icons.Outlined.MoreHoriz,
+                contentDescription = null,
+                tint = foreground,
+                modifier = Modifier.size(23.dp),
+            )
+        }
+        MarkingEffect.STRIKE -> {
+            Icon(
+                imageVector = Icons.Outlined.StrikethroughS,
+                contentDescription = null,
+                modifier = Modifier.size(23.dp),
+            )
+        }
+        MarkingEffect.HIGHLIGHT -> {
+            Icon(
+                imageVector = Icons.Outlined.Highlight,
+                contentDescription = null,
+                modifier = Modifier.size(23.dp),
+            )
+        }
     }
 }
 
 @Composable
-private fun MarkingRuleTile(rule: HighlightRule, selected: Boolean, onClick: () -> Unit) {
+private fun MarkingRuleTile(
+    rule: HighlightRule,
+    selected: Boolean,
+    onClick: () -> Unit,
+) {
     Column(
-        modifier = Modifier
+        modifier =
+        Modifier
             .clip(RoundedCornerShape(16.dp))
             .background(if (selected) LegadoTheme.colorScheme.secondaryContainer else Color.Transparent)
             .clickable(onClick = onClick)
@@ -461,14 +483,14 @@ private fun MarkingRuleTile(rule: HighlightRule, selected: Boolean, onClick: () 
                 .background(
                     Color(
                         rule.underlineColor ?: rule.textColor ?: rule.bgColor
-                        ?: MarkingEffect.DEFAULT_COLOR
-                    )
-                )
+                            ?: MarkingEffect.DEFAULT_COLOR,
+                    ),
+                ),
         )
         Spacer(Modifier.height(4.dp))
         AppText(
             rule.name.ifBlank { rule.displayPattern() },
-            style = LegadoTheme.typography.labelSmall
+            style = LegadoTheme.typography.labelSmall,
         )
     }
 }
@@ -483,8 +505,15 @@ private fun HighlightRule.toProcessStyle() = TextProcessStyle(
     underlineSvgPath = underlineSvgPath,
 )
 
-private val MarkingMenuColors = listOf(
-    0xFFF44848.toInt(), 0xFF22C55E.toInt(), 0xFF3B82F6.toInt(),
-    0xFFA855F7.toInt(), 0xFFFF7417.toInt(), 0xFFEC4899.toInt(),
-    0xFF18B5A4.toInt(), 0xFF9A4D0F.toInt(), 0xFF111111.toInt(),
-)
+private val MarkingMenuColors =
+    listOf(
+        0xFFF44848.toInt(),
+        0xFF22C55E.toInt(),
+        0xFF3B82F6.toInt(),
+        0xFFA855F7.toInt(),
+        0xFFFF7417.toInt(),
+        0xFFEC4899.toInt(),
+        0xFF18B5A4.toInt(),
+        0xFF9A4D0F.toInt(),
+        0xFF111111.toInt(),
+    )

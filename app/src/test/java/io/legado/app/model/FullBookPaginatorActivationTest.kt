@@ -5,7 +5,6 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class FullBookPaginatorActivationTest {
-
     @Test
     fun `direct whole-book page tips enable pagination`() {
         assertTrue(isActive(selection(value = WHOLE_BOOK_PAGE)))
@@ -19,8 +18,8 @@ class FullBookPaginatorActivationTest {
                 selection(
                     value = ORDINARY_TIP,
                     template = "{BookName} {FullPageIndex}/{FullPageSize}",
-                )
-            )
+                ),
+            ),
         )
     }
 

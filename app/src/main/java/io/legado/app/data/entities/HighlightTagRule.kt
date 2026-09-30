@@ -13,12 +13,10 @@ data class HighlightTagRule(
     var enabled: Boolean = true,
     var order: Int = 0,
 ) {
-
     override fun hashCode(): Int = id.hashCode()
 
     override fun equals(other: Any?): Boolean {
         if (other is HighlightTagRule) return id == other.id
         return false
     }
-
 }

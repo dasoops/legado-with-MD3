@@ -15,7 +15,6 @@ import io.legado.app.base.adapter.RecyclerAdapter
 import io.legado.app.databinding.DialogRecyclerViewBinding
 import io.legado.app.databinding.ItemSourceImportBinding
 import io.legado.app.help.config.ThemeConfigStore
-//import io.legado.app.lib.theme.primaryColor
 import io.legado.app.ui.widget.dialog.CodeDialog
 import io.legado.app.ui.widget.dialog.WaitDialog
 import io.legado.app.utils.GSON
@@ -53,9 +52,9 @@ class ImportThemeDialog() : BaseBottomSheetDialogFragment(R.layout.dialog_recycl
 
     @SuppressLint("NotifyDataSetChanged")
     override fun onFragmentCreated(view: View, savedInstanceState: Bundle?) {
-        //binding.toolBar.setBackgroundColor(primaryColor)
+        // binding.toolBar.setBackgroundColor(primaryColor)
         binding.toolBar.setTitle(R.string.import_theme)
-        //binding.rotateLoading.visible()
+        // binding.rotateLoading.visible()
         binding.recyclerView.layoutManager = LinearLayoutManager(requireContext())
         binding.recyclerView.adapter = adapter
         binding.tvCancel.visible()
@@ -114,13 +113,13 @@ class ImportThemeDialog() : BaseBottomSheetDialogFragment(R.layout.dialog_recycl
             binding.tvFooterLeft.text = getString(
                 R.string.select_cancel_count,
                 viewModel.selectCount,
-                viewModel.allSources.size
+                viewModel.allSources.size,
             )
         } else {
             binding.tvFooterLeft.text = getString(
                 R.string.select_all_count,
                 viewModel.selectCount,
-                viewModel.allSources.size
+                viewModel.allSources.size,
             )
         }
     }
@@ -128,15 +127,13 @@ class ImportThemeDialog() : BaseBottomSheetDialogFragment(R.layout.dialog_recycl
     inner class SourcesAdapter(context: Context) :
         RecyclerAdapter<ThemeConfigStore.Config, ItemSourceImportBinding>(context) {
 
-        override fun getViewBinding(parent: ViewGroup): ItemSourceImportBinding {
-            return ItemSourceImportBinding.inflate(inflater, parent, false)
-        }
+        override fun getViewBinding(parent: ViewGroup): ItemSourceImportBinding = ItemSourceImportBinding.inflate(inflater, parent, false)
 
         override fun convert(
             holder: ItemViewHolder,
             binding: ItemSourceImportBinding,
             item: ThemeConfigStore.Config,
-            payloads: MutableList<Any>
+            payloads: MutableList<Any>,
         ) {
             binding.apply {
                 cbSourceName.isChecked = viewModel.selectStatus[holder.layoutPosition]
@@ -169,12 +166,11 @@ class ImportThemeDialog() : BaseBottomSheetDialogFragment(R.layout.dialog_recycl
                         CodeDialog(
                             GSON.toJson(source),
                             disableEdit = false,
-                            requestId = holder.layoutPosition.toString()
-                        )
+                            requestId = holder.layoutPosition.toString(),
+                        ),
                     )
                 }
             }
         }
-
     }
 }

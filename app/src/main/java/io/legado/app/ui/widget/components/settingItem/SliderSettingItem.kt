@@ -31,15 +31,15 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
-import kotlin.math.roundToInt
 import io.legado.app.R
 import io.legado.app.ui.theme.LegadoTheme
 import io.legado.app.ui.theme.LegadoTheme.composeEngine
 import io.legado.app.ui.theme.ThemeResolver
-import io.legado.app.ui.widget.components.button.ConfirmDismissButtonsRow
 import io.legado.app.ui.widget.components.SplicedColumnDivider
+import io.legado.app.ui.widget.components.button.ConfirmDismissButtonsRow
 import io.legado.app.ui.widget.components.sliderAccessibility
 import io.legado.app.ui.widget.components.text.AppText
+import kotlin.math.roundToInt
 import top.yukonga.miuix.kmp.basic.BasicComponent
 import top.yukonga.miuix.kmp.basic.Slider as MiuixSlider
 import top.yukonga.miuix.kmp.basic.TextField as MiuixTextField
@@ -55,31 +55,29 @@ fun SliderSettingItem(
     description: String? = null,
     valueLabel: ((Float) -> String)? = null,
     decimal: Boolean = false,
-    onValueChange: (Float) -> Unit
+    onValueChange: (Float) -> Unit,
 ) {
-
     var expanded by remember { mutableStateOf(false) }
     var isInputMode by remember { mutableStateOf(false) }
     var sliderValue by remember(value) { mutableFloatStateOf(value) }
     val textFieldState = rememberTextFieldState()
 
     // 默认整数模式：滑动吸附到整数；decimal = true 时保留 0.1 精度
-    fun snap(v: Float): Float =
-        if (decimal) (v * 10).roundToInt() / 10f else v.roundToInt().toFloat()
+    fun snap(v: Float): Float = if (decimal) (v * 10).roundToInt() / 10f else v.roundToInt().toFloat()
 
-    fun format(v: Float): String =
-        if (v % 1f == 0f) v.toInt().toString() else v.toString()
+    fun format(v: Float): String = if (v % 1f == 0f) v.toInt().toString() else v.toString()
 
     LaunchedEffect(value) {
         sliderValue = value
     }
 
     // 拖动过程中让标题下的数值实时跟随滑块，松手后才真正应用
-    val displayDescription = when {
-        valueLabel != null -> valueLabel(sliderValue)
-        sliderValue != value -> format(sliderValue)
-        else -> description
-    }
+    val displayDescription =
+        when {
+            valueLabel != null -> valueLabel(sliderValue)
+            sliderValue != value -> format(sliderValue)
+            else -> description
+        }
 
     val sliderAccessibilityValue = displayDescription ?: sliderValue.toString()
 
@@ -104,10 +102,10 @@ fun SliderSettingItem(
     SplicedColumnDivider()
 
     if (ThemeResolver.isMiuixEngine(composeEngine)) {
-
         Column(
-            modifier = Modifier
-                .fillMaxWidth()
+            modifier =
+            Modifier
+                .fillMaxWidth(),
         ) {
             BasicComponent(
                 title = title,
@@ -117,30 +115,32 @@ fun SliderSettingItem(
                         commitValue()
                     }
                     expanded = !expanded
-                }
+                },
             )
 
             AnimatedVisibility(visible = expanded) {
                 Column(
-                    modifier = Modifier
+                    modifier =
+                    Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 8.dp)
+                        .padding(horizontal = 16.dp, vertical = 8.dp),
                 ) {
                     AnimatedContent(
                         targetState = isInputMode,
-                        label = "input_slider_switch"
+                        label = "input_slider_switch",
                     ) { targetInputMode ->
                         if (targetInputMode) {
                             MiuixTextField(
                                 state = textFieldState,
                                 lineLimits = TextFieldLineLimits.SingleLine,
-                                label = stringResource(
+                                label =
+                                stringResource(
                                     R.string.input_value_range,
                                     valueRange.start.toInt(),
-                                    valueRange.endInclusive.toInt()
+                                    valueRange.endInclusive.toInt(),
                                 ),
                                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                                modifier = Modifier.fillMaxWidth()
+                                modifier = Modifier.fillMaxWidth(),
                             )
                         } else {
                             MiuixSlider(
@@ -153,12 +153,13 @@ fun SliderSettingItem(
                                 },
                                 valueRange = valueRange,
                                 steps = steps,
-                                modifier = Modifier
+                                modifier =
+                                Modifier
                                     .fillMaxWidth()
                                     .sliderAccessibility(
                                         label = title,
                                         value = sliderAccessibilityValue,
-                                    )
+                                    ),
                             )
                         }
                     }
@@ -172,17 +173,17 @@ fun SliderSettingItem(
                                 replace(0, length, format(defaultValue))
                             }
                         },
-                        dismissText = if (isInputMode) {
+                        dismissText =
+                        if (isInputMode) {
                             stringResource(R.string.slider)
                         } else {
                             stringResource(R.string.edit)
                         },
-                        confirmText = stringResource(R.string.text_default)
+                        confirmText = stringResource(R.string.text_default),
                     )
                 }
             }
         }
-
     } else {
         SettingItem(
             title = title,
@@ -198,7 +199,7 @@ fun SliderSettingItem(
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     AnimatedContent(
                         targetState = isInputMode,
-                        label = "input_slider_switch"
+                        label = "input_slider_switch",
                     ) { targetInputMode ->
                         if (targetInputMode) {
                             TextField(
@@ -209,20 +210,22 @@ fun SliderSettingItem(
                                         stringResource(
                                             R.string.input_value_range,
                                             valueRange.start.toInt(),
-                                            valueRange.endInclusive.toInt()
-                                        )
+                                            valueRange.endInclusive.toInt(),
+                                        ),
                                     )
                                 },
                                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                                modifier = Modifier
+                                modifier =
+                                Modifier
                                     .fillMaxWidth()
                                     .heightIn(min = 48.dp),
-                                contentPadding = PaddingValues(
+                                contentPadding =
+                                PaddingValues(
                                     top = 4.dp,
                                     bottom = 4.dp,
                                     start = 12.dp,
-                                    end = 12.dp
-                                )
+                                    end = 12.dp,
+                                ),
                             )
                         } else {
                             Slider(
@@ -235,12 +238,13 @@ fun SliderSettingItem(
                                 },
                                 valueRange = valueRange,
                                 steps = steps,
-                                modifier = Modifier
+                                modifier =
+                                Modifier
                                     .fillMaxWidth()
                                     .sliderAccessibility(
                                         label = title,
                                         value = sliderAccessibilityValue,
-                                    )
+                                    ),
                             )
                         }
                     }
@@ -255,14 +259,15 @@ fun SliderSettingItem(
                             replace(0, length, format(defaultValue))
                         }
                     },
-                    dismissText = if (isInputMode) {
+                    dismissText =
+                    if (isInputMode) {
                         stringResource(R.string.slider)
                     } else {
                         stringResource(R.string.edit)
                     },
-                    confirmText = stringResource(R.string.text_default)
+                    confirmText = stringResource(R.string.text_default),
                 )
-            }
+            },
         )
     }
 }

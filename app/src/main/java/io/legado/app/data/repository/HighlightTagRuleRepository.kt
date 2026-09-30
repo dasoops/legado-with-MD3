@@ -7,12 +7,9 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.withContext
 
 class HighlightTagRuleRepository {
-
     private val dao = appDb.highlightTagRuleDao
 
-    fun flowAll(): Flow<List<HighlightTagRule>> {
-        return dao.flowAll()
-    }
+    fun flowAll(): Flow<List<HighlightTagRule>> = dao.flowAll()
 
     suspend fun getEnabled(): List<HighlightTagRule> = withContext(Dispatchers.IO) {
         dao.getEnabled()
@@ -40,10 +37,9 @@ class HighlightTagRuleRepository {
         dao.getById(id)
     }
 
-    suspend fun getByIds(ids: Set<Long>): List<HighlightTagRule> =
-        withContext(Dispatchers.IO) {
-            if (ids.isEmpty()) emptyList() else dao.getByIds(ids)
-        }
+    suspend fun getByIds(ids: Set<Long>): List<HighlightTagRule> = withContext(Dispatchers.IO) {
+        if (ids.isEmpty()) emptyList() else dao.getByIds(ids)
+    }
 
     suspend fun enableByIds(ids: Set<Long>) = withContext(Dispatchers.IO) {
         if (ids.isEmpty()) return@withContext
@@ -66,10 +62,10 @@ class HighlightTagRuleRepository {
     }
 
     suspend fun moveOrder(rules: List<HighlightTagRule>) = withContext(Dispatchers.IO) {
-        val updatedRules = rules.mapIndexed { index, rule ->
-            rule.copy(order = index)
-        }
+        val updatedRules =
+            rules.mapIndexed { index, rule ->
+                rule.copy(order = index)
+            }
         dao.update(*updatedRules.toTypedArray())
     }
-
 }

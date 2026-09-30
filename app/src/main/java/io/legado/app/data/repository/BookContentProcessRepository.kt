@@ -11,7 +11,6 @@ import kotlinx.coroutines.withContext
 class BookContentProcessRepository(
     private val dao: BookContentProcessDao,
 ) : BookContentProcessGateway {
-
     override suspend fun getForChapter(
         bookUrl: String,
         chapterIndex: Int?,
@@ -22,9 +21,7 @@ class BookContentProcessRepository(
     override fun flowForChapter(
         bookUrl: String,
         chapterIndex: Int?,
-    ): Flow<List<BookContentProcess>> {
-        return dao.flowForChapter(bookUrl, chapterIndex).flowOn(Dispatchers.IO)
-    }
+    ): Flow<List<BookContentProcess>> = dao.flowForChapter(bookUrl, chapterIndex).flowOn(Dispatchers.IO)
 
     override suspend fun nextOrder(bookUrl: String): Int = withContext(Dispatchers.IO) {
         dao.maxOrder(bookUrl) + 1
@@ -34,7 +31,10 @@ class BookContentProcessRepository(
         dao.upsert(process)
     }
 
-    override suspend fun setEnabled(id: String, enabled: Boolean) = withContext(Dispatchers.IO) {
+    override suspend fun setEnabled(
+        id: String,
+        enabled: Boolean,
+    ) = withContext(Dispatchers.IO) {
         dao.setEnabled(id, enabled)
     }
 

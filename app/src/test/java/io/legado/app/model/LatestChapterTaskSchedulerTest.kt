@@ -10,7 +10,6 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class LatestChapterTaskSchedulerTest {
-
     @Test
     fun `same chapter keeps running task and only latest pending task`() = runBlocking {
         val scheduler = LatestChapterTaskScheduler<String>(this)

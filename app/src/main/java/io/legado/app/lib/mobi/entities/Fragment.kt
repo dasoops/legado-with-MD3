@@ -5,5 +5,5 @@ data class Fragment(
     val selector: String,
     val index: Int,
     val offset: Int,
-    val length: Int
+    val length: Int,
 )

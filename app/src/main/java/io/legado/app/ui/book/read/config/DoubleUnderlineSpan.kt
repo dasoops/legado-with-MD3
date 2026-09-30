@@ -14,7 +14,6 @@ class DoubleUnderlineSpan(
     private val underlineWidth: Float = 1f,
     private val underlineOffset: Float = 6f,
 ) : ReplacementSpan() {
-
     private val offsetPx = underlineOffset.toInt().dpToPx()
     private val lineGap = 3.dpToPx()
     private val widthPx = underlineWidth.toInt().dpToPx()
@@ -24,7 +23,7 @@ class DoubleUnderlineSpan(
         text: CharSequence,
         start: Int,
         end: Int,
-        fm: Paint.FontMetricsInt?
+        fm: Paint.FontMetricsInt?,
     ): Int {
         if (fm != null) {
             val metrics = paint.fontMetricsInt
@@ -45,7 +44,7 @@ class DoubleUnderlineSpan(
         top: Int,
         y: Int,
         bottom: Int,
-        paint: Paint
+        paint: Paint,
     ) {
         val textStr = text.subSequence(start, end).toString()
         paint.color = textColor
@@ -54,12 +53,13 @@ class DoubleUnderlineSpan(
         val width = paint.measureText(text, start, end)
         val line1Y = y + offsetPx
         val line2Y = line1Y + lineGap + widthPx
-        val linePaint = Paint(paint).apply {
-            color = underlineColor
-            style = Paint.Style.STROKE
-            strokeWidth = underlineWidth.dpToPx()
-            isAntiAlias = true
-        }
+        val linePaint =
+            Paint(paint).apply {
+                color = underlineColor
+                style = Paint.Style.STROKE
+                strokeWidth = underlineWidth.dpToPx()
+                isAntiAlias = true
+            }
         canvas.drawLine(x, line1Y.toFloat(), x + width, line1Y.toFloat(), linePaint)
         canvas.drawLine(x, line2Y.toFloat(), x + width, line2Y.toFloat(), linePaint)
     }

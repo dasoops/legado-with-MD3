@@ -34,12 +34,13 @@ fun ReadBookColorTheme(
     content: @Composable () -> Unit,
 ) {
     ProvideThemeOverride(
-        theme = rememberReadBookColorTheme(
+        theme =
+        rememberReadBookColorTheme(
             styleConfig = styleConfig,
             preferences = preferences,
             isAppDark = isDarkTheme,
         ),
-        content = content
+        content = content,
     )
 }
 
@@ -51,14 +52,20 @@ private fun rememberReadBookColorTheme(
 ): ThemeOverrideState? {
     val paletteStyle = preferences.readMenuPaletteStyle
     return when (preferences.readBarStyle) {
-        1 -> rememberReadBackgroundTheme(styleConfig, isAppDark, paletteStyle)
-        2 -> rememberCustomReadMenuTheme(
-            styleConfig = styleConfig,
-            preferences = preferences,
-            isAppDark = isAppDark,
-            paletteStyle = paletteStyle,
-        )
-        else -> null
+        1 -> {
+            rememberReadBackgroundTheme(styleConfig, isAppDark, paletteStyle)
+        }
+        2 -> {
+            rememberCustomReadMenuTheme(
+                styleConfig = styleConfig,
+                preferences = preferences,
+                isAppDark = isAppDark,
+                paletteStyle = paletteStyle,
+            )
+        }
+        else -> {
+            null
+        }
     }
 }
 
@@ -68,37 +75,42 @@ private fun rememberReadBackgroundTheme(
     isAppDark: Boolean,
     paletteStyle: String,
 ): ThemeOverrideState {
-    val fallbackSeedColor = LegadoTheme.seedColor
-        .takeUnless { it == Color.Unspecified }
-        ?: LegadoTheme.colorScheme.primary
-    val background = remember(styleConfig, isAppDark) {
-        runCatching {
-            ReadStyleResolver.currentBackground(ReadBookConfig.durConfig, isAppDark)
-        }.getOrNull()
-    }
+    val fallbackSeedColor =
+        LegadoTheme.seedColor
+            .takeUnless { it == Color.Unspecified }
+            ?: LegadoTheme.colorScheme.primary
+    val background =
+        remember(styleConfig, isAppDark) {
+            runCatching {
+                ReadStyleResolver.currentBackground(ReadBookConfig.durConfig, isAppDark)
+            }.getOrNull()
+        }
     // Keep the last resolved image seed while the next background is decoded.
     var resolvedImageSeedColor by remember { mutableStateOf<Color?>(null) }
-    val solidSeedColor = remember(background) {
-        background
-            ?.takeIf { it.type == 0 }
-            ?.value
-            ?.toColorOrNull()
-    }
+    val solidSeedColor =
+        remember(background) {
+            background
+                ?.takeIf { it.type == 0 }
+                ?.value
+                ?.toColorOrNull()
+        }
 
     LaunchedEffect(background, styleConfig, isAppDark) {
         if (background != null && background.type != 0) {
-            val seedColor = extractCurrentReadBackgroundSeed(isAppDark)
-                ?: ReadSessionState.backgroundMeanColor.takeIf { it != 0 }?.let(::Color)
+            val seedColor =
+                extractCurrentReadBackgroundSeed(isAppDark)
+                    ?: ReadSessionState.backgroundMeanColor.takeIf { it != 0 }?.let(::Color)
             if (seedColor != null) {
                 resolvedImageSeedColor = seedColor
             }
         }
     }
 
-    val sourceColor = solidSeedColor
-        ?: resolvedImageSeedColor
-        ?: ReadSessionState.backgroundMeanColor.takeIf { it != 0 }?.let(::Color)
-        ?: fallbackSeedColor
+    val sourceColor =
+        solidSeedColor
+            ?: resolvedImageSeedColor
+            ?: ReadSessionState.backgroundMeanColor.takeIf { it != 0 }?.let(::Color)
+            ?: fallbackSeedColor
     return rememberReadThemeOverride(
         seedColor = sourceColor,
         backgroundColor = null,
@@ -115,32 +127,35 @@ private fun rememberCustomReadMenuTheme(
     isAppDark: Boolean,
     paletteStyle: String,
 ): ThemeOverrideState {
-    val menuBackgroundColor = remember(
-        styleConfig,
-        preferences.readMenuBgColor,
-        preferences.readMenuBgColorNight,
-        isAppDark,
-    ) {
-        Color(preferences.readMenuBackgroundColor(isAppDark))
-    }
-    val accentColor = remember(
-        styleConfig,
-        preferences.readMenuAccentColor,
-        preferences.readMenuAccentColorNight,
-        isAppDark,
-    ) {
-        Color(preferences.readMenuAccentColor(isAppDark))
-    }
-    val menuContainerColor = remember(
-        styleConfig,
-        preferences.readMenuContainerColor,
-        preferences.readMenuContainerColorNight,
-        preferences.readMenuBgColor,
-        preferences.readMenuBgColorNight,
-        isAppDark,
-    ) {
-        Color(preferences.readMenuContainerColor(isAppDark))
-    }
+    val menuBackgroundColor =
+        remember(
+            styleConfig,
+            preferences.readMenuBgColor,
+            preferences.readMenuBgColorNight,
+            isAppDark,
+        ) {
+            Color(preferences.readMenuBackgroundColor(isAppDark))
+        }
+    val accentColor =
+        remember(
+            styleConfig,
+            preferences.readMenuAccentColor,
+            preferences.readMenuAccentColorNight,
+            isAppDark,
+        ) {
+            Color(preferences.readMenuAccentColor(isAppDark))
+        }
+    val menuContainerColor =
+        remember(
+            styleConfig,
+            preferences.readMenuContainerColor,
+            preferences.readMenuContainerColorNight,
+            preferences.readMenuBgColor,
+            preferences.readMenuBgColorNight,
+            isAppDark,
+        ) {
+            Color(preferences.readMenuContainerColor(isAppDark))
+        }
     val useSeedOnly = preferences.readMenuColorMode == 0
     if (!useSeedOnly) {
         return rememberCustomReadMenuThemeOverride(
@@ -190,11 +205,12 @@ private fun rememberCustomReadMenuThemeOverride(
             defaultPaletteStyle = themeSettings.paletteStyle,
         ).let { base ->
             base.copy(
-                colorScheme = base.colorScheme.withCustomReadMenuColors(
+                colorScheme =
+                base.colorScheme.withCustomReadMenuColors(
                     accentColor = accentColor,
                     menuBackgroundColor = menuBackgroundColor,
                     menuContainerColor = menuContainerColor,
-                )
+                ),
             )
         }
     }
@@ -210,13 +226,14 @@ private fun rememberReadThemeOverride(
     paletteStyle: String = "",
 ): ThemeOverrideState {
     val themeSettings = LocalAppUiConfiguration.current.theme
-    val isDark = remember(backgroundColor, containerColor, fallbackDark, deriveDarkFromColor) {
-        if (deriveDarkFromColor) {
-            (containerColor ?: backgroundColor)?.let { it.luminance() < 0.5f } ?: fallbackDark
-        } else {
-            fallbackDark
+    val isDark =
+        remember(backgroundColor, containerColor, fallbackDark, deriveDarkFromColor) {
+            if (deriveDarkFromColor) {
+                (containerColor ?: backgroundColor)?.let { it.luminance() < 0.5f } ?: fallbackDark
+            } else {
+                fallbackDark
+            }
         }
-    }
     return remember(
         seedColor,
         backgroundColor,
@@ -248,22 +265,25 @@ private fun buildReadThemeOverride(
     defaultPaletteStyle: String,
 ): ThemeOverrideState {
     val colorSpec = ThemeResolver.resolveColorSpecFromMaterialVersion(materialVersion)
-    val resolvedPaletteStyle = paletteStyle
-        .takeIf { it.isNotBlank() }
-        ?.let { ThemeResolver.resolvePaletteStyle(it) }
-        ?: ThemeResolver.resolvePaletteStyle(defaultPaletteStyle)
-    val base = buildThemeOverrideState(
-        seedColor = seedColor,
-        isDark = isDark,
-        paletteStyle = resolvedPaletteStyle,
-        colorSpec = colorSpec,
-        usePureBlack = false,
-    )
-    return base.copy(
-        colorScheme = base.colorScheme.withReadSurfaceColors(
-            backgroundColor = backgroundColor,
-            containerColor = containerColor
+    val resolvedPaletteStyle =
+        paletteStyle
+            .takeIf { it.isNotBlank() }
+            ?.let { ThemeResolver.resolvePaletteStyle(it) }
+            ?: ThemeResolver.resolvePaletteStyle(defaultPaletteStyle)
+    val base =
+        buildThemeOverrideState(
+            seedColor = seedColor,
+            isDark = isDark,
+            paletteStyle = resolvedPaletteStyle,
+            colorSpec = colorSpec,
+            usePureBlack = false,
         )
+    return base.copy(
+        colorScheme =
+        base.colorScheme.withReadSurfaceColors(
+            backgroundColor = backgroundColor,
+            containerColor = containerColor,
+        ),
     )
 }
 
@@ -287,64 +307,51 @@ private fun ColorScheme.withCustomReadMenuColors(
     accentColor: Color,
     menuBackgroundColor: Color,
     menuContainerColor: Color,
-): ColorScheme {
-    return copy(
-        primary = accentColor,
-        onPrimary = accentColor.contrastContentColor(),
-        surfaceTint = accentColor,
-        surfaceContainerHigh = menuBackgroundColor,
-        surfaceContainerLow = menuContainerColor,
-    )
+): ColorScheme = copy(
+    primary = accentColor,
+    onPrimary = accentColor.contrastContentColor(),
+    surfaceTint = accentColor,
+    surfaceContainerHigh = menuBackgroundColor,
+    surfaceContainerLow = menuContainerColor,
+)
+
+private fun Color.contrastContentColor(): Color = if (luminance() > 0.5f) Color.Black else Color.White
+
+private fun ReadPreferences.readMenuBackgroundColor(isDark: Boolean): Int = if (isDark) {
+    readMenuBgColorNight.takeIf { it != 0 } ?: ReadBookConfig.durConfig.menuBgColor(isNight = true)
+} else {
+    readMenuBgColor.takeIf { it != 0 } ?: ReadBookConfig.durConfig.menuBgColor(isNight = false)
 }
 
-private fun Color.contrastContentColor(): Color {
-    return if (luminance() > 0.5f) Color.Black else Color.White
+private fun ReadPreferences.readMenuAccentColor(isDark: Boolean): Int = if (isDark) {
+    readMenuAccentColorNight.takeIf { it != 0 }
+        ?: ReadBookConfig.durConfig.menuAccentColor(isNight = true)
+} else {
+    readMenuAccentColor.takeIf { it != 0 }
+        ?: ReadBookConfig.durConfig.menuAccentColor(isNight = false)
 }
 
-private fun ReadPreferences.readMenuBackgroundColor(isDark: Boolean): Int {
-    return if (isDark) {
-        readMenuBgColorNight.takeIf { it != 0 } ?: ReadBookConfig.durConfig.menuBgColor(isNight = true)
-    } else {
-        readMenuBgColor.takeIf { it != 0 } ?: ReadBookConfig.durConfig.menuBgColor(isNight = false)
-    }
+private fun ReadPreferences.readMenuContainerColor(isDark: Boolean): Int = if (isDark) {
+    readMenuContainerColorNight.takeIf { it != 0 } ?: readMenuBackgroundColor(isDark = true)
+} else {
+    readMenuContainerColor.takeIf { it != 0 } ?: readMenuBackgroundColor(isDark = false)
 }
 
-private fun ReadPreferences.readMenuAccentColor(isDark: Boolean): Int {
-    return if (isDark) {
-        readMenuAccentColorNight.takeIf { it != 0 }
-            ?: ReadBookConfig.durConfig.menuAccentColor(isNight = true)
-    } else {
-        readMenuAccentColor.takeIf { it != 0 }
-            ?: ReadBookConfig.durConfig.menuAccentColor(isNight = false)
-    }
-}
-
-private fun ReadPreferences.readMenuContainerColor(isDark: Boolean): Int {
-    return if (isDark) {
-        readMenuContainerColorNight.takeIf { it != 0 } ?: readMenuBackgroundColor(isDark = true)
-    } else {
-        readMenuContainerColor.takeIf { it != 0 } ?: readMenuBackgroundColor(isDark = false)
-    }
-}
-
-private suspend fun extractCurrentReadBackgroundSeed(isDarkTheme: Boolean): Color? {
-    return withContext(Dispatchers.Default) {
-        runCatching {
-            val drawable = ReadStyleResolver.currentBackgroundDrawable(
+private suspend fun extractCurrentReadBackgroundSeed(isDarkTheme: Boolean): Color? = withContext(Dispatchers.Default) {
+    runCatching {
+        val drawable =
+            ReadStyleResolver.currentBackgroundDrawable(
                 config = ReadBookConfig.durConfig,
                 width = 128,
                 height = 128,
                 isNightTheme = isDarkTheme,
             )
-            if (drawable is ColorDrawable) {
-                Color(drawable.color)
-            } else {
-                Color(drawable.toSafeBitmap(128).extractSeedColor())
-            }
-        }.getOrNull()
-    }
+        if (drawable is ColorDrawable) {
+            Color(drawable.color)
+        } else {
+            Color(drawable.toSafeBitmap(128).extractSeedColor())
+        }
+    }.getOrNull()
 }
 
-private fun String.toColorOrNull(): Color? {
-    return runCatching { Color(toColorInt()) }.getOrNull()
-}
+private fun String.toColorOrNull(): Color? = runCatching { Color(toColorInt()) }.getOrNull()

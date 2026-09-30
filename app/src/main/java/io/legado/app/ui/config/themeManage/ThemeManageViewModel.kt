@@ -23,7 +23,6 @@ import kotlinx.coroutines.sync.Mutex
 class ThemeManageViewModel(
     private val themePackageManager: ThemePackageManager,
 ) : ViewModel() {
-
     private val operationMutex = Mutex()
 
     private val _uiState = MutableStateFlow(ThemeManageUiState())
@@ -38,37 +37,65 @@ class ThemeManageViewModel(
 
     fun onIntent(intent: ThemeManageIntent) {
         when (intent) {
-            ThemeManageIntent.LoadSavedThemes -> loadSavedThemes()
-            is ThemeManageIntent.ExportPackage -> exportPackage(intent)
-            is ThemeManageIntent.ImportPackage -> importPackage(intent.uri)
-            is ThemeManageIntent.ImportLegacyJson -> importLegacyJson(intent.uri)
-            is ThemeManageIntent.SaveTheme -> saveTheme(intent)
-            is ThemeManageIntent.ApplySavedTheme -> applySavedTheme(intent.theme)
-            is ThemeManageIntent.DeleteSavedTheme -> deleteSavedTheme(intent.theme)
-            ThemeManageIntent.MigrateLegacyThemes -> migrateLegacyThemes()
-            ThemeManageIntent.OpenSaveDialog ->
+            ThemeManageIntent.LoadSavedThemes -> {
+                loadSavedThemes()
+            }
+            is ThemeManageIntent.ExportPackage -> {
+                exportPackage(intent)
+            }
+            is ThemeManageIntent.ImportPackage -> {
+                importPackage(intent.uri)
+            }
+            is ThemeManageIntent.ImportLegacyJson -> {
+                importLegacyJson(intent.uri)
+            }
+            is ThemeManageIntent.SaveTheme -> {
+                saveTheme(intent)
+            }
+            is ThemeManageIntent.ApplySavedTheme -> {
+                applySavedTheme(intent.theme)
+            }
+            is ThemeManageIntent.DeleteSavedTheme -> {
+                deleteSavedTheme(intent.theme)
+            }
+            ThemeManageIntent.MigrateLegacyThemes -> {
+                migrateLegacyThemes()
+            }
+            ThemeManageIntent.OpenSaveDialog -> {
                 _uiState.update { it.copy(dialog = ThemeManageDialog.Save()) }
-            is ThemeManageIntent.UpdateSaveName -> _uiState.update { state ->
-                val dialog = state.dialog as? ThemeManageDialog.Save ?: return@update state
-                state.copy(dialog = dialog.copy(name = intent.value))
             }
-            is ThemeManageIntent.UpdateSearchQuery -> _uiState.update {
-                it.copy(searchQuery = intent.value)
+            is ThemeManageIntent.UpdateSaveName -> {
+                _uiState.update { state ->
+                    val dialog = state.dialog as? ThemeManageDialog.Save ?: return@update state
+                    state.copy(dialog = dialog.copy(name = intent.value))
+                }
             }
-            is ThemeManageIntent.OpenApplyDialog ->
+            is ThemeManageIntent.UpdateSearchQuery -> {
+                _uiState.update {
+                    it.copy(searchQuery = intent.value)
+                }
+            }
+            is ThemeManageIntent.OpenApplyDialog -> {
                 _uiState.update { it.copy(dialog = ThemeManageDialog.Apply(intent.theme)) }
-            is ThemeManageIntent.OpenDeleteDialog ->
+            }
+            is ThemeManageIntent.OpenDeleteDialog -> {
                 _uiState.update { it.copy(dialog = ThemeManageDialog.Delete(intent.theme)) }
-            is ThemeManageIntent.OpenEditSheet ->
+            }
+            is ThemeManageIntent.OpenEditSheet -> {
                 _uiState.update { it.copy(dialog = ThemeManageDialog.Edit(intent.theme)) }
-            ThemeManageIntent.DismissDialog ->
+            }
+            ThemeManageIntent.DismissDialog -> {
                 _uiState.update { it.copy(dialog = null) }
-            is ThemeManageIntent.RequestExport ->
+            }
+            is ThemeManageIntent.RequestExport -> {
                 _effects.tryEmit(ThemeManageEffect.OpenExportDocument(intent.theme))
-            ThemeManageIntent.RequestImportPackage ->
+            }
+            ThemeManageIntent.RequestImportPackage -> {
                 _effects.tryEmit(ThemeManageEffect.OpenImportPackage)
-            ThemeManageIntent.RequestImportLegacyJson ->
+            }
+            ThemeManageIntent.RequestImportLegacyJson -> {
                 _effects.tryEmit(ThemeManageEffect.OpenImportLegacyJson)
+            }
         }
     }
 
@@ -100,15 +127,16 @@ class ThemeManageViewModel(
     private fun saveTheme(intent: ThemeManageIntent.SaveTheme) {
         launchExclusive {
             _uiState.update { it.copy(loading = true) }
-            val result = runCatching {
-                themePackageManager.saveTheme(
-                    name = intent.name,
-                    data = intent.data,
-                )
-                intent.replacedTheme
-                    ?.takeIf { it.name != intent.name }
-                    ?.let { themePackageManager.deleteSavedTheme(it).getOrThrow() }
-            }
+            val result =
+                runCatching {
+                    themePackageManager.saveTheme(
+                        name = intent.name,
+                        data = intent.data,
+                    )
+                    intent.replacedTheme
+                        ?.takeIf { it.name != intent.name }
+                        ?.let { themePackageManager.deleteSavedTheme(it).getOrThrow() }
+                }
             if (result.isSuccess) {
                 refreshSavedThemes()
             } else {
@@ -117,7 +145,7 @@ class ThemeManageViewModel(
                     ThemeManageEffect.ShowResult(
                         messageRes = R.string.theme_manage_save_failed,
                         detail = result.exceptionOrNull()?.localizedMessage,
-                    )
+                    ),
                 )
             }
         }
@@ -136,7 +164,7 @@ class ThemeManageViewModel(
                     ThemeManageEffect.ShowResult(
                         messageRes = R.string.theme_manage_apply_failed,
                         detail = result.exceptionOrNull()?.localizedMessage,
-                    )
+                    ),
                 )
             }
         }
@@ -154,7 +182,7 @@ class ThemeManageViewModel(
                     ThemeManageEffect.ShowResult(
                         messageRes = R.string.theme_manage_delete_failed,
                         detail = result.exceptionOrNull()?.localizedMessage,
-                    )
+                    ),
                 )
             }
         }
@@ -162,12 +190,13 @@ class ThemeManageViewModel(
 
     private fun exportPackage(intent: ThemeManageIntent.ExportPackage) {
         launchExclusive {
-            val result = themePackageManager.exportPackage(
-                uri = Uri.parse(intent.uri),
-                themeName = intent.themeName,
-                themeData = intent.themeData,
-                savedTheme = intent.savedTheme,
-            )
+            val result =
+                themePackageManager.exportPackage(
+                    uri = Uri.parse(intent.uri),
+                    themeName = intent.themeName,
+                    themeData = intent.themeData,
+                    savedTheme = intent.savedTheme,
+                )
             _effects.emit(
                 if (result.isSuccess) {
                     ThemeManageEffect.ShowResult(R.string.theme_manage_export_success)
@@ -176,7 +205,7 @@ class ThemeManageViewModel(
                         messageRes = R.string.theme_manage_export_failed,
                         detail = result.exceptionOrNull()?.localizedMessage,
                     )
-                }
+                },
             )
         }
     }
@@ -207,7 +236,7 @@ class ThemeManageViewModel(
                     messageRes = R.string.theme_manage_import_failed,
                     detail = result.exceptionOrNull()?.localizedMessage,
                 )
-            }
+            },
         )
     }
 
@@ -221,7 +250,7 @@ class ThemeManageViewModel(
                 ThemeManageEffect.LegacyMigrationFinished(
                     migratedCount = result.migratedCount,
                     failedCount = result.failedCount,
-                )
+                ),
             )
         }
     }
@@ -248,10 +277,21 @@ data class ThemeManageUiState(
 )
 
 sealed interface ThemeManageDialog {
-    data class Save(val name: String = "") : ThemeManageDialog
-    data class Apply(val theme: SavedTheme) : ThemeManageDialog
-    data class Delete(val theme: SavedTheme) : ThemeManageDialog
-    data class Edit(val theme: SavedTheme) : ThemeManageDialog
+    data class Save(
+        val name: String = "",
+    ) : ThemeManageDialog
+
+    data class Apply(
+        val theme: SavedTheme,
+    ) : ThemeManageDialog
+
+    data class Delete(
+        val theme: SavedTheme,
+    ) : ThemeManageDialog
+
+    data class Edit(
+        val theme: SavedTheme,
+    ) : ThemeManageDialog
 }
 
 sealed interface ThemeManageIntent {
@@ -264,33 +304,72 @@ sealed interface ThemeManageIntent {
         val savedTheme: SavedTheme? = null,
     ) : ThemeManageIntent
 
-    data class ImportPackage(val uri: String) : ThemeManageIntent
-    data class ImportLegacyJson(val uri: String) : ThemeManageIntent
+    data class ImportPackage(
+        val uri: String,
+    ) : ThemeManageIntent
+
+    data class ImportLegacyJson(
+        val uri: String,
+    ) : ThemeManageIntent
+
     data class SaveTheme(
         val name: String,
         val data: ThemeExportData? = null,
         val replacedTheme: SavedTheme? = null,
     ) : ThemeManageIntent
 
-    data class ApplySavedTheme(val theme: SavedTheme) : ThemeManageIntent
-    data class DeleteSavedTheme(val theme: SavedTheme) : ThemeManageIntent
+    data class ApplySavedTheme(
+        val theme: SavedTheme,
+    ) : ThemeManageIntent
+
+    data class DeleteSavedTheme(
+        val theme: SavedTheme,
+    ) : ThemeManageIntent
+
     data object MigrateLegacyThemes : ThemeManageIntent
+
     data object OpenSaveDialog : ThemeManageIntent
-    data class UpdateSaveName(val value: String) : ThemeManageIntent
-    data class UpdateSearchQuery(val value: String) : ThemeManageIntent
-    data class OpenApplyDialog(val theme: SavedTheme) : ThemeManageIntent
-    data class OpenDeleteDialog(val theme: SavedTheme) : ThemeManageIntent
-    data class OpenEditSheet(val theme: SavedTheme) : ThemeManageIntent
+
+    data class UpdateSaveName(
+        val value: String,
+    ) : ThemeManageIntent
+
+    data class UpdateSearchQuery(
+        val value: String,
+    ) : ThemeManageIntent
+
+    data class OpenApplyDialog(
+        val theme: SavedTheme,
+    ) : ThemeManageIntent
+
+    data class OpenDeleteDialog(
+        val theme: SavedTheme,
+    ) : ThemeManageIntent
+
+    data class OpenEditSheet(
+        val theme: SavedTheme,
+    ) : ThemeManageIntent
+
     data object DismissDialog : ThemeManageIntent
-    data class RequestExport(val theme: SavedTheme? = null) : ThemeManageIntent
+
+    data class RequestExport(
+        val theme: SavedTheme? = null,
+    ) : ThemeManageIntent
+
     data object RequestImportPackage : ThemeManageIntent
+
     data object RequestImportLegacyJson : ThemeManageIntent
 }
 
 sealed interface ThemeManageEffect {
-    data class OpenExportDocument(val theme: SavedTheme?) : ThemeManageEffect
+    data class OpenExportDocument(
+        val theme: SavedTheme?,
+    ) : ThemeManageEffect
+
     data object OpenImportPackage : ThemeManageEffect
+
     data object OpenImportLegacyJson : ThemeManageEffect
+
     data class LegacyMigrationFinished(
         val migratedCount: Int,
         val failedCount: Int,

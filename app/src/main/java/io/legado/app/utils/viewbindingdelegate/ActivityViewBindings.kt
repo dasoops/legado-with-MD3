@@ -12,7 +12,7 @@ import androidx.viewbinding.ViewBinding
 @JvmName("viewBindingActivity")
 inline fun <T : ViewBinding> ComponentActivity.viewBinding(
     crossinline bindingInflater: (LayoutInflater) -> T,
-    setContentView: Boolean = false
+    setContentView: Boolean = false,
 ) = lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
     val binding = bindingInflater.invoke(layoutInflater)
     if (setContentView) {

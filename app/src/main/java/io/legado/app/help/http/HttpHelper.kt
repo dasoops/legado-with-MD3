@@ -4,6 +4,13 @@ import io.legado.app.constant.AppConst
 import io.legado.app.help.CacheManager
 import io.legado.app.help.http.CookieManager.cookieJarHeader
 import io.legado.app.utils.NetworkUtils
+import java.io.File
+import java.net.InetSocketAddress
+import java.net.Proxy
+import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.ThreadFactory
+import java.util.concurrent.ThreadPoolExecutor
+import java.util.concurrent.TimeUnit
 import okhttp3.Cache
 import okhttp3.ConnectionSpec
 import okhttp3.Cookie
@@ -13,30 +20,26 @@ import okhttp3.HttpUrl
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import splitties.init.appCtx
-import java.io.File
-import java.net.InetSocketAddress
-import java.net.Proxy
-import java.util.concurrent.ConcurrentHashMap
-import java.util.concurrent.ThreadFactory
-import java.util.concurrent.ThreadPoolExecutor
-import java.util.concurrent.TimeUnit
 
 private val proxyClientCache: ConcurrentHashMap<String, OkHttpClient> by lazy {
     ConcurrentHashMap()
 }
 
-private val cacheSettingsGateway get() = org.koin.core.context.GlobalContext.get().get<io.legado.app.domain.gateway.DownloadCacheSettingsGateway>()
+private val cacheSettingsGateway get() =
+    org.koin.core.context.GlobalContext
+        .get()
+        .get<io.legado.app.domain.gateway.DownloadCacheSettingsGateway>()
 
 val cookieJar by lazy {
     object : CookieJar {
+        override fun loadForRequest(url: HttpUrl): List<Cookie> = emptyList()
 
-        override fun loadForRequest(url: HttpUrl): List<Cookie> {
-            return emptyList()
-        }
-
-        override fun saveFromResponse(url: HttpUrl, cookies: List<Cookie>) {
+        override fun saveFromResponse(
+            url: HttpUrl,
+            cookies: List<Cookie>,
+        ) {
             if (cookies.isEmpty()) return
-            //临时保存 书源启用cookie选项再添加到数据库
+            // 临时保存 书源启用cookie选项再添加到数据库
             val cookieBuilder = StringBuilder()
             cookies.forEachIndexed { index, cookie ->
                 if (index > 0) cookieBuilder.append(";")
@@ -45,96 +48,105 @@ val cookieJar by lazy {
             val domain = NetworkUtils.getSubDomain(url.toString())
             CacheManager.putMemory("${domain}_cookieJar", cookieBuilder.toString())
         }
-
     }
 }
 
 /**
  * 强制缓存拦截器，对于封面请求（由CoverFetcher标记），强制缓存30天
  */
-private val cacheControlInterceptor = Interceptor { chain ->
-    val request = chain.request()
-    val response = chain.proceed(request)
-    if (request.tag() === io.legado.app.help.coil.CoverFetcher.COVER_REQUEST_TAG) {
-        response.newBuilder()
-            .header("Cache-Control", "public, max-age=2592000")
-            .removeHeader("Pragma")
-            .build()
-    } else {
-        response
+private val cacheControlInterceptor =
+    Interceptor { chain ->
+        val request = chain.request()
+        val response = chain.proceed(request)
+        if (request.tag() === io.legado.app.help.coil.CoverFetcher.COVER_REQUEST_TAG) {
+            response
+                .newBuilder()
+                .header("Cache-Control", "public, max-age=2592000")
+                .removeHeader("Pragma")
+                .build()
+        } else {
+            response
+        }
     }
-}
 
 val okHttpClient: OkHttpClient by lazy {
-    val specs = arrayListOf(
-        ConnectionSpec.MODERN_TLS,
-        ConnectionSpec.COMPATIBLE_TLS,
-        ConnectionSpec.CLEARTEXT
-    )
+    val specs =
+        arrayListOf(
+            ConnectionSpec.MODERN_TLS,
+            ConnectionSpec.COMPATIBLE_TLS,
+            ConnectionSpec.CLEARTEXT,
+        )
 
-    //TODO：自定义缓存大小
+    // TODO：自定义缓存大小
     val cache = Cache(File(appCtx.cacheDir, "http_cache"), 100L * 1024L * 1024L)
 
-    val builder = OkHttpClient.Builder()
-        .cache(cache)
-        .connectTimeout(15, TimeUnit.SECONDS)
-        .writeTimeout(15, TimeUnit.SECONDS)
-        .readTimeout(60, TimeUnit.SECONDS)
-        .callTimeout(60, TimeUnit.SECONDS)
-        //.cookieJar(cookieJar = cookieJar)
-        .sslSocketFactory(SSLHelper.unsafeSSLSocketFactory, SSLHelper.unsafeTrustManager)
-        .retryOnConnectionFailure(true)
-        .hostnameVerifier(SSLHelper.unsafeHostnameVerifier)
-        .connectionSpecs(specs)
-        .followRedirects(true)
-        .followSslRedirects(true)
-        .addInterceptor(OkHttpExceptionInterceptor)
-        .addInterceptor { chain ->
-            val request = chain.request()
-            val builder = request.newBuilder()
-            if (request.header(AppConst.UA_NAME) == null) {
-                builder.addHeader(AppConst.UA_NAME, cacheSettingsGateway.currentSettings.userAgent)
-            } else if (request.header(AppConst.UA_NAME) == "null") {
-                builder.removeHeader(AppConst.UA_NAME)
-            }
-            builder.addHeader("Keep-Alive", "300")
-            builder.addHeader("Connection", "Keep-Alive")
-            chain.proceed(builder.build())
-        }
-        .addNetworkInterceptor(cacheControlInterceptor) // 添加强制缓存拦截器
-        .addNetworkInterceptor { chain ->
-            var request = chain.request()
-            val enableCookieJar = request.header(cookieJarHeader) != null
+    val builder =
+        OkHttpClient
+            .Builder()
+            .cache(cache)
+            .connectTimeout(15, TimeUnit.SECONDS)
+            .writeTimeout(15, TimeUnit.SECONDS)
+            .readTimeout(60, TimeUnit.SECONDS)
+            .callTimeout(60, TimeUnit.SECONDS)
+            // .cookieJar(cookieJar = cookieJar)
+            .sslSocketFactory(SSLHelper.unsafeSSLSocketFactory, SSLHelper.unsafeTrustManager)
+            .retryOnConnectionFailure(true)
+            .hostnameVerifier(SSLHelper.unsafeHostnameVerifier)
+            .connectionSpecs(specs)
+            .followRedirects(true)
+            .followSslRedirects(true)
+            .addInterceptor(OkHttpExceptionInterceptor)
+            .addInterceptor { chain ->
+                val request = chain.request()
+                val builder = request.newBuilder()
+                if (request.header(AppConst.UA_NAME) == null) {
+                    builder.addHeader(AppConst.UA_NAME, cacheSettingsGateway.currentSettings.userAgent)
+                } else if (request.header(AppConst.UA_NAME) == "null") {
+                    builder.removeHeader(AppConst.UA_NAME)
+                }
+                builder.addHeader("Keep-Alive", "300")
+                builder.addHeader("Connection", "Keep-Alive")
+                chain.proceed(builder.build())
+            }.addNetworkInterceptor(cacheControlInterceptor) // 添加强制缓存拦截器
+            .addNetworkInterceptor { chain ->
+                var request = chain.request()
+                val enableCookieJar = request.header(cookieJarHeader) != null
 
-            if (enableCookieJar) {
-                val requestBuilder = request.newBuilder()
-                requestBuilder.removeHeader(cookieJarHeader)
-                request = CookieManager.loadRequest(requestBuilder.build())
-            }
+                if (enableCookieJar) {
+                    val requestBuilder = request.newBuilder()
+                    requestBuilder.removeHeader(cookieJarHeader)
+                    request = CookieManager.loadRequest(requestBuilder.build())
+                }
 
-            val networkResponse = chain.proceed(request)
+                val networkResponse = chain.proceed(request)
 
-            if (enableCookieJar) {
-                CookieManager.saveResponse(networkResponse)
+                if (enableCookieJar) {
+                    CookieManager.saveResponse(networkResponse)
+                }
+                networkResponse
             }
-            networkResponse
-        }
     builder.addInterceptor(DecompressInterceptor)
     builder.build().apply {
         val okHttpName =
-            OkHttpClient::class.java.name.removePrefix("okhttp3.").removeSuffix("Client")
+            OkHttpClient::class.java.name
+                .removePrefix("okhttp3.")
+                .removeSuffix("Client")
         val executor = dispatcher.executorService as ThreadPoolExecutor
         val threadName = "$okHttpName Dispatcher"
-        executor.threadFactory = ThreadFactory { runnable ->
-            Thread(runnable, threadName).apply {
-                isDaemon = false
-                uncaughtExceptionHandler = OkhttpUncaughtExceptionHandler
+        executor.threadFactory =
+            ThreadFactory { runnable ->
+                Thread(runnable, threadName).apply {
+                    isDaemon = false
+                    uncaughtExceptionHandler = OkhttpUncaughtExceptionHandler
+                }
             }
-        }
     }
 }
 
-enum class HttpCacheType(val dirName: String, val maxSize: Long) {
+enum class HttpCacheType(
+    val dirName: String,
+    val maxSize: Long,
+) {
     COVER("http_cache", 100L * 1024 * 1024),
 }
 
@@ -151,7 +163,8 @@ fun clearHttpCache(type: HttpCacheType) {
         // 保证用户能彻底删除封面数据腾空间。
         HttpCacheType.COVER -> {
             okHttpClient.cache?.delete()
-            io.legado.app.help.coil.CoverFileCache.clear()
+            io.legado.app.help.coil.CoverFileCache
+                .clear()
         }
     }
 }
@@ -169,8 +182,8 @@ fun getProxyClient(proxy: String? = null): OkHttpClient {
     val r = Regex("(http|socks4|socks5)://(.*):(\\d{2,5})(@.*@.*)?")
     val ms = r.findAll(proxy)
     val group = ms.first()
-    var username = ""       //代理服务器验证用户名
-    var password = ""       //代理服务器验证密码
+    var username = "" // 代理服务器验证用户名
+    var password = "" // 代理服务器验证密码
     val type = if (group.groupValues[1] == "http") "http" else "socks"
     val host = group.groupValues[2]
     val port = group.groupValues[3].toInt()
@@ -186,9 +199,11 @@ fun getProxyClient(proxy: String? = null): OkHttpClient {
             builder.proxy(Proxy(Proxy.Type.SOCKS, InetSocketAddress(host, port)))
         }
         if (username != "" && password != "") {
-            builder.proxyAuthenticator { _, response -> //设置代理服务器账号密码
+            builder.proxyAuthenticator { _, response ->
+                // 设置代理服务器账号密码
                 val credential: String = Credentials.basic(username, password)
-                response.request.newBuilder()
+                response.request
+                    .newBuilder()
                     .header("Proxy-Authorization", credential)
                     .build()
             }

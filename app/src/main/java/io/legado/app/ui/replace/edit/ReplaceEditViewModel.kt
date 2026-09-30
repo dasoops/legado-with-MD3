@@ -23,9 +23,8 @@ import kotlinx.coroutines.launch
 class ReplaceEditViewModel(
     private val app: Application,
     private val replaceRuleRepository: ReplaceRuleRepository,
-    private val route: ReplaceEditRoute
+    private val route: ReplaceEditRoute,
 ) : ViewModel() {
-
     private val _uiState = MutableStateFlow(ReplaceEditUiState())
     val uiState = _uiState.asStateFlow()
 
@@ -104,26 +103,27 @@ class ReplaceEditViewModel(
                 scopeContent = rule.scopeContent,
                 scope = rule.scope ?: "",
                 excludeScope = rule.excludeScope ?: "",
-                timeout = rule.timeoutMillisecond.toString()
+                timeout = rule.timeoutMillisecond.toString(),
             )
         }
     }
 
     private fun getReplaceRuleFromState(): ReplaceRule {
         val state = _uiState.value
-        val rule = ReplaceRule().apply {
-            id = state.id
-            name = state.name
-            group = if (state.group == "默认" || state.group.isBlank()) null else state.group
-            pattern = state.pattern
-            replacement = state.replacement
-            isRegex = state.isRegex
-            scopeTitle = state.scopeTitle
-            scopeContent = state.scopeContent
-            scope = state.scope
-            excludeScope = state.excludeScope
-            timeoutMillisecond = state.timeout.toLongOrNull() ?: 3000L
-        }
+        val rule =
+            ReplaceRule().apply {
+                id = state.id
+                name = state.name
+                group = if (state.group == "默认" || state.group.isBlank()) null else state.group
+                pattern = state.pattern
+                replacement = state.replacement
+                isRegex = state.isRegex
+                scopeTitle = state.scopeTitle
+                scopeContent = state.scopeContent
+                scope = state.scope
+                excludeScope = state.excludeScope
+                timeoutMillisecond = state.timeout.toLongOrNull() ?: 3000L
+            }
         return rule
     }
 
@@ -144,8 +144,9 @@ class ReplaceEditViewModel(
                     throw NoStackTraceException("剪贴板为空")
                 }
 
-                val pastedRule = GSON.fromJsonObject<ReplaceRule>(text).getOrNull()
-                    ?: throw NoStackTraceException("格式不对")
+                val pastedRule =
+                    GSON.fromJsonObject<ReplaceRule>(text).getOrNull()
+                        ?: throw NoStackTraceException("格式不对")
 
                 launch(Dispatchers.Main) {
                     updateStateFromRule(pastedRule)
@@ -182,10 +183,15 @@ class ReplaceEditViewModel(
     }
 
     private fun onGroupChange(v: String) = _uiState.update { it.copy(group = v) }
+
     private fun onRegexChange(v: Boolean) = _uiState.update { it.copy(isRegex = v) }
+
     private fun onScopeTitleChange(v: Boolean) = _uiState.update { it.copy(scopeTitle = v) }
+
     private fun onScopeContentChange(v: Boolean) = _uiState.update { it.copy(scopeContent = v) }
+
     private fun onTimeoutChange(v: String) = _uiState.update { it.copy(timeout = v) }
+
     private fun toggleGroupDialog(show: Boolean) = _uiState.update { it.copy(showGroupDialog = show) }
 
     private fun setActiveField(field: ActiveField) {
@@ -194,11 +200,21 @@ class ReplaceEditViewModel(
 
     private fun insertTextAtCursor(text: String) {
         when (_uiState.value.activeField) {
-            ActiveField.Name -> _uiState.update { it.copy(name = it.name + text) }
-            ActiveField.Pattern -> _uiState.update { it.copy(pattern = it.pattern + text) }
-            ActiveField.Replacement -> _uiState.update { it.copy(replacement = it.replacement + text) }
-            ActiveField.Scope -> _uiState.update { it.copy(scope = it.scope + text) }
-            ActiveField.Exclude -> _uiState.update { it.copy(excludeScope = it.excludeScope + text) }
+            ActiveField.Name -> {
+                _uiState.update { it.copy(name = it.name + text) }
+            }
+            ActiveField.Pattern -> {
+                _uiState.update { it.copy(pattern = it.pattern + text) }
+            }
+            ActiveField.Replacement -> {
+                _uiState.update { it.copy(replacement = it.replacement + text) }
+            }
+            ActiveField.Scope -> {
+                _uiState.update { it.copy(scope = it.scope + text) }
+            }
+            ActiveField.Exclude -> {
+                _uiState.update { it.copy(excludeScope = it.excludeScope + text) }
+            }
             else -> {}
         }
     }
@@ -208,19 +224,20 @@ class ReplaceEditViewModel(
             val state = _uiState.value
 
             val existingRule = if (state.id > 0) replaceRuleRepository.findById(state.id) else null
-            val rule = (existingRule ?: ReplaceRule()).apply {
-                id = existingRule?.id ?: if (state.id <= 0) System.currentTimeMillis() else state.id
-                name = state.name
-                group = if (state.group == "默认" || state.group.isBlank()) null else state.group
-                pattern = state.pattern
-                replacement = state.replacement
-                isRegex = state.isRegex
-                scopeTitle = state.scopeTitle
-                scopeContent = state.scopeContent
-                scope = state.scope
-                excludeScope = state.excludeScope
-                timeoutMillisecond = state.timeout.toLongOrNull() ?: 3000L
-            }
+            val rule =
+                (existingRule ?: ReplaceRule()).apply {
+                    id = existingRule?.id ?: if (state.id <= 0) System.currentTimeMillis() else state.id
+                    name = state.name
+                    group = if (state.group == "默认" || state.group.isBlank()) null else state.group
+                    pattern = state.pattern
+                    replacement = state.replacement
+                    isRegex = state.isRegex
+                    scopeTitle = state.scopeTitle
+                    scopeContent = state.scopeContent
+                    scope = state.scope
+                    excludeScope = state.excludeScope
+                    timeoutMillisecond = state.timeout.toLongOrNull() ?: 3000L
+                }
 
             if (existingRule == null && rule.order == Int.MIN_VALUE) {
                 rule.order = replaceRuleRepository.getNextOrder()
@@ -231,7 +248,6 @@ class ReplaceEditViewModel(
             _effects.tryEmit(ReplaceEditEffect.NavigateBack)
         }
     }
-
 
     private fun deleteGroups(groups: List<String>) {
         viewModelScope.launch {

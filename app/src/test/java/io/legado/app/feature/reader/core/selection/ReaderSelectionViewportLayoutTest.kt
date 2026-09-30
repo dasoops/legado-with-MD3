@@ -18,10 +18,11 @@ class ReaderSelectionViewportLayoutTest {
         val previous = page(0, 0, 0)
         val current = page(0, 1, 1)
         val next = page(0, 2, 2)
-        val layout = ReaderPageViewportLayout.scroll(
-            ReaderPageWindow(previous, current, next),
-            scrollOffsetPx = 20f,
-        )
+        val layout =
+            ReaderPageViewportLayout.scroll(
+                ReaderPageWindow(previous, current, next),
+                scrollOffsetPx = 20f,
+            )
 
         assertEquals(previous.id, layout.pageAt(5f, 10f)?.page?.id)
         assertEquals(90f, layout.pageAt(5f, 10f)?.localY(10f))
@@ -35,10 +36,11 @@ class ReaderSelectionViewportLayoutTest {
     @Test fun selectionBoundsAreTranslatedForEveryVisiblePage() {
         val current = page(0, 0, 0)
         val next = page(0, 1, 1)
-        val layout = ReaderPageViewportLayout.scroll(
-            ReaderPageWindow(current = current, next = next),
-            scrollOffsetPx = -20f,
-        )
+        val layout =
+            ReaderPageViewportLayout.scroll(
+                ReaderPageWindow(current = current, next = next),
+                scrollOffsetPx = -20f,
+            )
 
         assertEquals(
             listOf(ReaderRect(0f, -20f, 10f, 0f), ReaderRect(0f, 80f, 10f, 100f)),
@@ -51,10 +53,11 @@ class ReaderSelectionViewportLayoutTest {
         val current = page(0, 0, 0)
         val next = page(0, 1, 1)
         val nextPlus = page(0, 2, 2)
-        val layout = ReaderPageViewportLayout.scroll(
-            ReaderPageWindow(current = current, next = next, nextPlus = nextPlus),
-            scrollOffsetPx = -20f,
-        )
+        val layout =
+            ReaderPageViewportLayout.scroll(
+                ReaderPageWindow(current = current, next = next, nextPlus = nextPlus),
+                scrollOffsetPx = -20f,
+            )
 
         val placement = layout.pageAt(5f, 190f)!!
         assertEquals(nextPlus.id, placement.page.id)
@@ -78,10 +81,11 @@ class ReaderSelectionViewportLayoutTest {
     @Test fun adjacentPageElementHitUsesItsLocalCoordinates() {
         val current = page(0, 0, 0)
         val next = page(0, 1, 1)
-        val layout = ReaderPageViewportLayout.scroll(
-            ReaderPageWindow(current = current, next = next),
-            scrollOffsetPx = -20f,
-        )
+        val layout =
+            ReaderPageViewportLayout.scroll(
+                ReaderPageWindow(current = current, next = next),
+                scrollOffsetPx = -20f,
+            )
 
         val placement = layout.pageAt(5f, 90f)!!
         assertEquals(next.id, placement.page.id)
@@ -93,14 +97,19 @@ class ReaderSelectionViewportLayoutTest {
 
     @Test fun pagedLayoutNeverExposesAdjacentPages() {
         val current = page(0, 1, 1)
-        val layout = ReaderPageViewportLayout.paged(
-            ReaderPageWindow(previous = page(0, 0, 0), current = current, next = page(0, 2, 2)),
-        )
+        val layout =
+            ReaderPageViewportLayout.paged(
+                ReaderPageWindow(previous = page(0, 0, 0), current = current, next = page(0, 2, 2)),
+            )
 
         assertEquals(listOf(current.id), layout.placements.map { it.page.id })
     }
 
-    private fun page(chapter: Int, index: Int, position: Int) = ReaderPage(
+    private fun page(
+        chapter: Int,
+        index: Int,
+        position: Int,
+    ) = ReaderPage(
         id = ReaderPageId(chapter, index),
         chapterTitle = "",
         text = position.toString(),
@@ -108,7 +117,8 @@ class ReaderSelectionViewportLayoutTest {
         heightPx = 100,
         contentTopPx = 0f,
         contentBottomPx = 100f,
-        elements = listOf(
+        elements =
+        listOf(
             ReaderElement.Text(
                 bounds = ReaderRect(0f, 0f, 10f, 20f),
                 baselinePx = 15f,

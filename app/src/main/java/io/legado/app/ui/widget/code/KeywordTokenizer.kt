@@ -4,7 +4,10 @@ import android.widget.MultiAutoCompleteTextView
 import kotlin.math.max
 
 class KeywordTokenizer : MultiAutoCompleteTextView.Tokenizer {
-    override fun findTokenStart(charSequence: CharSequence, cursor: Int): Int {
+    override fun findTokenStart(
+        charSequence: CharSequence,
+        cursor: Int,
+    ): Int {
         var sequenceStr = charSequence.toString()
         sequenceStr = sequenceStr.substring(0, cursor)
         val spaceIndex = sequenceStr.lastIndexOf(" ")
@@ -15,11 +18,10 @@ class KeywordTokenizer : MultiAutoCompleteTextView.Tokenizer {
         return if (index + 1 < charSequence.length) index + 1 else index
     }
 
-    override fun findTokenEnd(charSequence: CharSequence, cursor: Int): Int {
-        return charSequence.length
-    }
+    override fun findTokenEnd(
+        charSequence: CharSequence,
+        cursor: Int,
+    ): Int = charSequence.length
 
-    override fun terminateToken(charSequence: CharSequence): CharSequence {
-        return charSequence
-    }
+    override fun terminateToken(charSequence: CharSequence): CharSequence = charSequence
 }

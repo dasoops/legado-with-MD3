@@ -12,16 +12,13 @@ import java.lang.ref.WeakReference
  */
 @Suppress("unused")
 object LifecycleHelp : Application.ActivityLifecycleCallbacks {
-
     private const val TAG = "LifecycleHelp"
 
     private val activities: MutableList<WeakReference<Activity>> = arrayListOf()
     private val services: MutableList<WeakReference<BaseService>> = arrayListOf()
     private var appFinishedListener: (() -> Unit)? = null
 
-    fun activitySize(): Int {
-        return activities.size
-    }
+    fun activitySize(): Int = activities.size
 
     /**
      * 判断指定Activity是否存在
@@ -82,7 +79,10 @@ object LifecycleHelp : Application.ActivityLifecycleCallbacks {
         }
     }
 
-    override fun onActivitySaveInstanceState(activity: Activity, outState: Bundle) {
+    override fun onActivitySaveInstanceState(
+        activity: Activity,
+        outState: Bundle,
+    ) {
         LogUtils.d(TAG, "${activity::class.simpleName} onSaveInstanceState")
     }
 
@@ -90,7 +90,10 @@ object LifecycleHelp : Application.ActivityLifecycleCallbacks {
         LogUtils.d(TAG, "${activity::class.simpleName} onStop")
     }
 
-    override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) {
+    override fun onActivityCreated(
+        activity: Activity,
+        savedInstanceState: Bundle?,
+    ) {
         LogUtils.d(TAG, "${activity::class.simpleName} onCreate")
         activities.add(WeakReference(activity))
     }

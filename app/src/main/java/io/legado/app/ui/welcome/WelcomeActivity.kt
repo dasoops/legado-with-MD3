@@ -10,7 +10,6 @@ import io.legado.app.ui.main.MainActivity
  * 故保留 Activity；实际状态与行为在 feature/onboarding。
  */
 class WelcomeActivity : BaseComposeActivity() {
-
     @Composable
     override fun Content() {
         OnboardingRouteScreen(
@@ -18,7 +17,7 @@ class WelcomeActivity : BaseComposeActivity() {
             onNavigateHome = {
                 startActivity(MainActivity.createHomeIntent(this@WelcomeActivity))
                 finish()
-            }
+            },
         )
     }
 }

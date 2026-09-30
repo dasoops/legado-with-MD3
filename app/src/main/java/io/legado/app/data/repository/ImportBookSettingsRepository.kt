@@ -16,9 +16,10 @@ class ImportBookSettingsRepository : ImportBookSettingsGateway {
     override val currentSettings: ImportBookSettings
         get() = AppConfigStore.preferences.toImportBookSettings()
 
-    override val settings: Flow<ImportBookSettings> = AppConfigStore.preferencesFlow
-        .map(Preferences::toImportBookSettings)
-        .distinctUntilChanged()
+    override val settings: Flow<ImportBookSettings> =
+        AppConfigStore.preferencesFlow
+            .map(Preferences::toImportBookSettings)
+            .distinctUntilChanged()
 
     override suspend fun update(transform: (ImportBookSettings) -> ImportBookSettings) {
         AppConfigStore.atomicUpdate(

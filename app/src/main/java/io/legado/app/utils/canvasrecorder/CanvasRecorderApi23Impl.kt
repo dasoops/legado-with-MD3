@@ -6,7 +6,6 @@ import io.legado.app.utils.canvasrecorder.pools.PicturePool
 import io.legado.app.utils.objectpool.synchronized
 
 class CanvasRecorderApi23Impl : BaseCanvasRecorder() {
-
     private var picture: Picture? = null
 
     override val width get() = picture?.width ?: -1
@@ -18,7 +17,10 @@ class CanvasRecorderApi23Impl : BaseCanvasRecorder() {
         }
     }
 
-    override fun beginRecording(width: Int, height: Int): Canvas {
+    override fun beginRecording(
+        width: Int,
+        height: Int,
+    ): Canvas {
         initPicture()
         return picture!!.beginRecording(width, height)
     }
@@ -43,5 +45,4 @@ class CanvasRecorderApi23Impl : BaseCanvasRecorder() {
     companion object {
         private val picturePool = PicturePool().synchronized()
     }
-
 }

@@ -15,7 +15,6 @@ class HuffcdicDecompressor(
     mobiBook: MobiBook,
     mobiHeader: MobiHeader,
 ) : Decompressor {
-
     private val magic: String
     private val offset1: Int
     private val offset2: Int
@@ -64,9 +63,7 @@ class HuffcdicDecompressor(
                 buffer.get(data)
                 dictionary.add(CDICEntry(data, decompressed))
             }
-
         }
-
     }
 
     override fun decompress(data: ByteArray): ByteArray {
@@ -113,13 +110,15 @@ class HuffcdicDecompressor(
             }
 
             bos.write(entry.data)
-
         }
 
         return bos.toByteArray()
     }
 
-    private fun ByteBuffer.readUIntX(offset: Int, maxlen: Int): Long {
+    private fun ByteBuffer.readUIntX(
+        offset: Int,
+        maxlen: Int,
+    ): Long {
         position(offset)
         var value = 0L
         var i = maxlen
@@ -129,5 +128,4 @@ class HuffcdicDecompressor(
         }
         return value
     }
-
 }

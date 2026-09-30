@@ -11,17 +11,19 @@ import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 
-data class BookSearchScope(val raw: String) {
-
+data class BookSearchScope(
+    val raw: String,
+) {
     private val parsed: ParsedSearchScope by lazy {
         parse(raw)
     }
 
     val items: List<String>
-        get() = when {
-            isSource -> sourceUrls
-            else -> groupNames
-        }
+        get() =
+            when {
+                isSource -> sourceUrls
+                else -> groupNames
+            }
 
     val isAll: Boolean
         get() = parsed.isAll
@@ -52,9 +54,10 @@ data class BookSearchScope(val raw: String) {
     )
 
     companion object {
-
-        fun encodeSource(name: String, url: String): String =
-            encodeSources(listOf(ScopeSourceItem(name, url)))
+        fun encodeSource(
+            name: String,
+            url: String,
+        ): String = encodeSources(listOf(ScopeSourceItem(name, url)))
 
         fun encodeGroups(groups: List<String>): String {
             val selected = groups.filter { it.isNotBlank() }
@@ -63,9 +66,12 @@ data class BookSearchScope(val raw: String) {
             } else {
                 buildJsonObject {
                     put("type", JsonPrimitive(TYPE_GROUP))
-                    put("groups", buildJsonArray {
-                        selected.forEach { add(JsonPrimitive(it)) }
-                    })
+                    put(
+                        "groups",
+                        buildJsonArray {
+                            selected.forEach { add(JsonPrimitive(it)) }
+                        },
+                    )
                 }.toString()
             }
         }
@@ -77,14 +83,19 @@ data class BookSearchScope(val raw: String) {
             } else {
                 buildJsonObject {
                     put("type", JsonPrimitive(TYPE_SOURCE))
-                    put("sources", buildJsonArray {
-                        selected.forEach { source ->
-                            add(buildJsonObject {
-                                put("name", JsonPrimitive(source.name))
-                                put("url", JsonPrimitive(source.url))
-                            })
-                        }
-                    })
+                    put(
+                        "sources",
+                        buildJsonArray {
+                            selected.forEach { source ->
+                                add(
+                                    buildJsonObject {
+                                        put("name", JsonPrimitive(source.name))
+                                        put("url", JsonPrimitive(source.url))
+                                    },
+                                )
+                            }
+                        },
+                    )
                 }.toString()
             }
         }
@@ -107,22 +118,28 @@ data class BookSearchScope(val raw: String) {
                 scopeJson.parseToJsonElement(json).jsonObject
             }.getOrNull()?.let { scope ->
                 when (scope["type"]?.jsonPrimitive?.contentOrNull) {
-                    TYPE_SOURCE -> ParsedSearchScope(
-                        sources = scope["sources"]
-                            ?.safeJsonArray()
-                            ?.mapNotNull { it.toSourceItemOrNull() }
-                            .orEmpty()
-                    )
-
-                    TYPE_GROUP -> ParsedSearchScope(
-                        groups = scope["groups"]
-                            ?.safeJsonArray()
-                            ?.mapNotNull { it.toStringOrNull() }
-                            ?.filter { it.isNotBlank() }
-                            .orEmpty()
-                    )
-
-                    else -> null
+                    TYPE_SOURCE -> {
+                        ParsedSearchScope(
+                            sources =
+                            scope["sources"]
+                                ?.safeJsonArray()
+                                ?.mapNotNull { it.toSourceItemOrNull() }
+                                .orEmpty(),
+                        )
+                    }
+                    TYPE_GROUP -> {
+                        ParsedSearchScope(
+                            groups =
+                            scope["groups"]
+                                ?.safeJsonArray()
+                                ?.mapNotNull { it.toStringOrNull() }
+                                ?.filter { it.isNotBlank() }
+                                .orEmpty(),
+                        )
+                    }
+                    else -> {
+                        null
+                    }
                 }
             }
         }
@@ -136,17 +153,15 @@ data class BookSearchScope(val raw: String) {
             return ParsedSearchScope(groups = raw.splitNotBlank(",").toList())
         }
 
-        private fun parseLegacySourceItems(items: List<String>): List<ScopeSourceItem> {
-            return items.mapNotNull { item ->
-                val splitIndex = item.indexOf("::")
-                if (splitIndex <= 0 || splitIndex >= item.lastIndex) {
-                    null
-                } else {
-                    ScopeSourceItem(
-                        name = item.substring(0, splitIndex),
-                        url = item.substring(splitIndex + 2)
-                    )
-                }
+        private fun parseLegacySourceItems(items: List<String>): List<ScopeSourceItem> = items.mapNotNull { item ->
+            val splitIndex = item.indexOf("::")
+            if (splitIndex <= 0 || splitIndex >= item.lastIndex) {
+                null
+            } else {
+                ScopeSourceItem(
+                    name = item.substring(0, splitIndex),
+                    url = item.substring(splitIndex + 2),
+                )
             }
         }
 
@@ -158,24 +173,21 @@ data class BookSearchScope(val raw: String) {
             jsonPrimitive.contentOrNull
         }.getOrNull()
 
-        private fun JsonElement.toSourceItemOrNull(): ScopeSourceItem? {
-            return runCatching {
-                val item = jsonObject
-                val url = item["url"]?.jsonPrimitive?.contentOrNull
-                if (url.isNullOrBlank()) {
-                    null
-                } else {
-                    ScopeSourceItem(
-                        name = item["name"]?.jsonPrimitive?.contentOrNull.orEmpty(),
-                        url = url
-                    )
-                }
-            }.getOrNull()
-        }
+        private fun JsonElement.toSourceItemOrNull(): ScopeSourceItem? = runCatching {
+            val item = jsonObject
+            val url = item["url"]?.jsonPrimitive?.contentOrNull
+            if (url.isNullOrBlank()) {
+                null
+            } else {
+                ScopeSourceItem(
+                    name = item["name"]?.jsonPrimitive?.contentOrNull.orEmpty(),
+                    url = url,
+                )
+            }
+        }.getOrNull()
 
         private const val TYPE_GROUP = "group"
         private const val TYPE_SOURCE = "source"
         private val scopeJson = Json
     }
-
 }

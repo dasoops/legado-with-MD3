@@ -5,7 +5,6 @@ import io.legado.app.domain.gateway.ReadSettingsGateway
 import org.koin.core.context.GlobalContext
 
 object CanvasRecorderFactory {
-
     private val readSettingsGateway
         get() = GlobalContext.get().get<ReadSettingsGateway>()
 
@@ -15,17 +14,17 @@ object CanvasRecorderFactory {
 
     // issue 3868
     fun create(locked: Boolean = false): CanvasRecorder {
-        val impl = when {
-            !readSettingsGateway.currentSettings.optimizeRender -> CanvasRecorderImpl()
-            atLeastApi29 -> CanvasRecorderApi29Impl()
-            atLeastApi24 -> CanvasRecorderApi23Impl()
-            else -> CanvasRecorderImpl()
-        }
+        val impl =
+            when {
+                !readSettingsGateway.currentSettings.optimizeRender -> CanvasRecorderImpl()
+                atLeastApi29 -> CanvasRecorderApi29Impl()
+                atLeastApi24 -> CanvasRecorderApi23Impl()
+                else -> CanvasRecorderImpl()
+            }
         return if (locked) {
             CanvasRecorderLocked(impl)
         } else {
             impl
         }
     }
-
 }

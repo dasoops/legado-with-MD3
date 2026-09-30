@@ -6,6 +6,7 @@ import io.legado.app.data.repository.BookmarkRepository
 import io.legado.app.feature.reader.core.navigation.ReaderPageContext
 import io.legado.app.model.ReadBook
 import io.legado.app.model.ReaderBookmarkState
+import kotlin.math.abs
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.Dispatchers.Main
@@ -20,7 +21,6 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import splitties.init.appCtx
-import kotlin.math.abs
 
 /**
  * 书签域（R2.2 续批）。
@@ -38,7 +38,6 @@ class ReadBookmarkDelegate(
      */
     private val bookKey: Flow<Pair<String, String>?>,
 ) {
-
     /**
      * 串行化下滑手势的切换：先查再写不是原子的，快速连滑会双双看到「空」而重复插入。
      * 锁住读-查-写整段后，两次滑动退化成正确的两次 toggle（加一条再删一条），不会出现重复。
@@ -72,8 +71,7 @@ class ReadBookmarkDelegate(
                         } else {
                             bookmarkRepository.flowByBook(key.first, key.second).map { key to it }
                         }
-                    }
-                    .collect { (key, bookmarks) ->
+                    }.collect { (key, bookmarks) ->
                         if (key == null) {
                             ReaderBookmarkState.clear()
                         } else {
@@ -100,13 +98,14 @@ class ReadBookmarkDelegate(
             toggleMutex.withLock {
                 val book = ReadBook.book ?: return@withLock
                 val page = currentPage() ?: return@withLock
-                val existing = bookmarkRepository.getByChapterRange(
-                    bookName = book.name,
-                    bookAuthor = book.author,
-                    chapterIndex = page.chapterIndex,
-                    startPos = page.startPosition,
-                    endPos = page.endPosition,
-                )
+                val existing =
+                    bookmarkRepository.getByChapterRange(
+                        bookName = book.name,
+                        bookAuthor = book.author,
+                        chapterIndex = page.chapterIndex,
+                        startPos = page.startPosition,
+                        endPos = page.endPosition,
+                    )
                 if (existing.isEmpty()) {
                     bookmarkRepository.save(
                         Bookmark(
@@ -118,19 +117,20 @@ class ReadBookmarkDelegate(
                             chapterPos = ReadBook.durChapterPos,
                             bookText = page.text.replace(BOOK_TEXT_MARKS, "").trim(),
                             content = "",
-                        )
+                        ),
                     )
                     host.emitEffect(
-                        ReadBookEffect.ShowToast(appCtx.getString(R.string.bookmark_added))
+                        ReadBookEffect.ShowToast(appCtx.getString(R.string.bookmark_added)),
                     )
                 } else {
                     // 只删离当前阅读位置最近的一条：同一页可能有多条书签，不应整页误删。
                     // 书签与划线笔记完全独立，这里只删书签本身。
-                    val nearest = existing.minByOrNull { abs(it.chapterPos - ReadBook.durChapterPos) }
-                        ?: return@withLock
+                    val nearest =
+                        existing.minByOrNull { abs(it.chapterPos - ReadBook.durChapterPos) }
+                            ?: return@withLock
                     bookmarkRepository.delete(nearest)
                     host.emitEffect(
-                        ReadBookEffect.ShowToast(appCtx.getString(R.string.bookmark_removed))
+                        ReadBookEffect.ShowToast(appCtx.getString(R.string.bookmark_removed)),
                     )
                 }
             }
@@ -142,16 +142,17 @@ class ReadBookmarkDelegate(
         scope.launch(IO) {
             val book = ReadBook.book ?: return@launch
             val page = currentPage() ?: return@launch
-            val bookmark = Bookmark(
-                bookName = book.name,
-                bookAuthor = book.author,
-                bookUrl = book.bookUrl,
-                chapterIndex = page.chapterIndex,
-                chapterName = page.chapterTitle,
-                chapterPos = ReadBook.durChapterPos,
-                bookText = page.text,
-                content = "",
-            )
+            val bookmark =
+                Bookmark(
+                    bookName = book.name,
+                    bookAuthor = book.author,
+                    bookUrl = book.bookUrl,
+                    chapterIndex = page.chapterIndex,
+                    chapterName = page.chapterTitle,
+                    chapterPos = ReadBook.durChapterPos,
+                    bookText = page.text,
+                    content = "",
+                )
             withContext(Main) {
                 host.setActiveSheet(ReadBookSheet.Bookmark(bookmark))
             }

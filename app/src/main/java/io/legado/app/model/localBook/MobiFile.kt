@@ -15,13 +15,14 @@ import io.legado.app.lib.mobi.entities.TOC
 import io.legado.app.utils.FileUtils
 import io.legado.app.utils.HtmlFormatter
 import io.legado.app.utils.printOnDebug
-import org.jsoup.Jsoup
 import java.io.File
 import java.io.FileOutputStream
 import java.io.InputStream
+import org.jsoup.Jsoup
 
-class MobiFile(var book: Book) {
-
+class MobiFile(
+    var book: Book,
+) {
     companion object : BaseLocalBookParse {
         private var mFile: MobiFile? = null
         private val xmlDeclarationRegex = "<\\?xml[^>]*>".toRegex()
@@ -38,24 +39,22 @@ class MobiFile(var book: Book) {
         }
 
         @Synchronized
-        override fun getChapterList(book: Book): ArrayList<BookChapter> {
-            return getMFile(book).getChapterList()
-        }
+        override fun getChapterList(book: Book): ArrayList<BookChapter> = getMFile(book).getChapterList()
 
         @Synchronized
-        override fun getContent(book: Book, chapter: BookChapter): String? {
-            return getMFile(book).getContent(chapter)
-        }
+        override fun getContent(
+            book: Book,
+            chapter: BookChapter,
+        ): String? = getMFile(book).getContent(chapter)
 
         @Synchronized
-        override fun getImage(book: Book, href: String): InputStream? {
-            return getMFile(book).getImage(href)
-        }
+        override fun getImage(
+            book: Book,
+            href: String,
+        ): InputStream? = getMFile(book).getImage(href)
 
         @Synchronized
-        override fun upBookInfo(book: Book) {
-            return getMFile(book).upBookInfo()
-        }
+        override fun upBookInfo(book: Book) = getMFile(book).upBookInfo()
 
         fun clear() {
             mFile = null
@@ -75,8 +74,8 @@ class MobiFile(var book: Book) {
         upBookCover(true)
     }
 
-    private fun readMobi(): MobiBook? {
-        return kotlin.runCatching {
+    private fun readMobi(): MobiBook? = kotlin
+        .runCatching {
             BookHelp.getBookPFD(book)?.let {
                 fileDescriptor = it
                 MobiReader().readMobi(it)
@@ -85,14 +84,11 @@ class MobiFile(var book: Book) {
             AppLog.put("读取Mobi文件失败\n${it.localizedMessage}", it)
             it.printOnDebug()
         }.getOrThrow()
-    }
 
-    private fun getChapterList(): ArrayList<BookChapter> {
-        return when (val book = mobiBook) {
-            is KF8Book -> getChapterListKF8(book)
-            is KF6Book -> getChapterListKF6(book)
-            else -> error("impossible condition")
-        }
+    private fun getChapterList(): ArrayList<BookChapter> = when (val book = mobiBook) {
+        is KF8Book -> getChapterListKF8(book)
+        is KF6Book -> getChapterListKF6(book)
+        else -> error("impossible condition")
     }
 
     private fun getChapterListKF6(kF6Book: KF6Book): ArrayList<BookChapter> {
@@ -177,15 +173,16 @@ class MobiFile(var book: Book) {
         return chapterList
     }
 
-    private fun getContent(chapter: BookChapter): String? {
-        return when (val book = mobiBook) {
-            is KF8Book -> getContentKF8(book, chapter)
-            is KF6Book -> getContentKF6(book, chapter)
-            else -> error("impossible condition")
-        }
+    private fun getContent(chapter: BookChapter): String? = when (val book = mobiBook) {
+        is KF8Book -> getContentKF8(book, chapter)
+        is KF6Book -> getContentKF6(book, chapter)
+        else -> error("impossible condition")
     }
 
-    private fun getContentKF6(kf6Book: KF6Book, chapter: BookChapter): String? {
+    private fun getContentKF6(
+        kf6Book: KF6Book,
+        chapter: BookChapter,
+    ): String? {
         if (chapter.isVolume && chapter.url.startsWith("skip:")) return ""
         var section = kf6Book.getSectionByHref(chapter.url) ?: return null
         val nextSectionHref = chapter.getVariable("nextUrl")
@@ -216,7 +213,10 @@ class MobiFile(var book: Book) {
         return format(soup.outerHtml())
     }
 
-    private fun getContentKF8(kf8Book: KF8Book, chapter: BookChapter): String? {
+    private fun getContentKF8(
+        kf8Book: KF8Book,
+        chapter: BookChapter,
+    ): String? {
         if (chapter.isVolume && chapter.url.startsWith("skip:")) return ""
         var section = kf8Book.getSectionByHref(chapter.url) ?: return null
         val nextSectionHref = chapter.getVariable("nextUrl")
@@ -249,27 +249,26 @@ class MobiFile(var book: Book) {
         return format(soup.outerHtml())
     }
 
-    private fun format(html: String): String {
-        return HtmlFormatter.formatKeepImg(html)
-            .replace(xmlDeclarationRegex, "")
-            .replace(doctypeDeclarationRegex, "")
+    private fun format(html: String): String = HtmlFormatter
+        .formatKeepImg(html)
+        .replace(xmlDeclarationRegex, "")
+        .replace(doctypeDeclarationRegex, "")
+
+    private fun getImage(href: String): InputStream? = when (val book = mobiBook) {
+        is KF8Book -> getImageKF8(book, href)
+        is KF6Book -> getImageKF6(book, href)
+        else -> error("impossible condition")
     }
 
-    private fun getImage(href: String): InputStream? {
-        return when (val book = mobiBook) {
-            is KF8Book -> getImageKF8(book, href)
-            is KF6Book -> getImageKF6(book, href)
-            else -> error("impossible condition")
-        }
-    }
+    private fun getImageKF6(
+        kf6Book: KF6Book,
+        href: String,
+    ): InputStream? = kf6Book.getResourceByHref(href)?.inputStream()
 
-    private fun getImageKF6(kf6Book: KF6Book, href: String): InputStream? {
-        return kf6Book.getResourceByHref(href)?.inputStream()
-    }
-
-    private fun getImageKF8(kf8Book: KF8Book, href: String): InputStream? {
-        return kf8Book.getResourceByHref(href)?.inputStream()
-    }
+    private fun getImageKF8(
+        kf8Book: KF8Book,
+        href: String,
+    ): InputStream? = kf8Book.getResourceByHref(href)?.inputStream()
 
     private fun upBookCover(fastCheck: Boolean = false) {
         try {
@@ -314,5 +313,4 @@ class MobiFile(var book: Book) {
             }
         }
     }
-
 }

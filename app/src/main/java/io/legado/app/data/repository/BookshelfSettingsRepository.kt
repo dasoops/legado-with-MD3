@@ -17,9 +17,10 @@ class BookshelfSettingsRepository : BookshelfSettingsGateway {
     override val currentSettings: BookshelfSettings
         get() = AppConfigStore.preferences.toBookshelfSettings()
 
-    override val settings: Flow<BookshelfSettings> = AppConfigStore.preferencesFlow
-        .map(Preferences::toBookshelfSettings)
-        .distinctUntilChanged()
+    override val settings: Flow<BookshelfSettings> =
+        AppConfigStore.preferencesFlow
+            .map(Preferences::toBookshelfSettings)
+            .distinctUntilChanged()
 
     override suspend fun update(transform: (BookshelfSettings) -> BookshelfSettings) {
         AppConfigStore.atomicUpdate(
@@ -64,7 +65,8 @@ internal fun Preferences.toBookshelfSettings() = BookshelfSettings(
     bookshelfGridLayout = compatDsInt(PreferKey.bookshelfGridLayout) ?: 0,
     bookshelfLayoutCompact = compatDsBoolean(PreferKey.bookshelfLayoutCompact) ?: false,
     bookshelfListCoverCenter = compatDsBoolean(PreferKey.bookshelfListCoverCenter) ?: true,
-    bookshelfListIntroBelowContent = compatDsBoolean(PreferKey.bookshelfListIntroBelowContent)
+    bookshelfListIntroBelowContent =
+    compatDsBoolean(PreferKey.bookshelfListIntroBelowContent)
         ?: false,
     bookshelfShowDivider = compatDsBoolean(PreferKey.bookshelfShowDivider) ?: true,
     bookshelfTitleSmallFont = compatDsBoolean(PreferKey.bookshelfTitleSmallFont) ?: false,

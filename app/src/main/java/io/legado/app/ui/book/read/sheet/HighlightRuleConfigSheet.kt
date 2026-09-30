@@ -34,8 +34,8 @@ import io.legado.app.ui.book.read.HighlightRuleConfigUiState
 import io.legado.app.ui.book.read.ReadBookIntent
 import io.legado.app.ui.widget.components.TinySwitch
 import io.legado.app.ui.widget.components.alert.AppAlertDialog
-import io.legado.app.ui.widget.components.button.series.SmallTonalButton
 import io.legado.app.ui.widget.components.button.series.MediumTonalButton
+import io.legado.app.ui.widget.components.button.series.SmallTonalButton
 import io.legado.app.ui.widget.components.filePicker.FilePickerSheet
 import io.legado.app.ui.widget.components.importComponents.BatchImportDialog
 import io.legado.app.ui.widget.components.importComponents.SourceInputDialog
@@ -60,11 +60,12 @@ fun HighlightRuleConfigSheet(
     val listState = rememberLazyListState()
     val hapticFeedback = LocalHapticFeedback.current
     var orderChanged by remember { mutableStateOf(false) }
-    val reorderableState = rememberReorderableLazyListState(listState) { from, to ->
-        orderChanged = true
-        onIntent(ReadBookIntent.MoveHighlightRule(from.index, to.index))
-        hapticFeedback.performHapticFeedback(HapticFeedbackType.SegmentFrequentTick)
-    }
+    val reorderableState =
+        rememberReorderableLazyListState(listState) { from, to ->
+            orderChanged = true
+            onIntent(ReadBookIntent.MoveHighlightRule(from.index, to.index))
+            hapticFeedback.performHapticFeedback(HapticFeedbackType.SegmentFrequentTick)
+        }
 
     LaunchedEffect(reorderableState.isAnyItemDragging) {
         if (!reorderableState.isAnyItemDragging && orderChanged) {
@@ -124,7 +125,7 @@ fun HighlightRuleConfigSheet(
             MediumTonalButton(
                 onClick = { onIntent(ReadBookIntent.AddHighlightRule) },
                 icon = Icons.Default.Add,
-                contentDescription = stringResource(R.string.add)
+                contentDescription = stringResource(R.string.add),
             )
         },
         endAction = {
@@ -133,7 +134,7 @@ fun HighlightRuleConfigSheet(
                 MediumTonalButton(
                     onClick = { expanded = true },
                     icon = Icons.Default.MoreVert,
-                    contentDescription = stringResource(R.string.more_menu)
+                    contentDescription = stringResource(R.string.more_menu),
                 )
                 RoundDropdownMenu(
                     expanded = expanded,
@@ -158,7 +159,8 @@ fun HighlightRuleConfigSheet(
         },
     ) {
         Column(
-            modifier = Modifier
+            modifier =
+            Modifier
                 .fillMaxWidth()
                 .padding(bottom = 16.dp),
         ) {
@@ -180,15 +182,15 @@ fun HighlightRuleConfigSheet(
                             onDeleteClick = {
                                 onIntent(ReadBookIntent.RequestDeleteHighlightRule(rule))
                             },
-                            modifier = Modifier
+                            modifier =
+                            Modifier
                                 .reorderAccessibility(
                                     index = index,
                                     itemCount = state.rules.size,
                                 ) { from, to ->
                                     onIntent(ReadBookIntent.MoveHighlightRule(from, to))
                                     onIntent(ReadBookIntent.SaveHighlightRuleOrder)
-                                }
-                                .longPressDraggableHandle()
+                                }.longPressDraggableHandle()
                                 .zIndex(if (isDragging) 1f else 0f)
                                 .animateItem(),
                         )
@@ -257,12 +259,12 @@ private fun HighlightRuleItem(
                 SmallTonalButton(
                     onClick = onEditClick,
                     icon = Icons.Default.Edit,
-                    contentDescription = stringResource(R.string.edit)
+                    contentDescription = stringResource(R.string.edit),
                 )
                 SmallTonalButton(
                     onClick = onDeleteClick,
                     icon = Icons.Default.Delete,
-                    contentDescription = stringResource(R.string.delete)
+                    contentDescription = stringResource(R.string.delete),
                 )
             }
         },

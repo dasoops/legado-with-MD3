@@ -14,12 +14,13 @@ import kotlinx.coroutines.launch
 class LabConfigViewModel(
     private val settingsGateway: LabSettingsGateway,
 ) : ViewModel() {
-    private val _uiState = MutableStateFlow(
-        LabConfigUiState(
-            settings = settingsGateway.currentSettings,
-            pageEstimateDiagnosticCount = LocalPageEstimateMetrics.size(),
+    private val _uiState =
+        MutableStateFlow(
+            LabConfigUiState(
+                settings = settingsGateway.currentSettings,
+                pageEstimateDiagnosticCount = LocalPageEstimateMetrics.size(),
+            ),
         )
-    )
     val uiState = _uiState.asStateFlow()
 
     private val _effects = MutableSharedFlow<LabConfigEffect>(extraBufferCapacity = 16)
@@ -36,7 +37,7 @@ class LabConfigViewModel(
     fun onIntent(intent: LabConfigIntent) {
         if (intent is LabConfigIntent.ExportPageEstimateDiagnostics) {
             _effects.tryEmit(
-                LabConfigEffect.SharePageEstimateDiagnostics(LocalPageEstimateMetrics.export())
+                LabConfigEffect.SharePageEstimateDiagnostics(LocalPageEstimateMetrics.export()),
             )
             return
         }

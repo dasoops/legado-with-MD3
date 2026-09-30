@@ -8,7 +8,6 @@ import io.legado.app.utils.startActivity
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class BookInfoActivity : BaseComposeActivity() {
-
     private val viewModel: BookInfoViewModel by viewModel()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -32,10 +31,9 @@ class BookInfoActivity : BaseComposeActivity() {
                         bookUrl = bookUrl,
                         inBookshelf = inBookshelf,
                         chapterChanged = chapterChanged,
-                    )
+                    ),
                 )
             },
         )
     }
-
 }

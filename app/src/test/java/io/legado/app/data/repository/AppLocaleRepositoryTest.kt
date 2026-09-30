@@ -14,14 +14,14 @@ import org.robolectric.annotation.Config
 @RunWith(RobolectricTestRunner::class)
 @Config(application = Application::class, sdk = [35])
 class AppLocaleRepositoryTest {
-
     @Test
     fun initialization_keepsPersistedLanguageWhenPlatformLocalesAreNotReady() {
-        val repository = AppLocaleRepository(
-            FakeAppLocalePlatform(),
-            { },
-            { "zh" },
-        )
+        val repository =
+            AppLocaleRepository(
+                FakeAppLocalePlatform(),
+                { },
+                { "zh" },
+            )
 
         assertEquals("zh", repository.currentLanguage)
     }
@@ -30,11 +30,12 @@ class AppLocaleRepositoryTest {
     fun setLanguage_updatesPlatformStateAndMirror() {
         val platform = FakeAppLocalePlatform()
         val persisted = mutableListOf<String>()
-        val repository = AppLocaleRepository(
-            platform,
-            persisted::add,
-            { persisted.lastOrNull() },
-        )
+        val repository =
+            AppLocaleRepository(
+                platform,
+                persisted::add,
+                { persisted.lastOrNull() },
+            )
 
         repository.setLanguage("en")
 
@@ -47,11 +48,12 @@ class AppLocaleRepositoryTest {
     fun synchronizeFromPlatform_updatesExternalLanguageSelection() {
         val platform = FakeAppLocalePlatform()
         val persisted = mutableListOf<String>()
-        val repository = AppLocaleRepository(
-            platform,
-            persisted::add,
-            { persisted.lastOrNull() },
-        )
+        val repository =
+            AppLocaleRepository(
+                platform,
+                persisted::add,
+                { persisted.lastOrNull() },
+            )
         platform.locales = localeListForLanguage("tw")
 
         repository.synchronizeFromPlatform()
@@ -64,11 +66,12 @@ class AppLocaleRepositoryTest {
     fun synchronizeFromPlatform_keepsExternalResetToAutoMeaningful() {
         val platform = FakeAppLocalePlatform(localeListForLanguage("zh"))
         val persisted = mutableListOf<String>()
-        val repository = AppLocaleRepository(
-            platform,
-            persisted::add,
-            { "zh" },
-        )
+        val repository =
+            AppLocaleRepository(
+                platform,
+                persisted::add,
+                { "zh" },
+            )
         platform.locales = LocaleListCompat.getEmptyLocaleList()
 
         repository.synchronizeFromPlatform()
@@ -91,11 +94,12 @@ class AppLocaleRepositoryTest {
     @Test
     fun synchronizeUnchangedLanguage_doesNotWriteMirrorAgain() {
         val persisted = mutableListOf<String>()
-        val repository = AppLocaleRepository(
-            FakeAppLocalePlatform(),
-            persisted::add,
-            { "auto" },
-        )
+        val repository =
+            AppLocaleRepository(
+                FakeAppLocalePlatform(),
+                persisted::add,
+                { "auto" },
+            )
 
         repository.synchronizeFromPlatform()
 

@@ -11,8 +11,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.semantics.toggleableState
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.toggleableState
 import androidx.compose.ui.state.ToggleableState
 import io.legado.app.ui.theme.LegadoTheme
 import io.legado.app.ui.theme.ThemeResolver
@@ -27,21 +27,22 @@ fun AdaptiveSwitch(
     checkedIcon: ImageVector = Icons.Filled.Check,
     uncheckedIcon: ImageVector? = null,
     showIcon: Boolean = true,
-    includeStateSemantics: Boolean = true
+    includeStateSemantics: Boolean = true,
 ) {
     val composeEngine = LegadoTheme.composeEngine
     if (ThemeResolver.isMiuixEngine(composeEngine)) {
         MiuixSwitch(
             checked = checked,
             onCheckedChange = onCheckedChange,
-            modifier = if (includeStateSemantics) {
+            modifier =
+            if (includeStateSemantics) {
                 modifier.semantics {
                     toggleableState = if (checked) ToggleableState.On else ToggleableState.Off
                 }
             } else {
                 modifier
             },
-            enabled = enabled
+            enabled = enabled,
         )
     } else {
         IconSwitch(
@@ -52,7 +53,7 @@ fun AdaptiveSwitch(
             checkedIcon = checkedIcon,
             uncheckedIcon = uncheckedIcon,
             showIcon = showIcon,
-            includeStateSemantics = includeStateSemantics
+            includeStateSemantics = includeStateSemantics,
         )
     }
 }
@@ -66,14 +67,15 @@ fun TinySwitch(
     checkedIcon: ImageVector = Icons.Filled.Check,
     uncheckedIcon: ImageVector? = null,
     showIcon: Boolean = true,
-    includeStateSemantics: Boolean = true
+    includeStateSemantics: Boolean = true,
 ) {
     val composeEngine = LegadoTheme.composeEngine
     if (ThemeResolver.isMiuixEngine(composeEngine)) {
         MiuixSwitch(
             checked = checked,
             onCheckedChange = onCheckedChange,
-            modifier = if (includeStateSemantics) {
+            modifier =
+            if (includeStateSemantics) {
                 modifier
                     .scale(0.9f)
                     .semantics {
@@ -82,7 +84,7 @@ fun TinySwitch(
             } else {
                 modifier.scale(0.9f)
             },
-            enabled = enabled
+            enabled = enabled,
         )
     } else {
         IconSwitch(
@@ -93,7 +95,7 @@ fun TinySwitch(
             checkedIcon = checkedIcon,
             uncheckedIcon = uncheckedIcon,
             showIcon = showIcon,
-            includeStateSemantics = includeStateSemantics
+            includeStateSemantics = includeStateSemantics,
         )
     }
 }
@@ -108,10 +110,11 @@ fun IconSwitch(
     uncheckedIcon: ImageVector? = null,
     showIcon: Boolean = true,
     colors: SwitchColors = SwitchDefaults.colors(),
-    includeStateSemantics: Boolean = true
+    includeStateSemantics: Boolean = true,
 ) {
     Switch(
-        modifier = if (includeStateSemantics) {
+        modifier =
+        if (includeStateSemantics) {
             modifier.semantics {
                 toggleableState = if (checked) ToggleableState.On else ToggleableState.Off
             }
@@ -131,9 +134,9 @@ fun IconSwitch(
                 Icon(
                     imageVector = icon,
                     contentDescription = null,
-                    modifier = Modifier.size(SwitchDefaults.IconSize)
+                    modifier = Modifier.size(SwitchDefaults.IconSize),
                 )
             }
-        }
+        },
     )
 }

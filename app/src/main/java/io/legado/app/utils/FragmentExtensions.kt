@@ -16,9 +16,7 @@ import io.legado.app.R
 import io.legado.app.data.entities.Book
 import io.legado.app.ui.main.MainActivity
 
-inline fun <reified T : DialogFragment> Fragment.showDialogFragment(
-    arguments: Bundle.() -> Unit = {}
-) {
+inline fun <reified T : DialogFragment> Fragment.showDialogFragment(arguments: Bundle.() -> Unit = {}) {
     val dialog = T::class.java.getDeclaredConstructor().newInstance()
     val bundle = Bundle()
     bundle.apply(arguments)
@@ -30,17 +28,19 @@ fun Fragment.showDialogFragment(dialogFragment: DialogFragment) {
     dialogFragment.show(childFragmentManager, dialogFragment::class.simpleName)
 }
 
-fun Fragment.getCompatColor(@ColorRes id: Int): Int = requireContext().getCompatColor(id)
+fun Fragment.getCompatColor(
+    @ColorRes id: Int,
+): Int = requireContext().getCompatColor(id)
 
-fun Fragment.getCompatDrawable(@DrawableRes id: Int): Drawable? =
-    requireContext().getCompatDrawable(id)
+fun Fragment.getCompatDrawable(
+    @DrawableRes id: Int,
+): Drawable? = requireContext().getCompatDrawable(id)
 
-fun Fragment.getCompatColorStateList(@ColorRes id: Int): ColorStateList? =
-    requireContext().getCompatColorStateList(id)
+fun Fragment.getCompatColorStateList(
+    @ColorRes id: Int,
+): ColorStateList? = requireContext().getCompatColorStateList(id)
 
-inline fun <reified T : Activity> Fragment.startActivity(
-    configIntent: Intent.() -> Unit = {}
-) {
+inline fun <reified T : Activity> Fragment.startActivity(configIntent: Intent.() -> Unit = {}) {
     startActivity(Intent(requireContext(), T::class.java).apply(configIntent))
 }
 

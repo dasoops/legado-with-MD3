@@ -37,7 +37,7 @@ sealed interface BaseRuleEvent {
     data class ShowSnackbar(
         val message: String,
         val actionLabel: String? = null,
-        val url: String? = null
+        val url: String? = null,
     ) : BaseRuleEvent
 }
 
@@ -46,21 +46,21 @@ abstract class BaseRuleViewModel<T : SelectableItem<ID>, Entity, ID, S : ListUiS
     protected val initialState: S,
 ) : BaseViewModel(application) {
 
-    protected val _searchKey = MutableStateFlow("")
-    protected val _groupFilter = MutableStateFlow("")
-    protected val _selectedIds = MutableStateFlow<Set<ID>>(emptySet())
-    protected val _isSearchMode = MutableStateFlow(false)
-    protected val _localItems = MutableStateFlow<List<T>?>(null)
-    protected val _importState = MutableStateFlow<BaseImportUiState<Entity>>(BaseImportUiState.Idle)
-    val importState = _importState.asStateFlow()
-    protected val _eventChannel = Channel<BaseRuleEvent>()
-    val events = _eventChannel.receiveAsFlow()
+    protected val searchKeyState = MutableStateFlow("")
+    protected val groupFilterState = MutableStateFlow("")
+    protected val selectedIdsState = MutableStateFlow<Set<ID>>(emptySet())
+    protected val searchModeState = MutableStateFlow(false)
+    protected val localItemsState = MutableStateFlow<List<T>?>(null)
+    protected val importStateMutable = MutableStateFlow<BaseImportUiState<Entity>>(BaseImportUiState.Idle)
+    val importState = importStateMutable.asStateFlow()
+    protected val eventChannel = Channel<BaseRuleEvent>()
+    val events = eventChannel.receiveAsFlow()
 
     abstract val rawDataFlow: Flow<List<Entity>>
 
     @Deprecated(
         "Use filterData with groupFilter instead",
-        ReplaceWith("filterData(data, searchKey, \"\")")
+        ReplaceWith("filterData(data, searchKey, \"\")"),
     )
     open fun filterData(data: List<Entity>, key: String): List<Entity> = data
 
@@ -73,9 +73,9 @@ abstract class BaseRuleViewModel<T : SelectableItem<ID>, Entity, ID, S : ListUiS
     private val itemsFlow: Flow<List<T>> by lazy {
         combine(
             rawDataFlow,
-            _searchKey,
-            _groupFilter,
-            _localItems
+            searchKeyState,
+            groupFilterState,
+            localItemsState,
         ) { data, searchKey, groupFilter, local ->
             if (local != null && searchKey.isEmpty() && groupFilter.isEmpty()) {
                 local
@@ -88,15 +88,15 @@ abstract class BaseRuleViewModel<T : SelectableItem<ID>, Entity, ID, S : ListUiS
     open val uiState: StateFlow<S> by lazy {
         combine(
             itemsFlow,
-            _selectedIds,
-            _isSearchMode,
-            _importState
+            selectedIdsState,
+            searchModeState,
+            importStateMutable,
         ) { items, selectedIds, isSearch, importState ->
             composeUiState(items, selectedIds, isSearch, importState)
         }.stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
-            initialValue = initialState
+            initialValue = initialState,
         )
     }
 
@@ -104,7 +104,7 @@ abstract class BaseRuleViewModel<T : SelectableItem<ID>, Entity, ID, S : ListUiS
         items: List<T>,
         selectedIds: Set<ID>,
         isSearch: Boolean,
-        importState: BaseImportUiState<Entity>
+        importState: BaseImportUiState<Entity>,
     ): S
 
     // 抽象方法：将实体转换为UI Item
@@ -130,30 +130,30 @@ abstract class BaseRuleViewModel<T : SelectableItem<ID>, Entity, ID, S : ListUiS
         if (from !in currentList.indices || to !in currentList.indices) return
         val item = currentList.removeAt(from)
         currentList.add(to, item)
-        _localItems.value = currentList
+        localItemsState.value = currentList
     }
 
     fun setSearchKey(key: String?) {
-        _localItems.value = null
-        _searchKey.value = key ?: ""
+        localItemsState.value = null
+        searchKeyState.value = key ?: ""
     }
 
     open fun setGroupFilter(filter: String?) {
-        _localItems.value = null
-        _groupFilter.value = filter ?: ""
+        localItemsState.value = null
+        groupFilterState.value = filter ?: ""
     }
 
     fun setSearchMode(active: Boolean) {
-        _isSearchMode.value = active
+        searchModeState.value = active
         if (!active) setSearchKey("")
     }
 
     fun toggleSelection(id: ID) {
-        _selectedIds.update { if (it.contains(id)) it - id else it + id }
+        selectedIdsState.update { if (it.contains(id)) it - id else it + id }
     }
 
     fun setSelection(ids: Set<ID>) {
-        _selectedIds.value = ids
+        selectedIdsState.value = ids
     }
 
     fun exportToUri(uri: Uri, rules: List<T>, selectedIds: Set<ID>) {
@@ -164,7 +164,7 @@ abstract class BaseRuleViewModel<T : SelectableItem<ID>, Entity, ID, S : ListUiS
                     .map { ruleItemToEntity(it) }
 
                 if (rulesToExport.isEmpty()) {
-                    _eventChannel.send(BaseRuleEvent.ShowSnackbar("没有选中的规则可导出"))
+                    eventChannel.send(BaseRuleEvent.ShowSnackbar("没有选中的规则可导出"))
                     return@launch
                 }
 
@@ -176,10 +176,10 @@ abstract class BaseRuleViewModel<T : SelectableItem<ID>, Entity, ID, S : ListUiS
                         writer.flush()
                     }
                 }
-                _eventChannel.send(BaseRuleEvent.ShowSnackbar("导出成功"))
+                eventChannel.send(BaseRuleEvent.ShowSnackbar("导出成功"))
             } catch (e: Exception) {
                 e.printStackTrace()
-                _eventChannel.send(BaseRuleEvent.ShowSnackbar("导出失败: ${e.localizedMessage}"))
+                eventChannel.send(BaseRuleEvent.ShowSnackbar("导出失败: ${e.localizedMessage}"))
             }
         }
     }
@@ -187,7 +187,7 @@ abstract class BaseRuleViewModel<T : SelectableItem<ID>, Entity, ID, S : ListUiS
     abstract fun ruleItemToEntity(item: T): Entity
 
     fun importSource(text: String) {
-        _importState.value = BaseImportUiState.Loading
+        importStateMutable.value = BaseImportUiState.Loading
 
         viewModelScope.launch(Dispatchers.IO) {
             runCatching {
@@ -206,66 +206,62 @@ abstract class BaseRuleViewModel<T : SelectableItem<ID>, Entity, ID, S : ListUiS
                         data = newRule,
                         oldData = oldRule,
                         status = status,
-                        isSelected = status != ImportStatus.Existing
+                        isSelected = status != ImportStatus.Existing,
                     )
                 }
 
-                _importState.value = BaseImportUiState.Success(
+                importStateMutable.value = BaseImportUiState.Success(
                     source = text,
-                    items = wrappers
+                    items = wrappers,
                 )
             }.onFailure {
                 it.printStackTrace()
-                _importState.value = BaseImportUiState.Error(it.localizedMessage ?: "Unknown Error")
+                importStateMutable.value = BaseImportUiState.Error(it.localizedMessage ?: "Unknown Error")
             }
         }
     }
 
-    protected suspend fun resolveSource(text: String): String {
-        return when {
-            text.isAbsUrl() -> {
-                okHttpClient.newCallResponseBody {
-                    if (text.endsWith("#requestWithoutUA")) {
-                        url(text.substringBeforeLast("#requestWithoutUA"))
-                        header(AppConst.UA_NAME, "null")
-                    } else {
-                        url(text)
-                    }
-                }.decompressed().text("utf-8")
-            }
-
-            text.isUri() -> text.toUri().readText(context)
-            else -> text
+    protected suspend fun resolveSource(text: String): String = when {
+        text.isAbsUrl() -> {
+            okHttpClient.newCallResponseBody {
+                if (text.endsWith("#requestWithoutUA")) {
+                    url(text.substringBeforeLast("#requestWithoutUA"))
+                    header(AppConst.UA_NAME, "null")
+                } else {
+                    url(text)
+                }
+            }.decompressed().text("utf-8")
         }
+        text.isUri() -> text.toUri().readText(context)
+        else -> text
     }
 
     fun cancelImport() {
-        _importState.value = BaseImportUiState.Idle
+        importStateMutable.value = BaseImportUiState.Idle
     }
 
     fun toggleImportSelection(index: Int) {
-        val currentState = _importState.value as? BaseImportUiState.Success<Entity> ?: return
+        val currentState = importStateMutable.value as? BaseImportUiState.Success<Entity> ?: return
         val newItems = currentState.items.toMutableList()
         val item = newItems[index]
         newItems[index] = item.copy(isSelected = !item.isSelected)
-        _importState.value = currentState.copy(items = newItems)
+        importStateMutable.value = currentState.copy(items = newItems)
     }
 
     fun toggleImportAll(isSelected: Boolean) {
-        val currentState = _importState.value as? BaseImportUiState.Success<Entity> ?: return
+        val currentState = importStateMutable.value as? BaseImportUiState.Success<Entity> ?: return
         val newItems = currentState.items.map { it.copy(isSelected = isSelected) }
-        _importState.value = currentState.copy(items = newItems)
+        importStateMutable.value = currentState.copy(items = newItems)
     }
 
     fun updateImportItem(index: Int, data: Entity) {
-        val currentState = _importState.value as? BaseImportUiState.Success<Entity> ?: return
+        val currentState = importStateMutable.value as? BaseImportUiState.Success<Entity> ?: return
         if (index !in currentState.items.indices) return
         val newItems = currentState.items.toMutableList()
         newItems[index] = newItems[index].copy(data = data)
-        _importState.value = currentState.copy(
+        importStateMutable.value = currentState.copy(
             items = newItems,
-            version = currentState.version + 1
+            version = currentState.version + 1,
         )
     }
-
 }

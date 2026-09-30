@@ -11,4 +11,3 @@ data class HomeRecentBookRow(
     val totalChapterNum: Int?,
     val chapterIndex: Int?,
 )
-

@@ -8,7 +8,7 @@ data class KF8Section(
     val length: Int,
     val totalLength: Int,
     val href: String,
-    var next: KF8Section? = null
+    var next: KF8Section? = null,
 ) {
     val linear get() = frags.isNotEmpty()
 }

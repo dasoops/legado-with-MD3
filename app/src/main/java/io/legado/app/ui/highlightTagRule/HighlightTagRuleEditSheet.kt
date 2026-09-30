@@ -31,9 +31,9 @@ import androidx.compose.ui.unit.dp
 import io.legado.app.R
 import io.legado.app.data.entities.HighlightTagRule
 import io.legado.app.ui.theme.LegadoTheme
+import io.legado.app.ui.widget.components.AdaptiveSwitch
 import io.legado.app.ui.widget.components.AppFloatingActionButton
 import io.legado.app.ui.widget.components.AppTextField
-import io.legado.app.ui.widget.components.AdaptiveSwitch
 import io.legado.app.ui.widget.components.button.series.MediumTonalButton
 import io.legado.app.ui.widget.components.menuItem.RoundDropdownMenu
 import io.legado.app.ui.widget.components.menuItem.RoundDropdownMenuItem
@@ -54,9 +54,10 @@ fun HighlightTagRuleEditSheet(
     val scope = rememberCoroutineScope()
 
     val isNew = rule == null || rule.id == 0L
-    val initial = remember(show, rule) {
-        rule ?: HighlightTagRule()
-    }
+    val initial =
+        remember(show, rule) {
+            rule ?: HighlightTagRule()
+        }
 
     var title by remember(show, rule) { mutableStateOf(initial.title) }
     var pattern by remember(show, rule) { mutableStateOf(initial.pattern) }
@@ -64,16 +65,15 @@ fun HighlightTagRuleEditSheet(
 
     var showMenu by remember(show, rule) { mutableStateOf(false) }
 
-    fun getCurrentRule(): HighlightTagRule {
-        return initial.copy(
-            title = title,
-            pattern = pattern,
-            enabled = enabled
-        )
-    }
+    fun getCurrentRule(): HighlightTagRule = initial.copy(
+        title = title,
+        pattern = pattern,
+        enabled = enabled,
+    )
 
     AppModalBottomSheet(
-        title = if (isNew) {
+        title =
+        if (isNew) {
             stringResource(R.string.highlight_tag_add_rule)
         } else {
             stringResource(R.string.highlight_tag_edit_rule)
@@ -90,7 +90,7 @@ fun HighlightTagRuleEditSheet(
                 MediumTonalButton(
                     onClick = { showMenu = true },
                     icon = Icons.Default.MoreVert,
-                    contentDescription = stringResource(R.string.more_menu)
+                    contentDescription = stringResource(R.string.more_menu),
                 )
                 RoundDropdownMenu(expanded = showMenu, onDismissRequest = { showMenu = false }) {
                     RoundDropdownMenuItem(
@@ -99,7 +99,7 @@ fun HighlightTagRuleEditSheet(
                         onClick = {
                             onCopy(getCurrentRule())
                             showMenu = false
-                        }
+                        },
                     )
                     RoundDropdownMenuItem(
                         text = stringResource(R.string.paste_rule),
@@ -113,21 +113,22 @@ fun HighlightTagRuleEditSheet(
                                 }
                             }
                             showMenu = false
-                        }
+                        },
                     )
                 }
             }
         },
         show = show,
-        onDismissRequest = onDismissRequest
+        onDismissRequest = onDismissRequest,
     ) {
         Box(modifier = Modifier.fillMaxWidth()) {
             Column(
-                modifier = Modifier
+                modifier =
+                Modifier
                     .fillMaxWidth()
                     .padding(bottom = 120.dp)
                     .verticalScroll(rememberScrollState()),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
+                verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 AppTextField(
                     modifier = Modifier.fillMaxWidth(),
@@ -135,7 +136,7 @@ fun HighlightTagRuleEditSheet(
                     onValueChange = { title = it },
                     backgroundColor = LegadoTheme.colorScheme.surface,
                     label = stringResource(R.string.highlight_tag_title),
-                    singleLine = true
+                    singleLine = true,
                 )
                 AppTextField(
                     modifier = Modifier.fillMaxWidth(),
@@ -143,7 +144,7 @@ fun HighlightTagRuleEditSheet(
                     onValueChange = { pattern = it },
                     backgroundColor = LegadoTheme.colorScheme.surface,
                     label = stringResource(R.string.highlight_tag_pattern),
-                    minLines = 3
+                    minLines = 3,
                 )
 
                 Spacer(modifier = Modifier.height(8.dp))
@@ -151,26 +152,27 @@ fun HighlightTagRuleEditSheet(
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
+                    verticalAlignment = Alignment.CenterVertically,
                 ) {
                     AppText(
                         text = stringResource(R.string.enabled),
-                        style = LegadoTheme.typography.bodyMedium
+                        style = LegadoTheme.typography.bodyMedium,
                     )
                     AdaptiveSwitch(
                         checked = enabled,
-                        onCheckedChange = { enabled = it }
+                        onCheckedChange = { enabled = it },
                     )
                 }
             }
 
             AppFloatingActionButton(
                 onClick = { onSave(getCurrentRule()) },
-                modifier = Modifier
+                modifier =
+                Modifier
                     .align(Alignment.BottomEnd)
                     .padding(16.dp),
                 tooltipText = stringResource(R.string.action_save),
-                icon = Icons.Default.Save
+                icon = Icons.Default.Save,
             )
         }
     }

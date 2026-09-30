@@ -7,7 +7,7 @@ import androidx.core.graphics.withSave
 inline fun CanvasRecorder.recordIfNeeded(
     width: Int,
     height: Int,
-    block: Canvas.() -> Unit
+    block: Canvas.() -> Unit,
 ): Boolean {
     if (!needRecord()) return false
     record(width, height, block)
@@ -22,7 +22,11 @@ fun CanvasRecorder.recordIfNeeded(view: View): Boolean {
     return true
 }
 
-inline fun CanvasRecorder.record(width: Int, height: Int, block: Canvas.() -> Unit) {
+inline fun CanvasRecorder.record(
+    width: Int,
+    height: Int,
+    block: Canvas.() -> Unit,
+) {
     val canvas = beginRecording(width, height)
     try {
         canvas.withSave {
@@ -37,7 +41,7 @@ inline fun CanvasRecorder.recordIfNeededThenDraw(
     canvas: Canvas,
     width: Int,
     height: Int,
-    block: Canvas.() -> Unit
+    block: Canvas.() -> Unit,
 ) {
     recordIfNeeded(width, height, block)
     draw(canvas)

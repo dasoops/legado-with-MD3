@@ -6,7 +6,6 @@ import io.legado.app.domain.model.settings.ThemeExportData
 import io.legado.app.help.config.AppConfigStore
 
 class ThemePackageSettingsRepository : ThemePackageSettingsGateway {
-
     override fun exportCurrent(): ThemeExportData = ThemeExportData(
         appTheme = string(PreferKey.appTheme, "0"),
         themeMode = string(PreferKey.themeMode, "0"),
@@ -37,11 +36,13 @@ class ThemePackageSettingsRepository : ThemePackageSettingsGateway {
         bookInfoInputColor = int(PreferKey.bookInfoInputColor, 0),
         bookInfoFollowCoverColor = boolean(PreferKey.bookInfoFollowCoverColor, true),
         bookInfoBackgroundBlur = string(PreferKey.bookInfoBackgroundBlur, "on"),
-        bookInfoNetworkCoverBackground = AppConfigStore.getString(
-            PreferKey.bookInfoNetworkCoverBackground
+        bookInfoNetworkCoverBackground =
+        AppConfigStore.getString(
+            PreferKey.bookInfoNetworkCoverBackground,
         ),
-        bookInfoDefaultCoverBackground = AppConfigStore.getString(
-            PreferKey.bookInfoDefaultCoverBackground
+        bookInfoDefaultCoverBackground =
+        AppConfigStore.getString(
+            PreferKey.bookInfoDefaultCoverBackground,
         ),
         containerOpacity = int(PreferKey.containerOpacity, 100),
         overrideBaseCardCornerRadius = boolean(PreferKey.overrideBaseCardCornerRadius, false),
@@ -50,7 +51,8 @@ class ThemePackageSettingsRepository : ThemePackageSettingsGateway {
         baseCardBorderWidth = float(PreferKey.baseCardBorderWidth, 1f),
         baseCardBorderColor = int(PreferKey.baseCardBorderColor, 0),
         baseCardBorderColorNight = int(PreferKey.baseCardBorderColorNight, 0),
-        disableSplicedColumnGroupCornerRadius = boolean(
+        disableSplicedColumnGroupCornerRadius =
+        boolean(
             PreferKey.disableSplicedColumnGroupCornerRadius,
             false,
         ),
@@ -76,14 +78,16 @@ class ThemePackageSettingsRepository : ThemePackageSettingsGateway {
         swipeAnimation = boolean(PreferKey.swipeAnimation, true),
         showBottomView = boolean(PreferKey.showBottomView, true),
         useFloatingBottomBar = boolean(PreferKey.useFloatingBottomBar, false),
-        useFloatingBottomBarLiquidGlass = boolean(
+        useFloatingBottomBarLiquidGlass =
+        boolean(
             PreferKey.useFloatingBottomBarLiquidGlass,
             false,
         ),
         tabletInterface = string(PreferKey.tabletInterface, "auto"),
         labelVisibilityMode = string(PreferKey.labelVisibilityMode, "auto"),
         defaultHomePage = string(PreferKey.defaultHomePage, "home"),
-        mainNavigationOrder = string(
+        mainNavigationOrder =
+        string(
             PreferKey.mainNavigationOrder,
             "home,bookshelf,my",
         ),
@@ -105,15 +109,18 @@ class ThemePackageSettingsRepository : ThemePackageSettingsGateway {
         bgImageDark = AppConfigStore.getString(PreferKey.bgImageN),
         bgImageBlurring = int(PreferKey.bgImageBlurring, 0),
         bgImageNBlurring = int(PreferKey.bgImageNBlurring, 0),
-        largeContainerBackgroundImageLight = AppConfigStore.getString(
-            PreferKey.largeContainerBackgroundImageLight
+        largeContainerBackgroundImageLight =
+        AppConfigStore.getString(
+            PreferKey.largeContainerBackgroundImageLight,
         ),
-        largeContainerBackgroundImageDark = AppConfigStore.getString(
-            PreferKey.largeContainerBackgroundImageDark
+        largeContainerBackgroundImageDark =
+        AppConfigStore.getString(
+            PreferKey.largeContainerBackgroundImageDark,
         ),
         itemBackgroundImageLight = AppConfigStore.getString(PreferKey.itemBackgroundImageLight),
         itemBackgroundImageDark = AppConfigStore.getString(PreferKey.itemBackgroundImageDark),
-        enableContainerBackgroundImage = boolean(
+        enableContainerBackgroundImage =
+        boolean(
             PreferKey.enableContainerBackgroundImage,
             false,
         ),
@@ -138,124 +145,139 @@ class ThemePackageSettingsRepository : ThemePackageSettingsGateway {
         AppConfigStore.putAllAndAwait(data.toPreferenceValues())
     }
 
-    private fun string(key: String, default: String) = AppConfigStore.getString(key) ?: default
-    private fun int(key: String, default: Int) = AppConfigStore.getInt(key) ?: default
-    private fun boolean(key: String, default: Boolean) = AppConfigStore.getBoolean(key) ?: default
-    private fun float(key: String, default: Float) = AppConfigStore.getFloat(key) ?: default
+    private fun string(
+        key: String,
+        default: String,
+    ) = AppConfigStore.getString(key) ?: default
+
+    private fun int(
+        key: String,
+        default: Int,
+    ) = AppConfigStore.getInt(key) ?: default
+
+    private fun boolean(
+        key: String,
+        default: Boolean,
+    ) = AppConfigStore.getBoolean(key) ?: default
+
+    private fun float(
+        key: String,
+        default: Float,
+    ) = AppConfigStore.getFloat(key) ?: default
 }
 
 internal fun ThemeExportData.toPreferenceValues(): Map<String, Any?> {
     val data = this
     val bookInfoBackground = bookInfoBackgroundBlur
     return mapOf(
-                PreferKey.appTheme to data.appTheme,
-                PreferKey.themeMode to data.themeMode,
-                PreferKey.pureBlack to data.isPureBlack,
-                PreferKey.composeEngine to data.composeEngine,
-                PreferKey.paletteStyle to data.paletteStyle,
-                PreferKey.materialVersion to data.materialVersion,
-                PreferKey.customMode to data.customMode,
-                PreferKey.customContrast to data.customContrast,
-                PreferKey.launcherIcon to data.launcherIcon,
-                PreferKey.isPredictiveBackEnabled to data.isPredictiveBackEnabled,
-                PreferKey.fontScale to data.fontScale,
-                PreferKey.enableDeepPersonalization to data.enableDeepPersonalization,
-                PreferKey.cPrimary to data.cPrimary,
-                PreferKey.cNPrimary to data.cNPrimary,
-                PreferKey.themeColor to data.themeColor,
-                PreferKey.secondaryThemeColor to data.secondaryThemeColor,
-                PreferKey.primaryTextColor to data.primaryTextColor,
-                PreferKey.secondaryTextColor to data.secondaryTextColor,
-                PreferKey.themeBackgroundColor to data.themeBackgroundColor,
-                PreferKey.labelContainerColor to data.labelContainerColor,
-                PreferKey.themeColorNight to data.themeColorNight,
-                PreferKey.secondaryThemeColorNight to data.secondaryThemeColorNight,
-                PreferKey.primaryTextColorNight to data.primaryTextColorNight,
-                PreferKey.secondaryTextColorNight to data.secondaryTextColorNight,
-                PreferKey.themeBackgroundColorNight to data.themeBackgroundColorNight,
-                PreferKey.labelContainerColorNight to data.labelContainerColorNight,
-                PreferKey.bookInfoInputColor to data.bookInfoInputColor,
-                PreferKey.bookInfoFollowCoverColor to data.bookInfoFollowCoverColor,
-                PreferKey.bookInfoBackgroundBlur to bookInfoBackground,
-                PreferKey.bookInfoNetworkCoverBackground to
-                    (data.bookInfoNetworkCoverBackground ?: bookInfoBackground),
-                PreferKey.bookInfoDefaultCoverBackground to
-                    (data.bookInfoDefaultCoverBackground ?: bookInfoBackground),
-                PreferKey.containerOpacity to data.containerOpacity,
-                PreferKey.overrideBaseCardCornerRadius to data.overrideBaseCardCornerRadius,
-                PreferKey.baseCardCornerRadius to data.baseCardCornerRadius,
-                PreferKey.overrideBaseCardBorder to data.overrideBaseCardBorder,
-                PreferKey.baseCardBorderWidth to data.baseCardBorderWidth,
-                PreferKey.baseCardBorderColor to data.baseCardBorderColor,
-                PreferKey.baseCardBorderColorNight to data.baseCardBorderColorNight,
-                PreferKey.disableSplicedColumnGroupCornerRadius to
-                    data.disableSplicedColumnGroupCornerRadius,
-                PreferKey.enableItemDivider to data.enableItemDivider,
-                PreferKey.itemDividerWidth to data.itemDividerWidth,
-                PreferKey.itemDividerLength to data.itemDividerLength,
-                PreferKey.itemDividerColor to data.itemDividerColor,
-                PreferKey.enableBlur to data.enableBlur,
-                PreferKey.enableProgressiveBlur to data.enableProgressiveBlur,
-                PreferKey.topBarBlurRadius to data.topBarBlurRadius,
-                PreferKey.bottomBarBlurRadius to data.bottomBarBlurRadius,
-                PreferKey.topBarBlurAlpha to data.topBarBlurAlpha,
-                PreferKey.bottomBarBlurAlpha to data.bottomBarBlurAlpha,
-                PreferKey.bottomBarLensRadius to data.bottomBarLensRadius,
-                PreferKey.topBarOpacity to data.topBarOpacity,
-                PreferKey.bottomBarOpacity to data.bottomBarOpacity,
-                PreferKey.enableCustomTagColors to data.enableCustomTagColors,
-                PreferKey.customTagColors to data.customTagColorsJson,
-                PreferKey.bookshelfCardColor to data.bookshelfCardColor,
-                PreferKey.bookshelfCardColorDark to data.bookshelfCardColorDark,
-                PreferKey.showHome to data.showHome,
-                PreferKey.showStatusBar to data.showStatusBar,
-                PreferKey.swipeAnimation to data.swipeAnimation,
-                PreferKey.showBottomView to data.showBottomView,
-                PreferKey.useFloatingBottomBar to data.useFloatingBottomBar,
-                PreferKey.useFloatingBottomBarLiquidGlass to data.useFloatingBottomBarLiquidGlass,
-                PreferKey.tabletInterface to data.tabletInterface,
-                PreferKey.labelVisibilityMode to data.labelVisibilityMode,
-                PreferKey.defaultHomePage to data.defaultHomePage,
-                PreferKey.mainNavigationOrder to data.mainNavigationOrder,
-                PreferKey.navIconHome to data.navIconHome,
-                PreferKey.navIconBookshelf to data.navIconBookshelf,
-                PreferKey.navIconExplore to data.navIconExplore,
-                PreferKey.navIconRss to data.navIconRss,
-                PreferKey.navIconMy to data.navIconMy,
+        PreferKey.appTheme to data.appTheme,
+        PreferKey.themeMode to data.themeMode,
+        PreferKey.pureBlack to data.isPureBlack,
+        PreferKey.composeEngine to data.composeEngine,
+        PreferKey.paletteStyle to data.paletteStyle,
+        PreferKey.materialVersion to data.materialVersion,
+        PreferKey.customMode to data.customMode,
+        PreferKey.customContrast to data.customContrast,
+        PreferKey.launcherIcon to data.launcherIcon,
+        PreferKey.isPredictiveBackEnabled to data.isPredictiveBackEnabled,
+        PreferKey.fontScale to data.fontScale,
+        PreferKey.enableDeepPersonalization to data.enableDeepPersonalization,
+        PreferKey.cPrimary to data.cPrimary,
+        PreferKey.cNPrimary to data.cNPrimary,
+        PreferKey.themeColor to data.themeColor,
+        PreferKey.secondaryThemeColor to data.secondaryThemeColor,
+        PreferKey.primaryTextColor to data.primaryTextColor,
+        PreferKey.secondaryTextColor to data.secondaryTextColor,
+        PreferKey.themeBackgroundColor to data.themeBackgroundColor,
+        PreferKey.labelContainerColor to data.labelContainerColor,
+        PreferKey.themeColorNight to data.themeColorNight,
+        PreferKey.secondaryThemeColorNight to data.secondaryThemeColorNight,
+        PreferKey.primaryTextColorNight to data.primaryTextColorNight,
+        PreferKey.secondaryTextColorNight to data.secondaryTextColorNight,
+        PreferKey.themeBackgroundColorNight to data.themeBackgroundColorNight,
+        PreferKey.labelContainerColorNight to data.labelContainerColorNight,
+        PreferKey.bookInfoInputColor to data.bookInfoInputColor,
+        PreferKey.bookInfoFollowCoverColor to data.bookInfoFollowCoverColor,
+        PreferKey.bookInfoBackgroundBlur to bookInfoBackground,
+        PreferKey.bookInfoNetworkCoverBackground to
+            (data.bookInfoNetworkCoverBackground ?: bookInfoBackground),
+        PreferKey.bookInfoDefaultCoverBackground to
+            (data.bookInfoDefaultCoverBackground ?: bookInfoBackground),
+        PreferKey.containerOpacity to data.containerOpacity,
+        PreferKey.overrideBaseCardCornerRadius to data.overrideBaseCardCornerRadius,
+        PreferKey.baseCardCornerRadius to data.baseCardCornerRadius,
+        PreferKey.overrideBaseCardBorder to data.overrideBaseCardBorder,
+        PreferKey.baseCardBorderWidth to data.baseCardBorderWidth,
+        PreferKey.baseCardBorderColor to data.baseCardBorderColor,
+        PreferKey.baseCardBorderColorNight to data.baseCardBorderColorNight,
+        PreferKey.disableSplicedColumnGroupCornerRadius to
+            data.disableSplicedColumnGroupCornerRadius,
+        PreferKey.enableItemDivider to data.enableItemDivider,
+        PreferKey.itemDividerWidth to data.itemDividerWidth,
+        PreferKey.itemDividerLength to data.itemDividerLength,
+        PreferKey.itemDividerColor to data.itemDividerColor,
+        PreferKey.enableBlur to data.enableBlur,
+        PreferKey.enableProgressiveBlur to data.enableProgressiveBlur,
+        PreferKey.topBarBlurRadius to data.topBarBlurRadius,
+        PreferKey.bottomBarBlurRadius to data.bottomBarBlurRadius,
+        PreferKey.topBarBlurAlpha to data.topBarBlurAlpha,
+        PreferKey.bottomBarBlurAlpha to data.bottomBarBlurAlpha,
+        PreferKey.bottomBarLensRadius to data.bottomBarLensRadius,
+        PreferKey.topBarOpacity to data.topBarOpacity,
+        PreferKey.bottomBarOpacity to data.bottomBarOpacity,
+        PreferKey.enableCustomTagColors to data.enableCustomTagColors,
+        PreferKey.customTagColors to data.customTagColorsJson,
+        PreferKey.bookshelfCardColor to data.bookshelfCardColor,
+        PreferKey.bookshelfCardColorDark to data.bookshelfCardColorDark,
+        PreferKey.showHome to data.showHome,
+        PreferKey.showStatusBar to data.showStatusBar,
+        PreferKey.swipeAnimation to data.swipeAnimation,
+        PreferKey.showBottomView to data.showBottomView,
+        PreferKey.useFloatingBottomBar to data.useFloatingBottomBar,
+        PreferKey.useFloatingBottomBarLiquidGlass to data.useFloatingBottomBarLiquidGlass,
+        PreferKey.tabletInterface to data.tabletInterface,
+        PreferKey.labelVisibilityMode to data.labelVisibilityMode,
+        PreferKey.defaultHomePage to data.defaultHomePage,
+        PreferKey.mainNavigationOrder to data.mainNavigationOrder,
+        PreferKey.navIconHome to data.navIconHome,
+        PreferKey.navIconBookshelf to data.navIconBookshelf,
+        PreferKey.navIconExplore to data.navIconExplore,
+        PreferKey.navIconRss to data.navIconRss,
+        PreferKey.navIconMy to data.navIconMy,
         PreferKey.navIconHomeSelected to data.navIconHomeSelected,
         PreferKey.navIconBookshelfSelected to data.navIconBookshelfSelected,
         PreferKey.navIconExploreSelected to data.navIconExploreSelected,
         PreferKey.navIconRssSelected to data.navIconRssSelected,
         PreferKey.navIconMySelected to data.navIconMySelected,
-                PreferKey.useMiuixMonet to data.useMiuixMonet,
-                PreferKey.useFlexibleTopAppBar to data.useFlexibleTopAppBar,
+        PreferKey.useMiuixMonet to data.useMiuixMonet,
+        PreferKey.useFlexibleTopAppBar to data.useFlexibleTopAppBar,
         PreferKey.topBarButtonStyle to data.topBarButtonStyle,
         PreferKey.mergeTopBarActions to data.mergeTopBarActions,
-                PreferKey.bgImage to data.bgImageLight,
-                PreferKey.bgImageN to data.bgImageDark,
-                PreferKey.bgImageBlurring to data.bgImageBlurring,
-                PreferKey.bgImageNBlurring to data.bgImageNBlurring,
-                PreferKey.largeContainerBackgroundImageLight to
-                    data.largeContainerBackgroundImageLight,
-                PreferKey.largeContainerBackgroundImageDark to
-                    data.largeContainerBackgroundImageDark,
-                PreferKey.itemBackgroundImageLight to data.itemBackgroundImageLight,
-                PreferKey.itemBackgroundImageDark to data.itemBackgroundImageDark,
-                PreferKey.enableContainerBackgroundImage to data.enableContainerBackgroundImage,
-                PreferKey.appColumnBackgroundOpacity to data.appColumnBackgroundOpacity,
-                PreferKey.glassCardBackgroundOpacity to data.glassCardBackgroundOpacity,
-                PreferKey.appFontPath to data.appFontPath,
-                PreferKey.loadCoverOnlyWifi to data.coverLoadOnlyWifi,
-                PreferKey.useDefaultCover to data.coverUseDefault,
-                PreferKey.coverShowShadow to data.coverShowShadow,
-                PreferKey.coverShowStroke to data.coverShowStroke,
-                PreferKey.coverDefaultColor to data.coverDefaultColor,
-                PreferKey.defaultCover to data.coverDefaultImage,
-                PreferKey.coverTextColor to data.coverTextColor,
-                PreferKey.coverShadowColor to data.coverShadowColor,
-                PreferKey.defaultCoverDark to data.coverDefaultImageDark,
-                PreferKey.coverTextColorN to data.coverTextColorN,
-                PreferKey.coverShadowColorN to data.coverShadowColorN,
-                PreferKey.coverInfoOrientation to data.coverInfoOrientation,
+        PreferKey.bgImage to data.bgImageLight,
+        PreferKey.bgImageN to data.bgImageDark,
+        PreferKey.bgImageBlurring to data.bgImageBlurring,
+        PreferKey.bgImageNBlurring to data.bgImageNBlurring,
+        PreferKey.largeContainerBackgroundImageLight to
+            data.largeContainerBackgroundImageLight,
+        PreferKey.largeContainerBackgroundImageDark to
+            data.largeContainerBackgroundImageDark,
+        PreferKey.itemBackgroundImageLight to data.itemBackgroundImageLight,
+        PreferKey.itemBackgroundImageDark to data.itemBackgroundImageDark,
+        PreferKey.enableContainerBackgroundImage to data.enableContainerBackgroundImage,
+        PreferKey.appColumnBackgroundOpacity to data.appColumnBackgroundOpacity,
+        PreferKey.glassCardBackgroundOpacity to data.glassCardBackgroundOpacity,
+        PreferKey.appFontPath to data.appFontPath,
+        PreferKey.loadCoverOnlyWifi to data.coverLoadOnlyWifi,
+        PreferKey.useDefaultCover to data.coverUseDefault,
+        PreferKey.coverShowShadow to data.coverShowShadow,
+        PreferKey.coverShowStroke to data.coverShowStroke,
+        PreferKey.coverDefaultColor to data.coverDefaultColor,
+        PreferKey.defaultCover to data.coverDefaultImage,
+        PreferKey.coverTextColor to data.coverTextColor,
+        PreferKey.coverShadowColor to data.coverShadowColor,
+        PreferKey.defaultCoverDark to data.coverDefaultImageDark,
+        PreferKey.coverTextColorN to data.coverTextColorN,
+        PreferKey.coverShadowColorN to data.coverShadowColorN,
+        PreferKey.coverInfoOrientation to data.coverInfoOrientation,
     )
 }

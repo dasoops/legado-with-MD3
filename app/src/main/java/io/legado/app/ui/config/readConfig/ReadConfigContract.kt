@@ -52,59 +52,193 @@ data class ReadConfigUiState(
 
 sealed interface ReadConfigSheet {
     data object PageKeys : ReadConfigSheet
+
     data object ClickActions : ReadConfigSheet
+
     data object EyeProtection : ReadConfigSheet
 }
 
 sealed interface ReadConfigIntent {
     data object OpenPageKeys : ReadConfigIntent
+
     data object OpenClickActions : ReadConfigIntent
+
     data object DismissSheet : ReadConfigIntent
-    data class ScreenOrientationChanged(val value: String) : ReadConfigIntent
-    data class KeepLightChanged(val value: String) : ReadConfigIntent
-    data class HideStatusBarChanged(val value: Boolean) : ReadConfigIntent
-    data class HideNavigationBarChanged(val value: Boolean) : ReadConfigIntent
-    data class PaddingDisplayCutoutsChanged(val value: Boolean) : ReadConfigIntent
-    data class TitleBarModeChanged(val value: String) : ReadConfigIntent
-    data class ReadMenuBlurAlphaChanged(val value: Int) : ReadConfigIntent
-    data class ReadBodyToLhChanged(val value: Boolean) : ReadConfigIntent
-    data class TextFullJustifyChanged(val value: Boolean) : ReadConfigIntent
-    data class TextBottomJustifyChanged(val value: Boolean) : ReadConfigIntent
-    data class AdaptSpecialStyleChanged(val value: Boolean) : ReadConfigIntent
-    data class UseZhLayoutChanged(val value: Boolean) : ReadConfigIntent
+
+    data class ScreenOrientationChanged(
+        val value: String,
+    ) : ReadConfigIntent
+
+    data class KeepLightChanged(
+        val value: String,
+    ) : ReadConfigIntent
+
+    data class HideStatusBarChanged(
+        val value: Boolean,
+    ) : ReadConfigIntent
+
+    data class HideNavigationBarChanged(
+        val value: Boolean,
+    ) : ReadConfigIntent
+
+    data class PaddingDisplayCutoutsChanged(
+        val value: Boolean,
+    ) : ReadConfigIntent
+
+    data class TitleBarModeChanged(
+        val value: String,
+    ) : ReadConfigIntent
+
+    data class ReadMenuBlurAlphaChanged(
+        val value: Int,
+    ) : ReadConfigIntent
+
+    data class ReadBodyToLhChanged(
+        val value: Boolean,
+    ) : ReadConfigIntent
+
+    data class TextFullJustifyChanged(
+        val value: Boolean,
+    ) : ReadConfigIntent
+
+    data class TextBottomJustifyChanged(
+        val value: Boolean,
+    ) : ReadConfigIntent
+
+    data class AdaptSpecialStyleChanged(
+        val value: Boolean,
+    ) : ReadConfigIntent
+
+    data class UseZhLayoutChanged(
+        val value: Boolean,
+    ) : ReadConfigIntent
+
     data object OpenEyeProtection : ReadConfigIntent
-    data class EyeProtectionEnabledChanged(val value: Boolean) : ReadConfigIntent
-    data class EyeProtectionIntensityChanged(val value: Int) : ReadConfigIntent
-    data class EyeProtectionAutoNightChanged(val value: Boolean) : ReadConfigIntent
-    data class EyeProtectionScheduleChanged(val value: Boolean) : ReadConfigIntent
-    data class EyeProtectionStartTimeChanged(val value: String) : ReadConfigIntent
-    data class EyeProtectionEndTimeChanged(val value: String) : ReadConfigIntent
-    data class ShowBrightnessViewChanged(val value: String) : ReadConfigIntent
-    data class BrightnessVwPosChanged(val value: String) : ReadConfigIntent
-    data class UseUnderlineChanged(val value: Boolean) : ReadConfigIntent
-    data class ReadSliderModeChanged(val value: String) : ReadConfigIntent
-    data class DoubleHorizontalPageChanged(val value: String) : ReadConfigIntent
-    data class ProgressBarBehaviorChanged(val value: String) : ReadConfigIntent
-    data class MouseWheelPageChanged(val value: Boolean) : ReadConfigIntent
-    data class VolumeKeyPageChanged(val value: Boolean) : ReadConfigIntent
-    data class KeyPageOnLongPressChanged(val value: Boolean) : ReadConfigIntent
-    data class PageTouchSlopChanged(val value: Int) : ReadConfigIntent
-    data class SliderVibratorChanged(val value: Boolean) : ReadConfigIntent
-    data class UseNewTocSheetChanged(val value: Boolean) : ReadConfigIntent
-    data class MaxLengthWithNoTocChanged(val value: Int) : ReadConfigIntent
-    data class SelectVibratorChanged(val value: Boolean) : ReadConfigIntent
-    data class SelectTextChanged(val value: Boolean) : ReadConfigIntent
-    data class NoAnimScrollPageChanged(val value: Boolean) : ReadConfigIntent
-    data class ClickImgWayChanged(val value: String) : ReadConfigIntent
-    data class OptimizeRenderChanged(val value: Boolean) : ReadConfigIntent
-    data class DisableReturnKeyChanged(val value: Boolean) : ReadConfigIntent
-    data class ShowReadTitleAdditionChanged(val value: Boolean) : ReadConfigIntent
-    data class ShowMenuIconChanged(val value: Boolean) : ReadConfigIntent
-    data class AutoSuggestDayNightChanged(val value: Boolean) : ReadConfigIntent
-    data class ReadingAnchorChanged(val value: Boolean) : ReadConfigIntent
-    data class PageKeysChanged(val prevKeys: String, val nextKeys: String) : ReadConfigIntent
+
+    data class EyeProtectionEnabledChanged(
+        val value: Boolean,
+    ) : ReadConfigIntent
+
+    data class EyeProtectionIntensityChanged(
+        val value: Int,
+    ) : ReadConfigIntent
+
+    data class EyeProtectionAutoNightChanged(
+        val value: Boolean,
+    ) : ReadConfigIntent
+
+    data class EyeProtectionScheduleChanged(
+        val value: Boolean,
+    ) : ReadConfigIntent
+
+    data class EyeProtectionStartTimeChanged(
+        val value: String,
+    ) : ReadConfigIntent
+
+    data class EyeProtectionEndTimeChanged(
+        val value: String,
+    ) : ReadConfigIntent
+
+    data class ShowBrightnessViewChanged(
+        val value: String,
+    ) : ReadConfigIntent
+
+    data class BrightnessVwPosChanged(
+        val value: String,
+    ) : ReadConfigIntent
+
+    data class UseUnderlineChanged(
+        val value: Boolean,
+    ) : ReadConfigIntent
+
+    data class ReadSliderModeChanged(
+        val value: String,
+    ) : ReadConfigIntent
+
+    data class DoubleHorizontalPageChanged(
+        val value: String,
+    ) : ReadConfigIntent
+
+    data class ProgressBarBehaviorChanged(
+        val value: String,
+    ) : ReadConfigIntent
+
+    data class MouseWheelPageChanged(
+        val value: Boolean,
+    ) : ReadConfigIntent
+
+    data class VolumeKeyPageChanged(
+        val value: Boolean,
+    ) : ReadConfigIntent
+
+    data class KeyPageOnLongPressChanged(
+        val value: Boolean,
+    ) : ReadConfigIntent
+
+    data class PageTouchSlopChanged(
+        val value: Int,
+    ) : ReadConfigIntent
+
+    data class SliderVibratorChanged(
+        val value: Boolean,
+    ) : ReadConfigIntent
+
+    data class UseNewTocSheetChanged(
+        val value: Boolean,
+    ) : ReadConfigIntent
+
+    data class MaxLengthWithNoTocChanged(
+        val value: Int,
+    ) : ReadConfigIntent
+
+    data class SelectVibratorChanged(
+        val value: Boolean,
+    ) : ReadConfigIntent
+
+    data class SelectTextChanged(
+        val value: Boolean,
+    ) : ReadConfigIntent
+
+    data class NoAnimScrollPageChanged(
+        val value: Boolean,
+    ) : ReadConfigIntent
+
+    data class ClickImgWayChanged(
+        val value: String,
+    ) : ReadConfigIntent
+
+    data class OptimizeRenderChanged(
+        val value: Boolean,
+    ) : ReadConfigIntent
+
+    data class DisableReturnKeyChanged(
+        val value: Boolean,
+    ) : ReadConfigIntent
+
+    data class ShowReadTitleAdditionChanged(
+        val value: Boolean,
+    ) : ReadConfigIntent
+
+    data class ShowMenuIconChanged(
+        val value: Boolean,
+    ) : ReadConfigIntent
+
+    data class AutoSuggestDayNightChanged(
+        val value: Boolean,
+    ) : ReadConfigIntent
+
+    data class ReadingAnchorChanged(
+        val value: Boolean,
+    ) : ReadConfigIntent
+
+    data class PageKeysChanged(
+        val prevKeys: String,
+        val nextKeys: String,
+    ) : ReadConfigIntent
 }
 
 sealed interface ReadConfigEffect {
-    data class SettingsUpdateFailed(val message: String) : ReadConfigEffect
+    data class SettingsUpdateFailed(
+        val message: String,
+    ) : ReadConfigEffect
 }

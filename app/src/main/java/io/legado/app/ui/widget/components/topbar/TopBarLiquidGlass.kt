@@ -27,9 +27,10 @@ import kotlin.math.tanh
 internal fun Modifier.topBarLiquidGlass(shape: Shape): Modifier {
     val backdrop = LocalTopBarBackdrop.current ?: return this
     if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) return this
-    val containerColor = LegadoTheme.colorScheme.surface.copy(
-        alpha = 0.5f
-    )
+    val containerColor =
+        LegadoTheme.colorScheme.surface.copy(
+            alpha = 0.5f,
+        )
     val shadowColor = Color.Black.copy(alpha = 0.04f)
     val animationScope = rememberCoroutineScope()
     val interactiveHighlight = remember(animationScope) { InteractiveHighlight(animationScope) }
@@ -45,7 +46,7 @@ internal fun Modifier.topBarLiquidGlass(shape: Shape): Modifier {
         shadow = {
             Shadow(
                 radius = 12.dp,
-                color = shadowColor
+                color = shadowColor,
             )
         },
         layerBlock = {
@@ -60,22 +61,24 @@ internal fun Modifier.topBarLiquidGlass(shape: Shape): Modifier {
                 translationY = maxOffset * tanh(0.05f * dragOffset.y / maxOffset) * progress
                 val maxDragScale = 4.dp.toPx() / height
                 val offsetAngle = atan2(dragOffset.y, dragOffset.x)
-                scaleX = scale + maxDragScale *
-                        abs(cos(offsetAngle) * dragOffset.x / size.maxDimension) *
-                        (width / height).coerceAtMost(1f) * progress
-                scaleY = scale + maxDragScale *
-                        abs(sin(offsetAngle) * dragOffset.y / size.maxDimension) *
-                        (height / width).coerceAtMost(1f) * progress
+                scaleX = scale +
+                    maxDragScale *
+                    abs(cos(offsetAngle) * dragOffset.x / size.maxDimension) *
+                    (width / height).coerceAtMost(1f) *
+                    progress
+                scaleY = scale +
+                    maxDragScale *
+                    abs(sin(offsetAngle) * dragOffset.y / size.maxDimension) *
+                    (height / width).coerceAtMost(1f) *
+                    progress
             }
         },
         onDrawSurface = {
             drawRect(containerColor)
         },
-    )
-        .then(interactiveHighlight.modifier)
+    ).then(interactiveHighlight.modifier)
         .then(interactiveHighlight.gestureModifier)
 }
 
 @Composable
-internal fun topBarLiquidGlassEnabled(): Boolean =
-    LocalTopBarBackdrop.current != null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
+internal fun topBarLiquidGlassEnabled(): Boolean = LocalTopBarBackdrop.current != null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU

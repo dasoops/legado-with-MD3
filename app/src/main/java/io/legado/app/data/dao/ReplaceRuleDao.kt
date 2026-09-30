@@ -16,10 +16,8 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 
-
 @Dao
 interface ReplaceRuleDao {
-
     @Query("SELECT * FROM replace_rules ORDER BY sortOrder ASC")
     fun flowAll(): Flow<List<ReplaceRule>>
 
@@ -35,16 +33,24 @@ interface ReplaceRuleDao {
     @Query("SELECT * FROM replace_rules ORDER BY name COLLATE NOCASE DESC")
     fun flowAllNameDesc(): Flow<List<ReplaceRule>>
 
-    @Query("SELECT * FROM replace_rules WHERE `group` LIKE :key OR name LIKE :key OR pattern LIKE :key OR replacement LIKE :key OR scope LIKE :key ORDER BY sortOrder ASC")
+    @Query(
+        "SELECT * FROM replace_rules WHERE `group` LIKE :key OR name LIKE :key OR pattern LIKE :key OR replacement LIKE :key OR scope LIKE :key ORDER BY sortOrder ASC",
+    )
     fun flowSearchAsc(key: String): Flow<List<ReplaceRule>>
 
-    @Query("SELECT * FROM replace_rules WHERE `group` LIKE :key OR name LIKE :key OR pattern LIKE :key OR replacement LIKE :key OR scope LIKE :key ORDER BY sortOrder DESC")
+    @Query(
+        "SELECT * FROM replace_rules WHERE `group` LIKE :key OR name LIKE :key OR pattern LIKE :key OR replacement LIKE :key OR scope LIKE :key ORDER BY sortOrder DESC",
+    )
     fun flowSearchDesc(key: String): Flow<List<ReplaceRule>>
 
-    @Query("SELECT * FROM replace_rules WHERE `group` LIKE :key OR name LIKE :key OR pattern LIKE :key OR replacement LIKE :key OR scope LIKE :key ORDER BY name COLLATE NOCASE ASC")
+    @Query(
+        "SELECT * FROM replace_rules WHERE `group` LIKE :key OR name LIKE :key OR pattern LIKE :key OR replacement LIKE :key OR scope LIKE :key ORDER BY name COLLATE NOCASE ASC",
+    )
     fun flowSearchNameAsc(key: String): Flow<List<ReplaceRule>>
 
-    @Query("SELECT * FROM replace_rules WHERE `group` LIKE :key OR name LIKE :key OR pattern LIKE :key OR replacement LIKE :key OR scope LIKE :key ORDER BY name COLLATE NOCASE DESC")
+    @Query(
+        "SELECT * FROM replace_rules WHERE `group` LIKE :key OR name LIKE :key OR pattern LIKE :key OR replacement LIKE :key OR scope LIKE :key ORDER BY name COLLATE NOCASE DESC",
+    )
     fun flowSearchNameDesc(key: String): Flow<List<ReplaceRule>>
 
     @Query("SELECT * FROM replace_rules WHERE `group` LIKE '%' || :key || '%' ORDER BY sortOrder ASC")
@@ -66,13 +72,19 @@ interface ReplaceRuleDao {
     @Query("SELECT * FROM replace_rules WHERE `group` IS NULL OR trim(`group`) = '' OR trim(`group`) LIKE '%未分组%' ORDER BY sortOrder DESC")
     fun flowNoGroupDesc(): Flow<List<ReplaceRule>>
 
-    @Query("SELECT * FROM replace_rules WHERE `group` IS NULL OR trim(`group`) = '' OR trim(`group`) LIKE '%未分组%' ORDER BY name COLLATE NOCASE ASC")
+    @Query(
+        "SELECT * FROM replace_rules WHERE `group` IS NULL OR trim(`group`) = '' OR trim(`group`) LIKE '%未分组%' ORDER BY name COLLATE NOCASE ASC",
+    )
     fun flowNoGroupNameAsc(): Flow<List<ReplaceRule>>
 
-    @Query("SELECT * FROM replace_rules WHERE `group` IS NULL OR trim(`group`) = '' OR trim(`group`) LIKE '%未分组%' ORDER BY name COLLATE NOCASE DESC")
+    @Query(
+        "SELECT * FROM replace_rules WHERE `group` IS NULL OR trim(`group`) = '' OR trim(`group`) LIKE '%未分组%' ORDER BY name COLLATE NOCASE DESC",
+    )
     fun flowNoGroupNameDesc(): Flow<List<ReplaceRule>>
 
-    @Query("SELECT * FROM replace_rules where `group` like :key or name like :key or pattern like :key or replacement like :key or scope like :key ORDER BY sortOrder ASC")
+    @Query(
+        "SELECT * FROM replace_rules where `group` like :key or name like :key or pattern like :key or replacement like :key or scope like :key ORDER BY sortOrder ASC",
+    )
     fun flowSearch(key: String): Flow<List<ReplaceRule>>
 
     @Query("SELECT * FROM replace_rules where `group` like '%' || :key || '%' ORDER BY sortOrder ASC")
@@ -109,29 +121,44 @@ interface ReplaceRuleDao {
         """SELECT * FROM replace_rules WHERE isEnabled = 1 and scopeContent = 1
         AND (scope LIKE '%' || :name || '%' or scope LIKE '%' || :origin || '%' or scope is null or scope = '')
         and (excludeScope is null or (excludeScope not LIKE '%' || :name || '%' and excludeScope not LIKE '%' || :origin || '%'))
-        order by sortOrder"""
+        order by sortOrder""",
     )
-    fun findEnabledByContentScope(name: String, origin: String): List<ReplaceRule>
+    fun findEnabledByContentScope(
+        name: String,
+        origin: String,
+    ): List<ReplaceRule>
 
     @Query(
         """SELECT * FROM replace_rules WHERE isEnabled = 1 and scopeTitle = 1
         AND (scope LIKE '%' || :name || '%' or scope LIKE '%' || :origin || '%' or scope is null or scope = '')
         and (excludeScope is null or (excludeScope not LIKE '%' || :name || '%' and excludeScope not LIKE '%' || :origin || '%'))
-        order by sortOrder"""
+        order by sortOrder""",
     )
-    fun findEnabledByTitleScope(name: String, origin: String): List<ReplaceRule>
+    fun findEnabledByTitleScope(
+        name: String,
+        origin: String,
+    ): List<ReplaceRule>
 
     @Query("UPDATE replace_rules SET isEnabled = :enabled WHERE id = :id")
-    suspend fun updateEnabled(id: Long, enabled: Boolean)
+    suspend fun updateEnabled(
+        id: Long,
+        enabled: Boolean,
+    )
 
     @Query("UPDATE replace_rules SET isEnabled = :enabled WHERE id IN (:ids)")
-    suspend fun updateEnabled(ids: List<Long>, enabled: Boolean)
+    suspend fun updateEnabled(
+        ids: List<Long>,
+        enabled: Boolean,
+    )
 
     @Query("DELETE FROM replace_rules WHERE id IN (:ids)")
     suspend fun deleteByIds(ids: List<Long>)
 
     @Query("UPDATE replace_rules SET sortOrder = :order WHERE id = :id")
-    suspend fun updateOrder(id: Long, order: Int)
+    suspend fun updateOrder(
+        id: Long,
+        order: Int,
+    )
 
     @Query("SELECT * FROM replace_rules WHERE id IN (:ids)")
     fun getByIds(ids: Set<Long>): List<ReplaceRule>
@@ -181,9 +208,8 @@ interface ReplaceRuleDao {
 
     fun allGroups(): List<String> = dealGroups(allGroupsUnProcessed)
 
-    fun flowGroups(): Flow<List<String>> {
-        return flowGroupsUnProcessed().map { list ->
+    fun flowGroups(): Flow<List<String>> = flowGroupsUnProcessed()
+        .map { list ->
             dealGroups(list)
         }.flowOn(IO)
-    }
 }

@@ -36,9 +36,8 @@ object ReadBookConfig {
         configStore.initShareConfig()
     }
 
-
-    const val configFileName = "readConfig.json"
-    const val shareConfigFileName = "shareReadConfig.json"
+    const val CONFIG_FILE_NAME = "readConfig.json"
+    const val SHARE_CONFIG_FILE_NAME = "shareReadConfig.json"
     val configFilePath: String get() = configStore.configFilePath
     val shareConfigFilePath: String get() = configStore.shareConfigFilePath
 
@@ -53,11 +52,12 @@ object ReadBookConfig {
 
     val textColor: Int get() = durConfig.curTextColor()
     val textColorNight: Int
-        get() = try {
-            durConfig.getTextColorNight().toColorInt()
-        } catch (_: Exception) {
-            0xFFADADAD.toInt()
-        }
+        get() =
+            try {
+                durConfig.getTextColorNight().toColorInt()
+            } catch (_: Exception) {
+                0xFFADADAD.toInt()
+            }
     val textAccentColor: Int get() = durConfig.curTextAccentColor()
     val textShadowColor: Int get() = durConfig.curTextShadowColor()
     val menuColor: Int get() = readMenuAccentColor
@@ -113,31 +113,35 @@ object ReadBookConfig {
     val readMenuBorderWidth get() = readSettings.readMenuBorderWidth.coerceIn(0, 4)
     val titleBarIconPosition get() = readSettings.titleBarIconPosition.coerceIn(0, 3)
     val readMenuBgColor: Int
-        get() = readSettings.readMenuBgColor.takeIf { it != 0 }
-            ?: durConfig.menuBgColor(isNight = false)
+        get() =
+            readSettings.readMenuBgColor.takeIf { it != 0 }
+                ?: durConfig.menuBgColor(isNight = false)
     val readMenuAccentColor: Int
-        get() = readSettings.readMenuAccentColor.takeIf { it != 0 }
-            ?: durConfig.menuAccentColor(isNight = false)
+        get() =
+            readSettings.readMenuAccentColor.takeIf { it != 0 }
+                ?: durConfig.menuAccentColor(isNight = false)
     val readMenuContainerColor: Int
         get() = readSettings.readMenuContainerColor.takeIf { it != 0 } ?: readMenuBgColor
     val readMenuBgColorNight: Int
-        get() = readSettings.readMenuBgColorNight.takeIf { it != 0 }
-            ?: durConfig.menuBgColor(isNight = true)
+        get() =
+            readSettings.readMenuBgColorNight.takeIf { it != 0 }
+                ?: durConfig.menuBgColor(isNight = true)
     val readMenuAccentColorNight: Int
-        get() = readSettings.readMenuAccentColorNight.takeIf { it != 0 }
-            ?: durConfig.menuAccentColor(isNight = true)
+        get() =
+            readSettings.readMenuAccentColorNight.takeIf { it != 0 }
+                ?: durConfig.menuAccentColor(isNight = true)
     val readMenuContainerColorNight: Int
         get() = readSettings.readMenuContainerColorNight.takeIf { it != 0 } ?: readMenuBgColorNight
 
     // region Map properties (JSON string serialization)
 
-    fun encodeReadMenuCustomIcons(value: Map<String, String>): String {
-        return GSON.toJson(value.filterValues { it.isNotBlank() })
-    }
+    fun encodeReadMenuCustomIcons(value: Map<String, String>): String = GSON.toJson(value.filterValues { it.isNotBlank() })
 
     private fun parseReadMenuCustomIcons(value: String?): Map<String, String> {
         if (value.isNullOrBlank()) return emptyMap()
-        return GSON.fromJsonObject<Map<String, String>>(value).getOrNull()
+        return GSON
+            .fromJsonObject<Map<String, String>>(value)
+            .getOrNull()
             ?.filterValues { it.isNotBlank() } ?: emptyMap()
     }
 
@@ -189,7 +193,6 @@ object ReadBookConfig {
 
     val resolvedMenuBlurColor: Int
         get() = if (ReadStyleResolver.isNightTheme()) readMenuBlurColorNight else readMenuBlurColor
-
 
     val config get() = if (shareLayout) shareConfig else durConfig
 
@@ -271,7 +274,7 @@ object ReadBookConfig {
         get() = config.titleSegType
 
     val titleSegScaling: Float
-        //旧版本可能存入负值，负值非法，回落到默认比例
+        // 旧版本可能存入负值，负值非法，回落到默认比例
         get() = config.titleSegScaling.let { if (it < 0f) 1f else it.coerceAtMost(2f) }
 
     val titleSegDistance: Int
@@ -516,15 +519,15 @@ object ReadBookConfig {
             dottedLine = shareConfig.dottedLine,
             dottedBase = shareConfig.dottedBase,
             dottedRatio = shareConfig.dottedRatio,
-            bgAlpha = shareConfig.bgAlpha
+            bgAlpha = shareConfig.bgAlpha,
         )
     }
 
     @Keep
     data class Config(
         val name: String = "",
-        val bgStr: String = "#EEEEEE",//白天背景
-        val bgStrNight: String = "#000000",//夜间背景
+        val bgStr: String = "#EEEEEE", // 白天背景
+        val bgStrNight: String = "#000000", // 夜间背景
         @Transient
         val menuBgColor: String = "#EEEFE3",
         @Transient
@@ -533,63 +536,63 @@ object ReadBookConfig {
         val menuBgColorNight: String = "#BFCBAD",
         @Transient
         val menuAcColorNight: String = "#586249",
-        val bgStrEInk: String = "#FFFFFF",//EInk背景
-        val bgAlpha: Int = 100,//背景透明度
-        val bgType: Int = 0,//白天背景类型 0:颜色, 1:assets图片, 2其它图片
-        val bgTypeNight: Int = 0,//夜间背景类型
-        val bgTypeEInk: Int = 0,//EInk背景类型
-        private val darkStatusIcon: Boolean = true,//白天是否暗色状态栏
-        private val darkStatusIconNight: Boolean = false,//晚上是否暗色状态栏
+        val bgStrEInk: String = "#FFFFFF", // EInk背景
+        val bgAlpha: Int = 100, // 背景透明度
+        val bgType: Int = 0, // 白天背景类型 0:颜色, 1:assets图片, 2其它图片
+        val bgTypeNight: Int = 0, // 夜间背景类型
+        val bgTypeEInk: Int = 0, // EInk背景类型
+        private val darkStatusIcon: Boolean = true, // 白天是否暗色状态栏
+        private val darkStatusIconNight: Boolean = false, // 晚上是否暗色状态栏
         private val darkStatusIconEInk: Boolean = true,
-        private val textColor: String = "#3E3D3B",//白天文字颜色
-        private val textColorNight: String = "#ADADAD",//夜间文字颜色
+        private val textColor: String = "#3E3D3B", // 白天文字颜色
+        private val textColorNight: String = "#ADADAD", // 夜间文字颜色
         private val textColorEInk: String = "#000000",
-        private val textAccentColor: String = "#834E00",//白天强调文字颜色
-        private val textAccentColorNight: String = "#FE4D55",//夜间强调文字颜色
+        private val textAccentColor: String = "#834E00", // 白天强调文字颜色
+        private val textAccentColorNight: String = "#FE4D55", // 夜间强调文字颜色
         private val textAccentColorEInk: String = "#000000",
-        private val pageAnim: Int = 0,//翻页动画
+        private val pageAnim: Int = 0, // 翻页动画
         private val pageAnimEInk: Int = 4,
-        val textFont: String = "",//字体
-        val titleFont: String = "",//标题字体
-        val headerFont: String = "",//页眉字体
-        val footerFont: String = "",//页脚字体
-        val headerFontSize: Int = 12,//页眉字号
-        val footerFontSize: Int = 12,//页脚字号
-        val applyHeaderStyle: Boolean = true,//页脚是否应用页眉字体样式
-        val textBold: Int = 500,//是否粗体字 0:正常, 1:粗体, 2:细体
-        val textSize: Int = 20,//文字大小
-        val textItalic: Boolean = false,// 是否启用斜体
-        val textShadow: Boolean = false,// 是否启用阴影
-        val shadowRadius: Float = 16f,// 阴影模糊半径
-        val shadowDx: Float = 1f,// 阴影x偏移
-        val shadowDy: Float = 1f,// 阴影y偏移
+        val textFont: String = "", // 字体
+        val titleFont: String = "", // 标题字体
+        val headerFont: String = "", // 页眉字体
+        val footerFont: String = "", // 页脚字体
+        val headerFontSize: Int = 12, // 页眉字号
+        val footerFontSize: Int = 12, // 页脚字号
+        val applyHeaderStyle: Boolean = true, // 页脚是否应用页眉字体样式
+        val textBold: Int = 500, // 是否粗体字 0:正常, 1:粗体, 2:细体
+        val textSize: Int = 20, // 文字大小
+        val textItalic: Boolean = false, // 是否启用斜体
+        val textShadow: Boolean = false, // 是否启用阴影
+        val shadowRadius: Float = 16f, // 阴影模糊半径
+        val shadowDx: Float = 1f, // 阴影x偏移
+        val shadowDy: Float = 1f, // 阴影y偏移
         private val shadowColor: String = "#3E3D3B",
         private val shadowColorN: String = "#3E3D3B",
-        val letterSpacing: Float = 0.1f,//字间距
-        val lineSpacingExtra: Int = 12,//行间距
-        val paragraphSpacing: Int = 2,//段距
-        val titleMode: Int = 0,//标题位置 0:居左 1:居中 2:隐藏
+        val letterSpacing: Float = 0.1f, // 字间距
+        val lineSpacingExtra: Int = 12, // 行间距
+        val paragraphSpacing: Int = 2, // 段距
+        val titleMode: Int = 0, // 标题位置 0:居左 1:居中 2:隐藏
         val titleSize: Int = 20,
         val titleTopSpacing: Int = 0,
         val titleBottomSpacing: Int = 0,
         val titleColor: Int = 0,
         val titleColorNight: Int = 0,
-        val titleBold: Int = 500,//是否粗体字 0:正常, 1:粗体, 2:细体
+        val titleBold: Int = 500, // 是否粗体字 0:正常, 1:粗体, 2:细体
         val titleLineSpacingExtra: Int = 12,
         val titleLineSpacingSub: Int = 12,
-        val titleSegType: Int = 0,//分段模式
-        val titleSegScaling: Float = 1f,//分段缩放，第二段与第一段的字体大小比例
-        val titleSegDistance: Int = 4,//分段判断，第几个字符开始分段
-        val titleSegFlag: String = "",//分段判断，碰到指定值时分段
-        val paragraphIndent: String = "　　",//段落缩进
-        val underline: Boolean = false, //下划线
+        val titleSegType: Int = 0, // 分段模式
+        val titleSegScaling: Float = 1f, // 分段缩放，第二段与第一段的字体大小比例
+        val titleSegDistance: Int = 4, // 分段判断，第几个字符开始分段
+        val titleSegFlag: String = "", // 分段判断，碰到指定值时分段
+        val paragraphIndent: String = "　　", // 段落缩进
+        val underline: Boolean = false, // 下划线
         val underlinePadding: Int = 10,
         val underlineHeight: Int = 1,
-        val underlineExtend: Boolean = false, //下划线延伸
+        val underlineExtend: Boolean = false, // 下划线延伸
         val underlineColor: String = "#3E3D3B",
         val underlineColorNight: String = "#ADADAD",
-        val dottedLine: Boolean = false, //虚线
-        val dottedBase: Float = 6f, //长度
+        val dottedLine: Boolean = false, // 虚线
+        val dottedBase: Float = 6f, // 长度
         val dottedRatio: Float = 6f,
         val paddingBottom: Int = 6,
         val paddingLeft: Int = 16,
@@ -638,9 +641,8 @@ object ReadBookConfig {
         val menuBottomHorizontalMargin: Int = 0,
         @Transient
         val menuBottomBottomMargin: Int = 0,
-        val highlightRules: ArrayList<HighlightRule> = arrayListOf()
+        val highlightRules: ArrayList<HighlightRule> = arrayListOf(),
     ) {
-
         @Transient
         private var textColorIntEInk = -1
 
@@ -761,39 +763,55 @@ object ReadBookConfig {
             "tipDividerColor" to tipDividerColor,
             "headerMode" to headerMode,
             "footerMode" to footerMode,
-            "highlightRules" to highlightRules.map { mapOf("id" to it.id, "name" to it.name, "pattern" to it.pattern, "sampleText" to it.sampleText, "targetScope" to it.targetScope, "enabled" to it.enabled, "position" to it.position, "textColor" to it.textColor, "bgColor" to it.bgColor, "underlineMode" to it.underlineMode, "underlineColor" to it.underlineColor, "underlineWidth" to it.underlineWidth, "underlineOffset" to it.underlineOffset, "underlineSvgPath" to it.underlineSvgPath, "bgImage" to it.bgImage, "bgImageFit" to it.bgImageFit, "bgImageScale" to it.bgImageScale, "configName" to it.configName, "fontPath" to it.fontPath, "fontSizeOffset" to it.fontSizeOffset) }
+            "highlightRules" to
+                highlightRules.map {
+                    mapOf(
+                        "id" to it.id,
+                        "name" to it.name,
+                        "pattern" to it.pattern,
+                        "sampleText" to it.sampleText,
+                        "targetScope" to it.targetScope,
+                        "enabled" to it.enabled,
+                        "position" to it.position,
+                        "textColor" to it.textColor,
+                        "bgColor" to it.bgColor,
+                        "underlineMode" to it.underlineMode,
+                        "underlineColor" to it.underlineColor,
+                        "underlineWidth" to it.underlineWidth,
+                        "underlineOffset" to it.underlineOffset,
+                        "underlineSvgPath" to it.underlineSvgPath,
+                        "bgImage" to it.bgImage,
+                        "bgImageFit" to it.bgImageFit,
+                        "bgImageScale" to it.bgImageScale,
+                        "configName" to it.configName,
+                        "fontPath" to it.fontPath,
+                        "fontSizeOffset" to it.fontSizeOffset,
+                    )
+                },
         )
 
-        fun getBgPath(bgIndex: Int): String? {
-            return ReadStyleResolver.backgroundPath(this, bgIndex)
-        }
+        fun getBgPath(bgIndex: Int): String? = ReadStyleResolver.backgroundPath(this, bgIndex)
 
         private inline fun <T> currentModeValue(
             eInk: () -> T,
             night: () -> T,
-            day: () -> T
-        ): T {
-            return when (ReadStyleResolver.currentMode()) {
-                ReadStyleResolver.ReadStyleMode.EInk -> eInk()
-                ReadStyleResolver.ReadStyleMode.Night -> night()
-                ReadStyleResolver.ReadStyleMode.Day -> day()
-            }
+            day: () -> T,
+        ): T = when (ReadStyleResolver.currentMode()) {
+            ReadStyleResolver.ReadStyleMode.EInk -> eInk()
+            ReadStyleResolver.ReadStyleMode.Night -> night()
+            ReadStyleResolver.ReadStyleMode.Day -> day()
         }
 
         private inline fun <T> nightThemeValue(
             night: () -> T,
-            day: () -> T
-        ): T {
-            return if (ReadStyleResolver.isNightTheme()) {
-                night()
-            } else {
-                day()
-            }
+            day: () -> T,
+        ): T = if (ReadStyleResolver.isNightTheme()) {
+            night()
+        } else {
+            day()
         }
 
-        private fun String.toColorIntSafe(fallback: Int): Int {
-            return runCatching { toColorInt() }.getOrDefault(fallback)
-        }
+        private fun String.toColorIntSafe(fallback: Int): Int = runCatching { toColorInt() }.getOrDefault(fallback)
 
         private fun ensureColorInts() {
             if (initColorInt) {
@@ -828,7 +846,7 @@ object ReadBookConfig {
             return currentModeValue(
                 eInk = { copy(textAccentColorEInk = hex) },
                 night = { copy(textAccentColorNight = hex) },
-                day = { copy(textAccentColor = hex) }
+                day = { copy(textAccentColor = hex) },
             )
         }
 
@@ -837,7 +855,7 @@ object ReadBookConfig {
             return currentModeValue(
                 eInk = { textAccentColorIntEInk },
                 night = { textAccentColorIntNight },
-                day = { textAccentColorInt }
+                day = { textAccentColorInt },
             )
         }
 
@@ -845,7 +863,7 @@ object ReadBookConfig {
             val hex = "#${color.hexString}"
             return nightThemeValue(
                 night = { copy(shadowColorN = hex) },
-                day = { copy(shadowColor = hex) }
+                day = { copy(shadowColor = hex) },
             )
         }
 
@@ -854,7 +872,7 @@ object ReadBookConfig {
             return currentModeValue(
                 eInk = { copy(textColorEInk = hex) },
                 night = { copy(textColorNight = hex) },
-                day = { copy(textColor = hex) }
+                day = { copy(textColor = hex) },
             )
         }
 
@@ -863,7 +881,7 @@ object ReadBookConfig {
             return currentModeValue(
                 eInk = { textColorIntEInk },
                 night = { textColorIntNight },
-                day = { textColorInt }
+                day = { textColorInt },
             )
         }
 
@@ -871,60 +889,65 @@ object ReadBookConfig {
             ensureColorInts()
             return nightThemeValue(
                 night = { shadowColorNightInt },
-                day = { shadowColorInt }
+                day = { shadowColorInt },
             )
         }
 
         fun withCurStatusIconDark(isDark: Boolean): Config = currentModeValue(
             eInk = { copy(darkStatusIconEInk = isDark) },
             night = { copy(darkStatusIconNight = isDark) },
-            day = { copy(darkStatusIcon = isDark) }
+            day = { copy(darkStatusIcon = isDark) },
         )
 
-        fun curStatusIconDark(): Boolean {
-            return currentModeValue(
-                eInk = { darkStatusIconEInk },
-                night = { darkStatusIconNight },
-                day = { darkStatusIcon }
-            )
-        }
+        fun curStatusIconDark(): Boolean = currentModeValue(
+            eInk = { darkStatusIconEInk },
+            night = { darkStatusIconNight },
+            day = { darkStatusIcon },
+        )
 
-        fun withCurPageAnim(@PageAnim.Anim anim: Int): Config = currentModeValue(
+        fun withCurPageAnim(
+            @PageAnim.Anim anim: Int,
+        ): Config = currentModeValue(
             eInk = { copy(pageAnimEInk = anim) },
             night = { copy(pageAnim = anim) },
-            day = { copy(pageAnim = anim) }
+            day = { copy(pageAnim = anim) },
         )
 
-        fun curPageAnim(): Int {
-            return currentModeValue(
-                eInk = { pageAnimEInk },
-                night = { pageAnim },
-                day = { pageAnim }
-            )
-        }
+        fun curPageAnim(): Int = currentModeValue(
+            eInk = { pageAnimEInk },
+            night = { pageAnim },
+            day = { pageAnim },
+        )
 
         // Public getters for mode-specific values (for ReadBookStyleConfig)
         fun getDarkStatusIcon(): Boolean = darkStatusIcon
+
         fun getDarkStatusIconNight(): Boolean = darkStatusIconNight
+
         fun getDarkStatusIconEInk(): Boolean = darkStatusIconEInk
+
         fun getTextColor(): String = textColor
+
         fun getTextColorNight(): String = textColorNight
+
         fun getTextColorEInk(): String = textColorEInk
+
         fun getPageAnim(): Int = pageAnim
+
         fun getPageAnimEInk(): Int = pageAnimEInk
 
-        fun withCurBg(bgType: Int, bg: String): Config =
-            ReadStyleResolver.withCurrentBackground(this, bgType, bg)
+        fun withCurBg(
+            bgType: Int,
+            bg: String,
+        ): Config = ReadStyleResolver.withCurrentBackground(this, bgType, bg)
 
-        fun curBgStr(): String {
-            return ReadStyleResolver.currentBackground(this).value
-        }
+        fun curBgStr(): String = ReadStyleResolver.currentBackground(this).value
 
         fun curMenuBg(): Int {
             ensureColorInts()
             return nightThemeValue(
                 night = { menuBgColorNightInt },
-                day = { menuBgColorInt }
+                day = { menuBgColorInt },
             )
         }
 
@@ -937,7 +960,7 @@ object ReadBookConfig {
             val hex = "#${bg.hexString}"
             return nightThemeValue(
                 night = { copy(menuBgColorNight = hex) },
-                day = { copy(menuBgColor = hex) }
+                day = { copy(menuBgColor = hex) },
             )
         }
 
@@ -945,7 +968,7 @@ object ReadBookConfig {
             ensureColorInts()
             return nightThemeValue(
                 night = { menuAcColorNightInt },
-                day = { menuAcColorInt }
+                day = { menuAcColorInt },
             )
         }
 
@@ -958,7 +981,7 @@ object ReadBookConfig {
             val hex = "#${bg.hexString}"
             return nightThemeValue(
                 night = { copy(menuAcColorNight = hex) },
-                day = { copy(menuAcColor = hex) }
+                day = { copy(menuAcColor = hex) },
             )
         }
 
@@ -966,7 +989,7 @@ object ReadBookConfig {
             ensureColorInts()
             return nightThemeValue(
                 night = { underlineColorNightInt },
-                day = { underlineColorInt }
+                day = { underlineColorInt },
             )
         }
 
@@ -974,16 +997,15 @@ object ReadBookConfig {
             val hex = "#${bg.hexString}"
             return nightThemeValue(
                 night = { copy(underlineColorNight = hex) },
-                day = { copy(underlineColor = hex) }
+                day = { copy(underlineColor = hex) },
             )
         }
 
-        fun curBgType(): Int {
-            return ReadStyleResolver.currentBackground(this).type
-        }
+        fun curBgType(): Int = ReadStyleResolver.currentBackground(this).type
 
-        fun curBgDrawable(width: Int, height: Int): Drawable {
-            return ReadStyleResolver.currentBackgroundDrawable(this, width, height)
-        }
+        fun curBgDrawable(
+            width: Int,
+            height: Int,
+        ): Drawable = ReadStyleResolver.currentBackgroundDrawable(this, width, height)
     }
 }

@@ -16,9 +16,10 @@ import org.robolectric.annotation.GraphicsMode
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
 class ReaderAndroidPaintFactoryTest {
     @Test fun nativeUnderlineAndStrikeUseTheSamePaintAsGlyphDrawing() {
-        val paint = ReaderAndroidPaintFactory.create(
-            ReaderTextStyle(0, 24f, nativeUnderline = true, strikeThrough = true),
-        )
+        val paint =
+            ReaderAndroidPaintFactory.create(
+                ReaderTextStyle(0, 24f, nativeUnderline = true, strikeThrough = true),
+            )
 
         assertTrue(paint.isUnderlineText)
         assertTrue(paint.isStrikeThruText)
@@ -45,11 +46,16 @@ class ReaderAndroidPaintFactoryTest {
 
     @Test
     fun measurementAndDrawingPreserveWeightItalicColorAndShadow() {
-        val style = ReaderTextStyle(
-            colorArgb = 0xff123456.toInt(), fontSizePx = 28f, fontWeight = 550,
-            italic = true, fontFamily = "serif", linearText = true,
-            shadow = ReaderTextShadow(0xff654321.toInt(), 3f, 2f, 1f),
-        )
+        val style =
+            ReaderTextStyle(
+                colorArgb = 0xff123456.toInt(),
+                fontSizePx = 28f,
+                fontWeight = 550,
+                italic = true,
+                fontFamily = "serif",
+                linearText = true,
+                shadow = ReaderTextShadow(0xff654321.toInt(), 3f, 2f, 1f),
+            )
         val draw = ReaderAndroidPaintFactory.create(style)
         val measure = ReaderAndroidPaintFactory.createTextPaint(style)
         assertEquals(style.colorArgb, draw.color)

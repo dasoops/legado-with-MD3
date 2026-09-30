@@ -8,10 +8,10 @@ import io.legado.app.api.ReturnData
 import io.legado.app.data.appDb
 import io.legado.app.data.entities.Book
 import io.legado.app.data.entities.BookProgress
+import io.legado.app.domain.gateway.BookshelfSettingsGateway
 import io.legado.app.help.book.BookHelp
 import io.legado.app.help.book.ContentProcessor
 import io.legado.app.help.book.isLocal
-import io.legado.app.domain.gateway.BookshelfSettingsGateway
 import io.legado.app.help.glide.ImageLoader
 import io.legado.app.model.BookCover
 import io.legado.app.model.ReadBook
@@ -20,15 +20,14 @@ import io.legado.app.utils.GSON
 import io.legado.app.utils.cnCompare
 import io.legado.app.utils.fromJsonObject
 import io.legado.app.utils.printOnDebug
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.runBlocking
-import splitties.init.appCtx
-import org.koin.core.context.GlobalContext
 import java.util.WeakHashMap
 import java.util.concurrent.TimeUnit
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.runBlocking
+import org.koin.core.context.GlobalContext
+import splitties.init.appCtx
 
 object BookController {
-
     private val bookshelfGateway by lazy { GlobalContext.get().get<BookshelfSettingsGateway>() }
 
     private val defaultCoverCache by lazy { WeakHashMap<Drawable, Bitmap>() }
@@ -43,15 +42,23 @@ object BookController {
             return if (books.isEmpty()) {
                 returnData.setErrorMsg("还没有添加小说")
             } else {
-                val data = when (bookshelfGateway.currentSettings.bookshelfSort) {
-                    1 -> books.sortedByDescending { it.latestChapterTime }
-                    2 -> books.sortedWith { o1, o2 ->
-                        o1.name.cnCompare(o2.name)
+                val data =
+                    when (bookshelfGateway.currentSettings.bookshelfSort) {
+                        1 -> {
+                            books.sortedByDescending { it.latestChapterTime }
+                        }
+                        2 -> {
+                            books.sortedWith { o1, o2 ->
+                                o1.name.cnCompare(o2.name)
+                            }
+                        }
+                        3 -> {
+                            books.sortedBy { it.order }
+                        }
+                        else -> {
+                            books.sortedByDescending { it.durChapterTime }
+                        }
                     }
-
-                    3 -> books.sortedBy { it.order }
-                    else -> books.sortedByDescending { it.durChapterTime }
-                }
                 returnData.setData(data)
             }
         }
@@ -62,23 +69,27 @@ object BookController {
     fun getCover(parameters: Map<String, List<String>>): ReturnData {
         val returnData = ReturnData()
         val coverPath = parameters["path"]?.firstOrNull()
-        val ftBitmap = ImageLoader.loadBitmap(appCtx, coverPath)
-            .override(84, 112)
-            .centerCrop()
-            .submit()
+        val ftBitmap =
+            ImageLoader
+                .loadBitmap(appCtx, coverPath)
+                .override(84, 112)
+                .centerCrop()
+                .submit()
         return try {
             returnData.setData(ftBitmap.get(3, TimeUnit.SECONDS))
         } catch (e: Exception) {
             try {
-                val defaultBitmap = defaultCoverCache.getOrPut(BookCover.defaultDrawable) {
-                    Glide.with(appCtx)
-                        .asBitmap()
-                        .load(BookCover.defaultDrawable.toBitmap())
-                        .override(84, 112)
-                        .centerCrop()
-                        .submit()
-                        .get()
-                }
+                val defaultBitmap =
+                    defaultCoverCache.getOrPut(BookCover.defaultDrawable) {
+                        Glide
+                            .with(appCtx)
+                            .asBitmap()
+                            .load(BookCover.defaultDrawable.toBitmap())
+                            .override(84, 112)
+                            .centerCrop()
+                            .submit()
+                            .get()
+                    }
                 returnData.setData(defaultBitmap)
             } catch (e: Exception) {
                 returnData.setErrorMsg(e.localizedMessage ?: "getCover error")
@@ -96,8 +107,9 @@ object BookController {
             if (bookUrl.isNullOrEmpty()) {
                 return returnData.setErrorMsg("参数url不能为空，请指定书籍地址")
             }
-            val book = appDb.bookDao.getBook(bookUrl)
-                ?: return returnData.setErrorMsg("未在数据库找到对应书籍，请先添加")
+            val book =
+                appDb.bookDao.getBook(bookUrl)
+                    ?: return returnData.setErrorMsg("未在数据库找到对应书籍，请先添加")
             if (!book.isLocal) {
                 return returnData.setErrorMsg("仅支持本地书籍")
             }
@@ -141,26 +153,30 @@ object BookController {
             return returnData.setErrorMsg("参数index不能为空, 请指定目录序号")
         }
         val book = appDb.bookDao.getBook(bookUrl)
-        val chapter = runBlocking {
-            var chapter = appDb.bookChapterDao.getChapter(bookUrl, index)
-            var wait = 0
-            while (chapter == null && wait < 30) {
-                delay(1000)
-                chapter = appDb.bookChapterDao.getChapter(bookUrl, index)
-                wait++
+        val chapter =
+            runBlocking {
+                var chapter = appDb.bookChapterDao.getChapter(bookUrl, index)
+                var wait = 0
+                while (chapter == null && wait < 30) {
+                    delay(1000)
+                    chapter = appDb.bookChapterDao.getChapter(bookUrl, index)
+                    wait++
+                }
+                chapter
             }
-            chapter
-        }
         if (book == null || chapter == null) {
             return returnData.setErrorMsg("未找到")
         }
-        val content: String = BookHelp.getContent(book, chapter)
-            ?: return returnData.setErrorMsg("未找到正文")
+        val content: String =
+            BookHelp.getContent(book, chapter)
+                ?: return returnData.setErrorMsg("未找到正文")
         val contentProcessor = ContentProcessor.get(book.name, book.origin)
-        val processed = runBlocking {
-            contentProcessor.getContent(book, chapter, content, includeTitle = false)
-                .toString()
-        }
+        val processed =
+            runBlocking {
+                contentProcessor
+                    .getContent(book, chapter, content, includeTitle = false)
+                    .toString()
+            }
         return returnData.setData(processed)
     }
 
@@ -193,9 +209,11 @@ object BookController {
      */
     suspend fun saveBookProgress(postData: String?): ReturnData {
         val returnData = ReturnData()
-        GSON.fromJsonObject<BookProgress>(postData)
+        GSON
+            .fromJsonObject<BookProgress>(postData)
             .onFailure { it.printOnDebug() }
-            .getOrNull()?.let { bookProgress ->
+            .getOrNull()
+            ?.let { bookProgress ->
                 appDb.bookDao.getBook(bookProgress.name, bookProgress.author)?.let { book ->
                     book.durChapterIndex = bookProgress.durChapterIndex
                     book.durChapterPos = bookProgress.durChapterPos
@@ -207,5 +225,4 @@ object BookController {
             }
         return returnData.setErrorMsg("格式不对")
     }
-
 }

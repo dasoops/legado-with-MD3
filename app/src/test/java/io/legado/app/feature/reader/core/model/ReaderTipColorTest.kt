@@ -4,7 +4,6 @@ import org.junit.Assert.assertEquals
 import org.junit.Test
 
 class ReaderTipColorTest {
-
     @Test
     fun `zero configured color follows body text instead of becoming transparent`() {
         assertEquals(

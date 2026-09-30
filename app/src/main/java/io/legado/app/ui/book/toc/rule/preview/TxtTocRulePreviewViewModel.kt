@@ -11,6 +11,8 @@ import io.legado.app.data.repository.TxtTocRuleRepository
 import io.legado.app.help.DefaultData
 import io.legado.app.model.localBook.LocalBook
 import io.legado.app.utils.Utf8BomUtils
+import java.util.regex.PatternSyntaxException
+import kotlin.coroutines.coroutineContext
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -21,15 +23,12 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import java.util.regex.PatternSyntaxException
-import kotlin.coroutines.coroutineContext
 
 class TxtTocRulePreviewViewModel(
     private val app: Application,
     private val bookRepository: BookRepository,
     private val repository: TxtTocRuleRepository,
 ) : ViewModel() {
-
     private val context get() = app.applicationContext
 
     private val _uiState = MutableStateFlow(TxtTocRulePreviewUiState())
@@ -41,7 +40,10 @@ class TxtTocRulePreviewViewModel(
     private var book: Book? = null
     private var lazyComputeJob: Job? = null
 
-    fun init(bookUrl: String, currentTocRegex: String?) {
+    fun init(
+        bookUrl: String,
+        currentTocRegex: String?,
+    ) {
         viewModelScope.launch(Dispatchers.IO) {
             loadRules(bookUrl, currentTocRegex)
         }
@@ -95,7 +97,10 @@ class TxtTocRulePreviewViewModel(
         }
     }
 
-    private suspend fun loadRules(bookUrl: String, currentTocRegex: String?) {
+    private suspend fun loadRules(
+        bookUrl: String,
+        currentTocRegex: String?,
+    ) {
         _uiState.update { it.copy(loading = true) }
 
         val book = runCatching { bookRepository.getBook(bookUrl) }.getOrNull()
@@ -105,9 +110,11 @@ class TxtTocRulePreviewViewModel(
         val allRules = getAllRules()
 
         // Placeholders: totalCount = -1 means not computed yet, 0 means no book / computed empty
-        val previewItems = allRules.map { tocRule ->
-            TocRulePreviewItem(rule = tocRule, totalCount = if (book != null) -1 else 0)
-        }.toMutableList()
+        val previewItems =
+            allRules
+                .map { tocRule ->
+                    TocRulePreviewItem(rule = tocRule, totalCount = if (book != null) -1 else 0)
+                }.toMutableList()
 
         _uiState.update {
             it.copy(
@@ -124,32 +131,42 @@ class TxtTocRulePreviewViewModel(
         }
     }
 
-    private fun computeChaptersLazy(book: Book, rules: List<TxtTocRule>) {
+    private fun computeChaptersLazy(
+        book: Book,
+        rules: List<TxtTocRule>,
+    ) {
         lazyComputeJob?.cancel()
-        lazyComputeJob = viewModelScope.launch(Dispatchers.IO) {
-            val resultMap = mutableMapOf<Long, TocRulePreviewItem>()
-            for (tocRule in rules) {
-                ensureActive()
-                val item = computePreview(book, tocRule)
-                resultMap[item.rule.id] = item
+        lazyComputeJob =
+            viewModelScope.launch(Dispatchers.IO) {
+                val resultMap = mutableMapOf<Long, TocRulePreviewItem>()
+                for (tocRule in rules) {
+                    ensureActive()
+                    val item = computePreview(book, tocRule)
+                    resultMap[item.rule.id] = item
+                }
+                _uiState.update { state ->
+                    val newRules =
+                        state.rules
+                            .map { existing ->
+                                resultMap[existing.rule.id] ?: existing
+                            }.toImmutableList()
+                    state.copy(rules = newRules)
+                }
             }
-            _uiState.update { state ->
-                val newRules = state.rules.map { existing ->
-                    resultMap[existing.rule.id] ?: existing
-                }.toImmutableList()
-                state.copy(rules = newRules)
-            }
-        }
     }
 
-    private suspend fun computePreview(book: Book?, tocRule: TxtTocRule): TocRulePreviewItem {
+    private suspend fun computePreview(
+        book: Book?,
+        tocRule: TxtTocRule,
+    ): TocRulePreviewItem {
         if (book == null) return TocRulePreviewItem(rule = tocRule)
         return try {
-            val pattern = try {
-                Regex(tocRule.chapterRule, RegexOption.MULTILINE)
-            } catch (e: PatternSyntaxException) {
-                return TocRulePreviewItem(rule = tocRule, totalCount = 0)
-            }
+            val pattern =
+                try {
+                    Regex(tocRule.chapterRule, RegexOption.MULTILINE)
+                } catch (e: PatternSyntaxException) {
+                    return TocRulePreviewItem(rule = tocRule, totalCount = 0)
+                }
             val (chapters, total) = analyzeWithPattern(book, pattern)
             TocRulePreviewItem(
                 rule = tocRule,
@@ -196,7 +213,8 @@ class TxtTocRulePreviewViewModel(
             _uiState.update {
                 it.copy(
                     rules = currentRules.toImmutableList(),
-                    selectedRule = if (it.selectedRule == existing?.chapterRule) {
+                    selectedRule =
+                    if (it.selectedRule == existing?.chapterRule) {
                         updatedRule.chapterRule
                     } else {
                         it.selectedRule
@@ -228,7 +246,10 @@ class TxtTocRulePreviewViewModel(
         return rules.filter { it.chapterRule.isNotBlank() }.sortedBy { it.serialNumber }
     }
 
-    private suspend fun analyzeWithPattern(book: Book, pattern: Regex): Pair<List<String>, Int> {
+    private suspend fun analyzeWithPattern(
+        book: Book,
+        pattern: Regex,
+    ): Pair<List<String>, Int> {
         val chapters = mutableListOf<String>()
         var totalCount = 0
         val charset = book.fileCharset()

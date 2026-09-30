@@ -14,19 +14,17 @@ class FilePathLoader : ModelLoader<String, File> {
         model: String,
         width: Int,
         height: Int,
-        options: com.bumptech.glide.load.Options
-    ): ModelLoader.LoadData<File>? {
-        return ModelLoader.LoadData(ObjectKey(model), FilePathFetcher(model))
-    }
+        options: com.bumptech.glide.load.Options,
+    ): ModelLoader.LoadData<File>? = ModelLoader.LoadData(ObjectKey(model), FilePathFetcher(model))
 
-    override fun handles(model: String): Boolean {
-        return true
-    }
+    override fun handles(model: String): Boolean = true
 
-    class FilePathFetcher(private val filePath: String) : DataFetcher<File> {
+    class FilePathFetcher(
+        private val filePath: String,
+    ) : DataFetcher<File> {
         override fun loadData(
             priority: Priority,
-            callback: DataFetcher.DataCallback<in File>
+            callback: DataFetcher.DataCallback<in File>,
         ) {
             val file = File(filePath)
             if (file.exists() && file.isFile) {
@@ -46,12 +44,8 @@ class FilePathLoader : ModelLoader<String, File> {
     }
 
     class Factory : ModelLoaderFactory<String, File> {
-        override fun build(multiFactory: MultiModelLoaderFactory): ModelLoader<String, File> {
-            return FilePathLoader()
-        }
+        override fun build(multiFactory: MultiModelLoaderFactory): ModelLoader<String, File> = FilePathLoader()
 
         override fun teardown() {}
     }
 }
-
-

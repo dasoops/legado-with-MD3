@@ -6,21 +6,21 @@ import kotlinx.collections.immutable.persistentListOf
 
 sealed class MainDestination(
     val route: String,
-    @StringRes val labelId: Int
+    @StringRes val labelId: Int,
 ) {
     object Home : MainDestination(
         route = "home",
-        labelId = R.string.home
+        labelId = R.string.home,
     )
 
     object Bookshelf : MainDestination(
         route = "bookshelf",
-        labelId = R.string.bookshelf
+        labelId = R.string.bookshelf,
     )
 
     object My : MainDestination(
         route = "my",
-        labelId = R.string.my
+        labelId = R.string.my,
     )
 
     companion object {
@@ -28,11 +28,12 @@ sealed class MainDestination(
 
         fun ordered(order: String): List<MainDestination> {
             val byRoute = mainDestinations.associateBy { it.route }
-            val ordered = order
-                .split(',')
-                .map(String::trim)
-                .distinct()
-                .mapNotNull(byRoute::get)
+            val ordered =
+                order
+                    .split(',')
+                    .map(String::trim)
+                    .distinct()
+                    .mapNotNull(byRoute::get)
             return ordered + mainDestinations.filterNot { it in ordered }
         }
     }

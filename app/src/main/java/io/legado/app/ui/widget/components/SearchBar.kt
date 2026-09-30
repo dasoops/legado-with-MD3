@@ -23,8 +23,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
@@ -49,7 +49,7 @@ fun SearchBar(
         AppIcon(
             modifier = Modifier.padding(horizontal = 12.dp),
             imageVector = AppIcons.Search,
-            contentDescription = null
+            contentDescription = null,
         )
     },
     backgroundColor: Color = MaterialTheme.colorScheme.surfaceContainerLow,
@@ -57,7 +57,7 @@ fun SearchBar(
     scope: CoroutineScope = rememberCoroutineScope(),
     trailingIcon: @Composable (() -> Unit)? = null,
     autoFocus: Boolean = true,
-    dropdownMenu: (@Composable (onDismiss: () -> Unit) -> Unit)? = null
+    dropdownMenu: (@Composable (onDismiss: () -> Unit) -> Unit)? = null,
 ) {
     val textFieldState = rememberTextFieldState(initialText = query)
     val focusRequester = remember { FocusRequester() }
@@ -101,17 +101,19 @@ fun SearchBar(
     }
 
     val isMiuix = ThemeResolver.isMiuixEngine(LegadoTheme.composeEngine)
-    val resolvedBackgroundColor = if (backgroundColor != Color.Unspecified) {
-        backgroundColor
-    } else {
-        if (isMiuix) MiuixTheme.colorScheme.surfaceContainer else MaterialTheme.colorScheme.surfaceContainerLow
-    }
+    val resolvedBackgroundColor =
+        if (backgroundColor != Color.Unspecified) {
+            backgroundColor
+        } else {
+            if (isMiuix) MiuixTheme.colorScheme.surfaceContainer else MaterialTheme.colorScheme.surfaceContainerLow
+        }
     val resolvedPlaceholder = placeholder ?: stringResource(R.string.search_placeholder)
 
     if (isMiuix) {
         AppDenseTextField(
             state = textFieldState,
-            modifier = modifier
+            modifier =
+            modifier
                 .fillMaxWidth()
                 .padding(vertical = 4.dp)
                 .focusRequester(focusRequester),
@@ -130,15 +132,17 @@ fun SearchBar(
         )
     } else {
         Surface(
-            modifier = Modifier
+            modifier =
+            Modifier
                 .fillMaxWidth()
                 .padding(bottom = 4.dp),
             shape = RoundedCornerShape(32.dp),
-            color = resolvedBackgroundColor
+            color = resolvedBackgroundColor,
         ) {
             AppDenseTextField(
                 state = textFieldState,
-                modifier = modifier
+                modifier =
+                modifier
                     .fillMaxWidth()
                     .focusRequester(focusRequester),
                 placeholder = { AppText(resolvedPlaceholder) },
@@ -149,7 +153,7 @@ fun SearchBar(
                     submitSearch(textFieldState.text.toString())
                 },
                 lineLimits = TextFieldLineLimits.SingleLine,
-                backgroundColor = Color.Transparent
+                backgroundColor = Color.Transparent,
             )
         }
     }

@@ -24,7 +24,7 @@ fun CheckboxItem(
     checked: Boolean,
     enabled: Boolean = true,
     description: String? = null,
-    onCheckedChange: (Boolean) -> Unit
+    onCheckedChange: (Boolean) -> Unit,
 ) {
     val alpha = if (enabled) 1f else 0.5f
     GlassCard(
@@ -32,48 +32,50 @@ fun CheckboxItem(
         containerColor = if (checked && enabled) LegadoTheme.colorScheme.secondaryContainer else color,
     ) {
         Row(
-            modifier = Modifier
+            modifier =
+            Modifier
                 .fillMaxWidth()
                 .toggleable(
                     value = checked,
                     enabled = enabled,
                     role = Role.Checkbox,
-                    onValueChange = onCheckedChange
-                )
-                .padding(vertical = 12.dp, horizontal = 12.dp),
-            verticalAlignment = Alignment.CenterVertically
+                    onValueChange = onCheckedChange,
+                ).padding(vertical = 12.dp, horizontal = 12.dp),
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             AppCheckbox(
                 checked = checked,
                 onCheckedChange = null,
                 enabled = enabled,
                 includeStateSemantics = false,
-                modifier = Modifier
+                modifier =
+                Modifier
                     .alpha(alpha)
-                    .clearAndSetSemantics { }
+                    .clearAndSetSemantics { },
             )
             Column(
-                modifier = Modifier
+                modifier =
+                Modifier
                     .weight(1f)
-                    .padding(start = 12.dp)
+                    .padding(start = 12.dp),
             ) {
                 AppText(
                     text = title,
                     style = LegadoTheme.typography.bodyMediumEmphasized,
                     maxLines = 1,
-                    modifier = Modifier.alpha(alpha)
+                    modifier = Modifier.alpha(alpha),
                 )
                 if (description != null) {
                     AppText(
                         text = description,
                         style = LegadoTheme.typography.labelSmallEmphasized,
                         maxLines = 1,
-                        modifier = Modifier
-                            .alpha(alpha)
+                        modifier =
+                        Modifier
+                            .alpha(alpha),
                     )
                 }
             }
         }
     }
-
 }

@@ -9,14 +9,9 @@ import java.io.InputStream
  */
 @Suppress("unused")
 object MD5Utils {
+    fun md5Encode(str: String?): String = digest("MD5", str.orEmpty().toByteArray()).toHexString()
 
-    fun md5Encode(str: String?): String {
-        return digest("MD5", str.orEmpty().toByteArray()).toHexString()
-    }
-
-    fun md5Encode(inputStream: InputStream): String {
-        return digest("MD5", inputStream).toHexString()
-    }
+    fun md5Encode(inputStream: InputStream): String = digest("MD5", inputStream).toHexString()
 
     fun md5Encode16(str: String): String {
         var reStr = md5Encode(str)

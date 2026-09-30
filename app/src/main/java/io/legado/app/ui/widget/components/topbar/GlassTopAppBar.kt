@@ -37,19 +37,21 @@ fun GlassTopAppBar(
     val composeEngine = LegadoTheme.composeEngine
     val isMiuix = ThemeResolver.isMiuixEngine(composeEngine)
 
-    val containerColor = if (!isMiuix) {
-        GlassTopAppBarDefaults.containerColor()
-    } else {
-        GlassTopAppBarDefaults.getMiuixAppBarColor()
-    }
+    val containerColor =
+        if (!isMiuix) {
+            GlassTopAppBarDefaults.containerColor()
+        } else {
+            GlassTopAppBarDefaults.getMiuixAppBarColor()
+        }
 
-    val finalModifier = if (hazeState != null) {
-        modifier
-            .background(color = containerColor)
-            .responsiveHazeEffect(state = hazeState)
-    } else {
-        modifier.background(color = containerColor)
-    }
+    val finalModifier =
+        if (hazeState != null) {
+            modifier
+                .background(color = containerColor)
+                .responsiveHazeEffect(state = hazeState)
+        } else {
+            modifier.background(color = containerColor)
+        }
 
     Column(modifier = finalModifier) {
         if (isMiuix) {
@@ -62,7 +64,7 @@ fun GlassTopAppBar(
                 navigationIcon = navigationIcon,
                 actions = {
                     TopBarActionsRow(
-                        modifier = Modifier.padding(end = miuixTopBarActionsEndPadding())
+                        modifier = Modifier.padding(end = miuixTopBarActionsEndPadding()),
                     ) { actions() }
                 },
                 color = Color.Transparent,
@@ -77,7 +79,7 @@ fun GlassTopAppBar(
                         text = title,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
-                        style = MaterialTheme.typography.titleLarge
+                        style = MaterialTheme.typography.titleLarge,
                     )
                 },
                 navigationIcon = navigationIcon,
@@ -86,10 +88,11 @@ fun GlassTopAppBar(
                         TopBarActionsRow { actions() }
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(
+                colors =
+                TopAppBarDefaults.topAppBarColors(
                     containerColor = Color.Transparent,
-                    scrolledContainerColor = Color.Transparent
-                )
+                    scrolledContainerColor = Color.Transparent,
+                ),
             )
         }
     }

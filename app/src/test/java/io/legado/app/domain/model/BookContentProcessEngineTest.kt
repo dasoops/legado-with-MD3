@@ -117,19 +117,19 @@ class BookContentProcessEngineTest {
                     chapterPosition = 0,
                     selectedText = normalized,
                     normalizedTextHash = MD5Utils.md5Encode(normalized),
-                )
+                ),
             ),
             actionJson = GSON.toJson(
                 TextProcessAction(
                     TextProcessAction.TYPE_MARK,
-                    text = normalized
-                )
+                    text = normalized,
+                ),
             ),
             styleJson = GSON.toJson(
                 TextProcessStyle(
                     underlineMode = 1,
-                    underlineColor = 0xFFFF0000.toInt()
-                )
+                    underlineColor = 0xFFFF0000.toInt(),
+                ),
             ),
         )
     }
@@ -144,14 +144,14 @@ class BookContentProcessEngineTest {
             id = "test",
             bookUrl = "book",
             chapterIndex = 0,
-            kind = BookContentProcess.KIND_AI_CLEAN,
+            kind = BookContentProcess.KIND_MANUAL_REPLACEMENT,
             anchorJson = GSON.toJson(
                 TextProcessAnchor(
                     chapterIndex = 0,
                     chapterPosition = chapterPosition,
                     selectedText = normalizedSelectedText,
                     normalizedTextHash = MD5Utils.md5Encode(normalizedSelectedText),
-                )
+                ),
             ),
             actionJson = GSON.toJson(TextProcessAction.replace(replacement)),
         )

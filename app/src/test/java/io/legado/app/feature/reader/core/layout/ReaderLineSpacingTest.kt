@@ -7,13 +7,37 @@ import org.junit.Test
 
 class ReaderLineSpacingTest {
     private val style = ReaderTextStyle(0, 20f)
-    private val config = ReaderPaginationConfig(0, "", 20, 50, 0f, 0f, 0f, 0f, 20f, 16f,
-        lineSpacingMultiplier = 1.5f)
-    private fun inline(text: String, multiplier: Float = 1.5f, title: Boolean = false) =
-        ReaderMeasuredBlock.InlineParagraph(text.mapIndexed { index, char ->
+    private val config =
+        ReaderPaginationConfig(
+            0,
+            "",
+            20,
+            50,
+            0f,
+            0f,
+            0f,
+            0f,
+            20f,
+            16f,
+            lineSpacingMultiplier = 1.5f,
+        )
+
+    private fun inline(
+        text: String,
+        multiplier: Float = 1.5f,
+        title: Boolean = false,
+    ) = ReaderMeasuredBlock.InlineParagraph(
+        text.mapIndexed { index, char ->
             ReaderMeasuredInlineItem.Text(char.toString(), 20f, style, index)
-        }, 0, ReaderTextAlignment.START, 20f, 16f, 20f,
-            emphasized = title, lineSpacingMultiplier = multiplier)
+        },
+        0,
+        ReaderTextAlignment.START,
+        20f,
+        16f,
+        20f,
+        emphasized = title,
+        lineSpacingMultiplier = multiplier,
+    )
 
     @Test fun paragraphUsesGlyphHeightForFitAndLineSpacingForAdvance() {
         val text = "甲乙丙"
@@ -36,17 +60,22 @@ class ReaderLineSpacingTest {
     }
 
     @Test fun paragraphSpacingIsAdditionalToTheLastLineAdvance() {
-        val page = ReaderPaginator.paginateBlocks(listOf(inline("甲"), inline("乙")),
-            config.copy(viewportHeightPx = 60, paragraphSpacingPx = 5f)).single()
+        val page =
+            ReaderPaginator
+                .paginateBlocks(
+                    listOf(inline("甲"), inline("乙")),
+                    config.copy(viewportHeightPx = 60, paragraphSpacingPx = 5f),
+                ).single()
         assertEquals(listOf(0f, 35f), page.elements.map { it.bounds.top })
     }
 
     @Test
     fun continuousScrollKeepsParagraphSpacingWhenItFallsAtAPageBoundary() {
-        val pages = ReaderPaginator.paginateBlocks(
-            listOf(inline("甲"), inline("乙")),
-            config.copy(continuousScroll = true, paragraphSpacingPx = 5f),
-        )
+        val pages =
+            ReaderPaginator.paginateBlocks(
+                listOf(inline("甲"), inline("乙")),
+                config.copy(continuousScroll = true, paragraphSpacingPx = 5f),
+            )
 
         assertEquals(listOf("甲\n", "乙"), pages.map { it.text })
         // The old View stacks the next TextPage after durY. That cursor includes the
@@ -57,13 +86,16 @@ class ReaderLineSpacingTest {
     @Test
     fun smallerInlineTextKeepsTheBodyLineBoxAndFollowingParagraphGap() {
         val small = style.copy(fontSizePx = 10f)
-        val first = inline("甲", multiplier = 1.5f).copy(
-            items = listOf(ReaderMeasuredInlineItem.Text("甲", 10f, small, 0)),
-        )
-        val page = ReaderPaginator.paginateBlocks(
-            listOf(first, inline("乙")),
-            config.copy(viewportHeightPx = 100, paragraphSpacingPx = 5f),
-        ).single()
+        val first =
+            inline("甲", multiplier = 1.5f).copy(
+                items = listOf(ReaderMeasuredInlineItem.Text("甲", 10f, small, 0)),
+            )
+        val page =
+            ReaderPaginator
+                .paginateBlocks(
+                    listOf(first, inline("乙")),
+                    config.copy(viewportHeightPx = 100, paragraphSpacingPx = 5f),
+                ).single()
 
         val text = page.elements.filterIsInstance<ReaderElement.Text>()
         assertEquals(20f, text.first().bounds.height, 0f)
@@ -71,10 +103,14 @@ class ReaderLineSpacingTest {
     }
 
     @Test fun doubledFontAndInlineImageDetermineHeightBeforeSpacingMultiplier() {
-        val paragraph = inline("甲乙").copy(items = listOf(
-            ReaderMeasuredInlineItem.Text("甲", 20f, style.copy(fontSizePx = 40f), 0),
-            ReaderMeasuredInlineItem.Image("image", 20f, 30f, 1),
-        ))
+        val paragraph =
+            inline("甲乙").copy(
+                items =
+                listOf(
+                    ReaderMeasuredInlineItem.Text("甲", 20f, style.copy(fontSizePx = 40f), 0),
+                    ReaderMeasuredInlineItem.Image("image", 20f, 30f, 1),
+                ),
+            )
         val page = ReaderPaginator.paginateBlocks(listOf(paragraph), config.copy(viewportHeightPx = 90)).single()
         assertEquals(40f, page.elements[0].bounds.height, 0f)
         assertEquals(60f, page.elements[1].bounds.top, 0f)
@@ -82,8 +118,12 @@ class ReaderLineSpacingTest {
     }
 
     @Test fun doubleColumnUsesSameFitRuleAndResetsAdvanceAtColumnBoundary() {
-        val page = ReaderPaginator.paginateBlocks(listOf(inline("甲乙丙丁")),
-            config.copy(viewportWidthPx = 40, columnCount = 2)).single()
+        val page =
+            ReaderPaginator
+                .paginateBlocks(
+                    listOf(inline("甲乙丙丁")),
+                    config.copy(viewportWidthPx = 40, columnCount = 2),
+                ).single()
         assertEquals(listOf(0f, 30f, 0f, 30f), page.elements.map { it.bounds.top })
         assertEquals(listOf(0f, 0f, 20f, 20f), page.elements.map { it.bounds.left })
     }

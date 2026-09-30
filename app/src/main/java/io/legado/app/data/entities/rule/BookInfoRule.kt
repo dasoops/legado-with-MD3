@@ -22,22 +22,25 @@ data class BookInfoRule(
     var wordCount: String? = null,
     var canReName: String? = null,
     var downloadUrls: String? = null,
-    var relatedBooks: String? = null
+    var relatedBooks: String? = null,
 ) : Parcelable {
-
     companion object {
-
-        val jsonDeserializer = JsonDeserializer<BookInfoRule?> { json, _, _ ->
-            when {
-                json.isJsonObject -> INITIAL_GSON.fromJson(json, BookInfoRule::class.java)
-                json.isJsonPrimitive -> INITIAL_GSON.fromJson(
-                    json.asString,
-                    BookInfoRule::class.java
-                )
-                else -> null
+        val jsonDeserializer =
+            JsonDeserializer<BookInfoRule?> { json, _, _ ->
+                when {
+                    json.isJsonObject -> {
+                        INITIAL_GSON.fromJson(json, BookInfoRule::class.java)
+                    }
+                    json.isJsonPrimitive -> {
+                        INITIAL_GSON.fromJson(
+                            json.asString,
+                            BookInfoRule::class.java,
+                        )
+                    }
+                    else -> {
+                        null
+                    }
+                }
             }
-        }
-
     }
-
 }

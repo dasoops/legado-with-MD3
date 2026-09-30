@@ -3,8 +3,6 @@ package io.legado.app.help.http
 import android.annotation.SuppressLint
 import android.net.http.X509TrustManagerExtensions
 import io.legado.app.utils.printOnDebug
-
-
 import java.io.IOException
 import java.io.InputStream
 import java.security.KeyManagementException
@@ -14,7 +12,14 @@ import java.security.SecureRandom
 import java.security.cert.CertificateException
 import java.security.cert.CertificateFactory
 import java.security.cert.X509Certificate
-import javax.net.ssl.*
+import javax.net.ssl.HostnameVerifier
+import javax.net.ssl.KeyManager
+import javax.net.ssl.KeyManagerFactory
+import javax.net.ssl.SSLContext
+import javax.net.ssl.SSLSocketFactory
+import javax.net.ssl.TrustManager
+import javax.net.ssl.TrustManagerFactory
+import javax.net.ssl.X509TrustManager
 
 @Suppress("unused")
 object SSLHelper {
@@ -30,22 +35,18 @@ object SSLHelper {
             @SuppressLint("TrustAllX509TrustManager")
             @Throws(CertificateException::class)
             override fun checkClientTrusted(chain: Array<X509Certificate>, authType: String) {
-                //do nothing，接受任意客户端证书
+                // do nothing，接受任意客户端证书
             }
 
             @SuppressLint("TrustAllX509TrustManager")
             @Throws(CertificateException::class)
             override fun checkServerTrusted(chain: Array<X509Certificate>, authType: String) {
-                //do nothing，接受任意客户端证书
+                // do nothing，接受任意客户端证书
             }
 
-            fun checkServerTrusted(chain: Array<X509Certificate>, authType: String, host: String): List<X509Certificate> {
-                return chain.toList()
-            }
+            fun checkServerTrusted(chain: Array<X509Certificate>, authType: String, host: String): List<X509Certificate> = chain.toList()
 
-            override fun getAcceptedIssuers(): Array<X509Certificate> {
-                return arrayOf()
-            }
+            override fun getAcceptedIssuers(): Array<X509Certificate> = arrayOf()
         }
 
     val unsafeTrustManagerExtensions by lazy {
@@ -78,17 +79,13 @@ object SSLHelper {
      * https单向认证
      * 可以额外配置信任服务端的证书策略，否则默认是按CA证书去验证的，若不是CA可信任的证书，则无法通过验证
      */
-    fun getSslSocketFactory(trustManager: X509TrustManager): SSLParams? {
-        return getSslSocketFactoryBase(trustManager, null, null)
-    }
+    fun getSslSocketFactory(trustManager: X509TrustManager): SSLParams? = getSslSocketFactoryBase(trustManager, null, null)
 
     /**
      * https单向认证
      * 用含有服务端公钥的证书校验服务端证书
      */
-    fun getSslSocketFactory(vararg certificates: InputStream): SSLParams? {
-        return getSslSocketFactoryBase(null, null, null, *certificates)
-    }
+    fun getSslSocketFactory(vararg certificates: InputStream): SSLParams? = getSslSocketFactoryBase(null, null, null, *certificates)
 
     /**
      * https双向认证
@@ -98,10 +95,8 @@ object SSLHelper {
     fun getSslSocketFactory(
         bksFile: InputStream,
         password: String,
-        vararg certificates: InputStream
-    ): SSLParams? {
-        return getSslSocketFactoryBase(null, bksFile, password, *certificates)
-    }
+        vararg certificates: InputStream,
+    ): SSLParams? = getSslSocketFactoryBase(null, bksFile, password, *certificates)
 
     /**
      * https双向认证
@@ -111,16 +106,14 @@ object SSLHelper {
     fun getSslSocketFactory(
         bksFile: InputStream,
         password: String,
-        trustManager: X509TrustManager
-    ): SSLParams? {
-        return getSslSocketFactoryBase(trustManager, bksFile, password)
-    }
+        trustManager: X509TrustManager,
+    ): SSLParams? = getSslSocketFactoryBase(trustManager, bksFile, password)
 
     private fun getSslSocketFactoryBase(
         trustManager: X509TrustManager?,
         bksFile: InputStream?,
         password: String?,
-        vararg certificates: InputStream
+        vararg certificates: InputStream,
     ): SSLParams? {
         val sslParams = SSLParams()
         try {
@@ -175,11 +168,11 @@ object SSLHelper {
                 e.printOnDebug()
             }
         }
-        //我们创建一个默认类型的TrustManagerFactory
+        // 我们创建一个默认类型的TrustManagerFactory
         val tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm())
-        //用我们之前的keyStore实例初始化TrustManagerFactory，这样tmf就会信任keyStore中的证书
+        // 用我们之前的keyStore实例初始化TrustManagerFactory，这样tmf就会信任keyStore中的证书
         tmf.init(keyStore)
-        //通过tmf获取TrustManager数组，TrustManager也会信任keyStore中的证书
+        // 通过tmf获取TrustManager数组，TrustManager也会信任keyStore中的证书
         return tmf.trustManagers
     }
 

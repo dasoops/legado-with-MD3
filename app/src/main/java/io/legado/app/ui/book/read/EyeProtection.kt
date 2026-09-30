@@ -8,11 +8,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ColorFilter
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.ColorMatrix as ComposeColorMatrix
-import kotlinx.coroutines.delay
+import androidx.compose.ui.graphics.graphicsLayer
 import java.time.LocalTime
-
+import kotlinx.coroutines.delay
 
 object EyeProtection {
     const val MIN_INTENSITY = 0
@@ -21,11 +20,18 @@ object EyeProtection {
     private const val MIN_FILTER_TEMPERATURE = 2596
     private const val MAX_FILTER_TEMPERATURE = 5500
 
-    private val coefficients = floatArrayOf(
-        0f, 0f, 1f,
-        -9.623533E-9f, 1.5304548E-4f, 0.39078277f,
-        -1.8935904E-8f, 3.024122E-4f, -0.1986509f,
-    )
+    private val coefficients =
+        floatArrayOf(
+            0f,
+            0f,
+            1f,
+            -9.623533E-9f,
+            1.5304548E-4f,
+            0.39078277f,
+            -1.8935904E-8f,
+            3.024122E-4f,
+            -0.1986509f,
+        )
 
     fun temperatureForIntensity(intensity: Int): Int {
         val normalized = intensity.coerceIn(MIN_INTENSITY, MAX_INTENSITY)
@@ -42,10 +48,26 @@ object EyeProtection {
         val green = cctSquared * coefficients[3] + cct * coefficients[4] + coefficients[5]
         val blue = cctSquared * coefficients[6] + cct * coefficients[7] + coefficients[8]
         return floatArrayOf(
-            red, 0f, 0f, 0f, 0f,
-            0f, green, 0f, 0f, 0f,
-            0f, 0f, blue, 0f, 0f,
-            0f, 0f, 0f, 1f, 0f,
+            red,
+            0f,
+            0f,
+            0f,
+            0f,
+            0f,
+            green,
+            0f,
+            0f,
+            0f,
+            0f,
+            0f,
+            blue,
+            0f,
+            0f,
+            0f,
+            0f,
+            0f,
+            1f,
+            0f,
         )
     }
 
@@ -78,21 +100,39 @@ object EyeProtection {
     }
 
     private fun parseTime(value: String): LocalTime? = runCatching {
-        val normalized = buildString {
-            value.trim().forEach { char ->
-                val digit = Character.digit(char, 10)
-                append(if (digit >= 0) ('0'.code + digit).toChar() else char)
+        val normalized =
+            buildString {
+                value.trim().forEach { char ->
+                    val digit = Character.digit(char, 10)
+                    append(if (digit >= 0) ('0'.code + digit).toChar() else char)
+                }
             }
-        }
         LocalTime.parse(normalized)
     }.getOrNull()
 
-    private val IDENTITY_MATRIX = floatArrayOf(
-        1f, 0f, 0f, 0f, 0f,
-        0f, 1f, 0f, 0f, 0f,
-        0f, 0f, 1f, 0f, 0f,
-        0f, 0f, 0f, 1f, 0f,
-    )
+    private val IDENTITY_MATRIX =
+        floatArrayOf(
+            1f,
+            0f,
+            0f,
+            0f,
+            0f,
+            0f,
+            1f,
+            0f,
+            0f,
+            0f,
+            0f,
+            0f,
+            1f,
+            0f,
+            0f,
+            0f,
+            0f,
+            0f,
+            1f,
+            0f,
+        )
 }
 
 @Composable
@@ -100,15 +140,16 @@ fun Modifier.eyeProtectionColorFilter(
     enabled: Boolean,
     intensity: Int,
 ): Modifier {
-    val cachedColorFilter = remember(enabled, intensity) {
-        if (enabled) {
-            ColorFilter.colorMatrix(
-                ComposeColorMatrix(EyeProtection.matrixValuesForIntensity(intensity))
-            )
-        } else {
-            null
+    val cachedColorFilter =
+        remember(enabled, intensity) {
+            if (enabled) {
+                ColorFilter.colorMatrix(
+                    ComposeColorMatrix(EyeProtection.matrixValuesForIntensity(intensity)),
+                )
+            } else {
+                null
+            }
         }
-    }
     if (cachedColorFilter == null) return this
 
     return graphicsLayer {

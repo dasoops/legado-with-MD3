@@ -1,6 +1,6 @@
 package io.legado.app.ui.widget.text
 
-//import io.legado.app.lib.theme.accentColor
+// import io.legado.app.lib.theme.accentColor
 import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Build
@@ -17,25 +17,23 @@ import io.legado.app.R
 import io.legado.app.utils.gone
 import io.legado.app.utils.visible
 
-
 @Suppress("unused")
-class AutoCompleteTextView @JvmOverloads constructor(
+class AutoCompleteTextView
+@JvmOverloads
+constructor(
     context: Context,
-    attrs: AttributeSet? = null
+    attrs: AttributeSet? = null,
 ) : MaterialAutoCompleteTextView(context, attrs) {
-
     var delCallBack: ((value: String) -> Unit)? = null
 
     init {
-        //applyTint(context.accentColor)
+        // applyTint(context.accentColor)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM) {
             isLocalePreferredLineHeightForMinimumUsed = false
         }
     }
 
-    override fun enoughToFilter(): Boolean {
-        return true
-    }
+    override fun enoughToFilter(): Boolean = true
 
     @SuppressLint("ClickableViewAccessibility")
     override fun onTouchEvent(event: MotionEvent?): Boolean {
@@ -55,12 +53,19 @@ class AutoCompleteTextView @JvmOverloads constructor(
         setAdapter(MyAdapter(context, value.toMutableList()))
     }
 
-    inner class MyAdapter(context: Context, values: List<String>) :
-        ArrayAdapter<String>(context, android.R.layout.simple_dropdown_item_1line, values) {
-
-        override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
-            val view = convertView ?: LayoutInflater.from(context)
-                .inflate(R.layout.item_1line_text_and_del, parent, false)
+    inner class MyAdapter(
+        context: Context,
+        values: List<String>,
+    ) : ArrayAdapter<String>(context, android.R.layout.simple_dropdown_item_1line, values) {
+        override fun getView(
+            position: Int,
+            convertView: View?,
+            parent: ViewGroup,
+        ): View {
+            val view =
+                convertView ?: LayoutInflater
+                    .from(context)
+                    .inflate(R.layout.item_1line_text_and_del, parent, false)
             val textView = view.findViewById<TextView>(R.id.text_view)
             textView.text = getItem(position)
             val ivDelete = view.findViewById<MaterialButton>(R.id.iv_delete)
@@ -81,5 +86,4 @@ class AutoCompleteTextView @JvmOverloads constructor(
             return view
         }
     }
-
 }

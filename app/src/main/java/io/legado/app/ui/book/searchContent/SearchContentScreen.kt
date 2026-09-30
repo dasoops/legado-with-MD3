@@ -81,7 +81,7 @@ import org.koin.androidx.compose.koinViewModel
 fun SearchContentRouteScreen(
     onBack: () -> Unit,
     autoFocus: Boolean = true,
-    viewModel: SearchContentViewModel = koinViewModel()
+    viewModel: SearchContentViewModel = koinViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     LaunchedEffect(viewModel) {
@@ -156,22 +156,26 @@ fun SearchContentScreen(
         }
     }
 
-    val contentState = when {
-        error != null -> SearchContentState.Error(error)
-        isSearching -> SearchContentState.Loading
-        searchQuery.isBlank() -> SearchContentState.History
-        searchResults.isEmpty() -> SearchContentState.EmptyResult
-        else -> null
-    }
+    val contentState =
+        when {
+            error != null -> SearchContentState.Error(error)
+            isSearching -> SearchContentState.Loading
+            searchQuery.isBlank() -> SearchContentState.History
+            searchResults.isEmpty() -> SearchContentState.EmptyResult
+            else -> null
+        }
 
     AppScaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
             Column {
                 GlassMediumFlexibleTopAppBar(
-                    title = if (searchQuery.isNotBlank() && searchResults.isNotEmpty()) {
+                    title =
+                    if (searchQuery.isNotBlank() && searchResults.isNotEmpty()) {
                         "共 ${searchResults.size} 条结果"
-                    } else "搜索内容",
+                    } else {
+                        "搜索内容"
+                    },
                     navigationIcon = { TopBarNavigationButton(onClick = onBack) },
                     actions = {
                         TopBarAnimatedActionButton(
@@ -180,7 +184,7 @@ fun SearchContentScreen(
                             iconChecked = Icons.Default.FindReplace,
                             iconUnchecked = Icons.Default.FindReplace,
                             activeText = "替换开启",
-                            inactiveText = "替换关闭"
+                            inactiveText = "替换关闭",
                         )
 
                         TopBarAnimatedActionButton(
@@ -189,13 +193,13 @@ fun SearchContentScreen(
                             iconChecked = Icons.Default.Code,
                             iconUnchecked = Icons.Default.Code,
                             activeText = "正则开启",
-                            inactiveText = "正则关闭"
+                            inactiveText = "正则关闭",
                         )
                     },
-                    scrollBehavior = scrollBehavior
+                    scrollBehavior = scrollBehavior,
                 )
                 Box(
-                    modifier = Modifier.adaptiveHorizontalPadding()
+                    modifier = Modifier.adaptiveHorizontalPadding(),
                 ) {
                     SearchBar(
                         query = searchQuery,
@@ -211,10 +215,10 @@ fun SearchContentScreen(
                                         onIntent(SearchContentIntent.UpdateQuery(""))
                                     },
                                     icon = AppIcons.Close,
-                                    contentDescription = stringResource(R.string.clear)
+                                    contentDescription = stringResource(R.string.clear),
                                 )
                             }
-                        }
+                        },
                     )
                 }
 
@@ -226,7 +230,8 @@ fun SearchContentScreen(
         floatingActionButton = {
             val fabVisible = (isSearching || searchResults.isNotEmpty()) && searchQuery.isNotBlank()
             AppFloatingActionButton(
-                modifier = Modifier.animateFloatingActionButton(
+                modifier =
+                Modifier.animateFloatingActionButton(
                     visible = fabVisible,
                     alignment = Alignment.BottomEnd,
                 ),
@@ -237,44 +242,45 @@ fun SearchContentScreen(
                         scrollToCurrentChapter()
                     }
                 },
-                tooltipText = if (isSearching) "停止搜索" else "跳转到当前章节"
+                tooltipText = if (isSearching) "停止搜索" else "跳转到当前章节",
             ) {
                 AnimatedContent(
                     targetState = isSearching,
-                    label = "FabIconTransition"
+                    label = "FabIconTransition",
                 ) { searching ->
                     if (searching) {
                         AppIcon(Icons.Default.Stop, contentDescription = stringResource(R.string.stop))
                     } else {
                         AppIcon(
                             Icons.Default.MyLocation,
-                            contentDescription = stringResource(R.string.a11y_locate_current_chapter)
+                            contentDescription = stringResource(R.string.a11y_locate_current_chapter),
                         )
                     }
                 }
             }
-        }
+        },
     ) { paddingValues ->
         Column(
-            modifier = Modifier
+            modifier =
+            Modifier
                 .fillMaxSize()
-                .padding(paddingValues)
+                .padding(paddingValues),
         ) {
             AnimatedContent(
                 targetState = contentState,
                 label = "SearchContentTransition",
-                modifier = Modifier.weight(1f)
+                modifier = Modifier.weight(1f),
             ) { state ->
                 when (state) {
                     is SearchContentState.Error -> {
                         EmptyMessage(
                             message = state.throwable.localizedMessage ?: "发生未知错误",
-                            modifier = Modifier
+                            modifier =
+                            Modifier
                                 .fillMaxSize()
-                                .wrapContentSize()
+                                .wrapContentSize(),
                         )
                     }
-
                     SearchContentState.History -> {
                         SearchHistoryList(
                             history = searchHistory,
@@ -287,22 +293,22 @@ fun SearchContentScreen(
                                 onIntent(SearchContentIntent.DeleteHistory(it))
                             },
                             onClearHistory = { onIntent(SearchContentIntent.ClearHistory) },
-                            onToggleScope = { onIntent(SearchContentIntent.ToggleHistoryScope) }
+                            onToggleScope = { onIntent(SearchContentIntent.ToggleHistoryScope) },
                         )
                     }
                     SearchContentState.EmptyResult -> {
                         EmptyMessage(
                             message = "没有找到相关内容！",
-                            modifier = Modifier
+                            modifier =
+                            Modifier
                                 .fillMaxSize()
-                                .wrapContentSize()
+                                .wrapContentSize(),
                         )
                     }
-
                     null -> {
                         FastScrollLazyColumn(
                             state = listState,
-                            modifier = Modifier.fillMaxSize()
+                            modifier = Modifier.fillMaxSize(),
                         ) {
                             itemsIndexed(searchResults) { index, result ->
                                 SearchResultItem(
@@ -312,12 +318,11 @@ fun SearchContentScreen(
                                     isCurrentChapter = result.chapterIndex == durChapterIndex,
                                     onClick = {
                                         onIntent(SearchContentIntent.OpenResult(result))
-                                    }
+                                    },
                                 )
                             }
                         }
                     }
-
                     else -> {}
                 }
             }
@@ -333,11 +338,12 @@ fun SearchHistoryList(
     onHistoryClick: (SearchContentHistory) -> Unit,
     onDeleteHistory: (SearchContentHistory) -> Unit,
     onClearHistory: () -> Unit,
-    onToggleScope: () -> Unit
+    onToggleScope: () -> Unit,
 ) {
     Column(modifier = Modifier.fillMaxSize()) {
         Box(
-            modifier = Modifier
+            modifier =
+            Modifier
                 .fillMaxWidth()
                 .adaptiveHorizontalPadding()
                 .padding(vertical = 4.dp),
@@ -346,7 +352,7 @@ fun SearchHistoryList(
                 text = "搜索历史",
                 style = LegadoTheme.typography.titleSmallEmphasized,
                 color = LegadoTheme.colorScheme.primary,
-                modifier = Modifier.align(Alignment.Center)
+                modifier = Modifier.align(Alignment.Center),
             )
             SmallToggleButton(
                 modifier = Modifier.align(Alignment.CenterEnd),
@@ -355,22 +361,24 @@ fun SearchHistoryList(
                 style = ToggleStyle.Tonal,
                 iconChecked = Icons.Default.Book,
                 icon = Icons.Default.CollectionsBookmark,
-                text = "仅本书"
+                text = "仅本书",
             )
         }
 
         if (history.isEmpty()) {
             EmptyMessage(
                 message = "暂无搜索历史",
-                modifier = Modifier
+                modifier =
+                Modifier
                     .fillMaxSize()
-                    .wrapContentSize()
+                    .wrapContentSize(),
             )
         } else {
             LazyColumn(modifier = Modifier.fillMaxSize()) {
                 items(history, key = { it.id }) { item ->
                     ListItem(
-                        modifier = Modifier
+                        modifier =
+                        Modifier
                             .clickable { onHistoryClick(item) }
                             .animateItem(),
                         leadingContent = {
@@ -380,34 +388,36 @@ fun SearchHistoryList(
                             SmallPlainButton(
                                 onClick = { onDeleteHistory(item) },
                                 icon = Icons.Default.Close,
-                                contentDescription = stringResource(R.string.delete)
+                                contentDescription = stringResource(R.string.delete),
                             )
                         },
-                        colors = ListItemDefaults.colors(
+                        colors =
+                        ListItemDefaults.colors(
                             containerColor = LegadoTheme.colorScheme.surface,
-                            contentColor = LegadoTheme.colorScheme.onSurface
-                        )
+                            contentColor = LegadoTheme.colorScheme.onSurface,
+                        ),
                     ) {
                         AppText(
                             text = item.query,
                             maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
+                            overflow = TextOverflow.Ellipsis,
                         )
                     }
                 }
                 item {
                     Box(
-                        modifier = Modifier
+                        modifier =
+                        Modifier
                             .fillMaxWidth()
                             .padding(vertical = 24.dp, horizontal = 16.dp)
                             .animateItem(),
-                        contentAlignment = Alignment.Center
+                        contentAlignment = Alignment.Center,
                     ) {
                         MediumOutlinedButton(
                             onClick = onClearHistory,
                             modifier = Modifier.fillMaxWidth(0.6f),
                             icon = Icons.Outlined.DeleteSweep,
-                            text = "清除搜索历史"
+                            text = "清除搜索历史",
                         )
                     }
                 }
@@ -422,51 +432,53 @@ fun SearchResultItem(
     result: SearchResult,
     isEInkMode: Boolean,
     isCurrentChapter: Boolean,
-    onClick: () -> Unit
+    onClick: () -> Unit,
 ) {
     Card(
         onClick = onClick,
-        modifier = modifier
+        modifier =
+        modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 8.dp),
-        colors = CardDefaults.cardColors(
+        colors =
+        CardDefaults.cardColors(
             containerColor =
-                LegadoTheme.colorScheme.surfaceContainer
-        )
+            LegadoTheme.colorScheme.surfaceContainer,
+        ),
     ) {
         Box(modifier = Modifier.padding(16.dp)) {
-
             Column {
                 AppText(
-                    text = result.getTitleAnnotatedString(
+                    text =
+                    result.getTitleAnnotatedString(
                         accentColor = LegadoTheme.colorScheme.primary,
                         isEInkMode = isEInkMode,
                     ),
-                    style = LegadoTheme.typography.titleSmall
+                    style = LegadoTheme.typography.titleSmall,
                 )
 
                 Spacer(modifier = Modifier.height(8.dp))
                 HorizontalDivider(
-                    color = LegadoTheme.colorScheme.surface
+                    color = LegadoTheme.colorScheme.surface,
                 )
                 Spacer(modifier = Modifier.height(8.dp))
 
                 AppText(
-                    text = result.getContentAnnotatedString(
+                    text =
+                    result.getContentAnnotatedString(
                         textColor = LegadoTheme.colorScheme.onSurface,
                         accentColor = LegadoTheme.colorScheme.primary,
                         backgroundColor = LegadoTheme.colorScheme.primaryContainer,
                         isEInkMode = isEInkMode,
                     ),
-                    style = LegadoTheme.typography.bodyMedium
+                    style = LegadoTheme.typography.bodyMedium,
                 )
             }
 
-            Row (
+            Row(
                 modifier = Modifier.align(Alignment.TopEnd),
-                horizontalArrangement = Arrangement.spacedBy(4.dp)
+                horizontalArrangement = Arrangement.spacedBy(4.dp),
             ) {
-
                 if (isCurrentChapter) {
                     TextCard(
                         text = "当前章节",

@@ -33,8 +33,8 @@ import io.legado.app.help.DefaultData
 import io.legado.app.help.DispatchersMonitor
 import io.legado.app.help.LifecycleHelp
 import io.legado.app.help.book.BookHelp
-import io.legado.app.help.config.AppConfigStore
 import io.legado.app.help.config.AppConfig
+import io.legado.app.help.config.AppConfigStore
 import io.legado.app.help.config.LocalConfig
 import io.legado.app.help.config.ReadBookConfig
 import io.legado.app.help.config.ThemeConfigStore
@@ -49,6 +49,10 @@ import io.legado.app.utils.ChineseUtils
 import io.legado.app.utils.LogUtils
 import io.legado.app.utils.getPrefBoolean
 import io.legado.app.utils.getPrefString
+import java.io.File
+import java.net.URL
+import java.util.concurrent.TimeUnit
+import java.util.logging.Level
 import kotlinx.coroutines.Dispatchers.Main
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
@@ -59,20 +63,15 @@ import org.koin.android.ext.koin.androidContext
 import org.koin.core.context.GlobalContext.startKoin
 import splitties.init.appCtx
 import splitties.systemservices.notificationManager
-import java.io.File
-import java.net.URL
-import java.util.concurrent.TimeUnit
-import java.util.logging.Level
 
-class App : Application(), SingletonImageLoader.Factory {
-
+class App :
+    Application(),
+    SingletonImageLoader.Factory {
     private val themeGateway get() = get<ThemeSettingsGateway>()
     private val otherGateway get() = get<OtherSettingsGateway>()
     private val readGateway get() = get<ReadSettingsGateway>()
 
-    override fun newImageLoader(context: Context): ImageLoader {
-        return get()
-    }
+    override fun newImageLoader(context: Context): ImageLoader = get()
 
     override fun onCreate() {
         // 首行初始化设置快照层：同步预加载 DataStore（触发 SP 迁移），
@@ -82,10 +81,13 @@ class App : Application(), SingletonImageLoader.Factory {
         // autoStoreLocales 持久化。不能每次启动都执行——API 33+ 上会覆盖用户在
         // 系统设置里选择的应用语言，API <33 上此时 AppCompat 存储尚未加载、
         // getApplicationLocales() 恒为空，isEmpty 守卫会形同虚设
-        val legacyLanguage = if (!LocalConfig.appLocaleMigrated) {
-            LocalConfig.appLocaleMigrated = true
-            AppConfigStore.getString(PreferKey.language) ?: "auto"
-        } else null
+        val legacyLanguage =
+            if (!LocalConfig.appLocaleMigrated) {
+                LocalConfig.appLocaleMigrated = true
+                AppConfigStore.getString(PreferKey.language) ?: "auto"
+            } else {
+                null
+            }
         startKoin {
             androidContext(this@App)
             modules(appDatabaseModule, appModule)
@@ -112,8 +114,9 @@ class App : Application(), SingletonImageLoader.Factory {
         }
         applyDayNightInit(this)
         if (getPrefString("app_theme", "0") == "12") {
-            if (themeGateway.currentSettings.customMode == "accent")
+            if (themeGateway.currentSettings.customMode == "accent") {
                 setTheme(R.style.ThemeOverlay_WhiteBackground)
+            }
 
             val colorImagePath = getPrefString(PreferKey.colorImage)
             if (!colorImagePath.isNullOrBlank()) {
@@ -126,20 +129,23 @@ class App : Application(), SingletonImageLoader.Factory {
                         val targetHeight = if (colorAccuracy) (bitmap.height / 4).coerceAtMost(256) else 16
                         val scaledBitmap = bitmap.scale(targetWidth, targetHeight, false)
 
-                        val options = DynamicColorsOptions.Builder()
-                            .setContentBasedSource(scaledBitmap)
-                            .build()
+                        val options =
+                            DynamicColorsOptions
+                                .Builder()
+                                .setContentBasedSource(scaledBitmap)
+                                .build()
 
                         DynamicColors.applyToActivitiesIfAvailable(this, options)
                         bitmap.recycle()
                     }
                 }
-            }else{
+            } else {
                 DynamicColors.applyToActivitiesIfAvailable(
                     this,
-                    DynamicColorsOptions.Builder()
+                    DynamicColorsOptions
+                        .Builder()
                         .setContentBasedSource(this.primaryColor)
-                        .build()
+                        .build(),
                 )
             }
         }
@@ -150,7 +156,8 @@ class App : Application(), SingletonImageLoader.Factory {
         // 也会直接写网关。AppCompat 的夜间模式统一跟随网关，否则资源配置不变，
         // WebView、旧 View 界面拿到的仍是切换前的深浅色。
         Coroutine.async {
-            get<AppShellSettingsGateway>().settings
+            get<AppShellSettingsGateway>()
+                .settings
                 .map { it.themeMode }
                 .distinctUntilChanged()
                 .collect {
@@ -162,7 +169,8 @@ class App : Application(), SingletonImageLoader.Factory {
             LogUtils.d("App", "onCreate")
             LogUtils.logDeviceInfo()
             createNotificationChannels()
-            LiveEventBus.config()
+            LiveEventBus
+                .config()
                 .lifecycleObserverAlwaysActive(true)
                 .autoClear(false)
                 .enableLogger(BuildConfig.DEBUG || otherGateway.currentSettings.recordLog)
@@ -172,26 +180,23 @@ class App : Application(), SingletonImageLoader.Factory {
             DispatchersMonitor.init()
             URL.setURLStreamHandlerFactory(ObsoleteUrlFactory(okHttpClient))
             launch { installGmsTlsProvider(appCtx) }
-            //初始化封面
+            // 初始化封面
             BookCover.toString()
-            //清除过期数据
+            // 清除过期数据
             appDb.cacheDao.clearDeadline(System.currentTimeMillis())
-            if (getPrefBoolean(PreferKey.autoClearExpired, true)) {
-                val clearTime = System.currentTimeMillis() - TimeUnit.DAYS.toMillis(1)
-                appDb.searchBookDao.clearExpired(clearTime)
-            }
             BookHelp.clearInvalidCache()
             Backup.clearCache()
             get<ReadStyleGateway>().clearUnusedBackgrounds()
             ThemeConfigStore.clearBg()
-            //初始化简繁转换引擎
+            // 初始化简繁转换引擎
             when (readGateway.currentSettings.chineseConverterType) {
                 1 -> {
                     ChineseUtils.fixT2sDict()
                     ChineseUtils.preLoad(true, TransType.TRADITIONAL_TO_SIMPLE)
                 }
-
-                2 -> ChineseUtils.preLoad(true, TransType.SIMPLE_TO_TRADITIONAL)
+                2 -> {
+                    ChineseUtils.preLoad(true, TransType.SIMPLE_TO_TRADITIONAL)
+                }
             }
         }
     }
@@ -216,10 +221,11 @@ class App : Application(), SingletonImageLoader.Factory {
             if ((appInfo.flags and ApplicationInfo.FLAG_SYSTEM) == 0) {
                 return
             }
-            val gms = context.createPackageContext(
-                gmsPackageName,
-                CONTEXT_INCLUDE_CODE or CONTEXT_IGNORE_SECURITY
-            )
+            val gms =
+                context.createPackageContext(
+                    gmsPackageName,
+                    CONTEXT_INCLUDE_CODE or CONTEXT_IGNORE_SECURITY,
+                )
             gms.classLoader
                 .loadClass("com.google.android.gms.common.security.ProviderInstallerImpl")
                 .getMethod("insertProvider", Context::class.java)
@@ -233,33 +239,40 @@ class App : Application(), SingletonImageLoader.Factory {
      * 创建通知ID
      */
     private fun createNotificationChannels() {
-        val downloadChannel = NotificationChannel(
-            channelIdDownload,
-            getString(R.string.action_download),
-            NotificationManager.IMPORTANCE_DEFAULT
-        ).apply {
-            enableLights(false)
-            enableVibration(false)
-            setSound(null, null)
-            lockscreenVisibility = Notification.VISIBILITY_PUBLIC
-        }
+        val downloadChannel =
+            NotificationChannel(
+                channelIdDownload,
+                getString(R.string.action_download),
+                NotificationManager.IMPORTANCE_DEFAULT,
+            ).apply {
+                enableLights(false)
+                enableVibration(false)
+                setSound(null, null)
+                lockscreenVisibility = Notification.VISIBILITY_PUBLIC
+            }
 
-        //向notification manager 提交channel
+        // 向notification manager 提交channel
         notificationManager.createNotificationChannels(
             listOf(
-                downloadChannel
-            )
+                downloadChannel,
+            ),
         )
     }
 
     class EventLogger : DefaultLogger() {
-
-        override fun log(level: Level, msg: String) {
+        override fun log(
+            level: Level,
+            msg: String,
+        ) {
             super.log(level, msg)
             LogUtils.d(TAG, msg)
         }
 
-        override fun log(level: Level, msg: String, th: Throwable?) {
+        override fun log(
+            level: Level,
+            msg: String,
+            th: Throwable?,
+        ) {
             super.log(level, msg, th)
             LogUtils.d(TAG, "$msg\n${th?.stackTraceToString()}")
         }
@@ -276,5 +289,4 @@ class App : Application(), SingletonImageLoader.Factory {
             }
         }
     }
-
 }

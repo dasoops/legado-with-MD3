@@ -7,4 +7,6 @@ import androidx.viewbinding.ViewBinding
  * Created by Invincible on 2017/11/28.
  */
 @Suppress("MemberVisibilityCanBePrivate")
-class ItemViewHolder(val binding: ViewBinding) : RecyclerView.ViewHolder(binding.root)
+class ItemViewHolder(
+    val binding: ViewBinding,
+) : RecyclerView.ViewHolder(binding.root)

@@ -13,12 +13,12 @@ class AllBookmarkActivity : BaseComposeActivity() {
     override fun Content() {
         MaterialTheme {
             AllBookmarkRouteScreen(
-                onBack = { finish() }
+                onBack = { finish() },
             )
         }
     }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
     }
 }

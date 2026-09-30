@@ -11,19 +11,20 @@ fun List<Float>.fastSum(): Float {
 inline fun <T> List<T>.fastBinarySearch(
     fromIndex: Int = 0,
     toIndex: Int = size,
-    comparison: (T) -> Int
+    comparison: (T) -> Int,
 ): Int {
     when {
-        fromIndex > toIndex ->
+        fromIndex > toIndex -> {
             throw IllegalArgumentException(
-                "fromIndex ($fromIndex) is greater than toIndex ($toIndex)."
+                "fromIndex ($fromIndex) is greater than toIndex ($toIndex).",
             )
-
-        fromIndex < 0 ->
+        }
+        fromIndex < 0 -> {
             throw IndexOutOfBoundsException("fromIndex ($fromIndex) is less than zero.")
-
-        toIndex > size ->
+        }
+        toIndex > size -> {
             throw IndexOutOfBoundsException("toIndex ($toIndex) is greater than size ($size).")
+        }
     }
 
     var low = fromIndex
@@ -34,32 +35,34 @@ inline fun <T> List<T>.fastBinarySearch(
         val midVal = get(mid)
         val cmp = comparison(midVal)
 
-        if (cmp < 0)
+        if (cmp < 0) {
             low = mid + 1
-        else if (cmp > 0)
+        } else if (cmp > 0) {
             high = mid - 1
-        else
+        } else {
             return mid // key found
+        }
     }
-    return -(low + 1)  // key not found
+    return -(low + 1) // key not found
 }
 
 inline fun <T, K : Comparable<K>> List<T>.fastBinarySearchBy(
     key: K?,
     fromIndex: Int = 0,
     toIndex: Int = size,
-    crossinline selector: (T) -> K?
+    crossinline selector: (T) -> K?,
 ): Int = fastBinarySearch(fromIndex, toIndex) { compareValues(selector(it), key) }
 
-fun <T> MutableList<T>.removeLastElement(): T {
-    return if (isEmpty()) {
-        throw NoSuchElementException("List is empty.")
-    } else {
-        removeAt(lastIndex)
-    }
+fun <T> MutableList<T>.removeLastElement(): T = if (isEmpty()) {
+    throw NoSuchElementException("List is empty.")
+} else {
+    removeAt(lastIndex)
 }
 
-fun <T> MutableList<T>.move(fromIndex: Int, toIndex: Int) {
+fun <T> MutableList<T>.move(
+    fromIndex: Int,
+    toIndex: Int,
+) {
     if (fromIndex == toIndex) return
     val element = removeAt(fromIndex)
     add(toIndex, element)

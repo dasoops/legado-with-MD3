@@ -4,7 +4,6 @@ import org.junit.Assert.assertEquals
 import org.junit.Test
 
 class AppDensityTest {
-
     @Test
     fun resolve_usesSettingWithinSupportedRange() {
         assertEquals(0.8f, resolveAppFontScale(8, systemFontScale = 1f), 0f)

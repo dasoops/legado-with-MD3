@@ -8,7 +8,8 @@ enum class ReaderTransitionMode {
     SIMULATION,
     SCROLL,
     FADE,
-    NONE;
+    NONE,
+    ;
 
     companion object {
         fun fromPageAnim(value: Int): ReaderTransitionMode = when (value) {
@@ -25,15 +26,14 @@ enum class ReaderTransitionMode {
 enum class ReaderTurnDirection { PREVIOUS, NEXT }
 
 object ReaderCoverShadowPolicy {
-    const val colorArgb: Int = 0x30111111
-    const val widthDp: Float = 36f
+    const val COLOR_ARGB: Int = 0x30111111
+    const val WIDTH_DP: Float = 36f
 
     /** The cover shadow fades rightward from the moving page's trailing edge. */
-    fun edgePx(direction: ReaderTurnDirection, displayOffsetPx: Float, pageWidthPx: Float): Float =
-        when (direction) {
-            ReaderTurnDirection.PREVIOUS -> displayOffsetPx
-            ReaderTurnDirection.NEXT -> pageWidthPx + displayOffsetPx
-        }
+    fun edgePx(direction: ReaderTurnDirection, displayOffsetPx: Float, pageWidthPx: Float): Float = when (direction) {
+        ReaderTurnDirection.PREVIOUS -> displayOffsetPx
+        ReaderTurnDirection.NEXT -> pageWidthPx + displayOffsetPx
+    }
 }
 
 object ReaderProgrammaticTurnPolicy {
@@ -80,7 +80,6 @@ data class ReaderHorizontalDrag(
             totalDeltaPx < 0f -> ReaderHorizontalDrag(totalDeltaPx, ReaderTurnDirection.NEXT)
             else -> null
         }
-
     }
 }
 
@@ -135,9 +134,13 @@ object ReaderPageTransitionPolicy {
         val available = if (direction == ReaderTurnDirection.PREVIOUS) hasPrevious else hasNext
         return ReaderPageTransition(
             direction = direction,
-            offsetPx = if (!available) 0f else when (direction) {
-                ReaderTurnDirection.PREVIOUS -> deltaPx.coerceIn(0f, pageExtentPx)
-                ReaderTurnDirection.NEXT -> deltaPx.coerceIn(-pageExtentPx, 0f)
+            offsetPx = if (!available) {
+                0f
+            } else {
+                when (direction) {
+                    ReaderTurnDirection.PREVIOUS -> deltaPx.coerceIn(0f, pageExtentPx)
+                    ReaderTurnDirection.NEXT -> deltaPx.coerceIn(-pageExtentPx, 0f)
+                }
             },
             pageExtentPx = pageExtentPx,
             dragging = available,
@@ -162,11 +165,16 @@ object ReaderPageTransitionPolicy {
         val movingForward = lastDragDeltaPx?.takeIf { it != 0f }?.let {
             if (direction == ReaderTurnDirection.NEXT) it < 0f else it > 0f
         }
-        val commit = !cancelled && transition.dragging &&
+        val commit = !cancelled &&
+            transition.dragging &&
             (movingForward ?: (transition.progress >= commitProgress || velocityCommits))
-        val target = if (!commit) 0f else when (direction) {
-            ReaderTurnDirection.PREVIOUS -> transition.pageExtentPx
-            ReaderTurnDirection.NEXT -> -transition.pageExtentPx
+        val target = if (!commit) {
+            0f
+        } else {
+            when (direction) {
+                ReaderTurnDirection.PREVIOUS -> transition.pageExtentPx
+                ReaderTurnDirection.NEXT -> -transition.pageExtentPx
+            }
         }
         return ReaderTransitionDecision(targetOffsetPx = target, commit = commit)
     }

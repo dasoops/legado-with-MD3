@@ -6,7 +6,6 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class CryptoCompatibilityTest {
-
     @Test
     fun `MD5 与标准向量一致`() {
         assertEquals("d41d8cd98f00b204e9800998ecf8427e", digest("MD5", ByteArray(0)).toHexString())
@@ -17,18 +16,19 @@ class CryptoCompatibilityTest {
     fun `SHA-256 与标准向量一致`() {
         assertEquals(
             "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad",
-            digest("SHA-256", "abc".toByteArray()).toHexString()
+            digest("SHA-256", "abc".toByteArray()).toHexString(),
         )
     }
 
     @Test
     fun `HMAC-SHA256 与标准向量一致`() {
         val expected = "f7bc83f430538424b13298e6aa6fb143ef4d59a14946175997479dbc2d1a3cd8"
-        val actual = hmac(
-            "HmacSHA256",
-            "key".toByteArray(),
-            "The quick brown fox jumps over the lazy dog".toByteArray()
-        ).toHexString()
+        val actual =
+            hmac(
+                "HmacSHA256",
+                "key".toByteArray(),
+                "The quick brown fox jumps over the lazy dog".toByteArray(),
+            ).toHexString()
         assertEquals(expected, actual)
     }
 
@@ -51,13 +51,13 @@ class CryptoCompatibilityTest {
         // 回归：beta.17 引入 kotlin.io.encoding.Base64(严格填充) 后，这类输入在 bookSource 的
         // aesBase64DecodeToString / decode() 解密时抛 "The padding option is set to PRESENT..."，
         // 导致获取目录失败。这里验证已恢复 Hutool 宽容行为。
-        assertEquals("test", String("dGVzdA".base64ToByteArray()))          // 缺 "=="
-        assertEquals("a", String("YQ".base64ToByteArray()))                  // 缺 "=="
-        assertEquals("abcd", String("YWJjZA".base64ToByteArray()))           // 缺 "=="
-        assertEquals("test", String("dGVzdA==".base64ToByteArray()))         // 有效填充不受影响
+        assertEquals("test", String("dGVzdA".base64ToByteArray())) // 缺 "=="
+        assertEquals("a", String("YQ".base64ToByteArray())) // 缺 "=="
+        assertEquals("abcd", String("YWJjZA".base64ToByteArray())) // 缺 "=="
+        assertEquals("test", String("dGVzdA==".base64ToByteArray())) // 有效填充不受影响
         assertTrue(
             byteArrayOf(0xfb.toByte(), 0x8f.toByte(), 0xbb.toByte(), 0xb4.toByte())
-                .contentEquals("-4-7tA".base64ToByteArray())                 // url-safe 缺填充
+                .contentEquals("-4-7tA".base64ToByteArray()), // url-safe 缺填充
         )
     }
 
@@ -99,7 +99,10 @@ class CryptoCompatibilityTest {
     @Test
     fun `nameUuidFromBytes 与 java UUID v3 一致`() {
         val input = "provider123:model-abc".toByteArray()
-        val expected = java.util.UUID.nameUUIDFromBytes(input).toString()
+        val expected =
+            java.util.UUID
+                .nameUUIDFromBytes(input)
+                .toString()
         assertEquals(expected, nameUuidFromBytes(input).toString())
     }
 

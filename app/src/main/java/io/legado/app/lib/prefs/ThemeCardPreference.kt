@@ -11,31 +11,34 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.core.view.ViewCompat
+import androidx.lifecycle.lifecycleScope
 import androidx.preference.PreferenceViewHolder
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import androidx.lifecycle.lifecycleScope
 import com.google.android.material.card.MaterialCardView
 import io.legado.app.R
 import io.legado.app.constant.PreferKey
 import io.legado.app.domain.gateway.ThemeSettingsGateway
+import io.legado.app.utils.activity
 import io.legado.app.utils.getPrefString
 import io.legado.app.utils.toastOnUi
-import io.legado.app.utils.activity
 import kotlinx.coroutines.launch
 import org.koin.core.context.GlobalContext
 import splitties.init.appCtx
 
 @SuppressLint("ResourceType")
-class ThemeCardPreference(context: Context, attrs: AttributeSet) : Preference(context, attrs) {
-
+class ThemeCardPreference(
+    context: Context,
+    attrs: AttributeSet,
+) : Preference(context, attrs) {
     private val themeSettingsGateway by lazy {
         GlobalContext.get().get<ThemeSettingsGateway>()
     }
 
     private var entries: Array<CharSequence> = context.resources.getTextArray(R.array.themes_item)
-    private var entryValues: Array<CharSequence> = context.resources.getTextArray(R.array.themes_value).takeIf { it.isNotEmpty() }
-        ?: arrayOf("0")
+    private var entryValues: Array<CharSequence> =
+        context.resources.getTextArray(R.array.themes_value).takeIf { it.isNotEmpty() }
+            ?: arrayOf("0")
     private var currentValue = "0"
 
     init {
@@ -57,13 +60,19 @@ class ThemeCardPreference(context: Context, attrs: AttributeSet) : Preference(co
     }
 
     private inner class ThemeAdapter : RecyclerView.Adapter<ThemeViewHolder>() {
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ThemeViewHolder {
+        override fun onCreateViewHolder(
+            parent: ViewGroup,
+            viewType: Int,
+        ): ThemeViewHolder {
             val view = LayoutInflater.from(parent.context).inflate(R.layout.item_theme_card, parent, false)
             return ThemeViewHolder(view)
         }
 
         @SuppressLint("NotifyDataSetChanged")
-        override fun onBindViewHolder(holder: ThemeViewHolder, position: Int) {
+        override fun onBindViewHolder(
+            holder: ThemeViewHolder,
+            position: Int,
+        ) {
             val label = entries.getOrNull(position)?.toString() ?: return
             val value = entryValues.getOrNull(position)?.toString() ?: return
 
@@ -84,9 +93,8 @@ class ThemeCardPreference(context: Context, attrs: AttributeSet) : Preference(co
             holder.card.checkedIconTint = ColorStateList.valueOf(colors[2])
             ViewCompat.setStateDescription(
                 holder.card,
-                context.getString(if (isSelected) R.string.a11y_selected else R.string.a11y_not_selected)
+                context.getString(if (isSelected) R.string.a11y_selected else R.string.a11y_not_selected),
             )
-
 
             holder.card.setOnClickListener {
                 if (value != currentValue) {
@@ -105,7 +113,8 @@ class ThemeCardPreference(context: Context, attrs: AttributeSet) : Preference(co
                         themeSettingsGateway.update {
                             it.copy(
                                 appTheme = value,
-                                containerOpacity = if (value == "13") {
+                                containerOpacity =
+                                if (value == "13") {
                                     0
                                 } else {
                                     it.containerOpacity
@@ -118,48 +127,50 @@ class ThemeCardPreference(context: Context, attrs: AttributeSet) : Preference(co
             }
         }
 
-
         override fun getItemCount(): Int = entries.size
     }
 
-    private val themeResIdMap = mapOf(
-        "0" to R.style.Theme_Base_Dycolors,
-        "1" to R.style.Theme_Base_GR,
-        "2" to R.style.Theme_Base_Lemon,
-        "3" to R.style.Theme_Base_WH,
-        "4" to R.style.Theme_Base_Elink,
-        "5" to R.style.Theme_Base_Sora,
-        "6" to R.style.Theme_Base_August,
-        "7" to R.style.Theme_Base_Carlotta,
-        "8" to R.style.Theme_Base_Koharu,
-        "9" to R.style.Theme_Base_Yuuka,
-        "10" to R.style.Theme_Base_Phoebe,
-        "11" to R.style.Theme_Base_Mujika,
-        "12" to R.style.ThemeOverlay_WhiteBackground,
-        "13" to R.style.AppTheme_Transparent)
+    private val themeResIdMap =
+        mapOf(
+            "0" to R.style.Theme_Base_Dycolors,
+            "1" to R.style.Theme_Base_GR,
+            "2" to R.style.Theme_Base_Lemon,
+            "3" to R.style.Theme_Base_WH,
+            "4" to R.style.Theme_Base_Elink,
+            "5" to R.style.Theme_Base_Sora,
+            "6" to R.style.Theme_Base_August,
+            "7" to R.style.Theme_Base_Carlotta,
+            "8" to R.style.Theme_Base_Koharu,
+            "9" to R.style.Theme_Base_Yuuka,
+            "10" to R.style.Theme_Base_Phoebe,
+            "11" to R.style.Theme_Base_Mujika,
+            "12" to R.style.ThemeOverlay_WhiteBackground,
+            "13" to R.style.AppTheme_Transparent,
+        )
 
     private fun getThemeColors(value: String): List<Int> {
         val themeResId = themeResIdMap[value] ?: return listOf(Color.GRAY, Color.GRAY, Color.GRAY, Color.GRAY)
 
         val themedContext = ContextThemeWrapper(context, themeResId)
-        val attrs = intArrayOf(
-            com.google.android.material.R.attr.colorOnSurface,
-            com.google.android.material.R.attr.colorSecondaryContainer,
-            com.google.android.material.R.attr.colorSecondaryVariant,
-            com.google.android.material.R.attr.colorSurfaceContainer,
-            androidx.appcompat.R.attr.colorPrimary,
-            com.google.android.material.R.attr.colorOnSurfaceVariant,
-            com.google.android.material.R.attr.colorSurface,
-            com.google.android.material.R.attr.colorSecondaryContainer,
-        )
+        val attrs =
+            intArrayOf(
+                com.google.android.material.R.attr.colorOnSurface,
+                com.google.android.material.R.attr.colorSecondaryContainer,
+                com.google.android.material.R.attr.colorSecondaryVariant,
+                com.google.android.material.R.attr.colorSurfaceContainer,
+                androidx.appcompat.R.attr.colorPrimary,
+                com.google.android.material.R.attr.colorOnSurfaceVariant,
+                com.google.android.material.R.attr.colorSurface,
+                com.google.android.material.R.attr.colorSecondaryContainer,
+            )
 
         val ta = themedContext.obtainStyledAttributes(attrs)
         return List(attrs.size) { ta.getColor(it, Color.GRAY) }.also { ta.recycle() }
     }
 
-
-
-    class ThemeViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+    class ThemeViewHolder(
+        view: View,
+    ) : RecyclerView.ViewHolder(view) {
         val card: MaterialCardView = view.findViewById(R.id.cardView)
         val label: TextView = view.findViewById(R.id.themeLabel)
         val colorTop: MaterialCardView = view.findViewById(R.id.cv_title)
@@ -167,7 +178,7 @@ class ThemeCardPreference(context: Context, attrs: AttributeSet) : Preference(co
         val colorPin: MaterialCardView = view.findViewById(R.id.cv_pin)
         val colorBottom: MaterialCardView = view.findViewById(R.id.cv_bottom)
         val colorBottomRight: MaterialCardView = view.findViewById(R.id.right_rect)
-        val colorBottomLeft : MaterialCardView = view.findViewById(R.id.left_circle)
-        val background : MaterialCardView = view.findViewById(R.id.cardView)
+        val colorBottomLeft: MaterialCardView = view.findViewById(R.id.left_circle)
+        val background: MaterialCardView = view.findViewById(R.id.cardView)
     }
 }

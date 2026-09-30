@@ -9,29 +9,31 @@ import com.google.android.material.navigation.NavigationView
 
 fun NavigationView.setItemIconColors(
     @ColorInt normalColor: Int,
-    @ColorInt selectedColor: Int
+    @ColorInt selectedColor: Int,
 ) {
-    val iconSl = ColorStateList(
-        arrayOf(
-            intArrayOf(-android.R.attr.state_checked),
-            intArrayOf(android.R.attr.state_checked)
-        ),
-        intArrayOf(normalColor, selectedColor)
-    )
+    val iconSl =
+        ColorStateList(
+            arrayOf(
+                intArrayOf(-android.R.attr.state_checked),
+                intArrayOf(android.R.attr.state_checked),
+            ),
+            intArrayOf(normalColor, selectedColor),
+        )
     itemIconTintList = iconSl
 }
 
 fun NavigationView.setItemTextColors(
     @ColorInt normalColor: Int,
-    @ColorInt selectedColor: Int
+    @ColorInt selectedColor: Int,
 ) {
-    val textSl = ColorStateList(
-        arrayOf(
-            intArrayOf(-android.R.attr.state_checked),
-            intArrayOf(android.R.attr.state_checked)
-        ),
-        intArrayOf(normalColor, selectedColor)
-    )
+    val textSl =
+        ColorStateList(
+            arrayOf(
+                intArrayOf(-android.R.attr.state_checked),
+                intArrayOf(android.R.attr.state_checked),
+            ),
+            intArrayOf(normalColor, selectedColor),
+        )
     itemTextColor = textSl
 }
 
@@ -39,4 +41,3 @@ fun NavigationView.disableScrollbar() {
     val navigationMenuView = getChildAt(0) as? NavigationMenuView
     navigationMenuView?.isVerticalScrollBarEnabled = false
 }
-

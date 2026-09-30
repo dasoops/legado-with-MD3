@@ -1,11 +1,11 @@
 package io.legado.app.data.repository
 
 import io.legado.app.domain.model.settings.ReadSettings
+import kotlin.reflect.full.memberProperties
+import kotlin.reflect.full.primaryConstructor
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
-import kotlin.reflect.full.memberProperties
-import kotlin.reflect.full.primaryConstructor
 
 /**
  * Track E · E0 / R1.5 —— `ReadSettingsGateway.update {}` 的持久化覆盖面不变式。
@@ -21,7 +21,6 @@ import kotlin.reflect.full.primaryConstructor
  * 判定方式是行为性的：改一个字段的值，看 `toGatewayPrefMap()` 的输出是否随之变化。
  */
 class ReadSettingsGatewayCoverageTest {
-
     @Test
     fun `update 写不进去的 ReadSettings 字段集合与基线一致`() {
         val actual = fieldsNotPersistedByUpdate()
@@ -77,7 +76,10 @@ class ReadSettingsGatewayCoverageTest {
         }
     }
 
-    private fun mutate(name: String, value: Any?): Any = when (value) {
+    private fun mutate(
+        name: String,
+        value: Any?,
+    ): Any = when (value) {
         is Boolean -> !value
         is Int -> value + 1
         is Long -> value + 1L

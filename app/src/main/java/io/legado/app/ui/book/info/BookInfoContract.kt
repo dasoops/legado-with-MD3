@@ -54,50 +54,91 @@ data class BookInfoBookUi(
 
 sealed interface BookInfoSheet {
     data object None : BookInfoSheet
+
     data object GroupPicker : BookInfoSheet
+
     data object ReadRecord : BookInfoSheet
 }
 
 sealed interface BookInfoDialog {
-    data class EditRemark(val remark: String?) : BookInfoDialog
-    data class PhotoPreview(val path: String) : BookInfoDialog
+    data class EditRemark(
+        val remark: String?,
+    ) : BookInfoDialog
+
+    data class PhotoPreview(
+        val path: String,
+    ) : BookInfoDialog
 }
 
 sealed interface BookInfoIntent {
     data object DismissSheet : BookInfoIntent
+
     data object DismissDialog : BookInfoIntent
-    data class MenuAction(val action: BookInfoMenuAction) : BookInfoIntent
+
+    data class MenuAction(
+        val action: BookInfoMenuAction,
+    ) : BookInfoIntent
+
     data object ReadClick : BookInfoIntent
+
     data object OpenLocalBookExternally : BookInfoIntent
+
     data object TocClick : BookInfoIntent
+
     data object CoverPreviewClick : BookInfoIntent
+
     data object GroupClick : BookInfoIntent
+
     data object ReadRecordClick : BookInfoIntent
+
     data object RemarkClick : BookInfoIntent
-    data class SaveCover(val path: String) : BookInfoIntent
-    data class UpdateRemark(val remark: String) : BookInfoIntent
-    data class AddTags(val tags: Set<String>) : BookInfoIntent
+
+    data class SaveCover(
+        val path: String,
+    ) : BookInfoIntent
+
+    data class UpdateRemark(
+        val remark: String,
+    ) : BookInfoIntent
+
+    data class AddTags(
+        val tags: Set<String>,
+    ) : BookInfoIntent
 
     /** 简介 HTML 图片长按。 */
-    data class IntroImageLongClick(val source: String) : BookInfoIntent
+    data class IntroImageLongClick(
+        val source: String,
+    ) : BookInfoIntent
 }
 
 sealed interface BookInfoEffect {
-    data class ShowMessage(val message: String) : BookInfoEffect
+    data class ShowMessage(
+        val message: String,
+    ) : BookInfoEffect
 
     data class Finish(
         val resultCode: Int? = null,
         val afterTransition: Boolean = false,
     ) : BookInfoEffect
 
-    data class OpenBookInfoEdit(val bookUrl: String) : BookInfoEffect
-    data class OpenToc(val bookUrl: String) : BookInfoEffect
+    data class OpenBookInfoEdit(
+        val bookUrl: String,
+    ) : BookInfoEffect
+
+    data class OpenToc(
+        val bookUrl: String,
+    ) : BookInfoEffect
+
     data class OpenReader(
         val book: Book,
         val inBookshelf: Boolean,
         val chapterChanged: Boolean,
     ) : BookInfoEffect
-    data class OpenLocalBookExternally(val uri: Uri) : BookInfoEffect
+
+    data class OpenLocalBookExternally(
+        val uri: Uri,
+    ) : BookInfoEffect
+
     data object ClearCache : BookInfoEffect
 }
 

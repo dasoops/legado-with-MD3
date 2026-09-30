@@ -4,7 +4,6 @@ import androidx.annotation.Keep
 
 @Keep
 class ReturnData {
-
     var isSuccess: Boolean = false
         private set
 

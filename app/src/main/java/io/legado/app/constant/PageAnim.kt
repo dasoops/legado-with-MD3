@@ -4,7 +4,6 @@ import androidx.annotation.IntDef
 
 @Suppress("ConstPropertyName")
 object PageAnim {
-
     const val coverPageAnim = 0
 
     const val slidePageAnim = 1
@@ -27,5 +26,4 @@ object PageAnim {
         noAnim,
     )
     annotation class Anim
-
 }

@@ -1,5 +1,7 @@
 package io.legado.app.model
 
+import kotlin.coroutines.CoroutineContext
+import kotlin.coroutines.cancellation.CancellationException
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
@@ -7,8 +9,6 @@ import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
-import kotlin.coroutines.CoroutineContext
-import kotlin.coroutines.cancellation.CancellationException
 
 internal class LatestChapterTaskScheduler<K>(
     private val scope: CoroutineScope,
@@ -29,7 +29,7 @@ internal class LatestChapterTaskScheduler<K>(
                 startLocked(key, entry, request)
             } else {
                 entry.pending?.result?.cancel(
-                    CancellationException("Replaced by a newer chapter task")
+                    CancellationException("Replaced by a newer chapter task"),
                 )
                 entry.pending = request
             }
@@ -38,11 +38,15 @@ internal class LatestChapterTaskScheduler<K>(
     }
 
     fun cancel(key: K) {
-        val running = synchronized(lock) {
-            entries.remove(key)?.also { entry ->
-                entry.pending?.result?.cancel()
-            }?.running?.job
-        }
+        val running =
+            synchronized(lock) {
+                entries
+                    .remove(key)
+                    ?.also { entry ->
+                        entry.pending?.result?.cancel()
+                    }?.running
+                    ?.job
+            }
         running?.cancel()
     }
 
@@ -51,15 +55,16 @@ internal class LatestChapterTaskScheduler<K>(
     }
 
     fun cancelIf(predicate: (K) -> Boolean) {
-        val runningJobs = synchronized(lock) {
-            entries.entries
-                .filter { predicate(it.key) }
-                .mapNotNull { (key, entry) ->
-                    entries.remove(key)
-                    entry.pending?.result?.cancel()
-                    entry.running?.job
-                }
-        }
+        val runningJobs =
+            synchronized(lock) {
+                entries.entries
+                    .filter { predicate(it.key) }
+                    .mapNotNull { (key, entry) ->
+                        entries.remove(key)
+                        entry.pending?.result?.cancel()
+                        entry.running?.job
+                    }
+            }
         runningJobs.forEach(Job::cancel)
     }
 
@@ -69,27 +74,35 @@ internal class LatestChapterTaskScheduler<K>(
         } ?: TaskState()
     }
 
-    private fun startLocked(key: K, entry: Entry, request: Request) {
+    private fun startLocked(
+        key: K,
+        entry: Entry,
+        request: Request,
+    ) {
         val token = Any()
-        val job = scope.launch(context, start = CoroutineStart.LAZY) {
-            try {
-                request.block(this)
-                request.result.complete(Unit)
-            } catch (error: CancellationException) {
-                request.result.cancel(error)
-                throw error
-            } catch (error: Throwable) {
-                request.result.completeExceptionally(error)
-                onError(key, error)
-            } finally {
-                onTaskFinished(key, token)
+        val job =
+            scope.launch(context, start = CoroutineStart.LAZY) {
+                try {
+                    request.block(this)
+                    request.result.complete(Unit)
+                } catch (error: CancellationException) {
+                    request.result.cancel(error)
+                    throw error
+                } catch (error: Throwable) {
+                    request.result.completeExceptionally(error)
+                    onError(key, error)
+                } finally {
+                    onTaskFinished(key, token)
+                }
             }
-        }
         entry.running = Running(token = token, job = job)
         job.start()
     }
 
-    private fun onTaskFinished(key: K, token: Any) {
+    private fun onTaskFinished(
+        key: K,
+        token: Any,
+    ) {
         synchronized(lock) {
             val entry = entries[key] ?: return
             if (entry.running?.token !== token) return

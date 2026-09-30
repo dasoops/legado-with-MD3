@@ -20,9 +20,10 @@ fun readerMenuSurfaceBrush(
 
     val transparent = color.copy(alpha = 0f)
     return Brush.verticalGradient(
-        colors = when (placement) {
+        colors =
+        when (placement) {
             ReaderMenuPlacement.Top -> listOf(opaque, transparent)
             ReaderMenuPlacement.Bottom -> listOf(transparent, opaque)
-        }
+        },
     )
 }

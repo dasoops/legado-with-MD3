@@ -8,9 +8,12 @@ import androidx.annotation.AttrRes
  * @author Aidan Follestad (afollestad)
  */
 object ThemeUtils {
-
     @JvmOverloads
-    fun resolveColor(context: Context, @AttrRes attr: Int, fallback: Int = 0): Int {
+    fun resolveColor(
+        context: Context,
+        @AttrRes attr: Int,
+        fallback: Int = 0,
+    ): Int {
         val a = context.theme.obtainStyledAttributes(intArrayOf(attr))
         return try {
             a.getColor(0, fallback)
@@ -22,7 +25,11 @@ object ThemeUtils {
     }
 
     @JvmOverloads
-    fun resolveFloat(context: Context, @AttrRes attr: Int, fallback: Float = 0.0f): Float {
+    fun resolveFloat(
+        context: Context,
+        @AttrRes attr: Int,
+        fallback: Float = 0.0f,
+    ): Float {
         val a = context.theme.obtainStyledAttributes(intArrayOf(attr))
         return try {
             a.getFloat(0, fallback)
@@ -33,7 +40,10 @@ object ThemeUtils {
         }
     }
 
-    fun resolveDrawable(context: Context, @AttrRes attr: Int): Drawable? {
+    fun resolveDrawable(
+        context: Context,
+        @AttrRes attr: Int,
+    ): Drawable? {
         val a = context.theme.obtainStyledAttributes(intArrayOf(attr))
         return try {
             a.getDrawable(0)

@@ -37,48 +37,52 @@ fun CollapsibleHeader(
     title: String,
     subtitle: String? = null,
     leadingContent: (@Composable RowScope.() -> Unit)? = null,
-    titleContent: (@Composable ColumnScope.() -> Unit)? = null
+    titleContent: (@Composable ColumnScope.() -> Unit)? = null,
 ) {
     GlassCard(
-        modifier = modifier
+        modifier =
+        modifier
             .fillMaxWidth()
             .padding(vertical = 4.dp),
         cornerRadius = 12.dp,
         containerColor = LegadoTheme.colorScheme.surfaceContainer,
-        onClick = onToggle
+        onClick = onToggle,
     ) {
         Row(
-            modifier = Modifier
+            modifier =
+            Modifier
                 .padding(horizontal = 16.dp, vertical = 12.dp),
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             if (leadingContent != null) {
                 leadingContent()
                 Spacer(modifier = Modifier.width(12.dp))
             }
             Column(
-                modifier = Modifier.weight(1f)
+                modifier = Modifier.weight(1f),
             ) {
                 if (titleContent != null) {
                     titleContent()
                 } else {
                     AppText(
                         text = title,
-                        style = LegadoTheme.typography.bodySmallEmphasized.copy(
+                        style =
+                        LegadoTheme.typography.bodySmallEmphasized.copy(
                             fontWeight = FontWeight.Bold,
-                            color = LegadoTheme.colorScheme.primary
+                            color = LegadoTheme.colorScheme.primary,
                         ),
                         maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
+                        overflow = TextOverflow.Ellipsis,
                     )
                     subtitle?.let {
                         AppText(
                             text = it,
-                            style = LegadoTheme.typography.labelSmallEmphasized.copy(
-                                color = LegadoTheme.colorScheme.onSurfaceVariant
+                            style =
+                            LegadoTheme.typography.labelSmallEmphasized.copy(
+                                color = LegadoTheme.colorScheme.onSurfaceVariant,
                             ),
                             maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
+                            overflow = TextOverflow.Ellipsis,
                         )
                     }
                 }
@@ -86,19 +90,20 @@ fun CollapsibleHeader(
 
             val rotation by animateFloatAsState(
                 targetValue = if (isCollapsed) 0f else 180f,
-                label = "arrowRotation"
+                label = "arrowRotation",
             )
 
             if (showIcon) {
                 Icon(
                     imageVector = Icons.Default.ExpandMore,
-                    contentDescription = if (isCollapsed) {
+                    contentDescription =
+                    if (isCollapsed) {
                         stringResource(R.string.expand)
                     } else {
                         stringResource(R.string.collapse)
                     },
                     modifier = Modifier.rotate(rotation),
-                    tint = LegadoTheme.colorScheme.primary
+                    tint = LegadoTheme.colorScheme.primary,
                 )
             }
         }

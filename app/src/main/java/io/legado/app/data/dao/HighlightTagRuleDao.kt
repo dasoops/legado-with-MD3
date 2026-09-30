@@ -11,7 +11,6 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface HighlightTagRuleDao {
-
     @Query("SELECT * FROM highlight_tag_rules ORDER BY `order` ASC")
     fun flowAll(): Flow<List<HighlightTagRule>>
 

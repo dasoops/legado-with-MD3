@@ -16,31 +16,31 @@ import com.bumptech.glide.request.target.Target
 import io.legado.app.R
 import io.legado.app.domain.gateway.AppShellSettingsGateway
 import io.legado.app.domain.gateway.CoverSettingsGateway
+import io.legado.app.domain.usecase.CoverAlbumUseCase
 import io.legado.app.help.glide.BlurTransformation
 import io.legado.app.help.glide.ImageLoader
 import io.legado.app.help.glide.OkHttpModelLoader
-import io.legado.app.domain.usecase.CoverAlbumUseCase
 import io.legado.app.utils.BitmapUtils
 import io.legado.app.utils.isNightMode
 import io.legado.app.utils.sysConfiguration
+import kotlin.random.Random
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import splitties.init.appCtx
-import kotlin.random.Random
 
 @Keep
 object BookCover : KoinComponent {
-
     private val coverAlbumUseCase: CoverAlbumUseCase by inject()
     private val shellSettingsGateway: AppShellSettingsGateway by inject()
     private val coverSettingsGateway: CoverSettingsGateway by inject()
 
     private val isNightTheme: Boolean
-        get() = when (shellSettingsGateway.currentSettings.themeMode) {
-            "1" -> false
-            "2" -> true
-            else -> sysConfiguration.isNightMode
-        }
+        get() =
+            when (shellSettingsGateway.currentSettings.themeMode) {
+                "1" -> false
+                "2" -> true
+                else -> sysConfiguration.isNightMode
+            }
 
     val defaultDrawable: Drawable
         @SuppressLint("UseCompatLoadingForDrawables")
@@ -52,14 +52,15 @@ object BookCover : KoinComponent {
             }
 
             val randomPath = paths[Random.nextInt(paths.size)]
-            return kotlin.runCatching {
-                BitmapUtils.decodeBitmap(randomPath, 600, 900)!!.toDrawable(appCtx.resources)
-            }.getOrDefault(appCtx.resources.getDrawable(R.drawable.image_cover_default, null))
+            return kotlin
+                .runCatching {
+                    BitmapUtils.decodeBitmap(randomPath, 600, 900)!!.toDrawable(appCtx.resources)
+                }.getOrDefault(appCtx.resources.getDrawable(R.drawable.image_cover_default, null))
         }
 
     fun getRandomDefaultPath(
         seed: Any? = null,
-        isNight: Boolean = isNightTheme
+        isNight: Boolean = isNightTheme,
     ): String? {
         val paths = coverAlbumUseCase.selectedImagePaths(isNight)
         if (paths.isEmpty()) return null
@@ -72,20 +73,23 @@ object BookCover : KoinComponent {
 
     fun getRandomDefaultDrawable(
         seed: Any? = null,
-        isNight: Boolean = isNightTheme
+        isNight: Boolean = isNightTheme,
     ): Drawable {
-        val randomPath = getRandomDefaultPath(seed, isNight)
-            ?: return appCtx.resources.getDrawable(R.drawable.image_cover_default, null)
+        val randomPath =
+            getRandomDefaultPath(seed, isNight)
+                ?: return appCtx.resources.getDrawable(R.drawable.image_cover_default, null)
 
         // 生成缓存键
-        val cacheKey = "$randomPath-${isNight}"
+        val cacheKey = "$randomPath-$isNight"
 
         // 从缓存中获取，如果没有则解码并缓存
-        val drawable = randomDrawableCache.getOrPut(cacheKey) {
-            kotlin.runCatching {
-                BitmapUtils.decodeBitmap(randomPath, 600, 900)!!.toDrawable(appCtx.resources)
-            }.getOrDefault(appCtx.resources.getDrawable(R.drawable.image_cover_default, null))
-        }
+        val drawable =
+            randomDrawableCache.getOrPut(cacheKey) {
+                kotlin
+                    .runCatching {
+                        BitmapUtils.decodeBitmap(randomPath, 600, 900)!!.toDrawable(appCtx.resources)
+                    }.getOrDefault(appCtx.resources.getDrawable(R.drawable.image_cover_default, null))
+            }
 
         // 返回克隆的实例并 mutate，防止多个 View 共享状态（如 bounds）导致显示异常
         return drawable.constantState?.newDrawable()?.mutate() ?: drawable
@@ -103,45 +107,47 @@ object BookCover : KoinComponent {
     ): RequestBuilder<Drawable> {
         val currentDefault = getRandomDefaultDrawable()
         if (coverSettingsGateway.currentSettings.useDefaultCover) {
-            return ImageLoader.load(context, currentDefault)
+            return ImageLoader
+                .load(context, currentDefault)
                 .centerCrop()
         }
         var options = RequestOptions().set(OkHttpModelLoader.loadOnlyWifiOption, loadOnlyWifi)
-        if (sourceOrigin != null) {
-            options = options.set(OkHttpModelLoader.sourceOriginOption, sourceOrigin)
-        }
-        var builder = ImageLoader.load(context, path)
-            .apply(options)
+        var builder =
+            ImageLoader
+                .load(context, path)
+                .apply(options)
         if (onLoadFinish != null) {
-            builder = builder.addListener(object : RequestListener<Drawable> {
-                override fun onLoadFailed(
-                    e: GlideException?,
-                    model: Any?,
-                    target: Target<Drawable?>,
-                    isFirstResource: Boolean,
-                ): Boolean {
-                    onLoadFinish.invoke()
-                    return false
-                }
+            builder =
+                builder.addListener(
+                    object : RequestListener<Drawable> {
+                        override fun onLoadFailed(
+                            e: GlideException?,
+                            model: Any?,
+                            target: Target<Drawable?>,
+                            isFirstResource: Boolean,
+                        ): Boolean {
+                            onLoadFinish.invoke()
+                            return false
+                        }
 
-                override fun onResourceReady(
-                    resource: Drawable,
-                    model: Any,
-                    target: Target<Drawable?>?,
-                    dataSource: DataSource,
-                    isFirstResource: Boolean,
-                ): Boolean {
-                    onLoadFinish.invoke()
-                    return false
-                }
-            })
+                        override fun onResourceReady(
+                            resource: Drawable,
+                            model: Any,
+                            target: Target<Drawable?>?,
+                            dataSource: DataSource,
+                            isFirstResource: Boolean,
+                        ): Boolean {
+                            onLoadFinish.invoke()
+                            return false
+                        }
+                    },
+                )
         }
-        return builder.placeholder(currentDefault)
+        return builder
+            .placeholder(currentDefault)
             .error(currentDefault)
             .centerCrop()
     }
-
-
 
     /**
      * 加载模糊封面
@@ -153,20 +159,19 @@ object BookCover : KoinComponent {
         sourceOrigin: String? = null,
     ): RequestBuilder<Drawable> {
         val currentDefault = getRandomDefaultDrawable()
-        val loadBlur = ImageLoader.load(context, currentDefault)
-            .transform(BlurTransformation(25), CenterCrop())
+        val loadBlur =
+            ImageLoader
+                .load(context, currentDefault)
+                .transform(BlurTransformation(25), CenterCrop())
         if (coverSettingsGateway.currentSettings.useDefaultCover) {
             return loadBlur
         }
         var options = RequestOptions().set(OkHttpModelLoader.loadOnlyWifiOption, loadOnlyWifi)
-        if (sourceOrigin != null) {
-            options = options.set(OkHttpModelLoader.sourceOriginOption, sourceOrigin)
-        }
-        return ImageLoader.load(context, path)
+        return ImageLoader
+            .load(context, path)
             .apply(options)
             .transform(BlurTransformation(25), CenterCrop())
             .transition(DrawableTransitionOptions.withCrossFade(1500))
             .thumbnail(loadBlur)
     }
-
 }

@@ -98,36 +98,40 @@ class ImportReplaceRuleViewModel(
 
     private suspend fun importAwait(text: String) {
         when {
-            text.isAbsUrl() -> importUrl(text)
+            text.isAbsUrl() -> {
+                importUrl(text)
+            }
             text.isJsonArray() -> {
                 val rules = ReplaceAnalyzer.jsonToReplaceRules(text).getOrThrow()
                 allRules.addAll(rules)
             }
-
             text.isJsonObject() -> {
                 val rule = ReplaceAnalyzer.jsonToReplaceRule(text).getOrThrow()
                 allRules.add(rule)
             }
-
             text.isUri() -> {
                 importAwait(text.toUri().readText(appCtx))
             }
-
-            else -> throw NoStackTraceException("格式不对")
+            else -> {
+                throw NoStackTraceException("格式不对")
+            }
         }
     }
 
     private suspend fun importUrl(url: String) {
-        okHttpClient.newCallResponseBody {
-            if (url.endsWith("#requestWithoutUA")) {
-                url(url.substringBeforeLast("#requestWithoutUA"))
-                header(AppConst.UA_NAME, "null")
-            } else {
-                url(url)
+        okHttpClient
+            .newCallResponseBody {
+                if (url.endsWith("#requestWithoutUA")) {
+                    url(url.substringBeforeLast("#requestWithoutUA"))
+                    header(AppConst.UA_NAME, "null")
+                } else {
+                    url(url)
+                }
+            }.decompressed()
+            .text("utf-8")
+            .let {
+                importAwait(it)
             }
-        }.decompressed().text("utf-8").let {
-            importAwait(it)
-        }
     }
 
     private fun comparisonSource() {

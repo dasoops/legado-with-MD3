@@ -9,6 +9,9 @@ import coil3.fetch.Fetcher
 import coil3.fetch.SourceFetchResult
 import coil3.request.Options
 import io.legado.app.utils.isWifiConnect
+import java.io.IOException
+import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -18,9 +21,6 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import okio.Buffer
 import splitties.init.appCtx
-import java.io.IOException
-import java.util.concurrent.ConcurrentHashMap
-import java.util.concurrent.TimeUnit
 
 class CoverFetcher(
     private val url: String,
@@ -28,7 +28,6 @@ class CoverFetcher(
     private val callFactory: Call.Factory,
     private val loadOnlyWifi: Boolean,
 ) : Fetcher {
-
     companion object {
         /** Tag applied to cover requests so [cacheControlInterceptor] can identify them. */
         val COVER_REQUEST_TAG = Unit
@@ -61,8 +60,6 @@ class CoverFetcher(
     }
 
     override suspend fun fetch(): FetchResult {
-        val source = options.extras[CoverExtras.Source]
-
         if (url.startsWith("data:", true)) {
             val base64Data = url.substringAfter("base64,", "")
             if (base64Data.isEmpty()) {
@@ -70,12 +67,13 @@ class CoverFetcher(
             }
             val bytes = Base64.decode(base64Data, Base64.DEFAULT)
             return SourceFetchResult(
-                source = ImageSource(
+                source =
+                ImageSource(
                     source = Buffer().write(bytes),
-                    fileSystem = options.fileSystem
+                    fileSystem = options.fileSystem,
                 ),
                 mimeType = null,
-                dataSource = DataSource.MEMORY
+                dataSource = DataSource.MEMORY,
             )
         }
 
@@ -97,12 +95,13 @@ class CoverFetcher(
         var fromCache = false
         try {
             withContext(Dispatchers.IO) {
-                val cacheRequest = Request.Builder()
-                    .url(url)
-                    .tag(io.legado.app.data.entities.BaseSource::class.java, source)
-                    .apply { requestHeaders?.forEach { (key, value) -> addHeader(key, value) } }
-                    .cacheControl(CacheControl.FORCE_CACHE)
-                    .build()
+                val cacheRequest =
+                    Request
+                        .Builder()
+                        .url(url)
+                        .apply { requestHeaders?.forEach { (key, value) -> addHeader(key, value) } }
+                        .cacheControl(CacheControl.FORCE_CACHE)
+                        .build()
                 val cacheResponse = callFactory.newCall(cacheRequest).execute()
                 if (cacheResponse.isSuccessful) {
                     fromCache = true
@@ -128,56 +127,60 @@ class CoverFetcher(
                 throw IOException("URL previously failed, skipping: $url")
             }
 
-            rawBytes = try {
-                withContext(Dispatchers.IO) {
-                    val networkRequest = Request.Builder()
-                        .url(url)
-                        .tag(io.legado.app.data.entities.BaseSource::class.java, source)
-                        .apply { requestHeaders?.forEach { (key, value) -> addHeader(key, value) } }
-                        .tag(COVER_REQUEST_TAG)
-                        .cacheControl(
-                            CacheControl.Builder()
-                                .maxAge(30, TimeUnit.DAYS)
-                                .build()
-                        )
-                        .build()
-                    val networkResponse = callFactory.newCall(networkRequest).execute()
-                    val body = networkResponse.body
-                    if (!networkResponse.isSuccessful) {
-                        body.close()
-                        throw IOException("HTTP ${networkResponse.code}")
+            rawBytes =
+                try {
+                    withContext(Dispatchers.IO) {
+                        val networkRequest =
+                            Request
+                                .Builder()
+                                .url(url)
+                                .apply { requestHeaders?.forEach { (key, value) -> addHeader(key, value) } }
+                                .tag(COVER_REQUEST_TAG)
+                                .cacheControl(
+                                    CacheControl
+                                        .Builder()
+                                        .maxAge(30, TimeUnit.DAYS)
+                                        .build(),
+                                ).build()
+                        val networkResponse = callFactory.newCall(networkRequest).execute()
+                        val body = networkResponse.body
+                        if (!networkResponse.isSuccessful) {
+                            body.close()
+                            throw IOException("HTTP ${networkResponse.code}")
+                        }
+                        body.use { it.bytes() }
                     }
-                    body.use { it.bytes() }
-                }
-            } catch (e: CancellationException) {
-                throw e
-            } catch (e: Exception) {
-                markFailed(url)
-                // 网络彻底失败（断网/源挂）时回退到本书别名缓存：
-                // 只要这本书曾经成功加载过封面，弱网/断网下仍显示上次缓存的封面，而不是灰图。
-                if (bookUrl != null) {
-                    val stale = withContext(Dispatchers.IO) {
-                        CoverFileCache.readByBookUrl(bookUrl)?.let { f ->
-                            try {
-                                if (f.length() in 1..20L * 1024 * 1024) f.readBytes() else null
-                            } catch (ex: Exception) {
-                                null
+                } catch (e: CancellationException) {
+                    throw e
+                } catch (e: Exception) {
+                    markFailed(url)
+                    // 网络彻底失败（断网/源挂）时回退到本书别名缓存：
+                    // 只要这本书曾经成功加载过封面，弱网/断网下仍显示上次缓存的封面，而不是灰图。
+                    if (bookUrl != null) {
+                        val stale =
+                            withContext(Dispatchers.IO) {
+                                CoverFileCache.readByBookUrl(bookUrl)?.let { f ->
+                                    try {
+                                        if (f.length() in 1..20L * 1024 * 1024) f.readBytes() else null
+                                    } catch (ex: Exception) {
+                                        null
+                                    }
+                                }
                             }
+                        if (stale != null) {
+                            return SourceFetchResult(
+                                source =
+                                ImageSource(
+                                    source = Buffer().write(stale),
+                                    fileSystem = options.fileSystem,
+                                ),
+                                mimeType = null,
+                                dataSource = DataSource.DISK,
+                            )
                         }
                     }
-                    if (stale != null) {
-                        return SourceFetchResult(
-                            source = ImageSource(
-                                source = Buffer().write(stale),
-                                fileSystem = options.fileSystem
-                            ),
-                            mimeType = null,
-                            dataSource = DataSource.DISK
-                        )
-                    }
+                    throw e
                 }
-                throw e
-            }
         }
 
         // 到这里必定已拿到字节（本地缓存/OkHttp 缓存/网络三选一，否则已抛出）。
@@ -193,19 +196,24 @@ class CoverFetcher(
             withContext(Dispatchers.IO) { CoverFileCache.write(originalUrl, fetchedBytes, bookUrl) }
         }
         return SourceFetchResult(
-            source = ImageSource(
+            source =
+            ImageSource(
                 source = Buffer().write(fetchedBytes),
-                fileSystem = options.fileSystem
+                fileSystem = options.fileSystem,
             ),
             mimeType = null,
-            dataSource = if (fromCache) DataSource.DISK else DataSource.NETWORK
+            dataSource = if (fromCache) DataSource.DISK else DataSource.NETWORK,
         )
     }
 
     class Factory(
         private val okHttpClient: OkHttpClient,
     ) : Fetcher.Factory<coil3.Uri> {
-        override fun create(data: coil3.Uri, options: Options, imageLoader: ImageLoader): Fetcher? {
+        override fun create(
+            data: coil3.Uri,
+            options: Options,
+            imageLoader: ImageLoader,
+        ): Fetcher? {
             val scheme = data.scheme
             if (scheme != "http" && scheme != "https" && scheme != "data") return null
 

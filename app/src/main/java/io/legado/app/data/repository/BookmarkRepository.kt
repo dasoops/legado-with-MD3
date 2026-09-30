@@ -10,20 +10,23 @@ import kotlinx.coroutines.withContext
 class BookmarkRepository(
     private val dao: BookmarkDao,
 ) {
-
     fun flowAll(): Flow<List<Bookmark>> = dao.flowAll().flowOn(Dispatchers.IO)
 
-    fun flowByBook(bookName: String, bookAuthor: String): Flow<List<Bookmark>> =
-        dao.flowByBook(bookName, bookAuthor).flowOn(Dispatchers.IO)
+    fun flowByBook(
+        bookName: String,
+        bookAuthor: String,
+    ): Flow<List<Bookmark>> = dao.flowByBook(bookName, bookAuthor).flowOn(Dispatchers.IO)
 
     suspend fun getAll(): List<Bookmark> = withContext(Dispatchers.IO) {
         dao.all
     }
 
-    suspend fun getByBook(bookName: String, bookAuthor: String): List<Bookmark> =
-        withContext(Dispatchers.IO) {
-            dao.getByBook(bookName, bookAuthor)
-        }
+    suspend fun getByBook(
+        bookName: String,
+        bookAuthor: String,
+    ): List<Bookmark> = withContext(Dispatchers.IO) {
+        dao.getByBook(bookName, bookAuthor)
+    }
 
     suspend fun getByChapterRange(
         bookName: String,

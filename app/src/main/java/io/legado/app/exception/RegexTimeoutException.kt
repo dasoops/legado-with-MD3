@@ -1,3 +1,5 @@
 package io.legado.app.exception
 
-class RegexTimeoutException(msg: String) : NoStackTraceException(msg)
+class RegexTimeoutException(
+    msg: String,
+) : NoStackTraceException(msg)

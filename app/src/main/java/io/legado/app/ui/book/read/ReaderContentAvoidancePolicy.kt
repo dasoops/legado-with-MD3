@@ -16,7 +16,6 @@ package io.legado.app.ui.book.read
  * 系统栏显隐动画与菜单开关不再触发整章重排。
  */
 object ReaderContentAvoidancePolicy {
-
     /** 平台侧采样的系统栏与刘海原始尺寸（px）。 */
     data class SystemBarInsets(
         val statusBarTopPx: Int = 0,
@@ -39,10 +38,12 @@ object ReaderContentAvoidancePolicy {
         val cutout = if (paddingDisplayCutouts) insets else SystemBarInsets()
         return ReaderPadding(
             left = cutout.cutoutLeftPx,
-            top = (if (statusPlaceholderGone) 0 else insets.statusBarTopPx) +
+            top =
+            (if (statusPlaceholderGone) 0 else insets.statusBarTopPx) +
                 (if (statusPlaceholderGone) cutout.cutoutTopPx else 0),
             right = cutout.cutoutRightPx,
-            bottom = (if (navPlaceholderGone) 0 else insets.navigationBarBottomPx) +
+            bottom =
+            (if (navPlaceholderGone) 0 else insets.navigationBarBottomPx) +
                 cutout.cutoutBottomPx,
         )
     }

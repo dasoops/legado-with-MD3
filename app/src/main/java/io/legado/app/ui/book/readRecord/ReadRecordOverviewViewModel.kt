@@ -10,12 +10,12 @@ import io.legado.app.data.entities.readRecord.ReadRecordSession
 import io.legado.app.data.repository.BookRepository
 import io.legado.app.data.repository.ReadRecordRepository
 import io.legado.app.domain.usecase.readRecord.GetReadRecordOverviewUseCase
+import java.time.LocalDate
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
-import java.time.LocalDate
 
 @Stable
 data class ReadRecordOverviewUiState(
@@ -31,42 +31,46 @@ data class ReadRecordOverviewUiState(
     val topBooks: List<ReadBookRanking> = emptyList(),
     val dailyTopBook: Map<LocalDate, Pair<String, String>> = emptyMap(),
     val allReadTimes: Map<LocalDate, Long> = emptyMap(),
-    val allReadCounts: Map<LocalDate, Int> = emptyMap()
+    val allReadCounts: Map<LocalDate, Int> = emptyMap(),
 )
 
 data class ReadBookRanking(
     val bookName: String,
     val bookAuthor: String,
     val readTime: Long,
-    var coverPath: String? = null
+    var coverPath: String? = null,
 )
 
 enum class ReadPeriod {
-    DAY, WEEK, MONTH, YEAR, ALL
+    DAY,
+    WEEK,
+    MONTH,
+    YEAR,
+    ALL,
 }
 
 class ReadRecordOverviewViewModel(
     private val repository: ReadRecordRepository,
     private val bookRepository: BookRepository,
-    private val getReadRecordOverviewUseCase: GetReadRecordOverviewUseCase
+    private val getReadRecordOverviewUseCase: GetReadRecordOverviewUseCase,
 ) : ViewModel() {
 
-    private val _period = MutableStateFlow(ReadPeriod.DAY)
-    private val _referenceDate = MutableStateFlow(LocalDate.now())
+    private val period = MutableStateFlow(ReadPeriod.DAY)
+    private val referenceDate = MutableStateFlow(LocalDate.now())
 
     private val overviewData = combine(
         repository.getAllRecordDetails(""),
         repository.getAllSessions(),
         repository.getLatestReadRecords(""),
-        bookRepository.getAllBooks()
+        bookRepository.getAllBooks(),
     ) { details, sessions, latestRecords, allBooks ->
         OverviewData(details, sessions, latestRecords, allBooks)
     }
 
     val uiState: StateFlow<ReadRecordOverviewUiState> = combine(
-        _period,
-        _referenceDate,
-        overviewData
+        period,
+        referenceDate,
+        overviewData,
     ) { period, refDate, data ->
         getReadRecordOverviewUseCase(
             period,
@@ -79,7 +83,7 @@ class ReadRecordOverviewViewModel(
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5000),
-        initialValue = ReadRecordOverviewUiState()
+        initialValue = ReadRecordOverviewUiState(),
     )
 
     fun onIntent(intent: ReadRecordOverviewIntent) {
@@ -91,12 +95,12 @@ class ReadRecordOverviewViewModel(
     }
 
     fun setPeriod(period: ReadPeriod) {
-        _period.value = period
+        this.period.value = period
     }
 
     fun nextDate() {
-        val current = _referenceDate.value
-        _referenceDate.value = when (_period.value) {
+        val current = referenceDate.value
+        referenceDate.value = when (period.value) {
             ReadPeriod.DAY -> current.plusDays(1)
             ReadPeriod.WEEK -> current.plusWeeks(1)
             ReadPeriod.MONTH -> current.plusMonths(1)
@@ -106,8 +110,8 @@ class ReadRecordOverviewViewModel(
     }
 
     fun prevDate() {
-        val current = _referenceDate.value
-        _referenceDate.value = when (_period.value) {
+        val current = referenceDate.value
+        referenceDate.value = when (period.value) {
             ReadPeriod.DAY -> current.minusDays(1)
             ReadPeriod.WEEK -> current.minusWeeks(1)
             ReadPeriod.MONTH -> current.minusMonths(1)

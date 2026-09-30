@@ -23,13 +23,13 @@ class MainViewModel(
     private val appShellSettingsGateway: AppShellSettingsGateway,
     private val themeSettingsGateway: ThemeSettingsGateway,
 ) : ViewModel() {
-
-    private val _uiState = MutableStateFlow(
-        buildMainUiState(
-            appShellSettingsGateway.currentSettings,
-            themeSettingsGateway.currentSettings,
+    private val _uiState =
+        MutableStateFlow(
+            buildMainUiState(
+                appShellSettingsGateway.currentSettings,
+                themeSettingsGateway.currentSettings,
+            ),
         )
-    )
     val uiState = _uiState.asStateFlow()
 
     private val _effects = MutableSharedFlow<MainEffect>(extraBufferCapacity = 16)
@@ -68,18 +68,29 @@ class MainViewModel(
 
     private fun handlePrefClick(event: PrefClickEvent) {
         when (event) {
-            is PrefClickEvent.StartActivity -> _effects.tryEmit(
-                MainEffect.StartActivity(
-                    destination = event.destination,
-                    configTag = event.configTag,
+            is PrefClickEvent.StartActivity -> {
+                _effects.tryEmit(
+                    MainEffect.StartActivity(
+                        destination = event.destination,
+                        configTag = event.configTag,
+                    ),
                 )
-            )
-            PrefClickEvent.ExitApp -> _effects.tryEmit(MainEffect.ExitApp)
-            PrefClickEvent.OpenReadRecord -> _effects.tryEmit(MainEffect.NavigateToReadRecord)
-            PrefClickEvent.OpenHighlightTagRule ->
+            }
+            PrefClickEvent.ExitApp -> {
+                _effects.tryEmit(MainEffect.ExitApp)
+            }
+            PrefClickEvent.OpenReadRecord -> {
+                _effects.tryEmit(MainEffect.NavigateToReadRecord)
+            }
+            PrefClickEvent.OpenHighlightTagRule -> {
                 _effects.tryEmit(MainEffect.NavigateToHighlightTagRule)
-            PrefClickEvent.OpenAbout -> _effects.tryEmit(MainEffect.NavigateToAbout)
-            else -> Unit
+            }
+            PrefClickEvent.OpenAbout -> {
+                _effects.tryEmit(MainEffect.NavigateToAbout)
+            }
+            else -> {
+                Unit
+            }
         }
     }
 }
@@ -88,12 +99,13 @@ private fun buildMainUiState(
     appShell: AppShellSettings,
     theme: ThemeSettings,
 ): MainUiState {
-    val destinations = MainDestination.ordered(appShell.mainNavigationOrder).filter {
-        when (it) {
-            MainDestination.Home -> appShell.showHome
-            else -> true
+    val destinations =
+        MainDestination.ordered(appShell.mainNavigationOrder).filter {
+            when (it) {
+                MainDestination.Home -> appShell.showHome
+                else -> true
+            }
         }
-    }
     return MainUiState(
         destinations = destinations.toImmutableList(),
         defaultHomePage = appShell.defaultHomePage,

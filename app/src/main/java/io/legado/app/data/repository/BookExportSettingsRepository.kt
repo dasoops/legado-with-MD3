@@ -16,9 +16,10 @@ class BookExportSettingsRepository : BookExportSettingsGateway {
     override val currentSettings: BookExportSettings
         get() = AppConfigStore.preferences.toBookExportSettings()
 
-    override val settings: Flow<BookExportSettings> = AppConfigStore.preferencesFlow
-        .map { it.toBookExportSettings() }
-        .distinctUntilChanged()
+    override val settings: Flow<BookExportSettings> =
+        AppConfigStore.preferencesFlow
+            .map { it.toBookExportSettings() }
+            .distinctUntilChanged()
 
     override suspend fun update(transform: (BookExportSettings) -> BookExportSettings) {
         AppConfigStore.atomicUpdate(

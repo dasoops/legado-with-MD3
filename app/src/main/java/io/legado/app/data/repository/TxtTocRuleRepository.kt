@@ -9,7 +9,6 @@ import kotlinx.coroutines.withContext
 class TxtTocRuleRepository(
     private val dao: TxtTocRuleDao,
 ) {
-
     fun flowAll(): Flow<List<TxtTocRule>> = dao.observeAll()
 
     fun flowSearch(key: String): Flow<List<TxtTocRule>> = dao.flowSearch(key)
@@ -35,7 +34,10 @@ class TxtTocRuleRepository(
         dao.delete(*rules.toTypedArray())
     }
 
-    suspend fun enableByIds(ids: Collection<Long>, enable: Boolean) = withContext(Dispatchers.IO) {
+    suspend fun enableByIds(
+        ids: Collection<Long>,
+        enable: Boolean,
+    ) = withContext(Dispatchers.IO) {
         val rules = dao.getByIds(ids.toSet())
         val updated = rules.map { it.copy(enable = enable) }
         dao.update(*updated.toTypedArray())

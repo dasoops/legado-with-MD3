@@ -62,28 +62,31 @@ fun AppPullToRefresh(
             contentPadding = PaddingValues(top = topPadding + 16.dp),
             pullToRefreshState = miuixRememberPullToRefreshState(),
             topAppBarScrollBehavior = (scrollBehavior as? MiuixGlassScrollBehavior)?.miuixBehavior,
-            refreshTexts = listOf(
+            refreshTexts =
+            listOf(
                 stringResource(R.string.pull_to_refresh),
                 stringResource(R.string.release_to_refresh),
                 stringResource(R.string.refreshing),
-                stringResource(R.string.refreshing)
-            )
+                stringResource(R.string.refreshing),
+            ),
         ) {
             content()
         }
     } else {
         val state = rememberPullToRefreshState()
-        val actualEnabled = enabled && (
-                isRefreshing ||
-                state.distanceFraction > 0f ||
-                scrollBehavior == null ||
-                if (scrollBehavior is M3GlassScrollBehavior) {
-                    val appbarState = scrollBehavior.m3Behavior.state
-                    (appbarState.heightOffsetLimit == 0f || appbarState.heightOffset >= 0f) && appbarState.contentOffset >= 0f
-                } else {
-                    scrollBehavior.collapsedFraction <= 0f
-                }
-            )
+        val actualEnabled =
+            enabled &&
+                (
+                    isRefreshing ||
+                        state.distanceFraction > 0f ||
+                        scrollBehavior == null ||
+                        if (scrollBehavior is M3GlassScrollBehavior) {
+                            val appbarState = scrollBehavior.m3Behavior.state
+                            (appbarState.heightOffsetLimit == 0f || appbarState.heightOffset >= 0f) && appbarState.contentOffset >= 0f
+                        } else {
+                            scrollBehavior.collapsedFraction <= 0f
+                        }
+                    )
         PullToRefreshBox(
             isRefreshing = isRefreshing,
             onRefresh = onRefresh,
@@ -94,11 +97,12 @@ fun AppPullToRefresh(
                 PullToRefreshDefaults.Indicator(
                     state = state,
                     isRefreshing = isRefreshing,
-                    modifier = Modifier
+                    modifier =
+                    Modifier
                         .padding(top = topPadding)
                         .align(Alignment.TopCenter),
                 )
-            }
+            },
         ) {
             content()
         }

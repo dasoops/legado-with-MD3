@@ -55,11 +55,12 @@ fun ThemeManageScreen(
 ) {
     val scrollBehavior = GlassTopAppBarDefaults.defaultScrollBehavior()
     val savedThemes = state.savedThemes
-    val filteredSavedThemes = remember(savedThemes, state.searchQuery) {
-        savedThemes.filter { theme ->
-            theme.name.contains(state.searchQuery, ignoreCase = true)
+    val filteredSavedThemes =
+        remember(savedThemes, state.searchQuery) {
+            savedThemes.filter { theme ->
+                theme.name.contains(state.searchQuery, ignoreCase = true)
+            }
         }
-    }
 
     AppScaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
@@ -69,49 +70,51 @@ fun ThemeManageScreen(
                 scrollBehavior = scrollBehavior,
                 navigationIcon = {
                     TopBarNavigationButton(onClick = onBackClick)
-                }
+                },
             )
-        }
+        },
     ) { paddingValues ->
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
-            contentPadding = adaptiveContentPadding(
+            contentPadding =
+            adaptiveContentPadding(
                 top = paddingValues.calculateTopPadding(),
-                bottom = 120.dp
+                bottom = 120.dp,
             ),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+            verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             item {
                 SplicedColumnGroup {
                     ClickableSettingItem(
                         title = stringResource(R.string.theme_manage_save_current),
                         description = stringResource(R.string.theme_manage_save_current_summary),
-                        onClick = { onIntent(ThemeManageIntent.OpenSaveDialog) }
+                        onClick = { onIntent(ThemeManageIntent.OpenSaveDialog) },
                     )
                     ClickableSettingItem(
                         title = stringResource(R.string.theme_manage_export_current),
                         description = stringResource(R.string.theme_manage_export_current_summary),
-                        onClick = { onIntent(ThemeManageIntent.RequestExport()) }
+                        onClick = { onIntent(ThemeManageIntent.RequestExport()) },
                     )
                     ClickableSettingItem(
                         title = stringResource(R.string.theme_manage_import_package),
                         description = stringResource(R.string.theme_manage_import_package_summary),
-                        onClick = { onIntent(ThemeManageIntent.RequestImportPackage) }
+                        onClick = { onIntent(ThemeManageIntent.RequestImportPackage) },
                     )
                     ClickableSettingItem(
                         title = stringResource(R.string.theme_manage_import_config),
                         description = stringResource(R.string.theme_manage_import_config_summary),
-                        onClick = { onIntent(ThemeManageIntent.RequestImportLegacyJson) }
+                        onClick = { onIntent(ThemeManageIntent.RequestImportLegacyJson) },
                     )
                     if (state.hasLegacyThemes) {
                         ClickableSettingItem(
                             title = stringResource(R.string.theme_manage_migrate_legacy),
-                            description = stringResource(
-                                R.string.theme_manage_migrate_legacy_summary
+                            description =
+                            stringResource(
+                                R.string.theme_manage_migrate_legacy_summary,
                             ),
                             onClick = {
                                 onIntent(ThemeManageIntent.MigrateLegacyThemes)
-                            }
+                            },
                         )
                     }
                 }
@@ -134,7 +137,7 @@ fun ThemeManageScreen(
                         text = stringResource(R.string.theme_manage_saved_themes),
                         style = MaterialTheme.typography.titleSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.padding(top = 8.dp, bottom = 4.dp)
+                        modifier = Modifier.padding(top = 8.dp, bottom = 4.dp),
                     )
                 }
 
@@ -144,7 +147,7 @@ fun ThemeManageScreen(
                         onApply = { onIntent(ThemeManageIntent.OpenApplyDialog(theme)) },
                         onEdit = { onIntent(ThemeManageIntent.OpenEditSheet(theme)) },
                         onExport = { onIntent(ThemeManageIntent.RequestExport(theme)) },
-                        onDelete = { onIntent(ThemeManageIntent.OpenDeleteDialog(theme)) }
+                        onDelete = { onIntent(ThemeManageIntent.OpenDeleteDialog(theme)) },
                     )
                 }
             }
@@ -172,9 +175,9 @@ fun ThemeManageScreen(
                 onValueChange = { onIntent(ThemeManageIntent.UpdateSaveName(it)) },
                 placeholder = { AppText(text = stringResource(R.string.theme_manage_name_hint)) },
                 singleLine = true,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
             )
-        }
+        },
     )
 
     // Apply theme dialog
@@ -191,10 +194,11 @@ fun ThemeManageScreen(
         },
         dismissText = stringResource(R.string.cancel),
         onDismiss = { onIntent(ThemeManageIntent.DismissDialog) },
-        text = stringResource(
+        text =
+        stringResource(
             R.string.theme_manage_apply_message,
             (state.dialog as? ThemeManageDialog.Apply)?.theme?.name.orEmpty(),
-        )
+        ),
     )
 
     // Delete theme dialog
@@ -211,10 +215,11 @@ fun ThemeManageScreen(
         },
         dismissText = stringResource(R.string.cancel),
         onDismiss = { onIntent(ThemeManageIntent.DismissDialog) },
-        text = stringResource(
+        text =
+        stringResource(
             R.string.theme_manage_delete_message,
             (state.dialog as? ThemeManageDialog.Delete)?.theme?.name.orEmpty(),
-        )
+        ),
     )
 
     // Edit theme sheet
@@ -229,10 +234,10 @@ fun ThemeManageScreen(
                     name = newName,
                     data = newData,
                     replacedTheme = (state.dialog as? ThemeManageDialog.Edit)?.theme,
-                )
+                ),
             )
             onIntent(ThemeManageIntent.DismissDialog)
-        }
+        },
     )
 }
 
@@ -242,47 +247,54 @@ private fun SavedThemeItem(
     onApply: () -> Unit,
     onEdit: () -> Unit,
     onExport: () -> Unit,
-    onDelete: () -> Unit
+    onDelete: () -> Unit,
 ) {
     val data = theme.data
-    val lightPrimary = data.themeColor.takeIf { it != 0 }?.let(::Color)
-        ?: data.cPrimary.takeIf { it != 0 }?.let(::Color)
-        ?: MaterialTheme.colorScheme.primary
-    val darkPrimary = data.themeColorNight.takeIf { it != 0 }?.let(::Color)
-        ?: data.cNPrimary.takeIf { it != 0 }?.let(::Color)
-        ?: lightPrimary
-    val lightSecondary = data.secondaryThemeColor.takeIf { it != 0 }?.let(::Color)
-        ?: lightPrimary
-    val darkSecondary = data.secondaryThemeColorNight.takeIf { it != 0 }?.let(::Color)
-        ?: lightSecondary
-    val lightSurface = data.themeBackgroundColor.takeIf { it != 0 }?.let(::Color)
-        ?: Color(0xFFF7F2FA)
-    val darkSurface = data.themeBackgroundColorNight.takeIf { it != 0 }?.let(::Color)
-        ?: if (data.enableDeepPersonalization && data.themeBackgroundColor != 0) {
-            Color(data.themeBackgroundColor)
-        } else if (data.isPureBlack) {
-            Color.Black
-        } else {
-            Color(0xFF1C1B1F)
-        }
+    val lightPrimary =
+        data.themeColor.takeIf { it != 0 }?.let(::Color)
+            ?: data.cPrimary.takeIf { it != 0 }?.let(::Color)
+            ?: MaterialTheme.colorScheme.primary
+    val darkPrimary =
+        data.themeColorNight.takeIf { it != 0 }?.let(::Color)
+            ?: data.cNPrimary.takeIf { it != 0 }?.let(::Color)
+            ?: lightPrimary
+    val lightSecondary =
+        data.secondaryThemeColor.takeIf { it != 0 }?.let(::Color)
+            ?: lightPrimary
+    val darkSecondary =
+        data.secondaryThemeColorNight.takeIf { it != 0 }?.let(::Color)
+            ?: lightSecondary
+    val lightSurface =
+        data.themeBackgroundColor.takeIf { it != 0 }?.let(::Color)
+            ?: Color(0xFFF7F2FA)
+    val darkSurface =
+        data.themeBackgroundColorNight.takeIf { it != 0 }?.let(::Color)
+            ?: if (data.enableDeepPersonalization && data.themeBackgroundColor != 0) {
+                Color(data.themeBackgroundColor)
+            } else if (data.isPureBlack) {
+                Color.Black
+            } else {
+                Color(0xFF1C1B1F)
+            }
 
     GlassCard(
         onClick = onApply,
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier.fillMaxWidth(),
     ) {
         Row(
-            modifier = Modifier
+            modifier =
+            Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 12.dp, vertical = 8.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Column(
-                modifier = Modifier.weight(1f)
+                modifier = Modifier.weight(1f),
             ) {
                 AppText(
                     text = theme.name,
                     style = LegadoTheme.typography.titleSmallEmphasized,
-                    maxLines = 1
+                    maxLines = 1,
                 )
                 Row(
                     modifier = Modifier.padding(top = 4.dp),
@@ -296,17 +308,17 @@ private fun SavedThemeItem(
             SmallPlainButton(
                 onClick = onEdit,
                 icon = Icons.Default.Edit,
-                contentDescription = stringResource(R.string.edit)
+                contentDescription = stringResource(R.string.edit),
             )
             SmallPlainButton(
                 onClick = onExport,
                 icon = Icons.Default.Share,
-                contentDescription = stringResource(R.string.share)
+                contentDescription = stringResource(R.string.share),
             )
             SmallPlainButton(
                 onClick = onDelete,
                 icon = Icons.Default.Delete,
-                contentDescription = stringResource(R.string.delete)
+                contentDescription = stringResource(R.string.delete),
             )
         }
     }
@@ -321,10 +333,11 @@ private fun ThemeColorGroup(
     Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
         listOf(primary, secondary, surface).forEach { color ->
             Box(
-                modifier = Modifier
+                modifier =
+                Modifier
                     .size(12.dp)
                     .background(color, CircleShape)
-                    .border(1.dp, MaterialTheme.colorScheme.outlineVariant, CircleShape)
+                    .border(1.dp, MaterialTheme.colorScheme.outlineVariant, CircleShape),
             )
         }
     }

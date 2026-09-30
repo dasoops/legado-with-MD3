@@ -7,66 +7,64 @@ import java.util.List;
 
 public class CollectionUtil {
 
-    /**
-     * Wraps an Enumeration around an Iterator
-     *
-     * @param <T>
-     * @author paul.siegmann
-     */
-    private static class IteratorEnumerationAdapter<T> implements Enumeration<T> {
+  /**
+   * Wraps an Enumeration around an Iterator
+   *
+   * @param <T>
+   * @author paul.siegmann
+   */
+  private static class IteratorEnumerationAdapter<T> implements Enumeration<T> {
 
-        private final Iterator<T> iterator;
+    private final Iterator<T> iterator;
 
-        public IteratorEnumerationAdapter(Iterator<T> iter) {
-            this.iterator = iter;
-        }
-
-        @Override
-        public boolean hasMoreElements() {
-            return iterator.hasNext();
-        }
-
-        @Override
-        public T nextElement() {
-            return iterator.next();
-        }
+    public IteratorEnumerationAdapter(Iterator<T> iter) {
+      this.iterator = iter;
     }
 
-    /**
-     * Creates an Enumeration out of the given Iterator.
-     *
-     * @param <T> g
-     * @param it  g
-     * @return an Enumeration created out of the given Iterator.
-     */
-    @SuppressWarnings("unused")
-    public static <T> Enumeration<T> createEnumerationFromIterator(
-            Iterator<T> it) {
-        return new IteratorEnumerationAdapter<>(it);
+    @Override
+    public boolean hasMoreElements() {
+      return iterator.hasNext();
     }
 
-
-    /**
-     * Returns the first element of the list, null if the list is null or empty.
-     *
-     * @param <T>  f
-     * @param list f
-     * @return the first element of the list, null if the list is null or empty.
-     */
-    public static <T> T first(List<T> list) {
-        if (list == null || list.isEmpty()) {
-            return null;
-        }
-        return list.get(0);
+    @Override
+    public T nextElement() {
+      return iterator.next();
     }
+  }
 
-    /**
-     * Whether the given collection is null or has no elements.
-     *
-     * @param collection g
-     * @return Whether the given collection is null or has no elements.
-     */
-    public static boolean isEmpty(Collection<?> collection) {
-        return collection == null || collection.isEmpty();
+  /**
+   * Creates an Enumeration out of the given Iterator.
+   *
+   * @param <T> g
+   * @param it g
+   * @return an Enumeration created out of the given Iterator.
+   */
+  @SuppressWarnings("unused")
+  public static <T> Enumeration<T> createEnumerationFromIterator(Iterator<T> it) {
+    return new IteratorEnumerationAdapter<>(it);
+  }
+
+  /**
+   * Returns the first element of the list, null if the list is null or empty.
+   *
+   * @param <T> f
+   * @param list f
+   * @return the first element of the list, null if the list is null or empty.
+   */
+  public static <T> T first(List<T> list) {
+    if (list == null || list.isEmpty()) {
+      return null;
     }
+    return list.get(0);
+  }
+
+  /**
+   * Whether the given collection is null or has no elements.
+   *
+   * @param collection g
+   * @return Whether the given collection is null or has no elements.
+   */
+  public static boolean isEmpty(Collection<?> collection) {
+    return collection == null || collection.isEmpty();
+  }
 }

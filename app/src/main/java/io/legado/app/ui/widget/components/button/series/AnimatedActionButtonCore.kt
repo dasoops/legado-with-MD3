@@ -38,10 +38,10 @@ internal fun AnimatedActionButtonCore(
     button: @Composable (
         modifier: Modifier,
         onToggle: (Boolean) -> Unit,
-        content: @Composable RowScope.() -> Unit
+        content: @Composable RowScope.() -> Unit,
     ) -> Unit,
     icon: @Composable (imageVector: ImageVector, modifier: Modifier, tint: Color?) -> Unit,
-    text: @Composable (text: String, modifier: Modifier, style: TextStyle, color: Color?) -> Unit
+    text: @Composable (text: String, modifier: Modifier, style: TextStyle, color: Color?) -> Unit,
 ) {
     var showText by remember { mutableStateOf(false) }
     var lastCheckedState by remember { mutableStateOf(checked) }
@@ -59,12 +59,12 @@ internal fun AnimatedActionButtonCore(
             lastCheckedState = nextChecked
             onCheckedChange(nextChecked)
             showText = true
-        }
+        },
     ) {
         icon(
             if (checked) iconChecked else iconUnchecked,
             Modifier.size(iconSize),
-            contentColor
+            contentColor,
         )
 
         // 用尺寸动画而非默认的整体缩放：文字消失/出现时宽度连续变化，避免
@@ -78,7 +78,7 @@ internal fun AnimatedActionButtonCore(
                 if (lastCheckedState) activeText else inactiveText,
                 Modifier.padding(start = textStartPadding),
                 textStyle,
-                contentColor
+                contentColor,
             )
         }
     }

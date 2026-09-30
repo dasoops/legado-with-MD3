@@ -74,11 +74,12 @@ object AppConfig {
     val recordHeapDump get() = other.recordHeapDump
     val adaptSpecialStyle get() = read.adaptSpecialStyle
     val isNightTheme: Boolean
-        get() = when (shell.themeMode) {
-            "1" -> false
-            "2" -> true
-            else -> sysConfiguration.isNightMode
-        }
+        get() =
+            when (shell.themeMode) {
+                "1" -> false
+                "2" -> true
+                else -> sysConfiguration.isNightMode
+            }
     val bookshelfLayoutModePortrait get() = bookshelf.bookshelfLayoutModePortrait
     val bookshelfLayoutModeLandscape get() = bookshelf.bookshelfLayoutModeLandscape
     val bookshelfLayoutGridPortrait get() = bookshelf.bookshelfLayoutGridPortrait

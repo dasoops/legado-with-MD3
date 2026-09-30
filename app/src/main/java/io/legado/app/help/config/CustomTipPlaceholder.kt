@@ -29,7 +29,8 @@ enum class CustomTipPlaceholder(
     PAGE_REMAINING("{PageRemaining}", "PageRemaining", R.string.placeholder_page_remaining),
     READ_PROGRESS("{ReadProgress}", "ReadProgress", R.string.placeholder_read_progress),
     FULL_PAGE_INDEX("{FullPageIndex}", "FullPageIndex", R.string.placeholder_full_page_index),
-    FULL_PAGE_SIZE("{FullPageSize}", "FullPageSize", R.string.placeholder_full_page_size);
+    FULL_PAGE_SIZE("{FullPageSize}", "FullPageSize", R.string.placeholder_full_page_size),
+    ;
 
     companion object {
         /** 占位符 key（即花括号内的部分），用于校验。 */
@@ -63,8 +64,6 @@ enum class CustomTipPlaceholder(
          *
          * @return `true` 表示模板中无占位符或所有占位符都是预定义的；`false` 表示至少有一个未知占位符。
          */
-        fun isValid(template: String): Boolean {
-            return extractPlaceholders(template).all { it in validKeys }
-        }
+        fun isValid(template: String): Boolean = extractPlaceholders(template).all { it in validKeys }
     }
 }

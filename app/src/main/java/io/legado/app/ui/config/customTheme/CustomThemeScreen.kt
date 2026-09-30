@@ -46,16 +46,17 @@ fun CustomThemeScreen(
                 scrollBehavior = scrollBehavior,
                 navigationIcon = {
                     TopBarNavigationButton(onClick = onBackClick)
-                }
+                },
             )
-        }
+        },
     ) { paddingValues ->
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
-            contentPadding = adaptiveContentPadding(
+            contentPadding =
+            adaptiveContentPadding(
                 top = paddingValues.calculateTopPadding(),
-                bottom = 120.dp
-            )
+                bottom = 120.dp,
+            ),
         ) {
             // Master switch: ON = deep color overrides, OFF = seed color mode
             item {
@@ -65,7 +66,7 @@ fun CustomThemeScreen(
                         checked = !state.enableDeepPersonalization,
                         onCheckedChange = {
                             onIntent(CustomThemeIntent.DeepPersonalizationChanged(!it))
-                        }
+                        },
                     )
                 }
             }
@@ -104,44 +105,45 @@ fun CustomThemeScreen(
                         ClickableSettingItem(
                             title = stringResource(R.string.seed_color),
                             description = stringResource(R.string.day),
-                            option = formatColorOption(state.primarySeedColor)
+                            option =
+                            formatColorOption(state.primarySeedColor)
                                 ?: stringResource(R.string.click_to_select),
                             onClick = { onIntent(CustomThemeIntent.OpenPicker(CustomThemePicker.DaySeed)) },
-                            trailingContent = { ColorSwatch(colorValue = state.primarySeedColor) }
+                            trailingContent = { ColorSwatch(colorValue = state.primarySeedColor) },
                         )
                         ClickableSettingItem(
                             title = stringResource(R.string.seed_color),
                             description = stringResource(R.string.night),
-                            option = formatColorOption(state.nightPrimarySeedColor)
+                            option =
+                            formatColorOption(state.nightPrimarySeedColor)
                                 ?: stringResource(R.string.click_to_select),
                             onClick = { onIntent(CustomThemeIntent.OpenPicker(CustomThemePicker.NightSeed)) },
-                            trailingContent = { ColorSwatch(colorValue = state.nightPrimarySeedColor) }
+                            trailingContent = { ColorSwatch(colorValue = state.nightPrimarySeedColor) },
                         )
                         DropdownListSettingItem(
                             title = stringResource(R.string.palette_style),
                             selectedValue = state.paletteStyle,
                             displayEntries = stringArrayResource(R.array.paletteStyle),
                             entryValues = stringArrayResource(R.array.paletteStyle_value),
-                            onValueChange = { onIntent(CustomThemeIntent.PaletteStyleChanged(it)) }
+                            onValueChange = { onIntent(CustomThemeIntent.PaletteStyleChanged(it)) },
                         )
                         DropdownListSettingItem(
                             title = stringResource(R.string.preferred_contrast),
                             selectedValue = state.customContrast,
                             displayEntries = stringArrayResource(R.array.customContrast),
                             entryValues = stringArrayResource(R.array.customContrast_value),
-                            onValueChange = { onIntent(CustomThemeIntent.CustomContrastChanged(it)) }
+                            onValueChange = { onIntent(CustomThemeIntent.CustomContrastChanged(it)) },
                         )
                         DropdownListSettingItem(
                             title = stringResource(R.string.material_version),
                             selectedValue = state.materialVersion,
                             displayEntries = stringArrayResource(R.array.materialVersion),
                             entryValues = stringArrayResource(R.array.materialVersion_value),
-                            onValueChange = { onIntent(CustomThemeIntent.MaterialVersionChanged(it)) }
+                            onValueChange = { onIntent(CustomThemeIntent.MaterialVersionChanged(it)) },
                         )
                     }
                 }
             }
-
         }
 
         ColorPickerSheet(
@@ -152,13 +154,13 @@ fun CustomThemeScreen(
         )
 
         ColorPickerSheet(
-            show = state.activePicker == CustomThemePicker.DaySeed ||
+            show =
+            state.activePicker == CustomThemePicker.DaySeed ||
                 state.activePicker == CustomThemePicker.NightSeed,
             initialColor = state.colorForPicker(),
             onDismissRequest = { onIntent(CustomThemeIntent.DismissPicker) },
             onColorSelected = { onIntent(CustomThemeIntent.ColorSelected(it)) },
         )
-
     }
 }
 
@@ -185,8 +187,11 @@ private fun CustomColorSettings(
             colorValue = secondary,
             onClick = {
                 onSelect(
-                    if (keySuffix.isEmpty()) CustomThemeColorSlot.Secondary
-                    else CustomThemeColorSlot.SecondaryNight
+                    if (keySuffix.isEmpty()) {
+                        CustomThemeColorSlot.Secondary
+                    } else {
+                        CustomThemeColorSlot.SecondaryNight
+                    },
                 )
             },
         )
@@ -198,7 +203,11 @@ private fun CustomColorSettings(
         CustomColorSettingItem(
             title = stringResource(R.string.theme_manage_secondary_text_color),
             colorValue = secondaryText,
-            onClick = { onSelect(if (keySuffix.isEmpty()) CustomThemeColorSlot.SecondaryText else CustomThemeColorSlot.SecondaryTextNight) },
+            onClick = {
+                onSelect(
+                    if (keySuffix.isEmpty()) CustomThemeColorSlot.SecondaryText else CustomThemeColorSlot.SecondaryTextNight,
+                )
+            },
         )
         CustomColorSettingItem(
             title = stringResource(R.string.theme_manage_background_color),
@@ -208,7 +217,11 @@ private fun CustomColorSettings(
         CustomColorSettingItem(
             title = stringResource(R.string.theme_manage_label_container_color),
             colorValue = labelContainer,
-            onClick = { onSelect(if (keySuffix.isEmpty()) CustomThemeColorSlot.LabelContainer else CustomThemeColorSlot.LabelContainerNight) },
+            onClick = {
+                onSelect(
+                    if (keySuffix.isEmpty()) CustomThemeColorSlot.LabelContainer else CustomThemeColorSlot.LabelContainerNight,
+                )
+            },
         )
     }
 }
@@ -236,34 +249,43 @@ private fun formatColorOption(colorValue: Int): String? {
 private fun ColorSwatch(colorValue: Int) {
     if (colorValue == 0) return
     Box(
-        modifier = Modifier
+        modifier =
+        Modifier
             .size(28.dp)
             .clip(CircleShape)
             .background(Color(colorValue))
             .border(
                 1.dp,
                 MaterialTheme.colorScheme.outlineVariant,
-                CircleShape
-            )
+                CircleShape,
+            ),
     )
 }
 
 private fun CustomThemeUiState.colorForPicker(): Int = when (val picker = activePicker) {
-    is CustomThemePicker.DeepColor -> when (picker.slot) {
-        CustomThemeColorSlot.Primary -> themeColor
-        CustomThemeColorSlot.Secondary -> secondaryThemeColor
-        CustomThemeColorSlot.PrimaryText -> primaryTextColor
-        CustomThemeColorSlot.SecondaryText -> secondaryTextColor
-        CustomThemeColorSlot.Background -> themeBackgroundColor
-        CustomThemeColorSlot.LabelContainer -> labelContainerColor
-        CustomThemeColorSlot.PrimaryNight -> themeColorNight
-        CustomThemeColorSlot.SecondaryNight -> secondaryThemeColorNight
-        CustomThemeColorSlot.PrimaryTextNight -> primaryTextColorNight
-        CustomThemeColorSlot.SecondaryTextNight -> secondaryTextColorNight
-        CustomThemeColorSlot.BackgroundNight -> themeBackgroundColorNight
-        CustomThemeColorSlot.LabelContainerNight -> labelContainerColorNight
+    is CustomThemePicker.DeepColor -> {
+        when (picker.slot) {
+            CustomThemeColorSlot.Primary -> themeColor
+            CustomThemeColorSlot.Secondary -> secondaryThemeColor
+            CustomThemeColorSlot.PrimaryText -> primaryTextColor
+            CustomThemeColorSlot.SecondaryText -> secondaryTextColor
+            CustomThemeColorSlot.Background -> themeBackgroundColor
+            CustomThemeColorSlot.LabelContainer -> labelContainerColor
+            CustomThemeColorSlot.PrimaryNight -> themeColorNight
+            CustomThemeColorSlot.SecondaryNight -> secondaryThemeColorNight
+            CustomThemeColorSlot.PrimaryTextNight -> primaryTextColorNight
+            CustomThemeColorSlot.SecondaryTextNight -> secondaryTextColorNight
+            CustomThemeColorSlot.BackgroundNight -> themeBackgroundColorNight
+            CustomThemeColorSlot.LabelContainerNight -> labelContainerColorNight
+        }
     }
-    CustomThemePicker.DaySeed -> primarySeedColor
-    CustomThemePicker.NightSeed -> nightPrimarySeedColor
-    null -> 0
+    CustomThemePicker.DaySeed -> {
+        primarySeedColor
+    }
+    CustomThemePicker.NightSeed -> {
+        nightPrimarySeedColor
+    }
+    null -> {
+        0
+    }
 }

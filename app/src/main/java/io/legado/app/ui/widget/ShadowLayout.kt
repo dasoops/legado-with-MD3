@@ -17,9 +17,11 @@ import io.legado.app.utils.getCompatColor
  * Created by lijiankun on 17/8/11.
  */
 @Suppress("unused")
-class ShadowLayout @JvmOverloads constructor(
+class ShadowLayout
+@JvmOverloads
+constructor(
     context: Context,
-    attrs: AttributeSet? = null
+    attrs: AttributeSet? = null,
 ) : RelativeLayout(context, attrs) {
     private val mPaint =
         Paint(Paint.ANTI_ALIAS_FLAG)
@@ -55,32 +57,36 @@ class ShadowLayout @JvmOverloads constructor(
      */
     private var mShadowShape = SHAPE_RECTANGLE
 
-
     init {
         setLayerType(View.LAYER_TYPE_SOFTWARE, null) // 关闭硬件加速
         setWillNotDraw(false) // 调用此方法后，才会执行 onDraw(Canvas) 方法
         val typedArray =
             context.obtainStyledAttributes(attrs, R.styleable.ShadowLayout)
-        mShadowColor = typedArray.getColor(
-            R.styleable.ShadowLayout_shadowColor,
-            context.getCompatColor(android.R.color.black)
-        )
+        mShadowColor =
+            typedArray.getColor(
+                R.styleable.ShadowLayout_shadowColor,
+                context.getCompatColor(android.R.color.black),
+            )
         mShadowRadius =
             typedArray.getDimension(R.styleable.ShadowLayout_shadowRadius, dip2px(0f))
         mShadowDx = typedArray.getDimension(R.styleable.ShadowLayout_shadowDx, dip2px(0f))
         mShadowDy = typedArray.getDimension(R.styleable.ShadowLayout_shadowDy, dip2px(0f))
         mShadowSide =
             typedArray.getInt(R.styleable.ShadowLayout_shadowSide, ALL)
-        mShadowShape = typedArray.getInt(
-            R.styleable.ShadowLayout_shadowShape,
-            SHAPE_RECTANGLE
-        )
+        mShadowShape =
+            typedArray.getInt(
+                R.styleable.ShadowLayout_shadowShape,
+                SHAPE_RECTANGLE,
+            )
         typedArray.recycle()
 
         setUpShadowPaint()
     }
 
-    override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
+    override fun onMeasure(
+        widthMeasureSpec: Int,
+        heightMeasureSpec: Int,
+    ) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec)
         val effect = mShadowRadius + dip2px(5f)
         var rectLeft = 0f
@@ -136,7 +142,7 @@ class ShadowLayout @JvmOverloads constructor(
                 mRectF.centerX(),
                 mRectF.centerY(),
                 mRectF.width().coerceAtMost(mRectF.height()) / 2,
-                mPaint
+                mPaint,
             )
         }
     }
@@ -181,5 +187,4 @@ class ShadowLayout @JvmOverloads constructor(
         const val SHAPE_RECTANGLE = 0x0001
         const val SHAPE_OVAL = 0x0010
     }
-
 }

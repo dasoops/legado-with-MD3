@@ -4,7 +4,6 @@ import android.os.Build
 
 @Suppress("unused")
 object Permissions {
-
     const val POST_NOTIFICATIONS = "android.permission.POST_NOTIFICATIONS"
 
     const val READ_CALENDAR = "android.permission.READ_CALENDAR"
@@ -47,11 +46,12 @@ object Permissions {
         "android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS"
 
     object Group {
-        val STORAGE = if (isManageExternalStorage()) {
-            arrayOf(MANAGE_EXTERNAL_STORAGE)
-        } else {
-            arrayOf(READ_EXTERNAL_STORAGE, WRITE_EXTERNAL_STORAGE)
-        }
+        val STORAGE =
+            if (isManageExternalStorage()) {
+                arrayOf(MANAGE_EXTERNAL_STORAGE)
+            } else {
+                arrayOf(READ_EXTERNAL_STORAGE, WRITE_EXTERNAL_STORAGE)
+            }
 
         val CAMERA = arrayOf(Permissions.CAMERA)
 
@@ -63,28 +63,28 @@ object Permissions {
 
         val MICROPHONE = arrayOf(RECORD_AUDIO)
 
-        val PHONE = arrayOf(
-            READ_PHONE_STATE,
-            CALL_PHONE,
-            READ_CALL_LOG,
-            WRITE_CALL_LOG,
-            ADD_VOICEMAIL,
-            USE_SIP,
-            PROCESS_OUTGOING_CALLS
-        )
+        val PHONE =
+            arrayOf(
+                READ_PHONE_STATE,
+                CALL_PHONE,
+                READ_CALL_LOG,
+                WRITE_CALL_LOG,
+                ADD_VOICEMAIL,
+                USE_SIP,
+                PROCESS_OUTGOING_CALLS,
+            )
 
         val SENSORS = arrayOf(BODY_SENSORS)
 
-        val SMS = arrayOf(
-            SEND_SMS,
-            RECEIVE_SMS,
-            READ_SMS,
-            RECEIVE_WAP_PUSH,
-            RECEIVE_MMS
-        )
+        val SMS =
+            arrayOf(
+                SEND_SMS,
+                RECEIVE_SMS,
+                READ_SMS,
+                RECEIVE_WAP_PUSH,
+                RECEIVE_MMS,
+            )
     }
 
-    fun isManageExternalStorage(): Boolean {
-        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.R
-    }
+    fun isManageExternalStorage(): Boolean = Build.VERSION.SDK_INT >= Build.VERSION_CODES.R
 }

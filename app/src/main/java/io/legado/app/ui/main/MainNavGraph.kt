@@ -110,7 +110,7 @@ fun MainActivity.mainEntryProvider(
                         MainRouteReadBook(
                             bookUrl = book.bookUrl,
                             sharedCoverKey = sharedCoverKey,
-                        )
+                        ),
                     )
                 }
             },
@@ -122,8 +122,8 @@ fun MainActivity.mainEntryProvider(
                         bookUrl = bookUrl,
                         origin = origin,
                         coverPath = coverPath,
-                        sharedCoverKey = sharedCoverKey
-                    )
+                        sharedCoverKey = sharedCoverKey,
+                    ),
                 )
             },
             onNavigateToBackupSettings = {
@@ -155,7 +155,7 @@ fun MainActivity.mainEntryProvider(
             onNavigateToTheme = { backStack.add(MainRouteSettingsTheme) },
             onNavigateToBackup = { backStack.add(MainRouteSettingsBackup) },
             onNavigateToDownloadCache = { backStack.add(MainRouteSettingsDownloadCache) },
-            onNavigateToLab = { backStack.add(MainRouteSettingsLabConfig) }
+            onNavigateToLab = { backStack.add(MainRouteSettingsLabConfig) },
         )
     }
 
@@ -184,7 +184,7 @@ fun MainActivity.mainEntryProvider(
         ThemeConfigRouteScreen(
             onBackClick = { onNavigateBack() },
             onNavigateToCustomTheme = { backStack.add(MainRouteSettingsCustomTheme) },
-            onNavigateToThemeManage = { backStack.add(MainRouteSettingsThemeManage) }
+            onNavigateToThemeManage = { backStack.add(MainRouteSettingsThemeManage) },
         )
     }
 
@@ -202,7 +202,7 @@ fun MainActivity.mainEntryProvider(
 
     entry<MainRouteSettingsCustomTheme> {
         CustomThemeRouteScreen(
-            onBackClick = { onNavigateBack() }
+            onBackClick = { onNavigateBack() },
         )
     }
 
@@ -211,52 +211,58 @@ fun MainActivity.mainEntryProvider(
     }
 
     entry<MainRouteReadBook>(
-        metadata = metadata {
+        metadata =
+        metadata {
             put(NavDisplay.TransitionKey) {
                 fadeIn(animationSpec = tween(600)) togetherWith
-                        fadeOut(animationSpec = tween(600))
+                    fadeOut(animationSpec = tween(600))
             }
             put(NavDisplay.PopTransitionKey) {
                 fadeIn(animationSpec = tween(600)) togetherWith
-                        fadeOut(animationSpec = tween(600))
+                    fadeOut(animationSpec = tween(600))
             }
             if (configuration.appShell.predictiveBackEnabled) {
                 put(NavDisplay.PredictivePopTransitionKey) { _ ->
                     fadeIn(animationSpec = tween(600)) togetherWith
-                            fadeOut(animationSpec = tween(600))
+                        fadeOut(animationSpec = tween(600))
                 }
             }
-        }
+        },
     ) { route ->
-        val readBookViewModel = koinViewModel<ReadBookViewModel>(
-            key = "ReadBook:${route.bookUrl ?: "last-read"}"
-        )
-        val readerSessionViewModel = koinViewModel<ReaderSessionViewModel>(
-            key = "ReaderSession:${route.bookUrl ?: "last-read"}"
-        )
-        val controller = remember(readBookViewModel, readerSessionViewModel) {
-            ReadBookController(
-                this@mainEntryProvider,
-                readBookViewModel,
-                readerSessionViewModel,
+        val readBookViewModel =
+            koinViewModel<ReadBookViewModel>(
+                key = "ReadBook:${route.bookUrl ?: "last-read"}",
             )
-        }
+        val readerSessionViewModel =
+            koinViewModel<ReaderSessionViewModel>(
+                key = "ReaderSession:${route.bookUrl ?: "last-read"}",
+            )
+        val controller =
+            remember(readBookViewModel, readerSessionViewModel) {
+                ReadBookController(
+                    this@mainEntryProvider,
+                    readBookViewModel,
+                    readerSessionViewModel,
+                )
+            }
         // Canvas 阅读面在首次组合时就会请求分页，必须先告诉 ViewModel 本路由要打开哪本书。
         // 刻意用 remember 而非 LaunchedEffect：后者在组合之后才跑，赶不上首帧。
         @Suppress("RememberReturnType")
         remember(readBookViewModel, route) {
         }
         val lifecycleOwner = LocalLifecycleOwner.current
-        val initRequest = remember(route) {
-            ReadBookInitRequest(
-                bookUrl = route.bookUrl,
-                inBookshelf = route.inBookshelf,
-                chapterChanged = route.chapterChanged,
-            )
-        }
+        val initRequest =
+            remember(route) {
+                ReadBookInitRequest(
+                    bookUrl = route.bookUrl,
+                    inBookshelf = route.inBookshelf,
+                    chapterChanged = route.chapterChanged,
+                )
+            }
         val effectsReady = remember(readBookViewModel) { CompletableDeferred<Unit>() }
         val readerResumeState = remember(controller, lifecycleOwner) { booleanArrayOf(false) }
         val collectorReady = remember(readBookViewModel) { booleanArrayOf(false) }
+
         fun resumeReader() {
             if (readerResumeState[0]) return
             readerResumeState[0] = true
@@ -287,7 +293,7 @@ fun MainActivity.mainEntryProvider(
                         searchWord = word,
                         searchResultIndex = readBookViewModel.uiState.value.searchResultIndex,
                         autoFocus = autoFocus,
-                    )
+                    ),
                 )
             },
         )
@@ -298,15 +304,20 @@ fun MainActivity.mainEntryProvider(
             MainActivity.hasActiveReadBookRoute = true
             controller.onClose = { onNavigateBack() }
 
-            val lifecycleObserver = LifecycleEventObserver { _, event ->
-                when (event) {
-                    Lifecycle.Event.ON_RESUME -> {
-                        if (collectorReady[0]) resumeReader()
+            val lifecycleObserver =
+                LifecycleEventObserver { _, event ->
+                    when (event) {
+                        Lifecycle.Event.ON_RESUME -> {
+                            if (collectorReady[0]) resumeReader()
+                        }
+                        Lifecycle.Event.ON_PAUSE -> {
+                            pauseReader()
+                        }
+                        else -> {
+                            Unit
+                        }
                     }
-                    Lifecycle.Event.ON_PAUSE -> pauseReader()
-                    else -> Unit
                 }
-            }
             lifecycleOwner.lifecycle.addObserver(lifecycleObserver)
             onDispose {
                 pauseReader()
@@ -341,10 +352,11 @@ fun MainActivity.mainEntryProvider(
     }
 
     entry<MainRouteSearchContent> { route ->
-        val viewModel = koinViewModel<SearchContentViewModel>(
-            key = "SearchContent:${route.bookUrl}",
-            parameters = { parametersOf(route) }
-        )
+        val viewModel =
+            koinViewModel<SearchContentViewModel>(
+                key = "SearchContent:${route.bookUrl}",
+                parameters = { parametersOf(route) },
+            )
         SearchContentRouteScreen(
             viewModel = viewModel,
             autoFocus = route.autoFocus,
@@ -357,15 +369,17 @@ fun MainActivity.mainEntryProvider(
             onBackClick = { onNavigateBack() },
             onBookClick = { name, author ->
                 lifecycleScope.launch {
-                    val book = withContext(IO) {
-                        io.legado.app.data.appDb.bookDao.getBook(name, author)
-                    }
+                    val book =
+                        withContext(IO) {
+                            io.legado.app.data.appDb.bookDao
+                                .getBook(name, author)
+                        }
                     if (book != null) this@mainEntryProvider.startActivityForBook(book)
                 }
             },
             onSummaryClick = {
                 onNavigateToRoute(MainRouteReadRecordOverview)
-            }
+            },
         )
     }
 
@@ -374,32 +388,35 @@ fun MainActivity.mainEntryProvider(
             onBackClick = { onNavigateBack() },
             onBookClick = { name, author ->
                 lifecycleScope.launch {
-                    val book = withContext(IO) {
-                        io.legado.app.data.appDb.bookDao.getBook(name, author)
-                    }
+                    val book =
+                        withContext(IO) {
+                            io.legado.app.data.appDb.bookDao
+                                .getBook(name, author)
+                        }
                     if (book != null) this@mainEntryProvider.startActivityForBook(book)
                 }
-            }
+            },
         )
     }
 
     entry<MainRouteBookInfo>(
-        metadata = metadata {
+        metadata =
+        metadata {
             put(NavDisplay.TransitionKey) {
                 fadeIn(animationSpec = tween(300)) togetherWith
-                        fadeOut(animationSpec = tween(300))
+                    fadeOut(animationSpec = tween(300))
             }
             put(NavDisplay.PopTransitionKey) {
                 fadeIn(animationSpec = tween(300)) togetherWith
-                        fadeOut(animationSpec = tween(300))
+                    fadeOut(animationSpec = tween(300))
             }
             if (configuration.appShell.predictiveBackEnabled) {
                 put(NavDisplay.PredictivePopTransitionKey) { _ ->
                     fadeIn(animationSpec = tween(300)) togetherWith
-                            fadeOut(animationSpec = tween(300))
+                        fadeOut(animationSpec = tween(300))
                 }
             }
-        }
+        },
     ) { route ->
         val bookInfoViewModel = koinViewModel<BookInfoViewModel>(key = "BookInfo:${route.bookUrl}")
         BookInfoRouteScreen(
@@ -418,7 +435,7 @@ fun MainActivity.mainEntryProvider(
                         inBookshelf = inBookshelf,
                         chapterChanged = chapterChanged,
                         sharedCoverKey = route.sharedCoverKey ?: bookCoverSharedElementKey(route.bookUrl),
-                    )
+                    ),
                 )
             },
             sharedTransitionScope = sharedTransitionScope,
@@ -429,7 +446,7 @@ fun MainActivity.mainEntryProvider(
 
     entry<MainRouteHighlightTagRule> {
         HighlightTagRuleRouteScreen(
-            onBackClick = { onNavigateBack() }
+            onBackClick = { onNavigateBack() },
         )
     }
 
@@ -439,13 +456,19 @@ fun MainActivity.mainEntryProvider(
         LaunchedEffect(viewModel) {
             viewModel.effects.collectLatest { effect ->
                 when (effect) {
-                    is AboutEffect.OpenUrl -> context.openUrl(effect.url)
-                    is AboutEffect.ShowToast -> context.toastOnUi(effect.message)
-                    is AboutEffect.StartDownload -> Download.start(
-                        context,
-                        effect.url,
-                        effect.fileName
-                    )
+                    is AboutEffect.OpenUrl -> {
+                        context.openUrl(effect.url)
+                    }
+                    is AboutEffect.ShowToast -> {
+                        context.toastOnUi(effect.message)
+                    }
+                    is AboutEffect.StartDownload -> {
+                        Download.start(
+                            context,
+                            effect.url,
+                            effect.fileName,
+                        )
+                    }
                 }
             }
         }

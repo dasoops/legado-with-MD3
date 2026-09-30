@@ -4,7 +4,6 @@ import org.junit.Assert.assertEquals
 import org.junit.Test
 
 class ReadStyleExportFileNameTest {
-
     @Test
     fun usesStyleNameAsExportFileName() {
         assertEquals("预设 3.zip", readStyleExportFileName("  预设 3  "))

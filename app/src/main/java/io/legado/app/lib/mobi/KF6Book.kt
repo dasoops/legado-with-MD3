@@ -6,7 +6,6 @@ import io.legado.app.lib.mobi.entities.NCX
 import io.legado.app.lib.mobi.entities.TOC
 import java.nio.CharBuffer
 
-
 /**
  * Kindle Format 6 Book
  */
@@ -14,9 +13,8 @@ class KF6Book(
     pdbFile: PDBFile,
     headers: MobiEntryHeaders,
     kf8BoundaryOffset: Int,
-    resourceStart: Int
+    resourceStart: Int,
 ) : MobiBook(pdbFile, headers, kf8BoundaryOffset, resourceStart) {
-
     lateinit var sections: List<KF6Section>
     lateinit var sectionIdMap: LinkedHashMap<Int, ArrayList<TOC>>
 
@@ -49,6 +47,7 @@ class KF6Book(
         if (toc == null) {
             return
         }
+
         fun fmap(item: TOC) {
             val index = getIndexByHref(item.href)
             if (index == -1) return
@@ -66,6 +65,7 @@ class KF6Book(
 
     private fun processNCX() {
         val ncx = getNCX() ?: return
+
         fun fmap(item: NCX): TOC {
             val filepos = item.offset!!
             val href = "filepos:${filepos.toString().padStart(10, '0')}"
@@ -136,5 +136,4 @@ class KF6Book(
     companion object {
         val mbpPagebreakRegex = "(?i)<\\s*(?:mbp:)?pagebreak[^>]*>".toRegex()
     }
-
 }

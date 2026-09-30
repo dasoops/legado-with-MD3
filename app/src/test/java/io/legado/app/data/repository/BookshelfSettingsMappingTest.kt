@@ -6,7 +6,6 @@ import org.junit.Assert.assertEquals
 import org.junit.Test
 
 class BookshelfSettingsMappingTest {
-
     @Test
     fun `Bookshelf 48 键写读映射逐字段对应`() {
         assertEquals(47, BookshelfSettings().toPrefMap().size)
@@ -21,67 +20,69 @@ class BookshelfSettingsMappingTest {
 
     @Test
     fun `隐藏空分组通过真实原子路径只写对应键`() {
-        val values = captureAtomicUpdateValues(
-            current = BookshelfSettings(hideEmptyGroups = false),
-            read = { it.toBookshelfSettings() },
-            toPrefMap = BookshelfSettings::toPrefMap,
-            transform = { it.copy(hideEmptyGroups = true) },
-        )
+        val values =
+            captureAtomicUpdateValues(
+                current = BookshelfSettings(hideEmptyGroups = false),
+                read = { it.toBookshelfSettings() },
+                toPrefMap = BookshelfSettings::toPrefMap,
+                transform = { it.copy(hideEmptyGroups = true) },
+            )
 
         assertEquals(mapOf(PreferKey.hideEmptyGroups to true), values)
     }
 }
 
 private fun bookshelfMappingSamples(): List<BookshelfSettings> {
-    val base = BookshelfSettings(
-        bookGroupStyle = 101,
-        hideEmptyGroups = false,
-        bookshelfSort = 102,
-        bookshelfSortOrder = 103,
-        showUnread = false,
-        showUnreadNew = false,
-        showTip = false,
-        showBookCount = false,
-        showLastUpdateTime = false,
-        showBookIntro = false,
-        bookshelfShowIntro = false,
-        bookshelfShowTag = false,
-        bookshelfShowLatestChapter = false,
-        bookshelfIntroMaxLines = 104,
-        showWaitUpCount = false,
-        showBookshelfFastScroller = false,
-        shouldShowExpandButton = false,
-        bookshelfRefreshingLimit = 105,
-        bookshelfLayoutModePortrait = 106,
-        bookshelfLayoutGridPortrait = 107,
-        bookshelfLayoutModeLandscape = 108,
-        bookshelfLayoutGridLandscape = 109,
-        bookshelfLayoutListPortrait = 110,
-        bookshelfLayoutListLandscape = 111,
-        bookshelfFolderLayoutModePortrait = 112,
-        bookshelfFolderLayoutGridPortrait = 113,
-        bookshelfFolderLayoutModeLandscape = 114,
-        bookshelfFolderLayoutGridLandscape = 115,
-        bookshelfFolderLayoutListPortrait = 116,
-        bookshelfFolderLayoutListLandscape = 117,
-        bookshelfGridLayout = 118,
-        bookshelfLayoutCompact = false,
-        bookshelfListCoverCenter = false,
-        bookshelfListIntroBelowContent = false,
-        bookshelfShowDivider = false,
-        bookshelfTitleSmallFont = false,
-        bookshelfTitleCenter = false,
-        bookshelfTitleMaxLines = 119,
-        bookshelfCoverShadow = false,
-        bookshelfCardColor = 120,
-        bookshelfCardColorDark = 121,
-        bookshelfGroupListStyle = 122,
-        bookshelfGroupCoverCount = 123,
-        bookshelfListCoverWidth = 124,
-        bookshelfGridCoverWidth = 125,
-        autoRefreshBook = false,
-        saveTabPosition = 987654321L,
-    )
+    val base =
+        BookshelfSettings(
+            bookGroupStyle = 101,
+            hideEmptyGroups = false,
+            bookshelfSort = 102,
+            bookshelfSortOrder = 103,
+            showUnread = false,
+            showUnreadNew = false,
+            showTip = false,
+            showBookCount = false,
+            showLastUpdateTime = false,
+            showBookIntro = false,
+            bookshelfShowIntro = false,
+            bookshelfShowTag = false,
+            bookshelfShowLatestChapter = false,
+            bookshelfIntroMaxLines = 104,
+            showWaitUpCount = false,
+            showBookshelfFastScroller = false,
+            shouldShowExpandButton = false,
+            bookshelfRefreshingLimit = 105,
+            bookshelfLayoutModePortrait = 106,
+            bookshelfLayoutGridPortrait = 107,
+            bookshelfLayoutModeLandscape = 108,
+            bookshelfLayoutGridLandscape = 109,
+            bookshelfLayoutListPortrait = 110,
+            bookshelfLayoutListLandscape = 111,
+            bookshelfFolderLayoutModePortrait = 112,
+            bookshelfFolderLayoutGridPortrait = 113,
+            bookshelfFolderLayoutModeLandscape = 114,
+            bookshelfFolderLayoutGridLandscape = 115,
+            bookshelfFolderLayoutListPortrait = 116,
+            bookshelfFolderLayoutListLandscape = 117,
+            bookshelfGridLayout = 118,
+            bookshelfLayoutCompact = false,
+            bookshelfListCoverCenter = false,
+            bookshelfListIntroBelowContent = false,
+            bookshelfShowDivider = false,
+            bookshelfTitleSmallFont = false,
+            bookshelfTitleCenter = false,
+            bookshelfTitleMaxLines = 119,
+            bookshelfCoverShadow = false,
+            bookshelfCardColor = 120,
+            bookshelfCardColorDark = 121,
+            bookshelfGroupListStyle = 122,
+            bookshelfGroupCoverCount = 123,
+            bookshelfListCoverWidth = 124,
+            bookshelfGridCoverWidth = 125,
+            autoRefreshBook = false,
+            saveTabPosition = 987654321L,
+        )
     return listOf(
         base,
         base.copy(hideEmptyGroups = true),

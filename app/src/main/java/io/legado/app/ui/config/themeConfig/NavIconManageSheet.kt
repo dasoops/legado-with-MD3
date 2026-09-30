@@ -52,15 +52,16 @@ fun NavIconManageSheet(
     onSelectIcon: (String) -> Unit,
     onClearIcon: (String) -> Unit,
 ) {
-    val destinations = listOf(
-        NavIconDestination(
-            "bookshelf",
-            R.string.bookshelf,
-            settings.navIconBookshelf,
-            settings.navIconBookshelfSelected,
-        ),
-        NavIconDestination("my", R.string.my, settings.navIconMy, settings.navIconMySelected),
-    )
+    val destinations =
+        listOf(
+            NavIconDestination(
+                "bookshelf",
+                R.string.bookshelf,
+                settings.navIconBookshelf,
+                settings.navIconBookshelfSelected,
+            ),
+            NavIconDestination("my", R.string.my, settings.navIconMy, settings.navIconMySelected),
+        )
 
     AppModalBottomSheet(
         show = show,
@@ -68,12 +69,14 @@ fun NavIconManageSheet(
         title = stringResource(R.string.theme_config_nav_icons),
     ) {
         Column(
-            modifier = Modifier
+            modifier =
+            Modifier
                 .fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             Row(
-                modifier = Modifier
+                modifier =
+                Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 12.dp),
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
@@ -85,7 +88,8 @@ fun NavIconManageSheet(
             }
             destinations.forEach { destination ->
                 NormalCard(
-                    modifier = Modifier
+                    modifier =
+                    Modifier
                         .fillMaxWidth(),
                     cornerRadius = 16.dp,
                     containerColor = LegadoTheme.colorScheme.onSheetContent,
@@ -96,12 +100,14 @@ fun NavIconManageSheet(
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                         AppIcon(
-                            imageVector = AppIcons.mainDestination(
+                            imageVector =
+                            AppIcons.mainDestination(
                                 destination.mainDestination,
                                 selected = false,
                             ),
                             contentDescription = null,
-                            modifier = Modifier
+                            modifier =
+                            Modifier
                                 .padding(start = 4.dp)
                                 .size(24.dp),
                         )
@@ -157,9 +163,10 @@ private fun NavigationIconSlot(
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     AppIcon(
                         imageVector = Icons.Default.Add,
-                        contentDescription = stringResource(
+                        contentDescription =
+                        stringResource(
                             R.string.theme_config_add_nav_icon,
-                            label
+                            label,
                         ),
                         modifier = Modifier.size(24.dp),
                         tint = LegadoTheme.colorScheme.primary,
@@ -197,13 +204,14 @@ private fun NavigationIconColumnHeader(label: String) {
     ) {
         AppText(
             text = label,
-            style = LegadoTheme.typography.labelSmallEmphasized
+            style = LegadoTheme.typography.labelSmallEmphasized,
         )
     }
 }
 
 private val NavIconDestination.mainDestination: MainDestination
-    get() = when (key) {
-        MainDestination.Bookshelf.route -> MainDestination.Bookshelf
-        else -> MainDestination.My
-    }
+    get() =
+        when (key) {
+            MainDestination.Bookshelf.route -> MainDestination.Bookshelf
+            else -> MainDestination.My
+        }

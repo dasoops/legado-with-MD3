@@ -11,20 +11,27 @@ import com.bumptech.glide.request.target.CustomTarget
 import com.bumptech.glide.request.transition.Transition
 import java.lang.ref.WeakReference
 
-class GlideImageGetter(private val context: Context, textView: TextView, private val originalHtml: String) :
-    Html.ImageGetter {
+class GlideImageGetter(
+    private val context: Context,
+    textView: TextView,
+    private val originalHtml: String,
+) : Html.ImageGetter {
     companion object {
-        fun create(context: Context, textView: TextView, html: String): GlideImageGetter {
-            return GlideImageGetter(context, textView, html)
-        }
-        private fun createEmptyDrawable(): Drawable {
-            return object : Drawable() {
-                override fun draw(canvas: android.graphics.Canvas) = Unit
-                override fun setAlpha(alpha: Int) = Unit
-                override fun setColorFilter(colorFilter: ColorFilter?) = Unit
-                @Deprecated("Deprecated in Java")
-                override fun getOpacity(): Int = PixelFormat.TRANSPARENT
-            }
+        fun create(
+            context: Context,
+            textView: TextView,
+            html: String,
+        ): GlideImageGetter = GlideImageGetter(context, textView, html)
+
+        private fun createEmptyDrawable(): Drawable = object : Drawable() {
+            override fun draw(canvas: android.graphics.Canvas) = Unit
+
+            override fun setAlpha(alpha: Int) = Unit
+
+            override fun setColorFilter(colorFilter: ColorFilter?) = Unit
+
+            @Deprecated("Deprecated in Java")
+            override fun getOpacity(): Int = PixelFormat.TRANSPARENT
         }
     }
 
@@ -39,7 +46,8 @@ class GlideImageGetter(private val context: Context, textView: TextView, private
         val urlDrawable = GlideUrlDrawable()
         val target = createImageTarget(urlDrawable, source)
         targets.add(target)
-        Glide.with(context)
+        Glide
+            .with(context)
             .load(source)
             .into(target)
         return urlDrawable
@@ -47,12 +55,12 @@ class GlideImageGetter(private val context: Context, textView: TextView, private
 
     private fun createImageTarget(
         urlDrawable: GlideUrlDrawable,
-        source: String
+        source: String,
     ): CustomTarget<Drawable> {
         return object : CustomTarget<Drawable>() {
             override fun onResourceReady(
                 resource: Drawable,
-                transition: Transition<in Drawable>?
+                transition: Transition<in Drawable>?,
             ) {
                 targets.remove(this)
                 val textView = textViewRef.get() ?: return
@@ -60,11 +68,12 @@ class GlideImageGetter(private val context: Context, textView: TextView, private
                 val maxWidth = availableWidth.takeIf { it > 0 } ?: 700
                 val drawableWidth = resource.intrinsicWidth.coerceAtLeast(1)
                 val drawableHeight = resource.intrinsicHeight.coerceAtLeast(1)
-                val scale = if (drawableWidth > maxWidth) {
-                    maxWidth.toFloat() / drawableWidth
-                } else {
-                    1f
-                }
+                val scale =
+                    if (drawableWidth > maxWidth) {
+                        maxWidth.toFloat() / drawableWidth
+                    } else {
+                        1f
+                    }
                 val width = (drawableWidth * scale).toInt()
                 val height = (drawableHeight * scale).toInt()
                 resource.setBounds(0, 0, width, height)
@@ -108,13 +117,13 @@ class GlideImageGetter(private val context: Context, textView: TextView, private
             // 创建新的ImageGetter，但使用缓存
             val cachedImageGetter = CachedImageGetter(loadedDrawables)
             val newHtml =
-                Html.fromHtml(originalHtml,  Html.FROM_HTML_MODE_COMPACT, cachedImageGetter, null)
+                Html.fromHtml(originalHtml, Html.FROM_HTML_MODE_COMPACT, cachedImageGetter, null)
             textView.text = newHtml
         }
     }
 
     private class CachedImageGetter(
-        private val drawableCache: Map<String, Drawable>
+        private val drawableCache: Map<String, Drawable>,
     ) : Html.ImageGetter {
         override fun getDrawable(source: String?): Drawable {
             if (source.isNullOrBlank()) {

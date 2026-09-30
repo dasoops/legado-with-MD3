@@ -14,12 +14,16 @@ import javax.crypto.Cipher
 
 @Keep
 @Suppress("unused")
-class AsymmetricCrypto(private val algorithm: String) {
-
-    private val keyAlgorithm = algorithm.substringBefore('/').let { name ->
-        val separator = name.lowercase().lastIndexOf("with")
-        if (separator >= 0) name.substring(separator + 4) else name
-    }.let { if (it.equals("ECDSA", true)) "EC" else it }
+class AsymmetricCrypto(
+    private val algorithm: String,
+) {
+    private val keyAlgorithm =
+        algorithm
+            .substringBefore('/')
+            .let { name ->
+                val separator = name.lowercase().lastIndexOf("with")
+                if (separator >= 0) name.substring(separator + 4) else name
+            }.let { if (it.equals("ECDSA", true)) "EC" else it }
     private var publicKey: PublicKey
     private var privateKey: PrivateKey
 
@@ -47,7 +51,11 @@ class AsymmetricCrypto(private val algorithm: String) {
 
     private fun key(usePublicKey: Boolean?): Key = if (usePublicKey == true) publicKey else privateKey
 
-    private fun crypt(data: ByteArray, usePublicKey: Boolean?, mode: Int): ByteArray {
+    private fun crypt(
+        data: ByteArray,
+        usePublicKey: Boolean?,
+        mode: Int,
+    ): ByteArray {
         val key = key(usePublicKey)
         val cipher = Cipher.getInstance(algorithm)
         cipher.init(mode, key)
@@ -74,62 +82,69 @@ class AsymmetricCrypto(private val algorithm: String) {
         else -> keySize - 11
     }
 
-    private fun decode(data: String): ByteArray =
-        if (data.length % 2 == 0 && data.all { it.isDigit() || it.lowercaseChar() in 'a'..'f' }) {
-            data.hexToByteArray()
-        } else {
-            data.base64ToByteArray()
-        }
-
-    @JvmOverloads
-    fun decrypt(data: Any, usePublicKey: Boolean? = true): ByteArray {
-        return when (data) {
-            is ByteArray -> crypt(data, usePublicKey, Cipher.DECRYPT_MODE)
-            is String -> crypt(decode(data), usePublicKey, Cipher.DECRYPT_MODE)
-            is InputStream -> crypt(data.readBytes(), usePublicKey, Cipher.DECRYPT_MODE)
-            else -> throw IllegalArgumentException("Unexpected input type")
-        }
+    private fun decode(data: String): ByteArray = if (data.length % 2 == 0 && data.all { it.isDigit() || it.lowercaseChar() in 'a'..'f' }) {
+        data.hexToByteArray()
+    } else {
+        data.base64ToByteArray()
     }
 
     @JvmOverloads
-    fun decryptStr(data: Any, usePublicKey: Boolean? = true): String {
-        return when (data) {
-            is ByteArray -> String(decrypt(data, usePublicKey), Charsets.UTF_8)
-            is String -> String(decrypt(data, usePublicKey), Charsets.UTF_8)
-            is InputStream -> String(decrypt(data, usePublicKey), Charsets.UTF_8)
-            else -> throw IllegalArgumentException("Unexpected input type")
-        }
+    fun decrypt(
+        data: Any,
+        usePublicKey: Boolean? = true,
+    ): ByteArray = when (data) {
+        is ByteArray -> crypt(data, usePublicKey, Cipher.DECRYPT_MODE)
+        is String -> crypt(decode(data), usePublicKey, Cipher.DECRYPT_MODE)
+        is InputStream -> crypt(data.readBytes(), usePublicKey, Cipher.DECRYPT_MODE)
+        else -> throw IllegalArgumentException("Unexpected input type")
     }
 
     @JvmOverloads
-    fun encrypt(data: Any, usePublicKey: Boolean? = true): ByteArray {
-        return when (data) {
-            is ByteArray -> crypt(data, usePublicKey, Cipher.ENCRYPT_MODE)
-            is String -> crypt(data.toByteArray(), usePublicKey, Cipher.ENCRYPT_MODE)
-            is InputStream -> crypt(data.readBytes(), usePublicKey, Cipher.ENCRYPT_MODE)
-            else -> throw IllegalArgumentException("Unexpected input type")
-        }
+    fun decryptStr(
+        data: Any,
+        usePublicKey: Boolean? = true,
+    ): String = when (data) {
+        is ByteArray -> String(decrypt(data, usePublicKey), Charsets.UTF_8)
+        is String -> String(decrypt(data, usePublicKey), Charsets.UTF_8)
+        is InputStream -> String(decrypt(data, usePublicKey), Charsets.UTF_8)
+        else -> throw IllegalArgumentException("Unexpected input type")
     }
 
     @JvmOverloads
-    fun encryptHex(data: Any, usePublicKey: Boolean? = true): String {
-        return when (data) {
-            is ByteArray, is String, is InputStream -> encrypt(data, usePublicKey).toHexString()
-            else -> throw IllegalArgumentException("Unexpected input type")
-        }
+    fun encrypt(
+        data: Any,
+        usePublicKey: Boolean? = true,
+    ): ByteArray = when (data) {
+        is ByteArray -> crypt(data, usePublicKey, Cipher.ENCRYPT_MODE)
+        is String -> crypt(data.toByteArray(), usePublicKey, Cipher.ENCRYPT_MODE)
+        is InputStream -> crypt(data.readBytes(), usePublicKey, Cipher.ENCRYPT_MODE)
+        else -> throw IllegalArgumentException("Unexpected input type")
     }
 
     @JvmOverloads
-    fun encryptBase64(data: Any, usePublicKey: Boolean? = true): String {
-        return encrypt(data, usePublicKey).toBase64()
+    fun encryptHex(
+        data: Any,
+        usePublicKey: Boolean? = true,
+    ): String = when (data) {
+        is ByteArray, is String, is InputStream -> encrypt(data, usePublicKey).toHexString()
+        else -> throw IllegalArgumentException("Unexpected input type")
     }
 
     @JvmOverloads
-    fun decryptHex(data: String, usePublicKey: Boolean? = true): ByteArray =
-        crypt(data.hexToByteArray(), usePublicKey, Cipher.DECRYPT_MODE)
+    fun encryptBase64(
+        data: Any,
+        usePublicKey: Boolean? = true,
+    ): String = encrypt(data, usePublicKey).toBase64()
 
     @JvmOverloads
-    fun decryptBase64(data: String, usePublicKey: Boolean? = true): ByteArray =
-        crypt(data.base64ToByteArray(), usePublicKey, Cipher.DECRYPT_MODE)
+    fun decryptHex(
+        data: String,
+        usePublicKey: Boolean? = true,
+    ): ByteArray = crypt(data.hexToByteArray(), usePublicKey, Cipher.DECRYPT_MODE)
 
+    @JvmOverloads
+    fun decryptBase64(
+        data: String,
+        usePublicKey: Boolean? = true,
+    ): ByteArray = crypt(data.base64ToByteArray(), usePublicKey, Cipher.DECRYPT_MODE)
 }

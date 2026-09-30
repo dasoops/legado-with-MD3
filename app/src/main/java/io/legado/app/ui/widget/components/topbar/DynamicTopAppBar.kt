@@ -27,7 +27,6 @@ import io.legado.app.ui.widget.components.icon.AppIcons
 import io.legado.app.ui.widget.components.list.ListUiState
 import io.legado.app.ui.widget.components.menuItem.RoundDropdownMenu
 
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun <T> DynamicTopAppBar(
@@ -48,23 +47,30 @@ fun <T> DynamicTopAppBar(
     onClearSelection: () -> Unit,
     topBarActions: @Composable RowScope.() -> Unit = {},
     dropDownMenuContent: @Composable (ColumnScope.(dismiss: () -> Unit) -> Unit)? = null,
-    bottomContent: @Composable (ColumnScope.(GlassTopAppBarScrollBehavior) -> Unit)? = null
+    bottomContent: @Composable (ColumnScope.(GlassTopAppBarScrollBehavior) -> Unit)? = null,
 ) {
     var showMenu by remember { mutableStateOf(false) }
     val isSelecting = state.selectedIds.isNotEmpty()
 
-
     GlassMediumFlexibleTopAppBar(
-        modifier = Modifier
+        modifier =
+        Modifier
             .fillMaxWidth(),
-        title = when {
-            state.isLoading -> stringResource(R.string.list_loading_title)
-            isSelecting -> stringResource(
-                R.string.list_selected_count,
-                state.selectedIds.size,
-                state.items.size
-            )
-            else -> title
+        title =
+        when {
+            state.isLoading -> {
+                stringResource(R.string.list_loading_title)
+            }
+            isSelecting -> {
+                stringResource(
+                    R.string.list_selected_count,
+                    state.selectedIds.size,
+                    state.items.size,
+                )
+            }
+            else -> {
+                title
+            }
         },
         useCharMode = isSelecting || state.isLoading,
         subtitle = subtitle,
@@ -73,9 +79,10 @@ fun <T> DynamicTopAppBar(
                 TopBarNavigationButton(
                     onClick = { if (isSelecting) onClearSelection() else onBackClick?.invoke() },
                     imageVector = if (isSelecting) AppIcons.Close else backNavigationIcon,
-                    contentDescription = stringResource(
-                        if (isSelecting) R.string.cancel_select else R.string.back
-                    )
+                    contentDescription =
+                    stringResource(
+                        if (isSelecting) R.string.cancel_select else R.string.back,
+                    ),
                 )
             }
         },
@@ -85,7 +92,7 @@ fun <T> DynamicTopAppBar(
                     TopBarActionButton(
                         onClick = { onSearchToggle(!state.isSearch) },
                         imageVector = AppIcons.Search,
-                        contentDescription = stringResource(R.string.search)
+                        contentDescription = stringResource(R.string.search),
                     )
                 }
 
@@ -96,11 +103,11 @@ fun <T> DynamicTopAppBar(
                         TopBarActionButton(
                             onClick = { showMenu = true },
                             imageVector = AppIcons.MoreVert,
-                            contentDescription = stringResource(R.string.more_menu)
+                            contentDescription = stringResource(R.string.more_menu),
                         )
                         RoundDropdownMenu(
                             expanded = showMenu,
-                            onDismissRequest = { showMenu = false }
+                            onDismissRequest = { showMenu = false },
                         ) { dismiss ->
                             content(dismiss)
                         }
@@ -111,11 +118,12 @@ fun <T> DynamicTopAppBar(
         scrollBehavior = scrollBehavior,
         bottomContent = {
             AnimatedVisibility(
-                modifier = Modifier
+                modifier =
+                Modifier
                     .adaptiveHorizontalPadding(),
                 visible = state.isSearch && !isSelecting,
                 enter = expandVertically() + fadeIn(),
-                exit = shrinkVertically() + fadeOut()
+                exit = shrinkVertically() + fadeOut(),
             ) {
                 SearchBar(
                     query = state.searchKey,
@@ -123,11 +131,11 @@ fun <T> DynamicTopAppBar(
                     onSearch = onSearchSubmit,
                     placeholder = searchPlaceholder,
                     trailingIcon = searchTrailingIcon,
-                    dropdownMenu = searchDropdownMenu
+                    dropdownMenu = searchDropdownMenu,
                 )
             }
 
             bottomContent?.invoke(this, scrollBehavior)
-        }
+        },
     )
 }

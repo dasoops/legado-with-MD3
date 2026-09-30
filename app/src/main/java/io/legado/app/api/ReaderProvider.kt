@@ -18,8 +18,13 @@ import kotlinx.coroutines.runBlocking
  */
 class ReaderProvider : ContentProvider() {
     private enum class RequestCode {
-        SaveBook, GetBookshelf, RefreshToc, GetChapterList, GetBookContent, GetBookCover,
-        SaveBookProgress
+        SaveBook,
+        GetBookshelf,
+        RefreshToc,
+        GetChapterList,
+        GetBookContent,
+        GetBookCover,
+        SaveBookProgress,
     }
 
     private val postBodyKey = "json"
@@ -48,34 +53,42 @@ class ReaderProvider : ContentProvider() {
     override fun delete(
         uri: Uri,
         selection: String?,
-        selectionArgs: Array<String>?
-    ): Int {
-        return 0
-    }
+        selectionArgs: Array<String>?,
+    ): Int = 0
 
-    override fun insert(uri: Uri, values: ContentValues?): Uri? {
+    override fun insert(
+        uri: Uri,
+        values: ContentValues?,
+    ): Uri? {
         if (sMatcher.match(uri) < 0) return null
         runBlocking {
             when (RequestCode.entries[sMatcher.match(uri)]) {
-                RequestCode.SaveBook -> values?.let {
-                    BookController.saveBook(values.getAsString(postBodyKey))
+                RequestCode.SaveBook -> {
+                    values?.let {
+                        BookController.saveBook(values.getAsString(postBodyKey))
+                    }
                 }
-
-                RequestCode.SaveBookProgress -> values?.let {
-                    BookController.saveBookProgress(values.getAsString(postBodyKey))
+                RequestCode.SaveBookProgress -> {
+                    values?.let {
+                        BookController.saveBookProgress(values.getAsString(postBodyKey))
+                    }
                 }
-
-                else -> throw IllegalStateException(
-                    "Unexpected value: " + RequestCode.entries[sMatcher.match(uri)].name
-                )
+                else -> {
+                    throw IllegalStateException(
+                        "Unexpected value: " + RequestCode.entries[sMatcher.match(uri)].name,
+                    )
+                }
             }
         }
         return null
     }
 
     override fun query(
-        uri: Uri, projection: Array<String>?, selection: String?,
-        selectionArgs: Array<String>?, sortOrder: String?
+        uri: Uri,
+        projection: Array<String>?,
+        selection: String?,
+        selectionArgs: Array<String>?,
+        sortOrder: String?,
     ): Cursor? {
         val map: MutableMap<String, ArrayList<String>> = HashMap()
         uri.getQueryParameter("url")?.let {
@@ -87,36 +100,41 @@ class ReaderProvider : ContentProvider() {
         uri.getQueryParameter("path")?.let {
             map["path"] = arrayListOf(it)
         }
-        return if (sMatcher.match(uri) < 0) null else when (RequestCode.entries[sMatcher.match(uri)]) {
-            RequestCode.GetBookshelf -> SimpleCursor(BookController.bookshelf)
-            RequestCode.GetBookContent -> SimpleCursor(BookController.getBookContent(map))
-            RequestCode.RefreshToc -> SimpleCursor(BookController.refreshToc(map))
-            RequestCode.GetChapterList -> SimpleCursor(BookController.getChapterList(map))
-            RequestCode.GetBookCover -> SimpleCursor(BookController.getCover(map))
-            else -> throw IllegalStateException(
-                "Unexpected value: " + RequestCode.entries[sMatcher.match(uri)].name
-            )
+        return if (sMatcher.match(uri) < 0) {
+            null
+        } else {
+            when (RequestCode.entries[sMatcher.match(uri)]) {
+                RequestCode.GetBookshelf -> SimpleCursor(BookController.bookshelf)
+                RequestCode.GetBookContent -> SimpleCursor(BookController.getBookContent(map))
+                RequestCode.RefreshToc -> SimpleCursor(BookController.refreshToc(map))
+                RequestCode.GetChapterList -> SimpleCursor(BookController.getChapterList(map))
+                RequestCode.GetBookCover -> SimpleCursor(BookController.getCover(map))
+                else -> throw IllegalStateException(
+                    "Unexpected value: " + RequestCode.entries[sMatcher.match(uri)].name,
+                )
+            }
         }
     }
 
     override fun update(
-        uri: Uri, values: ContentValues?, selection: String?,
-        selectionArgs: Array<String>?
+        uri: Uri,
+        values: ContentValues?,
+        selection: String?,
+        selectionArgs: Array<String>?,
     ) = throw UnsupportedOperationException("Not yet implemented")
-
 
     /**
      * Simple inner class to deliver json callback data.
      *
      * Only getString() makes sense.
      */
-    private class SimpleCursor(data: ReturnData?) : MatrixCursor(arrayOf("result"), 1) {
-
+    private class SimpleCursor(
+        data: ReturnData?,
+    ) : MatrixCursor(arrayOf("result"), 1) {
         private val mData: String = Gson().toJson(data)
 
         init {
             addRow(arrayOf(mData))
         }
-
     }
 }

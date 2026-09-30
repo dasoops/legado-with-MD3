@@ -37,7 +37,6 @@ class ReadConfigUpdateDelegate(
     private val readSettingsRepository: ReadSettingsRepository,
     private val readBookStyleConfigRepository: ReadStyleGateway,
 ) {
-
     interface Host {
         /** 当前菜单配置快照，个别分支要读旧值做回退判断。 */
         val menuConfig: ReadMenuConfig
@@ -67,8 +66,10 @@ class ReadConfigUpdateDelegate(
             is ConfigUpdate.TextItalic,
             is ConfigUpdate.TextBold,
             is ConfigUpdate.TextColor,
-            is ConfigUpdate.TextAccentColor -> Unit
-
+            is ConfigUpdate.TextAccentColor,
+            -> {
+                Unit
+            }
             // --- Title style ---
             is ConfigUpdate.TitleMode,
             is ConfigUpdate.TitleBold,
@@ -83,8 +84,10 @@ class ReadConfigUpdateDelegate(
             is ConfigUpdate.TitleFont,
             is ConfigUpdate.TitleSegType,
             is ConfigUpdate.TitleSegDistance,
-            is ConfigUpdate.TitleSegFlag -> Unit
-
+            is ConfigUpdate.TitleSegFlag,
+            -> {
+                Unit
+            }
             // --- Header / footer tips ---
             is ConfigUpdate.HeaderMode,
             is ConfigUpdate.FooterMode,
@@ -109,8 +112,10 @@ class ReadConfigUpdateDelegate(
             is ConfigUpdate.TipHeaderColorNight,
             is ConfigUpdate.TipFooterColor,
             is ConfigUpdate.TipFooterColorNight,
-            is ConfigUpdate.TipDividerColor -> Unit
-
+            is ConfigUpdate.TipDividerColor,
+            -> {
+                Unit
+            }
             // --- Layout / style ---
             is ConfigUpdate.StyleSelect -> {
                 scope.launch {
@@ -127,8 +132,9 @@ class ReadConfigUpdateDelegate(
                     readSettingsRepository.setShareLayout(update.value)
                 }
             }
-            is ConfigUpdate.PageAnim -> Unit
-
+            is ConfigUpdate.PageAnim -> {
+                Unit
+            }
             // --- Menu appearance ---
             is ConfigUpdate.MenuBgColor -> {
                 scope.launch {
@@ -196,7 +202,6 @@ class ReadConfigUpdateDelegate(
                 }
                 postEvent(EventBus.UPDATE_READ_ACTION_BAR, true)
             }
-
             // --- Menu bar border ---
             is ConfigUpdate.BorderWidth -> {
                 scope.launch {
@@ -216,14 +221,15 @@ class ReadConfigUpdateDelegate(
                 }
                 host.updateMenuConfig { it.copy(readMenuBorderColorNight = update.color) }
             }
-
             // --- Shadow ---
             is ConfigUpdate.TextShadow,
             is ConfigUpdate.ShadowRadius,
             is ConfigUpdate.ShadowDx,
             is ConfigUpdate.ShadowDy,
-            is ConfigUpdate.ShadowColor -> Unit
-
+            is ConfigUpdate.ShadowColor,
+            -> {
+                Unit
+            }
             // --- Underline ---
             is ConfigUpdate.Underline,
             is ConfigUpdate.DottedLine,
@@ -232,28 +238,36 @@ class ReadConfigUpdateDelegate(
             is ConfigUpdate.UnderlinePadding,
             is ConfigUpdate.DottedBase,
             is ConfigUpdate.DottedRatio,
-            is ConfigUpdate.UnderlineColor -> Unit
-
+            is ConfigUpdate.UnderlineColor,
+            -> {
+                Unit
+            }
             // --- Body padding ---
             is ConfigUpdate.PaddingTop,
             is ConfigUpdate.PaddingBottom,
             is ConfigUpdate.PaddingLeft,
-            is ConfigUpdate.PaddingRight -> Unit
-
+            is ConfigUpdate.PaddingRight,
+            -> {
+                Unit
+            }
             // --- Header padding ---
             is ConfigUpdate.HeaderPaddingTop,
             is ConfigUpdate.HeaderPaddingBottom,
             is ConfigUpdate.HeaderPaddingLeft,
             is ConfigUpdate.HeaderPaddingRight,
-            is ConfigUpdate.ShowHeaderLine -> Unit
-
+            is ConfigUpdate.ShowHeaderLine,
+            -> {
+                Unit
+            }
             // --- Footer padding ---
             is ConfigUpdate.FooterPaddingTop,
             is ConfigUpdate.FooterPaddingBottom,
             is ConfigUpdate.FooterPaddingLeft,
             is ConfigUpdate.FooterPaddingRight,
-            is ConfigUpdate.ShowFooterLine -> Unit
-
+            is ConfigUpdate.ShowFooterLine,
+            -> {
+                Unit
+            }
             // --- Background / display ---
             is ConfigUpdate.BgStr,
             is ConfigUpdate.BgStrNight,
@@ -263,7 +277,10 @@ class ReadConfigUpdateDelegate(
             is ConfigUpdate.BgTypeEInk,
             is ConfigUpdate.BgAlpha,
             is ConfigUpdate.StatusIconDark,
-            is ConfigUpdate.StyleName -> Unit
+            is ConfigUpdate.StyleName,
+            -> {
+                Unit
+            }
             is ConfigUpdate.MenuIconShowText -> {
                 scope.launch {
                     readSettingsRepository.setReadMenuIconShowText(update.value)
@@ -306,20 +323,25 @@ class ReadConfigUpdateDelegate(
                 host.updateMenuConfig { it.copy(readMenuBottomCornerRadius = value) }
             }
             is ConfigUpdate.FloatingBottomBar -> {
-                val needsBlurFallback = !update.value &&
+                val needsBlurFallback =
+                    !update.value &&
                         host.menuConfig.readMenuBottomBarBlurMode ==
-                        ReadMenuBlurMode.LiquidGlass
+                        ReadMenuBlurMode.LIQUID_GLASS
                 scope.launch {
                     readSettingsRepository.setReadMenuFloatingBottomBar(update.value)
                     if (needsBlurFallback) {
-                        readSettingsRepository.setReadMenuBottomBarBlurMode(ReadMenuBlurMode.Haze)
+                        readSettingsRepository.setReadMenuBottomBarBlurMode(ReadMenuBlurMode.HAZE)
                     }
                 }
                 host.updateMenuConfig {
                     it.copy(
                         readMenuFloatingBottomBar = update.value,
-                        readMenuBottomBarBlurMode = if (needsBlurFallback) ReadMenuBlurMode.Haze
-                        else it.readMenuBottomBarBlurMode,
+                        readMenuBottomBarBlurMode =
+                        if (needsBlurFallback) {
+                            ReadMenuBlurMode.HAZE
+                        } else {
+                            it.readMenuBottomBarBlurMode
+                        },
                     )
                 }
             }
@@ -330,9 +352,10 @@ class ReadConfigUpdateDelegate(
                 host.updateMenuConfig { it.copy(showMenuIcon = update.value) }
             }
             is ConfigUpdate.MenuTopBarBlurMode -> {
-                val mode = update.value.coerceIn(0, 2).let {
-                    if (it == ReadMenuBlurMode.LiquidGlass) ReadMenuBlurMode.Haze else it
-                }
+                val mode =
+                    update.value.coerceIn(0, 2).let {
+                        if (it == ReadMenuBlurMode.LIQUID_GLASS) ReadMenuBlurMode.HAZE else it
+                    }
                 scope.launch {
                     readSettingsRepository.setReadMenuTopBarBlurMode(mode)
                 }
@@ -340,7 +363,6 @@ class ReadConfigUpdateDelegate(
                     it.copy(readMenuTopBarBlurMode = mode)
                 }
             }
-
             is ConfigUpdate.MenuBottomBarBlurMode -> {
                 val mode = update.value.coerceIn(0, 2)
                 scope.launch {
@@ -350,7 +372,6 @@ class ReadConfigUpdateDelegate(
                     it.copy(readMenuBottomBarBlurMode = mode)
                 }
             }
-
             is ConfigUpdate.MenuTopBarLiquidGlassButtons -> {
                 scope.launch {
                     readSettingsRepository.setReadMenuTopBarLiquidGlassButtons(update.value)
@@ -359,7 +380,6 @@ class ReadConfigUpdateDelegate(
                     it.copy(readMenuTopBarLiquidGlassButtons = update.value)
                 }
             }
-
             is ConfigUpdate.MenuTopBarMergeButtons -> {
                 scope.launch {
                     readSettingsRepository.setReadMenuTopBarMergeButtons(update.value)
@@ -368,7 +388,6 @@ class ReadConfigUpdateDelegate(
                     it.copy(readMenuTopBarMergeButtons = update.value)
                 }
             }
-
             is ConfigUpdate.MenuTopBarTitleCapsule -> {
                 scope.launch {
                     readSettingsRepository.setReadMenuTopBarTitleCapsule(update.value)
@@ -377,7 +396,6 @@ class ReadConfigUpdateDelegate(
                     it.copy(readMenuTopBarTitleCapsule = update.value)
                 }
             }
-
             is ConfigUpdate.MenuBottomBarLiquidGlassButtons -> {
                 scope.launch {
                     readSettingsRepository.setReadMenuBottomBarLiquidGlassButtons(update.value)
@@ -386,7 +404,6 @@ class ReadConfigUpdateDelegate(
                     it.copy(readMenuBottomBarLiquidGlassButtons = update.value)
                 }
             }
-
             is ConfigUpdate.MenuFloatingIconLiquidGlass -> {
                 scope.launch {
                     readSettingsRepository.setReadMenuFloatingIconLiquidGlass(update.value)
@@ -395,11 +412,11 @@ class ReadConfigUpdateDelegate(
                     it.copy(readMenuFloatingIconLiquidGlass = update.value)
                 }
             }
-
             is ConfigUpdate.MenuTopBarBlurSelection -> {
-                val mode = update.mode.coerceIn(0, 2).let {
-                    if (it == ReadMenuBlurMode.LiquidGlass) ReadMenuBlurMode.Haze else it
-                }
+                val mode =
+                    update.mode.coerceIn(0, 2).let {
+                        if (it == ReadMenuBlurMode.LIQUID_GLASS) ReadMenuBlurMode.HAZE else it
+                    }
                 val style = update.style.coerceIn(0, 1)
                 scope.launch {
                     readSettingsRepository.setReadMenuTopBarBlurMode(mode)
@@ -412,7 +429,6 @@ class ReadConfigUpdateDelegate(
                     )
                 }
             }
-
             is ConfigUpdate.MenuBottomBarBlurStyle -> {
                 val style = update.value.coerceIn(0, 1)
                 scope.launch {
@@ -469,7 +485,7 @@ class ReadConfigUpdateDelegate(
                 }
                 scope.launch {
                     readSettingsRepository.setReadMenuCustomIcons(
-                        ReadBookConfig.encodeReadMenuCustomIcons(icons)
+                        ReadBookConfig.encodeReadMenuCustomIcons(icons),
                     )
                 }
                 host.updateMenuConfig { it.copy(readMenuCustomIcons = icons.toImmutableMap()) }
@@ -485,7 +501,7 @@ class ReadConfigUpdateDelegate(
                 }
                 scope.launch {
                     readSettingsRepository.setTitleBarCustomIcons(
-                        ReadBookConfig.encodeReadMenuCustomIcons(icons)
+                        ReadBookConfig.encodeReadMenuCustomIcons(icons),
                     )
                 }
                 host.updateMenuConfig { it.copy(titleBarCustomIcons = icons.toImmutableMap()) }
@@ -508,7 +524,6 @@ class ReadConfigUpdateDelegate(
                 }
                 host.updateMenuConfig { it.copy(titleBarCompact = update.value) }
             }
-
             // --- System UI (also persists to DataStore) ---
             is ConfigUpdate.HideStatusBar -> {
                 scope.launch {
@@ -520,7 +535,6 @@ class ReadConfigUpdateDelegate(
                     readSettingsRepository.setHideNavigationBar(update.value)
                 }
             }
-
             // --- Display toggles ---
             is ConfigUpdate.PaddingDisplayCutouts -> {
                 scope.launch {
@@ -567,7 +581,6 @@ class ReadConfigUpdateDelegate(
                 }
                 postEvent(PreferKey.showBrightnessView, "")
             }
-
             is ConfigUpdate.BrightnessVwPos -> {
                 scope.launch {
                     readSettingsRepository.setBrightnessVwPos(update.value)
@@ -576,7 +589,6 @@ class ReadConfigUpdateDelegate(
                     it.copy(brightnessVwPos = update.value)
                 }
             }
-
             is ConfigUpdate.BrightnessAuto -> {
                 host.updateMenuConfig {
                     it.copy(brightnessAuto = update.value)
@@ -587,8 +599,8 @@ class ReadConfigUpdateDelegate(
                 host.emitEffect(
                     ReadBookEffect.ToggleBrightnessAuto(
                         update.value,
-                        host.menuConfig.readBrightness
-                    )
+                        host.menuConfig.readBrightness,
+                    ),
                 )
             }
             is ConfigUpdate.UseUnderlineGlobal -> {
@@ -640,7 +652,7 @@ class ReadConfigUpdateDelegate(
                     // 等写入落地再发 UpdateStyle，否则 upBookmarkBadge 读到旧尺寸
                     readSettingsRepository.preferences.first { it.bookmarkBadgeSize == update.value }
                     host.emitEffect(
-                        ReadBookEffect.UpdateReaderConfig(setOf(ConfigUpdateAction.UpdateStyle))
+                        ReadBookEffect.UpdateReaderConfig(setOf(ConfigUpdateAction.UpdateStyle)),
                     )
                 }
             }
@@ -720,14 +732,12 @@ class ReadConfigUpdateDelegate(
                 }
                 postEvent(EventBus.UPDATE_READ_ACTION_BAR, true)
             }
-
             // --- Auto read ---
             is ConfigUpdate.AutoReadSpeed -> {
                 scope.launch {
                     readSettingsRepository.setAutoReadSpeed(update.value)
                 }
             }
-
             // --- Chinese converter ---
             is ConfigUpdate.ChineseConverterType -> {
                 scope.launch {
@@ -748,126 +758,285 @@ class ReadConfigUpdateDelegate(
     }
 
     private fun ConfigUpdate.toReadStyleMutation(): ReadStyleMutation? = when (this) {
-        is ConfigUpdate.TextSize -> intMutation(ReadStyleIntKey.TextSize, value)
-        is ConfigUpdate.LetterSpacing -> floatMutation(ReadStyleFloatKey.LetterSpacing, value)
-        is ConfigUpdate.LineSpacing -> intMutation(ReadStyleIntKey.LineSpacing, value)
-        is ConfigUpdate.ParagraphSpacing -> intMutation(ReadStyleIntKey.ParagraphSpacing, value)
-        is ConfigUpdate.ParagraphIndent -> stringMutation(ReadStyleStringKey.ParagraphIndent, value)
-        is ConfigUpdate.TextItalic -> booleanMutation(ReadStyleBooleanKey.TextItalic, value)
-        is ConfigUpdate.TextBold -> intMutation(ReadStyleIntKey.TextBold, value)
-        is ConfigUpdate.TextColor -> colorMutation(ReadStyleColorKey.Text, color)
-        is ConfigUpdate.TextAccentColor -> colorMutation(ReadStyleColorKey.TextAccent, color)
-        is ConfigUpdate.TitleMode -> intMutation(ReadStyleIntKey.TitleMode, value)
-        is ConfigUpdate.TitleBold -> intMutation(ReadStyleIntKey.TitleBold, value)
-        is ConfigUpdate.TitleSegScaling -> floatMutation(ReadStyleFloatKey.TitleSegScaling, value)
-        is ConfigUpdate.TitleLineSpacingExtra ->
+        is ConfigUpdate.TextSize -> {
+            intMutation(ReadStyleIntKey.TextSize, value)
+        }
+        is ConfigUpdate.LetterSpacing -> {
+            floatMutation(ReadStyleFloatKey.LetterSpacing, value)
+        }
+        is ConfigUpdate.LineSpacing -> {
+            intMutation(ReadStyleIntKey.LineSpacing, value)
+        }
+        is ConfigUpdate.ParagraphSpacing -> {
+            intMutation(ReadStyleIntKey.ParagraphSpacing, value)
+        }
+        is ConfigUpdate.ParagraphIndent -> {
+            stringMutation(ReadStyleStringKey.ParagraphIndent, value)
+        }
+        is ConfigUpdate.TextItalic -> {
+            booleanMutation(ReadStyleBooleanKey.TextItalic, value)
+        }
+        is ConfigUpdate.TextBold -> {
+            intMutation(ReadStyleIntKey.TextBold, value)
+        }
+        is ConfigUpdate.TextColor -> {
+            colorMutation(ReadStyleColorKey.Text, color)
+        }
+        is ConfigUpdate.TextAccentColor -> {
+            colorMutation(ReadStyleColorKey.TextAccent, color)
+        }
+        is ConfigUpdate.TitleMode -> {
+            intMutation(ReadStyleIntKey.TitleMode, value)
+        }
+        is ConfigUpdate.TitleBold -> {
+            intMutation(ReadStyleIntKey.TitleBold, value)
+        }
+        is ConfigUpdate.TitleSegScaling -> {
+            floatMutation(ReadStyleFloatKey.TitleSegScaling, value)
+        }
+        is ConfigUpdate.TitleLineSpacingExtra -> {
             intMutation(ReadStyleIntKey.TitleLineSpacingExtra, value)
-        is ConfigUpdate.TitleLineSpacingSub ->
+        }
+        is ConfigUpdate.TitleLineSpacingSub -> {
             intMutation(ReadStyleIntKey.TitleLineSpacingSub, value)
-        is ConfigUpdate.TitleSize -> intMutation(ReadStyleIntKey.TitleSize, value)
-        is ConfigUpdate.TitleTopSpacing -> intMutation(ReadStyleIntKey.TitleTopSpacing, value)
-        is ConfigUpdate.TitleBottomSpacing ->
+        }
+        is ConfigUpdate.TitleSize -> {
+            intMutation(ReadStyleIntKey.TitleSize, value)
+        }
+        is ConfigUpdate.TitleTopSpacing -> {
+            intMutation(ReadStyleIntKey.TitleTopSpacing, value)
+        }
+        is ConfigUpdate.TitleBottomSpacing -> {
             intMutation(ReadStyleIntKey.TitleBottomSpacing, value)
-        is ConfigUpdate.TitleColor -> colorMutation(ReadStyleColorKey.Title, color)
-        is ConfigUpdate.TitleColorNight -> colorMutation(ReadStyleColorKey.TitleNight, color)
-        is ConfigUpdate.TitleFont -> stringMutation(ReadStyleStringKey.TitleFont, path)
-        is ConfigUpdate.TitleSegType -> intMutation(ReadStyleIntKey.TitleSegType, value)
-        is ConfigUpdate.TitleSegDistance -> intMutation(ReadStyleIntKey.TitleSegDistance, value)
-        is ConfigUpdate.TitleSegFlag -> stringMutation(ReadStyleStringKey.TitleSegFlag, value)
-        is ConfigUpdate.HeaderMode -> intMutation(ReadStyleIntKey.HeaderMode, value)
-        is ConfigUpdate.FooterMode -> intMutation(ReadStyleIntKey.FooterMode, value)
-        is ConfigUpdate.TipHeaderLeft -> intMutation(ReadStyleIntKey.TipHeaderLeft, value)
-        is ConfigUpdate.TipHeaderMiddle -> intMutation(ReadStyleIntKey.TipHeaderMiddle, value)
-        is ConfigUpdate.TipHeaderRight -> intMutation(ReadStyleIntKey.TipHeaderRight, value)
-        is ConfigUpdate.TipFooterLeft -> intMutation(ReadStyleIntKey.TipFooterLeft, value)
-        is ConfigUpdate.TipFooterMiddle -> intMutation(ReadStyleIntKey.TipFooterMiddle, value)
-        is ConfigUpdate.TipFooterRight -> intMutation(ReadStyleIntKey.TipFooterRight, value)
-        is ConfigUpdate.HeaderFont -> stringMutation(ReadStyleStringKey.HeaderFont, path)
-        is ConfigUpdate.CustomTipHeaderLeft ->
+        }
+        is ConfigUpdate.TitleColor -> {
+            colorMutation(ReadStyleColorKey.Title, color)
+        }
+        is ConfigUpdate.TitleColorNight -> {
+            colorMutation(ReadStyleColorKey.TitleNight, color)
+        }
+        is ConfigUpdate.TitleFont -> {
+            stringMutation(ReadStyleStringKey.TitleFont, path)
+        }
+        is ConfigUpdate.TitleSegType -> {
+            intMutation(ReadStyleIntKey.TitleSegType, value)
+        }
+        is ConfigUpdate.TitleSegDistance -> {
+            intMutation(ReadStyleIntKey.TitleSegDistance, value)
+        }
+        is ConfigUpdate.TitleSegFlag -> {
+            stringMutation(ReadStyleStringKey.TitleSegFlag, value)
+        }
+        is ConfigUpdate.HeaderMode -> {
+            intMutation(ReadStyleIntKey.HeaderMode, value)
+        }
+        is ConfigUpdate.FooterMode -> {
+            intMutation(ReadStyleIntKey.FooterMode, value)
+        }
+        is ConfigUpdate.TipHeaderLeft -> {
+            intMutation(ReadStyleIntKey.TipHeaderLeft, value)
+        }
+        is ConfigUpdate.TipHeaderMiddle -> {
+            intMutation(ReadStyleIntKey.TipHeaderMiddle, value)
+        }
+        is ConfigUpdate.TipHeaderRight -> {
+            intMutation(ReadStyleIntKey.TipHeaderRight, value)
+        }
+        is ConfigUpdate.TipFooterLeft -> {
+            intMutation(ReadStyleIntKey.TipFooterLeft, value)
+        }
+        is ConfigUpdate.TipFooterMiddle -> {
+            intMutation(ReadStyleIntKey.TipFooterMiddle, value)
+        }
+        is ConfigUpdate.TipFooterRight -> {
+            intMutation(ReadStyleIntKey.TipFooterRight, value)
+        }
+        is ConfigUpdate.HeaderFont -> {
+            stringMutation(ReadStyleStringKey.HeaderFont, path)
+        }
+        is ConfigUpdate.CustomTipHeaderLeft -> {
             stringMutation(ReadStyleStringKey.CustomTipHeaderLeft, value)
-        is ConfigUpdate.CustomTipHeaderMiddle ->
+        }
+        is ConfigUpdate.CustomTipHeaderMiddle -> {
             stringMutation(ReadStyleStringKey.CustomTipHeaderMiddle, value)
-        is ConfigUpdate.CustomTipHeaderRight ->
+        }
+        is ConfigUpdate.CustomTipHeaderRight -> {
             stringMutation(ReadStyleStringKey.CustomTipHeaderRight, value)
-        is ConfigUpdate.CustomTipFooterLeft ->
+        }
+        is ConfigUpdate.CustomTipFooterLeft -> {
             stringMutation(ReadStyleStringKey.CustomTipFooterLeft, value)
-        is ConfigUpdate.CustomTipFooterMiddle ->
+        }
+        is ConfigUpdate.CustomTipFooterMiddle -> {
             stringMutation(ReadStyleStringKey.CustomTipFooterMiddle, value)
-        is ConfigUpdate.CustomTipFooterRight ->
+        }
+        is ConfigUpdate.CustomTipFooterRight -> {
             stringMutation(ReadStyleStringKey.CustomTipFooterRight, value)
-        is ConfigUpdate.HeaderFontSize -> intMutation(ReadStyleIntKey.HeaderFontSize, value)
-        is ConfigUpdate.FooterFont -> stringMutation(ReadStyleStringKey.FooterFont, path)
-        is ConfigUpdate.FooterFontSize -> intMutation(ReadStyleIntKey.FooterFontSize, value)
-        is ConfigUpdate.ApplyHeaderStyle ->
+        }
+        is ConfigUpdate.HeaderFontSize -> {
+            intMutation(ReadStyleIntKey.HeaderFontSize, value)
+        }
+        is ConfigUpdate.FooterFont -> {
+            stringMutation(ReadStyleStringKey.FooterFont, path)
+        }
+        is ConfigUpdate.FooterFontSize -> {
+            intMutation(ReadStyleIntKey.FooterFontSize, value)
+        }
+        is ConfigUpdate.ApplyHeaderStyle -> {
             booleanMutation(ReadStyleBooleanKey.ApplyHeaderStyle, value)
-        is ConfigUpdate.TipHeaderColor -> colorMutation(ReadStyleColorKey.TipHeader, color)
-        is ConfigUpdate.TipHeaderColorNight ->
+        }
+        is ConfigUpdate.TipHeaderColor -> {
+            colorMutation(ReadStyleColorKey.TipHeader, color)
+        }
+        is ConfigUpdate.TipHeaderColorNight -> {
             colorMutation(ReadStyleColorKey.TipHeaderNight, color)
-        is ConfigUpdate.TipFooterColor -> colorMutation(ReadStyleColorKey.TipFooter, color)
-        is ConfigUpdate.TipFooterColorNight ->
+        }
+        is ConfigUpdate.TipFooterColor -> {
+            colorMutation(ReadStyleColorKey.TipFooter, color)
+        }
+        is ConfigUpdate.TipFooterColorNight -> {
             colorMutation(ReadStyleColorKey.TipFooterNight, color)
-        is ConfigUpdate.TipDividerColor -> colorMutation(ReadStyleColorKey.TipDivider, color)
-        is ConfigUpdate.PageAnim -> intMutation(ReadStyleIntKey.PageAnim, value)
-        is ConfigUpdate.TextShadow -> booleanMutation(ReadStyleBooleanKey.TextShadow, value)
-        is ConfigUpdate.ShadowRadius -> floatMutation(ReadStyleFloatKey.ShadowRadius, value)
-        is ConfigUpdate.ShadowDx -> floatMutation(ReadStyleFloatKey.ShadowDx, value)
-        is ConfigUpdate.ShadowDy -> floatMutation(ReadStyleFloatKey.ShadowDy, value)
-        is ConfigUpdate.ShadowColor -> colorMutation(ReadStyleColorKey.Shadow, color)
-        is ConfigUpdate.Underline -> booleanMutation(ReadStyleBooleanKey.Underline, value)
-        is ConfigUpdate.DottedLine -> booleanMutation(ReadStyleBooleanKey.DottedLine, value)
-        is ConfigUpdate.UnderlineExtend ->
+        }
+        is ConfigUpdate.TipDividerColor -> {
+            colorMutation(ReadStyleColorKey.TipDivider, color)
+        }
+        is ConfigUpdate.PageAnim -> {
+            intMutation(ReadStyleIntKey.PageAnim, value)
+        }
+        is ConfigUpdate.TextShadow -> {
+            booleanMutation(ReadStyleBooleanKey.TextShadow, value)
+        }
+        is ConfigUpdate.ShadowRadius -> {
+            floatMutation(ReadStyleFloatKey.ShadowRadius, value)
+        }
+        is ConfigUpdate.ShadowDx -> {
+            floatMutation(ReadStyleFloatKey.ShadowDx, value)
+        }
+        is ConfigUpdate.ShadowDy -> {
+            floatMutation(ReadStyleFloatKey.ShadowDy, value)
+        }
+        is ConfigUpdate.ShadowColor -> {
+            colorMutation(ReadStyleColorKey.Shadow, color)
+        }
+        is ConfigUpdate.Underline -> {
+            booleanMutation(ReadStyleBooleanKey.Underline, value)
+        }
+        is ConfigUpdate.DottedLine -> {
+            booleanMutation(ReadStyleBooleanKey.DottedLine, value)
+        }
+        is ConfigUpdate.UnderlineExtend -> {
             booleanMutation(ReadStyleBooleanKey.UnderlineExtend, value)
-        is ConfigUpdate.UnderlineHeight -> intMutation(ReadStyleIntKey.UnderlineHeight, value)
-        is ConfigUpdate.UnderlinePadding -> intMutation(ReadStyleIntKey.UnderlinePadding, value)
-        is ConfigUpdate.DottedBase -> floatMutation(ReadStyleFloatKey.DottedBase, value)
-        is ConfigUpdate.DottedRatio -> floatMutation(ReadStyleFloatKey.DottedRatio, value)
-        is ConfigUpdate.UnderlineColor -> colorMutation(ReadStyleColorKey.Underline, color)
-        is ConfigUpdate.PaddingTop -> intMutation(ReadStyleIntKey.PaddingTop, value)
-        is ConfigUpdate.PaddingBottom -> intMutation(ReadStyleIntKey.PaddingBottom, value)
-        is ConfigUpdate.PaddingLeft -> intMutation(ReadStyleIntKey.PaddingLeft, value)
-        is ConfigUpdate.PaddingRight -> intMutation(ReadStyleIntKey.PaddingRight, value)
-        is ConfigUpdate.HeaderPaddingTop -> intMutation(ReadStyleIntKey.HeaderPaddingTop, value)
-        is ConfigUpdate.HeaderPaddingBottom ->
+        }
+        is ConfigUpdate.UnderlineHeight -> {
+            intMutation(ReadStyleIntKey.UnderlineHeight, value)
+        }
+        is ConfigUpdate.UnderlinePadding -> {
+            intMutation(ReadStyleIntKey.UnderlinePadding, value)
+        }
+        is ConfigUpdate.DottedBase -> {
+            floatMutation(ReadStyleFloatKey.DottedBase, value)
+        }
+        is ConfigUpdate.DottedRatio -> {
+            floatMutation(ReadStyleFloatKey.DottedRatio, value)
+        }
+        is ConfigUpdate.UnderlineColor -> {
+            colorMutation(ReadStyleColorKey.Underline, color)
+        }
+        is ConfigUpdate.PaddingTop -> {
+            intMutation(ReadStyleIntKey.PaddingTop, value)
+        }
+        is ConfigUpdate.PaddingBottom -> {
+            intMutation(ReadStyleIntKey.PaddingBottom, value)
+        }
+        is ConfigUpdate.PaddingLeft -> {
+            intMutation(ReadStyleIntKey.PaddingLeft, value)
+        }
+        is ConfigUpdate.PaddingRight -> {
+            intMutation(ReadStyleIntKey.PaddingRight, value)
+        }
+        is ConfigUpdate.HeaderPaddingTop -> {
+            intMutation(ReadStyleIntKey.HeaderPaddingTop, value)
+        }
+        is ConfigUpdate.HeaderPaddingBottom -> {
             intMutation(ReadStyleIntKey.HeaderPaddingBottom, value)
-        is ConfigUpdate.HeaderPaddingLeft -> intMutation(ReadStyleIntKey.HeaderPaddingLeft, value)
-        is ConfigUpdate.HeaderPaddingRight ->
+        }
+        is ConfigUpdate.HeaderPaddingLeft -> {
+            intMutation(ReadStyleIntKey.HeaderPaddingLeft, value)
+        }
+        is ConfigUpdate.HeaderPaddingRight -> {
             intMutation(ReadStyleIntKey.HeaderPaddingRight, value)
-        is ConfigUpdate.ShowHeaderLine ->
+        }
+        is ConfigUpdate.ShowHeaderLine -> {
             booleanMutation(ReadStyleBooleanKey.ShowHeaderLine, value)
-        is ConfigUpdate.FooterPaddingTop -> intMutation(ReadStyleIntKey.FooterPaddingTop, value)
-        is ConfigUpdate.FooterPaddingBottom ->
+        }
+        is ConfigUpdate.FooterPaddingTop -> {
+            intMutation(ReadStyleIntKey.FooterPaddingTop, value)
+        }
+        is ConfigUpdate.FooterPaddingBottom -> {
             intMutation(ReadStyleIntKey.FooterPaddingBottom, value)
-        is ConfigUpdate.FooterPaddingLeft -> intMutation(ReadStyleIntKey.FooterPaddingLeft, value)
-        is ConfigUpdate.FooterPaddingRight ->
+        }
+        is ConfigUpdate.FooterPaddingLeft -> {
+            intMutation(ReadStyleIntKey.FooterPaddingLeft, value)
+        }
+        is ConfigUpdate.FooterPaddingRight -> {
             intMutation(ReadStyleIntKey.FooterPaddingRight, value)
-        is ConfigUpdate.ShowFooterLine ->
+        }
+        is ConfigUpdate.ShowFooterLine -> {
             booleanMutation(ReadStyleBooleanKey.ShowFooterLine, value)
-        is ConfigUpdate.BgStr -> stringMutation(ReadStyleStringKey.BgStr, value)
-        is ConfigUpdate.BgStrNight -> stringMutation(ReadStyleStringKey.BgStrNight, value)
-        is ConfigUpdate.BgStrEInk -> stringMutation(ReadStyleStringKey.BgStrEInk, value)
-        is ConfigUpdate.BgType -> intMutation(ReadStyleIntKey.BgType, value)
-        is ConfigUpdate.BgTypeNight -> intMutation(ReadStyleIntKey.BgTypeNight, value)
-        is ConfigUpdate.BgTypeEInk -> intMutation(ReadStyleIntKey.BgTypeEInk, value)
-        is ConfigUpdate.BgAlpha -> intMutation(ReadStyleIntKey.BgAlpha, value)
-        is ConfigUpdate.StatusIconDark ->
+        }
+        is ConfigUpdate.BgStr -> {
+            stringMutation(ReadStyleStringKey.BgStr, value)
+        }
+        is ConfigUpdate.BgStrNight -> {
+            stringMutation(ReadStyleStringKey.BgStrNight, value)
+        }
+        is ConfigUpdate.BgStrEInk -> {
+            stringMutation(ReadStyleStringKey.BgStrEInk, value)
+        }
+        is ConfigUpdate.BgType -> {
+            intMutation(ReadStyleIntKey.BgType, value)
+        }
+        is ConfigUpdate.BgTypeNight -> {
+            intMutation(ReadStyleIntKey.BgTypeNight, value)
+        }
+        is ConfigUpdate.BgTypeEInk -> {
+            intMutation(ReadStyleIntKey.BgTypeEInk, value)
+        }
+        is ConfigUpdate.BgAlpha -> {
+            intMutation(ReadStyleIntKey.BgAlpha, value)
+        }
+        is ConfigUpdate.StatusIconDark -> {
             booleanMutation(ReadStyleBooleanKey.StatusIconDark, value)
-        is ConfigUpdate.StyleName -> stringMutation(ReadStyleStringKey.StyleName, value)
-        else -> null
+        }
+        is ConfigUpdate.StyleName -> {
+            stringMutation(ReadStyleStringKey.StyleName, value)
+        }
+        else -> {
+            null
+        }
     }
-
 }
 
-internal fun intMutation(key: ReadStyleIntKey, value: Int) =
-    ReadStyleMutation.IntValue(key, value)
+internal fun intMutation(
+    key: ReadStyleIntKey,
+    value: Int,
+) = ReadStyleMutation.IntValue(key, value)
 
-internal fun floatMutation(key: ReadStyleFloatKey, value: Float) =
-    ReadStyleMutation.FloatValue(key, value)
+internal fun floatMutation(
+    key: ReadStyleFloatKey,
+    value: Float,
+) = ReadStyleMutation.FloatValue(key, value)
 
-internal fun booleanMutation(key: ReadStyleBooleanKey, value: Boolean) =
-    ReadStyleMutation.BooleanValue(key, value)
+internal fun booleanMutation(
+    key: ReadStyleBooleanKey,
+    value: Boolean,
+) = ReadStyleMutation.BooleanValue(key, value)
 
-internal fun stringMutation(key: ReadStyleStringKey, value: String) =
-    ReadStyleMutation.StringValue(key, value)
+internal fun stringMutation(
+    key: ReadStyleStringKey,
+    value: String,
+) = ReadStyleMutation.StringValue(key, value)
 
-internal fun colorMutation(key: ReadStyleColorKey, value: Int) =
-    ReadStyleMutation.ColorValue(key, value)
+internal fun colorMutation(
+    key: ReadStyleColorKey,
+    value: Int,
+) = ReadStyleMutation.ColorValue(key, value)

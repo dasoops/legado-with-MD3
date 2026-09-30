@@ -1,10 +1,10 @@
 package io.legado.app.ui.book.read
 
 import io.legado.app.ui.book.read.ConfigUpdateActionsInvariantTest.Companion.NO_RENDER_EFFECT
-import org.junit.Assert.assertTrue
-import org.junit.Test
 import kotlin.reflect.KClass
 import kotlin.reflect.full.primaryConstructor
+import org.junit.Assert.assertTrue
+import org.junit.Test
 
 /**
  * Track E · E0 —— `ConfigUpdate` 渲染副作用的完备性不变式。
@@ -21,12 +21,12 @@ import kotlin.reflect.full.primaryConstructor
  * 双向棘轮：新增成员漏填 actions 会红；白名单条目补上了 actions 却忘了从白名单移除，也会红。
  */
 class ConfigUpdateActionsInvariantTest {
-
     @Test
     fun `每个 ConfigUpdate 成员都声明了渲染副作用，或在无副作用白名单里`() {
-        val offenders = emptyActionMembers()
-            .filterNot { it in NO_RENDER_EFFECT }
-            .sorted()
+        val offenders =
+            emptyActionMembers()
+                .filterNot { it in NO_RENDER_EFFECT }
+                .sorted()
 
         assertTrue(
             "以下 ConfigUpdate 成员的 actions 为空集，改了不会驱动任何渲染副作用：\n" +
@@ -56,108 +56,124 @@ class ConfigUpdateActionsInvariantTest {
         assertTrue("ConfigUpdate 只枚举到 $count 个成员，反射可能失效", count > 100)
     }
 
-    private fun emptyActionMembers(): List<String> =
-        ConfigUpdate::class.sealedSubclasses.mapNotNull { type ->
-            type.simpleName?.takeIf { instantiate(type).actions.isEmpty() }
-        }
+    private fun emptyActionMembers(): List<String> = ConfigUpdate::class.sealedSubclasses.mapNotNull { type ->
+        type.simpleName?.takeIf { instantiate(type).actions.isEmpty() }
+    }
 
     private fun instantiate(type: KClass<out ConfigUpdate>): ConfigUpdate {
         type.objectInstance?.let { return it }
-        val constructor = type.primaryConstructor
-            ?: error("ConfigUpdate.${type.simpleName} 既不是 object 也没有主构造函数")
-        val args: List<Any> = constructor.parameters.map { parameter ->
-            when (parameter.type.classifier) {
-                Int::class -> 0
-                Long::class -> 0L
-                Float::class -> 0f
-                Double::class -> 0.0
-                Boolean::class -> false
-                String::class -> ""
-                else -> error(
-                    "ConfigUpdate.${type.simpleName} 的参数 ${parameter.name} 是未支持的类型 " +
-                        "${parameter.type}，请在本测试补充对应的占位值"
-                )
+        val constructor =
+            type.primaryConstructor
+                ?: error("ConfigUpdate.${type.simpleName} 既不是 object 也没有主构造函数")
+        val args: List<Any> =
+            constructor.parameters.map { parameter ->
+                when (parameter.type.classifier) {
+                    Int::class -> {
+                        0
+                    }
+                    Long::class -> {
+                        0L
+                    }
+                    Float::class -> {
+                        0f
+                    }
+                    Double::class -> {
+                        0.0
+                    }
+                    Boolean::class -> {
+                        false
+                    }
+                    String::class -> {
+                        ""
+                    }
+                    else -> {
+                        error(
+                            "ConfigUpdate.${type.simpleName} 的参数 ${parameter.name} 是未支持的类型 " +
+                                "${parameter.type}，请在本测试补充对应的占位值",
+                        )
+                    }
+                }
             }
-        }
         return constructor.call(*args.toTypedArray())
     }
 
     private companion object {
         /** 只写 DataStore、由 `readPreferences` StateFlow 反应式生效的成员。E1 后删除。 */
-        val NO_RENDER_EFFECT = setOf(
-            // 阅读菜单外观
-            "MenuTextColor",
-            "MenuTextColorNight",
-            // 菜单强调色/容器色与菜单栏边框只被菜单读取（menuConfig 状态驱动），无正文副作用
-            "MenuAccentColor",
-            "MenuAccentColorNight",
-            "MenuContainerColor",
-            "MenuContainerColorNight",
-            "BorderWidth",
-            "BorderColor",
-            "BorderColorNight",
-            "MenuIconShowText",
-            "MenuIconStyle",
-            "MenuIconItemsPerRow",
-            "MenuIconRowCount",
-            "MenuFloatingIconLiquidGlass",
-            "MenuBottomCornerRadius",
-            "MenuBlurRadius",
-            "MenuBlurAlpha",
-            "MenuBlurColor",
-            "MenuBlurColorNight",
-            "MenuPaletteStyle",
-            "MenuLensRadius",
-            "MenuCustomIcon",
-            "MenuTopBarBlurMode",
-            "MenuTopBarBlurSelection",
-            "MenuTopBarLiquidGlassButtons",
-            "MenuTopBarMergeButtons",
-            "MenuTopBarTitleCapsule",
-            "MenuBottomBarBlurMode",
-            "MenuBottomBarBlurStyle",
-            "MenuBottomBarLiquidGlassButtons",
-            "FloatingBottomBar",
-            "ShowMenuIcon",
-            // 标题栏
-            "TitleBarIconStyle",
-            "TitleBarIconPosition",
-            "TitleBarCustomIcon",
-            "TitleBarCompact",
-            "TitleBarMode",
-            "ShowTitleBarIcons",
-            // 亮度 / 进度条
-            "ShowBrightnessView",
-            "BrightnessVwPos",
-            "BrightnessAuto",
-            "ReadSliderMode",
-            "ProgressBarBehavior",
-            // 手势 / 按键
-            "MouseWheelPage",
-            "VolumeKeyPage",
-            "KeyPageOnLongPress",
-            "SwipeToAddBookmark",
-            "BookmarkBadgeSize",
-            "SliderVibrator",
-            "SelectVibrator",
-            "ClickImgWay",
-            "DisableReturnKey",
-            "NoAnimScrollPage",
-            // 文本选择菜单
-            "SelectText",
-            "ExpandTextMenu",
-            "ShowSelectMenuIcon",
-            // 其它纯业务/纯菜单项
-            "StyleName",
-            "AutoSuggestDayNight",
-            "ShowReadTitleAddition",
-            "AutoReadSpeed",
-            // 只决定点击目录时开新 Sheet 还是旧 Activity，取用时读设置，无渲染副作用
-            "UseNewTocSheet",
-            // 只影响下次目录解析时的无规则章节切分长度，取用时读设置，无渲染副作用
-            "MaxLengthWithNoToc",
-            // 只写 DataStore 的 readingAnchorEnabled，锚点栏可见性由 readPreferences 反应式驱动
-            "ReadingAnchorEnabled",
-        )
+        val NO_RENDER_EFFECT =
+            setOf(
+                // 阅读菜单外观
+                "MenuTextColor",
+                "MenuTextColorNight",
+                // 菜单强调色/容器色与菜单栏边框只被菜单读取（menuConfig 状态驱动），无正文副作用
+                "MenuAccentColor",
+                "MenuAccentColorNight",
+                "MenuContainerColor",
+                "MenuContainerColorNight",
+                "BorderWidth",
+                "BorderColor",
+                "BorderColorNight",
+                "MenuIconShowText",
+                "MenuIconStyle",
+                "MenuIconItemsPerRow",
+                "MenuIconRowCount",
+                "MenuFloatingIconLiquidGlass",
+                "MenuBottomCornerRadius",
+                "MenuBlurRadius",
+                "MenuBlurAlpha",
+                "MenuBlurColor",
+                "MenuBlurColorNight",
+                "MenuPaletteStyle",
+                "MenuLensRadius",
+                "MenuCustomIcon",
+                "MenuTopBarBlurMode",
+                "MenuTopBarBlurSelection",
+                "MenuTopBarLiquidGlassButtons",
+                "MenuTopBarMergeButtons",
+                "MenuTopBarTitleCapsule",
+                "MenuBottomBarBlurMode",
+                "MenuBottomBarBlurStyle",
+                "MenuBottomBarLiquidGlassButtons",
+                "FloatingBottomBar",
+                "ShowMenuIcon",
+                // 标题栏
+                "TitleBarIconStyle",
+                "TitleBarIconPosition",
+                "TitleBarCustomIcon",
+                "TitleBarCompact",
+                "TitleBarMode",
+                "ShowTitleBarIcons",
+                // 亮度 / 进度条
+                "ShowBrightnessView",
+                "BrightnessVwPos",
+                "BrightnessAuto",
+                "ReadSliderMode",
+                "ProgressBarBehavior",
+                // 手势 / 按键
+                "MouseWheelPage",
+                "VolumeKeyPage",
+                "KeyPageOnLongPress",
+                "SwipeToAddBookmark",
+                "BookmarkBadgeSize",
+                "SliderVibrator",
+                "SelectVibrator",
+                "ClickImgWay",
+                "DisableReturnKey",
+                "NoAnimScrollPage",
+                // 文本选择菜单
+                "SelectText",
+                "ExpandTextMenu",
+                "ShowSelectMenuIcon",
+                // 其它纯业务/纯菜单项
+                "StyleName",
+                "AutoSuggestDayNight",
+                "ShowReadTitleAddition",
+                "AutoReadSpeed",
+                // 只决定点击目录时开新 Sheet 还是旧 Activity，取用时读设置，无渲染副作用
+                "UseNewTocSheet",
+                // 只影响下次目录解析时的无规则章节切分长度，取用时读设置，无渲染副作用
+                "MaxLengthWithNoToc",
+                // 只写 DataStore 的 readingAnchorEnabled，锚点栏可见性由 readPreferences 反应式驱动
+                "ReadingAnchorEnabled",
+            )
     }
 }

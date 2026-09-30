@@ -7,15 +7,15 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotSame
 import org.junit.Assert.assertSame
 import org.junit.Assert.assertTrue
-import org.junit.Rule
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import org.robolectric.RuntimeEnvironment
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import org.robolectric.RuntimeEnvironment
 import splitties.init.injectAsAppCtx
 
 @RunWith(RobolectricTestRunner::class)
@@ -48,7 +48,12 @@ class ReaderTextBackgroundLoaderTest {
     @Test
     fun changedFileGetsANewCacheIdentity() {
         val file = temporaryFolder.newFile("changing.png")
-        fun write(width: Int, height: Int, color: Int) {
+
+        fun write(
+            width: Int,
+            height: Int,
+            color: Int,
+        ) {
             Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888).apply {
                 eraseColor(color)
                 file.outputStream().use { compress(Bitmap.CompressFormat.PNG, 100, it) }

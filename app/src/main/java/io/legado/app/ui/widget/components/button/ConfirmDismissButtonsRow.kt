@@ -25,31 +25,34 @@ fun ConfirmDismissButtonsRow(
 
     Row(
         modifier = modifier.fillMaxWidth(),
-        horizontalArrangement = if (isMiuix) {
+        horizontalArrangement =
+        if (isMiuix) {
             Arrangement.spacedBy(12.dp)
         } else {
             Arrangement.spacedBy(12.dp, Alignment.End)
-        }
+        },
     ) {
         SecondaryButton(
             onClick = onDismiss,
-            modifier = if (isMiuix) {
+            modifier =
+            if (isMiuix) {
                 Modifier.weight(1f)
             } else {
                 Modifier.widthIn(min = 88.dp)
             },
             enabled = dismissEnabled,
-            text = dismissText
+            text = dismissText,
         )
         PrimaryButton(
             onClick = onConfirm,
-            modifier = if (isMiuix) {
+            modifier =
+            if (isMiuix) {
                 Modifier.weight(1f)
             } else {
                 Modifier.widthIn(min = 88.dp)
             },
             enabled = confirmEnabled,
-            text = confirmText
+            text = confirmText,
         )
     }
 }

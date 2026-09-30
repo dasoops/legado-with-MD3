@@ -11,21 +11,20 @@ fun File.getFile(vararg subDirFiles: String): File {
     return File(path)
 }
 
-fun File.exists(vararg subDirFiles: String): Boolean {
-    return getFile(*subDirFiles).exists()
-}
+fun File.exists(vararg subDirFiles: String): Boolean = getFile(*subDirFiles).exists()
 
 @Throws(Exception::class)
 fun File.listFileDocs(filter: FileDocFilter? = null): ArrayList<FileDoc> {
     val docList = arrayListOf<FileDoc>()
     listFiles()?.forEach {
-        val item = FileDoc(
-            it.name,
-            it.isDirectory,
-            it.length(),
-            it.lastModified(),
-            Uri.fromFile(it)
-        )
+        val item =
+            FileDoc(
+                it.name,
+                it.isDirectory,
+                it.length(),
+                it.lastModified(),
+                Uri.fromFile(it),
+            )
         if (filter == null || filter.invoke(item)) {
             docList.add(item)
         }
@@ -83,6 +82,4 @@ fun File.checkWrite(): Boolean {
     }
 }
 
-fun File.outputStream(append: Boolean = false): FileOutputStream {
-    return FileOutputStream(this, append)
-}
+fun File.outputStream(append: Boolean = false): FileOutputStream = FileOutputStream(this, append)

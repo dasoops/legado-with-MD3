@@ -34,12 +34,30 @@ data class CoverAlbumManageUiState(
 
 sealed interface CoverAlbumIntent {
     data object CreateClick : CoverAlbumIntent
-    data class EditClick(val albumId: String) : CoverAlbumIntent
-    data class RenameClick(val albumId: String) : CoverAlbumIntent
-    data class DeleteClick(val albumId: String) : CoverAlbumIntent
-    data class SaveName(val name: String) : CoverAlbumIntent
+
+    data class EditClick(
+        val albumId: String,
+    ) : CoverAlbumIntent
+
+    data class RenameClick(
+        val albumId: String,
+    ) : CoverAlbumIntent
+
+    data class DeleteClick(
+        val albumId: String,
+    ) : CoverAlbumIntent
+
+    data class SaveName(
+        val name: String,
+    ) : CoverAlbumIntent
+
     data object ConfirmDelete : CoverAlbumIntent
-    data class AddImagesClick(val albumId: String, val isDark: Boolean) : CoverAlbumIntent
+
+    data class AddImagesClick(
+        val albumId: String,
+        val isDark: Boolean,
+    ) : CoverAlbumIntent
+
     data class ImagesSelected(
         val albumId: String,
         val isDark: Boolean,
@@ -53,16 +71,31 @@ sealed interface CoverAlbumIntent {
     ) : CoverAlbumIntent
 
     data object DismissEditor : CoverAlbumIntent
+
     data object DismissDialog : CoverAlbumIntent
 }
 
 sealed interface CoverAlbumEffect {
-    data class SelectImages(val albumId: String, val isDark: Boolean) : CoverAlbumEffect
-    data class ShowMessage(val message: String) : CoverAlbumEffect
+    data class SelectImages(
+        val albumId: String,
+        val isDark: Boolean,
+    ) : CoverAlbumEffect
+
+    data class ShowMessage(
+        val message: String,
+    ) : CoverAlbumEffect
 }
 
 sealed interface CoverAlbumDialog {
     data object Create : CoverAlbumDialog
-    data class Rename(val albumId: String, val currentName: String) : CoverAlbumDialog
-    data class Delete(val albumId: String, val name: String) : CoverAlbumDialog
+
+    data class Rename(
+        val albumId: String,
+        val currentName: String,
+    ) : CoverAlbumDialog
+
+    data class Delete(
+        val albumId: String,
+        val name: String,
+    ) : CoverAlbumDialog
 }

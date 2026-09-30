@@ -4,20 +4,18 @@ package io.legado.app.help.book
 
 import android.net.Uri
 import androidx.core.net.toUri
-import io.legado.app.domain.model.BookTags
 import io.legado.app.constant.AppLog
 import io.legado.app.constant.AppPattern
-import io.legado.app.constant.BookSourceType
 import io.legado.app.constant.BookType
 import io.legado.app.data.appDb
 import io.legado.app.data.entities.BaseBook
 import io.legado.app.data.entities.Book
-import io.legado.app.data.entities.BookSource
 import io.legado.app.data.entities.HighlightTagRule
 import io.legado.app.domain.gateway.BookExportSettingsGateway
 import io.legado.app.domain.gateway.ImportBookSettingsGateway
 import io.legado.app.domain.gateway.OtherSettingsGateway
 import io.legado.app.domain.gateway.ReadSettingsGateway
+import io.legado.app.domain.model.BookTags
 import io.legado.app.exception.NoStackTraceException
 import io.legado.app.help.RuleBigDataHelp
 import io.legado.app.model.localBook.LocalBook
@@ -32,17 +30,17 @@ import io.legado.app.utils.isUri
 import io.legado.app.utils.normalizeFileName
 import io.legado.app.utils.splitNotBlank
 import io.legado.app.utils.toastOnUi
+import java.io.File
+import java.util.concurrent.ConcurrentHashMap
+import kotlin.math.max
+import kotlin.math.min
+import kotlin.time.Clock
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.daysUntil
 import kotlinx.datetime.todayIn
 import org.koin.core.context.GlobalContext
 import splitties.init.appCtx
-import java.io.File
-import java.util.concurrent.ConcurrentHashMap
-import kotlin.math.max
-import kotlin.math.min
-import kotlin.time.Clock
 
 private val otherGateway by lazy { GlobalContext.get().get<OtherSettingsGateway>() }
 private val importBookGateway by lazy { GlobalContext.get().get<ImportBookSettingsGateway>() }
@@ -79,9 +77,13 @@ val Book.isPdf: Boolean
     get() = isLocal && originName.endsWith(".pdf", true)
 
 val Book.isMobi: Boolean
-    get() = isLocal && (originName.endsWith(".mobi", true) ||
-            originName.endsWith(".azw3", true) ||
-            originName.endsWith(".azw", true))
+    get() =
+        isLocal &&
+            (
+                originName.endsWith(".mobi", true) ||
+                    originName.endsWith(".azw3", true) ||
+                    originName.endsWith(".azw", true)
+                )
 
 val Book.isOnLineTxt: Boolean
     get() = !isLocal && isType(BookType.text)
@@ -106,43 +108,37 @@ val Book.archiveName: String
         return origin.substringAfter("::").substringAfterLast("/")
     }
 
-fun Book.getBookTypeName(): String {
-    return when {
-        isLocalTxt   -> "txt"
-        isEpub       -> "epub"
-        isUmd        -> "umd"
-        isPdf        -> "pdf"
-        isMobi       -> "mobi"
-        isAudio      -> "有声书"
-        isImage      -> "漫画"
-        isOnLineTxt  -> "小说"
-        isWebFile    -> "网页文件"
-        else         -> "未知类型"
-    }
+fun Book.getBookTypeName(): String = when {
+    isLocalTxt -> "txt"
+    isEpub -> "epub"
+    isUmd -> "umd"
+    isPdf -> "pdf"
+    isMobi -> "mobi"
+    isAudio -> "有声书"
+    isImage -> "漫画"
+    isOnLineTxt -> "小说"
+    isWebFile -> "网页文件"
+    else -> "未知类型"
 }
-
 
 fun Book.contains(word: String?): Boolean {
     if (word.isNullOrEmpty()) {
         return true
     }
-    return name.contains(word)
-            || author.contains(word)
-            || originName.contains(word)
-            || origin.contains(word)
-            || kind?.contains(word) == true
-            || customTag?.contains(word) == true
-            || intro?.contains(word) == true
+    return name.contains(word) ||
+        author.contains(word) ||
+        originName.contains(word) ||
+        origin.contains(word) ||
+        kind?.contains(word) == true ||
+        customTag?.contains(word) == true ||
+        intro?.contains(word) == true
 }
 
-fun Book.getSourceTagList(): List<String> =
-    kind?.splitNotBlank(",", "\n").orEmpty().distinct()
+fun Book.getSourceTagList(): List<String> = kind?.splitNotBlank(",", "\n").orEmpty().distinct()
 
-fun Book.getCustomTagList(): List<String> =
-    customTag?.splitNotBlank(",", "\n").orEmpty().distinct()
+fun Book.getCustomTagList(): List<String> = customTag?.splitNotBlank(",", "\n").orEmpty().distinct()
 
-fun Book.getDisplayTagList(): List<String> =
-    BookTags.display(customTag, kind, durChapterIndex, durChapterPos, totalChapterNum)
+fun Book.getDisplayTagList(): List<String> = BookTags.display(customTag, kind, durChapterIndex, durChapterPos, totalChapterNum)
 
 /**
  * 仅在目标bookUrl未被其他书占用，或判定为同一本书时，允许迁移主键。
@@ -152,16 +148,19 @@ fun Book.canSafelyRebindTo(newBookUrl: String): Boolean {
     val targetBook = appDb.bookDao.getBook(newBookUrl) ?: return true
 
     val sameOriginName = originName.isNotBlank() && originName == targetBook.originName
-    val sameNameAuthor = name.isNotBlank() && author.isNotBlank()
-            && name == targetBook.name && author == targetBook.author
+    val sameNameAuthor =
+        name.isNotBlank() &&
+            author.isNotBlank() &&
+            name == targetBook.name &&
+            author == targetBook.author
     val sameOrigin = origin.isNotBlank() && origin == targetBook.origin
     val canMerge = sameOriginName && (sameNameAuthor || sameOrigin)
     if (!canMerge) {
         AppLog.put(
             "书籍重定位冲突，已跳过迁移\n" +
-                    "old=$bookUrl\nnew=$newBookUrl\n" +
-                    "oldName=$name oldAuthor=$author oldOriginName=$originName\n" +
-                    "targetName=${targetBook.name} targetAuthor=${targetBook.author} targetOriginName=${targetBook.originName}"
+                "old=$bookUrl\nnew=$newBookUrl\n" +
+                "oldName=$name oldAuthor=$author oldOriginName=$originName\n" +
+                "targetName=${targetBook.name} targetAuthor=${targetBook.author} targetOriginName=${targetBook.originName}",
         )
     }
     return canMerge
@@ -179,18 +178,22 @@ fun Book.getLocalUri(): Uri {
     if (uri != null) {
         return uri
     }
-    uri = if (bookUrl.isUri()) {
-        bookUrl.toUri()
-    } else {
-        Uri.fromFile(File(bookUrl))
-    }
-    //先检测uri是否有效,这个比较快
-    uri.inputStream(appCtx).getOrNull()?.use {
-        localUriCache[bookUrl] = uri
-    }?.let {
-        return uri
-    }
-    //不同的设备书籍保存路径可能不一样, uri无效时尝试寻找当前保存路径下的文件
+    uri =
+        if (bookUrl.isUri()) {
+            bookUrl.toUri()
+        } else {
+            Uri.fromFile(File(bookUrl))
+        }
+    // 先检测uri是否有效,这个比较快
+    uri
+        .inputStream(appCtx)
+        .getOrNull()
+        ?.use {
+            localUriCache[bookUrl] = uri
+        }?.let {
+            return uri
+        }
+    // 不同的设备书籍保存路径可能不一样, uri无效时尝试寻找当前保存路径下的文件
     val defaultBookDir = otherGateway.currentSettings.defaultBookTreeUri
     val importBookDir = importBookGateway.currentSettings.importBookPath
 
@@ -210,7 +213,6 @@ fun Book.getLocalUri(): Uri {
                     return fileDoc.uri
                 }
                 appDb.runInTransaction {
-
                     if (oldBook.bookUrl == newBookUrl) {
                         save()
                     } else {
@@ -228,11 +230,12 @@ fun Book.getLocalUri(): Uri {
 
     // 查找添加本地选择的目录
     if (!importBookDir.isNullOrBlank() && defaultBookDir != importBookDir) {
-        val treeUri = if (importBookDir.isUri()) {
-            importBookDir.toUri()
-        } else {
-            Uri.fromFile(File(importBookDir))
-        }
+        val treeUri =
+            if (importBookDir.isUri()) {
+                importBookDir.toUri()
+            } else {
+                Uri.fromFile(File(importBookDir))
+            }
         val treeFileDoc = FileDoc.fromUri(treeUri, true)
         val fileDoc = treeFileDoc.find(originName, 5, 100)
         if (fileDoc != null) {
@@ -261,12 +264,13 @@ fun Book.getLocalUri(): Uri {
     return uri
 }
 
-
 fun Book.getArchiveUri(): Uri? {
     val defaultBookDir = otherGateway.currentSettings.defaultBookTreeUri
     return if (isArchive && !defaultBookDir.isNullOrBlank()) {
-        FileDoc.fromUri(defaultBookDir.toUri(), true)
-            .find(archiveName)?.uri
+        FileDoc
+            .fromUri(defaultBookDir.toUri(), true)
+            .find(archiveName)
+            ?.uri
     } else {
         null
     }
@@ -287,18 +291,24 @@ fun Book.getRemoteUrl(): String? {
     return null
 }
 
-fun Book.setType(@BookType.Type vararg types: Int) {
+fun Book.setType(
+    @BookType.Type vararg types: Int,
+) {
     type = 0
     addType(*types)
 }
 
-fun Book.addType(@BookType.Type vararg types: Int) {
+fun Book.addType(
+    @BookType.Type vararg types: Int,
+) {
     types.forEach {
         type = type or it
     }
 }
 
-fun Book.removeType(@BookType.Type vararg types: Int) {
+fun Book.removeType(
+    @BookType.Type vararg types: Int,
+) {
     types.forEach {
         type = type and it.inv()
     }
@@ -312,16 +322,14 @@ fun Book.clearType() {
     type = 0
 }
 
-fun Book.isType(@BookType.Type bookType: Int): Boolean = type and bookType > 0
+fun Book.isType(
+    @BookType.Type bookType: Int,
+): Boolean = type and bookType > 0
 
 fun Book.upType() {
     if (type < 8) {
-        type = when (type) {
-            BookSourceType.image -> BookType.image
-            BookSourceType.audio -> BookType.audio
-            BookSourceType.file -> BookType.webFile
-            else -> BookType.text
-        }
+        type =
+            BookType.text
         if (origin == BookType.localTag || origin.startsWith(BookType.webDavTag)) {
             type = type or BookType.local
         }
@@ -331,13 +339,17 @@ fun Book.upType() {
 fun Book.upKind() {
     val fileSizePattern = Regex("""^\d[\d,.]*\s*(b|kb|M|G|T)$""", RegexOption.IGNORE_CASE)
     val wordCountPattern = Regex(""".*?\d.*字$""")
-    val kinds = kind?.splitNotBlank(",", "\n").orEmpty()
-        .filter {
-            it.isNotBlank() && !fileSizePattern.matches(it.trim()) && !wordCountPattern.matches(
-                it.trim()
-            )
-        }
-        .toMutableList()
+    val kinds =
+        kind
+            ?.splitNotBlank(",", "\n")
+            .orEmpty()
+            .filter {
+                it.isNotBlank() &&
+                    !fileSizePattern.matches(it.trim()) &&
+                    !wordCountPattern.matches(
+                        it.trim(),
+                    )
+            }.toMutableList()
 
     if (isLocal) {
         // 添加格式
@@ -349,7 +361,10 @@ fun Book.upKind() {
         try {
             val size = FileDoc.fromFile(bookUrl).size
             if (size > 0) {
-                kinds.add(io.legado.app.utils.ConvertUtils.formatFileSize(size))
+                kinds.add(
+                    io.legado.app.utils.ConvertUtils
+                        .formatFileSize(size),
+                )
             }
         } catch (e: Exception) {
             // ignore
@@ -374,14 +389,16 @@ fun parseHighlightedTags(
         return emptyList<HighlightedTag>() to kindLabels
     }
 
-    val compiledRules = rules.sortedBy { it.order }.mapNotNull { rule ->
-        val regex = try {
-            Regex(rule.pattern)
-        } catch (_: Exception) {
-            return@mapNotNull null
+    val compiledRules =
+        rules.sortedBy { it.order }.mapNotNull { rule ->
+            val regex =
+                try {
+                    Regex(rule.pattern)
+                } catch (_: Exception) {
+                    return@mapNotNull null
+                }
+            rule to regex
         }
-        rule to regex
-    }
     if (compiledRules.isEmpty()) {
         return emptyList<HighlightedTag>() to kindLabels
     }
@@ -403,14 +420,15 @@ fun parseHighlightedTags(
         }
     }
 
-    val highlighted = compiledRules.mapNotNull { (rule, _) ->
-        ruleToLabels[rule]?.let { labels ->
-            HighlightedTag(
-                matchedLabels = labels,
-                title = rule.title.takeIf { it.isNotBlank() },
-            )
+    val highlighted =
+        compiledRules.mapNotNull { (rule, _) ->
+            ruleToLabels[rule]?.let { labels ->
+                HighlightedTag(
+                    matchedLabels = labels,
+                    title = rule.title.takeIf { it.isNotBlank() },
+                )
+            }
         }
-    }
 
     return highlighted to regular
 }
@@ -423,11 +441,12 @@ fun Book.sync(oldBook: Book) {
         durChapterIndex = curBook.durChapterIndex
         val replaceRules = ContentProcessor.get(this).getTitleReplaceRules()
         appDb.bookChapterDao.getChapter(bookUrl, durChapterIndex)?.let {
-            durChapterTitle = it.getDisplayTitle(
-                replaceRules,
-                getUseReplaceRule(otherGateway.currentSettings.replaceEnableDefault),
-                chineseConverterType = readGateway.currentSettings.chineseConverterType,
-            )
+            durChapterTitle =
+                it.getDisplayTitle(
+                    replaceRules,
+                    getUseReplaceRule(otherGateway.currentSettings.replaceEnableDefault),
+                    chineseConverterType = readGateway.currentSettings.chineseConverterType,
+                )
         }
     }
     canUpdate = curBook.canUpdate
@@ -438,9 +457,7 @@ fun Book.update() {
     appDb.bookDao.update(this)
 }
 
-fun Book.primaryStr(): String {
-    return origin + bookUrl
-}
+fun Book.primaryStr(): String = origin + bookUrl
 
 fun Book.updateTo(newBook: Book): Book {
     newBook.durChapterIndex = durChapterIndex
@@ -470,23 +487,13 @@ fun Book.updateTo(newBook: Book): Book {
     return newBook
 }
 
-fun Book.hasVariable(key: String): Boolean {
-    return variableMap.contains(key) || RuleBigDataHelp.hasBookVariable(bookUrl, key)
+fun Book.hasVariable(key: String): Boolean = variableMap.contains(key) || RuleBigDataHelp.hasBookVariable(bookUrl, key)
+
+fun Book.getFolderNameNoCache(): String = name.replace(AppPattern.fileNameRegex, "").let {
+    it.substring(0, min(9, it.length)) + MD5Utils.md5Encode16(bookUrl)
 }
 
-fun Book.getFolderNameNoCache(): String {
-    return name.replace(AppPattern.fileNameRegex, "").let {
-        it.substring(0, min(9, it.length)) + MD5Utils.md5Encode16(bookUrl)
-    }
-}
-
-fun Book.getBookSource(): BookSource? {
-    return appDb.bookSourceDao.getBookSource(origin)
-}
-
-fun Book.isLocalModified(): Boolean {
-    return isLocal && LocalBook.getLastModified(this).getOrDefault(0L) > latestChapterTime
-}
+fun Book.isLocalModified(): Boolean = isLocal && LocalBook.getLastModified(this).getOrDefault(0L) > latestChapterTime
 
 fun Book.releaseHtmlData() {
     infoHtml = null
@@ -518,14 +525,15 @@ fun Book.getExportFileName(
 
             val inside = match.groupValues[1]
 
-            val field = when {
-                inside.equals("name", ignoreCase = true) -> name
-                inside.equals("author", ignoreCase = true) -> getRealAuthor()
-                inside.equals("group", ignoreCase = true) -> group
-                inside.equals("source", ignoreCase = true) -> originName
-                inside.equals("remark", ignoreCase = true) -> remark
-                else -> null
-            }
+            val field =
+                when {
+                    inside.equals("name", ignoreCase = true) -> name
+                    inside.equals("author", ignoreCase = true) -> getRealAuthor()
+                    inside.equals("group", ignoreCase = true) -> group
+                    inside.equals("source", ignoreCase = true) -> originName
+                    inside.equals("remark", ignoreCase = true) -> remark
+                    else -> null
+                }
 
             if (field != null) {
                 result.append(field)
@@ -540,14 +548,12 @@ fun Book.getExportFileName(
             result.append(template.substring(lastEnd))
         }
 
-        "${result}.$suffix"
-
+        "$result.$suffix"
     } catch (e: Exception) {
         AppLog.put("导出书名规则错误,使用默认规则\n${e.localizedMessage}", e)
         "$name 作者：${getRealAuthor()}.$suffix"
     }
 }
-
 
 /**
  * 获取分割文件后的文件名
@@ -555,9 +561,9 @@ fun Book.getExportFileName(
 fun Book.getExportFileName(
     suffix: String,
     epubIndex: Int,
-    jsStr: String? = exportGateway.currentSettings.episodeExportFileName
+    jsStr: String? = exportGateway.currentSettings.episodeExportFileName,
 ): String {
-    val default = "$name 作者：${getRealAuthor()} [${epubIndex}].$suffix"
+    val default = "$name 作者：${getRealAuthor()} [$epubIndex].$suffix"
     if (jsStr.isNullOrBlank()) {
         return default
     }
@@ -565,11 +571,11 @@ fun Book.getExportFileName(
 }
 
 // 根据当前日期计算章节总数
-fun Book.simulatedTotalChapterNum(): Int {
-    return if (readSimulating()) {
-        val currentDate = Clock.System.todayIn(TimeZone.currentSystemDefault())
-        val startDateStr = config.startDate
-        val daysPassed = if (startDateStr != null) {
+fun Book.simulatedTotalChapterNum(): Int = if (readSimulating()) {
+    val currentDate = Clock.System.todayIn(TimeZone.currentSystemDefault())
+    val startDateStr = config.startDate
+    val daysPassed =
+        if (startDateStr != null) {
             try {
                 val startDate = LocalDate.parse(startDateStr)
                 startDate.daysUntil(currentDate) + 1
@@ -580,19 +586,14 @@ fun Book.simulatedTotalChapterNum(): Int {
         } else {
             1 // 没有设置起始日期时返回默认值1
         }
-        // 计算当前应该解锁到哪一章
-        val chaptersToUnlock =
-            max(0, (config.startChapter ?: 0) + (daysPassed * config.dailyChapters))
-        min(totalChapterNum, chaptersToUnlock)
-    } else {
-        totalChapterNum
-    }
+    // 计算当前应该解锁到哪一章
+    val chaptersToUnlock =
+        max(0, (config.startChapter ?: 0) + (daysPassed * config.dailyChapters))
+    min(totalChapterNum, chaptersToUnlock)
+} else {
+    totalChapterNum
 }
 
-fun Book.readSimulating(): Boolean {
-    return config.readSimulating
-}
+fun Book.readSimulating(): Boolean = config.readSimulating
 
-fun tryParesExportFileName(jsStr: String): Boolean {
-    return false
-}
+fun tryParesExportFileName(jsStr: String): Boolean = false

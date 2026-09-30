@@ -64,25 +64,28 @@ import org.koin.compose.koinInject
 
 private val fontGridHeight = 360.dp
 
-enum class FontSort(@param:StringRes val labelRes: Int) {
+enum class FontSort(
+    @param:StringRes val labelRes: Int,
+) {
     NameAsc(R.string.sort_name_asc),
     NameDesc(R.string.sort_name_desc),
     SizeAsc(R.string.sort_size_asc),
     SizeDesc(R.string.sort_size_desc),
     DateAsc(R.string.sort_time_asc),
-    DateDesc(R.string.sort_time_desc);
+    DateDesc(R.string.sort_time_desc),
+    ;
 
     companion object {
-        fun fromInt(value: Int): FontSort {
-            return entries.getOrElse(value) { NameAsc }
-        }
+        fun fromInt(value: Int): FontSort = entries.getOrElse(value) { NameAsc }
     }
 }
 
-
 sealed interface FontFolderState {
     data object Loading : FontFolderState
-    data class Loaded(val uri: Uri?) : FontFolderState
+
+    data class Loaded(
+        val uri: Uri?,
+    ) : FontFolderState
 }
 
 /**
@@ -106,46 +109,55 @@ fun FontSelectGrid(
     var fontItems by remember { mutableStateOf<List<FileDoc>>(emptyList()) }
     var filesLoading by remember { mutableStateOf(false) }
     var searchQuery by remember { mutableStateOf("") }
-    val fontSortFlow = remember(otherSettings) {
-        otherSettings.settings.map { it.fontSort }.distinctUntilChanged()
-    }
+    val fontSortFlow =
+        remember(otherSettings) {
+            otherSettings.settings.map { it.fontSort }.distinctUntilChanged()
+        }
     val fontSort by fontSortFlow.collectAsStateWithLifecycle(
-        initialValue = otherSettings.currentSettings.fontSort
+        initialValue = otherSettings.currentSettings.fontSort,
     )
 
     LaunchedEffect(folderState) {
         if (folderState is FontFolderState.Loaded) {
             filesLoading = true
             try {
-                fontItems = withContext(Dispatchers.IO) {
-                    loadFontFiles(context, folderState.uri)
-                }
+                fontItems =
+                    withContext(Dispatchers.IO) {
+                        loadFontFiles(context, folderState.uri)
+                    }
             } finally {
                 filesLoading = false
             }
         }
     }
 
-    val filteredItems = remember(fontItems, searchQuery, fontSort) {
-        val filtered = if (searchQuery.isBlank()) fontItems
-        else fontItems.filter { it.name.contains(searchQuery, ignoreCase = true) }
+    val filteredItems =
+        remember(fontItems, searchQuery, fontSort) {
+            val filtered =
+                if (searchQuery.isBlank()) {
+                    fontItems
+                } else {
+                    fontItems.filter { it.name.contains(searchQuery, ignoreCase = true) }
+                }
 
-        val comparator = when (FontSort.fromInt(fontSort)) {
-            FontSort.NameAsc -> Comparator<FileDoc> { a, b -> a.name.cnCompare(b.name) }
-            FontSort.NameDesc -> Comparator<FileDoc> { a, b -> b.name.cnCompare(a.name) }
-            FontSort.SizeAsc -> compareBy<FileDoc> { it.size }
-            FontSort.SizeDesc -> compareByDescending<FileDoc> { it.size }
-            FontSort.DateAsc -> compareBy<FileDoc> { it.lastModified }
-            FontSort.DateDesc -> compareByDescending<FileDoc> { it.lastModified }
+            val comparator =
+                when (FontSort.fromInt(fontSort)) {
+                    FontSort.NameAsc -> Comparator<FileDoc> { a, b -> a.name.cnCompare(b.name) }
+                    FontSort.NameDesc -> Comparator<FileDoc> { a, b -> b.name.cnCompare(a.name) }
+                    FontSort.SizeAsc -> compareBy<FileDoc> { it.size }
+                    FontSort.SizeDesc -> compareByDescending<FileDoc> { it.size }
+                    FontSort.DateAsc -> compareBy<FileDoc> { it.lastModified }
+                    FontSort.DateDesc -> compareByDescending<FileDoc> { it.lastModified }
+                }
+            filtered.sortedWith(comparator)
         }
-        filtered.sortedWith(comparator)
-    }
 
     val showLoading = folderState is FontFolderState.Loading || filesLoading
 
     Column(
-        modifier = Modifier
-            .fillMaxWidth()
+        modifier =
+        Modifier
+            .fillMaxWidth(),
     ) {
         // Search
         SearchBar(
@@ -160,12 +172,12 @@ fun FontSelectGrid(
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.Sort,
                             contentDescription = stringResource(R.string.sort),
-                            tint = LegadoTheme.colorScheme.onSurfaceVariant
+                            tint = LegadoTheme.colorScheme.onSurfaceVariant,
                         )
                     }
                     DropdownMenu(
                         expanded = expanded,
-                        onDismissRequest = { expanded = false }
+                        onDismissRequest = { expanded = false },
                     ) {
                         ProvideAppDensity {
                             FontSort.entries.forEach { sort ->
@@ -177,21 +189,24 @@ fun FontSelectGrid(
                                         }
                                         expanded = false
                                     },
-                                    trailingIcon = if (fontSort == sort.ordinal) {
+                                    trailingIcon =
+                                    if (fontSort == sort.ordinal) {
                                         {
                                             Icon(
                                                 imageVector = Icons.Default.Check,
                                                 contentDescription = null,
-                                                tint = LegadoTheme.colorScheme.primary
+                                                tint = LegadoTheme.colorScheme.primary,
                                             )
                                         }
-                                    } else null
+                                    } else {
+                                        null
+                                    },
                                 )
                             }
                         }
                     }
                 }
-            }
+            },
         )
 
         Spacer(Modifier.height(4.dp))
@@ -199,7 +214,8 @@ fun FontSelectGrid(
         // Font grid
         if (showLoading) {
             Box(
-                modifier = Modifier
+                modifier =
+                Modifier
                     .fillMaxWidth()
                     .height(fontGridHeight),
                 contentAlignment = Alignment.Center,
@@ -208,7 +224,8 @@ fun FontSelectGrid(
             }
         } else if (filteredItems.isEmpty()) {
             Box(
-                modifier = Modifier
+                modifier =
+                Modifier
                     .fillMaxWidth()
                     .height(fontGridHeight),
                 contentAlignment = Alignment.Center,
@@ -247,7 +264,8 @@ private fun FontItem(
 ) {
     val fontFamily by rememberItemFontFamily(item.uri)
     Box(
-        modifier = Modifier
+        modifier =
+        Modifier
             .fillMaxWidth()
             .background(LegadoTheme.colorScheme.surface, RoundedCornerShape(8.dp))
             .clickable(onClick = onClick)
@@ -255,7 +273,7 @@ private fun FontItem(
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.height(48.dp)
+            modifier = Modifier.height(48.dp),
         ) {
             Text(
                 text = item.name,
@@ -282,18 +300,20 @@ private fun FontItem(
 private fun rememberItemFontFamily(uri: Uri): State<FontFamily?> {
     val context = LocalContext.current
     return produceState<FontFamily?>(initialValue = null, uri) {
-        val parsed = withContext(Dispatchers.IO) {
-            runCatching {
-                val typeface: Typeface? = if (uri.scheme == "content") {
-                    context.contentResolver.openFileDescriptor(uri, "r")?.use {
-                        Typeface.Builder(it.fileDescriptor).build()
-                    }
-                } else {
-                    uri.path?.let { Typeface.createFromFile(it) }
-                }
-                typeface?.let { FontFamily(it) }
-            }.onFailure { if (it is CancellationException) throw it }.getOrNull()
-        }
+        val parsed =
+            withContext(Dispatchers.IO) {
+                runCatching {
+                    val typeface: Typeface? =
+                        if (uri.scheme == "content") {
+                            context.contentResolver.openFileDescriptor(uri, "r")?.use {
+                                Typeface.Builder(it.fileDescriptor).build()
+                            }
+                        } else {
+                            uri.path?.let { Typeface.createFromFile(it) }
+                        }
+                    typeface?.let { FontFamily(it) }
+                }.onFailure { if (it is CancellationException) throw it }.getOrNull()
+            }
         if (parsed != null) value = parsed
     }
 }

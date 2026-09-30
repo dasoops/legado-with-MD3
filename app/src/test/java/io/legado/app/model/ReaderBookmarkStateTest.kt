@@ -7,7 +7,6 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class ReaderBookmarkStateTest {
-
     @After
     fun tearDown() {
         ReaderBookmarkState.clear()

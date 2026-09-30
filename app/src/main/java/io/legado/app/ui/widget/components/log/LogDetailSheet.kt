@@ -24,12 +24,12 @@ fun LogDetailSheet(
                 Column {
                     AppText(
                         text = content,
-                        style = LegadoTheme.typography.bodySmall
+                        style = LegadoTheme.typography.bodySmall,
                     )
                 }
             }
         },
         confirmText = stringResource(android.R.string.ok),
-        onConfirm = onDismissRequest
+        onConfirm = onDismissRequest,
     )
 }

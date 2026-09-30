@@ -1,13 +1,12 @@
 package io.legado.app.ui.book.info.edit
 
 import android.os.Bundle
-import org.koin.androidx.viewmodel.ext.android.viewModel
 import androidx.compose.runtime.Composable
 import io.legado.app.base.BaseComposeActivity
 import io.legado.app.ui.main.MainActivity
+import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class BookInfoEditActivity : BaseComposeActivity() {
-
     private val viewModel by viewModel<BookInfoEditViewModel>()
 
     @Composable
@@ -30,5 +29,4 @@ class BookInfoEditActivity : BaseComposeActivity() {
             viewModel.loadBook(it)
         }
     }
-
 }

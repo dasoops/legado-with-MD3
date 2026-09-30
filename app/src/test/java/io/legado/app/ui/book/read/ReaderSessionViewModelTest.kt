@@ -9,7 +9,6 @@ import org.junit.Assert.assertSame
 import org.junit.Test
 
 class ReaderSessionViewModelTest {
-
     @Test
     fun buffersRenderUpdatesUntilEntranceSettlesAndThenPublishesImmediately() {
         val viewModel = ReaderSessionViewModel()
@@ -21,17 +20,18 @@ class ReaderSessionViewModelTest {
         assertEquals(1L, viewModel.uiState.value.background.revision)
         assertNull(viewModel.uiState.value.paginationError)
 
-        val preparedPage = ReaderPage(
-            id = ReaderPageId(chapterIndex = 1, pageIndex = 2),
-            chapterTitle = "chapter",
-            text = "content",
-            widthPx = 100,
-            heightPx = 200,
-            contentTopPx = 0f,
-            contentBottomPx = 200f,
-            elements = emptyList(),
-            revision = 1L,
-        )
+        val preparedPage =
+            ReaderPage(
+                id = ReaderPageId(chapterIndex = 1, pageIndex = 2),
+                chapterTitle = "chapter",
+                text = "content",
+                widthPx = 100,
+                heightPx = 200,
+                contentTopPx = 0f,
+                contentBottomPx = 200f,
+                elements = emptyList(),
+                revision = 1L,
+            )
         viewModel.submitPageWindow(ReaderPageWindow(current = preparedPage))
         assertSame(preparedPage, viewModel.uiState.value.pageWindow.current)
         assertNull(viewModel.uiState.value.paginationError)

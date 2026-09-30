@@ -4,7 +4,6 @@ import org.junit.Assert.assertEquals
 import org.junit.Test
 
 class ReaderBackgroundAlphaTest {
-
     @Test
     fun `legacy percentage is normalized for Canvas alpha`() {
         assertEquals(0f, readerBackgroundAlpha(0f), 0f)

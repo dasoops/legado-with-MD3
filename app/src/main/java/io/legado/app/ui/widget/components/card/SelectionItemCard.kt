@@ -31,8 +31,8 @@ import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
@@ -45,11 +45,11 @@ import io.legado.app.ui.theme.LegadoTheme
 import io.legado.app.ui.theme.LegadoTheme.composeEngine
 import io.legado.app.ui.theme.ThemeResolver
 import io.legado.app.ui.widget.components.AdaptiveSwitch
-import io.legado.app.ui.widget.components.reorderAccessibility
 import io.legado.app.ui.widget.components.button.series.SmallPlainButton
 import io.legado.app.ui.widget.components.checkBox.AppCheckbox
 import io.legado.app.ui.widget.components.icon.AppIcons
 import io.legado.app.ui.widget.components.menuItem.RoundDropdownMenu
+import io.legado.app.ui.widget.components.reorderAccessibility
 import io.legado.app.ui.widget.components.text.AppText
 import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.ReorderableLazyListState
@@ -76,23 +76,26 @@ fun SelectionItemCard(
     contentDescription: String? = null,
     enableSwitchContentDescription: String? = null,
     editContentDescription: String? = null,
-    moreContentDescription: String? = null
+    moreContentDescription: String? = null,
 ) {
     val composeEngine = ThemeResolver.isMiuixEngine(composeEngine)
     val animatedContainerColor by animateColorAsState(
-        targetValue = if (isSelected)
+        targetValue =
+        if (isSelected) {
             selectedContainerColor
                 ?: if (composeEngine) LegadoTheme.colorScheme.secondaryContainer else LegadoTheme.colorScheme.secondaryContainer
-        else
+        } else {
             containerColor
-                ?: if (composeEngine) LegadoTheme.colorScheme.surfaceContainer else LegadoTheme.colorScheme.surfaceContainerLow,
+                ?: if (composeEngine) LegadoTheme.colorScheme.surfaceContainer else LegadoTheme.colorScheme.surfaceContainerLow
+        },
         animationSpec = tween(durationMillis = 200, easing = FastOutSlowInEasing),
-        label = "CardColor"
+        label = "CardColor",
     )
 
     GlassCard(
         onClick = onToggleSelection,
-        modifier = modifier
+        modifier =
+        modifier
             .fillMaxWidth()
             .then(
                 if (contentDescription != null || inSelectionMode) {
@@ -105,11 +108,11 @@ fun SelectionItemCard(
                     }
                 } else {
                     Modifier
-                }
+                },
             ),
         cornerRadius = 12.dp,
         containerColor = animatedContainerColor,
-        elevation = elevation
+        elevation = elevation,
     ) {
         SelectionItemCardContent(
             title = title,
@@ -125,7 +128,7 @@ fun SelectionItemCard(
             dropdownContent = dropdownContent,
             enableSwitchContentDescription = enableSwitchContentDescription,
             editContentDescription = editContentDescription,
-            moreContentDescription = moreContentDescription
+            moreContentDescription = moreContentDescription,
         )
     }
 }
@@ -145,35 +148,36 @@ fun SelectionItemCardContent(
     dropdownContent: @Composable (ColumnScope.(onDismiss: () -> Unit) -> Unit)? = null,
     enableSwitchContentDescription: String? = null,
     editContentDescription: String? = null,
-    moreContentDescription: String? = null
+    moreContentDescription: String? = null,
 ) {
     var showMenu by remember { mutableStateOf(false) }
     val defaultEditDescription = stringResource(R.string.edit)
     val defaultMoreDescription = stringResource(R.string.more_menu)
 
     Row(
-        modifier = Modifier
+        modifier =
+        Modifier
             .fillMaxWidth()
             .animateContentSize(),
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = Alignment.CenterVertically,
     ) {
         AnimatedVisibility(
-            visible = inSelectionMode || leadingContent != null
+            visible = inSelectionMode || leadingContent != null,
         ) {
             Box(
                 modifier = Modifier.padding(start = 12.dp),
-                contentAlignment = Alignment.Center
+                contentAlignment = Alignment.Center,
             ) {
                 AnimatedContent(
                     targetState = inSelectionMode,
-                    label = "LeadingContent"
+                    label = "LeadingContent",
                 ) { selectionMode ->
                     if (selectionMode) {
                         AppCheckbox(
                             checked = isSelected,
                             onCheckedChange = null,
                             includeStateSemantics = false,
-                            modifier = Modifier.clearAndSetSemantics { }
+                            modifier = Modifier.clearAndSetSemantics { },
                         )
                     } else {
                         leadingContent?.invoke()
@@ -184,22 +188,24 @@ fun SelectionItemCardContent(
 
         if (ThemeResolver.isMiuixEngine(composeEngine)) {
             BasicComponent(
-                modifier = Modifier.weight(1f)
+                modifier = Modifier.weight(1f),
             ) {
                 AppText(
                     text = title,
                     style = LegadoTheme.typography.titleSmall,
                     maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
+                    overflow = TextOverflow.Ellipsis,
                 )
                 when {
-                    supportingContent != null -> supportingContent()
+                    supportingContent != null -> {
+                        supportingContent()
+                    }
                     !subtitle.isNullOrBlank() -> {
                         AppText(
                             text = subtitle,
                             style = LegadoTheme.typography.bodySmall,
                             maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
+                            overflow = TextOverflow.Ellipsis,
                         )
                     }
                 }
@@ -207,27 +213,32 @@ fun SelectionItemCardContent(
         } else {
             ListItem(
                 modifier = Modifier.weight(1f),
-                supportingContent = when {
-                    supportingContent != null -> supportingContent
+                supportingContent =
+                when {
+                    supportingContent != null -> {
+                        supportingContent
+                    }
                     !subtitle.isNullOrBlank() -> {
                         {
                             AppText(
                                 text = subtitle,
                                 style = LegadoTheme.typography.bodySmall,
                                 maxLines = 1,
-                                overflow = TextOverflow.Ellipsis
+                                overflow = TextOverflow.Ellipsis,
                             )
                         }
                     }
-                    else -> null
+                    else -> {
+                        null
+                    }
                 },
-                colors = ListItemDefaults.colors(containerColor = Color.Transparent)
+                colors = ListItemDefaults.colors(containerColor = Color.Transparent),
             ) {
                 AppText(
                     text = title,
                     style = LegadoTheme.typography.titleSmall,
                     maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
+                    overflow = TextOverflow.Ellipsis,
                 )
             }
         }
@@ -235,22 +246,24 @@ fun SelectionItemCardContent(
         Row(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(8.dp),
-            modifier = Modifier
-                .padding(end = 8.dp)
+            modifier =
+            Modifier
+                .padding(end = 8.dp),
         ) {
             onEnabledChange?.let {
                 AdaptiveSwitch(
-                    modifier = Modifier
+                    modifier =
+                    Modifier
                         .scale(0.8f)
                         .then(
                             enableSwitchContentDescription?.let { description ->
                                 Modifier.semantics {
                                     contentDescription = description
                                 }
-                            } ?: Modifier
+                            } ?: Modifier,
                         ),
                     checked = isEnabled,
-                    onCheckedChange = it
+                    onCheckedChange = it,
                 )
             }
 
@@ -258,7 +271,7 @@ fun SelectionItemCardContent(
                 SmallPlainButton(
                     onClick = onClickEdit,
                     icon = AppIcons.Edit,
-                    contentDescription = editContentDescription ?: defaultEditDescription
+                    contentDescription = editContentDescription ?: defaultEditDescription,
                 )
             }
 
@@ -271,11 +284,11 @@ fun SelectionItemCardContent(
                     SmallPlainButton(
                         onClick = { showMenu = true },
                         icon = AppIcons.MoreVert,
-                        contentDescription = moreContentDescription ?: defaultMoreDescription
+                        contentDescription = moreContentDescription ?: defaultMoreDescription,
                     )
                     RoundDropdownMenu(
                         expanded = showMenu,
-                        onDismissRequest = { showMenu = false }
+                        onDismissRequest = { showMenu = false },
                     ) {
                         dropdownContent { showMenu = false }
                     }
@@ -315,19 +328,22 @@ fun LazyItemScope.ReorderableSelectionItem(
     onMoveItem: ((from: Int, to: Int) -> Unit)? = null,
 ) {
     val hapticFeedback = LocalHapticFeedback.current
-    val reorderAccessibilityModifier = if (reorderIndex != null && onMoveItem != null) {
-        Modifier.reorderAccessibility(
-            index = reorderIndex,
-            itemCount = reorderItemCount,
-            enabled = canReorder && !inSelectionMode,
-            onMove = onMoveItem,
-        )
-    } else Modifier
+    val reorderAccessibilityModifier =
+        if (reorderIndex != null && onMoveItem != null) {
+            Modifier.reorderAccessibility(
+                index = reorderIndex,
+                itemCount = reorderItemCount,
+                enabled = canReorder && !inSelectionMode,
+                onMove = onMoveItem,
+            )
+        } else {
+            Modifier
+        }
 
     ReorderableItem(state, key = key) { isDragging ->
         val elevation by animateDpAsState(
             targetValue = if (isDragging) 8.dp else 0.dp,
-            label = "DragElevation"
+            label = "DragElevation",
         )
 
         SelectionItemCard(
@@ -350,7 +366,8 @@ fun LazyItemScope.ReorderableSelectionItem(
             enableSwitchContentDescription = enableSwitchContentDescription,
             editContentDescription = editContentDescription,
             moreContentDescription = moreContentDescription,
-            modifier = modifier
+            modifier =
+            modifier
                 .then(reorderAccessibilityModifier)
                 .zIndex(if (isDragging) 1f else 0f)
                 .then(
@@ -361,11 +378,12 @@ fun LazyItemScope.ReorderableSelectionItem(
                             },
                             onDragStopped = {
                                 hapticFeedback.performHapticFeedback(HapticFeedbackType.GestureEnd)
-                            }
+                            },
                         )
-                    } else Modifier
-                )
-                .animateItem()
+                    } else {
+                        Modifier
+                    },
+                ).animateItem(),
         )
     }
 }

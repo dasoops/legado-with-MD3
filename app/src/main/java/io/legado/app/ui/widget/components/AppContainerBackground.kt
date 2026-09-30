@@ -18,10 +18,10 @@ import coil3.compose.rememberAsyncImagePainter
 import coil3.request.ImageRequest
 import io.legado.app.ui.theme.LegadoTheme
 import io.legado.app.ui.theme.LocalAppUiConfiguration
+import java.io.File
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.koin.compose.koinInject
-import java.io.File
 
 enum class AppContainerBackgroundType {
     Large,
@@ -38,29 +38,35 @@ fun Modifier.appContainerBackground(
     contentScale: ContentScale = ContentScale.Crop,
 ): Modifier {
     val theme = LocalAppUiConfiguration.current.theme
-    val configuredImage = if (useThemeBackground && theme.enableContainerBackgroundImage) {
-        when (type) {
-            AppContainerBackgroundType.Large -> if (LegadoTheme.isDark) {
-                theme.largeContainerBackgroundImageDark
-            } else {
-                theme.largeContainerBackgroundImageLight
+    val configuredImage =
+        if (useThemeBackground && theme.enableContainerBackgroundImage) {
+            when (type) {
+                AppContainerBackgroundType.Large -> {
+                    if (LegadoTheme.isDark) {
+                        theme.largeContainerBackgroundImageDark
+                    } else {
+                        theme.largeContainerBackgroundImageLight
+                    }
+                }
+                AppContainerBackgroundType.Item -> {
+                    if (LegadoTheme.isDark) {
+                        theme.itemBackgroundImageDark
+                    } else {
+                        theme.itemBackgroundImageLight
+                    }
+                }
             }
-            AppContainerBackgroundType.Item -> if (LegadoTheme.isDark) {
-                theme.itemBackgroundImageDark
-            } else {
-                theme.itemBackgroundImageLight
-            }
+        } else {
+            null
         }
-    } else {
-        null
-    }
     val path = backgroundImage ?: configuredImage
     if (path.isNullOrBlank()) return this
 
-    val alpha = backgroundAlpha ?: when (type) {
-        AppContainerBackgroundType.Large -> theme.appColumnBackgroundOpacity / 100f
-        AppContainerBackgroundType.Item -> theme.glassCardBackgroundOpacity / 100f
-    }
+    val alpha =
+        backgroundAlpha ?: when (type) {
+            AppContainerBackgroundType.Large -> theme.appColumnBackgroundOpacity / 100f
+            AppContainerBackgroundType.Item -> theme.glassCardBackgroundOpacity / 100f
+        }
     val ninePatch by produceState<NinePatchDrawable?>(initialValue = null, path) {
         value = withContext(Dispatchers.IO) { loadNinePatch(path) }
     }
@@ -69,16 +75,19 @@ fun Modifier.appContainerBackground(
     val density = LocalDensity.current
     val requestWidth = with(density) { configuration.screenWidthDp.dp.roundToPx() }
     val requestHeight = with(density) { configuration.screenHeightDp.dp.roundToPx() }
-    val request = remember(context, path, ninePatch, requestWidth, requestHeight) {
-        ImageRequest.Builder(context)
-            .data(ninePatch ?: path)
-            .size(requestWidth.coerceAtLeast(1), requestHeight.coerceAtLeast(1))
-            .build()
-    }
-    val painter = rememberAsyncImagePainter(
-        model = request,
-        imageLoader = koinInject(),
-    )
+    val request =
+        remember(context, path, ninePatch, requestWidth, requestHeight) {
+            ImageRequest
+                .Builder(context)
+                .data(ninePatch ?: path)
+                .size(requestWidth.coerceAtLeast(1), requestHeight.coerceAtLeast(1))
+                .build()
+        }
+    val painter =
+        rememberAsyncImagePainter(
+            model = request,
+            imageLoader = koinInject(),
+        )
     return this
         .paint(
             painter = painter,

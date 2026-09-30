@@ -10,5 +10,5 @@ data class NCX(
     val parent: Int?,
     val firstChild: Int?,
     val lastChild: Int?,
-    var children: List<NCX>? = null
+    var children: List<NCX>? = null,
 )

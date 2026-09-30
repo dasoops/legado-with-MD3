@@ -23,20 +23,27 @@ interface ExactChapterPageCountStore {
 
     suspend fun save(value: ExactChapterPageCount)
 
-    suspend fun deleteChapter(bookId: String, chapterId: String)
+    suspend fun deleteChapter(
+        bookId: String,
+        chapterId: String,
+    )
 
     companion object {
-        val None = object : ExactChapterPageCountStore {
-            override suspend fun load(
-                bookId: String,
-                layoutSignature: Long,
-                engineVersion: Int,
-            ) = emptyList<ExactChapterPageCount>()
+        val None =
+            object : ExactChapterPageCountStore {
+                override suspend fun load(
+                    bookId: String,
+                    layoutSignature: Long,
+                    engineVersion: Int,
+                ) = emptyList<ExactChapterPageCount>()
 
-            override suspend fun save(value: ExactChapterPageCount) = Unit
+                override suspend fun save(value: ExactChapterPageCount) = Unit
 
-            override suspend fun deleteChapter(bookId: String, chapterId: String) = Unit
-        }
+                override suspend fun deleteChapter(
+                    bookId: String,
+                    chapterId: String,
+                ) = Unit
+            }
     }
 }
 
@@ -53,7 +60,10 @@ object RoomExactChapterPageCountStore : ExactChapterPageCountStore {
         appDb.exactChapterPageCountDao.upsert(value.toEntity())
     }
 
-    override suspend fun deleteChapter(bookId: String, chapterId: String) {
+    override suspend fun deleteChapter(
+        bookId: String,
+        chapterId: String,
+    ) {
         appDb.exactChapterPageCountDao.deleteChapter(bookId, chapterId)
     }
 }

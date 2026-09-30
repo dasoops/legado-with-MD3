@@ -24,20 +24,22 @@ fun PillHeaderDivider(
     modifier: Modifier = Modifier,
     dotSize: Dp = 2.dp,
     dotColor: Color = LegadoTheme.colorScheme.outlineVariant.copy(alpha = 0.8f),
-    titleColor: Color = LegadoTheme.colorScheme.primary
+    titleColor: Color = LegadoTheme.colorScheme.primary,
 ) {
     Row(
-        modifier = modifier
+        modifier =
+        modifier
             .fillMaxWidth()
             .padding(horizontal = 12.dp, vertical = 4.dp),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.Center
+        horizontalArrangement = Arrangement.Center,
     ) {
         Box(
-            modifier = Modifier
+            modifier =
+            Modifier
                 .size(dotSize)
                 .clip(CircleShape)
-                .background(dotColor)
+                .background(dotColor),
         )
 
         AppText(
@@ -45,14 +47,15 @@ fun PillHeaderDivider(
             style = LegadoTheme.typography.labelSmall,
             color = titleColor,
             modifier = Modifier.padding(horizontal = 12.dp),
-            maxLines = 1
+            maxLines = 1,
         )
 
         Box(
-            modifier = Modifier
+            modifier =
+            Modifier
                 .size(dotSize)
                 .clip(CircleShape)
-                .background(dotColor)
+                .background(dotColor),
         )
     }
 }

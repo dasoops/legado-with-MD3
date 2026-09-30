@@ -25,20 +25,21 @@ fun SettingCard(
     colors: CardColors? = null,
     elevation: Dp = 0.dp,
     border: BorderStroke? = null,
-    content: @Composable ColumnScope.() -> Unit
+    content: @Composable ColumnScope.() -> Unit,
 ) {
     val composeEngine = LegadoTheme.composeEngine
     if (ThemeResolver.isMiuixEngine(composeEngine)) {
         BasicComponent(
             modifier = modifier,
             onClick = onClick,
-            content = content
+            content = content,
         )
     } else {
-        val baseColors = colors ?: CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.secondaryContainer,
-            contentColor = MaterialTheme.colorScheme.onSecondaryContainer
-        )
+        val baseColors =
+            colors ?: CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+            )
 
         GlassCard(
             modifier = modifier,

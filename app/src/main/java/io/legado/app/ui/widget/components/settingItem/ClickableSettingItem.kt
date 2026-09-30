@@ -22,7 +22,7 @@ fun ClickableSettingItem(
     imageVector: ImageVector? = null,
     onLongClick: (() -> Unit)? = null,
     trailingContent: (@Composable () -> Unit)? = null,
-    onClick: () -> Unit
+    onClick: () -> Unit,
 ) {
     val composeEngine = LegadoTheme.composeEngine
     SplicedColumnDivider()
@@ -32,7 +32,7 @@ fun ClickableSettingItem(
             title = title,
             summary = description,
             insideMargin = BasicComponentDefaults.InsideMargin,
-            onClick = onClick
+            onClick = onClick,
         )
     } else {
         SettingItem(
@@ -41,15 +41,16 @@ fun ClickableSettingItem(
             description = description,
             option = option,
             imageVector = imageVector,
-            trailingContent = trailingContent ?: {
+            trailingContent =
+            trailingContent ?: {
                 Icon(
                     imageVector = Icons.Default.ChevronRight,
                     contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             },
             onClick = onClick,
-            onLongClick = onLongClick
+            onLongClick = onLongClick,
         )
     }
 }

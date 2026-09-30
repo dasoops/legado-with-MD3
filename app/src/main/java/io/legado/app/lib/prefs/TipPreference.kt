@@ -7,8 +7,10 @@ import androidx.core.content.withStyledAttributes
 import androidx.preference.PreferenceViewHolder
 import io.legado.app.R
 
-class TipPreference(context: Context, attrs: AttributeSet) : Preference(context, attrs) {
-
+class TipPreference(
+    context: Context,
+    attrs: AttributeSet,
+) : Preference(context, attrs) {
     private var tipText: String? = null
 
     init {

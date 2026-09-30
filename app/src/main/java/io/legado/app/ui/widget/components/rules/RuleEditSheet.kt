@@ -50,7 +50,7 @@ data class RuleEditFields(
     val rule1: String = "",
     val rule2: String = "",
     val rule3: String = "",
-    val extra: String = ""
+    val extra: String = "",
 )
 
 /**
@@ -152,11 +152,11 @@ fun <T> RuleEditSheet(
             )
         },
         endAction = {
-            Box{
+            Box {
                 MediumTonalButton(
                     onClick = { showMenu = true },
                     icon = Icons.Default.MoreVert,
-                    contentDescription = stringResource(R.string.more_menu)
+                    contentDescription = stringResource(R.string.more_menu),
                 )
                 RoundDropdownMenu(expanded = showMenu, onDismissRequest = { showMenu = false }) {
                     RoundDropdownMenuItem(
@@ -165,7 +165,7 @@ fun <T> RuleEditSheet(
                         onClick = {
                             onCopy(getCurrentEntity())
                             showMenu = false
-                        }
+                        },
                     )
                     RoundDropdownMenuItem(
                         text = stringResource(R.string.paste_rule),
@@ -181,21 +181,22 @@ fun <T> RuleEditSheet(
                                 }
                             }
                             showMenu = false
-                        }
+                        },
                     )
                 }
             }
         },
         show = show,
-        onDismissRequest = onDismissRequest
+        onDismissRequest = onDismissRequest,
     ) {
         Box(modifier = Modifier.fillMaxWidth()) {
             Column(
-                modifier = Modifier
+                modifier =
+                Modifier
                     .fillMaxWidth()
                     .padding(bottom = 120.dp)
                     .verticalScroll(rememberScrollState()),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
+                verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 AppTextField(
                     modifier = Modifier.fillMaxWidth(),
@@ -203,14 +204,14 @@ fun <T> RuleEditSheet(
                     onValueChange = { name = it },
                     backgroundColor = LegadoTheme.colorScheme.surface,
                     label = stringResource(R.string.name),
-                    singleLine = true
+                    singleLine = true,
                 )
                 AppTextField(
                     modifier = Modifier.fillMaxWidth(),
                     value = rule1,
                     onValueChange = { rule1 = it },
                     backgroundColor = LegadoTheme.colorScheme.surface,
-                    label = label1
+                    label = label1,
                 )
                 AppTextField(
                     modifier = Modifier.fillMaxWidth(),
@@ -218,7 +219,7 @@ fun <T> RuleEditSheet(
                     onValueChange = { rule2 = it },
                     backgroundColor = LegadoTheme.colorScheme.surface,
                     label = label2,
-                    minLines = 3
+                    minLines = 3,
                 )
                 label3?.let { label ->
                     AppTextField(
@@ -226,7 +227,7 @@ fun <T> RuleEditSheet(
                         value = rule3,
                         onValueChange = { rule3 = it },
                         backgroundColor = LegadoTheme.colorScheme.surface,
-                        label = label
+                        label = label,
                     )
                 }
 
@@ -261,7 +262,8 @@ fun <T> RuleEditSheet(
                                 Icon(
                                     imageVector = if (result.matched) Icons.Default.Check else Icons.Default.Close,
                                     contentDescription = null,
-                                    tint = if (result.matched) {
+                                    tint =
+                                    if (result.matched) {
                                         LegadoTheme.colorScheme.primary
                                     } else {
                                         LegadoTheme.colorScheme.error
@@ -271,7 +273,8 @@ fun <T> RuleEditSheet(
                                 AppText(
                                     text = result.line,
                                     style = LegadoTheme.typography.bodySmall,
-                                    color = if (result.matched) {
+                                    color =
+                                    if (result.matched) {
                                         LegadoTheme.colorScheme.onSurface
                                     } else {
                                         LegadoTheme.colorScheme.onSurfaceVariant
@@ -287,7 +290,8 @@ fun <T> RuleEditSheet(
             }
 
             Row(
-                modifier = Modifier
+                modifier =
+                Modifier
                     .align(Alignment.BottomEnd)
                     .padding(16.dp),
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
@@ -303,7 +307,7 @@ fun <T> RuleEditSheet(
                 AppFloatingActionButton(
                     onClick = { onSave(getCurrentEntity()) },
                     tooltipText = stringResource(R.string.action_save),
-                    icon = Icons.Default.Save
+                    icon = Icons.Default.Save,
                 )
             }
         }

@@ -16,16 +16,19 @@ fun <T> ActivityResultLauncher<T?>.launch() {
 }
 
 class SelectImageContract : ActivityResultContract<Int?, SelectImageContract.Result>() {
-
     private val delegate = ActivityResultContracts.PickVisualMedia()
     private var requestCode: Int? = null
     private var useFallback = false
 
-    override fun createIntent(context: Context, input: Int?): Intent {
+    override fun createIntent(
+        context: Context,
+        input: Int?,
+    ): Intent {
         requestCode = input
-        val intent = Intent(Intent.ACTION_GET_CONTENT)
-            .addCategory(Intent.CATEGORY_OPENABLE)
-            .setType("image/*")
+        val intent =
+            Intent(Intent.ACTION_GET_CONTENT)
+                .addCategory(Intent.CATEGORY_OPENABLE)
+                .setType("image/*")
         useFallback = intent.resolveActivity(appCtx.packageManager) == null
         return if (useFallback) {
             val request = PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
@@ -35,30 +38,38 @@ class SelectImageContract : ActivityResultContract<Int?, SelectImageContract.Res
         }
     }
 
-    override fun parseResult(resultCode: Int, intent: Intent?): Result {
+    override fun parseResult(
+        resultCode: Int,
+        intent: Intent?,
+    ): Result {
         val isFallback = useFallback
         useFallback = false
 
-        val uri = if (isFallback) {
-            delegate.parseResult(resultCode, intent)
-        } else if (resultCode == RESULT_OK) {
-            intent?.data
-        } else null
+        val uri =
+            if (isFallback) {
+                delegate.parseResult(resultCode, intent)
+            } else if (resultCode == RESULT_OK) {
+                intent?.data
+            } else {
+                null
+            }
 
         return Result(requestCode, uri)
     }
 
     data class Result(
         val requestCode: Int?,
-        val uri: Uri? = null
+        val uri: Uri? = null,
     )
-
 }
 
-class StartActivityContract(private val cls: Class<*>) :
-    ActivityResultContract<(Intent.() -> Unit)?, ActivityResult>() {
-
-    override fun createIntent(context: Context, input: (Intent.() -> Unit)?): Intent {
+class StartActivityContract(
+    private val cls: Class<*>,
+) : ActivityResultContract<(Intent.() -> Unit)?, ActivityResult>() {
+    override fun createIntent(
+        context: Context,
+        input: (Intent.() -> Unit)?,
+    ): Intent {
         val intent = Intent(context, cls)
         input?.let {
             intent.apply(input)
@@ -67,9 +78,7 @@ class StartActivityContract(private val cls: Class<*>) :
     }
 
     override fun parseResult(
-        resultCode: Int, intent: Intent?
-    ): ActivityResult {
-        return ActivityResult(resultCode, intent)
-    }
-
+        resultCode: Int,
+        intent: Intent?,
+    ): ActivityResult = ActivityResult(resultCode, intent)
 }

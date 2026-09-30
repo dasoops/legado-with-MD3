@@ -4,7 +4,6 @@ import androidx.annotation.IntDef
 import androidx.annotation.StringRes
 
 interface ViewSwitcher {
-
     companion object {
         const val SHOW_CONTENT_VIEW = 0
         const val SHOW_ERROR_VIEW = 1
@@ -18,12 +17,13 @@ interface ViewSwitcher {
 
     fun showErrorView(message: CharSequence)
 
-    fun showErrorView(@StringRes messageId: Int)
+    fun showErrorView(
+        @StringRes messageId: Int,
+    )
 
     fun showEmptyView()
 
     fun showProgressView()
 
     fun showContentView()
-
 }

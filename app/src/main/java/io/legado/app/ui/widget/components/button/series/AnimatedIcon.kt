@@ -14,7 +14,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 fun AnimatedIcon(
     imageVector: ImageVector,
     contentDescription: String?,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     AnimatedContent(
         targetState = imageVector,
@@ -22,12 +22,12 @@ fun AnimatedIcon(
             (fadeIn() + scaleIn(initialScale = 0.8f))
                 .togetherWith(fadeOut())
         },
-        label = "IconTransition"
+        label = "IconTransition",
     ) { targetIcon ->
         Icon(
             imageVector = targetIcon,
             contentDescription = contentDescription,
-            modifier = modifier
+            modifier = modifier,
         )
     }
 }

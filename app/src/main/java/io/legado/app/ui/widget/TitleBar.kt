@@ -15,11 +15,12 @@ import splitties.views.bottomPadding
 import splitties.views.topPadding
 
 @Suppress("unused", "MemberVisibilityCanBePrivate")
-class TitleBar @JvmOverloads constructor(
+class TitleBar
+@JvmOverloads
+constructor(
     context: Context,
-    attrs: AttributeSet? = null
+    attrs: AttributeSet? = null,
 ) : AppBarLayout(context, attrs) {
-
     val toolbar: MaterialToolbar
     val menu: Menu
         get() = toolbar.menu
@@ -48,10 +49,13 @@ class TitleBar @JvmOverloads constructor(
     private val attachToActivity: Boolean
 
     init {
-        val a = context.obtainStyledAttributes(
-            attrs, R.styleable.TitleBar,
-            R.attr.titleBarStyle, 0
-        )
+        val a =
+            context.obtainStyledAttributes(
+                attrs,
+                R.styleable.TitleBar,
+                R.attr.titleBarStyle,
+                0,
+            )
         navigationIconTint = a.getColorStateList(R.styleable.TitleBar_navigationIconTint)
         navigationIconTintMode = a.getInt(R.styleable.TitleBar_navigationIconTintMode, 9)
         attachToActivity = a.getBoolean(R.styleable.TitleBar_attachToActivity, true)
@@ -80,7 +84,7 @@ class TitleBar @JvmOverloads constructor(
             if (a.hasValue(R.styleable.TitleBar_titleTextAppearance)) {
                 this.setTitleTextAppearance(
                     context,
-                    a.getResourceId(R.styleable.TitleBar_titleTextAppearance, 0)
+                    a.getResourceId(R.styleable.TitleBar_titleTextAppearance, 0),
                 )
             }
 
@@ -91,7 +95,7 @@ class TitleBar @JvmOverloads constructor(
             if (a.hasValue(R.styleable.TitleBar_subtitleTextAppearance)) {
                 this.setSubtitleTextAppearance(
                     context,
-                    a.getResourceId(R.styleable.TitleBar_subtitleTextAppearance, 0)
+                    a.getResourceId(R.styleable.TitleBar_subtitleTextAppearance, 0),
                 )
             }
 
@@ -99,35 +103,38 @@ class TitleBar @JvmOverloads constructor(
                 this.setSubtitleTextColor(a.getColor(R.styleable.TitleBar_subtitleTextColor, -0x1))
             }
 
-
-            if (a.hasValue(R.styleable.TitleBar_contentInsetLeft)
-                || a.hasValue(R.styleable.TitleBar_contentInsetRight)
+            if (a.hasValue(R.styleable.TitleBar_contentInsetLeft) ||
+                a.hasValue(R.styleable.TitleBar_contentInsetRight)
             ) {
                 this.setContentInsetsAbsolute(
                     a.getDimensionPixelSize(R.styleable.TitleBar_contentInsetLeft, 0),
-                    a.getDimensionPixelSize(R.styleable.TitleBar_contentInsetRight, 0)
+                    a.getDimensionPixelSize(R.styleable.TitleBar_contentInsetRight, 0),
                 )
             }
 
-            if (a.hasValue(R.styleable.TitleBar_contentInsetStart)
-                || a.hasValue(R.styleable.TitleBar_contentInsetEnd)
+            if (a.hasValue(R.styleable.TitleBar_contentInsetStart) ||
+                a.hasValue(R.styleable.TitleBar_contentInsetEnd)
             ) {
                 this.setContentInsetsRelative(
                     a.getDimensionPixelSize(R.styleable.TitleBar_contentInsetStart, 0),
-                    a.getDimensionPixelSize(R.styleable.TitleBar_contentInsetEnd, 0)
+                    a.getDimensionPixelSize(R.styleable.TitleBar_contentInsetEnd, 0),
                 )
             }
 
             if (a.hasValue(R.styleable.TitleBar_contentInsetStartWithNavigation)) {
-                this.contentInsetStartWithNavigation = a.getDimensionPixelOffset(
-                    R.styleable.TitleBar_contentInsetStartWithNavigation, 0
-                )
+                this.contentInsetStartWithNavigation =
+                    a.getDimensionPixelOffset(
+                        R.styleable.TitleBar_contentInsetStartWithNavigation,
+                        0,
+                    )
             }
 
             if (a.hasValue(R.styleable.TitleBar_contentInsetEndWithActions)) {
-                this.contentInsetEndWithActions = a.getDimensionPixelOffset(
-                    R.styleable.TitleBar_contentInsetEndWithActions, 0
-                )
+                this.contentInsetEndWithActions =
+                    a.getDimensionPixelOffset(
+                        R.styleable.TitleBar_contentInsetEndWithActions,
+                        0,
+                    )
             }
 
             if (!titleText.isNullOrBlank()) {
@@ -166,7 +173,7 @@ class TitleBar @JvmOverloads constructor(
             }
 
             stateListAnimator = null
-            //elevation = context.elevation
+            // elevation = context.elevation
         }
         a.recycle()
     }
@@ -188,7 +195,10 @@ class TitleBar @JvmOverloads constructor(
         toolbar.setSubtitle(subtitleId)
     }
 
-    fun onMultiWindowModeChanged(isInMultiWindowMode: Boolean, fullScreen: Boolean) {
+    fun onMultiWindowModeChanged(
+        isInMultiWindowMode: Boolean,
+        fullScreen: Boolean,
+    ) {
 //        if (fitStatusBar) {
 //            val topPadding = if (!isInMultiWindowMode && fullScreen) context.statusBarHeight else 0
 //            setPadding(paddingLeft, topPadding, paddingRight, paddingBottom)
@@ -203,5 +213,4 @@ class TitleBar @JvmOverloads constructor(
             }
         }
     }
-
 }

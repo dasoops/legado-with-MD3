@@ -46,7 +46,7 @@ fun EditThemeSheet(
     themeData: ThemeExportData?,
     themeName: String,
     onDismissRequest: () -> Unit,
-    onSave: (newName: String, newData: ThemeExportData) -> Unit
+    onSave: (newName: String, newData: ThemeExportData) -> Unit,
 ) {
     if (!show || themeData == null) return
 
@@ -67,17 +67,18 @@ fun EditThemeSheet(
                     }
                 },
                 icon = Icons.Default.Done,
-                contentDescription = stringResource(R.string.save)
+                contentDescription = stringResource(R.string.save),
             )
-        }
+        },
     ) {
         Column(
-            modifier = Modifier
+            modifier =
+            Modifier
                 .fillMaxWidth()
                 .verticalScroll(rememberScrollState())
                 .navigationBarsPadding()
                 .padding(bottom = 32.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+            verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             // Name
             AppTextField(
@@ -85,8 +86,9 @@ fun EditThemeSheet(
                 onValueChange = { name = it },
                 placeholder = { },
                 singleLine = true,
-                modifier = Modifier
-                    .fillMaxWidth()
+                modifier =
+                Modifier
+                    .fillMaxWidth(),
             )
 
             Spacer(modifier = Modifier.height(8.dp))
@@ -98,28 +100,28 @@ fun EditThemeSheet(
                 selectedValue = data.themeMode,
                 displayEntries = stringArrayResource(R.array.theme_mode),
                 entryValues = stringArrayResource(R.array.theme_mode_v),
-                onValueChange = { data = data.copy(themeMode = it) }
+                onValueChange = { data = data.copy(themeMode = it) },
             )
             CompactDropdownSettingItem(
                 title = stringResource(R.string.palette_style),
                 selectedValue = data.paletteStyle,
                 displayEntries = stringArrayResource(R.array.paletteStyle),
                 entryValues = stringArrayResource(R.array.paletteStyle_value),
-                onValueChange = { data = data.copy(paletteStyle = it) }
+                onValueChange = { data = data.copy(paletteStyle = it) },
             )
             CompactDropdownSettingItem(
                 title = stringResource(R.string.material_version),
                 selectedValue = data.materialVersion,
                 displayEntries = stringArrayResource(R.array.materialVersion),
                 entryValues = stringArrayResource(R.array.materialVersion_value),
-                onValueChange = { data = data.copy(materialVersion = it) }
+                onValueChange = { data = data.copy(materialVersion = it) },
             )
             CompactDropdownSettingItem(
                 title = stringResource(R.string.preferred_contrast),
                 selectedValue = data.customContrast,
                 displayEntries = stringArrayResource(R.array.customContrast),
                 entryValues = stringArrayResource(R.array.customContrast_value),
-                onValueChange = { data = data.copy(customContrast = it) }
+                onValueChange = { data = data.copy(customContrast = it) },
             )
 
             Spacer(modifier = Modifier.height(8.dp))
@@ -129,53 +131,67 @@ fun EditThemeSheet(
             CompactSwitchSettingItem(
                 title = stringResource(R.string.theme_manage_use_palette_colors),
                 checked = !data.enableDeepPersonalization,
-                onCheckedChange = { data = data.copy(enableDeepPersonalization = !it) }
+                onCheckedChange = { data = data.copy(enableDeepPersonalization = !it) },
             )
             if (data.enableDeepPersonalization) {
                 SectionTitle(stringResource(R.string.day))
                 ColorItem(stringResource(R.string.theme_manage_primary_color), data.themeColor) {
-                    currentColorKey = "themeColor"; showColorPicker = true
+                    currentColorKey = "themeColor"
+                    showColorPicker = true
                 }
                 ColorItem(stringResource(R.string.theme_manage_secondary_color), data.secondaryThemeColor) {
-                    currentColorKey = "secondaryThemeColor"; showColorPicker = true
+                    currentColorKey = "secondaryThemeColor"
+                    showColorPicker = true
                 }
                 ColorItem(stringResource(R.string.theme_manage_primary_text_color), data.primaryTextColor) {
-                    currentColorKey = "primaryTextColor"; showColorPicker = true
+                    currentColorKey = "primaryTextColor"
+                    showColorPicker = true
                 }
                 ColorItem(stringResource(R.string.theme_manage_secondary_text_color), data.secondaryTextColor) {
-                    currentColorKey = "secondaryTextColor"; showColorPicker = true
+                    currentColorKey = "secondaryTextColor"
+                    showColorPicker = true
                 }
                 ColorItem(stringResource(R.string.theme_manage_background_color), data.themeBackgroundColor) {
-                    currentColorKey = "themeBackgroundColor"; showColorPicker = true
+                    currentColorKey = "themeBackgroundColor"
+                    showColorPicker = true
                 }
                 ColorItem(stringResource(R.string.theme_manage_label_container_color), data.labelContainerColor) {
-                    currentColorKey = "labelContainerColor"; showColorPicker = true
+                    currentColorKey = "labelContainerColor"
+                    showColorPicker = true
                 }
                 SectionTitle(stringResource(R.string.night))
                 ColorItem(stringResource(R.string.theme_manage_primary_color), data.themeColorNight) {
-                    currentColorKey = "themeColorNight"; showColorPicker = true
+                    currentColorKey = "themeColorNight"
+                    showColorPicker = true
                 }
                 ColorItem(stringResource(R.string.theme_manage_secondary_color), data.secondaryThemeColorNight) {
-                    currentColorKey = "secondaryThemeColorNight"; showColorPicker = true
+                    currentColorKey = "secondaryThemeColorNight"
+                    showColorPicker = true
                 }
                 ColorItem(stringResource(R.string.theme_manage_primary_text_color), data.primaryTextColorNight) {
-                    currentColorKey = "primaryTextColorNight"; showColorPicker = true
+                    currentColorKey = "primaryTextColorNight"
+                    showColorPicker = true
                 }
                 ColorItem(stringResource(R.string.theme_manage_secondary_text_color), data.secondaryTextColorNight) {
-                    currentColorKey = "secondaryTextColorNight"; showColorPicker = true
+                    currentColorKey = "secondaryTextColorNight"
+                    showColorPicker = true
                 }
                 ColorItem(stringResource(R.string.theme_manage_background_color), data.themeBackgroundColorNight) {
-                    currentColorKey = "themeBackgroundColorNight"; showColorPicker = true
+                    currentColorKey = "themeBackgroundColorNight"
+                    showColorPicker = true
                 }
                 ColorItem(stringResource(R.string.theme_manage_label_container_color), data.labelContainerColorNight) {
-                    currentColorKey = "labelContainerColorNight"; showColorPicker = true
+                    currentColorKey = "labelContainerColorNight"
+                    showColorPicker = true
                 }
             } else {
                 ColorItem(stringResource(R.string.theme_manage_day_seed_color), data.cPrimary) {
-                    currentColorKey = "cPrimary"; showColorPicker = true
+                    currentColorKey = "cPrimary"
+                    showColorPicker = true
                 }
                 ColorItem(stringResource(R.string.theme_manage_night_seed_color), data.cNPrimary) {
-                    currentColorKey = "cNPrimary"; showColorPicker = true
+                    currentColorKey = "cNPrimary"
+                    showColorPicker = true
                 }
             }
 
@@ -186,48 +202,48 @@ fun EditThemeSheet(
             CompactSwitchSettingItem(
                 title = stringResource(R.string.show_home),
                 checked = data.showHome,
-                onCheckedChange = { data = data.copy(showHome = it) }
+                onCheckedChange = { data = data.copy(showHome = it) },
             )
             CompactSwitchSettingItem(
                 title = stringResource(R.string.show_bottom_nav),
                 checked = data.showBottomView,
-                onCheckedChange = { data = data.copy(showBottomView = it) }
+                onCheckedChange = { data = data.copy(showBottomView = it) },
             )
             CompactSwitchSettingItem(
                 title = stringResource(R.string.floating_bottom_bar),
                 checked = data.useFloatingBottomBar,
-                onCheckedChange = { data = data.copy(useFloatingBottomBar = it) }
+                onCheckedChange = { data = data.copy(useFloatingBottomBar = it) },
             )
             CompactSwitchSettingItem(
                 title = stringResource(R.string.theme_manage_status_bar),
                 checked = data.showStatusBar,
-                onCheckedChange = { data = data.copy(showStatusBar = it) }
+                onCheckedChange = { data = data.copy(showStatusBar = it) },
             )
             CompactSwitchSettingItem(
                 title = stringResource(R.string.theme_manage_page_turn_animation),
                 checked = data.swipeAnimation,
-                onCheckedChange = { data = data.copy(swipeAnimation = it) }
+                onCheckedChange = { data = data.copy(swipeAnimation = it) },
             )
             CompactDropdownSettingItem(
                 title = stringResource(R.string.tabletInterface),
                 selectedValue = data.tabletInterface,
                 displayEntries = stringArrayResource(R.array.tabletInterface),
                 entryValues = stringArrayResource(R.array.tabletInterface_value),
-                onValueChange = { data = data.copy(tabletInterface = it) }
+                onValueChange = { data = data.copy(tabletInterface = it) },
             )
             CompactDropdownSettingItem(
                 title = stringResource(R.string.theme_manage_label_visibility),
                 selectedValue = data.labelVisibilityMode,
                 displayEntries = stringArrayResource(R.array.label_vis_mode),
                 entryValues = stringArrayResource(R.array.label_vis_mode_value),
-                onValueChange = { data = data.copy(labelVisibilityMode = it) }
+                onValueChange = { data = data.copy(labelVisibilityMode = it) },
             )
             CompactDropdownSettingItem(
                 title = stringResource(R.string.default_home_page),
                 selectedValue = data.defaultHomePage,
                 displayEntries = stringArrayResource(R.array.default_home_page),
                 entryValues = stringArrayResource(R.array.default_home_page_value),
-                onValueChange = { data = data.copy(defaultHomePage = it) }
+                onValueChange = { data = data.copy(defaultHomePage = it) },
             )
 
             Spacer(modifier = Modifier.height(8.dp))
@@ -237,32 +253,32 @@ fun EditThemeSheet(
             CompactSwitchSettingItem(
                 title = stringResource(R.string.is_blur_enable),
                 checked = data.enableBlur,
-                onCheckedChange = { data = data.copy(enableBlur = it) }
+                onCheckedChange = { data = data.copy(enableBlur = it) },
             )
             if (data.enableBlur) {
                 CompactSliderSettingItem(
                     title = stringResource(R.string.theme_manage_top_bar_blur_radius),
                     value = data.topBarBlurRadius.toFloat(),
                     valueRange = 1f..60f,
-                    onValueChange = { data = data.copy(topBarBlurRadius = it.toInt()) }
+                    onValueChange = { data = data.copy(topBarBlurRadius = it.toInt()) },
                 )
                 CompactSliderSettingItem(
                     title = stringResource(R.string.theme_manage_bottom_bar_blur_radius),
                     value = data.bottomBarBlurRadius.toFloat(),
                     valueRange = 1f..60f,
-                    onValueChange = { data = data.copy(bottomBarBlurRadius = it.toInt()) }
+                    onValueChange = { data = data.copy(bottomBarBlurRadius = it.toInt()) },
                 )
                 CompactSliderSettingItem(
                     title = stringResource(R.string.theme_manage_top_bar_blur_opacity),
                     value = data.topBarBlurAlpha.toFloat(),
                     valueRange = 0f..255f,
-                    onValueChange = { data = data.copy(topBarBlurAlpha = it.toInt()) }
+                    onValueChange = { data = data.copy(topBarBlurAlpha = it.toInt()) },
                 )
                 CompactSliderSettingItem(
                     title = stringResource(R.string.theme_manage_bottom_bar_blur_opacity),
                     value = data.bottomBarBlurAlpha.toFloat(),
                     valueRange = 0f..255f,
-                    onValueChange = { data = data.copy(bottomBarBlurAlpha = it.toInt()) }
+                    onValueChange = { data = data.copy(bottomBarBlurAlpha = it.toInt()) },
                 )
             }
 
@@ -274,13 +290,13 @@ fun EditThemeSheet(
                 title = stringResource(R.string.top_bar_opacity),
                 value = data.topBarOpacity.toFloat(),
                 valueRange = 0f..100f,
-                onValueChange = { data = data.copy(topBarOpacity = it.toInt()) }
+                onValueChange = { data = data.copy(topBarOpacity = it.toInt()) },
             )
             CompactSliderSettingItem(
                 title = stringResource(R.string.bottom_bar_opacity),
                 value = data.bottomBarOpacity.toFloat(),
                 valueRange = 0f..100f,
-                onValueChange = { data = data.copy(bottomBarOpacity = it.toInt()) }
+                onValueChange = { data = data.copy(bottomBarOpacity = it.toInt()) },
             )
 
             Spacer(modifier = Modifier.height(8.dp))
@@ -291,7 +307,7 @@ fun EditThemeSheet(
                 title = stringResource(R.string.container_opacity),
                 value = data.containerOpacity.toFloat(),
                 valueRange = 0f..100f,
-                onValueChange = { data = data.copy(containerOpacity = it.toInt()) }
+                onValueChange = { data = data.copy(containerOpacity = it.toInt()) },
             )
 
             Spacer(modifier = Modifier.height(8.dp))
@@ -301,19 +317,20 @@ fun EditThemeSheet(
             CompactSwitchSettingItem(
                 title = stringResource(R.string.pure_black),
                 checked = data.isPureBlack,
-                onCheckedChange = { data = data.copy(isPureBlack = it) }
+                onCheckedChange = { data = data.copy(isPureBlack = it) },
             )
             CompactSwitchSettingItem(
                 title = stringResource(R.string.use_flexible_top_bar),
                 checked = data.useFlexibleTopAppBar,
-                onCheckedChange = { data = data.copy(useFlexibleTopAppBar = it) }
+                onCheckedChange = { data = data.copy(useFlexibleTopAppBar = it) },
             )
         }
     }
 
     ColorPickerSheet(
         show = showColorPicker,
-        initialColor = when (currentColorKey) {
+        initialColor =
+        when (currentColorKey) {
             "themeColor" -> data.themeColor
             "secondaryThemeColor" -> data.secondaryThemeColor
             "primaryTextColor" -> data.primaryTextColor
@@ -332,25 +349,26 @@ fun EditThemeSheet(
         },
         onDismissRequest = { showColorPicker = false },
         onColorSelected = { color ->
-            data = when (currentColorKey) {
-                "themeColor" -> data.copy(themeColor = color)
-                "secondaryThemeColor" -> data.copy(secondaryThemeColor = color)
-                "primaryTextColor" -> data.copy(primaryTextColor = color)
-                "secondaryTextColor" -> data.copy(secondaryTextColor = color)
-                "themeBackgroundColor" -> data.copy(themeBackgroundColor = color)
-                "labelContainerColor" -> data.copy(labelContainerColor = color)
-                "themeColorNight" -> data.copy(themeColorNight = color)
-                "secondaryThemeColorNight" -> data.copy(secondaryThemeColorNight = color)
-                "primaryTextColorNight" -> data.copy(primaryTextColorNight = color)
-                "secondaryTextColorNight" -> data.copy(secondaryTextColorNight = color)
-                "themeBackgroundColorNight" -> data.copy(themeBackgroundColorNight = color)
-                "labelContainerColorNight" -> data.copy(labelContainerColorNight = color)
-                "cPrimary" -> data.copy(cPrimary = color)
-                "cNPrimary" -> data.copy(cNPrimary = color)
-                else -> data
-            }
+            data =
+                when (currentColorKey) {
+                    "themeColor" -> data.copy(themeColor = color)
+                    "secondaryThemeColor" -> data.copy(secondaryThemeColor = color)
+                    "primaryTextColor" -> data.copy(primaryTextColor = color)
+                    "secondaryTextColor" -> data.copy(secondaryTextColor = color)
+                    "themeBackgroundColor" -> data.copy(themeBackgroundColor = color)
+                    "labelContainerColor" -> data.copy(labelContainerColor = color)
+                    "themeColorNight" -> data.copy(themeColorNight = color)
+                    "secondaryThemeColorNight" -> data.copy(secondaryThemeColorNight = color)
+                    "primaryTextColorNight" -> data.copy(primaryTextColorNight = color)
+                    "secondaryTextColorNight" -> data.copy(secondaryTextColorNight = color)
+                    "themeBackgroundColorNight" -> data.copy(themeBackgroundColorNight = color)
+                    "labelContainerColorNight" -> data.copy(labelContainerColorNight = color)
+                    "cPrimary" -> data.copy(cPrimary = color)
+                    "cNPrimary" -> data.copy(cNPrimary = color)
+                    else -> data
+                }
             showColorPicker = false
-        }
+        },
     )
 }
 
@@ -360,15 +378,20 @@ private fun SectionTitle(text: String) {
         text = text,
         style = MaterialTheme.typography.titleSmall,
         color = MaterialTheme.colorScheme.onSurfaceVariant,
-        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
     )
 }
 
 @Composable
-private fun ColorItem(title: String, colorValue: Int, onClick: () -> Unit) {
+private fun ColorItem(
+    title: String,
+    colorValue: Int,
+    onClick: () -> Unit,
+) {
     CompactClickableSettingItem(
         title = title,
-        description = if (colorValue != 0) {
+        description =
+        if (colorValue != 0) {
             "#${Integer.toHexString(colorValue).uppercase()}"
         } else {
             null
@@ -377,17 +400,18 @@ private fun ColorItem(title: String, colorValue: Int, onClick: () -> Unit) {
         trailingContent = {
             if (colorValue != 0) {
                 Box(
-                    modifier = Modifier
+                    modifier =
+                    Modifier
                         .size(24.dp)
                         .clip(CircleShape)
                         .background(Color(colorValue))
                         .border(
                             1.dp,
                             MaterialTheme.colorScheme.outlineVariant,
-                            CircleShape
-                        )
+                            CircleShape,
+                        ),
                 )
             }
-        }
+        },
     )
 }

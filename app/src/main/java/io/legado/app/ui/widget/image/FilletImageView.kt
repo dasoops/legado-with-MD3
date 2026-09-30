@@ -10,9 +10,11 @@ import io.legado.app.R
 import io.legado.app.utils.dpToPx
 import kotlin.math.max
 
-class FilletImageView @JvmOverloads constructor(
+class FilletImageView
+@JvmOverloads
+constructor(
     context: Context,
-    attrs: AttributeSet? = null
+    attrs: AttributeSet? = null,
 ) : AppCompatImageView(context, attrs) {
     internal var width: Float = 0.toFloat()
     internal var height: Float = 0.toFloat()
@@ -27,25 +29,28 @@ class FilletImageView @JvmOverloads constructor(
         val defaultRadius = 5.dpToPx()
         val radius =
             array.getDimensionPixelOffset(R.styleable.FilletImageView_radius, defaultRadius)
-        leftTopRadius = array.getDimensionPixelOffset(
-            R.styleable.FilletImageView_left_top_radius,
-            defaultRadius
-        )
-        rightTopRadius = array.getDimensionPixelOffset(
-            R.styleable.FilletImageView_right_top_radius,
-            defaultRadius
-        )
+        leftTopRadius =
+            array.getDimensionPixelOffset(
+                R.styleable.FilletImageView_left_top_radius,
+                defaultRadius,
+            )
+        rightTopRadius =
+            array.getDimensionPixelOffset(
+                R.styleable.FilletImageView_right_top_radius,
+                defaultRadius,
+            )
         rightBottomRadius =
             array.getDimensionPixelOffset(
                 R.styleable.FilletImageView_right_bottom_radius,
-                defaultRadius
+                defaultRadius,
             )
-        leftBottomRadius = array.getDimensionPixelOffset(
-            R.styleable.FilletImageView_left_bottom_radius,
-            defaultRadius
-        )
+        leftBottomRadius =
+            array.getDimensionPixelOffset(
+                R.styleable.FilletImageView_left_bottom_radius,
+                defaultRadius,
+            )
 
-        //如果四个角的值没有设置，那么就使用通用的radius的值。
+        // 如果四个角的值没有设置，那么就使用通用的radius的值。
         if (defaultRadius == leftTopRadius) {
             leftTopRadius = radius
         }
@@ -61,14 +66,20 @@ class FilletImageView @JvmOverloads constructor(
         array.recycle()
     }
 
-    override fun onLayout(changed: Boolean, left: Int, top: Int, right: Int, bottom: Int) {
+    override fun onLayout(
+        changed: Boolean,
+        left: Int,
+        top: Int,
+        right: Int,
+        bottom: Int,
+    ) {
         super.onLayout(changed, left, top, right, bottom)
         width = getWidth().toFloat()
         height = getHeight().toFloat()
     }
 
     override fun onDraw(canvas: Canvas) {
-        //这里做下判断，只有图片的宽高大于设置的圆角距离的时候才进行裁剪
+        // 这里做下判断，只有图片的宽高大于设置的圆角距离的时候才进行裁剪
         val maxLeft = max(leftTopRadius, leftBottomRadius)
         val maxRight = max(rightTopRadius, rightBottomRadius)
         val minWidth = maxLeft + maxRight
@@ -76,8 +87,9 @@ class FilletImageView @JvmOverloads constructor(
         val maxBottom = max(leftBottomRadius, rightBottomRadius)
         val minHeight = maxTop + maxBottom
         if (width >= minWidth && height > minHeight) {
-            @SuppressLint("DrawAllocation") val path = Path()
-            //四个角：右上，右下，左下，左上
+            @SuppressLint("DrawAllocation")
+            val path = Path()
+            // 四个角：右上，右下，左下，左上
             path.moveTo(leftTopRadius.toFloat(), 0f)
             path.lineTo(width - rightTopRadius, 0f)
             path.quadTo(width, 0f, width, rightTopRadius.toFloat())
@@ -95,5 +107,4 @@ class FilletImageView @JvmOverloads constructor(
         }
         super.onDraw(canvas)
     }
-
 }

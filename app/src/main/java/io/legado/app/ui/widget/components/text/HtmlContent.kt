@@ -63,9 +63,10 @@ import org.jsoup.nodes.TextNode
 fun HtmlContent(
     html: String,
     modifier: Modifier = Modifier,
-    style: TextStyle = LegadoTheme.typography.bodyMedium.merge(
-        color = LegadoTheme.colorScheme.onSurface
-    ),
+    style: TextStyle =
+        LegadoTheme.typography.bodyMedium.merge(
+            color = LegadoTheme.colorScheme.onSurface,
+        ),
     interactive: Boolean = false,
     onButtonClick: (name: String, click: String) -> Unit = { _, _ -> },
     onImageClick: (click: String) -> Unit = {},
@@ -188,63 +189,76 @@ private fun HtmlTextRun(
         val image = (painterState as? AsyncImagePainter.State.Success)?.result?.image
         val drawableWidth = image?.width?.coerceAtLeast(1) ?: 1
         val drawableHeight = image?.height?.coerceAtLeast(1) ?: 1
-        val scale = if (maxWidthPx in 1..<drawableWidth) {
-            maxWidthPx.toFloat() / drawableWidth
-        } else {
-            1f
-        }
+        val scale =
+            if (maxWidthPx in 1..<drawableWidth) {
+                maxWidthPx.toFloat() / drawableWidth
+            } else {
+                1f
+            }
         val width = with(density) { (drawableWidth * scale).toDp().toSp() }
         val height = with(density) { (drawableHeight * scale).toDp().toSp() }
-        val imageModifier = if (interactive) {
-            Modifier.combinedClickable(
-                onClick = { if (inline.click != null) onImageClick(inline.click) },
-                onLongClick = { onImageLongClick(inline.source) },
-            )
-        } else {
-            Modifier
-        }
-        inlineContent[id] = InlineTextContent(
-            placeholder = Placeholder(
-                width = width.value.coerceAtLeast(1f).sp,
-                height = height.value.coerceAtLeast(1f).sp,
-                placeholderVerticalAlign = PlaceholderVerticalAlign.TextBottom,
-            )
-        ) {
-            Image(
-                painter = painter,
-                contentDescription = inline.description,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .then(imageModifier),
-                contentScale = ContentScale.Fit,
-            )
-        }
+        val imageModifier =
+            if (interactive) {
+                Modifier.combinedClickable(
+                    onClick = { if (inline.click != null) onImageClick(inline.click) },
+                    onLongClick = { onImageLongClick(inline.source) },
+                )
+            } else {
+                Modifier
+            }
+        inlineContent[id] =
+            InlineTextContent(
+                placeholder =
+                Placeholder(
+                    width = width.value.coerceAtLeast(1f).sp,
+                    height = height.value.coerceAtLeast(1f).sp,
+                    placeholderVerticalAlign = PlaceholderVerticalAlign.TextBottom,
+                ),
+            ) {
+                Image(
+                    painter = painter,
+                    contentDescription = inline.description,
+                    modifier =
+                    Modifier
+                        .fillMaxSize()
+                        .then(imageModifier),
+                    contentScale = ContentScale.Fit,
+                )
+            }
     }
 
-    val annotatedText = buildAnnotatedString {
-        imageIndex = 0
-        inlines.forEach { inline ->
-            when (inline) {
-                is HtmlInline.Text -> appendStyledText(inline, linkColor)
-                is HtmlInline.Image -> {
-                    val id = "html-image-$paragraphIndex-${imageIndex++}"
-                    if (interactive && inline.click != null) {
-                        appendInlineContent(id, inline.description ?: "image")
-                    } else if (inline.link != null) {
-                        withLink(LinkAnnotation.Url(inline.link)) {
+    val annotatedText =
+        buildAnnotatedString {
+            imageIndex = 0
+            inlines.forEach { inline ->
+                when (inline) {
+                    is HtmlInline.Text -> {
+                        appendStyledText(inline, linkColor)
+                    }
+                    is HtmlInline.Image -> {
+                        val id = "html-image-$paragraphIndex-${imageIndex++}"
+                        if (interactive && inline.click != null) {
+                            appendInlineContent(id, inline.description ?: "image")
+                        } else if (inline.link != null) {
+                            withLink(LinkAnnotation.Url(inline.link)) {
+                                appendInlineContent(id, inline.description ?: "image")
+                            }
+                        } else {
                             appendInlineContent(id, inline.description ?: "image")
                         }
-                    } else {
-                        appendInlineContent(id, inline.description ?: "image")
+                    }
+                    HtmlInline.LineBreak -> {
+                        append('\n')
+                    }
+                    HtmlInline.HorizontalRule -> {
+                        append('\n')
+                    }
+                    is HtmlInline.Button -> {
+                        Unit
                     }
                 }
-
-                HtmlInline.LineBreak -> append('\n')
-                HtmlInline.HorizontalRule -> append('\n')
-                is HtmlInline.Button -> Unit
             }
         }
-    }
 
     BasicText(
         text = annotatedText,
@@ -265,22 +279,26 @@ private fun HtmlButtonChip(
 ) {
     val baseSize = if (baseStyle.fontSize.value.isNaN()) 14.sp else baseStyle.fontSize
     val scaledSize = baseSize * 0.9f
-    val buttonFontSize = if (!scaledSize.value.isNaN() && scaledSize.value < 11f) {
-        11.sp
-    } else {
-        scaledSize
-    }
-    val buttonStyle = baseStyle.copy(
-        fontWeight = FontWeight.SemiBold,
-        fontSize = buttonFontSize,
-    )
-    val clickModifier = if (interactive) {
-        Modifier.clickable { onButtonClick(button.name, button.click) }
-    } else {
-        Modifier
-    }
+    val buttonFontSize =
+        if (!scaledSize.value.isNaN() && scaledSize.value < 11f) {
+            11.sp
+        } else {
+            scaledSize
+        }
+    val buttonStyle =
+        baseStyle.copy(
+            fontWeight = FontWeight.SemiBold,
+            fontSize = buttonFontSize,
+        )
+    val clickModifier =
+        if (interactive) {
+            Modifier.clickable { onButtonClick(button.name, button.click) }
+        } else {
+            Modifier
+        }
     Box(
-        modifier = Modifier
+        modifier =
+        Modifier
             .padding(vertical = 2.dp)
             .clip(RoundedCornerShape(8.dp))
             .background(LegadoTheme.colorScheme.surfaceContainer)
@@ -301,10 +319,11 @@ private fun AnnotatedString.Builder.appendStyledText(
     text: HtmlInline.Text,
     linkColor: Color,
 ) {
-    val spanStyle = text.style.toSpanStyle(
-        fallbackColor = if (text.link != null) linkColor else null,
-        underlineLink = text.link != null,
-    )
+    val spanStyle =
+        text.style.toSpanStyle(
+            fallbackColor = if (text.link != null) linkColor else null,
+            underlineLink = text.link != null,
+        )
     if (text.link != null) {
         withLink(LinkAnnotation.Url(text.link)) {
             withStyle(spanStyle) { append(text.value) }
@@ -318,10 +337,11 @@ private fun HtmlTextStyle.toSpanStyle(
     fallbackColor: Color?,
     underlineLink: Boolean,
 ): SpanStyle {
-    val decorations = buildList {
-        if (underline || underlineLink) add(TextDecoration.Underline)
-        if (strikeThrough) add(TextDecoration.LineThrough)
-    }
+    val decorations =
+        buildList {
+            if (underline || underlineLink) add(TextDecoration.Underline)
+            if (strikeThrough) add(TextDecoration.LineThrough)
+        }
     return SpanStyle(
         color = parseHtmlColor(color) ?: fallbackColor ?: Color.Unspecified,
         background = parseHtmlColor(backgroundColor) ?: Color.Unspecified,
@@ -329,7 +349,8 @@ private fun HtmlTextStyle.toSpanStyle(
         fontStyle = if (italic) FontStyle.Italic else null,
         fontSize = if (relativeFontSize == 1f) androidx.compose.ui.unit.TextUnit.Unspecified else relativeFontSize.em,
         textDecoration = decorations.takeIf { it.isNotEmpty() }?.let(TextDecoration::combine),
-        baselineShift = when (baseline) {
+        baselineShift =
+        when (baseline) {
             HtmlBaseline.Normal -> null
             HtmlBaseline.Subscript -> BaselineShift.Subscript
             HtmlBaseline.Superscript -> BaselineShift.Superscript
@@ -343,15 +364,22 @@ private fun parseHtmlColor(value: String?): Color? {
     return runCatching {
         when {
             normalized.startsWith("rgb(") -> {
-                val channels = normalized.substringAfter('(').substringBefore(')').split(',')
-                    .map { it.trim().toInt().coerceIn(0, 255) }
+                val channels =
+                    normalized
+                        .substringAfter('(')
+                        .substringBefore(')')
+                        .split(',')
+                        .map { it.trim().toInt().coerceIn(0, 255) }
                 if (channels.size != 3) return null
                 Color(channels[0], channels[1], channels[2])
             }
-
             normalized.startsWith("rgba(") -> {
                 val channels =
-                    normalized.substringAfter('(').substringBefore(')').split(',').map(String::trim)
+                    normalized
+                        .substringAfter('(')
+                        .substringBefore(')')
+                        .split(',')
+                        .map(String::trim)
                 if (channels.size != 4) return null
                 Color(
                     red = channels[0].toInt().coerceIn(0, 255),
@@ -360,8 +388,9 @@ private fun parseHtmlColor(value: String?): Color? {
                     alpha = (channels[3].toFloat().coerceIn(0f, 1f) * 255).toInt(),
                 )
             }
-
-            else -> Color(normalized.toColorInt())
+            else -> {
+                Color(normalized.toColorInt())
+            }
         }
     }.getOrNull()
 }
@@ -414,12 +443,36 @@ internal data class HtmlTextStyle(
 internal enum class HtmlBaseline { Normal, Subscript, Superscript }
 
 internal object HtmlParser {
-
-    private val blockTags = setOf(
-        "address", "article", "aside", "blockquote", "div", "dl", "fieldset", "figcaption",
-        "figure", "footer", "form", "h1", "h2", "h3", "h4", "h5", "h6", "header",
-        "hr", "main", "nav", "ol", "p", "pre", "section", "table", "ul",
-    )
+    private val blockTags =
+        setOf(
+            "address",
+            "article",
+            "aside",
+            "blockquote",
+            "div",
+            "dl",
+            "fieldset",
+            "figcaption",
+            "figure",
+            "footer",
+            "form",
+            "h1",
+            "h2",
+            "h3",
+            "h4",
+            "h5",
+            "h6",
+            "header",
+            "hr",
+            "main",
+            "nav",
+            "ol",
+            "p",
+            "pre",
+            "section",
+            "table",
+            "ul",
+        )
 
     private const val BUTTON_SPLIT = "@onclick:"
 
@@ -439,7 +492,10 @@ internal object HtmlParser {
         return sb.toString()
     }
 
-    private fun collectText(node: Node, sb: StringBuilder) {
+    private fun collectText(
+        node: Node,
+        sb: StringBuilder,
+    ) {
         when (node) {
             is TextNode -> sb.append(normalizeWhitespace(node.wholeText))
             is Element -> node.childNodes().forEach { collectText(it, sb) }
@@ -492,26 +548,37 @@ internal object HtmlParser {
         val style = mergeStyle(inheritedStyle, element)
         when (element.normalName()) {
             "div", "section", "article", "main", "header", "footer", "nav", "aside", "form",
-            "fieldset", "figure", "figcaption", "address", "blockquote" -> parseContainer(
-                element.childNodes(), style, inheritedLink, paragraphs
-            )
-
-            "ul", "ol" -> parseList(element, style, inheritedLink, paragraphs)
-            "table" -> element.select("tr").forEach { row ->
-                val content = mutableListOf<HtmlInline>()
-                // jsoup 1.16.2 (intentionally pinned for rule compatibility) does not support
-                // the CSS :scope pseudo-selector. Reading direct children also expresses the
-                // intended table-cell semantics without relying on selector support.
-                row.children().filter { it.normalName() == "th" || it.normalName() == "td" }
-                    .forEachIndexed { index, cell ->
-                    if (index > 0) appendText(content, "  ", style, inheritedLink)
-                    cell.childNodes().forEach { parseInline(it, style, inheritedLink, content) }
-                }
-                addParagraph(content, paragraphs)
+            "fieldset", "figure", "figcaption", "address", "blockquote",
+            -> {
+                parseContainer(
+                    element.childNodes(),
+                    style,
+                    inheritedLink,
+                    paragraphs,
+                )
             }
-
-            "hr" -> paragraphs += HtmlParagraph(listOf(HtmlInline.HorizontalRule))
-
+            "ul", "ol" -> {
+                parseList(element, style, inheritedLink, paragraphs)
+            }
+            "table" -> {
+                element.select("tr").forEach { row ->
+                    val content = mutableListOf<HtmlInline>()
+                    // jsoup 1.16.2 (intentionally pinned for rule compatibility) does not support
+                    // the CSS :scope pseudo-selector. Reading direct children also expresses the
+                    // intended table-cell semantics without relying on selector support.
+                    row
+                        .children()
+                        .filter { it.normalName() == "th" || it.normalName() == "td" }
+                        .forEachIndexed { index, cell ->
+                            if (index > 0) appendText(content, "  ", style, inheritedLink)
+                            cell.childNodes().forEach { parseInline(it, style, inheritedLink, content) }
+                        }
+                    addParagraph(content, paragraphs)
+                }
+            }
+            "hr" -> {
+                paragraphs += HtmlParagraph(listOf(HtmlInline.HorizontalRule))
+            }
             else -> {
                 val content = mutableListOf<HtmlInline>()
                 element.childNodes().forEach { parseInline(it, style, inheritedLink, content) }
@@ -543,36 +610,46 @@ internal object HtmlParser {
         output: MutableList<HtmlInline>,
     ) {
         when (node) {
-            is TextNode -> appendText(
-                output,
-                normalizeWhitespace(node.wholeText),
-                inheritedStyle,
-                inheritedLink
-            )
-
+            is TextNode -> {
+                appendText(
+                    output,
+                    normalizeWhitespace(node.wholeText),
+                    inheritedStyle,
+                    inheritedLink,
+                )
+            }
             is Element -> {
                 val style = mergeStyle(inheritedStyle, node)
-                val link = if (node.normalName() == "a") node.attr("href")
-                    .ifBlank { inheritedLink } else inheritedLink
+                val link =
+                    if (node.normalName() == "a") {
+                        node
+                            .attr("href")
+                            .ifBlank { inheritedLink }
+                    } else {
+                        inheritedLink
+                    }
                 when (node.normalName()) {
-                    "br" -> output += HtmlInline.LineBreak
+                    "br" -> {
+                        output += HtmlInline.LineBreak
+                    }
                     "hr" -> {
                         output += HtmlInline.LineBreak
                         output += HtmlInline.HorizontalRule
                         output += HtmlInline.LineBreak
                     }
-
-                    "img" -> node.attr("src").takeIf(String::isNotBlank)?.let { source ->
-                        val (loadSource, click) = parseImageOptions(source)
-                        output += HtmlInline.Image(
-                            source,
-                            loadSource,
-                            node.attr("alt").ifBlank { null },
-                            link,
-                            click,
-                        )
+                    "img" -> {
+                        node.attr("src").takeIf(String::isNotBlank)?.let { source ->
+                            val (loadSource, click) = parseImageOptions(source)
+                            output +=
+                                HtmlInline.Image(
+                                    source,
+                                    loadSource,
+                                    node.attr("alt").ifBlank { null },
+                                    link,
+                                    click,
+                                )
+                        }
                     }
-
                     "button" -> {
                         val buttonText = collectButtonText(node)
                         val parts = buttonText.split(BUTTON_SPLIT, limit = 2)
@@ -582,7 +659,6 @@ internal object HtmlParser {
                             appendText(output, buttonText, style, inheritedLink)
                         }
                     }
-
                     in blockTags -> {
                         if (output.isNotEmpty() && output.last() !is HtmlInline.LineBreak) {
                             output += HtmlInline.LineBreak
@@ -592,8 +668,9 @@ internal object HtmlParser {
                             output += HtmlInline.LineBreak
                         }
                     }
-
-                    else -> node.childNodes().forEach { parseInline(it, style, link, output) }
+                    else -> {
+                        node.childNodes().forEach { parseInline(it, style, link, output) }
+                    }
                 }
             }
         }
@@ -631,8 +708,11 @@ internal object HtmlParser {
         val last = content.lastOrNull() as? HtmlInline.Text
         if (last != null) {
             val trimmed = last.value.trimEnd()
-            if (trimmed.isEmpty()) content.removeAt(content.lastIndex)
-            else content[content.lastIndex] = last.copy(value = trimmed)
+            if (trimmed.isEmpty()) {
+                content.removeAt(content.lastIndex)
+            } else {
+                content[content.lastIndex] = last.copy(value = trimmed)
+            }
         }
         while (content.firstOrNull() is HtmlInline.LineBreak) content.removeAt(0)
         while (content.lastOrNull() is HtmlInline.LineBreak) content.removeAt(content.lastIndex)
@@ -640,86 +720,163 @@ internal object HtmlParser {
 
     private fun normalizeWhitespace(value: String): String = value.replace(Regex("\\s+"), " ")
 
-    private fun mergeStyle(parent: HtmlTextStyle, element: Element): HtmlTextStyle {
-        var style = when (element.normalName()) {
-            "b", "strong" -> parent.copy(bold = true)
-            "i", "em", "cite", "dfn" -> parent.copy(italic = true)
-            "u", "ins" -> parent.copy(underline = true)
-            "s", "strike", "del" -> parent.copy(strikeThrough = true)
-            "sub" -> parent.copy(
-                relativeFontSize = parent.relativeFontSize * 0.8f,
-                baseline = HtmlBaseline.Subscript
-            )
-
-            "sup" -> parent.copy(
-                relativeFontSize = parent.relativeFontSize * 0.8f,
-                baseline = HtmlBaseline.Superscript
-            )
-
-            "small" -> parent.copy(relativeFontSize = parent.relativeFontSize * 0.8f)
-            "big" -> parent.copy(relativeFontSize = parent.relativeFontSize * 1.2f)
-            "h1" -> parent.copy(bold = true, relativeFontSize = parent.relativeFontSize * 2f)
-            "h2" -> parent.copy(bold = true, relativeFontSize = parent.relativeFontSize * 1.5f)
-            "h3" -> parent.copy(bold = true, relativeFontSize = parent.relativeFontSize * 1.17f)
-            "h4", "h5", "h6" -> parent.copy(bold = true)
-            "mark" -> parent.copy(backgroundColor = "#ffff00")
-            else -> parent
-        }
+    private fun mergeStyle(
+        parent: HtmlTextStyle,
+        element: Element,
+    ): HtmlTextStyle {
+        var style =
+            when (element.normalName()) {
+                "b", "strong" -> {
+                    parent.copy(bold = true)
+                }
+                "i", "em", "cite", "dfn" -> {
+                    parent.copy(italic = true)
+                }
+                "u", "ins" -> {
+                    parent.copy(underline = true)
+                }
+                "s", "strike", "del" -> {
+                    parent.copy(strikeThrough = true)
+                }
+                "sub" -> {
+                    parent.copy(
+                        relativeFontSize = parent.relativeFontSize * 0.8f,
+                        baseline = HtmlBaseline.Subscript,
+                    )
+                }
+                "sup" -> {
+                    parent.copy(
+                        relativeFontSize = parent.relativeFontSize * 0.8f,
+                        baseline = HtmlBaseline.Superscript,
+                    )
+                }
+                "small" -> {
+                    parent.copy(relativeFontSize = parent.relativeFontSize * 0.8f)
+                }
+                "big" -> {
+                    parent.copy(relativeFontSize = parent.relativeFontSize * 1.2f)
+                }
+                "h1" -> {
+                    parent.copy(bold = true, relativeFontSize = parent.relativeFontSize * 2f)
+                }
+                "h2" -> {
+                    parent.copy(bold = true, relativeFontSize = parent.relativeFontSize * 1.5f)
+                }
+                "h3" -> {
+                    parent.copy(bold = true, relativeFontSize = parent.relativeFontSize * 1.17f)
+                }
+                "h4", "h5", "h6" -> {
+                    parent.copy(bold = true)
+                }
+                "mark" -> {
+                    parent.copy(backgroundColor = "#ffff00")
+                }
+                else -> {
+                    parent
+                }
+            }
         if (element.normalName() == "font") {
             element.attr("color").takeIf(String::isNotBlank)?.let { style = style.copy(color = it) }
             element.attr("size").toIntOrNull()?.let { size ->
-                val scale = when (size.coerceIn(1, 7)) {
-                    1 -> .63f; 2 -> .82f; 3 -> 1f; 4 -> 1.13f; 5 -> 1.5f; 6 -> 2f; else -> 3f
-                }
+                val scale =
+                    when (size.coerceIn(1, 7)) {
+                        1 -> .63f
+                        2 -> .82f
+                        3 -> 1f
+                        4 -> 1.13f
+                        5 -> 1.5f
+                        6 -> 2f
+                        else -> 3f
+                    }
                 style = style.copy(relativeFontSize = scale)
             }
         }
         element.attr("style").split(';').forEach { declaration ->
-            val (name, rawValue) = declaration.split(':', limit = 2).takeIf { it.size == 2 }
-                ?: return@forEach
+            val (name, rawValue) =
+                declaration.split(':', limit = 2).takeIf { it.size == 2 }
+                    ?: return@forEach
             val value = rawValue.trim().removeSuffix("!important").trim()
-            style = when (name.trim().lowercase()) {
-                "color" -> style.copy(color = value)
-                "background", "background-color" -> style.copy(backgroundColor = value)
-                "font-weight" -> style.copy(
-                    bold = value.equals("bold", true) || value.toIntOrNull()
-                        ?.let { it >= 600 } == true)
-
-                "font-style" -> style.copy(
-                    italic = value.equals(
-                        "italic",
-                        true
-                    ) || value.equals("oblique", true)
-                )
-
-                "text-decoration", "text-decoration-line" -> style.copy(
-                    underline = "underline" in value.lowercase(),
-                    strikeThrough = "line-through" in value.lowercase(),
-                )
-
-                "font-size" -> parseRelativeFontSize(value)?.let { style.copy(relativeFontSize = it) }
-                    ?: style
-
-                "vertical-align" -> style.copy(
-                    baseline = when (value.lowercase()) {
-                        "sub" -> HtmlBaseline.Subscript
-                        "super" -> HtmlBaseline.Superscript
-                        else -> HtmlBaseline.Normal
+            style =
+                when (name.trim().lowercase()) {
+                    "color" -> {
+                        style.copy(color = value)
                     }
-                )
-
-                else -> style
-            }
+                    "background", "background-color" -> {
+                        style.copy(backgroundColor = value)
+                    }
+                    "font-weight" -> {
+                        style.copy(
+                            bold =
+                            value.equals("bold", true) ||
+                                value
+                                    .toIntOrNull()
+                                    ?.let { it >= 600 } == true,
+                        )
+                    }
+                    "font-style" -> {
+                        style.copy(
+                            italic =
+                            value.equals(
+                                "italic",
+                                true,
+                            ) ||
+                                value.equals("oblique", true),
+                        )
+                    }
+                    "text-decoration", "text-decoration-line" -> {
+                        style.copy(
+                            underline = "underline" in value.lowercase(),
+                            strikeThrough = "line-through" in value.lowercase(),
+                        )
+                    }
+                    "font-size" -> {
+                        parseRelativeFontSize(value)?.let { style.copy(relativeFontSize = it) }
+                            ?: style
+                    }
+                    "vertical-align" -> {
+                        style.copy(
+                            baseline =
+                            when (value.lowercase()) {
+                                "sub" -> HtmlBaseline.Subscript
+                                "super" -> HtmlBaseline.Superscript
+                                else -> HtmlBaseline.Normal
+                            },
+                        )
+                    }
+                    else -> {
+                        style
+                    }
+                }
         }
         return style
     }
 
     private fun parseRelativeFontSize(value: String): Float? = when {
-        value.endsWith("em", true) -> value.dropLast(2).trim().toFloatOrNull()
-        value.endsWith("%") -> value.dropLast(1).trim().toFloatOrNull()?.div(100f)
-        value.endsWith("px", true) -> value.dropLast(2).trim().toFloatOrNull()?.div(16f)
-        value.equals("smaller", true) -> 0.8f
-        value.equals("larger", true) -> 1.2f
-        else -> null
+        value.endsWith("em", true) -> {
+            value.dropLast(2).trim().toFloatOrNull()
+        }
+        value.endsWith("%") -> {
+            value
+                .dropLast(1)
+                .trim()
+                .toFloatOrNull()
+                ?.div(100f)
+        }
+        value.endsWith("px", true) -> {
+            value
+                .dropLast(2)
+                .trim()
+                .toFloatOrNull()
+                ?.div(16f)
+        }
+        value.equals("smaller", true) -> {
+            0.8f
+        }
+        value.equals("larger", true) -> {
+            1.2f
+        }
+        else -> {
+            null
+        }
     }?.coerceIn(0.5f, 4f)
 }

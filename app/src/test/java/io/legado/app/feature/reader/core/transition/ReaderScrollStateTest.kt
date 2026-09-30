@@ -38,9 +38,16 @@ class ReaderScrollStateTest {
             val nextExtent = 700f + seed * 3f
             val overshoot = 1f + (seed % 5) * 150f
             val delta = -(currentExtent - 300f + overshoot)
-            val result = ReaderScrollPolicy.apply(
-                -300f, delta, 900f, currentExtent, 800f, true, true,
-            )
+            val result =
+                ReaderScrollPolicy.apply(
+                    -300f,
+                    delta,
+                    900f,
+                    currentExtent,
+                    800f,
+                    true,
+                    true,
+                )
             assertEquals(ReaderScrollCrossing.NEXT, result.crossing)
             assertTrue(result.offsetPx < 0f)
             assertTrue(result.offsetPx > -nextExtent)
@@ -57,28 +64,30 @@ class ReaderScrollStateTest {
     }
 
     @Test fun textPageStepsKeepOneVisibleRowInBothDirections() {
-        val page = scrollPage(
-            listOf(
-                text(0f, 20f, 0),
-                text(20f, 40f, 1),
-                text(40f, 60f, 2),
-                text(60f, 80f, 3),
-            ),
-        )
+        val page =
+            scrollPage(
+                listOf(
+                    text(0f, 20f, 0),
+                    text(20f, 40f, 1),
+                    text(40f, 60f, 2),
+                    text(60f, 80f, 3),
+                ),
+            )
 
         assertEquals(-60f, ReaderScrollPolicy.pageStep(page, 0f, ReaderTurnDirection.NEXT), 0f)
         assertEquals(60f, ReaderScrollPolicy.pageStep(page, 0f, ReaderTurnDirection.PREVIOUS), 0f)
     }
 
     @Test fun visibleRowsAreCalculatedAfterTheCurrentScrollOffset() {
-        val page = scrollPage(
-            listOf(
-                text(0f, 20f, 0),
-                text(20f, 40f, 1),
-                text(80f, 100f, 2),
-                text(140f, 160f, 3),
-            ),
-        )
+        val page =
+            scrollPage(
+                listOf(
+                    text(0f, 20f, 0),
+                    text(20f, 40f, 1),
+                    text(80f, 100f, 2),
+                    text(140f, 160f, 3),
+                ),
+            )
 
         assertEquals(-40f, ReaderScrollPolicy.pageStep(page, -40f, ReaderTurnDirection.NEXT), 0f)
         assertEquals(20f, ReaderScrollPolicy.pageStep(page, -40f, ReaderTurnDirection.PREVIOUS), 0f)
@@ -97,12 +106,13 @@ class ReaderScrollStateTest {
     @Test fun tapStepAtPageBottomContinuesIntoTheNextPage() {
         // 滚到页尾（只剩当前页末行可见、下一页顶部已露出）时，合成可视页的末行
         // 在下一页里，点按下一页应跨过页边界继续滚，而不是停在页尾只挪几像素。
-        val rows = listOf(
-            text(0f, 20f, 0),
-            text(20f, 40f, 1),
-            text(40f, 60f, 2),
-            text(60f, 80f, 3),
-        )
+        val rows =
+            listOf(
+                text(0f, 20f, 0),
+                text(20f, 40f, 1),
+                text(40f, 60f, 2),
+                text(60f, 80f, 3),
+            )
         val current = scrollPage(rows, extent = 80f)
         val next = scrollPage(rows, extent = 80f)
 
@@ -117,18 +127,23 @@ class ReaderScrollStateTest {
     @Test fun tapStepAtPageTopContinuesIntoThePreviousPage() {
         // 跨页余量为正（页顶露出上一页末行）时，合成可视页的首行在上一页里，
         // 点按上一页的步距把该行对齐到视口底。
-        val rows = listOf(
-            text(0f, 20f, 0),
-            text(20f, 40f, 1),
-            text(40f, 60f, 2),
-            text(60f, 80f, 3),
-        )
+        val rows =
+            listOf(
+                text(0f, 20f, 0),
+                text(20f, 40f, 1),
+                text(40f, 60f, 2),
+                text(60f, 80f, 3),
+            )
         val current = scrollPage(rows, extent = 80f)
         val previous = scrollPage(rows, extent = 80f)
 
-        val withPrevious = ReaderScrollPolicy.pageStep(
-            current, 10f, ReaderTurnDirection.PREVIOUS, previous = previous,
-        )
+        val withPrevious =
+            ReaderScrollPolicy.pageStep(
+                current,
+                10f,
+                ReaderTurnDirection.PREVIOUS,
+                previous = previous,
+            )
         assertEquals(70f, withPrevious, 0f)
 
         val withoutPrevious = ReaderScrollPolicy.pageStep(current, 10f, ReaderTurnDirection.PREVIOUS)
@@ -141,13 +156,14 @@ class ReaderScrollStateTest {
         val next = scrollPage(listOf(text(0f, 20f, 1)), extent = 20f)
         val nextPlus = scrollPage(listOf(text(10f, 30f, 2)), extent = 80f)
 
-        val distance = ReaderScrollPolicy.pageStep(
-            page = current,
-            offsetPx = 0f,
-            direction = ReaderTurnDirection.NEXT,
-            next = next,
-            nextPlus = nextPlus,
-        )
+        val distance =
+            ReaderScrollPolicy.pageStep(
+                page = current,
+                offsetPx = 0f,
+                direction = ReaderTurnDirection.NEXT,
+                next = next,
+                nextPlus = nextPlus,
+            )
 
         // nextPlus 的文字在栈 y=60..80，点击下一页保留其首行，移动 50px。
         assertEquals(-50f, distance, 0f)
@@ -182,7 +198,11 @@ class ReaderScrollStateTest {
         assertEquals(300, ReaderScrollPolicy.stepDurationMillis(-800f, 0f))
     }
 
-    private fun text(top: Float, bottom: Float, position: Int) = ReaderElement.Text(
+    private fun text(
+        top: Float,
+        bottom: Float,
+        position: Int,
+    ) = ReaderElement.Text(
         bounds = ReaderRect(0f, top + 10f, 10f, bottom + 10f),
         baselinePx = bottom + 5f,
         value = position.toString(),

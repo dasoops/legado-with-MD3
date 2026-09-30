@@ -5,7 +5,6 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class ReaderMainAxisPolicyTest {
-
     @Test
     fun `horizontal paging claims only a horizontal dominant drag`() {
         assertTrue(ReaderMainAxisPolicy.isHorizontalDominant(-20f, 12f))

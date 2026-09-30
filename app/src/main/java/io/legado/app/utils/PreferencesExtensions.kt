@@ -19,7 +19,7 @@ import java.io.File
 @SuppressLint("DiscouragedPrivateApi")
 fun Context.getSharedPreferences(
     dir: String,
-    fileName: String
+    fileName: String,
 ): SharedPreferences? {
     try {
         // 获取 ContextWrapper对象中的mBase变量。该变量保存了 ContextImpl 对象
@@ -51,51 +51,56 @@ fun Context.getSharedPreferences(
     return null
 }
 
-fun SharedPreferences.getString(key: String): String? {
-    return getString(key, null)
-}
+fun SharedPreferences.getString(key: String): String? = getString(key, null)
 
-fun SharedPreferences.putString(key: String, value: String) {
+fun SharedPreferences.putString(
+    key: String,
+    value: String,
+) {
     edit {
         putString(key, value)
     }
 }
 
-fun SharedPreferences.getBoolean(key: String): Boolean {
-    return getBoolean(key, false)
-}
+fun SharedPreferences.getBoolean(key: String): Boolean = getBoolean(key, false)
 
-fun SharedPreferences.putBoolean(key: String, value: Boolean) {
+fun SharedPreferences.putBoolean(
+    key: String,
+    value: Boolean,
+) {
     edit {
         putBoolean(key, value)
     }
 }
 
-fun SharedPreferences.getInt(key: String): Int {
-    return getInt(key, 0)
-}
+fun SharedPreferences.getInt(key: String): Int = getInt(key, 0)
 
-fun SharedPreferences.putInt(key: String, value: Int) {
+fun SharedPreferences.putInt(
+    key: String,
+    value: Int,
+) {
     edit {
         putInt(key, value)
     }
 }
 
-fun SharedPreferences.getLong(key: String): Long {
-    return getLong(key, 0)
-}
+fun SharedPreferences.getLong(key: String): Long = getLong(key, 0)
 
-fun SharedPreferences.putLong(key: String, value: Long) {
+fun SharedPreferences.putLong(
+    key: String,
+    value: Long,
+) {
     edit {
         putLong(key, value)
     }
 }
 
-fun SharedPreferences.getFloat(key: String): Float {
-    return getFloat(key, 0f)
-}
+fun SharedPreferences.getFloat(key: String): Float = getFloat(key, 0f)
 
-fun SharedPreferences.putFloat(key: String, value: Float) {
+fun SharedPreferences.putFloat(
+    key: String,
+    value: Float,
+) {
     edit {
         putFloat(key, value)
     }

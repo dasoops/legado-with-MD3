@@ -33,15 +33,17 @@ import org.robolectric.annotation.Config
 @RunWith(RobolectricTestRunner::class)
 @Config(application = Application::class, sdk = [35])
 class SearchContentHistoryRecordingTest {
-
     private lateinit var db: AppDatabase
 
     @Before
     fun setUp() {
-        db = Room.inMemoryDatabaseBuilder(
-            RuntimeEnvironment.getApplication(),
-            AppDatabase::class.java,
-        ).allowMainThreadQueries().build()
+        db =
+            Room
+                .inMemoryDatabaseBuilder(
+                    RuntimeEnvironment.getApplication(),
+                    AppDatabase::class.java,
+                ).allowMainThreadQueries()
+                .build()
     }
 
     @After
@@ -96,7 +98,10 @@ class SearchContentHistoryRecordingTest {
     }
 
     /** initBook() 在 IO 线程取书，书就位后才会有"确认搜索"的写入。 */
-    private fun awaitBook(viewModel: SearchContentViewModel, timeoutMs: Long = 3_000) {
+    private fun awaitBook(
+        viewModel: SearchContentViewModel,
+        timeoutMs: Long = 3_000,
+    ) {
         val deadline = System.currentTimeMillis() + timeoutMs
         while (System.currentTimeMillis() < deadline) {
             idle()
@@ -107,13 +112,17 @@ class SearchContentHistoryRecordingTest {
     }
 
     /** 轮询等待历史写入（Room 的挂起写入落在自己的执行器上，主线程 idle 不等它）。 */
-    private fun awaitQueries(atLeast: Int, timeoutMs: Long = 3_000): List<String> {
+    private fun awaitQueries(
+        atLeast: Int,
+        timeoutMs: Long = 3_000,
+    ): List<String> {
         val deadline = System.currentTimeMillis() + timeoutMs
         var queries = emptyList<String>()
         while (System.currentTimeMillis() < deadline) {
             idle()
-            queries = runBlocking { db.searchContentHistoryDao.getAll().first() }
-                .map(SearchContentHistory::query)
+            queries =
+                runBlocking { db.searchContentHistoryDao.getAll().first() }
+                    .map(SearchContentHistory::query)
             if (queries.size >= atLeast) break
             Thread.sleep(20)
         }
@@ -125,6 +134,7 @@ class SearchContentHistoryRecordingTest {
     private class FakeThemeSettingsGateway : ThemeSettingsGateway {
         override val currentSettings: ThemeSettings = ThemeSettings()
         override val settings: Flow<ThemeSettings> = MutableStateFlow(ThemeSettings())
+
         override suspend fun update(transform: (ThemeSettings) -> ThemeSettings) = Unit
     }
 

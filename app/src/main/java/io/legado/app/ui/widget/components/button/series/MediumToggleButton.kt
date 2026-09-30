@@ -21,25 +21,27 @@ fun MediumToggleButton(
     icon: ImageVector? = null,
     iconChecked: ImageVector? = null,
     text: String? = null,
-    contentDescription: String? = null
+    contentDescription: String? = null,
 ) {
     val containerColor by animateColorAsState(
-        targetValue = if (checked) {
+        targetValue =
+        if (checked) {
             LegadoTheme.colorScheme.primaryContainer
         } else {
             LegadoTheme.colorScheme.surfaceContainer
         },
         animationSpec = tween(150),
-        label = "MediumToggleContainerColor"
+        label = "MediumToggleContainerColor",
     )
     val contentColor by animateColorAsState(
-        targetValue = if (checked) {
+        targetValue =
+        if (checked) {
             LegadoTheme.colorScheme.onPrimaryContainer
         } else {
             LegadoTheme.colorScheme.onSurfaceVariant
         },
         animationSpec = tween(150),
-        label = "MediumToggleContentColor"
+        label = "MediumToggleContentColor",
     )
     SeriesButton(
         onClick = { onCheckedChange(!checked) },
@@ -48,14 +50,15 @@ fun MediumToggleButton(
         selected = checked,
         onLongClick = onLongClick,
         size = if (text == null) MediumSeriesIconButtonSize else null,
-        style = when (style) {
+        style =
+        when (style) {
             ToggleStyle.Outlined -> SeriesIconButtonStyle.Outlined
             ToggleStyle.Tonal -> SeriesIconButtonStyle.Tonal
         },
         containerColor = containerColor,
         selectedContainerColor = containerColor,
         contentColor = contentColor,
-        selectedContentColor = contentColor
+        selectedContentColor = contentColor,
     ) { resolvedContentColor ->
         SeriesButtonContent(
             icon = if (checked) (iconChecked ?: icon)!! else icon!!,
@@ -65,7 +68,7 @@ fun MediumToggleButton(
             textStyle = LegadoTheme.typography.labelMedium,
             contentColor = resolvedContentColor,
             padding = PaddingValues(horizontal = 8.dp, vertical = 6.dp),
-            spacing = 8.dp
+            spacing = 8.dp,
         )
     }
 }

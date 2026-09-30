@@ -14,11 +14,11 @@ open class SymmetricCryptoAndroid(
     private val algorithm: String,
     key: ByteArray?,
 ) {
-
     private val transformation = if (algorithm.contains('/')) algorithm else "$algorithm/ECB/PKCS5Padding"
     private val keyAlgorithm = algorithm.substringBefore('/')
-    private val secretKey = key?.let { SecretKeySpec(normalizedKey(it), keyAlgorithm) }
-        ?: KeyGenerator.getInstance(keyAlgorithm).generateKey()
+    private val secretKey =
+        key?.let { SecretKeySpec(normalizedKey(it), keyAlgorithm) }
+            ?: KeyGenerator.getInstance(keyAlgorithm).generateKey()
     private var iv: ByteArray? = null
 
     private fun normalizedKey(key: ByteArray): ByteArray = when {
@@ -45,42 +45,43 @@ open class SymmetricCryptoAndroid(
 
     fun encrypt(data: String): ByteArray = encrypt(data.toByteArray())
 
-    fun encrypt(data: String, charset: String?): ByteArray =
-        encrypt(data.toByteArray(charset?.let(Charset::forName) ?: Charsets.UTF_8))
+    fun encrypt(
+        data: String,
+        charset: String?,
+    ): ByteArray = encrypt(data.toByteArray(charset?.let(Charset::forName) ?: Charsets.UTF_8))
 
-    fun encrypt(data: String, charset: Charset?): ByteArray =
-        encrypt(data.toByteArray(charset ?: Charsets.UTF_8))
+    fun encrypt(
+        data: String,
+        charset: Charset?,
+    ): ByteArray = encrypt(data.toByteArray(charset ?: Charsets.UTF_8))
 
     fun encrypt(data: InputStream): ByteArray = encrypt(data.readBytes())
 
     fun decrypt(data: ByteArray): ByteArray = cipher(Cipher.DECRYPT_MODE).doFinal(data)
 
-    fun encryptBase64(data: ByteArray): String {
-        return encrypt(data).toBase64()
-    }
+    fun encryptBase64(data: ByteArray): String = encrypt(data).toBase64()
 
-    fun encryptBase64(data: String, charset: String?): String {
-        return encrypt(data, charset).toBase64()
-    }
+    fun encryptBase64(
+        data: String,
+        charset: String?,
+    ): String = encrypt(data, charset).toBase64()
 
-    fun encryptBase64(data: String, charset: Charset?): String {
-        return encrypt(data, charset).toBase64()
-    }
+    fun encryptBase64(
+        data: String,
+        charset: Charset?,
+    ): String = encrypt(data, charset).toBase64()
 
-    fun encryptBase64(data: String): String {
-        return encrypt(data).toBase64()
-    }
+    fun encryptBase64(data: String): String = encrypt(data).toBase64()
 
-    fun encryptBase64(data: InputStream): String {
-        return encrypt(data).toBase64()
-    }
+    fun encryptBase64(data: InputStream): String = encrypt(data).toBase64()
 
     fun decrypt(data: String): ByteArray {
-        val bytes = if (data.isHex() && data.length % 2 == 0) {
-            data.hexToByteArray()
-        } else {
-            data.base64ToByteArray()
-        }
+        val bytes =
+            if (data.isHex() && data.length % 2 == 0) {
+                data.hexToByteArray()
+            } else {
+                data.base64ToByteArray()
+            }
         return decrypt(bytes)
     }
 
@@ -105,5 +106,4 @@ open class SymmetricCryptoAndroid(
     fun encryptStr(data: ByteArray): String = String(encrypt(data), Charsets.UTF_8)
 
     fun encryptStr(data: String): String = String(encrypt(data), Charsets.UTF_8)
-
 }

@@ -7,7 +7,6 @@ import org.junit.Assert.assertEquals
 import org.junit.Test
 
 class ReaderBackgroundBoundsTest {
-
     private val baseStyle = ReaderTextStyle(colorArgb = 0xFF000000.toInt(), fontSizePx = 40f)
 
     private fun textElement(
@@ -28,11 +27,12 @@ class ReaderBackgroundBoundsTest {
 
     @Test fun mergesAdjacentSameColorBoxesOnTheSameLine() {
         val red = 0xFFAA0000.toInt()
-        val bands = listOf(
-            textElement(0f, 40f, 0f, 50f, red),
-            textElement(42f, 82f, 0f, 50f, red),
-            textElement(84f, 124f, 0f, 50f, red),
-        ).mergeBackgroundBounds()
+        val bands =
+            listOf(
+                textElement(0f, 40f, 0f, 50f, red),
+                textElement(42f, 82f, 0f, 50f, red),
+                textElement(84f, 124f, 0f, 50f, red),
+            ).mergeBackgroundBounds()
         assertEquals(1, bands.size)
         assertEquals(red, bands[0].colorArgb)
         assertEquals(ReaderRect(0f, 0f, 124f, 50f), bands[0].bounds)
@@ -41,38 +41,42 @@ class ReaderBackgroundBoundsTest {
     @Test fun differentColorStartsANewBand() {
         val red = 0xFFAA0000.toInt()
         val blue = 0xFF0000AA.toInt()
-        val bands = listOf(
-            textElement(0f, 40f, 0f, 50f, red),
-            textElement(42f, 82f, 0f, 50f, blue),
-            textElement(84f, 124f, 0f, 50f, red),
-        ).mergeBackgroundBounds()
+        val bands =
+            listOf(
+                textElement(0f, 40f, 0f, 50f, red),
+                textElement(42f, 82f, 0f, 50f, blue),
+                textElement(84f, 124f, 0f, 50f, red),
+            ).mergeBackgroundBounds()
         assertEquals(listOf(red, blue, red), bands.map { it.colorArgb })
     }
 
     @Test fun differentLineStartsANewBand() {
         val red = 0xFFAA0000.toInt()
-        val bands = listOf(
-            textElement(0f, 40f, 0f, 50f, red),
-            textElement(0f, 40f, 60f, 110f, red),
-        ).mergeBackgroundBounds()
+        val bands =
+            listOf(
+                textElement(0f, 40f, 0f, 50f, red),
+                textElement(0f, 40f, 60f, 110f, red),
+            ).mergeBackgroundBounds()
         assertEquals(2, bands.size)
     }
 
     @Test fun gapBeyondToleranceStartsANewBand() {
         val red = 0xFFAA0000.toInt()
-        val bands = listOf(
-            textElement(0f, 40f, 0f, 50f, red),
-            textElement(200f, 240f, 0f, 50f, red),
-        ).mergeBackgroundBounds()
+        val bands =
+            listOf(
+                textElement(0f, 40f, 0f, 50f, red),
+                textElement(200f, 240f, 0f, 50f, red),
+            ).mergeBackgroundBounds()
         assertEquals(2, bands.size)
     }
 
     @Test fun unstyledElementsAreSkipped() {
         val red = 0xFFAA0000.toInt()
-        val bands = listOf(
-            textElement(0f, 40f, 0f, 50f, null),
-            textElement(42f, 82f, 0f, 50f, red),
-        ).mergeBackgroundBounds()
+        val bands =
+            listOf(
+                textElement(0f, 40f, 0f, 50f, null),
+                textElement(42f, 82f, 0f, 50f, red),
+            ).mergeBackgroundBounds()
         assertEquals(1, bands.size)
         assertEquals(ReaderRect(42f, 0f, 82f, 50f), bands[0].bounds)
     }

@@ -93,17 +93,20 @@ fun AllBookmarkRouteScreen(
             val book = exportBook
             if (uri != null && book != null) {
                 viewModel.onIntent(AllBookmarkIntent.Export(uri, exportMarkdown, book))
-            Toast.makeText(context, context.getString(R.string.export_started), Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, context.getString(R.string.export_started), Toast.LENGTH_SHORT).show()
+            }
         }
-    }
     LaunchedEffect(viewModel) {
         viewModel.effects.collectLatest { effect ->
             when (effect) {
-                is AllBookmarkEffect.ShowMessage -> Toast.makeText(
-                    context,
-                    effect.message,
-                    Toast.LENGTH_SHORT
-                ).show()
+                is AllBookmarkEffect.ShowMessage -> {
+                    Toast
+                        .makeText(
+                            context,
+                            effect.message,
+                            Toast.LENGTH_SHORT,
+                        ).show()
+                }
             }
         }
     }
@@ -137,23 +140,27 @@ fun AllBookmarkScreen(
     val scrollBehavior = GlassTopAppBarDefaults.defaultScrollBehavior()
     val pagerState = rememberPagerState(pageCount = { DETAIL_PAGE_COUNT })
     val selectedTab = pagerState.currentPage
-    val bookmarkItems = remember(state.detailItems) {
-        state.detailItems.filter { it is BookmarkDetailItemUi.SavedBookmark }
-    }
-    val noteItems = remember(state.detailItems) {
-        state.detailItems.filterIsInstance<BookmarkDetailItemUi.Marking>()
-    }
-    val activeListState = when {
-        selectedBook == null -> overviewListState
-        selectedTab == NOTE_TAB -> noteListState
-        else -> bookmarkListState
-    }
-    val bodyState = when {
-        state.isLoading -> BookmarkBodyState.Loading
-        selectedBook == null && state.books.isEmpty() -> BookmarkBodyState.EmptyLibrary
-        selectedBook == null -> BookmarkBodyState.Overview
-        else -> BookmarkBodyState.Detail
-    }
+    val bookmarkItems =
+        remember(state.detailItems) {
+            state.detailItems.filter { it is BookmarkDetailItemUi.SavedBookmark }
+        }
+    val noteItems =
+        remember(state.detailItems) {
+            state.detailItems.filterIsInstance<BookmarkDetailItemUi.Marking>()
+        }
+    val activeListState =
+        when {
+            selectedBook == null -> overviewListState
+            selectedTab == NOTE_TAB -> noteListState
+            else -> bookmarkListState
+        }
+    val bodyState =
+        when {
+            state.isLoading -> BookmarkBodyState.Loading
+            selectedBook == null && state.books.isEmpty() -> BookmarkBodyState.EmptyLibrary
+            selectedBook == null -> BookmarkBodyState.Overview
+            else -> BookmarkBodyState.Detail
+        }
 
     BackHandler(enabled = selectedBook != null) { onIntent(AllBookmarkIntent.CloseBook) }
     // 换书时回到该书的初始页：带定位目标直接落在备注页，否则落在书签页
@@ -187,7 +194,7 @@ fun AllBookmarkScreen(
                         TopBarNavigationButton(
                             onClick = {
                                 if (selectedBook == null) onBack() else onIntent(AllBookmarkIntent.CloseBook)
-                            }
+                            },
                         )
                     },
                     actions = {
@@ -207,7 +214,8 @@ fun AllBookmarkScreen(
                             )
                             RoundDropdownMenu(
                                 expanded = showMenu,
-                                onDismissRequest = { showMenu = false }) {
+                                onDismissRequest = { showMenu = false },
+                            ) {
                                 RoundDropdownMenuItem(
                                     text = stringResource(R.string.export_bookmarks_json),
                                     onClick = {
@@ -235,7 +243,8 @@ fun AllBookmarkScreen(
                     SearchBar(
                         query = state.searchQuery,
                         onQueryChange = { onIntent(AllBookmarkIntent.SetSearchQuery(it)) },
-                        placeholder = if (selectedBook == null) {
+                        placeholder =
+                        if (selectedBook == null) {
                             stringResource(R.string.feature_bookmarks_search_notes)
                         } else {
                             stringResource(
@@ -249,7 +258,8 @@ fun AllBookmarkScreen(
                 }
                 if (selectedBook != null) {
                     AppTabRow(
-                        tabTitles = listOf(
+                        tabTitles =
+                        listOf(
                             "${stringResource(R.string.bookmark)} ${selectedBook.bookmarkCount}",
                             "${stringResource(R.string.bookmark_mark_note)} ${selectedBook.markingCount}",
                         ),
@@ -273,56 +283,72 @@ fun AllBookmarkScreen(
             modifier = Modifier.fillMaxSize(),
         ) { body ->
             when (body) {
-                BookmarkBodyState.Loading -> EmptyMessage(
-                    message = stringResource(R.string.loading),
-                    isLoading = true,
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(top = topPadding),
-                )
-
-                BookmarkBodyState.EmptyLibrary -> EmptyMessage(
-                    message = if (state.searchQuery.isBlank()) stringResource(R.string.no_bookmark)
-                    else stringResource(R.string.feature_bookmarks_no_matching_notes),
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(top = topPadding),
-                )
-
-                BookmarkBodyState.Overview -> BookOverview(
-                    books = state.books,
-                    listState = overviewListState,
-                    topPadding = topPadding,
-                    onBookClick = {
-                        onIntent(
-                            AllBookmarkIntent.OpenBook(
-                                it.key,
-                                it.matchedMarkingId
+                BookmarkBodyState.Loading -> {
+                    EmptyMessage(
+                        message = stringResource(R.string.loading),
+                        isLoading = true,
+                        modifier =
+                        Modifier
+                            .fillMaxSize()
+                            .padding(top = topPadding),
+                    )
+                }
+                BookmarkBodyState.EmptyLibrary -> {
+                    EmptyMessage(
+                        message =
+                        if (state.searchQuery.isBlank()) {
+                            stringResource(R.string.no_bookmark)
+                        } else {
+                            stringResource(R.string.feature_bookmarks_no_matching_notes)
+                        },
+                        modifier =
+                        Modifier
+                            .fillMaxSize()
+                            .padding(top = topPadding),
+                    )
+                }
+                BookmarkBodyState.Overview -> {
+                    BookOverview(
+                        books = state.books,
+                        listState = overviewListState,
+                        topPadding = topPadding,
+                        onBookClick = {
+                            onIntent(
+                                AllBookmarkIntent.OpenBook(
+                                    it.key,
+                                    it.matchedMarkingId,
+                                ),
                             )
-                        )
-                    },
-                )
-
-                BookmarkBodyState.Detail -> HorizontalPager(
-                    state = pagerState,
-                    modifier = Modifier.fillMaxSize(),
-                ) { tab ->
-                    val pageItems = if (tab == BOOKMARK_TAB) bookmarkItems else noteItems
-                    if (pageItems.isEmpty()) {
-                        EmptyMessage(
-                            message = if (tab == BOOKMARK_TAB) stringResource(R.string.no_bookmark)
-                            else stringResource(R.string.feature_bookmarks_no_notes),
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .padding(top = topPadding),
-                        )
-                    } else {
-                        DetailList(
-                            items = pageItems,
-                            listState = if (tab == BOOKMARK_TAB) bookmarkListState else noteListState,
-                            topPadding = topPadding,
-                            onIntent = onIntent,
-                        )
+                        },
+                    )
+                }
+                BookmarkBodyState.Detail -> {
+                    HorizontalPager(
+                        state = pagerState,
+                        modifier = Modifier.fillMaxSize(),
+                    ) { tab ->
+                        val pageItems = if (tab == BOOKMARK_TAB) bookmarkItems else noteItems
+                        if (pageItems.isEmpty()) {
+                            EmptyMessage(
+                                message =
+                                if (tab == BOOKMARK_TAB) {
+                                    stringResource(R.string.no_bookmark)
+                                } else {
+                                    stringResource(R.string.feature_bookmarks_no_notes)
+                                },
+                                modifier =
+                                Modifier
+                                    .fillMaxSize()
+                                    .padding(top = topPadding),
+                            )
+                        } else {
+                            DetailList(
+                                items = pageItems,
+                                listState = if (tab == BOOKMARK_TAB) bookmarkListState else noteListState,
+                                topPadding = topPadding,
+                                onIntent = onIntent,
+                            )
+                        }
                     }
                 }
             }
@@ -351,7 +377,8 @@ private fun BookOverview(
                 onClick = { onBookClick(book) },
             ) {
                 Row(
-                    modifier = Modifier
+                    modifier =
+                    Modifier
                         .fillMaxWidth()
                         .padding(12.dp),
                     horizontalArrangement = Arrangement.spacedBy(16.dp),
@@ -364,13 +391,16 @@ private fun BookOverview(
                             maxLines = 2,
                             overflow = TextOverflow.Ellipsis,
                         )
-                        if (book.key.author.isNotBlank()) AppText(
-                            text = book.key.author,
-                            style = LegadoTheme.typography.labelMediumEmphasized,
-                            color = LegadoTheme.colorScheme.onSurfaceVariant,
-                        )
+                        if (book.key.author.isNotBlank()) {
+                            AppText(
+                                text = book.key.author,
+                                style = LegadoTheme.typography.labelMediumEmphasized,
+                                color = LegadoTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
                         AppText(
-                            text = stringResource(
+                            text =
+                            stringResource(
                                 R.string.feature_bookmarks_counts,
                                 book.bookmarkCount,
                                 book.markingCount,
@@ -378,11 +408,13 @@ private fun BookOverview(
                             style = LegadoTheme.typography.labelSmall,
                             color = LegadoTheme.colorScheme.onSurfaceVariant,
                         )
-                        if (book.matchedMarkingId != null) AppText(
-                            text = stringResource(R.string.feature_bookmarks_match_hint),
-                            style = LegadoTheme.typography.labelSmall,
-                            color = LegadoTheme.colorScheme.primary,
-                        )
+                        if (book.matchedMarkingId != null) {
+                            AppText(
+                                text = stringResource(R.string.feature_bookmarks_match_hint),
+                                style = LegadoTheme.typography.labelSmall,
+                                color = LegadoTheme.colorScheme.primary,
+                            )
+                        }
                     }
                     CoilBookCover(
                         name = book.key.name,
@@ -414,7 +446,8 @@ private fun DetailList(
     ) {
         items(items, key = { it.stableId }, contentType = { it::class }) { item ->
             GlassCard(
-                modifier = Modifier
+                modifier =
+                Modifier
                     .fillMaxWidth()
                     .animateItem(),
                 cornerRadius = 14.dp,
@@ -424,19 +457,21 @@ private fun DetailList(
                 },
                 onLongClick = {
                     if (item is BookmarkDetailItemUi.SavedBookmark) editingBookmark = item.bookmark
-                }
+                },
             ) {
                 Column(
-                    modifier = Modifier
+                    modifier =
+                    Modifier
                         .fillMaxWidth()
                         .padding(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
                     AppText(
-                        text = item.chapterName.ifBlank {
+                        text =
+                        item.chapterName.ifBlank {
                             stringResource(
                                 R.string.feature_bookmarks_chapter_fallback,
-                                item.chapterIndex + 1
+                                item.chapterIndex + 1,
                             )
                         },
                         style = LegadoTheme.typography.labelLarge,
@@ -452,15 +487,16 @@ private fun DetailList(
                                 maxLines = DETAIL_TEXT_MAX_LINES,
                                 overflow = TextOverflow.Ellipsis,
                             )
-                            if (item.bookmark.content.isNotBlank()) AppText(
-                                text = item.bookmark.content,
-                                style = LegadoTheme.typography.labelMedium,
-                                color = LegadoTheme.colorScheme.onSurfaceVariant,
-                                maxLines = DETAIL_TEXT_MAX_LINES,
-                                overflow = TextOverflow.Ellipsis,
-                            )
+                            if (item.bookmark.content.isNotBlank()) {
+                                AppText(
+                                    text = item.bookmark.content,
+                                    style = LegadoTheme.typography.labelMedium,
+                                    color = LegadoTheme.colorScheme.onSurfaceVariant,
+                                    maxLines = DETAIL_TEXT_MAX_LINES,
+                                    overflow = TextOverflow.Ellipsis,
+                                )
+                            }
                         }
-
                         is BookmarkDetailItemUi.Marking -> {
                             AppText(
                                 text = item.selectedText,
@@ -468,13 +504,15 @@ private fun DetailList(
                                 maxLines = DETAIL_TEXT_MAX_LINES,
                                 overflow = TextOverflow.Ellipsis,
                             )
-                            if (item.marking.note.isNotBlank()) AppText(
-                                text = item.marking.note,
-                                style = LegadoTheme.typography.labelMedium,
-                                color = LegadoTheme.colorScheme.onSurfaceVariant,
-                                maxLines = DETAIL_TEXT_MAX_LINES,
-                                overflow = TextOverflow.Ellipsis,
-                            )
+                            if (item.marking.note.isNotBlank()) {
+                                AppText(
+                                    text = item.marking.note,
+                                    style = LegadoTheme.typography.labelMedium,
+                                    color = LegadoTheme.colorScheme.onSurfaceVariant,
+                                    maxLines = DETAIL_TEXT_MAX_LINES,
+                                    overflow = TextOverflow.Ellipsis,
+                                )
+                            }
                         }
                     }
                 }
@@ -485,7 +523,13 @@ private fun DetailList(
         show = editingBookmark != null,
         bookmark = editingBookmark ?: Bookmark(),
         onDismiss = { editingBookmark = null },
-        onSave = { onIntent(AllBookmarkIntent.UpdateBookmark(it)); editingBookmark = null },
-        onDelete = { onIntent(AllBookmarkIntent.DeleteBookmark(it)); editingBookmark = null },
+        onSave = {
+            onIntent(AllBookmarkIntent.UpdateBookmark(it))
+            editingBookmark = null
+        },
+        onDelete = {
+            onIntent(AllBookmarkIntent.DeleteBookmark(it))
+            editingBookmark = null
+        },
     )
 }

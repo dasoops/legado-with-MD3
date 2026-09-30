@@ -16,14 +16,14 @@ import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
 
-
 /**
  * 嵌套惯性滚动 TextView
  */
-class ScrollTextView(context: Context, attrs: AttributeSet?) :
-    MaterialTextView(context, attrs) {
-
-    //是否到顶或者到底的标志
+class ScrollTextView(
+    context: Context,
+    attrs: AttributeSet?,
+) : MaterialTextView(context, attrs) {
+    // 是否到顶或者到底的标志
     private var disallowIntercept = true
 
     private val scrollStateIdle = 0
@@ -38,42 +38,44 @@ class ScrollTextView(context: Context, attrs: AttributeSet?) :
     private var mMinFlingVelocity: Int = 0
     private var mMaxFlingVelocity: Int = 0
 
-    //滑动距离的最大边界
+    // 滑动距离的最大边界
     private var mOffsetHeight: Int = 0
 
-    //f(x) = (x-1)^5 + 1
-    private val sQuinticInterpolator = Interpolator {
-        var t = it
-        t -= 1.0f
-        t * t * t * t * t + 1.0f
-    }
+    // f(x) = (x-1)^5 + 1
+    private val sQuinticInterpolator =
+        Interpolator {
+            var t = it
+            t -= 1.0f
+            t * t * t * t * t + 1.0f
+        }
 
-    private val gestureDetector = GestureDetector(context,
-        object : GestureDetector.SimpleOnGestureListener() {
-
-            override fun onDown(e: MotionEvent): Boolean {
-                disallowIntercept = true
-                return super.onDown(e)
-            }
-
-            override fun onScroll(
-                e1: MotionEvent?,
-                e2: MotionEvent,
-                distanceX: Float,
-                distanceY: Float
-            ): Boolean {
-                val y = scrollY + distanceY
-                if (y < 0 || y > mOffsetHeight) {
-                    disallowIntercept = false
-                    //这里触发父布局或祖父布局的滑动事件
-                    parent.requestDisallowInterceptTouchEvent(false)
-                } else {
+    private val gestureDetector =
+        GestureDetector(
+            context,
+            object : GestureDetector.SimpleOnGestureListener() {
+                override fun onDown(e: MotionEvent): Boolean {
                     disallowIntercept = true
+                    return super.onDown(e)
                 }
-                return true
-            }
 
-        })
+                override fun onScroll(
+                    e1: MotionEvent?,
+                    e2: MotionEvent,
+                    distanceX: Float,
+                    distanceY: Float,
+                ): Boolean {
+                    val y = scrollY + distanceY
+                    if (y < 0 || y > mOffsetHeight) {
+                        disallowIntercept = false
+                        // 这里触发父布局或祖父布局的滑动事件
+                        parent.requestDisallowInterceptTouchEvent(false)
+                    } else {
+                        disallowIntercept = true
+                    }
+                    return true
+                }
+            },
+        )
 
     init {
         val vc = ViewConfiguration.get(context)
@@ -83,7 +85,10 @@ class ScrollTextView(context: Context, attrs: AttributeSet?) :
         movementMethod = LinkMovementMethod.getInstance()
     }
 
-    override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
+    override fun onMeasure(
+        widthMeasureSpec: Int,
+        heightMeasureSpec: Int,
+    ) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec)
         initOffsetHeight()
     }
@@ -92,7 +97,7 @@ class ScrollTextView(context: Context, attrs: AttributeSet?) :
         text: CharSequence,
         start: Int,
         lengthBefore: Int,
-        lengthAfter: Int
+        lengthAfter: Int,
     ) {
         super.onTextChanged(text, start, lengthBefore, lengthAfter)
         initOffsetHeight()
@@ -150,7 +155,7 @@ class ScrollTextView(context: Context, attrs: AttributeSet?) :
     @SuppressLint("ClickableViewAccessibility")
     override fun onTouchEvent(event: MotionEvent): Boolean {
         val result = super.onTouchEvent(event)
-        //如果是需要拦截，则再拦截，这个方法会在onScrollChanged方法之后再调用一次
+        // 如果是需要拦截，则再拦截，这个方法会在onScrollChanged方法之后再调用一次
         if (disallowIntercept && lineCount > maxLines) {
             parent.requestDisallowInterceptTouchEvent(true)
         }
@@ -158,26 +163,29 @@ class ScrollTextView(context: Context, attrs: AttributeSet?) :
         return result
     }
 
-    override fun scrollTo(x: Int, y: Int) {
+    override fun scrollTo(
+        x: Int,
+        y: Int,
+    ) {
         super.scrollTo(x, min(y, mOffsetHeight))
     }
 
     private fun initOffsetHeight() {
         val mLayoutHeight: Int
 
-        //获得内容面板
+        // 获得内容面板
         val mLayout = layout ?: return
-        //获得内容面板的高度
+        // 获得内容面板的高度
         mLayoutHeight = mLayout.height
-        //获取上内边距
+        // 获取上内边距
         val paddingTop: Int = totalPaddingTop
-        //获取下内边距
+        // 获取下内边距
         val paddingBottom: Int = totalPaddingBottom
 
-        //获得控件的实际高度
+        // 获得控件的实际高度
         val mHeight: Int = measuredHeight
 
-        //计算滑动距离的边界
+        // 计算滑动距离的边界
         mOffsetHeight = mLayoutHeight + paddingTop + paddingBottom - mHeight
         if (mOffsetHeight <= 0) {
             scrollTo(0, 0)
@@ -202,7 +210,6 @@ class ScrollTextView(context: Context, attrs: AttributeSet?) :
      * 惯性滚动
      */
     private inner class ViewFling : Runnable {
-
         private var mLastFlingY = 0
         private val mScroller: OverScroller = OverScroller(context, sQuinticInterpolator)
         private var mEatRunOnAnimationRequest = false
@@ -236,7 +243,7 @@ class ScrollTextView(context: Context, attrs: AttributeSet?) :
                 Integer.MIN_VALUE,
                 Integer.MAX_VALUE,
                 Integer.MIN_VALUE,
-                Integer.MAX_VALUE
+                Integer.MAX_VALUE,
             )
             postOnAnimation()
         }
@@ -268,5 +275,4 @@ class ScrollTextView(context: Context, attrs: AttributeSet?) :
             }
         }
     }
-
 }

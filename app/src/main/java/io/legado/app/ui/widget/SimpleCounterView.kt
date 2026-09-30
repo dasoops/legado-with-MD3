@@ -19,14 +19,14 @@ import io.legado.app.utils.visible
 @SuppressLint("ViewConstructor", "ClickableViewAccessibility")
 class SimpleCounterView @JvmOverloads constructor(
     context: Context,
-    attrs: AttributeSet? = null
+    attrs: AttributeSet? = null,
 ) : FrameLayout(context, attrs) {
 
     private val binding = ViewSimpleCounterBinding.inflate(LayoutInflater.from(context), this)
-    private var _orientation: Int = 1
-    private var _progress = 0
-    private var _max = 100
-    private var _min = 0
+    private var orientation: Int = 1
+    private var currentProgress = 0
+    private var maximum = 100
+    private var minimum = 0
     private val isBottomBackground: Boolean
 
     var valueFormat: ((Int) -> String)? = null
@@ -42,25 +42,25 @@ class SimpleCounterView @JvmOverloads constructor(
     private val tvTit: TextView
 
     var progress: Int
-        get() = _progress
+        get() = currentProgress
         set(value) {
-            _progress = value.coerceIn(_min, _max)
+            currentProgress = value.coerceIn(min, max)
             updateValue()
         }
 
     var max: Int
-        get() = _max
+        get() = maximum
         set(value) {
-            _max = value.coerceAtLeast(1)
-            _progress = _progress.coerceAtMost(_max)
+            maximum = value.coerceAtLeast(1)
+            currentProgress = currentProgress.coerceAtMost(maximum)
             updateValue()
         }
 
     var min: Int
-        get() = _min
+        get() = minimum
         set(value) {
-            _min = value
-            _progress = _progress.coerceAtLeast(_min)
+            minimum = value
+            currentProgress = currentProgress.coerceAtLeast(minimum)
             updateValue()
         }
 
@@ -68,15 +68,15 @@ class SimpleCounterView @JvmOverloads constructor(
         val typedArray = context.obtainStyledAttributes(attrs, R.styleable.DetailSeekBar)
         isBottomBackground = typedArray.getBoolean(R.styleable.DetailSeekBar_isBottomBackground, false)
         val title = typedArray.getText(R.styleable.DetailSeekBar_title)
-        _max = typedArray.getInt(R.styleable.DetailSeekBar_max, 100)
-        _min = typedArray.getInt(R.styleable.DetailSeekBar_min, 0)
-        _progress = _progress.coerceIn(_min, _max)
+        maximum = typedArray.getInt(R.styleable.DetailSeekBar_max, 100)
+        minimum = typedArray.getInt(R.styleable.DetailSeekBar_min, 0)
+        currentProgress = currentProgress.coerceIn(minimum, maximum)
 
         val ta = context.obtainStyledAttributes(attrs, R.styleable.SimpleCounterView)
-        _orientation = ta.getInt(R.styleable.SimpleCounterView_orientation, 1)
+        orientation = ta.getInt(R.styleable.SimpleCounterView_orientation, 1)
         ta.recycle()
 
-        if (_orientation == 1) {
+        if (orientation == 1) {
             tvTit = binding.tvSeekTitleVertical
             binding.tvSeekTitle.gone()
             binding.tvSeekTitleVertical.visible()
@@ -92,18 +92,18 @@ class SimpleCounterView @JvmOverloads constructor(
         TooltipCompat.setTooltipText(tvTit, title)
 
         binding.ivSeekPlus.setOnClickListener {
-            if (_progress < _max) {
-                _progress++
+            if (progress < max) {
+                progress++
                 updateValue()
-                onChanged?.invoke(_progress)
+                onChanged?.invoke(progress)
             }
         }
 
         binding.ivSeekReduce.setOnClickListener {
-            if (_progress > _min) {
-                _progress--
+            if (progress > min) {
+                progress--
                 updateValue()
-                onChanged?.invoke(_progress)
+                onChanged?.invoke(progress)
             }
         }
 
@@ -148,13 +148,13 @@ class SimpleCounterView @JvmOverloads constructor(
         context.alert(title = null, message = null) {
             customView {
                 val detailSeekBar = DetailSeekBar(ctx).apply {
-                    max = _max
-                    min = _min
-                    progress = _progress
+                    max = this@SimpleCounterView.max
+                    min = this@SimpleCounterView.min
+                    progress = this@SimpleCounterView.progress
                     valueFormat = this@SimpleCounterView.valueFormat
                     setTitle(tvTit.text)
                     onChanged = {
-                        _progress = it
+                        this@SimpleCounterView.progress = it
                         updateValue()
                         this@SimpleCounterView.onChanged?.invoke(it)
                     }
@@ -162,10 +162,13 @@ class SimpleCounterView @JvmOverloads constructor(
 
                 FrameLayout(ctx).apply {
                     setPadding(64, 0, 64, 0)
-                    addView(detailSeekBar, LayoutParams(
-                        LayoutParams.MATCH_PARENT,
-                        LayoutParams.WRAP_CONTENT
-                    ))
+                    addView(
+                        detailSeekBar,
+                        LayoutParams(
+                            LayoutParams.MATCH_PARENT,
+                            LayoutParams.WRAP_CONTENT,
+                        ),
+                    )
                 }
             }
 
@@ -175,7 +178,7 @@ class SimpleCounterView @JvmOverloads constructor(
     }
 
     private fun updateValue() {
-        binding.tvSeekValue.text = valueFormat?.invoke(_progress) ?: _progress.toString()
+        binding.tvSeekValue.text = valueFormat?.invoke(progress) ?: progress.toString()
     }
 
     private val startIncrementRunnable = Runnable {
@@ -188,10 +191,10 @@ class SimpleCounterView @JvmOverloads constructor(
 
     private val incrementRunnable = object : Runnable {
         override fun run() {
-            if (_progress < _max) {
-                _progress++
+            if (progress < max) {
+                progress++
                 updateValue()
-                onChanged?.invoke(_progress)
+                onChanged?.invoke(progress)
                 handler.postDelayed(this, repeatInterval)
             }
         }
@@ -199,10 +202,10 @@ class SimpleCounterView @JvmOverloads constructor(
 
     private val decrementRunnable = object : Runnable {
         override fun run() {
-            if (_progress > _min) {
-                _progress--
+            if (progress > min) {
+                progress--
                 updateValue()
-                onChanged?.invoke(_progress)
+                onChanged?.invoke(progress)
                 handler.postDelayed(this, repeatInterval)
             }
         }
@@ -221,5 +224,4 @@ class SimpleCounterView @JvmOverloads constructor(
         binding.ivSeekReduce.isEnabled = enabled
         binding.tvSeekValue.isEnabled = enabled
     }
-
 }

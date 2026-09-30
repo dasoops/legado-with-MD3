@@ -4,16 +4,17 @@ import android.content.Context
 import android.util.AttributeSet
 import com.google.android.material.slider.Slider
 
-//import io.legado.app.lib.theme.accentColor
+// import io.legado.app.lib.theme.accentColor
 
 /**
  * @author Aidan Follestad (afollestad)
  */
 
-
-class ThemeSlider(context: Context, attrs: AttributeSet) : Slider(context, attrs) {
-
-//    private var isDragging = false
+class ThemeSlider(
+    context: Context,
+    attrs: AttributeSet,
+) : Slider(context, attrs) {
+    //    private var isDragging = false
 
 //    @SuppressLint("ClickableViewAccessibility")
 //    override fun onTouchEvent(event: MotionEvent): Boolean {
@@ -51,4 +52,3 @@ class ThemeSlider(context: Context, attrs: AttributeSet) : Slider(context, attrs
 //        return x >= thumbCenterX - thumbRadius && x <= thumbCenterX + thumbRadius
 //    }
 }
-

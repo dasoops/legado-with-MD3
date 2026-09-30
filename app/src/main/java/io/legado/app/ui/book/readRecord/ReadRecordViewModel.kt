@@ -1,16 +1,20 @@
 package io.legado.app.ui.book.readRecord
 
-import androidx.lifecycle.ViewModel
 import androidx.compose.runtime.Stable
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import io.legado.app.data.entities.readRecord.ReadRecord
 import io.legado.app.data.entities.readRecord.ReadRecordDetail
-import io.legado.app.data.entities.readRecord.ReadRecordSession
 import io.legado.app.data.entities.readRecord.ReadRecordRepairReport
+import io.legado.app.data.entities.readRecord.ReadRecordSession
 import io.legado.app.data.local.preferences.LocalPreferencesKeys
-import io.legado.app.data.repository.SettingsRepository
 import io.legado.app.data.repository.BookRepository
 import io.legado.app.data.repository.ReadRecordRepository
+import io.legado.app.data.repository.SettingsRepository
+import java.time.Instant
+import java.time.LocalDate
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.ImmutableMap
 import kotlinx.collections.immutable.persistentListOf
@@ -18,21 +22,17 @@ import kotlinx.collections.immutable.persistentMapOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toImmutableMap
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import java.time.Instant
-import java.time.LocalDate
-import java.time.ZoneId
-import java.time.format.DateTimeFormatter
 
 @Stable
 data class ReadRecordUiState(
@@ -53,14 +53,14 @@ data class ReadRecordUiState(
 enum class DisplayMode {
     AGGREGATE,
     TIMELINE,
-    LATEST
+    LATEST,
 }
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class ReadRecordViewModel(
     private val repository: ReadRecordRepository,
     private val bookRepository: BookRepository,
-    private val localPreferencesRepository: SettingsRepository
+    private val localPreferencesRepository: SettingsRepository,
 ) : ViewModel() {
 
     private val _displayMode = MutableStateFlow(DisplayMode.AGGREGATE)
@@ -69,33 +69,34 @@ class ReadRecordViewModel(
     init {
         viewModelScope.launch {
             val saved = localPreferencesRepository.getPreference(
-                LocalPreferencesKeys.READ_RECORD_DISPLAY_MODE, DisplayMode.AGGREGATE.name
+                LocalPreferencesKeys.READ_RECORD_DISPLAY_MODE,
+                DisplayMode.AGGREGATE.name,
             ).first()
             _displayMode.value = runCatching { DisplayMode.valueOf(saved) }
                 .getOrDefault(DisplayMode.AGGREGATE)
         }
     }
 
-    private val _searchKey = MutableStateFlow("")
-    private val _repairReport = MutableStateFlow<ReadRecordRepairReport?>(null)
+    private val searchKey = MutableStateFlow("")
+    private val repairReport = MutableStateFlow<ReadRecordRepairReport?>(null)
     private val _effects = MutableSharedFlow<ReadRecordEffect>(extraBufferCapacity = 16)
     val effects = _effects.asSharedFlow()
-    private val _selectedDate = MutableStateFlow<LocalDate?>(null)
+    private val selectedDate = MutableStateFlow<LocalDate?>(null)
     val readRecordEnabled: StateFlow<Boolean> = repository.readRecordEnabled
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
-            initialValue = true
+            initialValue = true,
         )
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    private val loadedDataFlow = _searchKey
+    private val loadedDataFlow = searchKey
         .flatMapLatest { query ->
             combine(
                 repository.getAllRecordDetails(query),
                 repository.getLatestReadRecords(query),
                 repository.getAllSessions(),
-                repository.getTotalReadTime()
+                repository.getTotalReadTime(),
             ) { details, latest, sessions, totalTime ->
                 LoadedData(totalTime, details, latest, sessions)
             }
@@ -103,8 +104,8 @@ class ReadRecordViewModel(
 
     val uiState: StateFlow<ReadRecordUiState> = combine(
         loadedDataFlow,
-        _selectedDate,
-        _searchKey,
+        selectedDate,
+        searchKey,
         _displayMode,
         readRecordEnabled,
     ) { data, selectedDate, searchKey, displayMode, enabled ->
@@ -131,9 +132,11 @@ class ReadRecordViewModel(
             .filter { session ->
                 val sDate = session.startTime.toDateString()
                 (dateStr == null || sDate == dateStr) &&
-                        (searchKey.isEmpty() ||
-                                session.bookName.contains(searchKey, ignoreCase = true) ||
-                                session.bookAuthor.contains(searchKey, ignoreCase = true))
+                    (
+                        searchKey.isEmpty() ||
+                            session.bookName.contains(searchKey, ignoreCase = true) ||
+                            session.bookAuthor.contains(searchKey, ignoreCase = true)
+                        )
             }
             .groupBy { it.startTime.toDateString() }
             .mapValues { (_, sessions) ->
@@ -161,8 +164,8 @@ class ReadRecordViewModel(
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5000),
-        initialValue = ReadRecordUiState(isLoading = true)
-    ).combine(_repairReport) { state, report -> state.copy(repairReport = report) }
+        initialValue = ReadRecordUiState(isLoading = true),
+    ).combine(repairReport) { state, report -> state.copy(repairReport = report) }
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
@@ -182,19 +185,19 @@ class ReadRecordViewModel(
             is ReadRecordIntent.MergeRecords -> mergeReadRecords(intent.target, intent.sources)
             ReadRecordIntent.ScanRepair -> scanRepair()
             ReadRecordIntent.RepairDatabase -> repairDatabase()
-            ReadRecordIntent.DismissRepairReport -> _repairReport.value = null
+            ReadRecordIntent.DismissRepairReport -> repairReport.value = null
         }
     }
 
     fun setSearchKey(query: String) {
-        _searchKey.value = query
+        searchKey.value = query
     }
 
     /** 执行只读问题扫描，并将结果放入统一 UiState。 */
     private fun scanRepair() {
         viewModelScope.launch {
             runCatching { repository.scanReadRecordIssues() }
-                .onSuccess { _repairReport.value = it }
+                .onSuccess { repairReport.value = it }
                 .onFailure { _effects.tryEmit(ReadRecordEffect.ShowError(it.localizedMessage.orEmpty())) }
         }
     }
@@ -206,7 +209,7 @@ class ReadRecordViewModel(
                 val identity = repository.repairReadRecordIdentities()
                 val sessions = repository.repairDuplicateSessions()
                 identity.copy(duplicateSessionCount = sessions)
-            }.onSuccess { _repairReport.value = it }
+            }.onSuccess { repairReport.value = it }
                 .onFailure { _effects.tryEmit(ReadRecordEffect.ShowError(it.localizedMessage.orEmpty())) }
         }
     }
@@ -215,13 +218,14 @@ class ReadRecordViewModel(
         _displayMode.value = mode
         viewModelScope.launch {
             localPreferencesRepository.updatePreference(
-                LocalPreferencesKeys.READ_RECORD_DISPLAY_MODE, mode.name
+                LocalPreferencesKeys.READ_RECORD_DISPLAY_MODE,
+                mode.name,
             )
         }
     }
 
     fun setSelectedDate(date: LocalDate?) {
-        _selectedDate.value = date
+        selectedDate.value = date
     }
 
     fun deleteDetail(detail: ReadRecordDetail) {
@@ -266,17 +270,11 @@ class ReadRecordViewModel(
         return mergedList
     }
 
-    suspend fun getChapterTitle(bookName: String, bookAuthor: String, chapterIndexLong: Long): String? {
-        return bookRepository.getChapterTitle(bookName, bookAuthor, chapterIndexLong.toInt())
-    }
+    suspend fun getChapterTitle(bookName: String, bookAuthor: String, chapterIndexLong: Long): String? = bookRepository.getChapterTitle(bookName, bookAuthor, chapterIndexLong.toInt())
 
-    suspend fun getBookCover(bookName: String, bookAuthor: String): String? {
-        return bookRepository.getBookCoverByNameAndAuthor(bookName, bookAuthor)
-    }
+    suspend fun getBookCover(bookName: String, bookAuthor: String): String? = bookRepository.getBookCoverByNameAndAuthor(bookName, bookAuthor)
 
-    suspend fun getMergeCandidates(targetRecord: ReadRecord): List<ReadRecord> {
-        return repository.getMergeCandidates(targetRecord)
-    }
+    suspend fun getMergeCandidates(targetRecord: ReadRecord): List<ReadRecord> = repository.getMergeCandidates(targetRecord)
 
     fun mergeReadRecords(targetRecord: ReadRecord, sourceRecords: List<ReadRecord>) {
         if (sourceRecords.isEmpty()) {
@@ -295,11 +293,10 @@ class ReadRecordViewModel(
         val totalReadTime: Long,
         val details: List<ReadRecordDetail>,
         val latestRecords: List<ReadRecord>,
-        val sessions: List<ReadRecordSession>
+        val sessions: List<ReadRecordSession>,
     )
 
-    private fun Long.toDateString(): String =
-        Instant.ofEpochMilli(this).atZone(ZoneId.systemDefault()).toLocalDate().toString()
+    private fun Long.toDateString(): String = Instant.ofEpochMilli(this).atZone(ZoneId.systemDefault()).toLocalDate().toString()
 }
 
 sealed interface ReadRecordIntent {

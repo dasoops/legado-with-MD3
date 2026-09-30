@@ -9,7 +9,6 @@ import kotlinx.coroutines.flow.SharedFlow
  * forwards them to the active reader renderer as [ReadBookEffect.UpdateReaderConfig].
  */
 object ReadConfigUpdateBus {
-
     private val _events = MutableSharedFlow<Set<ConfigUpdateAction>>(extraBufferCapacity = 64)
     val events: SharedFlow<Set<ConfigUpdateAction>> = _events
 

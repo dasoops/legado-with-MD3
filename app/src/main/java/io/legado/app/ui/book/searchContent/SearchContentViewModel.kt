@@ -39,18 +39,39 @@ data class SearchContentUiState(
 )
 
 sealed interface SearchContentIntent {
-    data class UpdateQuery(val value: String) : SearchContentIntent
+    data class UpdateQuery(
+        val value: String,
+    ) : SearchContentIntent
 
     /** 用户在输入法上按下「搜索」：确认这次查询并把关键词写入搜索历史。 */
-    data class SubmitSearch(val value: String) : SearchContentIntent
-    data class ToggleReplace(val enabled: Boolean) : SearchContentIntent
-    data class ToggleRegex(val enabled: Boolean) : SearchContentIntent
+    data class SubmitSearch(
+        val value: String,
+    ) : SearchContentIntent
+
+    data class ToggleReplace(
+        val enabled: Boolean,
+    ) : SearchContentIntent
+
+    data class ToggleRegex(
+        val enabled: Boolean,
+    ) : SearchContentIntent
+
     data object ToggleHistoryScope : SearchContentIntent
-    data class DeleteHistory(val history: SearchContentHistory) : SearchContentIntent
+
+    data class DeleteHistory(
+        val history: SearchContentHistory,
+    ) : SearchContentIntent
+
     data object ClearHistory : SearchContentIntent
+
     data object StopSearch : SearchContentIntent
+
     data object MarkAutoScrollDone : SearchContentIntent
-    data class OpenResult(val result: SearchResult) : SearchContentIntent
+
+    data class OpenResult(
+        val result: SearchResult,
+    ) : SearchContentIntent
+
     data object LeaveSearch : SearchContentIntent
 }
 
@@ -60,9 +81,14 @@ sealed interface SearchContentEffect {
 
 sealed interface SearchContentState {
     data object Loading : SearchContentState
+
     data object History : SearchContentState
+
     data object EmptyResult : SearchContentState
-    data class Error(val throwable: Throwable) : SearchContentState
+
+    data class Error(
+        val throwable: Throwable,
+    ) : SearchContentState
 }
 
 class SearchContentViewModel(
@@ -73,9 +99,12 @@ class SearchContentViewModel(
     private val searchContentRepository: SearchContentRepository,
     private val themeSettingsGateway: ThemeSettingsGateway,
 ) : ViewModel() {
-    private val restoredSession = if (initialSearchWord == null) {
-        searchContentRepository.getLastSession(bookUrl)
-    } else null
+    private val restoredSession =
+        if (initialSearchWord == null) {
+            searchContentRepository.getLastSession(bookUrl)
+        } else {
+            null
+        }
 
     /**
      * 从阅读页选中文字进入时，这次查询是用户主动发起的，允许记入历史；
@@ -83,15 +112,16 @@ class SearchContentViewModel(
      */
     private val initialSearchSubmitted = initialSearchWord != null
 
-    private val _uiState = MutableStateFlow(
-        SearchContentUiState(
-            searchQuery = initialSearchWord ?: restoredSession?.query.orEmpty(),
-            replaceEnabled = restoredSession?.replaceEnabled ?: false,
-            regexReplace = restoredSession?.regexReplace ?: false,
-            shouldAutoScroll = searchResultIndex > 0,
-            isEInkMode = themeSettingsGateway.currentSettings.appTheme == "4",
+    private val _uiState =
+        MutableStateFlow(
+            SearchContentUiState(
+                searchQuery = initialSearchWord ?: restoredSession?.query.orEmpty(),
+                replaceEnabled = restoredSession?.replaceEnabled ?: false,
+                regexReplace = restoredSession?.regexReplace ?: false,
+                shouldAutoScroll = searchResultIndex > 0,
+                isEInkMode = themeSettingsGateway.currentSettings.appTheme == "4",
+            ),
         )
-    )
     val uiState = _uiState.asStateFlow()
 
     private val _effects = MutableSharedFlow<SearchContentEffect>(extraBufferCapacity = 16)
@@ -132,18 +162,29 @@ class SearchContentViewModel(
                 _uiState.update { it.copy(historyOnlyThisBook = !it.historyOnlyThisBook) }
                 observeHistory()
             }
-            is SearchContentIntent.DeleteHistory -> viewModelScope.launch {
-                searchContentRepository.deleteHistory(intent.history.id)
+            is SearchContentIntent.DeleteHistory -> {
+                viewModelScope.launch {
+                    searchContentRepository.deleteHistory(intent.history.id)
+                }
             }
-            SearchContentIntent.ClearHistory -> viewModelScope.launch {
-                val state = _uiState.value
-                searchContentRepository.clearHistory(state.book, state.historyOnlyThisBook)
+            SearchContentIntent.ClearHistory -> {
+                viewModelScope.launch {
+                    val state = _uiState.value
+                    searchContentRepository.clearHistory(state.book, state.historyOnlyThisBook)
+                }
             }
-            SearchContentIntent.StopSearch -> stopSearch()
-            SearchContentIntent.MarkAutoScrollDone ->
+            SearchContentIntent.StopSearch -> {
+                stopSearch()
+            }
+            SearchContentIntent.MarkAutoScrollDone -> {
                 _uiState.update { it.copy(shouldAutoScroll = false) }
-            is SearchContentIntent.OpenResult -> openResult(intent.result)
-            SearchContentIntent.LeaveSearch -> leaveSearch()
+            }
+            is SearchContentIntent.OpenResult -> {
+                openResult(intent.result)
+            }
+            SearchContentIntent.LeaveSearch -> {
+                leaveSearch()
+            }
         }
     }
 
@@ -151,12 +192,13 @@ class SearchContentViewModel(
         viewModelScope.launch {
             val state = _uiState.value
             val book = bookRepository.getBook(bookUrl)
-            val cachedResults = searchContentRepository.getCache(
-                bookUrl,
-                state.searchQuery,
-                state.replaceEnabled,
-                state.regexReplace,
-            )
+            val cachedResults =
+                searchContentRepository.getCache(
+                    bookUrl,
+                    state.searchQuery,
+                    state.replaceEnabled,
+                    state.regexReplace,
+                )
             _uiState.update {
                 it.copy(
                     book = book,
@@ -174,12 +216,14 @@ class SearchContentViewModel(
     private fun observeHistory() {
         historyJob?.cancel()
         val state = _uiState.value
-        historyJob = viewModelScope.launch {
-            searchContentRepository.observeHistory(state.book, state.historyOnlyThisBook)
-                .collect { history ->
-                    _uiState.update { it.copy(searchHistory = history.toImmutableList()) }
-                }
-        }
+        historyJob =
+            viewModelScope.launch {
+                searchContentRepository
+                    .observeHistory(state.book, state.historyOnlyThisBook)
+                    .collect { history ->
+                        _uiState.update { it.copy(searchHistory = history.toImmutableList()) }
+                    }
+            }
     }
 
     /**
@@ -205,25 +249,26 @@ class SearchContentViewModel(
             state.replaceEnabled,
             state.regexReplace,
         )
-        searchJob = viewModelScope.launch {
-            state.book?.let { book ->
-                if (recordHistory) {
-                    searchContentRepository.saveHistory(book, state.searchQuery)
-                }
-                searchContentRepository.search(
-                    book,
-                    state.searchQuery,
-                    state.replaceEnabled,
-                    state.regexReplace,
-                )
-                    .onStart { _uiState.update { it.copy(isSearching = true, error = null) } }
-                    .onCompletion { _uiState.update { it.copy(isSearching = false) } }
-                    .catch { error -> _uiState.update { it.copy(isSearching = false, error = error) } }
-                    .collect { results ->
-                        _uiState.update { it.copy(searchResults = results.toImmutableList()) }
+        searchJob =
+            viewModelScope.launch {
+                state.book?.let { book ->
+                    if (recordHistory) {
+                        searchContentRepository.saveHistory(book, state.searchQuery)
                     }
+                    searchContentRepository
+                        .search(
+                            book,
+                            state.searchQuery,
+                            state.replaceEnabled,
+                            state.regexReplace,
+                        ).onStart { _uiState.update { it.copy(isSearching = true, error = null) } }
+                        .onCompletion { _uiState.update { it.copy(isSearching = false) } }
+                        .catch { error -> _uiState.update { it.copy(isSearching = false, error = error) } }
+                        .collect { results ->
+                            _uiState.update { it.copy(searchResults = results.toImmutableList()) }
+                        }
+                }
             }
-        }
     }
 
     private fun stopSearch() {
@@ -256,7 +301,7 @@ class SearchContentViewModel(
                 searchResults = results,
                 index = index,
                 query = result.query,
-            )
+            ),
         )
         _effects.tryEmit(SearchContentEffect.NavigateBack)
     }

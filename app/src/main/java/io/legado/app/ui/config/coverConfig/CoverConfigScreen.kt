@@ -57,8 +57,9 @@ fun CoverConfigScreen(
     val scrollBehavior = GlassTopAppBarDefaults.defaultScrollBehavior()
     val settings = state.settings
     val albumState = state.albumSelection
-    val selectedAlbum = albumState.albums
-        .firstOrNull { it.id == albumState.selectedAlbumId }
+    val selectedAlbum =
+        albumState.albums
+            .firstOrNull { it.id == albumState.selectedAlbumId }
 
     AppScaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
@@ -68,196 +69,202 @@ fun CoverConfigScreen(
                 scrollBehavior = scrollBehavior,
                 navigationIcon = {
                     TopBarNavigationButton(onClick = onBackClick)
-                }
+                },
             )
-        }
+        },
     ) { paddingValues ->
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
-            contentPadding = adaptiveContentPadding(
+            contentPadding =
+            adaptiveContentPadding(
                 top = paddingValues.calculateTopPadding(),
-                bottom = 120.dp
-            )
+                bottom = 120.dp,
+            ),
         ) {
             item {
                 SplicedColumnGroup {
-                SwitchSettingItem(
-                    title = stringResource(R.string.only_wifi),
-                    description = stringResource(R.string.only_wifi_summary),
-                    checked = settings.loadOnlyOnWifi,
-                    onCheckedChange = { value ->
-                        onIntent(CoverConfigIntent.SetLoadOnlyOnWifi(value))
-                    }
-                )
+                    SwitchSettingItem(
+                        title = stringResource(R.string.only_wifi),
+                        description = stringResource(R.string.only_wifi_summary),
+                        checked = settings.loadOnlyOnWifi,
+                        onCheckedChange = { value ->
+                            onIntent(CoverConfigIntent.SetLoadOnlyOnWifi(value))
+                        },
+                    )
 
-                SwitchSettingItem(
-                    title = stringResource(R.string.use_default_cover),
-                    description = stringResource(R.string.use_default_cover_s),
-                    checked = settings.useDefaultCover,
-                    onCheckedChange = { value ->
-                        onIntent(CoverConfigIntent.SetUseDefaultCover(value))
-                    }
-                )
+                    SwitchSettingItem(
+                        title = stringResource(R.string.use_default_cover),
+                        description = stringResource(R.string.use_default_cover_s),
+                        checked = settings.useDefaultCover,
+                        onCheckedChange = { value ->
+                            onIntent(CoverConfigIntent.SetUseDefaultCover(value))
+                        },
+                    )
 
-                ClickableSettingItem(
-                    title = stringResource(R.string.default_cover),
-                    description = selectedAlbum?.let {
-                        "${it.name} · ${
-                            stringResource(
-                                R.string.cover_album_day_night_count,
-                                it.lightImages.size,
-                                it.darkImages.size,
+                    ClickableSettingItem(
+                        title = stringResource(R.string.default_cover),
+                        description =
+                        selectedAlbum?.let {
+                            "${it.name} · ${
+                                stringResource(
+                                    R.string.cover_album_day_night_count,
+                                    it.lightImages.size,
+                                    it.darkImages.size,
+                                )
+                            }"
+                        } ?: stringResource(R.string.cover_album_none),
+                        onClick = { onIntent(CoverConfigIntent.ShowSheet(CoverConfigSheet.Album)) },
+                    )
+
+                    SwitchSettingItem(
+                        title = stringResource(R.string.cover_show_shadow),
+                        checked = settings.showShadow,
+                        onCheckedChange = { value ->
+                            onIntent(CoverConfigIntent.SetShowShadow(value))
+                        },
+                    )
+
+                    SwitchSettingItem(
+                        title = stringResource(R.string.cover_show_stroke),
+                        checked = settings.showStroke,
+                        onCheckedChange = { value ->
+                            onIntent(CoverConfigIntent.SetShowStroke(value))
+                        },
+                    )
+
+                    SwitchSettingItem(
+                        title = stringResource(R.string.default_color),
+                        checked = settings.useDefaultColor,
+                        onCheckedChange = { value ->
+                            onIntent(CoverConfigIntent.SetUseDefaultColor(value))
+                        },
+                    )
+                }
+
+                SplicedColumnGroup {
+                    DropdownListSettingItem(
+                        title = stringResource(R.string.cover_info_orientation),
+                        selectedValue = settings.infoOrientation,
+                        displayEntries =
+                        arrayOf(
+                            stringResource(R.string.screen_portrait),
+                            stringResource(R.string.screen_landscape),
+                        ),
+                        entryValues = arrayOf("0", "1"),
+                        onValueChange = { value ->
+                            onIntent(CoverConfigIntent.SetInfoOrientation(value))
+                        },
+                    )
+                }
+
+                SplicedColumnGroup(title = stringResource(R.string.network_book_badge_setting)) {
+                    DropdownListSettingItem(
+                        title = stringResource(R.string.network_book_badge_setting),
+                        selectedValue = settings.exploreFilterState.toString(),
+                        displayEntries =
+                        arrayOf(
+                            stringResource(R.string.filter_show_all),
+                            stringResource(R.string.filter_hide_in_shelf),
+                            stringResource(R.string.filter_hide_same_name_author),
+                            stringResource(R.string.filter_show_not_in_shelf_only),
+                        ),
+                        entryValues = arrayOf("0", "1", "2", "3"),
+                        onValueChange = { value ->
+                            onIntent(CoverConfigIntent.SetExploreFilterState(value.toInt()))
+                        },
+                    )
+                }
+
+                SplicedColumnGroup(title = stringResource(R.string.day)) {
+                    ClickableSettingItem(
+                        title = stringResource(R.string.text_color),
+                        option = "#${Integer.toHexString(settings.textColor).uppercase()}",
+                        onClick = {
+                            onIntent(
+                                CoverConfigIntent.ShowSheet(
+                                    CoverConfigSheet.Color(CoverColorField.Text),
+                                ),
                             )
-                        }"
-                    } ?: stringResource(R.string.cover_album_none),
-                    onClick = { onIntent(CoverConfigIntent.ShowSheet(CoverConfigSheet.Album)) }
-                )
-
-                SwitchSettingItem(
-                    title = stringResource(R.string.cover_show_shadow),
-                    checked = settings.showShadow,
-                    onCheckedChange = { value ->
-                        onIntent(CoverConfigIntent.SetShowShadow(value))
-                    }
-                )
-
-                SwitchSettingItem(
-                    title = stringResource(R.string.cover_show_stroke),
-                    checked = settings.showStroke,
-                    onCheckedChange = { value ->
-                        onIntent(CoverConfigIntent.SetShowStroke(value))
-                    }
-                )
-
-                SwitchSettingItem(
-                    title = stringResource(R.string.default_color),
-                    checked = settings.useDefaultColor,
-                    onCheckedChange = { value ->
-                        onIntent(CoverConfigIntent.SetUseDefaultColor(value))
-                    }
-                )
-            }
-
-            SplicedColumnGroup {
-                DropdownListSettingItem(
-                    title = stringResource(R.string.cover_info_orientation),
-                    selectedValue = settings.infoOrientation,
-                    displayEntries = arrayOf(
-                        stringResource(R.string.screen_portrait),
-                        stringResource(R.string.screen_landscape)
-                    ),
-                    entryValues = arrayOf("0", "1"),
-                    onValueChange = { value ->
-                        onIntent(CoverConfigIntent.SetInfoOrientation(value))
-                    }
-                )
-            }
-
-            SplicedColumnGroup(title = stringResource(R.string.network_book_badge_setting)) {
-                DropdownListSettingItem(
-                    title = stringResource(R.string.network_book_badge_setting),
-                    selectedValue = settings.exploreFilterState.toString(),
-                    displayEntries = arrayOf(
-                        stringResource(R.string.filter_show_all),
-                        stringResource(R.string.filter_hide_in_shelf),
-                        stringResource(R.string.filter_hide_same_name_author),
-                        stringResource(R.string.filter_show_not_in_shelf_only)
-                    ),
-                    entryValues = arrayOf("0", "1", "2", "3"),
-                    onValueChange = { value ->
-                        onIntent(CoverConfigIntent.SetExploreFilterState(value.toInt()))
-                    }
-                )
-            }
-
-            SplicedColumnGroup(title = stringResource(R.string.day)) {
-                ClickableSettingItem(
-                    title = stringResource(R.string.text_color),
-                    option = "#${Integer.toHexString(settings.textColor).uppercase()}",
-                    onClick = {
-                        onIntent(
-                            CoverConfigIntent.ShowSheet(
-                                CoverConfigSheet.Color(CoverColorField.Text)
+                        },
+                        trailingContent = {
+                            Box(
+                                modifier =
+                                Modifier
+                                    .size(28.dp)
+                                    .clip(CircleShape)
+                                    .background(Color(settings.textColor))
+                                    .border(1.dp, MaterialTheme.colorScheme.outlineVariant, CircleShape),
                             )
-                        )
-                    },
-                    trailingContent = {
-                        Box(
-                            modifier = Modifier
-                                .size(28.dp)
-                                .clip(CircleShape)
-                                .background(Color(settings.textColor))
-                                .border(1.dp, MaterialTheme.colorScheme.outlineVariant, CircleShape)
-                        )
-                    }
-                )
+                        },
+                    )
 
-                ClickableSettingItem(
-                    title = stringResource(R.string.text_shadow_color),
-                    option = "#${Integer.toHexString(settings.shadowColor).uppercase()}",
-                    onClick = {
-                        onIntent(
-                            CoverConfigIntent.ShowSheet(
-                                CoverConfigSheet.Color(CoverColorField.Shadow)
+                    ClickableSettingItem(
+                        title = stringResource(R.string.text_shadow_color),
+                        option = "#${Integer.toHexString(settings.shadowColor).uppercase()}",
+                        onClick = {
+                            onIntent(
+                                CoverConfigIntent.ShowSheet(
+                                    CoverConfigSheet.Color(CoverColorField.Shadow),
+                                ),
                             )
-                        )
-                    },
-                    trailingContent = {
-                        Box(
-                            modifier = Modifier
-                                .size(28.dp)
-                                .clip(CircleShape)
-                                .background(Color(settings.shadowColor))
-                                .border(1.dp, MaterialTheme.colorScheme.outlineVariant, CircleShape)
-                        )
-                    }
-                )
-
-            }
-
-            SplicedColumnGroup(title = stringResource(R.string.night)) {
-                ClickableSettingItem(
-                    title = stringResource(R.string.text_color),
-                    option = "#${Integer.toHexString(settings.textColorDark).uppercase()}",
-                    onClick = {
-                        onIntent(
-                            CoverConfigIntent.ShowSheet(
-                                CoverConfigSheet.Color(CoverColorField.TextDark)
+                        },
+                        trailingContent = {
+                            Box(
+                                modifier =
+                                Modifier
+                                    .size(28.dp)
+                                    .clip(CircleShape)
+                                    .background(Color(settings.shadowColor))
+                                    .border(1.dp, MaterialTheme.colorScheme.outlineVariant, CircleShape),
                             )
-                        )
-                    },
-                    trailingContent = {
-                        Box(
-                            modifier = Modifier
-                                .size(28.dp)
-                                .clip(CircleShape)
-                                .background(Color(settings.textColorDark))
-                                .border(1.dp, MaterialTheme.colorScheme.outlineVariant, CircleShape)
-                        )
-                    }
-                )
+                        },
+                    )
+                }
 
-                ClickableSettingItem(
-                    title = stringResource(R.string.text_shadow_color),
-                    option = "#${Integer.toHexString(settings.shadowColorDark).uppercase()}",
-                    onClick = {
-                        onIntent(
-                            CoverConfigIntent.ShowSheet(
-                                CoverConfigSheet.Color(CoverColorField.ShadowDark)
+                SplicedColumnGroup(title = stringResource(R.string.night)) {
+                    ClickableSettingItem(
+                        title = stringResource(R.string.text_color),
+                        option = "#${Integer.toHexString(settings.textColorDark).uppercase()}",
+                        onClick = {
+                            onIntent(
+                                CoverConfigIntent.ShowSheet(
+                                    CoverConfigSheet.Color(CoverColorField.TextDark),
+                                ),
                             )
-                        )
-                    },
-                    trailingContent = {
-                        Box(
-                            modifier = Modifier
-                                .size(28.dp)
-                                .clip(CircleShape)
-                                .background(Color(settings.shadowColorDark))
-                                .border(1.dp, MaterialTheme.colorScheme.outlineVariant, CircleShape)
-                        )
-                    }
-                )
+                        },
+                        trailingContent = {
+                            Box(
+                                modifier =
+                                Modifier
+                                    .size(28.dp)
+                                    .clip(CircleShape)
+                                    .background(Color(settings.textColorDark))
+                                    .border(1.dp, MaterialTheme.colorScheme.outlineVariant, CircleShape),
+                            )
+                        },
+                    )
 
+                    ClickableSettingItem(
+                        title = stringResource(R.string.text_shadow_color),
+                        option = "#${Integer.toHexString(settings.shadowColorDark).uppercase()}",
+                        onClick = {
+                            onIntent(
+                                CoverConfigIntent.ShowSheet(
+                                    CoverConfigSheet.Color(CoverColorField.ShadowDark),
+                                ),
+                            )
+                        },
+                        trailingContent = {
+                            Box(
+                                modifier =
+                                Modifier
+                                    .size(28.dp)
+                                    .clip(CircleShape)
+                                    .background(Color(settings.shadowColorDark))
+                                    .border(1.dp, MaterialTheme.colorScheme.outlineVariant, CircleShape),
+                            )
+                        },
+                    )
                 }
             }
         }
@@ -277,12 +284,13 @@ fun CoverConfigScreen(
     }
 
     (state.activeSheet as? CoverConfigSheet.Color)?.field?.let { field ->
-        val initialColor = when (field) {
-            CoverColorField.Text -> settings.textColor
-            CoverColorField.Shadow -> settings.shadowColor
-            CoverColorField.TextDark -> settings.textColorDark
-            CoverColorField.ShadowDark -> settings.shadowColorDark
-        }
+        val initialColor =
+            when (field) {
+                CoverColorField.Text -> settings.textColor
+                CoverColorField.Shadow -> settings.shadowColor
+                CoverColorField.TextDark -> settings.textColorDark
+                CoverColorField.ShadowDark -> settings.shadowColorDark
+            }
 
         ColorPickerSheet(
             show = true,
@@ -290,14 +298,21 @@ fun CoverConfigScreen(
             onDismissRequest = { onIntent(CoverConfigIntent.DismissSheet) },
             onColorSelected = { color ->
                 when (field) {
-                    CoverColorField.Text -> onIntent(CoverConfigIntent.SetTextColor(color))
-                    CoverColorField.Shadow -> onIntent(CoverConfigIntent.SetShadowColor(color))
-                    CoverColorField.TextDark -> onIntent(CoverConfigIntent.SetTextColorDark(color))
-                    CoverColorField.ShadowDark ->
+                    CoverColorField.Text -> {
+                        onIntent(CoverConfigIntent.SetTextColor(color))
+                    }
+                    CoverColorField.Shadow -> {
+                        onIntent(CoverConfigIntent.SetShadowColor(color))
+                    }
+                    CoverColorField.TextDark -> {
+                        onIntent(CoverConfigIntent.SetTextColorDark(color))
+                    }
+                    CoverColorField.ShadowDark -> {
                         onIntent(CoverConfigIntent.SetShadowColorDark(color))
+                    }
                 }
                 onIntent(CoverConfigIntent.DismissSheet)
-            }
+            },
         )
     }
 }

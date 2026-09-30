@@ -8,34 +8,34 @@ import org.junit.Assert.assertNull
 import org.junit.Test
 
 class ThemePackageSettingsMappingTest {
-
     @Test
     fun `主题包完整映射为同一批配置键值`() {
-        val values = ThemeExportData(
-            appTheme = "12",
-            themeMode = "2",
-            customMode = null,
-            bookInfoBackgroundBlur = "off",
-            bookInfoNetworkCoverBackground = null,
-            bookInfoDefaultCoverBackground = "off_for_default",
-            overrideBaseCardCornerRadius = true,
-            baseCardCornerRadius = 20.5f,
-            overrideBaseCardBorder = true,
-            baseCardBorderWidth = 1.5f,
-            baseCardBorderColor = 0x11223344,
-            baseCardBorderColorNight = 0x55667788,
-            disableSplicedColumnGroupCornerRadius = true,
-            bottomBarLensRadius = 31.5f,
-            mainNavigationOrder = "bookshelf,home,my",
-            bgImageLight = "/light.jpg",
-            largeContainerBackgroundImageLight = "/large-light.9.png",
-            itemBackgroundImageDark = "/item-dark.png",
-            enableContainerBackgroundImage = true,
-            appColumnBackgroundOpacity = 75,
-            glassCardBackgroundOpacity = 60,
-            coverDefaultImageDark = "/dark-cover.jpg",
-            assets = mapOf("bgImageLight" to "base64"),
-        ).toPreferenceValues()
+        val values =
+            ThemeExportData(
+                appTheme = "12",
+                themeMode = "2",
+                customMode = null,
+                bookInfoBackgroundBlur = "off",
+                bookInfoNetworkCoverBackground = null,
+                bookInfoDefaultCoverBackground = "off_for_default",
+                overrideBaseCardCornerRadius = true,
+                baseCardCornerRadius = 20.5f,
+                overrideBaseCardBorder = true,
+                baseCardBorderWidth = 1.5f,
+                baseCardBorderColor = 0x11223344,
+                baseCardBorderColorNight = 0x55667788,
+                disableSplicedColumnGroupCornerRadius = true,
+                bottomBarLensRadius = 31.5f,
+                mainNavigationOrder = "bookshelf,home,my",
+                bgImageLight = "/light.jpg",
+                largeContainerBackgroundImageLight = "/large-light.9.png",
+                itemBackgroundImageDark = "/item-dark.png",
+                enableContainerBackgroundImage = true,
+                appColumnBackgroundOpacity = 75,
+                glassCardBackgroundOpacity = 60,
+                coverDefaultImageDark = "/dark-cover.jpg",
+                assets = mapOf("bgImageLight" to "base64"),
+            ).toPreferenceValues()
 
         assertEquals("12", values[PreferKey.appTheme])
         assertEquals("2", values[PreferKey.themeMode])

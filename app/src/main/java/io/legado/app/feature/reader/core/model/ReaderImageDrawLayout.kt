@@ -14,13 +14,18 @@ data class ReaderImageDrawLayout(
             imageHeightPx: Int,
         ): ReaderImageDrawLayout? {
             if (
-                container.width <= 0f || container.height <= 0f ||
-                imageWidthPx <= 0 || imageHeightPx <= 0
-            ) return null
-            val scale = minOf(
-                container.width / imageWidthPx,
-                container.height / imageHeightPx,
-            )
+                container.width <= 0f ||
+                container.height <= 0f ||
+                imageWidthPx <= 0 ||
+                imageHeightPx <= 0
+            ) {
+                return null
+            }
+            val scale =
+                minOf(
+                    container.width / imageWidthPx,
+                    container.height / imageHeightPx,
+                )
             val width = imageWidthPx * scale
             val height = imageHeightPx * scale
             return ReaderImageDrawLayout(

@@ -18,24 +18,27 @@ data class HomeReadingBook(
     val chapterProgress: Float?,
 )
 
-enum class HomeDashboardSection(val storageValue: String) {
+enum class HomeDashboardSection(
+    val storageValue: String,
+) {
     RecentBook("recent_book"),
     TotalReadBooks("total_read_books"),
     TotalReadTime("total_read_time"),
     RecentBooks("recent_books"),
     DailyGoal("daily_goal"),
-    WebDavBackup("webdav_backup");
+    WebDavBackup("webdav_backup"),
+    ;
 
     companion object {
         fun fromStorage(value: String): Set<HomeDashboardSection> {
             if (value.isBlank()) return emptySet()
-            val sections = value
-                .split(',')
-                .map(String::trim)
-                .mapNotNull { stored ->
-                    entries.firstOrNull { it.storageValue == stored }
-                }
-                .toSet()
+            val sections =
+                value
+                    .split(',')
+                    .map(String::trim)
+                    .mapNotNull { stored ->
+                        entries.firstOrNull { it.storageValue == stored }
+                    }.toSet()
             return sections.ifEmpty { entries.toSet() }
         }
     }

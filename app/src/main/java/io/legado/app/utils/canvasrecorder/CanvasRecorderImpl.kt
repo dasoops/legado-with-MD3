@@ -8,14 +8,16 @@ import io.legado.app.utils.canvasrecorder.pools.CanvasPool
 import splitties.init.appCtx
 
 class CanvasRecorderImpl : BaseCanvasRecorder() {
-
     var bitmap: Bitmap? = null
     var canvas: Canvas? = null
 
     override val width get() = bitmap?.width ?: -1
     override val height get() = bitmap?.height ?: -1
 
-    private fun init(width: Int, height: Int) {
+    private fun init(
+        width: Int,
+        height: Int,
+    ) {
         if (width <= 0 || height <= 0) {
             return
         }
@@ -32,11 +34,15 @@ class CanvasRecorderImpl : BaseCanvasRecorder() {
         }
     }
 
-    private fun canReconfigure(width: Int, height: Int): Boolean {
-        return bitmap!!.allocationByteCount >= width * height * 4
-    }
+    private fun canReconfigure(
+        width: Int,
+        height: Int,
+    ): Boolean = bitmap!!.allocationByteCount >= width * height * 4
 
-    override fun beginRecording(width: Int, height: Int): Canvas {
+    override fun beginRecording(
+        width: Int,
+        height: Int,
+    ): Canvas {
         init(width, height)
         bitmap?.eraseColor(Color.TRANSPARENT)
         canvas = canvasPool.obtain().apply { setBitmap(bitmap) }
@@ -68,5 +74,4 @@ class CanvasRecorderImpl : BaseCanvasRecorder() {
         private val canvasPool = CanvasPool(2)
         private val bitmapPool = Glide.get(appCtx).bitmapPool
     }
-
 }

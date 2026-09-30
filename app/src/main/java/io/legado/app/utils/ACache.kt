@@ -1,4 +1,4 @@
-//Copyright (c) 2017. 章钦豪. All rights reserved.
+// Copyright (c) 2017. 章钦豪. All rights reserved.
 package io.legado.app.utils
 
 import android.graphics.Bitmap
@@ -7,15 +7,21 @@ import android.graphics.Canvas
 import android.graphics.PixelFormat
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
-import org.json.JSONArray
-import org.json.JSONObject
-import splitties.init.appCtx
-import java.io.*
-import java.util.*
+import java.io.ByteArrayInputStream
+import java.io.ByteArrayOutputStream
+import java.io.File
+import java.io.IOException
+import java.io.ObjectInputStream
+import java.io.ObjectOutputStream
+import java.io.Serializable
+import java.util.Collections
+import java.util.HashMap
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.atomic.AtomicLong
 import kotlin.math.min
-
+import org.json.JSONArray
+import org.json.JSONObject
+import splitties.init.appCtx
 
 /**
  * 本地缓存
@@ -35,7 +41,7 @@ class ACache private constructor(cacheDir: File, max_size: Long, max_count: Int)
             cacheName: String = "ACache",
             maxSize: Long = MAX_SIZE.toLong(),
             maxCount: Int = MAX_COUNT,
-            cacheDir: Boolean = true
+            cacheDir: Boolean = true,
         ): ACache {
             val f =
                 if (cacheDir) File(appCtx.cacheDir, cacheName) else File(appCtx.filesDir, cacheName)
@@ -46,7 +52,7 @@ class ACache private constructor(cacheDir: File, max_size: Long, max_count: Int)
         fun get(
             cacheDir: File,
             maxSize: Long = MAX_SIZE.toLong(),
-            maxCount: Int = MAX_COUNT
+            maxCount: Int = MAX_COUNT,
         ): ACache {
             synchronized(this) {
                 var manager = mInstanceMap[cacheDir.absoluteFile.toString() + myPid()]
@@ -58,9 +64,7 @@ class ACache private constructor(cacheDir: File, max_size: Long, max_count: Int)
             }
         }
 
-        private fun myPid(): String {
-            return "_" + android.os.Process.myPid()
-        }
+        private fun myPid(): String = "_" + android.os.Process.myPid()
     }
 
     private var mCache: ACacheManager? = null
@@ -74,7 +78,6 @@ class ACache private constructor(cacheDir: File, max_size: Long, max_count: Int)
         } catch (e: Exception) {
             e.printOnDebug()
         }
-
     }
 
     // =======================================
@@ -107,10 +110,14 @@ class ACache private constructor(cacheDir: File, max_size: Long, max_count: Int)
      * @param saveTime 保存的时间，单位：秒
      */
     fun put(key: String, value: String, saveTime: Int) {
-        if (saveTime == 0) put(key, value) else put(
-            key,
-            Utils.newStringWithDateInfo(saveTime, value)
-        )
+        if (saveTime == 0) {
+            put(key, value)
+        } else {
+            put(
+                key,
+                Utils.newStringWithDateInfo(saveTime, value),
+            )
+        }
     }
 
     /**
@@ -121,8 +128,9 @@ class ACache private constructor(cacheDir: File, max_size: Long, max_count: Int)
     fun getAsString(key: String): String? {
         mCache?.let { mCache ->
             val file = mCache[key]
-            if (!file.exists())
+            if (!file.exists()) {
                 return null
+            }
             var removeFile = false
             try {
                 val text = file.readText()
@@ -134,8 +142,9 @@ class ACache private constructor(cacheDir: File, max_size: Long, max_count: Int)
             } catch (e: IOException) {
                 e.printOnDebug()
             } finally {
-                if (removeFile)
+                if (removeFile) {
                     remove(key)
+                }
             }
         }
         return null
@@ -217,7 +226,6 @@ class ACache private constructor(cacheDir: File, max_size: Long, max_count: Int)
         } catch (e: Exception) {
             null
         }
-
     }
 
     // =======================================
@@ -246,8 +254,11 @@ class ACache private constructor(cacheDir: File, max_size: Long, max_count: Int)
      * @param saveTime 保存的时间，单位：秒
      */
     fun put(key: String, value: ByteArray, saveTime: Int) {
-        if (saveTime == 0) put(key, value)
-        else put(key, Utils.newByteArrayWithDateInfo(saveTime, value))
+        if (saveTime == 0) {
+            put(key, value)
+        } else {
+            put(key, Utils.newByteArrayWithDateInfo(saveTime, value))
+        }
     }
 
     /**
@@ -260,8 +271,9 @@ class ACache private constructor(cacheDir: File, max_size: Long, max_count: Int)
             var removeFile = false
             try {
                 val file = mCache[key]
-                if (!file.exists())
+                if (!file.exists()) {
                     return null
+                }
 
                 val byteArray = file.readBytes()
                 return if (!Utils.isDue(byteArray)) {
@@ -273,8 +285,9 @@ class ACache private constructor(cacheDir: File, max_size: Long, max_count: Int)
             } catch (e: Exception) {
                 e.printOnDebug()
             } finally {
-                if (removeFile)
+                if (removeFile) {
                     remove(key)
+                }
             }
         }
         return null
@@ -333,11 +346,9 @@ class ACache private constructor(cacheDir: File, max_size: Long, max_count: Int)
                 } catch (e: IOException) {
                     e.printOnDebug()
                 }
-
             }
         }
         return null
-
     }
 
     // =======================================
@@ -370,10 +381,10 @@ class ACache private constructor(cacheDir: File, max_size: Long, max_count: Int)
      *
      * @return bitmap 数据
      */
-    fun getAsBitmap(key: String): Bitmap? {
-        return if (getAsBinary(key) == null) {
-            null
-        } else Utils.bytes2Bitmap(getAsBinary(key)!!)
+    fun getAsBitmap(key: String): Bitmap? = if (getAsBinary(key) == null) {
+        null
+    } else {
+        Utils.bytes2Bitmap(getAsBinary(key)!!)
     }
 
     // =======================================
@@ -406,13 +417,13 @@ class ACache private constructor(cacheDir: File, max_size: Long, max_count: Int)
      *
      * @return Drawable 数据
      */
-    fun getAsDrawable(key: String): Drawable? {
-        return if (getAsBinary(key) == null) {
-            null
-        } else Utils.bitmap2Drawable(
+    fun getAsDrawable(key: String): Drawable? = if (getAsBinary(key) == null) {
+        null
+    } else {
+        Utils.bitmap2Drawable(
             Utils.bytes2Bitmap(
-                getAsBinary(key)!!
-            )
+                getAsBinary(key)!!,
+            ),
         )
     }
 
@@ -440,9 +451,7 @@ class ACache private constructor(cacheDir: File, max_size: Long, max_count: Int)
      *
      * @return 是否移除成功
      */
-    fun remove(key: String): Boolean {
-        return mCache?.remove(key) == true
-    }
+    fun remove(key: String): Boolean = mCache?.remove(key) == true
 
     /**
      * 清除所有数据
@@ -465,9 +474,7 @@ class ACache private constructor(cacheDir: File, max_size: Long, max_count: Int)
          *
          * @return true：到期了 false：还没有到期
          */
-        fun isDue(str: String): Boolean {
-            return isDue(str.toByteArray())
-        }
+        fun isDue(str: String): Boolean = isDue(str.toByteArray())
 
         /**
          * 判断缓存的byte数据是否到期
@@ -496,9 +503,7 @@ class ACache private constructor(cacheDir: File, max_size: Long, max_count: Int)
             return false
         }
 
-        fun newStringWithDateInfo(second: Int, strInfo: String): String {
-            return createDateInfo(second) + strInfo
-        }
+        fun newStringWithDateInfo(second: Int, strInfo: String): String = createDateInfo(second) + strInfo
 
         fun newByteArrayWithDateInfo(second: Int, data2: ByteArray): ByteArray {
             val data1 = createDateInfo(second).toByteArray()
@@ -517,28 +522,32 @@ class ACache private constructor(cacheDir: File, max_size: Long, max_count: Int)
             return strInfo
         }
 
-        fun clearDateInfo(data: ByteArray): ByteArray {
-            return if (hasDateInfo(data)) {
-                copyOfRange(
-                    data, indexOf(data, mSeparator) + 1,
-                    data.size
-                )
-            } else data
+        fun clearDateInfo(data: ByteArray): ByteArray = if (hasDateInfo(data)) {
+            copyOfRange(
+                data,
+                indexOf(data, mSeparator) + 1,
+                data.size,
+            )
+        } else {
+            data
         }
 
-        fun hasDateInfo(data: ByteArray?): Boolean {
-            return (data != null && data.size > 15 && data[13] == '-'.code.toByte()
-                    && indexOf(data, mSeparator) > 14)
-        }
+        fun hasDateInfo(data: ByteArray?): Boolean = (
+            data != null &&
+                data.size > 15 &&
+                data[13] == '-'.code.toByte() &&
+                indexOf(data, mSeparator) > 14
+            )
 
         fun getDateInfoFromDate(data: ByteArray): Array<String>? {
             if (hasDateInfo(data)) {
                 val saveDate = String(copyOfRange(data, 0, 13))
                 val deleteAfter = String(
                     copyOfRange(
-                        data, 14,
-                        indexOf(data, mSeparator)
-                    )
+                        data,
+                        14,
+                        indexOf(data, mSeparator),
+                    ),
                 )
                 return arrayOf(saveDate, deleteAfter)
             }
@@ -560,8 +569,11 @@ class ACache private constructor(cacheDir: File, max_size: Long, max_count: Int)
             require(newLength >= 0) { "$from > $to" }
             val copy = ByteArray(newLength)
             System.arraycopy(
-                original, from, copy, 0,
-                min(original.size - from, newLength)
+                original,
+                from,
+                copy,
+                0,
+                min(original.size - from, newLength),
             )
             return copy
         }
@@ -586,10 +598,10 @@ class ACache private constructor(cacheDir: File, max_size: Long, max_count: Int)
         /*
          * byte[] → Bitmap
          */
-        fun bytes2Bitmap(b: ByteArray): Bitmap? {
-            return if (b.isEmpty()) {
-                null
-            } else BitmapFactory.decodeByteArray(b, 0, b.size)
+        fun bytes2Bitmap(b: ByteArray): Bitmap? = if (b.isEmpty()) {
+            null
+        } else {
+            BitmapFactory.decodeByteArray(b, 0, b.size)
         }
 
         /*
@@ -599,12 +611,14 @@ class ACache private constructor(cacheDir: File, max_size: Long, max_count: Int)
             // 取 drawable 的长宽
             val w = drawable.intrinsicWidth
             val h = drawable.intrinsicHeight
+
             // 取 drawable 的颜色格式
             @Suppress("DEPRECATION")
-            val config = if (drawable.opacity != PixelFormat.OPAQUE)
+            val config = if (drawable.opacity != PixelFormat.OPAQUE) {
                 Bitmap.Config.ARGB_8888
-            else
+            } else {
                 Bitmap.Config.RGB_565
+            }
             // 建立对应 bitmap
             val bitmap = Bitmap.createBitmap(w, h, config)
             // 建立对应 bitmap 的画布
@@ -618,10 +632,10 @@ class ACache private constructor(cacheDir: File, max_size: Long, max_count: Int)
         /*
          * Bitmap → Drawable
          */
-        fun bitmap2Drawable(bm: Bitmap?): Drawable? {
-            return if (bm == null) {
-                null
-            } else BitmapDrawable(appCtx.resources, bm)
+        fun bitmap2Drawable(bm: Bitmap?): Drawable? = if (bm == null) {
+            null
+        } else {
+            BitmapDrawable(appCtx.resources, bm)
         }
     }
 
@@ -633,7 +647,7 @@ class ACache private constructor(cacheDir: File, max_size: Long, max_count: Int)
     open inner class ACacheManager(
         private var cacheDir: File,
         private val sizeLimit: Long,
-        private val countLimit: Int
+        private val countLimit: Int,
     ) {
         private val cacheSize: AtomicLong = AtomicLong()
         private val cacheCount: AtomicInteger = AtomicInteger()
@@ -649,7 +663,6 @@ class ACache private constructor(cacheDir: File, max_size: Long, max_count: Int)
          */
         private fun calculateCacheSizeAndCacheCount() {
             Thread {
-
                 try {
                     var size = 0
                     var count = 0
@@ -666,13 +679,10 @@ class ACache private constructor(cacheDir: File, max_size: Long, max_count: Int)
                 } catch (e: Exception) {
                     e.printOnDebug()
                 }
-
-
             }.start()
         }
 
         fun put(file: File) {
-
             try {
                 var curCacheCount = cacheCount.get()
                 while (curCacheCount + 1 > countLimit) {
@@ -697,7 +707,6 @@ class ACache private constructor(cacheDir: File, max_size: Long, max_count: Int)
             } catch (e: Exception) {
                 e.printOnDebug()
             }
-
         }
 
         operator fun get(key: String): File {
@@ -709,9 +718,7 @@ class ACache private constructor(cacheDir: File, max_size: Long, max_count: Int)
             return file
         }
 
-        fun newFile(key: String): File {
-            return File(cacheDir, key.hashCode().toString() + "")
-        }
+        fun newFile(key: String): File = File(cacheDir, key.hashCode().toString() + "")
 
         fun remove(key: String): Boolean {
             val image = get(key)
@@ -731,7 +738,6 @@ class ACache private constructor(cacheDir: File, max_size: Long, max_count: Int)
             } catch (e: Exception) {
                 e.printOnDebug()
             }
-
         }
 
         /**
@@ -772,12 +778,8 @@ class ACache private constructor(cacheDir: File, max_size: Long, max_count: Int)
                 e.printOnDebug()
                 return 0
             }
-
         }
 
-        private fun calculateSize(file: File): Long {
-            return file.length()
-        }
+        private fun calculateSize(file: File): Long = file.length()
     }
-
 }

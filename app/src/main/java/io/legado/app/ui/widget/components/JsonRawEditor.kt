@@ -32,11 +32,11 @@ fun JsonRawEditor(
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             AppText(
                 text = label,
-                style = LegadoTheme.typography.labelMediumEmphasized
+                style = LegadoTheme.typography.labelMediumEmphasized,
             )
             Row {
                 SmallPlainButton(
@@ -47,7 +47,7 @@ fun JsonRawEditor(
                         }
                     },
                     icon = Icons.Default.AutoFixHigh,
-                    contentDescription = stringResource(R.string.format_json)
+                    contentDescription = stringResource(R.string.format_json),
                 )
                 SmallPlainButton(
                     onClick = {
@@ -58,7 +58,7 @@ fun JsonRawEditor(
                         }
                     },
                     icon = Icons.Default.Compress,
-                    contentDescription = stringResource(R.string.minify_json)
+                    contentDescription = stringResource(R.string.minify_json),
                 )
             }
         }
@@ -66,11 +66,12 @@ fun JsonRawEditor(
         AppTextField(
             value = value,
             onValueChange = onValueChange,
-            modifier = Modifier
+            modifier =
+            Modifier
                 .fillMaxWidth()
                 .heightIn(min = 150.dp, max = 400.dp),
             backgroundColor = LegadoTheme.colorScheme.onSheetContent,
-            maxLines = 1000
+            maxLines = 1000,
         )
     }
 }

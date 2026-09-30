@@ -52,7 +52,8 @@ fun CoverAlbumSelectSheet(
         },
     ) {
         Column(
-            modifier = Modifier
+            modifier =
+            Modifier
                 .fillMaxWidth()
                 .verticalScroll(rememberScrollState())
                 .padding(vertical = 8.dp),
@@ -72,7 +73,8 @@ fun CoverAlbumSelectSheet(
             state.albums.forEach { album ->
                 CoverAlbumSelectionItem(
                     name = album.name,
-                    imagePath = album.lightImages.firstOrNull()?.path
+                    imagePath =
+                    album.lightImages.firstOrNull()?.path
                         ?: album.darkImages.firstOrNull()?.path,
                     lightImageCount = album.lightImages.size,
                     darkImageCount = album.darkImages.size,
@@ -100,21 +102,24 @@ private fun CoverAlbumSelectionItem(
         onClick = onClick,
         modifier = Modifier.fillMaxWidth(),
         cornerRadius = 16.dp,
-        containerColor = if (selected) {
+        containerColor =
+        if (selected) {
             LegadoTheme.colorScheme.secondaryContainer
         } else {
             LegadoTheme.colorScheme.surfaceContainerHigh
         },
     ) {
         Row(
-            modifier = Modifier
+            modifier =
+            Modifier
                 .fillMaxWidth()
                 .padding(12.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             Box(
-                modifier = Modifier
+                modifier =
+                Modifier
                     .size(width = 44.dp, height = 60.dp)
                     .clip(RoundedCornerShape(8.dp)),
                 contentAlignment = Alignment.Center,
@@ -142,7 +147,8 @@ private fun CoverAlbumSelectionItem(
                 )
                 if (lightImageCount != null && darkImageCount != null) {
                     AppText(
-                        text = stringResource(
+                        text =
+                        stringResource(
                             R.string.cover_album_day_night_count,
                             lightImageCount,
                             darkImageCount,

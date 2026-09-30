@@ -9,9 +9,8 @@ import androidx.fragment.app.Fragment
 import androidx.viewbinding.ViewBinding
 
 private class FragmentViewBindingProperty<F : Fragment, T : ViewBinding>(
-    viewBinder: (F) -> T
+    viewBinder: (F) -> T,
 ) : ViewBindingProperty<F, T>(viewBinder) {
-
     override fun getLifecycleOwner(thisRef: F) = thisRef.viewLifecycleOwner
 }
 
@@ -19,9 +18,7 @@ private class FragmentViewBindingProperty<F : Fragment, T : ViewBinding>(
  * Create new [ViewBinding] associated with the [Fragment]
  */
 @JvmName("viewBindingFragment")
-public fun <F : Fragment, T : ViewBinding> Fragment.viewBinding(viewBinder: (F) -> T): ViewBindingProperty<F, T> {
-    return FragmentViewBindingProperty(viewBinder)
-}
+public fun <F : Fragment, T : ViewBinding> Fragment.viewBinding(viewBinder: (F) -> T): ViewBindingProperty<F, T> = FragmentViewBindingProperty(viewBinder)
 
 /**
  * Create new [ViewBinding] associated with the [Fragment]
@@ -32,10 +29,8 @@ public fun <F : Fragment, T : ViewBinding> Fragment.viewBinding(viewBinder: (F) 
 @JvmName("viewBindingFragment")
 public inline fun <F : Fragment, T : ViewBinding> Fragment.viewBinding(
     crossinline vbFactory: (View) -> T,
-    crossinline viewProvider: (F) -> View = Fragment::requireView
-): ViewBindingProperty<F, T> {
-    return viewBinding { fragment: F -> vbFactory(viewProvider(fragment)) }
-}
+    crossinline viewProvider: (F) -> View = Fragment::requireView,
+): ViewBindingProperty<F, T> = viewBinding { fragment: F -> vbFactory(viewProvider(fragment)) }
 
 /**
  * Create new [ViewBinding] associated with the [Fragment]
@@ -46,9 +41,7 @@ public inline fun <F : Fragment, T : ViewBinding> Fragment.viewBinding(
 @JvmName("viewBindingFragment")
 public inline fun <T : ViewBinding> Fragment.viewBinding(
     crossinline vbFactory: (View) -> T,
-    @IdRes viewBindingRootId: Int
-): ViewBindingProperty<Fragment, T> {
-    return viewBinding(vbFactory) { fragment: Fragment ->
-        fragment.requireView().findViewById(viewBindingRootId)
-    }
+    @IdRes viewBindingRootId: Int,
+): ViewBindingProperty<Fragment, T> = viewBinding(vbFactory) { fragment: Fragment ->
+    fragment.requireView().findViewById(viewBindingRootId)
 }

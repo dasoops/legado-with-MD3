@@ -1,6 +1,5 @@
 package io.legado.app.ui.widget.components.text
 
-
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -42,14 +41,16 @@ fun AppText(
 
     val defaultTextColor = LegadoTheme.colorScheme.onSurface
 
-    val finalTextColor = color.takeOrElse {
-        baseStyle.color.takeOrElse { defaultTextColor }
-    }
+    val finalTextColor =
+        color.takeOrElse {
+            baseStyle.color.takeOrElse { defaultTextColor }
+        }
 
     BasicText(
         text = text,
         modifier = modifier,
-        style = baseStyle.merge(
+        style =
+        baseStyle.merge(
             color = finalTextColor,
             fontSize = fontSize,
             fontWeight = fontWeight,
@@ -64,7 +65,7 @@ fun AppText(
         overflow = overflow,
         softWrap = softWrap,
         maxLines = maxLines,
-        minLines = minLines
+        minLines = minLines,
     )
 }
 
@@ -96,14 +97,16 @@ fun AppText(
     val defaultTextColor = LegadoTheme.colorScheme.onSurface
 
     // 3. 颜色降级逻辑：传入的 color -> style 中的 color -> 主题默认色
-    val finalTextColor = color.takeOrElse {
-        baseStyle.color.takeOrElse { defaultTextColor }
-    }
+    val finalTextColor =
+        color.takeOrElse {
+            baseStyle.color.takeOrElse { defaultTextColor }
+        }
 
     BasicText(
         text = text,
         modifier = modifier,
-        style = baseStyle.merge(
+        style =
+        baseStyle.merge(
             color = finalTextColor,
             fontSize = fontSize,
             fontWeight = fontWeight,
@@ -118,6 +121,6 @@ fun AppText(
         overflow = overflow,
         softWrap = softWrap,
         maxLines = maxLines,
-        minLines = minLines
+        minLines = minLines,
     )
 }

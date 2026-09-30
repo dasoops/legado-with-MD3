@@ -11,7 +11,6 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface TxtTocRuleDao {
-
     @Query("select * from txtTocRules order by serialNumber")
     fun observeAll(): Flow<List<TxtTocRule>>
 

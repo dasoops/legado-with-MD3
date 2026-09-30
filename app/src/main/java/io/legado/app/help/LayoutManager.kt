@@ -8,7 +8,6 @@ import androidx.recyclerview.widget.StaggeredGridLayoutManager
 
 @Suppress("unused")
 object LayoutManager {
-
     interface LayoutManagerFactory {
         fun create(recyclerView: RecyclerView): RecyclerView.LayoutManager
     }
@@ -17,57 +16,38 @@ object LayoutManager {
     @Retention(AnnotationRetention.SOURCE)
     annotation class Orientation
 
-    fun linear(): LayoutManagerFactory {
-        return object : LayoutManagerFactory {
-            override fun create(recyclerView: RecyclerView): RecyclerView.LayoutManager {
-                return LinearLayoutManager(recyclerView.context)
-            }
-        }
+    fun linear(): LayoutManagerFactory = object : LayoutManagerFactory {
+        override fun create(recyclerView: RecyclerView): RecyclerView.LayoutManager = LinearLayoutManager(recyclerView.context)
     }
 
-
-    fun linear(@Orientation orientation: Int, reverseLayout: Boolean): LayoutManagerFactory {
-        return object : LayoutManagerFactory {
-            override fun create(recyclerView: RecyclerView): RecyclerView.LayoutManager {
-                return LinearLayoutManager(recyclerView.context, orientation, reverseLayout)
-            }
-        }
+    fun linear(
+        @Orientation orientation: Int,
+        reverseLayout: Boolean,
+    ): LayoutManagerFactory = object : LayoutManagerFactory {
+        override fun create(recyclerView: RecyclerView): RecyclerView.LayoutManager = LinearLayoutManager(recyclerView.context, orientation, reverseLayout)
     }
 
-
-    fun grid(spanCount: Int): LayoutManagerFactory {
-        return object : LayoutManagerFactory {
-            override fun create(recyclerView: RecyclerView): RecyclerView.LayoutManager {
-                return GridLayoutManager(recyclerView.context, spanCount)
-            }
-        }
+    fun grid(spanCount: Int): LayoutManagerFactory = object : LayoutManagerFactory {
+        override fun create(recyclerView: RecyclerView): RecyclerView.LayoutManager = GridLayoutManager(recyclerView.context, spanCount)
     }
-
 
     fun grid(
         spanCount: Int,
         @Orientation orientation: Int,
-        reverseLayout: Boolean
-    ): LayoutManagerFactory {
-        return object : LayoutManagerFactory {
-            override fun create(recyclerView: RecyclerView): RecyclerView.LayoutManager {
-                return GridLayoutManager(
-                    recyclerView.context,
-                    spanCount,
-                    orientation,
-                    reverseLayout
-                )
-            }
-        }
+        reverseLayout: Boolean,
+    ): LayoutManagerFactory = object : LayoutManagerFactory {
+        override fun create(recyclerView: RecyclerView): RecyclerView.LayoutManager = GridLayoutManager(
+            recyclerView.context,
+            spanCount,
+            orientation,
+            reverseLayout,
+        )
     }
 
-
-    fun staggeredGrid(spanCount: Int, @Orientation orientation: Int): LayoutManagerFactory {
-        return object : LayoutManagerFactory {
-            override fun create(recyclerView: RecyclerView): RecyclerView.LayoutManager {
-                return StaggeredGridLayoutManager(spanCount, orientation)
-            }
-        }
+    fun staggeredGrid(
+        spanCount: Int,
+        @Orientation orientation: Int,
+    ): LayoutManagerFactory = object : LayoutManagerFactory {
+        override fun create(recyclerView: RecyclerView): RecyclerView.LayoutManager = StaggeredGridLayoutManager(spanCount, orientation)
     }
-
 }

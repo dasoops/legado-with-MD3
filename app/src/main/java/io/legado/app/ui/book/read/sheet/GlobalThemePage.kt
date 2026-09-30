@@ -98,9 +98,10 @@ fun GlobalThemePage(
     val configList = styleConfig.styleItems
 
     Column(
-        modifier = modifier
+        modifier =
+        modifier
             .fillMaxWidth()
-            .verticalScroll(rememberScrollState())
+            .verticalScroll(rememberScrollState()),
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -118,11 +119,12 @@ fun GlobalThemePage(
             )
             NormalCard(
                 onClick = onOpenTypographyConfig,
-                modifier = Modifier
+                modifier =
+                Modifier
                     .height(56.dp)
                     .aspectRatio(1f),
                 containerColor = LegadoTheme.colorScheme.surfaceContainerLow,
-                cornerRadius = 12.dp
+                cornerRadius = 12.dp,
             ) {
                 Box(
                     contentAlignment = Alignment.Center,
@@ -142,19 +144,20 @@ fun GlobalThemePage(
         // Style section label + Day/Night
         NormalCard(
             containerColor = LegadoTheme.colorScheme.surfaceContainerLow,
-            cornerRadius = 12.dp
+            cornerRadius = 12.dp,
         ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(4.dp),
-                modifier = Modifier
+                modifier =
+                Modifier
                     .fillMaxWidth()
                     .padding(start = 12.dp, end = 12.dp, top = 12.dp),
             ) {
                 Column(modifier = Modifier.weight(1f)) {
                     AppText(
                         text = stringResource(R.string.text_bg_style),
-                        style = LegadoTheme.typography.titleSmallEmphasized
+                        style = LegadoTheme.typography.titleSmallEmphasized,
                     )
                     AppText(
                         text = stringResource(R.string.long_click_to_custom),
@@ -189,13 +192,15 @@ fun GlobalThemePage(
             // Style cards: [shareLayout] [cards...]
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier
+                modifier =
+                Modifier
                     .fillMaxWidth()
                     .padding(start = 12.dp, end = 12.dp, bottom = 12.dp),
             ) {
                 TooltipBox(
-                    positionProvider = TooltipDefaults.rememberTooltipPositionProvider(
-                        TooltipAnchorPosition.Above
+                    positionProvider =
+                    TooltipDefaults.rememberTooltipPositionProvider(
+                        TooltipAnchorPosition.Above,
                     ),
                     tooltip = {
                         ProvideAppDensity {
@@ -218,24 +223,27 @@ fun GlobalThemePage(
                             onIntent(ReadBookIntent.UpdateConfig(ConfigUpdate.ShareLayout(newShareLayout)))
                             onShareLayoutChange(newShareLayout)
                         },
-                        modifier = Modifier
+                        modifier =
+                        Modifier
                             .width(40.dp)
                             .height(56.dp),
                         cornerRadius = 8.dp,
-                        containerColor = if (shareLayout) {
+                        containerColor =
+                        if (shareLayout) {
                             LegadoTheme.colorScheme.secondaryContainer
                         } else {
                             LegadoTheme.colorScheme.surfaceContainerLow
                         },
-                        border = BorderStroke(
+                        border =
+                        BorderStroke(
                             1.dp,
-                            LegadoTheme.colorScheme.secondaryContainer.copy(alpha = 0.5f)
+                            LegadoTheme.colorScheme.secondaryContainer.copy(alpha = 0.5f),
                         ),
-                        contentColor = if (shareLayout) LegadoTheme.colorScheme.onSecondaryContainer else null
+                        contentColor = if (shareLayout) LegadoTheme.colorScheme.onSecondaryContainer else null,
                     ) {
                         Box(
                             modifier = Modifier.fillMaxSize(),
-                            contentAlignment = Alignment.Center
+                            contentAlignment = Alignment.Center,
                         ) {
                             Icon(
                                 Icons.Default.GridView,
@@ -264,7 +272,8 @@ fun GlobalThemePage(
                 LazyRow(
                     state = styleListState,
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    modifier = Modifier
+                    modifier =
+                    Modifier
                         .weight(1f)
                         .padding(start = 8.dp)
                         .fadingEdge(styleListState),
@@ -290,14 +299,15 @@ fun GlobalThemePage(
                             onClick = {
                                 onIntent(ReadBookIntent.AddReadStyleConfig)
                             },
-                            modifier = Modifier
+                            modifier =
+                            Modifier
                                 .width(40.dp)
                                 .height(56.dp),
                             containerColor = LegadoTheme.colorScheme.surfaceContainerLow,
                         ) {
                             Box(
                                 modifier = Modifier.fillMaxSize(),
-                                contentAlignment = Alignment.Center
+                                contentAlignment = Alignment.Center,
                             ) {
                                 Icon(
                                     Icons.Default.Add,
@@ -313,14 +323,15 @@ fun GlobalThemePage(
 
         Spacer(Modifier.height(8.dp))
 
-        val pageAnimOptions = listOf(
-            R.string.page_anim_cover,
-            R.string.page_anim_slide,
-            R.string.page_anim_simulation,
-            R.string.page_anim_scroll,
-            R.string.page_anim_fade,
-            R.string.page_anim_none,
-        )
+        val pageAnimOptions =
+            listOf(
+                R.string.page_anim_cover,
+                R.string.page_anim_slide,
+                R.string.page_anim_simulation,
+                R.string.page_anim_scroll,
+                R.string.page_anim_fade,
+                R.string.page_anim_none,
+            )
         var showPageAnimMenu by remember { mutableStateOf(false) }
         val pageAnimEntries = pageAnimOptions.map { stringResource(it) }.toTypedArray()
         val pageAnimEntryValues = pageAnimOptions.indices.map { it.toString() }.toTypedArray()
@@ -365,7 +376,8 @@ fun GlobalThemePage(
             }
             NormalCard(
                 onClick = onOpenPaddingConfig,
-                modifier = Modifier
+                modifier =
+                Modifier
                     .height(56.dp)
                     .aspectRatio(1f),
                 containerColor = LegadoTheme.colorScheme.surfaceContainerLow,
@@ -394,37 +406,42 @@ fun StyleCard(
     onLongClick: () -> Unit,
 ) {
     val mode = ReadStyleResolver.currentMode(isNightTheme)
-    val bgType = when (mode) {
-        ReadStyleResolver.ReadStyleMode.Day -> config.bgType
-        ReadStyleResolver.ReadStyleMode.Night -> config.bgTypeNight
-        ReadStyleResolver.ReadStyleMode.EInk -> config.bgTypeEInk
-    }
-    val bgValue = when (mode) {
-        ReadStyleResolver.ReadStyleMode.Day -> config.bgValue
-        ReadStyleResolver.ReadStyleMode.Night -> config.bgValueNight
-        ReadStyleResolver.ReadStyleMode.EInk -> config.bgValueEInk
-    }
-    val bgColor = if (bgType == 0) {
-        try {
-            Color(bgValue.toColorInt())
-        } catch (_: Exception) {
+    val bgType =
+        when (mode) {
+            ReadStyleResolver.ReadStyleMode.Day -> config.bgType
+            ReadStyleResolver.ReadStyleMode.Night -> config.bgTypeNight
+            ReadStyleResolver.ReadStyleMode.EInk -> config.bgTypeEInk
+        }
+    val bgValue =
+        when (mode) {
+            ReadStyleResolver.ReadStyleMode.Day -> config.bgValue
+            ReadStyleResolver.ReadStyleMode.Night -> config.bgValueNight
+            ReadStyleResolver.ReadStyleMode.EInk -> config.bgValueEInk
+        }
+    val bgColor =
+        if (bgType == 0) {
+            try {
+                Color(bgValue.toColorInt())
+            } catch (_: Exception) {
+                LegadoTheme.colorScheme.surface
+            }
+        } else {
             LegadoTheme.colorScheme.surface
         }
-    } else {
-        LegadoTheme.colorScheme.surface
-    }
-    val textColor = Color(
-        when (mode) {
-            ReadStyleResolver.ReadStyleMode.Day -> config.textColor
-            ReadStyleResolver.ReadStyleMode.Night -> config.textColorNight
-            ReadStyleResolver.ReadStyleMode.EInk -> config.textColorEInk
-        }
-    )
+    val textColor =
+        Color(
+            when (mode) {
+                ReadStyleResolver.ReadStyleMode.Day -> config.textColor
+                ReadStyleResolver.ReadStyleMode.Night -> config.textColorNight
+                ReadStyleResolver.ReadStyleMode.EInk -> config.textColorEInk
+            },
+        )
     val name = config.name.ifBlank { stringResource(R.string.text_bg_style) }
     val bgPath = ReadStyleResolver.backgroundPath(bgType, bgValue)
 
     NormalCard(
-        modifier = Modifier
+        modifier =
+        Modifier
             .width(44.dp)
             .height(56.dp),
         cornerRadius = 8.dp,
@@ -447,18 +464,20 @@ fun StyleCard(
                 color = textColor,
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis,
-                modifier = Modifier
+                modifier =
+                Modifier
                     .align(Alignment.Center)
                     .padding(horizontal = 8.dp),
             )
             if (isSelected) {
                 Box(
-                    modifier = Modifier
+                    modifier =
+                    Modifier
                         .align(Alignment.BottomCenter)
                         .fillMaxWidth()
                         .height(12.dp)
                         .background(
-                            color = LegadoTheme.colorScheme.surfaceContainerHigh
+                            color = LegadoTheme.colorScheme.surfaceContainerHigh,
                         ),
                     contentAlignment = Alignment.Center,
                 ) {

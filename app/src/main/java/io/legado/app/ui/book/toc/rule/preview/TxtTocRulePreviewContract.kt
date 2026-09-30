@@ -19,12 +19,17 @@ data class TxtTocRulePreviewUiState(
     val showSearch: Boolean = false,
 ) {
     val filteredRules: ImmutableList<TocRulePreviewItem>
-        get() = if (searchQuery.isBlank()) rules
-        else rules.filter {
-            it.rule.name.contains(searchQuery, ignoreCase = true) ||
-                    it.rule.example?.contains(searchQuery, ignoreCase = true) == true ||
-                    it.rule.chapterRule.contains(searchQuery, ignoreCase = true)
-        }.toImmutableList()
+        get() =
+            if (searchQuery.isBlank()) {
+                rules
+            } else {
+                rules
+                    .filter {
+                        it.rule.name.contains(searchQuery, ignoreCase = true) ||
+                            it.rule.example?.contains(searchQuery, ignoreCase = true) == true ||
+                            it.rule.chapterRule.contains(searchQuery, ignoreCase = true)
+                    }.toImmutableList()
+            }
 }
 
 @Stable
@@ -36,25 +41,53 @@ data class TocRulePreviewItem(
 )
 
 sealed interface TxtTocRulePreviewSheet {
-    data class ChapterList(val item: TocRulePreviewItem) : TxtTocRulePreviewSheet
+    data class ChapterList(
+        val item: TocRulePreviewItem,
+    ) : TxtTocRulePreviewSheet
 }
 
 sealed interface TxtTocRulePreviewIntent {
     data object DismissSheet : TxtTocRulePreviewIntent
-    data class ShowChapterList(val item: TocRulePreviewItem) : TxtTocRulePreviewIntent
-    data class SelectRule(val rule: String) : TxtTocRulePreviewIntent
+
+    data class ShowChapterList(
+        val item: TocRulePreviewItem,
+    ) : TxtTocRulePreviewIntent
+
+    data class SelectRule(
+        val rule: String,
+    ) : TxtTocRulePreviewIntent
+
     data object ToggleLayout : TxtTocRulePreviewIntent
+
     data object OpenManagePage : TxtTocRulePreviewIntent
-    data class EditRule(val rule: TxtTocRule) : TxtTocRulePreviewIntent
+
+    data class EditRule(
+        val rule: TxtTocRule,
+    ) : TxtTocRulePreviewIntent
+
     data object DismissEditDialog : TxtTocRulePreviewIntent
-    data class SaveRule(val rule: TxtTocRule) : TxtTocRulePreviewIntent
+
+    data class SaveRule(
+        val rule: TxtTocRule,
+    ) : TxtTocRulePreviewIntent
+
     data object ToggleSearch : TxtTocRulePreviewIntent
-    data class UpdateSearchQuery(val query: String) : TxtTocRulePreviewIntent
+
+    data class UpdateSearchQuery(
+        val query: String,
+    ) : TxtTocRulePreviewIntent
+
     data object ApplyRule : TxtTocRulePreviewIntent
 }
 
 sealed interface TxtTocRulePreviewEffect {
-    data class ShowToast(val message: String) : TxtTocRulePreviewEffect
+    data class ShowToast(
+        val message: String,
+    ) : TxtTocRulePreviewEffect
+
     data object OpenManagePage : TxtTocRulePreviewEffect
-    data class ApplyRule(val rule: String) : TxtTocRulePreviewEffect
+
+    data class ApplyRule(
+        val rule: String,
+    ) : TxtTocRulePreviewEffect
 }

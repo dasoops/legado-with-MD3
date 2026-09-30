@@ -14,9 +14,9 @@ import android.view.View
 import android.window.OnBackInvokedDispatcher
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.os.LocaleListCompat
 import androidx.core.graphics.drawable.toDrawable
 import androidx.core.graphics.scale
+import androidx.core.os.LocaleListCompat
 import androidx.core.view.WindowCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
@@ -24,12 +24,11 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.viewbinding.ViewBinding
 import com.google.android.material.color.DynamicColors
 import com.google.android.material.color.DynamicColorsOptions
-import io.legado.app.R
 import io.legado.app.BuildConfig
+import io.legado.app.R
 import io.legado.app.constant.AppLog
 import io.legado.app.constant.PreferKey
 import io.legado.app.constant.Theme
-import io.legado.app.help.config.ThemeConfigStore
 import io.legado.app.domain.gateway.AppLocaleGateway
 import io.legado.app.domain.gateway.AppShellSettingsGateway
 import io.legado.app.domain.gateway.AppUiConfigurationGateway
@@ -37,15 +36,16 @@ import io.legado.app.domain.gateway.ThemeSettingsGateway
 import io.legado.app.domain.model.settings.AppUiConfiguration
 import io.legado.app.domain.model.settings.AppUiConfigurationDiff
 import io.legado.app.domain.model.settings.diffFrom
+import io.legado.app.help.config.ThemeConfigStore
 import io.legado.app.lib.theme.primaryColor
+import io.legado.app.utils.LogUtils
 import io.legado.app.utils.applyOpenTint
 import io.legado.app.utils.applyTint
 import io.legado.app.utils.disableAutoFill
 import io.legado.app.utils.fullScreen
-import io.legado.app.utils.isNightMode
 import io.legado.app.utils.getPrefString
 import io.legado.app.utils.hideSoftInput
-import io.legado.app.utils.LogUtils
+import io.legado.app.utils.isNightMode
 import io.legado.app.utils.setStatusBarColorAuto
 import io.legado.app.utils.sysConfiguration
 import io.legado.app.utils.themeColor
@@ -55,14 +55,12 @@ import java.io.File
 import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
 
-
 abstract class BaseActivity<VB : ViewBinding>(
     val fullScreen: Boolean = true,
     private val toolBarTheme: Theme = Theme.Auto,
     private val transparent: Boolean = false,
-    private val imageBg: Boolean = true
+    private val imageBg: Boolean = true,
 ) : AppCompatActivity() {
-
     protected open val legacyUiConfigurationPolicy =
         LegacyUiConfigurationPolicy.ControlledRecreate
 
@@ -88,19 +86,17 @@ abstract class BaseActivity<VB : ViewBinding>(
             }
         }
 
-
     override fun onCreateView(
         parent: View?,
         name: String,
         context: Context,
-        attrs: AttributeSet
+        attrs: AttributeSet,
     ): View? {
 //        if (AppConst.menuViewNames.contains(name) && parent?.parent is FrameLayout) {
 //            (parent.parent as View).setBackgroundColor(backgroundColor)
 //        }
         return super.onCreateView(parent, name, context, attrs)
     }
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
         initTheme()
@@ -110,12 +106,12 @@ abstract class BaseActivity<VB : ViewBinding>(
             val enable = !shellGateway.currentSettings.predictiveBackEnabled
             if (enable) {
                 onBackInvokedDispatcher.registerOnBackInvokedCallback(
-                    OnBackInvokedDispatcher.PRIORITY_DEFAULT
+                    OnBackInvokedDispatcher.PRIORITY_DEFAULT,
                 ) {
                     onBackPressedDispatcher.onBackPressed()
                 }
             } else {
-                //不注册才是启用
+                // 不注册才是启用
             }
         }
 
@@ -123,27 +119,30 @@ abstract class BaseActivity<VB : ViewBinding>(
         lastPlatformConfiguration = Configuration(resources.configuration)
         lastUiConfiguration = appUiConfigurationGateway.currentConfiguration
         WindowCompat.setDecorFitsSystemWindows(window, false)
-        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.S)
+        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.S) {
             enableEdgeToEdge()
-        else{
+        } else {
             setupSystemBar()
         }
-        //setupSystemBar()
+        // setupSystemBar()
         setContentView(binding.root)
         upBackgroundImage()
 
         observeLiveBus()
         observeAppUiConfiguration()
         traceConfiguration("onCreate")
-        //onActivityCreated(savedInstanceState)
+        // onActivityCreated(savedInstanceState)
     }
 
-    override fun onMultiWindowModeChanged(isInMultiWindowMode: Boolean, newConfig: Configuration) {
+    override fun onMultiWindowModeChanged(
+        isInMultiWindowMode: Boolean,
+        newConfig: Configuration,
+    ) {
         super.onMultiWindowModeChanged(isInMultiWindowMode, newConfig)
 
 //        findViewById<TitleBar>(R.id.title_bar)
 //            ?.onMultiWindowModeChanged(isInMultiWindowMode, fullScreen)
-        //setupSystemBar()
+        // setupSystemBar()
     }
 
     open fun setupSystemBar() {
@@ -153,13 +152,14 @@ abstract class BaseActivity<VB : ViewBinding>(
         setStatusBarColorAuto(
             themeColor(com.google.android.material.R.attr.colorSurface),
             true,
-            fullScreen
+            fullScreen,
         )
-        val isDarkTheme = when (shellGateway.currentSettings.themeMode) {
-            "1" -> false
-            "2" -> true
-            else -> sysConfiguration.isNightMode
-        }
+        val isDarkTheme =
+            when (shellGateway.currentSettings.themeMode) {
+                "1" -> false
+                "2" -> true
+                else -> sysConfiguration.isNightMode
+            }
         WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightStatusBars = !isDarkTheme
     }
 
@@ -172,14 +172,16 @@ abstract class BaseActivity<VB : ViewBinding>(
         AppContextWrapper.applyFont(this)
         appLocaleGateway.synchronizeFromPlatform()
 
-        val platformDiff = AppUiConfigurationDiff(
-            localeChanged = previous != null && previous.locales != newConfig.locales,
-            themeChanged = hasPlatformNightModeChanged(
-                themeMode = appUiConfigurationGateway.currentConfiguration.appShell.themeMode,
-                previousUiMode = previous?.uiMode,
-                newUiMode = newConfig.uiMode,
-            ),
-        )
+        val platformDiff =
+            AppUiConfigurationDiff(
+                localeChanged = previous != null && previous.locales != newConfig.locales,
+                themeChanged =
+                hasPlatformNightModeChanged(
+                    themeMode = appUiConfigurationGateway.currentConfiguration.appShell.themeMode,
+                    previousUiMode = previous?.uiMode,
+                    newUiMode = newConfig.uiMode,
+                ),
+            )
         if (platformDiff.hasChanges) {
             handleAppUiConfiguration(
                 appUiConfigurationGateway.currentConfiguration,
@@ -204,15 +206,16 @@ abstract class BaseActivity<VB : ViewBinding>(
         super.onDestroy()
     }
 
-
-
     final override fun onCreateOptionsMenu(menu: Menu): Boolean {
         val bool = onCompatCreateOptionsMenu(menu)
         menu.applyTint(this, toolBarTheme)
         return bool
     }
 
-    override fun onMenuOpened(featureId: Int, menu: Menu): Boolean {
+    override fun onMenuOpened(
+        featureId: Int,
+        menu: Menu,
+    ): Boolean {
         menu.applyOpenTint(this)
         return super.onMenuOpened(featureId, menu)
     }
@@ -234,17 +237,39 @@ abstract class BaseActivity<VB : ViewBinding>(
             "0" -> {
                 DynamicColors.applyToActivityIfAvailable(this)
             }
-            "1" -> setTheme(R.style.Theme_Base_GR)
-            "2" -> setTheme(R.style.Theme_Base_Lemon)
-            "3" -> setTheme(R.style.Theme_Base_WH)
-            "4" -> setTheme(R.style.Theme_Base_Elink)
-            "5" -> setTheme(R.style.Theme_Base_Sora)
-            "6" -> setTheme(R.style.Theme_Base_August)
-            "7" -> setTheme(R.style.Theme_Base_Carlotta)
-            "8" -> setTheme(R.style.Theme_Base_Koharu)
-            "9" -> setTheme(R.style.Theme_Base_Yuuka)
-            "10" -> setTheme(R.style.Theme_Base_Phoebe)
-            "11" -> setTheme(R.style.Theme_Base_Mujika)
+            "1" -> {
+                setTheme(R.style.Theme_Base_GR)
+            }
+            "2" -> {
+                setTheme(R.style.Theme_Base_Lemon)
+            }
+            "3" -> {
+                setTheme(R.style.Theme_Base_WH)
+            }
+            "4" -> {
+                setTheme(R.style.Theme_Base_Elink)
+            }
+            "5" -> {
+                setTheme(R.style.Theme_Base_Sora)
+            }
+            "6" -> {
+                setTheme(R.style.Theme_Base_August)
+            }
+            "7" -> {
+                setTheme(R.style.Theme_Base_Carlotta)
+            }
+            "8" -> {
+                setTheme(R.style.Theme_Base_Koharu)
+            }
+            "9" -> {
+                setTheme(R.style.Theme_Base_Yuuka)
+            }
+            "10" -> {
+                setTheme(R.style.Theme_Base_Phoebe)
+            }
+            "11" -> {
+                setTheme(R.style.Theme_Base_Mujika)
+            }
             "12" -> {
                 val colorImagePath = getPrefString(PreferKey.colorImage)
                 var colorImageApplied = false
@@ -258,9 +283,11 @@ abstract class BaseActivity<VB : ViewBinding>(
                             val targetHeight = if (colorAccuracy) (bitmap.height / 4).coerceAtMost(256) else 16
                             val scaledBitmap = bitmap.scale(targetWidth, targetHeight, false)
 
-                            val options = DynamicColorsOptions.Builder()
-                                .setContentBasedSource(scaledBitmap)
-                                .build()
+                            val options =
+                                DynamicColorsOptions
+                                    .Builder()
+                                    .setContentBasedSource(scaledBitmap)
+                                    .build()
 
                             DynamicColors.applyToActivityIfAvailable(this, options)
                             bitmap.recycle()
@@ -273,22 +300,26 @@ abstract class BaseActivity<VB : ViewBinding>(
                     // 否则该 Activity 完全拿不到动态配色，与 Compose 界面不一致
                     DynamicColors.applyToActivityIfAvailable(
                         this,
-                        DynamicColorsOptions.Builder()
+                        DynamicColorsOptions
+                            .Builder()
                             .setContentBasedSource(application.primaryColor)
-                            .build()
+                            .build(),
                     )
                 }
 
                 // 必须在动态取色之后应用，否则会被动态配色的 surface/background 覆盖
-                if (themeGateway.currentSettings.customMode == "accent")
+                if (themeGateway.currentSettings.customMode == "accent") {
                     setTheme(R.style.ThemeOverlay_WhiteBackground)
+                }
             }
-
-            "13" -> setTheme(R.style.AppTheme_Transparent)
+            "13" -> {
+                setTheme(R.style.AppTheme_Transparent)
+            }
         }
 
-        if (themeGateway.currentSettings.isPureBlack)
+        if (themeGateway.currentSettings.isPureBlack) {
             setTheme(R.style.ThemeOverlay_PureBlack)
+        }
     }
 
     open fun upBackgroundImage() {
@@ -300,9 +331,10 @@ abstract class BaseActivity<VB : ViewBinding>(
                     window.decorView.background = background.toDrawable(resources)
                 } else if (hasWindowBackgroundImage) {
                     hasWindowBackgroundImage = false
-                    window.decorView.background = themeColor(
-                        com.google.android.material.R.attr.colorSurface
-                    ).toDrawable()
+                    window.decorView.background =
+                        themeColor(
+                            com.google.android.material.R.attr.colorSurface,
+                        ).toDrawable()
                 }
             } catch (e: OutOfMemoryError) {
                 toastOnUi("背景图片太大,内存溢出")
@@ -368,8 +400,12 @@ abstract class BaseActivity<VB : ViewBinding>(
                     requestControlledRecreate()
                 }
             }
-            LegacyUiConfigurationPolicy.ControlledRecreate -> requestControlledRecreate()
-            LegacyUiConfigurationPolicy.ApplyOnNextOpen -> Unit
+            LegacyUiConfigurationPolicy.ControlledRecreate -> {
+                requestControlledRecreate()
+            }
+            LegacyUiConfigurationPolicy.ApplyOnNextOpen -> {
+                Unit
+            }
         }
     }
 
@@ -384,7 +420,9 @@ abstract class BaseActivity<VB : ViewBinding>(
         recreatePosted = true
         window.decorView.post {
             recreatePosted = false
-            if (pendingControlledRecreate && !isFinishing && !isDestroyed &&
+            if (pendingControlledRecreate &&
+                !isFinishing &&
+                !isDestroyed &&
                 lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)
             ) {
                 pendingControlledRecreate = false
@@ -402,17 +440,15 @@ abstract class BaseActivity<VB : ViewBinding>(
         LogUtils.d(
             "UiConfiguration",
             "${javaClass.simpleName}@${System.identityHashCode(this)} $event" +
-                (diff?.let { " diff=$it" } ?: "")
+                (diff?.let { " diff=$it" } ?: ""),
         )
     }
 
-    override fun dispatchTouchEvent(ev: MotionEvent): Boolean {
-        return try {
-            super.dispatchTouchEvent(ev)
-        } catch (e: IllegalArgumentException) {
-            e.printStackTrace()
-            false
-        }
+    override fun dispatchTouchEvent(ev: MotionEvent): Boolean = try {
+        super.dispatchTouchEvent(ev)
+    } catch (e: IllegalArgumentException) {
+        e.printStackTrace()
+        false
     }
 
     override fun finish() {

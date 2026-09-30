@@ -32,19 +32,19 @@ class ReaderAutoPagePolicyTest {
             ReaderAutoPagePolicy.shouldPreserveRemainingTime(
                 menuPaused = true,
                 selectionPaused = false,
-            )
+            ),
         )
         assertTrue(
             ReaderAutoPagePolicy.shouldPreserveRemainingTime(
                 menuPaused = false,
                 selectionPaused = true,
-            )
+            ),
         )
         assertFalse(
             ReaderAutoPagePolicy.shouldPreserveRemainingTime(
                 menuPaused = false,
                 selectionPaused = false,
-            )
+            ),
         )
     }
 

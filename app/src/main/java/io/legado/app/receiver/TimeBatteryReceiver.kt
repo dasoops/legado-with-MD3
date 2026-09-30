@@ -8,15 +8,17 @@ import android.os.BatteryManager
 import io.legado.app.constant.EventBus
 import io.legado.app.utils.postEvent
 
-
 class TimeBatteryReceiver : BroadcastReceiver() {
+    val filter =
+        IntentFilter().apply {
+            addAction(Intent.ACTION_TIME_TICK)
+            addAction(Intent.ACTION_BATTERY_CHANGED)
+        }
 
-    val filter = IntentFilter().apply {
-        addAction(Intent.ACTION_TIME_TICK)
-        addAction(Intent.ACTION_BATTERY_CHANGED)
-    }
-
-    override fun onReceive(context: Context, intent: Intent) {
+    override fun onReceive(
+        context: Context,
+        intent: Intent,
+    ) {
         when (intent.action) {
             Intent.ACTION_TIME_TICK -> {
                 postEvent(EventBus.TIME_CHANGED, "")
@@ -27,5 +29,4 @@ class TimeBatteryReceiver : BroadcastReceiver() {
             }
         }
     }
-
 }

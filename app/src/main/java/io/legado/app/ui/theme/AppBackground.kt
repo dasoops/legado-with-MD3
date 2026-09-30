@@ -14,32 +14,34 @@ import org.koin.compose.koinInject
 @Composable
 fun AppBackground(
     darkTheme: Boolean,
-    content: @Composable () -> Unit
+    content: @Composable () -> Unit,
 ) {
     val themeSettings = LocalAppUiConfiguration.current.theme
     val hasImageBg = themeSettings.hasBackgroundImage(darkTheme)
-    val bgImagePath = if (darkTheme) {
-        themeSettings.backgroundImageDark
-    } else {
-        themeSettings.backgroundImageLight
-    }
-    val blur = if (darkTheme) {
-        themeSettings.backgroundImageDarkBlurring
-    } else {
-        themeSettings.backgroundImageBlurring
-    }
+    val bgImagePath =
+        if (darkTheme) {
+            themeSettings.backgroundImageDark
+        } else {
+            themeSettings.backgroundImageLight
+        }
+    val blur =
+        if (darkTheme) {
+            themeSettings.backgroundImageDarkBlurring
+        } else {
+            themeSettings.backgroundImageBlurring
+        }
 
     Box(modifier = Modifier.fillMaxSize()) {
-
         if (hasImageBg && !bgImagePath.isNullOrBlank()) {
             AsyncImage(
                 model = bgImagePath,
                 contentDescription = null,
                 imageLoader = koinInject(),
-                modifier = Modifier
+                modifier =
+                Modifier
                     .fillMaxSize()
                     .blur(blur.dp),
-                contentScale = ContentScale.Crop
+                contentScale = ContentScale.Crop,
             )
         }
 

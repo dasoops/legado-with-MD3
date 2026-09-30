@@ -31,8 +31,8 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.outlined.FormatListBulleted
 import androidx.compose.material.icons.automirrored.filled.OpenInNew
+import androidx.compose.material.icons.automirrored.outlined.FormatListBulleted
 import androidx.compose.material.icons.filled.Book
 import androidx.compose.material.icons.filled.BookmarkAdd
 import androidx.compose.material.icons.filled.Edit
@@ -78,9 +78,10 @@ import androidx.compose.ui.unit.dp
 import coil3.ImageLoader
 import coil3.compose.AsyncImage
 import coil3.size.Size
-import io.legado.app.feature.booktags.TagSelectSheet
 import io.legado.app.R
+import io.legado.app.feature.booktags.TagSelectSheet
 import io.legado.app.help.coil.CoverExtras
+import io.legado.app.model.BookCover as BookCoverModel
 import io.legado.app.ui.theme.LegadoTheme
 import io.legado.app.ui.theme.LocalHazeState
 import io.legado.app.ui.theme.LocalLegadoThemeColors
@@ -122,11 +123,10 @@ import io.legado.app.ui.widget.components.topbar.TopBarNavigationButton
 import io.legado.app.ui.widget.components.topbar.miuixTopBarActionsEndPadding
 import io.legado.app.ui.widget.components.topbar.miuixTopBarSlotPadding
 import io.legado.app.utils.HtmlFormatter
-import kotlinx.coroutines.delay
 import kotlinx.collections.immutable.ImmutableList
+import kotlinx.coroutines.delay
 import org.koin.compose.koinInject
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
-import io.legado.app.model.BookCover as BookCoverModel
 import top.yukonga.miuix.kmp.basic.TopAppBar as MiuixTopAppBar
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -142,11 +142,12 @@ fun BookInfoScreen(
 ) {
     val waitForSharedTransition = sharedCoverKey != null && animatedVisibilityScope != null
     val transition = animatedVisibilityScope?.transition
-    val transitionSettled = transition?.let {
-        it.currentState == EnterExitState.Visible &&
+    val transitionSettled =
+        transition?.let {
+            it.currentState == EnterExitState.Visible &&
                 it.targetState == EnterExitState.Visible &&
                 !it.isRunning
-    } == true
+        } == true
     val sharedTransitionFinished = !waitForSharedTransition || transitionSettled
     var canApplyCoverTheme by remember(
         sharedCoverKey,
@@ -168,26 +169,31 @@ fun BookInfoScreen(
     ) {
         mutableStateOf(initiallyUsesDefaultCover)
     }
-    val backdropStyle = state.book?.let {
-        resolveBookInfoBackdropStyle(
+    val backdropStyle =
+        state.book?.let {
+            resolveBookInfoBackdropStyle(
+                usesDefaultCover = usesDefaultCover,
+                defaultCoverBackground = state.bookInfoDefaultCoverBackground,
+                networkCoverBackground = state.bookInfoNetworkCoverBackground,
+            )
+        }
+    val bookColorTheme =
+        rememberBookInfoColorTheme(
+            book = state.book,
+            enabled = backdropStyle?.showCover == true,
             usesDefaultCover = usesDefaultCover,
-            defaultCoverBackground = state.bookInfoDefaultCoverBackground,
-            networkCoverBackground = state.bookInfoNetworkCoverBackground,
+            followCoverColor = state.bookInfoFollowCoverColor,
+            defaultCover = state.defaultCover,
+            defaultCoverDark = state.defaultCoverDark,
+            loadCoverOnlyOnWifi = state.loadCoverOnlyOnWifi,
         )
-    }
-    val bookColorTheme = rememberBookInfoColorTheme(
-        book = state.book,
-        enabled = backdropStyle?.showCover == true,
-        usesDefaultCover = usesDefaultCover,
-        followCoverColor = state.bookInfoFollowCoverColor,
-        defaultCover = state.defaultCover,
-        defaultCoverDark = state.defaultCoverDark,
-        loadCoverOnlyOnWifi = state.loadCoverOnlyOnWifi,
-    )
 
-    BookInfoColorTheme(theme = bookColorTheme.takeIf {
-        canApplyCoverTheme && backdropStyle?.showCover == true
-    }) {
+    BookInfoColorTheme(
+        theme =
+        bookColorTheme.takeIf {
+            canApplyCoverTheme && backdropStyle?.showCover == true
+        },
+    ) {
         BookInfoScreenContent(
             state = state,
             tags = tags,
@@ -207,8 +213,10 @@ fun BookInfoScreen(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalSharedTransitionApi::class,
-    ExperimentalMaterial3ExpressiveApi::class
+@OptIn(
+    ExperimentalMaterial3Api::class,
+    ExperimentalSharedTransitionApi::class,
+    ExperimentalMaterial3ExpressiveApi::class,
 )
 @Composable
 private fun BookInfoScreenContent(
@@ -224,16 +232,18 @@ private fun BookInfoScreenContent(
     onNetworkCoverLoadError: (String?) -> Unit,
 ) {
     val isMiuix = ThemeResolver.isMiuixEngine(LegadoTheme.composeEngine)
-    val scrollBehavior = if (isMiuix) {
-        MiuixGlassScrollBehavior(MiuixScrollBehavior())
-    } else {
-        M3GlassScrollBehavior(TopAppBarDefaults.exitUntilCollapsedScrollBehavior())
-    }
+    val scrollBehavior =
+        if (isMiuix) {
+            MiuixGlassScrollBehavior(MiuixScrollBehavior())
+        } else {
+            M3GlassScrollBehavior(TopAppBarDefaults.exitUntilCollapsedScrollBehavior())
+        }
     val listState = rememberLazyListState()
     val snackbarHostState = remember { SnackbarHostState() }
 
     AppScaffold(
-        modifier = Modifier
+        modifier =
+        Modifier
             .fillMaxSize()
             .nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
@@ -273,12 +283,13 @@ private fun BookInfoScreenContent(
                     isRefreshing = state.isTocLoading,
                     onRefresh = { onIntent(BookInfoIntent.MenuAction(BookInfoMenuAction.Refresh)) },
                     topPadding = paddingValues.calculateTopPadding(),
-                    scrollBehavior = scrollBehavior
+                    scrollBehavior = scrollBehavior,
                 ) {
                     LazyColumn(
                         state = listState,
                         modifier = Modifier.fillMaxSize(),
-                        contentPadding = PaddingValues(
+                        contentPadding =
+                        PaddingValues(
                             top = paddingValues.calculateTopPadding() + 8.dp,
                             bottom = paddingValues.calculateBottomPadding() + 88.dp,
                         ),
@@ -289,7 +300,7 @@ private fun BookInfoScreenContent(
                                 highlightedTags = state.highlightedTags,
                                 kindLabels = state.kindLabels,
                                 groupNames = state.groupNames,
-                                 onCoverPreview = { onIntent(BookInfoIntent.CoverPreviewClick) },
+                                onCoverPreview = { onIntent(BookInfoIntent.CoverPreviewClick) },
                                 onNetworkCoverLoadError = {
                                     onNetworkCoverLoadError(book.coverPath)
                                 },
@@ -302,30 +313,30 @@ private fun BookInfoScreenContent(
                         }
                         item {
                             Column(
-                                modifier = Modifier
+                                modifier =
+                                Modifier
                                     .fillMaxWidth()
                                     .background(
-                                        color = LegadoTheme.colorScheme.surface
-                                    )
-                                    .padding(bottom = 24.dp)
+                                        color = LegadoTheme.colorScheme.surface,
+                                    ).padding(bottom = 24.dp),
                             ) {
                                 BookInfoActions(
                                     inBookshelf = state.inBookshelf,
-                                     isLocalBook = book.isLocal,
+                                    isLocalBook = book.isLocal,
                                     onOpenLocalBookExternally = {
                                         onIntent(BookInfoIntent.OpenLocalBookExternally)
                                     },
                                     onTocClick = { onIntent(BookInfoIntent.TocClick) },
                                     onGroupClick = { onIntent(BookInfoIntent.GroupClick) },
                                     onReadRecordClick = { onIntent(BookInfoIntent.ReadRecordClick) },
-                                 )
-                                 BookInfoSummary(
-                                     book = book,
-                                     tocLoadFailed = state.tocLoadFailed,
-                                     onRemarkClick = { onIntent(BookInfoIntent.RemarkClick) },
-                                     onIntroImageLongClick = { source ->
-                                         onIntent(BookInfoIntent.IntroImageLongClick(source))
-                                     },
+                                )
+                                BookInfoSummary(
+                                    book = book,
+                                    tocLoadFailed = state.tocLoadFailed,
+                                    onRemarkClick = { onIntent(BookInfoIntent.RemarkClick) },
+                                    onIntroImageLongClick = { source ->
+                                        onIntent(BookInfoIntent.IntroImageLongClick(source))
+                                    },
                                 )
                             }
                         }
@@ -348,7 +359,9 @@ private fun BookInfoScreenContent(
     }
 
     when (val sheet = renderedSheet) {
-        BookInfoSheet.None -> Unit
+        BookInfoSheet.None -> {
+            Unit
+        }
         BookInfoSheet.GroupPicker -> {
             TagSelectSheet(
                 show = currentSheet == BookInfoSheet.GroupPicker,
@@ -357,12 +370,14 @@ private fun BookInfoScreenContent(
                 onConfirm = { onIntent(BookInfoIntent.AddTags(it)) },
             )
         }
-        BookInfoSheet.ReadRecord -> BookReadRecordSheet(
-            show = currentSheet == BookInfoSheet.ReadRecord,
-            totalReadTime = state.readRecordTotalTime,
-            timelineDays = state.readRecordTimelineDays,
-            onDismissRequest = { onIntent(BookInfoIntent.DismissSheet) },
-        )
+        BookInfoSheet.ReadRecord -> {
+            BookReadRecordSheet(
+                show = currentSheet == BookInfoSheet.ReadRecord,
+                totalReadTime = state.readRecordTotalTime,
+                timelineDays = state.readRecordTimelineDays,
+                onDismissRequest = { onIntent(BookInfoIntent.DismissSheet) },
+            )
+        }
     }
 
     BookInfoDialogs(state = state, onIntent = onIntent)
@@ -374,10 +389,11 @@ private fun BookInfoColorTheme(
     content: @Composable () -> Unit,
 ) {
     val baseTheme = LocalLegadoThemeColors.current
-    val animationSpec = tween<Color>(
-        durationMillis = 400,
-        easing = FastOutSlowInEasing,
-    )
+    val animationSpec =
+        tween<Color>(
+            durationMillis = 400,
+            easing = FastOutSlowInEasing,
+        )
     val targetColorScheme = theme?.colorScheme ?: baseTheme.colorScheme
     val targetSeedColor = theme?.seedColor ?: baseTheme.seedColor
     val animatedColorScheme = targetColorScheme.animateColorSchemeAsState(animationSpec)
@@ -405,17 +421,19 @@ private fun BookInfoTransparentTopAppBar(
 ) {
     val hazeState = LocalHazeState.current
     val isMiuix = ThemeResolver.isMiuixEngine(LegadoTheme.composeEngine)
-    val collapsedColor = if (isMiuix) {
-        GlassTopAppBarDefaults.getMiuixAppBarColor()
-    } else {
-        GlassTopAppBarDefaults.scrolledContainerColor()
-    }
+    val collapsedColor =
+        if (isMiuix) {
+            GlassTopAppBarDefaults.getMiuixAppBarColor()
+        } else {
+            GlassTopAppBarDefaults.scrolledContainerColor()
+        }
     val isAtTop = scrollBehavior.collapsedFraction <= 0.001f
     val resolvedColor = if (isAtTop) Color.Transparent else collapsedColor
-    val topBarColors = TopAppBarDefaults.topAppBarColors(
-        containerColor = resolvedColor,
-        scrolledContainerColor = resolvedColor,
-    )
+    val topBarColors =
+        TopAppBarDefaults.topAppBarColors(
+            containerColor = resolvedColor,
+            scrolledContainerColor = resolvedColor,
+        )
 
     if (isMiuix) {
         MiuixTopAppBar(
@@ -427,9 +445,10 @@ private fun BookInfoTransparentTopAppBar(
             },
             actions = {
                 TopBarActionsRow(
-                    modifier = Modifier.padding(
-                        end = miuixTopBarActionsEndPadding()
-                    )
+                    modifier =
+                    Modifier.padding(
+                        end = miuixTopBarActionsEndPadding(),
+                    ),
                 ) {
                     BookInfoTopBarActions(
                         state = state,
@@ -487,35 +506,38 @@ private fun rememberBookInfoColorTheme(
     val isNight = LegadoTheme.isDark
     val defaultCoverPaths =
         if (isNight) defaultCoverDark else defaultCover
-    val coverPath = remember(
-        book.name,
-        book.author,
-        book.coverPath,
-        usesDefaultCover,
-        isNight,
-        defaultCoverPaths,
-    ) {
-        if (usesDefaultCover) {
-            BookCoverModel.getRandomDefaultPath(
-                seed = book.name,
-                isNight = isNight,
-            )
-        } else {
-            book.coverPath
-        }
-    } ?: return null
+    val coverPath =
+        remember(
+            book.name,
+            book.author,
+            book.coverPath,
+            usesDefaultCover,
+            isNight,
+            defaultCoverPaths,
+        ) {
+            if (usesDefaultCover) {
+                BookCoverModel.getRandomDefaultPath(
+                    seed = book.name,
+                    isNight = isNight,
+                )
+            } else {
+                book.coverPath
+            }
+        } ?: return null
     val loadOnlyWifi = !usesDefaultCover && loadCoverOnlyOnWifi
-    val requestKey = remember(coverPath, loadOnlyWifi) {
-        listOf(coverPath, loadOnlyWifi)
-    }
+    val requestKey =
+        remember(coverPath, loadOnlyWifi) {
+            listOf(coverPath, loadOnlyWifi)
+        }
 
-    val seedColor = rememberImageSeedColor(
-        imageLoader = imageLoader,
-        data = coverPath,
-        requestKey = requestKey,
-    ) {
-        extras[CoverExtras.LoadOnlyWifi] = loadOnlyWifi
-    }
+    val seedColor =
+        rememberImageSeedColor(
+            imageLoader = imageLoader,
+            data = coverPath,
+            requestKey = requestKey,
+        ) {
+            extras[CoverExtras.LoadOnlyWifi] = loadOnlyWifi
+        }
 
     return rememberThemeOverride(seedColor)
 }
@@ -525,11 +547,12 @@ private fun resolveBookInfoBackdropStyle(
     defaultCoverBackground: String,
     networkCoverBackground: String,
 ): BookInfoBackdropStyle {
-    val backgroundMode = if (usesDefaultCover) {
-        defaultCoverBackground
-    } else {
-        networkCoverBackground
-    }
+    val backgroundMode =
+        if (usesDefaultCover) {
+            defaultCoverBackground
+        } else {
+            networkCoverBackground
+        }
     return resolveBookInfoBackdropStyle(backgroundMode)
 }
 
@@ -542,7 +565,7 @@ private fun BookInfoTopBarActions(
         TopBarActionButton(
             onClick = { onMenuAction(BookInfoMenuAction.Edit) },
             imageVector = Icons.Default.Edit,
-            contentDescription = stringResource(R.string.edit)
+            contentDescription = stringResource(R.string.edit),
         )
     }
     BookInfoOverflowAction(
@@ -583,34 +606,37 @@ private fun BookInfoBackdrop(
     usesDefaultCover: Boolean,
     onNetworkCoverLoadError: (String?) -> Unit,
 ) {
-    val backdropState = remember(
-        book.name,
-        book.author,
-        book.coverPath,
-        usesDefaultCover,
-        style,
-    ) {
-        BookInfoBackdropState(
-            name = book.name,
-            author = book.author,
-            coverPath = if (usesDefaultCover) null else book.coverPath,
-            style = style,
+    val backdropState =
+        remember(
+            book.name,
+            book.author,
+            book.coverPath,
+            usesDefaultCover,
+            style,
+        ) {
+            BookInfoBackdropState(
+                name = book.name,
+                author = book.author,
+                coverPath = if (usesDefaultCover) null else book.coverPath,
+                style = style,
+            )
+        }
+    val seedOverlay =
+        lerp(
+            LegadoTheme.colorScheme.secondaryContainer,
+            LegadoTheme.seedColor,
+            0.42f,
         )
-    }
-    val seedOverlay = lerp(
-        LegadoTheme.colorScheme.secondaryContainer,
-        LegadoTheme.seedColor,
-        0.42f
-    )
     Box(
-        modifier = Modifier
+        modifier =
+        Modifier
             .fillMaxSize()
-            .clearAndSetSemantics { }
+            .clearAndSetSemantics { },
     ) {
         Crossfade(
             targetState = backdropState,
             animationSpec = tween(800),
-            label = "BackdropCrossfade"
+            label = "BackdropCrossfade",
         ) { currentBook ->
             if (currentBook.style.showCover) {
                 BookCoverImage(
@@ -618,7 +644,8 @@ private fun BookInfoBackdrop(
                     author = currentBook.author,
                     path = currentBook.coverPath,
                     memoryCacheKey = currentBook.coverPath?.let { "$it#book-info-backdrop" },
-                    modifier = Modifier
+                    modifier =
+                    Modifier
                         .fillMaxWidth()
                         .height(480.dp)
                         .then(
@@ -626,47 +653,52 @@ private fun BookInfoBackdrop(
                                 Modifier.blur(24.dp)
                             } else {
                                 Modifier
-                            }
+                            },
                         ),
                     contentScale = ContentScale.Crop,
                     showLoadingPlaceholder = false,
                     onError = { onNetworkCoverLoadError(currentBook.coverPath) },
                     requestBuilder = {
                         size(Size(384, 384))
-                    }
+                    },
                 )
             }
         }
         if (style.applySeedOverlay) {
             Box(
-                modifier = Modifier
+                modifier =
+                Modifier
                     .fillMaxSize()
-                    .background(seedOverlay.copy(alpha = 0.34f))
+                    .background(seedOverlay.copy(alpha = 0.34f)),
             )
         }
         Box(
-            modifier = Modifier
+            modifier =
+            Modifier
                 .fillMaxSize()
                 .background(
                     Brush.verticalGradient(
-                        colorStops = arrayOf(
+                        colorStops =
+                        arrayOf(
                             0f to Color.Transparent,
-                            0.20f to if (style.applySeedOverlay) {
-                                seedOverlay.copy(alpha = 0.10f)
-                            } else {
-                                Color.Transparent
-                            },
-                            0.40f to if (style.applySeedOverlay) {
-                                seedOverlay.copy(alpha = 0.18f)
-                            } else {
-                                LegadoTheme.colorScheme.surface.copy(alpha = 0.35f)
-                            },
+                            0.20f to
+                                if (style.applySeedOverlay) {
+                                    seedOverlay.copy(alpha = 0.10f)
+                                } else {
+                                    Color.Transparent
+                                },
+                            0.40f to
+                                if (style.applySeedOverlay) {
+                                    seedOverlay.copy(alpha = 0.18f)
+                                } else {
+                                    LegadoTheme.colorScheme.surface.copy(alpha = 0.35f)
+                                },
                             0.60f to LegadoTheme.colorScheme.surface.copy(alpha = 0.85f),
                             0.80f to LegadoTheme.colorScheme.surface,
                             1f to LegadoTheme.colorScheme.surface,
-                        )
-                    )
-                )
+                        ),
+                    ),
+                ),
         )
     }
 }
@@ -689,24 +721,24 @@ private fun BookInfoOverflowMenu(
         if (state.inBookshelf) {
             RoundDropdownMenuItem(
                 text = stringResource(R.string.edit),
-                onClick = { onMenuAction(BookInfoMenuAction.Edit) }
+                onClick = { onMenuAction(BookInfoMenuAction.Edit) },
             )
         }
         RoundDropdownMenuItem(
             text = stringResource(R.string.refresh),
-            onClick = { onMenuAction(BookInfoMenuAction.Refresh) }
+            onClick = { onMenuAction(BookInfoMenuAction.Refresh) },
         )
         RoundDropdownMenuItem(
             text = stringResource(R.string.read_record),
-            onClick = { onMenuAction(BookInfoMenuAction.ReadRecord) }
+            onClick = { onMenuAction(BookInfoMenuAction.ReadRecord) },
         )
         RoundDropdownMenuItem(
             text = stringResource(R.string.to_top),
-            onClick = { onMenuAction(BookInfoMenuAction.Top) }
+            onClick = { onMenuAction(BookInfoMenuAction.Top) },
         )
         RoundDropdownMenuItem(
             text = stringResource(R.string.clear_cache),
-            onClick = { onMenuAction(BookInfoMenuAction.ClearCache) }
+            onClick = { onMenuAction(BookInfoMenuAction.ClearCache) },
         )
     }
 }
@@ -727,11 +759,13 @@ private fun BookInfoHeader(
 ) {
     val coverDescription = stringResource(R.string.a11y_book_cover_actions, book.name)
     Column(
-        modifier = Modifier
+        modifier =
+        Modifier
             .fillMaxWidth()
             .background(
                 Brush.verticalGradient(
-                    colors = listOf(
+                    colors =
+                    listOf(
                         Color.Transparent,
                         if (applySeedOverlay) {
                             lerp(LegadoTheme.colorScheme.surface, LegadoTheme.seedColor, 0.08f)
@@ -740,15 +774,14 @@ private fun BookInfoHeader(
                             LegadoTheme.colorScheme.surface.copy(alpha = 0.5f)
                         },
                         LegadoTheme.colorScheme.surface,
-                    )
-                )
-            )
-            .padding(top = 16.dp, bottom = 8.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
+                    ),
+                ),
+            ).padding(top = 16.dp, bottom = 8.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         Column(
             modifier = Modifier.padding(horizontal = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+            verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -756,34 +789,37 @@ private fun BookInfoHeader(
                 verticalAlignment = Alignment.Top,
             ) {
                 Box(
-                    modifier = Modifier
+                    modifier =
+                    Modifier
                         .width(112.dp)
                         .combinedClickable(onClick = onCoverPreview, onLongClick = onCoverPreview)
                         .semantics {
                             role = Role.Button
                             contentDescription = coverDescription
-                        }
+                        },
                 ) {
                     CoilBookCover(
                         name = book.name,
                         author = book.author,
                         path = if (usesDefaultCover) null else book.coverPath,
                         onError = onNetworkCoverLoadError,
-                        modifier = Modifier
+                        modifier =
+                        Modifier
                             .width(112.dp)
                             .aspectRatio(5f / 7f),
                         showLoadingPlaceholder = sharedCoverKey == null,
                         sharedTransitionScope = sharedTransitionScope,
                         animatedVisibilityScope = animatedVisibilityScope,
-                        sharedCoverKey = sharedCoverKey
+                        sharedCoverKey = sharedCoverKey,
                     )
                 }
                 Column(
-                    modifier = Modifier
+                    modifier =
+                    Modifier
                         .weight(1f)
                         .align(Alignment.CenterVertically)
                         .padding(top = 8.dp, bottom = 8.dp),
-                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                    verticalArrangement = Arrangement.spacedBy(4.dp),
                 ) {
                     var showTitleMenu by remember { mutableStateOf(false) }
                     var isTitleExpanded by rememberSaveable { mutableStateOf(false) }
@@ -793,21 +829,22 @@ private fun BookInfoHeader(
                             style = LegadoTheme.typography.headlineSmall,
                             fontWeight = FontWeight.Bold,
                             maxLines = if (isTitleExpanded) Int.MAX_VALUE else 2,
-                            modifier = Modifier.combinedClickable(
+                            modifier =
+                            Modifier.combinedClickable(
                                 onClick = {},
                                 onLongClick = { showTitleMenu = true },
-                            )
+                            ),
                         )
                         RoundDropdownMenu(
                             expanded = showTitleMenu,
-                            onDismissRequest = { showTitleMenu = false }
+                            onDismissRequest = { showTitleMenu = false },
                         ) {
                             RoundDropdownMenuItem(
                                 text = stringResource(if (isTitleExpanded) R.string.collapse else R.string.expand),
                                 onClick = {
                                     showTitleMenu = false
                                     isTitleExpanded = !isTitleExpanded
-                                }
+                                },
                             )
                         }
                     }
@@ -815,7 +852,7 @@ private fun BookInfoHeader(
                         text = stringResource(R.string.author_show, book.realAuthor),
                         style = LegadoTheme.typography.bodyLarge,
                         color = LegadoTheme.colorScheme.onSurfaceVariant,
-                         modifier = Modifier,
+                        modifier = Modifier,
                     )
                 }
             }
@@ -826,7 +863,8 @@ private fun BookInfoHeader(
                 val kindListState = rememberLazyListState()
                 LazyRow(
                     state = kindListState,
-                    modifier = Modifier
+                    modifier =
+                    Modifier
                         .fillMaxWidth()
                         .fadingEdge(kindListState),
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -843,7 +881,7 @@ private fun BookInfoHeader(
                     }
                     itemsIndexed(
                         items = kindLabels,
-                        key = { index, label -> "kind-$index-$label" }
+                        key = { index, label -> "kind-$index-$label" },
                     ) { _, label ->
                         TextCard(
                             text = label,
@@ -887,16 +925,18 @@ private fun BookInfoActions(
         }
     }
 
-    val shelfLabel = when {
-        inBookshelf && isLocalBook -> stringResource(R.string.open_in_other_app)
-        showShelfRemoveHint -> stringResource(R.string.click_to_remove)
-        showLongPressGroupHint -> stringResource(R.string.long_press_add_tags)
-        inBookshelf -> stringResource(R.string.already_in_bookshelf)
-        else -> stringResource(R.string.add_to_bookshelf)
-    }
+    val shelfLabel =
+        when {
+            inBookshelf && isLocalBook -> stringResource(R.string.open_in_other_app)
+            showShelfRemoveHint -> stringResource(R.string.click_to_remove)
+            showLongPressGroupHint -> stringResource(R.string.long_press_add_tags)
+            inBookshelf -> stringResource(R.string.already_in_bookshelf)
+            else -> stringResource(R.string.add_to_bookshelf)
+        }
 
     Row(
-        modifier = Modifier
+        modifier =
+        Modifier
             .fillMaxWidth()
             .background(LegadoTheme.colorScheme.surface)
             .padding(horizontal = 16.dp, vertical = 8.dp),
@@ -917,13 +957,13 @@ private fun BookInfoActions(
             modifier = Modifier.weight(1f),
             icon = Icons.AutoMirrored.Outlined.FormatListBulleted,
             label = stringResource(R.string.view_toc),
-            onClick = onTocClick
+            onClick = onTocClick,
         )
         BookInfoActionCard(
             modifier = Modifier.weight(1f),
             icon = Icons.Default.Timeline,
             label = stringResource(R.string.read_record),
-            onClick = onReadRecordClick
+            onClick = onReadRecordClick,
         )
     }
 }
@@ -934,10 +974,11 @@ private fun BookInfoActionCard(
     icon: ImageVector,
     label: String,
     onLongClick: (() -> Unit)? = null,
-    onClick: () -> Unit
+    onClick: () -> Unit,
 ) {
     GlassCard(
-        modifier = modifier.semantics(mergeDescendants = true) {
+        modifier =
+        modifier.semantics(mergeDescendants = true) {
             role = Role.Button
             contentDescription = label
         },
@@ -947,7 +988,8 @@ private fun BookInfoActionCard(
         contentColor = LegadoTheme.colorScheme.onSurface,
     ) {
         Column(
-            modifier = Modifier
+            modifier =
+            Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 8.dp, vertical = 12.dp),
             verticalArrangement = Arrangement.spacedBy(4.dp),
@@ -971,11 +1013,12 @@ private fun BookInfoSummary(
     onIntroImageLongClick: (source: String) -> Unit,
 ) {
     Column(
-        modifier = Modifier
+        modifier =
+        Modifier
             .fillMaxWidth()
             .background(LegadoTheme.colorScheme.surface)
             .padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 120.dp),
-        verticalArrangement = Arrangement.spacedBy(4.dp)
+        verticalArrangement = Arrangement.spacedBy(4.dp),
     ) {
         AnimatedTextLine(
             text = stringResource(R.string.toc_s, book.durChapterTitle ?: stringResource(R.string.loading)),
@@ -1000,10 +1043,11 @@ private fun BookInfoSummary(
             )
             AppText(
                 text = "|",
-                color = LegadoTheme.colorScheme.secondary
+                color = LegadoTheme.colorScheme.secondary,
             )
             AnimatedTextLine(
-                text = when {
+                text =
+                when {
                     book.durChapterIndex == 0 && book.durChapterPos == 0 -> stringResource(R.string.is_unread)
                     book.durChapterIndex + 1 == book.totalChapterNum && book.totalChapterNum > 0 -> "已读完"
                     else -> stringResource(R.string.read_chapter_index, book.durChapterIndex + 1)
@@ -1014,12 +1058,12 @@ private fun BookInfoSummary(
             if (tocLoadFailed) {
                 AppText(
                     text = " · ",
-                    color = LegadoTheme.colorScheme.secondary
+                    color = LegadoTheme.colorScheme.secondary,
                 )
                 AnimatedTextLine(
                     text = stringResource(R.string.error_load_toc),
                     style = LegadoTheme.typography.labelMedium,
-                    color = LegadoTheme.colorScheme.error
+                    color = LegadoTheme.colorScheme.error,
                 )
             }
         }
@@ -1033,7 +1077,7 @@ private fun BookInfoSummary(
                 Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
                     AnimatedTextLine(
                         text = remark,
-                        style = LegadoTheme.typography.labelMediumEmphasized
+                        style = LegadoTheme.typography.labelMediumEmphasized,
                     )
                 }
             }
@@ -1067,44 +1111,56 @@ private fun BookInfoIntro(
         return
     }
     when (val c = content) {
-        is BookInfoIntroContent.Html -> HtmlContent(
-            html = c.html,
-            interactive = true,
-            onImageLongClick = onImageLongClick,
-            imageModel = { imageUrl ->
-                buildCoverImageRequest(
-                    context = context,
-                    data = imageUrl,
-                    sourceOrigin = null,
-                    loadOnlyWifi = false,
-                )
-            },
-        )
-
-        is BookInfoIntroContent.Markdown -> MarkdownBlock(
-            content = c.markdown,
-            imageModel = { imageUrl ->
-                buildCoverImageRequest(
-                    context = context,
-                    data = imageUrl,
-                    sourceOrigin = null,
-                    loadOnlyWifi = false,
-                )
-            },
-            onImageLongClick = onImageLongClick,
-        )
-
-        is BookInfoIntroContent.Plain -> AnimatedTextLine(
-            text = c.text,
-            style = LegadoTheme.typography.bodyMedium,
-        )
+        is BookInfoIntroContent.Html -> {
+            HtmlContent(
+                html = c.html,
+                interactive = true,
+                onImageLongClick = onImageLongClick,
+                imageModel = { imageUrl ->
+                    buildCoverImageRequest(
+                        context = context,
+                        data = imageUrl,
+                        sourceOrigin = null,
+                        loadOnlyWifi = false,
+                    )
+                },
+            )
+        }
+        is BookInfoIntroContent.Markdown -> {
+            MarkdownBlock(
+                content = c.markdown,
+                imageModel = { imageUrl ->
+                    buildCoverImageRequest(
+                        context = context,
+                        data = imageUrl,
+                        sourceOrigin = null,
+                        loadOnlyWifi = false,
+                    )
+                },
+                onImageLongClick = onImageLongClick,
+            )
+        }
+        is BookInfoIntroContent.Plain -> {
+            AnimatedTextLine(
+                text = c.text,
+                style = LegadoTheme.typography.bodyMedium,
+            )
+        }
     }
 }
 
 private sealed interface BookInfoIntroContent {
-    data class Html(val html: String) : BookInfoIntroContent
-    data class Markdown(val markdown: String) : BookInfoIntroContent
-    data class Plain(val text: String) : BookInfoIntroContent
+    data class Html(
+        val html: String,
+    ) : BookInfoIntroContent
+
+    data class Markdown(
+        val markdown: String,
+    ) : BookInfoIntroContent
+
+    data class Plain(
+        val text: String,
+    ) : BookInfoIntroContent
 }
 
 /**
@@ -1123,7 +1179,6 @@ private fun parseBookInfoIntro(intro: String?): BookInfoIntroContent? {
                 BookInfoIntroContent.Html(intro.substring(8, lastIndex))
             }
         }
-
         intro.startsWith("<usehtml>") -> {
             val lastIndex = intro.lastIndexOf("<")
             if (lastIndex < 9) {
@@ -1132,7 +1187,6 @@ private fun parseBookInfoIntro(intro: String?): BookInfoIntroContent? {
                 BookInfoIntroContent.Html(intro.substring(9, lastIndex))
             }
         }
-
         intro.startsWith("<md>") -> {
             val lastIndex = intro.lastIndexOf("<")
             if (lastIndex < 4) {
@@ -1141,8 +1195,9 @@ private fun parseBookInfoIntro(intro: String?): BookInfoIntroContent? {
                 BookInfoIntroContent.Markdown(intro.substring(4, lastIndex))
             }
         }
-
-        else -> BookInfoIntroContent.Plain(HtmlFormatter.formatDisplayText(intro))
+        else -> {
+            BookInfoIntroContent.Plain(HtmlFormatter.formatDisplayText(intro))
+        }
     }
 }
 
@@ -1169,7 +1224,7 @@ private fun BookInfoDialogs(
                 label = stringResource(R.string.book_remark),
                 modifier = Modifier.fillMaxWidth(),
             )
-        }
+        },
     )
 
     AppAlertDialog(
@@ -1190,12 +1245,13 @@ private fun BookInfoDialogs(
                     author = state.book?.author,
                     path = d.path,
                     ignoreUseDefaultCover = true,
-                    modifier = Modifier
+                    modifier =
+                    Modifier
                         .heightIn(max = 420.dp)
-                        .fillMaxWidth(0.6f)
+                        .fillMaxWidth(0.6f),
                 )
             }
-        }
+        },
     )
 
     AppAlertDialog(
@@ -1205,7 +1261,6 @@ private fun BookInfoDialogs(
             Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
                 AppCircularProgressIndicator()
             }
-        }
+        },
     )
-
 }

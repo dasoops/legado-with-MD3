@@ -15,8 +15,9 @@ fun ConstraintLayout.modifyBegin(withAnim: Boolean = false): ConstraintModify.Co
 }
 
 @Suppress("MemberVisibilityCanBePrivate", "unused")
-class ConstraintModify(private val constraintLayout: ConstraintLayout) {
-
+class ConstraintModify(
+    private val constraintLayout: ConstraintLayout,
+) {
     val begin: ConstraintBegin by lazy {
         applyConstraintSet.clone(constraintLayout)
         ConstraintBegin(constraintLayout, applyConstraintSet)
@@ -52,13 +53,11 @@ class ConstraintModify(private val constraintLayout: ConstraintLayout) {
         resetConstraintSet.applyTo(constraintLayout)
     }
 
-
     @Suppress("unused", "MemberVisibilityCanBePrivate")
     class ConstraintBegin(
         private val constraintLayout: ConstraintLayout,
-        private val applyConstraintSet: ConstraintSet
+        private val applyConstraintSet: ConstraintSet,
     ) {
-
         /**
          * 清除关系,这里不仅仅会清除关系，还会清除对应控件的宽高为 w:0,h:0
          * @param viewId 视图ID
@@ -75,17 +74,26 @@ class ConstraintModify(private val constraintLayout: ConstraintLayout) {
          * @param anchor 要解除的关系
          * @return
          */
-        fun clear(viewId: Int, anchor: Anchor): ConstraintBegin {
+        fun clear(
+            viewId: Int,
+            anchor: Anchor,
+        ): ConstraintBegin {
             applyConstraintSet.clear(viewId, anchor.toInt())
             return this
         }
 
-        fun setHorizontalWeight(viewId: Int, weight: Float): ConstraintBegin {
+        fun setHorizontalWeight(
+            viewId: Int,
+            weight: Float,
+        ): ConstraintBegin {
             applyConstraintSet.setHorizontalWeight(viewId, weight)
             return this
         }
 
-        fun setVerticalWeight(viewId: Int, weight: Float): ConstraintBegin {
+        fun setVerticalWeight(
+            viewId: Int,
+            weight: Float,
+        ): ConstraintBegin {
             applyConstraintSet.setVerticalWeight(viewId, weight)
             return this
         }
@@ -104,7 +112,7 @@ class ConstraintModify(private val constraintLayout: ConstraintLayout) {
             left: Int,
             top: Int,
             right: Int,
-            bottom: Int
+            bottom: Int,
         ): ConstraintBegin {
             setMarginLeft(viewId, left)
             setMarginTop(viewId, top)
@@ -119,7 +127,10 @@ class ConstraintModify(private val constraintLayout: ConstraintLayout) {
          * @param left marginLeft
          * @return
          */
-        fun setMarginLeft(@IdRes viewId: Int, left: Int): ConstraintBegin {
+        fun setMarginLeft(
+            @IdRes viewId: Int,
+            left: Int,
+        ): ConstraintBegin {
             applyConstraintSet.setMargin(viewId, ConstraintSet.LEFT, left)
             return this
         }
@@ -130,7 +141,10 @@ class ConstraintModify(private val constraintLayout: ConstraintLayout) {
          * @param right marginRight
          * @return
          */
-        fun setMarginRight(@IdRes viewId: Int, right: Int): ConstraintBegin {
+        fun setMarginRight(
+            @IdRes viewId: Int,
+            right: Int,
+        ): ConstraintBegin {
             applyConstraintSet.setMargin(viewId, ConstraintSet.RIGHT, right)
             return this
         }
@@ -141,7 +155,10 @@ class ConstraintModify(private val constraintLayout: ConstraintLayout) {
          * @param top marginTop
          * @return
          */
-        fun setMarginTop(@IdRes viewId: Int, top: Int): ConstraintBegin {
+        fun setMarginTop(
+            @IdRes viewId: Int,
+            top: Int,
+        ): ConstraintBegin {
             applyConstraintSet.setMargin(viewId, ConstraintSet.TOP, top)
             return this
         }
@@ -152,7 +169,10 @@ class ConstraintModify(private val constraintLayout: ConstraintLayout) {
          * @param bottom marginBottom
          * @return
          */
-        fun setMarginBottom(@IdRes viewId: Int, bottom: Int): ConstraintBegin {
+        fun setMarginBottom(
+            @IdRes viewId: Int,
+            bottom: Int,
+        ): ConstraintBegin {
             applyConstraintSet.setMargin(viewId, ConstraintSet.BOTTOM, bottom)
             return this
         }
@@ -163,7 +183,10 @@ class ConstraintModify(private val constraintLayout: ConstraintLayout) {
          * @param endId
          * @return
          */
-        fun leftToLeftOf(@IdRes startId: Int, @IdRes endId: Int): ConstraintBegin {
+        fun leftToLeftOf(
+            @IdRes startId: Int,
+            @IdRes endId: Int,
+        ): ConstraintBegin {
             applyConstraintSet.connect(startId, ConstraintSet.LEFT, endId, ConstraintSet.LEFT)
             return this
         }
@@ -174,7 +197,10 @@ class ConstraintModify(private val constraintLayout: ConstraintLayout) {
          * @param endId
          * @return
          */
-        fun leftToRightOf(@IdRes startId: Int, @IdRes endId: Int): ConstraintBegin {
+        fun leftToRightOf(
+            @IdRes startId: Int,
+            @IdRes endId: Int,
+        ): ConstraintBegin {
             applyConstraintSet.connect(startId, ConstraintSet.LEFT, endId, ConstraintSet.RIGHT)
             return this
         }
@@ -185,7 +211,10 @@ class ConstraintModify(private val constraintLayout: ConstraintLayout) {
          * @param endId
          * @return
          */
-        fun topToTopOf(@IdRes startId: Int, @IdRes endId: Int): ConstraintBegin {
+        fun topToTopOf(
+            @IdRes startId: Int,
+            @IdRes endId: Int,
+        ): ConstraintBegin {
             applyConstraintSet.connect(startId, ConstraintSet.TOP, endId, ConstraintSet.TOP)
             return this
         }
@@ -196,7 +225,10 @@ class ConstraintModify(private val constraintLayout: ConstraintLayout) {
          * @param endId
          * @return
          */
-        fun topToBottomOf(@IdRes startId: Int, @IdRes endId: Int): ConstraintBegin {
+        fun topToBottomOf(
+            @IdRes startId: Int,
+            @IdRes endId: Int,
+        ): ConstraintBegin {
             applyConstraintSet.connect(startId, ConstraintSet.TOP, endId, ConstraintSet.BOTTOM)
             return this
         }
@@ -207,7 +239,10 @@ class ConstraintModify(private val constraintLayout: ConstraintLayout) {
          * @param endId
          * @return
          */
-        fun rightToLeftOf(@IdRes startId: Int, @IdRes endId: Int): ConstraintBegin {
+        fun rightToLeftOf(
+            @IdRes startId: Int,
+            @IdRes endId: Int,
+        ): ConstraintBegin {
             applyConstraintSet.connect(startId, ConstraintSet.RIGHT, endId, ConstraintSet.LEFT)
             return this
         }
@@ -218,7 +253,10 @@ class ConstraintModify(private val constraintLayout: ConstraintLayout) {
          * @param endId
          * @return
          */
-        fun rightToRightOf(@IdRes startId: Int, @IdRes endId: Int): ConstraintBegin {
+        fun rightToRightOf(
+            @IdRes startId: Int,
+            @IdRes endId: Int,
+        ): ConstraintBegin {
             applyConstraintSet.connect(startId, ConstraintSet.RIGHT, endId, ConstraintSet.RIGHT)
             return this
         }
@@ -229,7 +267,10 @@ class ConstraintModify(private val constraintLayout: ConstraintLayout) {
          * @param endId
          * @return
          */
-        fun bottomToBottomOf(@IdRes startId: Int, @IdRes endId: Int): ConstraintBegin {
+        fun bottomToBottomOf(
+            @IdRes startId: Int,
+            @IdRes endId: Int,
+        ): ConstraintBegin {
             applyConstraintSet.connect(startId, ConstraintSet.BOTTOM, endId, ConstraintSet.BOTTOM)
             return this
         }
@@ -240,7 +281,10 @@ class ConstraintModify(private val constraintLayout: ConstraintLayout) {
          * @param endId
          * @return
          */
-        fun bottomToTopOf(@IdRes startId: Int, @IdRes endId: Int): ConstraintBegin {
+        fun bottomToTopOf(
+            @IdRes startId: Int,
+            @IdRes endId: Int,
+        ): ConstraintBegin {
             applyConstraintSet.connect(startId, ConstraintSet.BOTTOM, endId, ConstraintSet.TOP)
             return this
         }
@@ -251,7 +295,10 @@ class ConstraintModify(private val constraintLayout: ConstraintLayout) {
          * @param width
          * @return
          */
-        fun setWidth(@IdRes viewId: Int, width: Int): ConstraintBegin {
+        fun setWidth(
+            @IdRes viewId: Int,
+            width: Int,
+        ): ConstraintBegin {
             applyConstraintSet.constrainWidth(viewId, width)
             return this
         }
@@ -262,7 +309,10 @@ class ConstraintModify(private val constraintLayout: ConstraintLayout) {
          * @param height
          * @return
          */
-        fun setHeight(@IdRes viewId: Int, height: Int): ConstraintBegin {
+        fun setHeight(
+            @IdRes viewId: Int,
+            height: Int,
+        ): ConstraintBegin {
             applyConstraintSet.constrainHeight(viewId, height)
             return this
         }
@@ -278,21 +328,25 @@ class ConstraintModify(private val constraintLayout: ConstraintLayout) {
     }
 
     enum class Anchor {
-        LEFT, RIGHT, TOP, BOTTOM, BASELINE, START, END, CIRCLE_REFERENCE;
+        LEFT,
+        RIGHT,
+        TOP,
+        BOTTOM,
+        BASELINE,
+        START,
+        END,
+        CIRCLE_REFERENCE,
+        ;
 
-        fun toInt(): Int {
-            return when (this) {
-                LEFT -> ConstraintSet.LEFT
-                RIGHT -> ConstraintSet.RIGHT
-                TOP -> ConstraintSet.TOP
-                BOTTOM -> ConstraintSet.BOTTOM
-                BASELINE -> ConstraintSet.BASELINE
-                START -> ConstraintSet.START
-                END -> ConstraintSet.END
-                CIRCLE_REFERENCE -> ConstraintSet.CIRCLE_REFERENCE
-            }
+        fun toInt(): Int = when (this) {
+            LEFT -> ConstraintSet.LEFT
+            RIGHT -> ConstraintSet.RIGHT
+            TOP -> ConstraintSet.TOP
+            BOTTOM -> ConstraintSet.BOTTOM
+            BASELINE -> ConstraintSet.BASELINE
+            START -> ConstraintSet.START
+            END -> ConstraintSet.END
+            CIRCLE_REFERENCE -> ConstraintSet.CIRCLE_REFERENCE
         }
-
     }
-
 }

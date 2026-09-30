@@ -11,9 +11,10 @@ import com.google.android.material.button.MaterialButtonToggleGroup
 import io.legado.app.R
 import io.legado.app.help.config.ThemeConfigStore
 
-
-class ThemeModePreference(context: Context, attrs: AttributeSet) : Preference(context, attrs) {
-
+class ThemeModePreference(
+    context: Context,
+    attrs: AttributeSet,
+) : Preference(context, attrs) {
     private var currentValue: String = "0"
 
     init {
@@ -39,9 +40,7 @@ class ThemeModePreference(context: Context, attrs: AttributeSet) : Preference(co
         updateButtonStateDescriptions(toggleGroup)
     }
 
-
     private fun setupToggleGroup(toggleGroup: MaterialButtonToggleGroup) {
-
         when (currentValue) {
             "0" -> toggleGroup.check(R.id.btn_system)
             "1" -> toggleGroup.check(R.id.btn_light)
@@ -50,12 +49,13 @@ class ThemeModePreference(context: Context, attrs: AttributeSet) : Preference(co
 
         toggleGroup.addOnButtonCheckedListener { group, checkedId, isChecked ->
             if (isChecked) {
-                val newValue = when (checkedId) {
-                    R.id.btn_system -> "0"
-                    R.id.btn_light -> "1"
-                    R.id.btn_dark -> "2"
-                    else -> null
-                }
+                val newValue =
+                    when (checkedId) {
+                        R.id.btn_system -> "0"
+                        R.id.btn_light -> "1"
+                        R.id.btn_dark -> "2"
+                        else -> null
+                    }
 
                 if (newValue != null && callChangeListener(newValue)) {
                     currentValue = newValue
@@ -80,10 +80,9 @@ class ThemeModePreference(context: Context, attrs: AttributeSet) : Preference(co
             val selected = child.id == group.checkedButtonId
             ViewCompat.setStateDescription(
                 child,
-                context.getString(if (selected) R.string.a11y_selected else R.string.a11y_not_selected)
+                context.getString(if (selected) R.string.a11y_selected else R.string.a11y_not_selected),
             )
             child.importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_YES
         }
     }
-
 }

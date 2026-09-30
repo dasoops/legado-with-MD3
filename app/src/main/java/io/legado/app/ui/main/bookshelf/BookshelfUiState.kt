@@ -17,40 +17,90 @@ data class BookshelfGroupSelectorState(
     val isInitialLoading: Boolean = true,
     val groups: ImmutableList<BookGroupUi> = persistentListOf(),
     val selectedGroupIndex: Int = 0,
-    val selectedGroupId: Long = BookGroup.IdAll
+    val selectedGroupId: Long = BookGroup.IdAll,
 )
 
 sealed interface BookshelfOverlay {
     data object ConfigSheet : BookshelfOverlay
+
     data object GroupManageSheet : BookshelfOverlay
+
     data object GroupMenu : BookshelfOverlay
+
     data object GroupSelectSheet : BookshelfOverlay
-    data class GroupEditSheet(val groupId: Long) : BookshelfOverlay
+
+    data class GroupEditSheet(
+        val groupId: Long,
+    ) : BookshelfOverlay
 }
 
 sealed interface BookshelfIntent {
-    data class ChangeGroup(val groupId: Long) : BookshelfIntent
-    data class SetSearchKey(val value: String) : BookshelfIntent
-    data class SetSearchMode(val active: Boolean) : BookshelfIntent
-    data class ShowOverlay(val overlay: BookshelfOverlay) : BookshelfIntent
+    data class ChangeGroup(
+        val groupId: Long,
+    ) : BookshelfIntent
+
+    data class SetSearchKey(
+        val value: String,
+    ) : BookshelfIntent
+
+    data class SetSearchMode(
+        val active: Boolean,
+    ) : BookshelfIntent
+
+    data class ShowOverlay(
+        val overlay: BookshelfOverlay,
+    ) : BookshelfIntent
+
     data object DismissOverlay : BookshelfIntent
+
     data object ToggleEditMode : BookshelfIntent
+
     data object ExitEditMode : BookshelfIntent
+
     data object ClearSelection : BookshelfIntent
+
     data object SelectAllVisible : BookshelfIntent
+
     data object InvertVisibleSelection : BookshelfIntent
-    data class ToggleBookSelection(val bookUrl: String) : BookshelfIntent
-    data class SetInFolderRoot(val value: Boolean) : BookshelfIntent
-    data class AddTags(val bookUrls: Set<String>, val tags: Set<String>) : BookshelfIntent
-    data class StartDragging(val books: List<BookUiItem>) : BookshelfIntent
-    data class MoveDragging(val from: Int, val to: Int, val books: List<BookUiItem>) : BookshelfIntent
+
+    data class ToggleBookSelection(
+        val bookUrl: String,
+    ) : BookshelfIntent
+
+    data class SetInFolderRoot(
+        val value: Boolean,
+    ) : BookshelfIntent
+
+    data class AddTags(
+        val bookUrls: Set<String>,
+        val tags: Set<String>,
+    ) : BookshelfIntent
+
+    data class StartDragging(
+        val books: List<BookUiItem>,
+    ) : BookshelfIntent
+
+    data class MoveDragging(
+        val from: Int,
+        val to: Int,
+        val books: List<BookUiItem>,
+    ) : BookshelfIntent
+
     data object FinishDragging : BookshelfIntent
+
     data object ScrollToTop : BookshelfIntent
+
     data class UpdateSetting(
         val transform: (BookshelfSettings) -> BookshelfSettings,
     ) : BookshelfIntent
-    data class SetCustomTagColorsEnabled(val enabled: Boolean) : BookshelfIntent
-    data class SetCustomTagColors(val colors: List<TagColorPair>) : BookshelfIntent
+
+    data class SetCustomTagColorsEnabled(
+        val enabled: Boolean,
+    ) : BookshelfIntent
+
+    data class SetCustomTagColors(
+        val colors: List<TagColorPair>,
+    ) : BookshelfIntent
 }
 
 sealed interface BookshelfEffect {

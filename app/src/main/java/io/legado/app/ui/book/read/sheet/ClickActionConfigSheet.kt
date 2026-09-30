@@ -34,56 +34,59 @@ import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 
 @Composable
-fun ClickActionConfigSheet(
-    onDismissRequest: () -> Unit,
-) {
+fun ClickActionConfigSheet(onDismissRequest: () -> Unit) {
     BackHandler(onBack = onDismissRequest)
 
     val readSettingsRepository: ReadSettingsRepository = koinInject()
     val preferences by readSettingsRepository.preferences.collectAsStateWithLifecycle(
-        initialValue = ReadPreferences()
+        initialValue = ReadPreferences(),
     )
     val scope = rememberCoroutineScope()
 
-    val actions = linkedMapOf(
-        -1 to stringResource(R.string.non_action),
-        0 to stringResource(R.string.menu),
-        1 to stringResource(R.string.next_page),
-        2 to stringResource(R.string.prev_page),
-        3 to stringResource(R.string.next_chapter),
-        4 to stringResource(R.string.previous_chapter),
-        7 to stringResource(R.string.bookmark_add),
-        8 to stringResource(R.string.edit_content),
-        9 to stringResource(R.string.replace_state_change),
-        10 to stringResource(R.string.chapter_list),
-        11 to stringResource(R.string.search_content),
-        12 to stringResource(R.string.sync_book_progress_t),
-    )
+    val actions =
+        linkedMapOf(
+            -1 to stringResource(R.string.non_action),
+            0 to stringResource(R.string.menu),
+            1 to stringResource(R.string.next_page),
+            2 to stringResource(R.string.prev_page),
+            3 to stringResource(R.string.next_chapter),
+            4 to stringResource(R.string.previous_chapter),
+            7 to stringResource(R.string.bookmark_add),
+            8 to stringResource(R.string.edit_content),
+            9 to stringResource(R.string.replace_state_change),
+            10 to stringResource(R.string.chapter_list),
+            11 to stringResource(R.string.search_content),
+            12 to stringResource(R.string.sync_book_progress_t),
+        )
 
     var selectingPrefKey by remember { mutableStateOf<String?>(null) }
 
     Box(
-        modifier = Modifier
+        modifier =
+        Modifier
             .fillMaxSize()
             .background(LegadoTheme.colorScheme.surfaceContainerLow.copy(alpha = 0.4f))
             .clickable(onClick = onDismissRequest),
     ) {
         Column(
-            modifier = Modifier
+            modifier =
+            Modifier
                 .fillMaxSize()
                 .padding(12.dp),
         ) {
             Spacer(
-                modifier = Modifier.padding(top = 36.dp)
+                modifier = Modifier.padding(top = 36.dp),
             )
             Row(
-                modifier = Modifier
+                modifier =
+                Modifier
                     .weight(1f)
                     .fillMaxWidth(),
             ) {
                 ClickAreaCell(
                     label = actions[preferences.clickActionTL] ?: "",
-                    modifier = Modifier
+                    modifier =
+                    Modifier
                         .weight(1f)
                         .fillMaxSize()
                         .padding(3.dp),
@@ -91,7 +94,8 @@ fun ClickActionConfigSheet(
                 )
                 ClickAreaCell(
                     label = actions[preferences.clickActionTC] ?: "",
-                    modifier = Modifier
+                    modifier =
+                    Modifier
                         .weight(1f)
                         .fillMaxSize()
                         .padding(3.dp),
@@ -99,7 +103,8 @@ fun ClickActionConfigSheet(
                 )
                 ClickAreaCell(
                     label = actions[preferences.clickActionTR] ?: "",
-                    modifier = Modifier
+                    modifier =
+                    Modifier
                         .weight(1f)
                         .fillMaxSize()
                         .padding(3.dp),
@@ -107,13 +112,15 @@ fun ClickActionConfigSheet(
                 )
             }
             Row(
-                modifier = Modifier
+                modifier =
+                Modifier
                     .weight(1f)
                     .fillMaxWidth(),
             ) {
                 ClickAreaCell(
                     label = actions[preferences.clickActionML] ?: "",
-                    modifier = Modifier
+                    modifier =
+                    Modifier
                         .weight(1f)
                         .fillMaxSize()
                         .padding(3.dp),
@@ -121,7 +128,8 @@ fun ClickActionConfigSheet(
                 )
                 ClickAreaCell(
                     label = actions[preferences.clickActionMC] ?: "",
-                    modifier = Modifier
+                    modifier =
+                    Modifier
                         .weight(1f)
                         .fillMaxSize()
                         .padding(3.dp),
@@ -129,7 +137,8 @@ fun ClickActionConfigSheet(
                 )
                 ClickAreaCell(
                     label = actions[preferences.clickActionMR] ?: "",
-                    modifier = Modifier
+                    modifier =
+                    Modifier
                         .weight(1f)
                         .fillMaxSize()
                         .padding(3.dp),
@@ -137,13 +146,15 @@ fun ClickActionConfigSheet(
                 )
             }
             Row(
-                modifier = Modifier
+                modifier =
+                Modifier
                     .weight(1f)
                     .fillMaxWidth(),
             ) {
                 ClickAreaCell(
                     label = actions[preferences.clickActionBL] ?: "",
-                    modifier = Modifier
+                    modifier =
+                    Modifier
                         .weight(1f)
                         .fillMaxSize()
                         .padding(3.dp),
@@ -151,7 +162,8 @@ fun ClickActionConfigSheet(
                 )
                 ClickAreaCell(
                     label = actions[preferences.clickActionBC] ?: "",
-                    modifier = Modifier
+                    modifier =
+                    Modifier
                         .weight(1f)
                         .fillMaxSize()
                         .padding(3.dp),
@@ -159,7 +171,8 @@ fun ClickActionConfigSheet(
                 )
                 ClickAreaCell(
                     label = actions[preferences.clickActionBR] ?: "",
-                    modifier = Modifier
+                    modifier =
+                    Modifier
                         .weight(1f)
                         .fillMaxSize()
                         .padding(3.dp),
@@ -181,7 +194,8 @@ fun ClickActionConfigSheet(
                 actionValues.forEachIndexed { index, label ->
                     AppText(
                         text = label,
-                        modifier = Modifier
+                        modifier =
+                        Modifier
                             .fillMaxWidth()
                             .clickable {
                                 val selectedAction = actionKeys[index]
@@ -191,8 +205,7 @@ fun ClickActionConfigSheet(
                                         selectingPrefKey = null
                                     }
                                 }
-                            }
-                            .padding(horizontal = 24.dp, vertical = 12.dp),
+                            }.padding(horizontal = 24.dp, vertical = 12.dp),
                         style = LegadoTheme.typography.bodyLarge,
                     )
                 }
@@ -210,7 +223,8 @@ private fun ClickAreaCell(
     GlassCard(
         modifier = modifier,
         onClick = onClick,
-        containerColor = LegadoTheme.colorScheme.surfaceContainer
+        containerColor =
+        LegadoTheme.colorScheme.surfaceContainer
             .copy(alpha = 0.9f),
     ) {
         Box(

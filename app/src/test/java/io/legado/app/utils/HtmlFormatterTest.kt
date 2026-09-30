@@ -6,17 +6,17 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class HtmlFormatterTest {
-
     @Test
     fun formatDisplayText_removesScriptAndStyleContents() {
-        val result = HtmlFormatter.formatDisplayText(
-            """
+        val result =
+            HtmlFormatter.formatDisplayText(
+                """
                 <style>.intro { color: red; }</style>
                 <p>第一段</p>
                 <script>window.alert('bad')</script>
                 <div>第二段</div>
-            """.trimIndent()
-        )
+                """.trimIndent(),
+            )
 
         assertEquals("　　第一段\n　　第二段", result)
         assertTrue(result.contains("第一段"))
@@ -32,9 +32,10 @@ class HtmlFormatterTest {
 
     @Test
     fun formatDisplayText_dropsBookMetaLines() {
-        val result = HtmlFormatter.formatDisplayText(
-            "书名：某某传<br>作者：张三<br>【分类】玄幻<br>最新章节：第一千章 大结局<br>简介：这是正文第一段<br>这是正文第二段"
-        )
+        val result =
+            HtmlFormatter.formatDisplayText(
+                "书名：某某传<br>作者：张三<br>【分类】玄幻<br>最新章节：第一千章 大结局<br>简介：这是正文第一段<br>这是正文第二段",
+            )
 
         assertEquals("　　这是正文第一段\n　　这是正文第二段", result)
     }
@@ -43,7 +44,7 @@ class HtmlFormatterTest {
     fun formatDisplayText_keepsContentStartingWithMetaWord() {
         assertEquals(
             "　　作者的话：这本书写了三年",
-            HtmlFormatter.formatDisplayText("作者的话：这本书写了三年")
+            HtmlFormatter.formatDisplayText("作者的话：这本书写了三年"),
         )
     }
 
@@ -51,15 +52,16 @@ class HtmlFormatterTest {
     fun formatDisplayText_keepsPlainTextLineBreaks() {
         assertEquals(
             "　　第一段\n　　第二段",
-            HtmlFormatter.formatDisplayText("第一段\n第二段")
+            HtmlFormatter.formatDisplayText("第一段\n第二段"),
         )
     }
 
     @Test
     fun textForWordCount_excludesImageMarkupAndNonReadableElements() {
-        val result = HtmlFormatter.textForWordCount(
-            "<p>正文</p><img src=\"https://example.com/cover.jpg\" alt=\"封面\"><script>ignored()</script><style>.hidden {}</style>"
-        )
+        val result =
+            HtmlFormatter.textForWordCount(
+                "<p>正文</p><img src=\"https://example.com/cover.jpg\" alt=\"封面\"><script>ignored()</script><style>.hidden {}</style>",
+            )
 
         assertEquals("正文", result)
     }
@@ -68,7 +70,7 @@ class HtmlFormatterTest {
     fun formatSummaryText_dropsIndentAndLineBreaks() {
         assertEquals(
             "第一段 第二段",
-            HtmlFormatter.formatSummaryText("<p>第一段</p><p>第二段</p>")
+            HtmlFormatter.formatSummaryText("<p>第一段</p><p>第二段</p>"),
         )
     }
 
@@ -77,8 +79,9 @@ class HtmlFormatterTest {
         assertEquals("普通简介", HtmlFormatter.formatSummaryText("　　普通简介"))
     }
 
-    //聚合书源实际写进详情简介的状态面板
-    private val aggregatedSourceIntro = """
+    // 聚合书源实际写进详情简介的状态面板
+    private val aggregatedSourceIntro =
+        """
         📡 当前服务：https://v1.example.cf
         🔑 账号状态：⚠️ 未登录 | 点击右上角 🔖 登录
         🏷 数据来源：百度
@@ -93,13 +96,13 @@ class HtmlFormatterTest {
         📖 书籍简介：
         这里是属于斗气的世界，没有花俏艳丽的魔法。
         新书等级制度：斗者，斗师，大斗师，斗灵。
-    """.trimIndent().replace("\n", "<br>")
+        """.trimIndent().replace("\n", "<br>")
 
     @Test
     fun formatIntroText_dropsSourceStatusPanel() {
         assertEquals(
             "　　这里是属于斗气的世界，没有花俏艳丽的魔法。\n　　新书等级制度：斗者，斗师，大斗师，斗灵。",
-            HtmlFormatter.formatIntroText(aggregatedSourceIntro)
+            HtmlFormatter.formatIntroText(aggregatedSourceIntro),
         )
     }
 
@@ -115,7 +118,7 @@ class HtmlFormatterTest {
     fun formatIntroText_keepsIconLineWithoutLabel() {
         assertEquals(
             "　　🔥 这本书已经完结了, 放心入坑",
-            HtmlFormatter.formatIntroText("🔥 这本书已经完结了, 放心入坑")
+            HtmlFormatter.formatIntroText("🔥 这本书已经完结了, 放心入坑"),
         )
     }
 

@@ -4,7 +4,10 @@ package io.legado.app.utils
 
 import android.content.Intent
 
-fun Intent.putJson(key: String, any: Any?) {
+fun Intent.putJson(
+    key: String,
+    any: Any?,
+) {
     any?.let {
         putExtra(key, GSON.toJson(any))
     }

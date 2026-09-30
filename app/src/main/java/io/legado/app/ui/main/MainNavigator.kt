@@ -12,7 +12,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 object MainNavigator {
-
     var backNavigationInProgress = false
         private set
     private val navigationScope by lazy(LazyThreadSafetyMode.NONE) {
@@ -42,7 +41,6 @@ object MainNavigator {
                 backStack.clear()
                 backStack.add(MainRouteBookshelf)
             }
-
             MainRouteSettings -> {
                 if (currentRoute == MainRouteBookshelf) {
                     backStack.add(MainRouteSettings)
@@ -52,7 +50,6 @@ object MainNavigator {
                     backStack.add(MainRouteSettings)
                 }
             }
-
             MainRouteSettingsOther,
             MainRouteSettingsRead,
             MainRouteSettingsCover,
@@ -60,15 +57,16 @@ object MainNavigator {
             MainRouteSettingsBackup,
             MainRouteSettingsCustomTheme,
             MainRouteSettingsThemeManage,
-            MainRouteSettingsDownloadCache -> {
+            MainRouteSettingsDownloadCache,
+            -> {
                 backStack.clear()
                 backStack.add(MainRouteBookshelf)
                 backStack.add(MainRouteSettings)
                 backStack.add(route)
             }
-
             MainRouteImportRemote,
-            is MainRouteReadBook -> {
+            is MainRouteReadBook,
+            -> {
                 if (
                     currentRoute == MainRouteBookshelf ||
                     currentRoute is MainRouteBookInfo
@@ -80,11 +78,9 @@ object MainNavigator {
                     backStack.add(route)
                 }
             }
-
             is MainRouteSearchContent -> {
                 backStack.add(route)
             }
-
             is MainRouteBookInfo -> {
                 if (
                     currentRoute == MainRouteBookshelf ||
@@ -97,9 +93,9 @@ object MainNavigator {
                     backStack.add(route)
                 }
             }
-
             MainRouteHighlightTagRule,
-            MainRouteReadRecord -> {
+            MainRouteReadRecord,
+            -> {
                 if (currentRoute == MainRouteBookshelf) {
                     backStack.add(route)
                 } else {
@@ -108,7 +104,6 @@ object MainNavigator {
                     backStack.add(route)
                 }
             }
-
             MainRouteAbout -> {
                 if (currentRoute == MainRouteBookshelf) {
                     backStack.add(route)
@@ -118,7 +113,6 @@ object MainNavigator {
                     backStack.add(route)
                 }
             }
-
             MainRouteReadRecordOverview -> {
                 if (currentRoute == MainRouteBookshelf || currentRoute == MainRouteReadRecord) {
                     backStack.add(route)
@@ -131,7 +125,10 @@ object MainNavigator {
         }
     }
 
-    fun navigateBack(activity: Activity, backStack: MutableList<NavKey>) {
+    fun navigateBack(
+        activity: Activity,
+        backStack: MutableList<NavKey>,
+    ) {
         if (backNavigationInProgress) {
             return
         }
@@ -145,10 +142,11 @@ object MainNavigator {
 
     fun onBackStackChanged() {
         backNavigationResetJob?.cancel()
-        backNavigationResetJob = navigationScope.launch {
-            delay(500)
-            backNavigationInProgress = false
-        }
+        backNavigationResetJob =
+            navigationScope.launch {
+                delay(500)
+                backNavigationInProgress = false
+            }
     }
 
     fun resolveStartRoute(intent: Intent?): NavKey {
@@ -156,28 +154,57 @@ object MainNavigator {
         return resolveStartRoute(route, intent)
     }
 
-    private fun resolveStartRoute(route: String?, intent: Intent?): MainRoute {
-        return when (route) {
-            MainRouteConst.ROUTE_MAIN -> MainRouteBookshelf
-            MainRouteConst.ROUTE_SETTINGS -> MainRouteSettings
-            MainRouteConst.ROUTE_SETTINGS_OTHER -> MainRouteSettingsOther
-            MainRouteConst.ROUTE_SETTINGS_READ -> MainRouteSettingsRead
-            MainRouteConst.ROUTE_SETTINGS_COVER -> MainRouteSettingsCover
-            MainRouteConst.ROUTE_SETTINGS_THEME -> MainRouteSettingsTheme
-            MainRouteConst.ROUTE_SETTINGS_BACKUP -> MainRouteSettingsBackup
-            MainRouteConst.ROUTE_SETTINGS_CUSTOM_THEME -> MainRouteSettingsCustomTheme
-            MainRouteConst.ROUTE_SETTINGS_LAB_CONFIG -> MainRouteSettingsLabConfig
-            MainRouteConst.ROUTE_SETTINGS_DOWNLOAD_CACHE -> MainRouteSettingsDownloadCache
-            MainRouteConst.ROUTE_IMPORT_REMOTE -> MainRouteImportRemote
-            MainRouteConst.ROUTE_READ_BOOK -> MainRouteReadBook(
+    private fun resolveStartRoute(
+        route: String?,
+        intent: Intent?,
+    ): MainRoute = when (route) {
+        MainRouteConst.ROUTE_MAIN -> {
+            MainRouteBookshelf
+        }
+        MainRouteConst.ROUTE_SETTINGS -> {
+            MainRouteSettings
+        }
+        MainRouteConst.ROUTE_SETTINGS_OTHER -> {
+            MainRouteSettingsOther
+        }
+        MainRouteConst.ROUTE_SETTINGS_READ -> {
+            MainRouteSettingsRead
+        }
+        MainRouteConst.ROUTE_SETTINGS_COVER -> {
+            MainRouteSettingsCover
+        }
+        MainRouteConst.ROUTE_SETTINGS_THEME -> {
+            MainRouteSettingsTheme
+        }
+        MainRouteConst.ROUTE_SETTINGS_BACKUP -> {
+            MainRouteSettingsBackup
+        }
+        MainRouteConst.ROUTE_SETTINGS_CUSTOM_THEME -> {
+            MainRouteSettingsCustomTheme
+        }
+        MainRouteConst.ROUTE_SETTINGS_LAB_CONFIG -> {
+            MainRouteSettingsLabConfig
+        }
+        MainRouteConst.ROUTE_SETTINGS_DOWNLOAD_CACHE -> {
+            MainRouteSettingsDownloadCache
+        }
+        MainRouteConst.ROUTE_IMPORT_REMOTE -> {
+            MainRouteImportRemote
+        }
+        MainRouteConst.ROUTE_READ_BOOK -> {
+            MainRouteReadBook(
                 bookUrl = intent?.getStringExtra(MainIntent.EXTRA_BOOK_URL),
                 inBookshelf = intent?.getBooleanExtra(MainIntent.EXTRA_IN_BOOKSHELF, true) != false,
-                chapterChanged = intent?.getBooleanExtra(
+                chapterChanged =
+                intent?.getBooleanExtra(
                     MainIntent.EXTRA_CHAPTER_CHANGED,
-                    false
+                    false,
                 ) == true,
             )
-            MainRouteConst.ROUTE_BOOK_INFO -> intent?.getStringExtra(MainIntent.EXTRA_BOOK_URL)
+        }
+        MainRouteConst.ROUTE_BOOK_INFO -> {
+            intent
+                ?.getStringExtra(MainIntent.EXTRA_BOOK_URL)
                 ?.takeIf { it.isNotBlank() }
                 ?.let { bookUrl ->
                     MainRouteBookInfo(
@@ -185,13 +212,15 @@ object MainNavigator {
                         author = intent.getStringExtra(MainIntent.EXTRA_BOOK_AUTHOR),
                         bookUrl = bookUrl,
                         origin = intent.getStringExtra(MainIntent.EXTRA_BOOK_ORIGIN),
-                        coverPath = intent.getStringExtra(MainIntent.EXTRA_BOOK_COVER)
+                        coverPath = intent.getStringExtra(MainIntent.EXTRA_BOOK_COVER),
                     )
                 } ?: MainRouteBookshelf
-
-            MainRouteConst.ROUTE_ABOUT -> MainRouteAbout
-
-            else -> MainRouteBookshelf
+        }
+        MainRouteConst.ROUTE_ABOUT -> {
+            MainRouteAbout
+        }
+        else -> {
+            MainRouteBookshelf
         }
     }
 }

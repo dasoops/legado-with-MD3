@@ -25,12 +25,12 @@ class OtherConfigViewModel(
     private val systemGateway: OtherConfigSystemGateway,
     initialState: OtherConfigUiState = OtherConfigUiState(),
 ) : ViewModel() {
-
     private var nextMessageId = 0L
 
-    private val _uiState = MutableStateFlow(
-        otherSettingsGateway.currentSettings.toUiState(initialState)
-    )
+    private val _uiState =
+        MutableStateFlow(
+            otherSettingsGateway.currentSettings.toUiState(initialState),
+        )
     val uiState = _uiState.asStateFlow()
 
     private val _effects = MutableSharedFlow<OtherConfigEffect>(extraBufferCapacity = 16)
@@ -52,50 +52,73 @@ class OtherConfigViewModel(
 
     fun onIntent(intent: OtherConfigIntent) {
         when (intent) {
-            is OtherConfigIntent.LanguageChanged -> appLocaleGateway.setLanguage(intent.value)
-            is OtherConfigIntent.UpdateToVariantChanged ->
+            is OtherConfigIntent.LanguageChanged -> {
+                appLocaleGateway.setLanguage(intent.value)
+            }
+            is OtherConfigIntent.UpdateToVariantChanged -> {
                 updateOtherSetting { it.copy(updateToVariant = intent.value) }
-            is OtherConfigIntent.AutoCheckUpdateOnStartChanged ->
+            }
+            is OtherConfigIntent.AutoCheckUpdateOnStartChanged -> {
                 updateOtherSetting { it.copy(autoCheckUpdateOnStart = intent.value) }
-            is OtherConfigIntent.AutoRefreshChanged ->
+            }
+            is OtherConfigIntent.AutoRefreshChanged -> {
                 updateOtherSetting { it.copy(autoRefresh = intent.value) }
-            is OtherConfigIntent.DefaultToReadChanged ->
+            }
+            is OtherConfigIntent.DefaultToReadChanged -> {
                 updateOtherSetting { it.copy(defaultToRead = intent.value) }
-            is OtherConfigIntent.DefaultBookTreeUriChanged ->
+            }
+            is OtherConfigIntent.DefaultBookTreeUriChanged -> {
                 updateOtherSetting { it.copy(defaultBookTreeUri = intent.value) }
-            is OtherConfigIntent.AntiAliasChanged ->
+            }
+            is OtherConfigIntent.AntiAliasChanged -> {
                 updateOtherSetting { it.copy(antiAlias = intent.value) }
-            is OtherConfigIntent.ReplaceEnableDefaultChanged ->
+            }
+            is OtherConfigIntent.ReplaceEnableDefaultChanged -> {
                 updateOtherSetting { it.copy(replaceEnableDefault = intent.value) }
-            is OtherConfigIntent.AutoClearExpiredChanged ->
+            }
+            is OtherConfigIntent.AutoClearExpiredChanged -> {
                 updateOtherSetting { it.copy(autoClearExpired = intent.value) }
-            is OtherConfigIntent.ShowAddToShelfAlertChanged ->
+            }
+            is OtherConfigIntent.ShowAddToShelfAlertChanged -> {
                 updateOtherSetting { it.copy(showAddToShelfAlert = intent.value) }
-            is OtherConfigIntent.SourceEditMaxLineChanged ->
+            }
+            is OtherConfigIntent.SourceEditMaxLineChanged -> {
                 updateOtherSetting { it.copy(sourceEditMaxLine = intent.value) }
-            is OtherConfigIntent.ProcessTextChanged -> setProcessTextEnable(intent.value)
-            is OtherConfigIntent.RecordLogChanged ->
+            }
+            is OtherConfigIntent.ProcessTextChanged -> {
+                setProcessTextEnable(intent.value)
+            }
+            is OtherConfigIntent.RecordLogChanged -> {
                 updateOtherSetting { it.copy(recordLog = intent.value) }
-            is OtherConfigIntent.RecordHeapDumpChanged ->
+            }
+            is OtherConfigIntent.RecordHeapDumpChanged -> {
                 updateOtherSetting { it.copy(recordHeapDump = intent.value) }
+            }
             is OtherConfigIntent.ShowOverlay -> {
                 _uiState.update { it.copy(activeOverlay = intent.overlay) }
             }
-            OtherConfigIntent.DismissOverlay ->
+            OtherConfigIntent.DismissOverlay -> {
                 _uiState.update { it.copy(activeOverlay = null) }
-            OtherConfigIntent.RequestNotificationPermission ->
+            }
+            OtherConfigIntent.RequestNotificationPermission -> {
                 _effects.tryEmit(OtherConfigEffect.RequestNotificationPermission)
-            OtherConfigIntent.RequestBatteryPermission ->
+            }
+            OtherConfigIntent.RequestBatteryPermission -> {
                 _effects.tryEmit(OtherConfigEffect.RequestBatteryPermission)
-            OtherConfigIntent.RequestSystemDirectory ->
+            }
+            OtherConfigIntent.RequestSystemDirectory -> {
                 _effects.tryEmit(OtherConfigEffect.OpenSystemDirectory)
-            is OtherConfigIntent.SaveLocalPassword -> saveLocalPassword(intent.password)
+            }
+            is OtherConfigIntent.SaveLocalPassword -> {
+                saveLocalPassword(intent.password)
+            }
             is OtherConfigIntent.MessageShown -> {
                 _uiState.update { state ->
                     state.copy(
-                        pendingMessages = state.pendingMessages
+                        pendingMessages =
+                        state.pendingMessages
                             .filterNot { it.id == intent.id }
-                            .toImmutableList()
+                            .toImmutableList(),
                     )
                 }
             }
@@ -150,12 +173,15 @@ class OtherConfigViewModel(
         updateOtherSetting { it.copy(defaultBookTreeUri = path) }
     }
 
-    private fun showMessage(@StringRes resId: Int) {
+    private fun showMessage(
+        @StringRes resId: Int,
+    ) {
         _uiState.update {
             it.copy(
-                pendingMessages = (
+                pendingMessages =
+                (
                     it.pendingMessages + OtherConfigMessage.resource(++nextMessageId, resId)
-                ).toImmutableList()
+                    ).toImmutableList(),
             )
         }
     }
@@ -163,27 +189,27 @@ class OtherConfigViewModel(
     private fun showMessage(message: String) {
         _uiState.update {
             it.copy(
-                pendingMessages = (
+                pendingMessages =
+                (
                     it.pendingMessages + OtherConfigMessage.text(++nextMessageId, message)
-                ).toImmutableList()
+                    ).toImmutableList(),
             )
         }
     }
 }
 
-private fun OtherSettings.toUiState(current: OtherConfigUiState): OtherConfigUiState =
-    current.copy(
-        updateToVariant = updateToVariant,
-        autoCheckUpdateOnStart = autoCheckUpdateOnStart,
-        autoRefresh = autoRefresh,
-        defaultToRead = defaultToRead,
-        defaultBookTreeUri = defaultBookTreeUri,
-        antiAlias = antiAlias,
-        replaceEnableDefault = replaceEnableDefault,
-        autoClearExpired = autoClearExpired,
-        showAddToShelfAlert = showAddToShelfAlert,
-        sourceEditMaxLine = sourceEditMaxLine,
-        processText = processText,
-        recordLog = recordLog,
-        recordHeapDump = recordHeapDump,
-    )
+private fun OtherSettings.toUiState(current: OtherConfigUiState): OtherConfigUiState = current.copy(
+    updateToVariant = updateToVariant,
+    autoCheckUpdateOnStart = autoCheckUpdateOnStart,
+    autoRefresh = autoRefresh,
+    defaultToRead = defaultToRead,
+    defaultBookTreeUri = defaultBookTreeUri,
+    antiAlias = antiAlias,
+    replaceEnableDefault = replaceEnableDefault,
+    autoClearExpired = autoClearExpired,
+    showAddToShelfAlert = showAddToShelfAlert,
+    sourceEditMaxLine = sourceEditMaxLine,
+    processText = processText,
+    recordLog = recordLog,
+    recordHeapDump = recordHeapDump,
+)

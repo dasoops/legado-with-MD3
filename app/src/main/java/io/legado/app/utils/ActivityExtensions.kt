@@ -22,9 +22,7 @@ import androidx.core.view.WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_B
 import androidx.fragment.app.DialogFragment
 import io.legado.app.R
 
-inline fun <reified T : DialogFragment> AppCompatActivity.showDialogFragment(
-    arguments: Bundle.() -> Unit = {}
-) {
+inline fun <reified T : DialogFragment> AppCompatActivity.showDialogFragment(arguments: Bundle.() -> Unit = {}) {
     @Suppress("DEPRECATION")
     val dialog = T::class.java.newInstance()
     val bundle = Bundle()
@@ -50,10 +48,11 @@ val WindowManager.windowSize: DisplayMetrics
         val displayMetrics = DisplayMetrics()
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             val windowMetrics: WindowMetrics = currentWindowMetrics
-            val insets = windowMetrics.windowInsets
-                .getInsetsIgnoringVisibility(
-                    WindowInsets.Type.systemBars() or WindowInsets.Type.displayCutout()
-                )
+            val insets =
+                windowMetrics.windowInsets
+                    .getInsetsIgnoringVisibility(
+                        WindowInsets.Type.systemBars() or WindowInsets.Type.displayCutout(),
+                    )
             val windowWidth = windowMetrics.bounds.width()
             val windowHeight = windowMetrics.bounds.height()
             var insetsWidth = insets.left + insets.right
@@ -81,7 +80,7 @@ fun Activity.fullScreen() {
         View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or View.SYSTEM_UI_FLAG_LAYOUT_STABLE
     window.clearFlags(
         WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS
-                or WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION
+            or WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION,
     )
     window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
 }
@@ -93,7 +92,7 @@ fun Activity.fullScreen() {
 fun Activity.setStatusBarColorAuto(
     @ColorInt color: Int,
     isTransparent: Boolean,
-    fullScreen: Boolean = true
+    fullScreen: Boolean = true,
 ) {
     val isLightBar = ColorUtils.isColorLight(color)
     if (fullScreen) {
@@ -115,12 +114,12 @@ fun Activity.setLightStatusBar(isLightBar: Boolean) {
             if (isLightBar) {
                 it.setSystemBarsAppearance(
                     WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS,
-                    WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS
+                    WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS,
                 )
             } else {
                 it.setSystemBarsAppearance(
                     0,
-                    WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS
+                    WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS,
                 )
             }
         }
@@ -161,7 +160,7 @@ fun Activity.toggleSystemBar(show: Boolean) {
     }
 }
 
-/////以下方法需要在View完全被绘制出来之后调用，否则判断不了,在比如 onWindowFocusChanged（）方法中可以得到正确的结果/////
+// ///以下方法需要在View完全被绘制出来之后调用，否则判断不了,在比如 onWindowFocusChanged（）方法中可以得到正确的结果/////
 
 /**
  * 返回NavigationBar
@@ -172,8 +171,8 @@ val Activity.navigationBar: View?
         for (i in 0 until viewGroup.childCount) {
             val child = viewGroup.getChildAt(i)
             val childId = child.id
-            if (childId != View.NO_ID
-                && resources.getResourceEntryName(childId) == "navigationBarBackground"
+            if (childId != View.NO_ID &&
+                resources.getResourceEntryName(childId) == "navigationBarBackground"
             ) {
                 return child
             }

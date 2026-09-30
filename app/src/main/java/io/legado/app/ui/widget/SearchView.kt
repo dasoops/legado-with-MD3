@@ -14,14 +14,15 @@ import android.util.AttributeSet
 import android.view.Gravity
 import android.widget.TextView
 import androidx.appcompat.widget.SearchView
+import androidx.core.graphics.withTranslation
 import io.legado.app.R
 import io.legado.app.utils.printOnDebug
-import androidx.core.graphics.withTranslation
 
-
-class SearchView @JvmOverloads constructor(
+class SearchView
+@JvmOverloads
+constructor(
     context: Context,
-    attrs: AttributeSet? = null
+    attrs: AttributeSet? = null,
 ) : SearchView(context, attrs) {
     private var mSearchHintIcon: Drawable? = null
     private var textView: TextView? = null
@@ -32,16 +33,16 @@ class SearchView @JvmOverloads constructor(
         left: Int,
         top: Int,
         right: Int,
-        bottom: Int
+        bottom: Int,
     ) {
         super.onLayout(changed, left, top, right, bottom)
         try {
             if (textView == null) {
                 textView = findViewById(androidx.appcompat.R.id.search_src_text)
-                //mSearchHintIcon = this.context.getDrawable(R.drawable.ic_search_hint)
+                // mSearchHintIcon = this.context.getDrawable(R.drawable.ic_search_hint)
             }
             // 改变字体
-            //textView!!.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14f)
+            // textView!!.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14f)
             textView!!.gravity = Gravity.CENTER_VERTICAL
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM) {
                 textView!!.isLocalePreferredLineHeightForMinimumUsed = false
@@ -89,18 +90,30 @@ class SearchView @JvmOverloads constructor(
         updateQueryHint()
     }
 
-    internal class CenteredImageSpan(drawable: Drawable?) : ImageSpan(drawable!!) {
+    internal class CenteredImageSpan(
+        drawable: Drawable?,
+    ) : ImageSpan(drawable!!) {
         override fun draw(
-            canvas: Canvas, text: CharSequence,
-            start: Int, end: Int, x: Float,
-            top: Int, y: Int, bottom: Int, paint: Paint
+            canvas: Canvas,
+            text: CharSequence,
+            start: Int,
+            end: Int,
+            x: Float,
+            top: Int,
+            y: Int,
+            bottom: Int,
+            paint: Paint,
         ) {
             // image to draw
             val b = drawable
             // font metrics of text to be replaced
             val fm = paint.fontMetricsInt
-            val transY = ((y + fm.descent + y + fm.ascent) / 2
-                    - b.bounds.bottom / 2)
+            val transY = (
+                (y + fm.descent + y + fm.ascent) /
+                    2 -
+                    b.bounds.bottom /
+                    2
+                )
             canvas.withTranslation(x, transY.toFloat()) {
                 b.draw(this)
             }

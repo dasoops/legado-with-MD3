@@ -13,22 +13,33 @@ import io.legado.app.utils.DrawableUtils
  */
 @Suppress("unused")
 object ViewUtils {
-
-    fun removeOnGlobalLayoutListener(v: View, listener: ViewTreeObserver.OnGlobalLayoutListener) {
+    fun removeOnGlobalLayoutListener(
+        v: View,
+        listener: ViewTreeObserver.OnGlobalLayoutListener,
+    ) {
         v.viewTreeObserver.removeOnGlobalLayoutListener(listener)
     }
 
-    fun setBackgroundCompat(view: View, drawable: Drawable?) {
+    fun setBackgroundCompat(
+        view: View,
+        drawable: Drawable?,
+    ) {
         view.background = drawable
     }
 
-    fun setBackgroundTransition(view: View, newDrawable: Drawable): TransitionDrawable {
+    fun setBackgroundTransition(
+        view: View,
+        newDrawable: Drawable,
+    ): TransitionDrawable {
         val transition = DrawableUtils.createTransitionDrawable(view.background, newDrawable)
         setBackgroundCompat(view, transition)
         return transition
     }
 
-    fun setBackgroundColorTransition(view: View, @ColorInt newColor: Int): TransitionDrawable {
+    fun setBackgroundColorTransition(
+        view: View,
+        @ColorInt newColor: Int,
+    ): TransitionDrawable {
         val oldColor = view.background
 
         val start = oldColor ?: ColorDrawable(view.solidColor)

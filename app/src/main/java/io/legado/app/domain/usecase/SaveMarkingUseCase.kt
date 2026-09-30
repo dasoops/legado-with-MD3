@@ -8,11 +8,11 @@ import io.legado.app.domain.model.TextProcessStyle
 import io.legado.app.utils.GSON
 import io.legado.app.utils.MD5Utils
 import io.legado.app.utils.fromJsonObject
+import kotlin.uuid.Uuid
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
-import kotlin.uuid.Uuid
 
 /**
  * 用户划线/高亮笔记的落库（book_marks 表）。与书签、AI 正文处理完全独立：
@@ -30,7 +30,6 @@ import kotlin.uuid.Uuid
 class SaveMarkingUseCase(
     private val bookMarkingGateway: BookMarkingGateway,
 ) {
-
     /**
      * 串行化「查旧 → 更新/新增」整段：快速双击保存会并发执行，各自查到「无旧标记」
      * 就会重复划线。锁住后两次保存退化成正确的先更新再更新。
@@ -63,49 +62,53 @@ class SaveMarkingUseCase(
         saveMutex.withLock {
             val normalized = BookContentProcessEngine.normalizeProcessText(selectedText)
             require(normalized.isNotBlank()) { "Selected text is empty" }
-            val existing = find(
-                bookName = bookName,
-                bookAuthor = bookAuthor,
-                chapterIndex = chapterIndex,
-                chapterPosition = chapterPosition,
-                selectedText = normalized,
-            )
-            val anchor = TextProcessAnchor(
-                chapterIndex = chapterIndex,
-                chapterPosition = chapterPosition,
-                selectedText = normalized,
-                contextBefore = contextBefore,
-                contextAfter = contextAfter,
-                normalizedTextHash = MD5Utils.md5Encode(normalized),
-            )
+            val existing =
+                find(
+                    bookName = bookName,
+                    bookAuthor = bookAuthor,
+                    chapterIndex = chapterIndex,
+                    chapterPosition = chapterPosition,
+                    selectedText = normalized,
+                )
+            val anchor =
+                TextProcessAnchor(
+                    chapterIndex = chapterIndex,
+                    chapterPosition = chapterPosition,
+                    selectedText = normalized,
+                    contextBefore = contextBefore,
+                    contextAfter = contextAfter,
+                    normalizedTextHash = MD5Utils.md5Encode(normalized),
+                )
             val now = System.currentTimeMillis()
             if (existing != null) {
-                val updated = existing.copy(
-                    bookUrl = bookUrl,
-                    anchorJson = GSON.toJson(anchor),
-                    styleJson = GSON.toJson(style),
-                    note = note,
-                    chapterName = chapterName.ifBlank { existing.chapterName },
-                    enabled = true,
-                    updatedAt = now,
-                )
+                val updated =
+                    existing.copy(
+                        bookUrl = bookUrl,
+                        anchorJson = GSON.toJson(anchor),
+                        styleJson = GSON.toJson(style),
+                        note = note,
+                        chapterName = chapterName.ifBlank { existing.chapterName },
+                        enabled = true,
+                        updatedAt = now,
+                    )
                 bookMarkingGateway.upsert(updated)
                 return@withContext updated
             }
-            val mark = BookMarking(
-                id = Uuid.random().toString(),
-                bookUrl = bookUrl,
-                bookName = bookName,
-                bookAuthor = bookAuthor,
-                chapterIndex = chapterIndex,
-                anchorJson = GSON.toJson(anchor),
-                styleJson = GSON.toJson(style),
-                note = note,
-                chapterName = chapterName,
-                enabled = true,
-                createdAt = now,
-                updatedAt = now,
-            )
+            val mark =
+                BookMarking(
+                    id = Uuid.random().toString(),
+                    bookUrl = bookUrl,
+                    bookName = bookName,
+                    bookAuthor = bookAuthor,
+                    chapterIndex = chapterIndex,
+                    anchorJson = GSON.toJson(anchor),
+                    styleJson = GSON.toJson(style),
+                    note = note,
+                    chapterName = chapterName,
+                    enabled = true,
+                    createdAt = now,
+                    updatedAt = now,
+                )
             bookMarkingGateway.upsert(mark)
             mark
         }
@@ -122,12 +125,13 @@ class SaveMarkingUseCase(
         selectedText: String,
     ): BookMarking? = withContext(Dispatchers.IO) {
         val normalized = BookContentProcessEngine.normalizeProcessText(selectedText)
-        bookMarkingGateway.getByBook(bookName, bookAuthor, chapterIndex)
+        bookMarkingGateway
+            .getByBook(bookName, bookAuthor, chapterIndex)
             .firstOrNull { mark ->
                 val anchor = mark.anchor()
                 anchor != null &&
-                        anchor.chapterPosition == chapterPosition &&
-                        anchor.selectedText == normalized
+                    anchor.chapterPosition == chapterPosition &&
+                    anchor.selectedText == normalized
             }
     }
 
@@ -142,6 +146,5 @@ class SaveMarkingUseCase(
         bookMarkingGateway.delete(id)
     }
 
-    private fun BookMarking.anchor(): TextProcessAnchor? =
-        GSON.fromJsonObject<TextProcessAnchor>(anchorJson).getOrNull()
+    private fun BookMarking.anchor(): TextProcessAnchor? = GSON.fromJsonObject<TextProcessAnchor>(anchorJson).getOrNull()
 }

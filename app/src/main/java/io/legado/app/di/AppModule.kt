@@ -7,8 +7,6 @@ import coil3.gif.GifDecoder
 import coil3.request.crossfade
 import coil3.svg.SvgDecoder
 import io.legado.app.data.AppDatabase
-import io.legado.app.data.repository.AiProfileRepository
-import io.legado.app.data.repository.AiTextRepositoryImpl
 import io.legado.app.data.repository.AppLocaleRepository
 import io.legado.app.data.repository.AppShellSettingsRepository
 import io.legado.app.data.repository.AppStartupRepository
@@ -21,9 +19,7 @@ import io.legado.app.data.repository.BookDomainRepositoryImpl
 import io.legado.app.data.repository.BookExportSettingsRepository
 import io.legado.app.data.repository.BookGroupMutationRepository
 import io.legado.app.data.repository.BookGroupRepository
-import io.legado.app.data.repository.BookSourceRepository
 import io.legado.app.data.repository.BookImportRepository
-import io.legado.app.data.repository.BookKnowledgeRepository
 import io.legado.app.data.repository.BookMarkingRepository
 import io.legado.app.data.repository.BookRepository
 import io.legado.app.data.repository.BookmarkRepository
@@ -36,7 +32,6 @@ import io.legado.app.data.repository.DownloadCacheSettingsRepository
 import io.legado.app.data.repository.HighlightRuleRepository
 import io.legado.app.data.repository.HighlightTagRuleRepository
 import io.legado.app.data.repository.HomeDashboardRepository
-import io.legado.app.data.repository.HomepageModulesRepository
 import io.legado.app.data.repository.HomepageSettingsRepository
 import io.legado.app.data.repository.ImportBookSettingsRepository
 import io.legado.app.data.repository.LabSettingsRepository
@@ -52,15 +47,11 @@ import io.legado.app.data.repository.ReadStyleConfigStore
 import io.legado.app.data.repository.ReadStyleRepository
 import io.legado.app.data.repository.ReplaceRuleRepository
 import io.legado.app.data.repository.SearchContentRepository
-import io.legado.app.data.repository.SearchRepository
-import io.legado.app.data.repository.SearchRepositoryImpl
 import io.legado.app.data.repository.SettingsRepository
 import io.legado.app.data.repository.ThemePackageSettingsRepository
 import io.legado.app.data.repository.ThemeSettingsRepository
 import io.legado.app.data.repository.TxtTocRuleRepository
 import io.legado.app.data.repository.WebDavBackupRepository
-import io.legado.app.domain.gateway.AiProfileGateway
-import io.legado.app.domain.gateway.AiTextGateway
 import io.legado.app.domain.gateway.AppLocaleGateway
 import io.legado.app.domain.gateway.AppShellSettingsGateway
 import io.legado.app.domain.gateway.AppStartupGateway
@@ -71,7 +62,6 @@ import io.legado.app.domain.gateway.BookCacheCleanupGateway
 import io.legado.app.domain.gateway.BookContentProcessGateway
 import io.legado.app.domain.gateway.BookExportSettingsGateway
 import io.legado.app.domain.gateway.BookGroupMutationGateway
-import io.legado.app.domain.gateway.BookKnowledgeGateway
 import io.legado.app.domain.gateway.BookMarkingGateway
 import io.legado.app.domain.gateway.BookshelfSettingsGateway
 import io.legado.app.domain.gateway.CoverAlbumGateway
@@ -79,7 +69,6 @@ import io.legado.app.domain.gateway.CoverSettingsGateway
 import io.legado.app.domain.gateway.DatabaseMaintenanceGateway
 import io.legado.app.domain.gateway.DownloadCacheSettingsGateway
 import io.legado.app.domain.gateway.HomeDashboardGateway
-import io.legado.app.domain.gateway.HomepageModulesGateway
 import io.legado.app.domain.gateway.HomepageSettingsGateway
 import io.legado.app.domain.gateway.ImportBookSettingsGateway
 import io.legado.app.domain.gateway.LabSettingsGateway
@@ -122,7 +111,6 @@ import io.legado.app.ui.about.AboutViewModel
 import io.legado.app.ui.association.ImportReplaceRuleViewModel
 import io.legado.app.ui.association.ImportTxtTocRuleViewModel
 import io.legado.app.ui.book.bookmark.AllBookmarkViewModel
-import io.legado.app.ui.book.changecover.ChangeCoverViewModel
 import io.legado.app.ui.book.group.GroupViewModel
 import io.legado.app.ui.book.info.BookInfoViewModel
 import io.legado.app.ui.book.info.edit.BookInfoEditViewModel
@@ -155,13 +143,13 @@ import io.legado.app.ui.replace.ReplaceRuleViewModel
 import io.legado.app.ui.replace.edit.ReplaceEditViewModel
 import io.legado.app.utils.isNightMode
 import io.legado.app.utils.sysConfiguration
+import kotlin.time.Clock
 import kotlinx.coroutines.Dispatchers
 import org.koin.core.module.dsl.factoryOf
 import org.koin.core.module.dsl.singleOf
 import org.koin.core.module.dsl.viewModel
 import org.koin.core.module.dsl.viewModelOf
 import org.koin.dsl.module
-import kotlin.time.Clock
 
 val appModule = module {
 
@@ -169,7 +157,6 @@ val appModule = module {
     single { get<AppDatabase>().bookDao }
     single { get<AppDatabase>().bookChapterDao }
     single { get<AppDatabase>().bookGroupDao }
-    single { get<AppDatabase>().bookSourceDao }
     single { get<AppDatabase>().searchContentHistoryDao }
 
     singleOf(::ReadRecordRepository)
@@ -177,7 +164,6 @@ val appModule = module {
     singleOf(::BookRepository)
     singleOf(::BookImportRepository)
     singleOf(::BookGroupRepository)
-    singleOf(::BookSourceRepository)
     singleOf(::BookmarkRepository)
     single<BookGroupMutationGateway> { BookGroupMutationRepository(get()) }
     singleOf(::BookshelfRepository)
@@ -237,8 +223,6 @@ val appModule = module {
     singleOf(::WebDavBackupUseCase)
     singleOf(::ThemePackageManager)
 
-    single<AiProfileGateway> { AiProfileRepository(get()) }
-    single<AiTextGateway> { AiTextRepositoryImpl() }
     single<AppStartupGateway> { AppStartupRepository(get()) }
     single<BackupRestoreGateway> { BackupRestoreRepository() }
     single<BookCacheCleanupGateway> { BookCacheCleanupRepository(get()) }
@@ -249,15 +233,9 @@ val appModule = module {
     single<LocalDirectoryGateway> { LocalDirectoryRepository(get()) }
     single<DatabaseMaintenanceGateway> { DatabaseMaintenanceRepository(get()) }
     single<WebDavBackupGateway> { WebDavBackupRepository() }
-    single<HomepageModulesGateway> { HomepageModulesRepository(get(), get()) }
     single<BookDomainRepository> { BookDomainRepositoryImpl(get(), get()) }
     single<BookContentProcessGateway> { BookContentProcessRepository(get()) }
     single<BookMarkingGateway> { BookMarkingRepository(get()) }
-    single<BookKnowledgeGateway> { BookKnowledgeRepository(get()) }
-    single {
-        SearchRepositoryImpl(get())
-    }
-    single<SearchRepository> { get<SearchRepositoryImpl>() }
     singleOf(::SaveBookContentProcessUseCase)
     singleOf(::SaveMarkingUseCase)
     singleOf(::VerifyBookmarkTargetUseCase)
@@ -358,20 +336,18 @@ val appModule = module {
             backupSettingsGateway = get(),
             otherSettingsGateway = get(),
             themeSettingsGateway = get(),
-            bookSourceRepository = get(),
             bookmarkRepository = get(),
             bookRepository = get(),
             readRecordRepository = get(),
             readerSession = get(),
         )
     }
-    viewModelOf(::ChangeCoverViewModel)
 
     viewModel { (route: ReplaceEditRoute) ->
         ReplaceEditViewModel(
             app = get(),
             replaceRuleRepository = get(),
-            route = route
+            route = route,
         )
     }
 

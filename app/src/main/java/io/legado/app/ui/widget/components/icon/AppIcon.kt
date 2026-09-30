@@ -35,24 +35,26 @@ fun AppIcon(
     val defaultTintColor = LegadoTheme.colorScheme.onSurface
     val finalTint = tint.takeOrElse { defaultTintColor }
 
-    val colorFilter = remember(finalTint) {
-        if (finalTint == Color.Unspecified) null else ColorFilter.tint(finalTint)
-    }
-
-    val semantics = if (contentDescription != null) {
-        Modifier.semantics {
-            this.contentDescription = contentDescription
-            this.role = Role.Image
+    val colorFilter =
+        remember(finalTint) {
+            if (finalTint == Color.Unspecified) null else ColorFilter.tint(finalTint)
         }
-    } else {
-        Modifier
-    }
+
+    val semantics =
+        if (contentDescription != null) {
+            Modifier.semantics {
+                this.contentDescription = contentDescription
+                this.role = Role.Image
+            }
+        } else {
+            Modifier
+        }
 
     Box(
         modifier
             .defaultIconSize(painter)
             .paint(painter, colorFilter = colorFilter, contentScale = ContentScale.Fit)
-            .then(semantics)
+            .then(semantics),
     )
 }
 
@@ -77,12 +79,10 @@ fun AppIcon(
  * 3. 辅助扩展函数：处理图标的默认尺寸
  * M3 和 MIUIX 内部都有 defaultSizeFor，如果 painter 没有固有尺寸，默认设为 24.dp
  */
-private fun Modifier.defaultIconSize(painter: Painter): Modifier {
-    return this.then(
-        if (painter.intrinsicSize == Size.Unspecified || painter.intrinsicSize.isUnspecified) {
-            Modifier.size(24.dp)
-        } else {
-            Modifier
-        }
-    )
-}
+private fun Modifier.defaultIconSize(painter: Painter): Modifier = this.then(
+    if (painter.intrinsicSize == Size.Unspecified || painter.intrinsicSize.isUnspecified) {
+        Modifier.size(24.dp)
+    } else {
+        Modifier
+    },
+)

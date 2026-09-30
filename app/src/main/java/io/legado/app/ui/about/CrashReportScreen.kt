@@ -38,12 +38,13 @@ fun CrashReportScreen(
     errorText: String,
     onCopy: () -> Unit,
     onRestart: () -> Unit,
-    onClose: () -> Unit
+    onClose: () -> Unit,
 ) {
     val scrollBehavior = GlassTopAppBarDefaults.defaultScrollBehavior()
-    val displayText = errorText.ifBlank {
-        stringResource(R.string.crash_report_empty)
-    }
+    val displayText =
+        errorText.ifBlank {
+            stringResource(R.string.crash_report_empty)
+        }
 
     AppScaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
@@ -53,53 +54,53 @@ fun CrashReportScreen(
                 navigationIcon = {
                     TopBarNavigationButton(
                         onClick = onClose,
-                        imageVector = AppIcons.Close
+                        imageVector = AppIcons.Close,
                     )
                 },
-                scrollBehavior = scrollBehavior
+                scrollBehavior = scrollBehavior,
             )
-        }
+        },
     ) { padding ->
         Column(
-            modifier = Modifier
+            modifier =
+            Modifier
                 .fillMaxSize()
                 .padding(padding)
                 .padding(horizontal = 16.dp, vertical = 12.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+            verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-
             Icon(
                 imageVector = AppIcons.BugReport,
                 contentDescription = null,
                 modifier = Modifier.size(48.dp),
-                tint = LegadoTheme.colorScheme.error
+                tint = LegadoTheme.colorScheme.error,
             )
             AppText(
                 text = stringResource(R.string.crash_report_message),
-                style = LegadoTheme.typography.titleMedium
+                style = LegadoTheme.typography.titleMedium,
             )
 
-
             SelectionContainer(
-                modifier = Modifier
+                modifier =
+                Modifier
                     .weight(1f)
                     .fillMaxWidth()
                     .background(
                         color = LegadoTheme.colorScheme.surfaceContainerLow,
-                        shape = RoundedCornerShape(12.dp)
-                    )
-                    .padding(12.dp)
+                        shape = RoundedCornerShape(12.dp),
+                    ).padding(12.dp)
                     .verticalScroll(rememberScrollState())
-                    .horizontalScroll(rememberScrollState())
+                    .horizontalScroll(rememberScrollState()),
             ) {
                 AppText(
                     text = displayText,
-                    style = LegadoTheme.typography.bodySmall.copy(
+                    style =
+                    LegadoTheme.typography.bodySmall.copy(
                         fontFamily = FontFamily.Monospace,
                         letterSpacing = 0.sp,
-                        lineHeight = 16.sp
+                        lineHeight = 16.sp,
                     ),
-                    softWrap = false
+                    softWrap = false,
                 )
             }
 
@@ -108,7 +109,7 @@ fun CrashReportScreen(
                 onConfirm = onCopy,
                 dismissText = stringResource(R.string.restart_app),
                 confirmText = stringResource(R.string.copy_text),
-                confirmEnabled = errorText.isNotBlank()
+                confirmEnabled = errorText.isNotBlank(),
             )
         }
     }

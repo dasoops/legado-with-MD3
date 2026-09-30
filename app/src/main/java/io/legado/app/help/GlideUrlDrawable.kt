@@ -5,8 +5,9 @@ import android.graphics.ColorFilter
 import android.graphics.PixelFormat
 import android.graphics.drawable.Drawable
 
-class GlideUrlDrawable(): Drawable() {
+class GlideUrlDrawable : Drawable() {
     private var mDrawable: Drawable? = null
+
     fun setDrawable(drawable: Drawable?) {
         this.mDrawable = drawable
         drawable?.bounds?.let { bounds ->
@@ -18,10 +19,9 @@ class GlideUrlDrawable(): Drawable() {
     override fun draw(canvas: Canvas) {
         mDrawable?.draw(canvas)
     }
+
     @Deprecated("Deprecated in Java")
-    override fun getOpacity(): Int {
-        return PixelFormat.TRANSLUCENT
-    }
+    override fun getOpacity(): Int = PixelFormat.TRANSLUCENT
 
     override fun setAlpha(alpha: Int) {
         mDrawable?.alpha = alpha

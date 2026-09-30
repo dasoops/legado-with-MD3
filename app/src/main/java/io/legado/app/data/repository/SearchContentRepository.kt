@@ -1,12 +1,12 @@
 package io.legado.app.data.repository
 
 import io.legado.app.data.appDb
+import io.legado.app.data.dao.SearchContentHistoryDao
 import io.legado.app.data.entities.Book
 import io.legado.app.data.entities.BookChapter
 import io.legado.app.data.entities.SearchContentHistory
-import io.legado.app.data.dao.SearchContentHistoryDao
-import io.legado.app.domain.gateway.ReadSettingsGateway
 import io.legado.app.domain.gateway.OtherSettingsGateway
+import io.legado.app.domain.gateway.ReadSettingsGateway
 import io.legado.app.help.book.BookHelp
 import io.legado.app.help.book.ContentProcessor
 import io.legado.app.help.book.isLocal
@@ -25,27 +25,35 @@ class SearchContentRepository(
     private val readSettingsGateway: ReadSettingsGateway? = null,
     private val otherSettingsGateway: OtherSettingsGateway? = null,
 ) {
-
     private val effectiveHistoryDao: SearchContentHistoryDao
         get() = historyDao ?: appDb.searchContentHistoryDao
 
-    fun observeHistory(book: Book?, onlyThisBook: Boolean): Flow<List<SearchContentHistory>> =
-        if (onlyThisBook && book != null) {
-            effectiveHistoryDao.getByBook(book.name, book.author)
-        } else {
-            effectiveHistoryDao.getAll()
-        }
+    fun observeHistory(
+        book: Book?,
+        onlyThisBook: Boolean,
+    ): Flow<List<SearchContentHistory>> = if (onlyThisBook && book != null) {
+        effectiveHistoryDao.getByBook(book.name, book.author)
+    } else {
+        effectiveHistoryDao.getAll()
+    }
 
-    suspend fun saveHistory(book: Book, query: String) {
-        val history = effectiveHistoryDao.get(book.name, book.author, query)
-            ?: SearchContentHistory(bookName = book.name, bookAuthor = book.author, query = query)
+    suspend fun saveHistory(
+        book: Book,
+        query: String,
+    ) {
+        val history =
+            effectiveHistoryDao.get(book.name, book.author, query)
+                ?: SearchContentHistory(bookName = book.name, bookAuthor = book.author, query = query)
         history.time = System.currentTimeMillis()
         effectiveHistoryDao.insert(history)
     }
 
     suspend fun deleteHistory(id: Long) = effectiveHistoryDao.delete(id)
 
-    suspend fun clearHistory(book: Book?, onlyThisBook: Boolean) {
+    suspend fun clearHistory(
+        book: Book?,
+        onlyThisBook: Boolean,
+    ) {
         if (onlyThisBook && book != null) {
             effectiveHistoryDao.deleteByBook(book.name, book.author)
         } else {
@@ -65,9 +73,7 @@ class SearchContentRepository(
         val results: List<SearchResult>,
     )
 
-    fun getLastSession(bookUrl: String): SearchSession? {
-        return lastSearchSession?.takeIf { it.bookUrl == bookUrl }
-    }
+    fun getLastSession(bookUrl: String): SearchSession? = lastSearchSession?.takeIf { it.bookUrl == bookUrl }
 
     fun beginSearch(
         bookUrl: String,
@@ -90,13 +96,18 @@ class SearchContentRepository(
         bookUrl: String,
         query: String,
         replaceEnabled: Boolean,
-        regexReplace: Boolean
+        regexReplace: Boolean,
     ): List<SearchResult>? {
         val key = searchKey(bookUrl, query, replaceEnabled, regexReplace)
         return if (lastQueryKey == key) lastSearchResults else null
     }
 
-    fun search(book: Book, query: String, replaceEnabled: Boolean, regexReplace: Boolean): Flow<List<SearchResult>> = flow {
+    fun search(
+        book: Book,
+        query: String,
+        replaceEnabled: Boolean,
+        regexReplace: Boolean,
+    ): Flow<List<SearchResult>> = flow {
         val chapters = appDb.bookChapterDao.getChapterList(book.bookUrl)
         val totalChapters = chapters.size
         val contentProcessor = ContentProcessor.get(book.name, book.origin)
@@ -107,26 +118,26 @@ class SearchContentRepository(
         val allResults = mutableListOf<SearchResult>()
 
         for (bookChapter in chapters) {
-
             currentCoroutineContext().ensureActive()
 
             if (book.isLocal || cacheChapterNames.contains(bookChapter.getFileName())) {
-                val chapterResults = searchChapter(
-                    query,
-                    book,
-                    bookChapter,
-                    contentProcessor,
-                    replaceEnabled,
-                    regexReplace,
-                    chineseConverterType,
-                    defaultReplaceEnabled,
-                ).map {
-                    if (totalChapters > 0) {
-                        it.copy(progressPercent = (bookChapter.index + 1).toFloat() / totalChapters * 100f)
-                    } else {
-                        it
+                val chapterResults =
+                    searchChapter(
+                        query,
+                        book,
+                        bookChapter,
+                        contentProcessor,
+                        replaceEnabled,
+                        regexReplace,
+                        chineseConverterType,
+                        defaultReplaceEnabled,
+                    ).map {
+                        if (totalChapters > 0) {
+                            it.copy(progressPercent = (bookChapter.index + 1).toFloat() / totalChapters * 100f)
+                        } else {
+                            it
+                        }
                     }
-                }
 
                 if (chapterResults.isNotEmpty()) {
                     allResults.addAll(chapterResults)
@@ -149,23 +160,22 @@ class SearchContentRepository(
         val cachedResults = ArrayList(results)
         lastSearchResults = cachedResults
         lastQueryKey = searchKey(bookUrl, query, replaceEnabled, regexReplace)
-        lastSearchSession = SearchSession(
-            bookUrl = bookUrl,
-            query = query,
-            replaceEnabled = replaceEnabled,
-            regexReplace = regexReplace,
-            results = cachedResults,
-        )
+        lastSearchSession =
+            SearchSession(
+                bookUrl = bookUrl,
+                query = query,
+                replaceEnabled = replaceEnabled,
+                regexReplace = regexReplace,
+                results = cachedResults,
+            )
     }
 
     private fun searchKey(
         bookUrl: String,
         query: String,
         replaceEnabled: Boolean,
-        regexReplace: Boolean
-    ): String {
-        return "$bookUrl-$query-$replaceEnabled-$regexReplace-${titleModeProvider()}"
-    }
+        regexReplace: Boolean,
+    ): String = "$bookUrl-$query-$replaceEnabled-$regexReplace-${titleModeProvider()}"
 
     private suspend fun searchChapter(
         query: String,
@@ -180,55 +190,65 @@ class SearchContentRepository(
         val searchResultsWithinChapter: MutableList<SearchResult> = mutableListOf()
         val chapterContent = BookHelp.getContent(book, chapter) ?: return searchResultsWithinChapter
 
-        chapter.title = when (chineseConverterType) {
-            1 -> ChineseUtils.t2s(chapter.title)
-            2 -> ChineseUtils.s2t(chapter.title)
-            else -> chapter.title
-        }
+        chapter.title =
+            when (chineseConverterType) {
+                1 -> ChineseUtils.t2s(chapter.title)
+                2 -> ChineseUtils.s2t(chapter.title)
+                else -> chapter.title
+            }
 
-        val bodyContent = contentProcessor.getContent(
-            book,
-            chapter,
-            chapterContent,
-            includeTitle = false,
-            useReplace = replaceEnabled
-        )
-        val includeTitle = titleModeProvider() != 2 ||
+        val bodyContent =
+            contentProcessor.getContent(
+                book,
+                chapter,
+                chapterContent,
+                includeTitle = false,
+                useReplace = replaceEnabled,
+            )
+        val includeTitle =
+            titleModeProvider() != 2 ||
                 chapter.isVolume ||
                 bodyContent.textList.isEmpty()
-        val mContent = if (includeTitle) {
-            val title = chapter.getDisplayTitle(
-                contentProcessor.getTitleReplaceRules(),
-                useReplace = replaceEnabled && book.getUseReplaceRule(defaultReplaceEnabled),
-                chineseConverterType = chineseConverterType,
-            )
-            listOf(title).plus(bodyContent.textList).joinToString("\n")
-        } else {
-            bodyContent.toString()
-        }
+        val mContent =
+            if (includeTitle) {
+                val title =
+                    chapter.getDisplayTitle(
+                        contentProcessor.getTitleReplaceRules(),
+                        useReplace = replaceEnabled && book.getUseReplaceRule(defaultReplaceEnabled),
+                        chineseConverterType = chineseConverterType,
+                    )
+                listOf(title).plus(bodyContent.textList).joinToString("\n")
+            } else {
+                bodyContent.toString()
+            }
 
         val matches = searchPosition(mContent, query, regexReplace)
 
         matches.forEachIndexed { index, match ->
             val construct = getResultAndQueryIndex(mContent, match.position, match.length)
-            val result = SearchResult(
-                bookUrl = book.bookUrl,
-                resultCountWithinChapter = index,
-                resultText = construct.second,
-                chapterTitle = chapter.title,
-                query = query,
-                chapterIndex = chapter.index,
-                queryIndexInResult = construct.first,
-                queryIndexInChapter = match.position,
-                matchLength = match.length,
-                isRegex = regexReplace
-            )
+            val result =
+                SearchResult(
+                    bookUrl = book.bookUrl,
+                    resultCountWithinChapter = index,
+                    resultText = construct.second,
+                    chapterTitle = chapter.title,
+                    query = query,
+                    chapterIndex = chapter.index,
+                    queryIndexInResult = construct.first,
+                    queryIndexInChapter = match.position,
+                    matchLength = match.length,
+                    isRegex = regexReplace,
+                )
             searchResultsWithinChapter.add(result)
         }
         return searchResultsWithinChapter
     }
 
-    private fun searchPosition(content: String, pattern: String, regexReplace: Boolean): List<SearchMatch> {
+    private fun searchPosition(
+        content: String,
+        pattern: String,
+        regexReplace: Boolean,
+    ): List<SearchMatch> {
         val positions: MutableList<SearchMatch> = mutableListOf()
         if (regexReplace) { // 正则表达式搜索
             try {
@@ -251,7 +271,7 @@ class SearchContentRepository(
     private fun getResultAndQueryIndex(
         content: String,
         queryIndexInContent: Int,
-        matchLength: Int
+        matchLength: Int,
     ): Pair<Int, String> {
         val length = 12
         var po1 = queryIndexInContent - length
@@ -271,5 +291,4 @@ class SearchContentRepository(
         val position: Int,
         val length: Int,
     )
-
 }

@@ -10,12 +10,12 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.VolumeUp
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.LightMode
 import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material.icons.automirrored.filled.VolumeUp
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
@@ -24,8 +24,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import io.legado.app.R
 import io.legado.app.ui.widget.components.button.series.MediumTonalButton
-import kotlinx.coroutines.delay
 import kotlin.time.Duration.Companion.seconds
+import kotlinx.coroutines.delay
 
 /**
  * 阅读界面底部悬浮胶囊组：独立悬浮窗纵向堆叠（朗读脱离提示、阅读锚点、主题切换提醒）。
@@ -38,15 +38,18 @@ fun ReadBookFloatingActionBar(
     state: ReadBookUiState,
     onIntent: (ReadBookIntent) -> Unit,
 ) {
-    val anchorVisible = state.readingAnchorAvailable &&
-        !state.menuVisible && !state.isShowingSearchResult
+    val anchorVisible =
+        state.readingAnchorAvailable &&
+            !state.menuVisible &&
+            !state.isShowingSearchResult
     val reminder = state.activeReminder?.takeIf { !state.menuVisible }
     Box(Modifier.fillMaxSize()) {
         AnimatedVisibility(
             visible = anchorVisible || reminder != null,
             enter = fadeIn(),
             exit = fadeOut(),
-            modifier = Modifier
+            modifier =
+            Modifier
                 .align(Alignment.BottomCenter)
                 .padding(bottom = 88.dp),
         ) {
@@ -91,9 +94,10 @@ private fun ThemeReminderCapsule(
     onIntent: (ReadBookIntent) -> Unit,
 ) {
     val isDark = (reminder.type as? ReminderType.DayNightReminder)?.targetIsNight == true
-    val actionText = stringResource(
-        if (isDark) R.string.switch_to_dark_mode_action else R.string.switch_to_light_mode_action
-    )
+    val actionText =
+        stringResource(
+            if (isDark) R.string.switch_to_dark_mode_action else R.string.switch_to_light_mode_action,
+        )
     LaunchedEffect(reminder.id) {
         delay(5.seconds)
         onIntent(ReadBookIntent.DismissReminder)

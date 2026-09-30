@@ -14,6 +14,12 @@ import io.legado.app.domain.model.CoverAlbumImageInput
 import io.legado.app.domain.model.CoverAlbumSelection
 import io.legado.app.help.config.AppConfigStore
 import io.legado.app.utils.GSON
+import java.io.File
+import java.io.FileOutputStream
+import java.nio.file.StandardCopyOption
+import java.security.DigestInputStream
+import java.security.MessageDigest
+import kotlin.uuid.Uuid
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -26,18 +32,11 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
-import java.io.File
-import java.io.FileOutputStream
-import java.nio.file.StandardCopyOption
-import java.security.DigestInputStream
-import java.security.MessageDigest
-import kotlin.uuid.Uuid
 
 class CoverAlbumRepository(
     private val context: Context,
     private val preferences: SettingsRepository,
 ) : CoverAlbumGateway {
-
     companion object {
         private const val FORMAT_VERSION = 2
         private const val INDEX_FILE_NAME = "albums.json"
@@ -46,39 +45,52 @@ class CoverAlbumRepository(
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private val operationMutex = Mutex()
-    private val rootDir = File(
-        context.getExternalFilesDir(null) ?: context.filesDir,
-        "cover_albums",
-    )
+    private val rootDir =
+        File(
+            context.getExternalFilesDir(null) ?: context.filesDir,
+            "cover_albums",
+        )
     private val indexFile = File(rootDir, INDEX_FILE_NAME)
 
-    private val initialSelection = runBlocking {
-        InitialSelection(
-            albumId = preferences.getPreference(
-                LocalPreferencesKeys.SELECTED_COVER_ALBUM_ID,
-                "",
-            ).first().ifBlank { null },
-            lightAlbumId = preferences.getPreference(
-                LocalPreferencesKeys.SELECTED_LIGHT_COVER_ALBUM_ID,
-                "",
-            ).first().ifBlank { null },
-            darkAlbumId = preferences.getPreference(
-                LocalPreferencesKeys.SELECTED_DARK_COVER_ALBUM_ID,
-                "",
-            ).first().ifBlank { null },
-        )
-    }
+    private val initialSelection =
+        runBlocking {
+            InitialSelection(
+                albumId =
+                preferences
+                    .getPreference(
+                        LocalPreferencesKeys.SELECTED_COVER_ALBUM_ID,
+                        "",
+                    ).first()
+                    .ifBlank { null },
+                lightAlbumId =
+                preferences
+                    .getPreference(
+                        LocalPreferencesKeys.SELECTED_LIGHT_COVER_ALBUM_ID,
+                        "",
+                    ).first()
+                    .ifBlank { null },
+                darkAlbumId =
+                preferences
+                    .getPreference(
+                        LocalPreferencesKeys.SELECTED_DARK_COVER_ALBUM_ID,
+                        "",
+                    ).first()
+                    .ifBlank { null },
+            )
+        }
 
     private val _albums = MutableStateFlow(loadAlbums(initialSelection))
     override val albums: StateFlow<List<CoverAlbum>> = _albums.asStateFlow()
 
-    private val _selection = MutableStateFlow(
-        CoverAlbumSelection(
-            albumId = initialSelection.albumId
-                ?: initialSelection.lightAlbumId
-                ?: initialSelection.darkAlbumId,
+    private val _selection =
+        MutableStateFlow(
+            CoverAlbumSelection(
+                albumId =
+                initialSelection.albumId
+                    ?: initialSelection.lightAlbumId
+                    ?: initialSelection.darkAlbumId,
+            ),
         )
-    )
     override val selection: StateFlow<CoverAlbumSelection> = _selection.asStateFlow()
 
     init {
@@ -87,22 +99,21 @@ class CoverAlbumRepository(
         }
     }
 
-    override fun selectedImagePaths(isDark: Boolean): List<String> {
-        return _albums.value
-            .firstOrNull { it.id == _selection.value.albumId }
-            ?.let { if (isDark) it.darkImages else it.lightImages }
-            ?.map { it.path }
-            .orEmpty()
-    }
+    override fun selectedImagePaths(isDark: Boolean): List<String> = _albums.value
+        .firstOrNull { it.id == _selection.value.albumId }
+        ?.let { if (isDark) it.darkImages else it.lightImages }
+        ?.map { it.path }
+        .orEmpty()
 
     override suspend fun createAlbum(name: String): String = withContext(Dispatchers.IO) {
         operationMutex.withLock {
-            val album = CoverAlbum(
-                id = Uuid.random().toString(),
-                name = name.trim(),
-                lightImages = emptyList(),
-                darkImages = emptyList(),
-            )
+            val album =
+                CoverAlbum(
+                    id = Uuid.random().toString(),
+                    name = name.trim(),
+                    lightImages = emptyList(),
+                    darkImages = emptyList(),
+                )
             replaceAlbums(_albums.value + album)
             album.id
         }
@@ -117,12 +128,13 @@ class CoverAlbumRepository(
             val albumId = Uuid.random().toString()
             val importedLightImages = copyImages(albumId, lightImages)
             val importedDarkImages = copyImages(albumId, darkImages)
-            val album = CoverAlbum(
-                id = albumId,
-                name = name.trim(),
-                lightImages = importedLightImages,
-                darkImages = importedDarkImages,
-            )
+            val album =
+                CoverAlbum(
+                    id = albumId,
+                    name = name.trim(),
+                    lightImages = importedLightImages,
+                    darkImages = importedDarkImages,
+                )
             runCatching {
                 replaceAlbums(_albums.value + album)
             }.onFailure {
@@ -140,7 +152,7 @@ class CoverAlbumRepository(
             replaceAlbums(
                 _albums.value.map { album ->
                     if (album.id == albumId) album.copy(name = name.trim()) else album
-                }
+                },
             )
         }
     }
@@ -172,15 +184,16 @@ class CoverAlbumRepository(
                         it
                     } else if (isDark) {
                         it.copy(
-                            darkImages = (it.darkImages + imported).distinctBy { image -> image.id }
+                            darkImages = (it.darkImages + imported).distinctBy { image -> image.id },
                         )
                     } else {
                         it.copy(
-                            lightImages = (it.lightImages + imported)
-                                .distinctBy { image -> image.id }
+                            lightImages =
+                            (it.lightImages + imported)
+                                .distinctBy { image -> image.id },
                         )
                     }
-                }
+                },
             )
             syncLegacyCoverPaths()
         }
@@ -200,21 +213,22 @@ class CoverAlbumRepository(
                     if (it.id == albumId) {
                         if (isDark) {
                             it.copy(
-                                darkImages = it.darkImages.filterNot { item -> item.id == imageId }
+                                darkImages = it.darkImages.filterNot { item -> item.id == imageId },
                             )
                         } else {
                             it.copy(
-                                lightImages = it.lightImages.filterNot { item -> item.id == imageId }
+                                lightImages = it.lightImages.filterNot { item -> item.id == imageId },
                             )
                         }
                     } else {
                         it
                     }
-                }
+                },
             )
             val updatedAlbum = _albums.value.first { it.id == albumId }
-            val stillUsed = (updatedAlbum.lightImages + updatedAlbum.darkImages)
-                .any { it.path == image.path }
+            val stillUsed =
+                (updatedAlbum.lightImages + updatedAlbum.darkImages)
+                    .any { it.path == image.path }
             if (!stillUsed) File(image.path).delete()
             syncLegacyCoverPaths()
         }
@@ -235,19 +249,26 @@ class CoverAlbumRepository(
             ) {
                 persistSelection(albumId = null)
             }
-            val migrated = preferences.getPreference(
-                LocalPreferencesKeys.COVER_ALBUM_MIGRATED,
-                false,
-            ).first()
-            val legacyLight = AppConfigStore.getString(PreferKey.defaultCover)
-                .orEmpty()
-                .toExistingFiles()
-            val legacyDark = AppConfigStore.getString(PreferKey.defaultCoverDark)
-                .orEmpty()
-                .toExistingFiles()
-            val needsRecovery = _albums.value.isEmpty() &&
-                _selection.value.albumId == null &&
-                (legacyLight.isNotEmpty() || legacyDark.isNotEmpty())
+            val migrated =
+                preferences
+                    .getPreference(
+                        LocalPreferencesKeys.COVER_ALBUM_MIGRATED,
+                        false,
+                    ).first()
+            val legacyLight =
+                AppConfigStore
+                    .getString(PreferKey.defaultCover)
+                    .orEmpty()
+                    .toExistingFiles()
+            val legacyDark =
+                AppConfigStore
+                    .getString(PreferKey.defaultCoverDark)
+                    .orEmpty()
+                    .toExistingFiles()
+            val needsRecovery =
+                _albums.value.isEmpty() &&
+                    _selection.value.albumId == null &&
+                    (legacyLight.isNotEmpty() || legacyDark.isNotEmpty())
             if (migrated && !needsRecovery) {
                 preferences.updatePreference(
                     LocalPreferencesKeys.SELECTED_COVER_ALBUM_ID,
@@ -260,18 +281,21 @@ class CoverAlbumRepository(
             var updatedAlbums = _albums.value
             if (legacyLight.isNotEmpty() || legacyDark.isNotEmpty()) {
                 val existing = updatedAlbums.firstOrNull { it.id == LEGACY_DEFAULT_ALBUM_ID }
-                val album = CoverAlbum(
-                    id = LEGACY_DEFAULT_ALBUM_ID,
-                    name = existing?.name ?: context.getString(R.string.default_cover),
-                    lightImages = (
-                        existing?.lightImages.orEmpty() +
-                            copyImages(LEGACY_DEFAULT_ALBUM_ID, legacyLight.toInputs())
-                        ).distinctBy { it.id },
-                    darkImages = (
-                        existing?.darkImages.orEmpty() +
-                            copyImages(LEGACY_DEFAULT_ALBUM_ID, legacyDark.toInputs())
-                        ).distinctBy { it.id },
-                )
+                val album =
+                    CoverAlbum(
+                        id = LEGACY_DEFAULT_ALBUM_ID,
+                        name = existing?.name ?: context.getString(R.string.default_cover),
+                        lightImages =
+                        (
+                            existing?.lightImages.orEmpty() +
+                                copyImages(LEGACY_DEFAULT_ALBUM_ID, legacyLight.toInputs())
+                            ).distinctBy { it.id },
+                        darkImages =
+                        (
+                            existing?.darkImages.orEmpty() +
+                                copyImages(LEGACY_DEFAULT_ALBUM_ID, legacyDark.toInputs())
+                            ).distinctBy { it.id },
+                    )
                 updatedAlbums = updatedAlbums.filterNot { it.id == album.id } + album
                 persistSelection(album.id)
             }
@@ -296,7 +320,7 @@ class CoverAlbumRepository(
             mapOf(
                 PreferKey.defaultCover to selectedImagePaths(isDark = false).joinToString(","),
                 PreferKey.defaultCoverDark to selectedImagePaths(isDark = true).joinToString(","),
-            )
+            ),
         )
     }
 
@@ -308,11 +332,12 @@ class CoverAlbumRepository(
         val albumDir = File(rootDir, albumId).apply { mkdirs() }
         return inputs.mapNotNull { input ->
             runCatching {
-                val extension = input.displayName
-                    .substringAfterLast('.', "img")
-                    .lowercase()
-                    .takeIf { it.matches(Regex("[a-z0-9]{1,8}")) }
-                    ?: "img"
+                val extension =
+                    input.displayName
+                        .substringAfterLast('.', "img")
+                        .lowercase()
+                        .takeIf { it.matches(Regex("[a-z0-9]{1,8}")) }
+                        ?: "img"
                 val tempFile = File(albumDir, ".${Uuid.random()}.tmp")
                 val digest = MessageDigest.getInstance("SHA-256")
                 input.openStream().use { source ->
@@ -348,17 +373,19 @@ class CoverAlbumRepository(
 
     private fun persistAlbums(albums: List<CoverAlbum>) {
         rootDir.mkdirs()
-        val stored = StoredCoverAlbumIndex(
-            formatVersion = FORMAT_VERSION,
-            albums = albums.map { album ->
-                StoredCoverAlbum(
-                    id = album.id,
-                    name = album.name,
-                    lightImages = album.lightImages.map { it.fileName },
-                    darkImages = album.darkImages.map { it.fileName },
-                )
-            },
-        )
+        val stored =
+            StoredCoverAlbumIndex(
+                formatVersion = FORMAT_VERSION,
+                albums =
+                albums.map { album ->
+                    StoredCoverAlbum(
+                        id = album.id,
+                        name = album.name,
+                        lightImages = album.lightImages.map { it.fileName },
+                        darkImages = album.darkImages.map { it.fileName },
+                    )
+                },
+            )
         val temp = File(rootDir, "$INDEX_FILE_NAME.tmp")
         FileOutputStream(temp).bufferedWriter().use { writer ->
             GSON.toJson(stored, writer)
@@ -382,46 +409,52 @@ class CoverAlbumRepository(
     private fun loadAlbums(selection: InitialSelection): List<CoverAlbum> {
         if (!indexFile.isFile) return emptyList()
         return runCatching {
-            val stored = indexFile.bufferedReader().use {
-                GSON.fromJson(it, StoredCoverAlbumIndex::class.java)
-            }
-            var albums = stored.albums.map { album ->
-                val legacyImages = album.images.mapExistingImages(album.id)
-                val lightFileNames = if (stored.formatVersion >= FORMAT_VERSION) {
-                    album.lightImages
-                } else if (album.id == selection.darkAlbumId &&
-                    album.id != selection.lightAlbumId
-                ) {
-                    emptyList()
-                } else {
-                    album.images
+            val stored =
+                indexFile.bufferedReader().use {
+                    GSON.fromJson(it, StoredCoverAlbumIndex::class.java)
                 }
-                val darkFileNames = if (stored.formatVersion >= FORMAT_VERSION) {
-                    album.darkImages
-                } else if (album.id == selection.darkAlbumId) {
-                    album.images
-                } else {
-                    emptyList()
+            var albums =
+                stored.albums.map { album ->
+                    val legacyImages = album.images.mapExistingImages(album.id)
+                    val lightFileNames =
+                        if (stored.formatVersion >= FORMAT_VERSION) {
+                            album.lightImages
+                        } else if (album.id == selection.darkAlbumId &&
+                            album.id != selection.lightAlbumId
+                        ) {
+                            emptyList()
+                        } else {
+                            album.images
+                        }
+                    val darkFileNames =
+                        if (stored.formatVersion >= FORMAT_VERSION) {
+                            album.darkImages
+                        } else if (album.id == selection.darkAlbumId) {
+                            album.images
+                        } else {
+                            emptyList()
+                        }
+                    CoverAlbum(
+                        id = album.id,
+                        name = album.name,
+                        lightImages =
+                        if (stored.formatVersion >= FORMAT_VERSION) {
+                            lightFileNames.mapExistingImages(album.id)
+                        } else if (lightFileNames == album.images) {
+                            legacyImages
+                        } else {
+                            emptyList()
+                        },
+                        darkImages =
+                        if (stored.formatVersion >= FORMAT_VERSION) {
+                            darkFileNames.mapExistingImages(album.id)
+                        } else if (darkFileNames == album.images) {
+                            legacyImages
+                        } else {
+                            emptyList()
+                        },
+                    )
                 }
-                CoverAlbum(
-                    id = album.id,
-                    name = album.name,
-                    lightImages = if (stored.formatVersion >= FORMAT_VERSION) {
-                        lightFileNames.mapExistingImages(album.id)
-                    } else if (lightFileNames == album.images) {
-                        legacyImages
-                    } else {
-                        emptyList()
-                    },
-                    darkImages = if (stored.formatVersion >= FORMAT_VERSION) {
-                        darkFileNames.mapExistingImages(album.id)
-                    } else if (darkFileNames == album.images) {
-                        legacyImages
-                    } else {
-                        emptyList()
-                    },
-                )
-            }
             if (stored.formatVersion < FORMAT_VERSION &&
                 selection.lightAlbumId != null &&
                 selection.darkAlbumId != null &&
@@ -430,19 +463,22 @@ class CoverAlbumRepository(
                 val lightAlbum = albums.firstOrNull { it.id == selection.lightAlbumId }
                 val darkAlbum = albums.firstOrNull { it.id == selection.darkAlbumId }
                 if (lightAlbum != null && darkAlbum != null) {
-                    val copiedDarkImages = copyImages(
-                        albumId = lightAlbum.id,
-                        inputs = darkAlbum.darkImages.map { image ->
-                            CoverAlbumImageInput(image.fileName) { File(image.path).inputStream() }
-                        },
-                    )
-                    albums = albums.map { album ->
-                        if (album.id == lightAlbum.id) {
-                            album.copy(darkImages = copiedDarkImages)
-                        } else {
-                            album
+                    val copiedDarkImages =
+                        copyImages(
+                            albumId = lightAlbum.id,
+                            inputs =
+                            darkAlbum.darkImages.map { image ->
+                                CoverAlbumImageInput(image.fileName) { File(image.path).inputStream() }
+                            },
+                        )
+                    albums =
+                        albums.map { album ->
+                            if (album.id == lightAlbum.id) {
+                                album.copy(darkImages = copiedDarkImages)
+                            } else {
+                                album
+                            }
                         }
-                    }
                 }
             }
             if (stored.formatVersion < FORMAT_VERSION) {
@@ -454,25 +490,23 @@ class CoverAlbumRepository(
         }.getOrDefault(emptyList())
     }
 
-    private fun List<String>.mapExistingImages(albumId: String): List<CoverAlbumImage> =
-        mapNotNull { fileName ->
-            val file = File(File(rootDir, albumId), fileName)
-            if (!file.isFile) return@mapNotNull null
-            CoverAlbumImage(
-                id = file.name,
-                fileName = file.name,
-                path = file.absolutePath,
-            )
-        }
+    private fun List<String>.mapExistingImages(albumId: String): List<CoverAlbumImage> = mapNotNull { fileName ->
+        val file = File(File(rootDir, albumId), fileName)
+        if (!file.isFile) return@mapNotNull null
+        CoverAlbumImage(
+            id = file.name,
+            fileName = file.name,
+            path = file.absolutePath,
+        )
+    }
 
-    private fun String.toExistingFiles(): List<File> =
-        split(",")
-            .asSequence()
-            .map(String::trim)
-            .filter(String::isNotEmpty)
-            .map(::File)
-            .filter(File::isFile)
-            .toList()
+    private fun String.toExistingFiles(): List<File> = split(",")
+        .asSequence()
+        .map(String::trim)
+        .filter(String::isNotEmpty)
+        .map(::File)
+        .filter(File::isFile)
+        .toList()
 
     private fun List<File>.toInputs(): List<CoverAlbumImageInput> = map { file ->
         CoverAlbumImageInput(file.name) { file.inputStream() }

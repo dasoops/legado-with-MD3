@@ -6,8 +6,11 @@ import org.junit.Assert.assertNull
 import org.junit.Test
 
 class ReaderBookmarkBadgeTest {
-    private fun badge(bookmarked: Boolean = true, scroll: Boolean = false, size: Int = 10) =
-        ReaderBookmarkBadge.create(bookmarked, scroll, 600, 100f, 30, 2f, size)
+    private fun badge(
+        bookmarked: Boolean = true,
+        scroll: Boolean = false,
+        size: Int = 10,
+    ) = ReaderBookmarkBadge.create(bookmarked, scroll, 600, 100f, 30, 2f, size)
 
     @Test
     fun topEdgeAnchorsToBodyTopAndPreservesRibbonRatio() {

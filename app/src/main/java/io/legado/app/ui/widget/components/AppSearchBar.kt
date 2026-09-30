@@ -94,9 +94,10 @@ fun AppSearchBar(
         return
     }
 
-    val initialSearchBarValue = remember {
-        if (expanded) SearchBarValue.Expanded else SearchBarValue.Collapsed
-    }
+    val initialSearchBarValue =
+        remember {
+            if (expanded) SearchBarValue.Expanded else SearchBarValue.Collapsed
+        }
     val searchBarState = rememberSearchBarState(initialValue = initialSearchBarValue)
     val textFieldState = rememberTextFieldState(initialText = query)
     val scope = rememberCoroutineScope()
@@ -157,12 +158,12 @@ fun AppSearchBar(
     SearchBar(
         modifier = modifier.padding(horizontal = 16.dp),
         state = searchBarState,
-        inputField = inputField
+        inputField = inputField,
     )
 
     ExpandedFullScreenSearchBar(
         state = searchBarState,
         inputField = inputField,
-        content = content
+        content = content,
     )
 }

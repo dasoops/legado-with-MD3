@@ -12,17 +12,14 @@ import java.security.MessageDigest
  * @radius: 0..25
  */
 class BlurTransformation(
-    @param:IntRange(from = 0, to = 25) private val radius: Int
+    @param:IntRange(from = 0, to = 25) private val radius: Int,
 ) : BitmapTransformation() {
-
     override fun transform(
         pool: BitmapPool,
         toTransform: Bitmap,
         outWidth: Int,
-        outHeight: Int
-    ): Bitmap {
-        return toTransform.stackBlur(radius)
-    }
+        outHeight: Int,
+    ): Bitmap = toTransform.stackBlur(radius)
 
     override fun updateDiskCacheKey(messageDigest: MessageDigest) {
         messageDigest.update("blur transformation".toByteArray())

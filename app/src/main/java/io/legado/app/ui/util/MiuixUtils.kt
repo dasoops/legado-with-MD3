@@ -45,6 +45,7 @@ val LocalIsWideScreen = staticCompositionLocalOf { false }
 
 interface MiuixNavigator {
     fun pop()
+
     fun push(route: Any)
 }
 
@@ -82,12 +83,15 @@ fun pageContentPadding(
     extraEnd: Dp = 0.dp,
 ): PaddingValues {
     val topPadding = innerPadding.calculateTopPadding() + extraTop
-    val bottomPadding = if (isWideScreen) {
-        WindowInsets.navigationBars.asPaddingValues()
-            .calculateBottomPadding() + outerPadding.calculateBottomPadding()
-    } else {
-        outerPadding.calculateBottomPadding()
-    }
+    val bottomPadding =
+        if (isWideScreen) {
+            WindowInsets.navigationBars
+                .asPaddingValues()
+                .calculateBottomPadding() +
+                outerPadding.calculateBottomPadding()
+        } else {
+            outerPadding.calculateBottomPadding()
+        }
     return remember(topPadding, bottomPadding, extraStart, extraEnd) {
         PaddingValues(
             top = topPadding,
@@ -154,13 +158,16 @@ fun BlurredBar(
     content: @Composable () -> Unit,
 ) {
     Box(
-        modifier = if (blurEnabled && backdrop != null) {
+        modifier =
+        if (blurEnabled && backdrop != null) {
             Modifier.textureBlur(
                 backdrop = backdrop,
                 shape = RectangleShape,
                 blurRadius = 25f,
-                colors = BlurColors(
-                    blendColors = listOf(
+                colors =
+                BlurColors(
+                    blendColors =
+                    listOf(
                         BlendColorEntry(color = MiuixTheme.colorScheme.surface.copy(0.8f)),
                     ),
                 ),

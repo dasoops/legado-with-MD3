@@ -7,9 +7,9 @@ import io.legado.app.domain.model.TextProcessAction
 import io.legado.app.domain.model.TextProcessAnchor
 import io.legado.app.utils.GSON
 import io.legado.app.utils.MD5Utils
+import kotlin.uuid.Uuid
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import kotlin.uuid.Uuid
 
 class SaveBookContentProcessUseCase(
     private val bookContentProcessGateway: BookContentProcessGateway,
@@ -23,10 +23,8 @@ class SaveBookContentProcessUseCase(
         contextBefore: String,
         contextAfter: String,
         replacementText: String,
-        kind: String = BookContentProcess.KIND_AI_CLEAN,
-        source: String = BookContentProcess.SOURCE_AI,
-        aiArtifactId: String? = null,
-        sourceContentHash: String? = null,
+        kind: String = BookContentProcess.KIND_MANUAL_REPLACEMENT,
+        source: String = BookContentProcess.SOURCE_USER,
     ): Result<BookContentProcess> = withContext(Dispatchers.IO) {
         runCatching {
             val normalizedSelectedText = BookContentProcessEngine.normalizeProcessText(selectedText)
@@ -58,8 +56,6 @@ class SaveBookContentProcessUseCase(
                 anchorJson = GSON.toJson(anchor),
                 actionJson = GSON.toJson(action),
                 source = source,
-                aiArtifactId = aiArtifactId,
-                sourceContentHash = sourceContentHash,
                 sortOrder = bookContentProcessGateway.nextOrder(bookUrl),
                 createdAt = now,
                 updatedAt = now,

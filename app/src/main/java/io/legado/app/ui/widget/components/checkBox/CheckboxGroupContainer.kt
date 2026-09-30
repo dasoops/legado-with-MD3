@@ -13,15 +13,16 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun CheckboxGroupContainer(
     columns: Int = 3,
-    content: LazyGridScope.() -> Unit
+    content: LazyGridScope.() -> Unit,
 ) {
     LazyVerticalGrid(
         columns = GridCells.Fixed(columns),
-        modifier = Modifier
+        modifier =
+        Modifier
             .fillMaxWidth()
             .padding(vertical = 4.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalArrangement = Arrangement.spacedBy(4.dp),
-        content = content
+        content = content,
     )
 }

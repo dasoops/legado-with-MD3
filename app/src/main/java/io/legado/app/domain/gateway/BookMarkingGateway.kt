@@ -11,13 +11,23 @@ interface BookMarkingGateway {
     suspend fun getByBook(
         bookName: String,
         bookAuthor: String,
-        chapterIndex: Int?
+        chapterIndex: Int?,
     ): List<BookMarking>
 
     /** 按「书名+作者」流式订阅全部章节，供目录 Sheet 笔记页跨源展示。 */
-    fun flowByBook(bookName: String, bookAuthor: String): Flow<List<BookMarking>>
+    fun flowByBook(
+        bookName: String,
+        bookAuthor: String,
+    ): Flow<List<BookMarking>>
+
     suspend fun getById(id: String): BookMarking?
+
     suspend fun upsert(bookMarking: BookMarking)
-    suspend fun setEnabled(id: String, enabled: Boolean)
+
+    suspend fun setEnabled(
+        id: String,
+        enabled: Boolean,
+    )
+
     suspend fun delete(id: String)
 }

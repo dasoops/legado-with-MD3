@@ -38,13 +38,27 @@ class HighlightTagRuleViewModel(
 
     fun onIntent(intent: HighlightTagRuleIntent) {
         when (intent) {
-            is HighlightTagRuleIntent.SetSearchMode -> setSearchMode(intent.active)
-            is HighlightTagRuleIntent.UpdateSearchQuery -> setSearchKey(intent.query)
-            HighlightTagRuleIntent.ClearSelection -> setSelection(emptySet())
-            HighlightTagRuleIntent.SelectAll -> selectAll()
-            HighlightTagRuleIntent.InvertSelection -> invertSelection()
-            is HighlightTagRuleIntent.SetSelection -> setSelection(intent.ids)
-            is HighlightTagRuleIntent.ToggleSelection -> toggleSelection(intent.id)
+            is HighlightTagRuleIntent.SetSearchMode -> {
+                setSearchMode(intent.active)
+            }
+            is HighlightTagRuleIntent.UpdateSearchQuery -> {
+                setSearchKey(intent.query)
+            }
+            HighlightTagRuleIntent.ClearSelection -> {
+                setSelection(emptySet())
+            }
+            HighlightTagRuleIntent.SelectAll -> {
+                selectAll()
+            }
+            HighlightTagRuleIntent.InvertSelection -> {
+                invertSelection()
+            }
+            is HighlightTagRuleIntent.SetSelection -> {
+                setSelection(intent.ids)
+            }
+            is HighlightTagRuleIntent.ToggleSelection -> {
+                toggleSelection(intent.id)
+            }
             HighlightTagRuleIntent.EnableSelection -> {
                 enableSelectionByIds(uiState.value.selectedIds)
                 setSelection(emptySet())
@@ -61,8 +75,12 @@ class HighlightTagRuleViewModel(
                 val state = uiState.value
                 exportToUri(intent.uri, state.items, state.selectedIds)
             }
-            is HighlightTagRuleIntent.MoveItem -> moveItemInList(intent.from, intent.to)
-            HighlightTagRuleIntent.SaveSortOrder -> saveSortOrder()
+            is HighlightTagRuleIntent.MoveItem -> {
+                moveItemInList(intent.from, intent.to)
+            }
+            HighlightTagRuleIntent.SaveSortOrder -> {
+                saveSortOrder()
+            }
             is HighlightTagRuleIntent.SaveRule -> {
                 if (intent.isNew) {
                     insert(intent.rule)
@@ -70,30 +88,51 @@ class HighlightTagRuleViewModel(
                     update(intent.rule)
                 }
             }
-            is HighlightTagRuleIntent.DeleteRule -> delete(intent.rule)
-            is HighlightTagRuleIntent.SetRuleEnabled -> update(intent.rule.copy(enabled = intent.enabled))
-            is HighlightTagRuleIntent.CopyRule -> copyRule(intent.rule)
-            is HighlightTagRuleIntent.ImportSource -> importSource(intent.text)
-            HighlightTagRuleIntent.CancelImport -> cancelImport()
-            is HighlightTagRuleIntent.ToggleImportSelection -> toggleImportSelection(intent.index)
-            is HighlightTagRuleIntent.ToggleImportAll -> toggleImportAll(intent.isSelected)
-            is HighlightTagRuleIntent.UpdateImportItem -> updateImportItem(intent.index, intent.rule)
-            HighlightTagRuleIntent.SaveImportedRules -> saveImportedRules()
+            is HighlightTagRuleIntent.DeleteRule -> {
+                delete(intent.rule)
+            }
+            is HighlightTagRuleIntent.SetRuleEnabled -> {
+                update(intent.rule.copy(enabled = intent.enabled))
+            }
+            is HighlightTagRuleIntent.CopyRule -> {
+                copyRule(intent.rule)
+            }
+            is HighlightTagRuleIntent.ImportSource -> {
+                importSource(intent.text)
+            }
+            HighlightTagRuleIntent.CancelImport -> {
+                cancelImport()
+            }
+            is HighlightTagRuleIntent.ToggleImportSelection -> {
+                toggleImportSelection(intent.index)
+            }
+            is HighlightTagRuleIntent.ToggleImportAll -> {
+                toggleImportAll(intent.isSelected)
+            }
+            is HighlightTagRuleIntent.UpdateImportItem -> {
+                updateImportItem(intent.index, intent.rule)
+            }
+            HighlightTagRuleIntent.SaveImportedRules -> {
+                saveImportedRules()
+            }
         }
     }
 
     override fun filterData(
         data: List<HighlightTagRule>,
         searchKey: String,
-        groupFilter: String
+        groupFilter: String,
     ): List<HighlightTagRule> {
         val key = groupFilter.ifEmpty { searchKey }
-        val filtered = if (key.isEmpty()) data else {
-            data.filter {
-                it.title.contains(key, ignoreCase = true) ||
+        val filtered =
+            if (key.isEmpty()) {
+                data
+            } else {
+                data.filter {
+                    it.title.contains(key, ignoreCase = true) ||
                         it.pattern.contains(key, ignoreCase = true)
+                }
             }
-        }
         return filtered.sortedBy { it.order }
     }
 
@@ -101,68 +140,65 @@ class HighlightTagRuleViewModel(
         items: List<HighlightTagRuleItemUi>,
         selectedIds: Set<Long>,
         isSearch: Boolean,
-        importState: BaseImportUiState<HighlightTagRule>
-    ): HighlightTagRuleUiState {
-        return HighlightTagRuleUiState(
-            items = items.toImmutableList(),
-            selectedIds = selectedIds.toImmutableSet(),
-            searchKey = _searchKey.value,
-            interaction = InteractionState(
-                isSearchMode = isSearch,
-                isUploading = importState is BaseImportUiState.Loading,
-                isLoading = false
-            )
-        )
-    }
+        importState: BaseImportUiState<HighlightTagRule>,
+    ): HighlightTagRuleUiState = HighlightTagRuleUiState(
+        items = items.toImmutableList(),
+        selectedIds = selectedIds.toImmutableSet(),
+        searchKey = searchKeyState.value,
+        interaction =
+        InteractionState(
+            isSearchMode = isSearch,
+            isUploading = importState is BaseImportUiState.Loading,
+            isLoading = false,
+        ),
+    )
 
     override fun HighlightTagRule.toUiItem() = HighlightTagRuleItemUi(
         id = id,
         displayName = title.ifBlank { pattern },
         pattern = pattern,
         isEnabled = enabled,
-        rule = this
+        rule = this,
     )
 
     override fun ruleItemToEntity(item: HighlightTagRuleItemUi): HighlightTagRule = item.rule
 
     override suspend fun generateJson(entities: List<HighlightTagRule>): String = GSON.toJson(entities)
 
-    override fun parseImportRules(text: String): List<HighlightTagRule> {
-        return when {
-            text.isJsonArray() -> GSON.fromJsonArray<HighlightTagRule>(text).getOrThrow()
-            text.isJsonObject() -> listOf(GSON.fromJsonObject<HighlightTagRule>(text).getOrThrow())
-            else -> throw Exception("格式不正确")
-        }
+    override fun parseImportRules(text: String): List<HighlightTagRule> = when {
+        text.isJsonArray() -> GSON.fromJsonArray<HighlightTagRule>(text).getOrThrow()
+        text.isJsonObject() -> listOf(GSON.fromJsonObject<HighlightTagRule>(text).getOrThrow())
+        else -> throw Exception("格式不正确")
     }
 
-    override fun hasChanged(newRule: HighlightTagRule, oldRule: HighlightTagRule): Boolean {
-        return newRule.title != oldRule.title
-                || newRule.pattern != oldRule.pattern
-                || newRule.enabled != oldRule.enabled
-    }
+    override fun hasChanged(
+        newRule: HighlightTagRule,
+        oldRule: HighlightTagRule,
+    ): Boolean = newRule.title != oldRule.title ||
+        newRule.pattern != oldRule.pattern ||
+        newRule.enabled != oldRule.enabled
 
-    override suspend fun findOldRule(newRule: HighlightTagRule): HighlightTagRule? {
-        return repository.findById(newRule.id)
-    }
+    override suspend fun findOldRule(newRule: HighlightTagRule): HighlightTagRule? = repository.findById(newRule.id)
 
     override fun saveImportedRules() {
-        val state = _importState.value as? BaseImportUiState.Success<HighlightTagRule> ?: return
+        val state = importStateMutable.value as? BaseImportUiState.Success<HighlightTagRule> ?: return
         viewModelScope.launch(Dispatchers.IO) {
-            val rulesToSave = state.items
-                .filter { it.isSelected }
-                .map { it.data }
+            val rulesToSave =
+                state.items
+                    .filter { it.isSelected }
+                    .map { it.data }
             repository.insert(*rulesToSave.toTypedArray())
             withContext(Dispatchers.Main) {
-                _importState.value = BaseImportUiState.Idle
+                importStateMutable.value = BaseImportUiState.Idle
             }
         }
     }
 
     fun saveSortOrder() {
-        val currentLocal = _localItems.value ?: return
+        val currentLocal = localItemsState.value ?: return
         viewModelScope.launch {
             repository.moveOrder(currentLocal.map { it.rule })
-            _localItems.value = null
+            localItemsState.value = null
         }
     }
 
@@ -177,12 +213,16 @@ class HighlightTagRuleViewModel(
     fun delSelectionByIds(ids: Set<Long>) {
         viewModelScope.launch {
             repository.deleteByIds(ids)
-            _selectedIds.update { it - ids }
+            selectedIdsState.update { it - ids }
         }
     }
 
     private fun selectAll() {
-        setSelection(uiState.value.items.map { it.id }.toSet())
+        setSelection(
+            uiState.value.items
+                .map { it.id }
+                .toSet(),
+        )
     }
 
     private fun invertSelection() {
@@ -191,7 +231,9 @@ class HighlightTagRuleViewModel(
     }
 
     fun update(vararg rule: HighlightTagRule) = viewModelScope.launch { repository.update(*rule) }
+
     fun insert(vararg rule: HighlightTagRule) = viewModelScope.launch { repository.insert(*rule) }
+
     fun delete(vararg rule: HighlightTagRule) = viewModelScope.launch { repository.delete(*rule) }
 
     fun copyRule(rule: HighlightTagRule) {

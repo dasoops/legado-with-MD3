@@ -17,7 +17,9 @@ import io.legado.app.feature.reader.platform.ReaderPageDecorationDrawCache
  * 普通类、组合外构建：窗口发布后由 effect 期预热，draw 期直读；位图类字段用
  * snapshot state 承载，加载完成只触发重绘不重组。
  */
-internal class ScrollPageDrawData(val page: ReaderPage) {
+internal class ScrollPageDrawData(
+    val page: ReaderPage,
+) {
     val textElements: List<ReaderElement.Text> = page.elements.filterIsInstance<ReaderElement.Text>()
     val paints: Map<ReaderTextStyle, Paint> =
         textElements.map { it.style }.distinct().associateWith(ReaderAndroidPaintFactory::create)
@@ -35,24 +37,30 @@ internal class ScrollPageDrawData(val page: ReaderPage) {
  * 都会生成新页实例但复用同一 elements 列表，缓存持续命中；只有真重排（新列表）才
  * 重建。超容量按 LRU 淘汰。
  */
-internal class ScrollPageDrawCache(capacity: Int = 8) {
+internal class ScrollPageDrawCache(
+    capacity: Int = 8,
+) {
     /**
      * 按 elements 的引用而非内容比较。每次查询都会创建新的 key 包装对象，故必须
      * 显式实现引用相等；Object 默认实现会把包装对象本身作为身份，令缓存永远 miss。
      */
-    private class ElementsKey(private val elements: List<ReaderElement>) {
-        override fun equals(other: Any?): Boolean =
-            other is ElementsKey && elements === other.elements
+    private class ElementsKey(
+        private val elements: List<ReaderElement>,
+    ) {
+        override fun equals(other: Any?): Boolean = other is ElementsKey && elements === other.elements
 
         override fun hashCode(): Int = System.identityHashCode(elements)
     }
 
-    private val entries = object : LinkedHashMap<ElementsKey, ScrollPageDrawData>(16, 0.75f, true) {
-        override fun removeEldestEntry(eldest: MutableMap.MutableEntry<ElementsKey, ScrollPageDrawData>): Boolean =
-            size > capacity
-    }
+    private val entries =
+        object : LinkedHashMap<ElementsKey, ScrollPageDrawData>(16, 0.75f, true) {
+            override fun removeEldestEntry(eldest: MutableMap.MutableEntry<ElementsKey, ScrollPageDrawData>): Boolean = size > capacity
+        }
 
-    fun put(page: ReaderPage, data: ScrollPageDrawData) {
+    fun put(
+        page: ReaderPage,
+        data: ScrollPageDrawData,
+    ) {
         synchronized(this) { entries[ElementsKey(page.elements)] = data }
     }
 
@@ -61,6 +69,5 @@ internal class ScrollPageDrawCache(capacity: Int = 8) {
     }
 
     /** draw 期兜底：miss 时主线程同步构建，保正确性不缺字；正常路径由预热先行。 */
-    fun ensure(page: ReaderPage): ScrollPageDrawData =
-        peek(page) ?: ScrollPageDrawData(page).also { put(page, it) }
+    fun ensure(page: ReaderPage): ScrollPageDrawData = peek(page) ?: ScrollPageDrawData(page).also { put(page, it) }
 }

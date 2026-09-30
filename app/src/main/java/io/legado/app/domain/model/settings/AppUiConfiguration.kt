@@ -8,11 +8,12 @@ data class AppUiConfiguration(
     val isSystemDarkTheme: Boolean = false,
 ) {
     val isDarkTheme: Boolean
-        get() = when (appShell.themeMode) {
-            "1" -> false
-            "2" -> true
-            else -> isSystemDarkTheme
-        }
+        get() =
+            when (appShell.themeMode) {
+                "1" -> false
+                "2" -> true
+                else -> isSystemDarkTheme
+            }
 }
 
 data class AppUiConfigurationDiff(
@@ -28,24 +29,24 @@ data class AppUiConfigurationDiff(
         get() = localeChanged || themeChanged || fontScaleChanged
 }
 
-fun AppUiConfiguration.diffFrom(previous: AppUiConfiguration): AppUiConfigurationDiff =
-    AppUiConfigurationDiff(
-        localeChanged = language != previous.language,
-        themeChanged = appShell.themeMode != previous.appShell.themeMode ||
-            (appShell.themeMode == "0" && isSystemDarkTheme != previous.isSystemDarkTheme) ||
-            theme.requiresLegacyThemeRefresh(previous.theme),
-        fontScaleChanged = appShell.fontScale != previous.appShell.fontScale,
-        windowChanged = appShell.showStatusBar != previous.appShell.showStatusBar ||
-            theme.backgroundImageLight != previous.theme.backgroundImageLight ||
-            theme.backgroundImageDark != previous.theme.backgroundImageDark ||
-            theme.backgroundImageBlurring != previous.theme.backgroundImageBlurring ||
-            theme.backgroundImageDarkBlurring != previous.theme.backgroundImageDarkBlurring,
-    )
+fun AppUiConfiguration.diffFrom(previous: AppUiConfiguration): AppUiConfigurationDiff = AppUiConfigurationDiff(
+    localeChanged = language != previous.language,
+    themeChanged =
+    appShell.themeMode != previous.appShell.themeMode ||
+        (appShell.themeMode == "0" && isSystemDarkTheme != previous.isSystemDarkTheme) ||
+        theme.requiresLegacyThemeRefresh(previous.theme),
+    fontScaleChanged = appShell.fontScale != previous.appShell.fontScale,
+    windowChanged =
+    appShell.showStatusBar != previous.appShell.showStatusBar ||
+        theme.backgroundImageLight != previous.theme.backgroundImageLight ||
+        theme.backgroundImageDark != previous.theme.backgroundImageDark ||
+        theme.backgroundImageBlurring != previous.theme.backgroundImageBlurring ||
+        theme.backgroundImageDarkBlurring != previous.theme.backgroundImageDarkBlurring,
+)
 
-private fun ThemeSettings.requiresLegacyThemeRefresh(previous: ThemeSettings): Boolean =
-    appTheme != previous.appTheme ||
-        isPureBlack != previous.isPureBlack ||
-        customMode != previous.customMode ||
-        appFontPath != previous.appFontPath ||
-        customPrimary != previous.customPrimary ||
-        customNightPrimary != previous.customNightPrimary
+private fun ThemeSettings.requiresLegacyThemeRefresh(previous: ThemeSettings): Boolean = appTheme != previous.appTheme ||
+    isPureBlack != previous.isPureBlack ||
+    customMode != previous.customMode ||
+    appFontPath != previous.appFontPath ||
+    customPrimary != previous.customPrimary ||
+    customNightPrimary != previous.customNightPrimary

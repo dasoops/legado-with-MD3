@@ -38,7 +38,11 @@ class ReaderAccessibilityPolicyTest {
         assertNull(ReaderAccessibilityPolicy.snapshot(ReaderPageWindow()))
     }
 
-    private fun page(index: Int, text: String, decoration: ReaderPageDecoration = ReaderPageDecoration()) = ReaderPage(
+    private fun page(
+        index: Int,
+        text: String,
+        decoration: ReaderPageDecoration = ReaderPageDecoration(),
+    ) = ReaderPage(
         id = ReaderPageId(0, index),
         chapterTitle = "章节",
         text = text,

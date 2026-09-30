@@ -14,17 +14,15 @@ import io.legado.app.R
 import io.legado.app.constant.AppLog
 import io.legado.app.domain.gateway.ThemeSettingsGateway
 import io.legado.app.help.coroutine.Coroutine
+import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlin.coroutines.CoroutineContext
 import org.koin.core.context.GlobalContext
-
 
 abstract class BaseDialogFragment(
     @LayoutRes layoutID: Int,
-    private val adaptationSoftKeyboard: Boolean = false
+    private val adaptationSoftKeyboard: Boolean = false,
 ) : DialogFragment(layoutID) {
-
     private val themeGateway get() = GlobalContext.get().get<ThemeSettingsGateway>()
 
     private var onDismissListener: OnDismissListener? = null
@@ -78,27 +76,37 @@ abstract class BaseDialogFragment(
         super.onCreate(savedInstanceState)
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    override fun onViewCreated(
+        view: View,
+        savedInstanceState: Bundle?,
+    ) {
         super.onViewCreated(view, savedInstanceState)
         if (adaptationSoftKeyboard) {
             view.setOnClickListener { dismiss() }
         } else if (themeGateway.currentSettings.appTheme != "4") {
-            //view.setBackgroundColor(ThemeStore.backgroundColor())
+            // view.setBackgroundColor(ThemeStore.backgroundColor())
         }
         onFragmentCreated(view, savedInstanceState)
         observeLiveBus()
     }
 
-    abstract fun onFragmentCreated(view: View, savedInstanceState: Bundle?)
+    abstract fun onFragmentCreated(
+        view: View,
+        savedInstanceState: Bundle?,
+    )
 
-    override fun show(manager: FragmentManager, tag: String?) {
-        kotlin.runCatching {
-            //在每个add事务前增加一个remove事务，防止连续的add
-            manager.beginTransaction().remove(this).commit()
-            super.show(manager, tag)
-        }.onFailure {
-            AppLog.put("显示对话框失败 tag:$tag", it)
-        }
+    override fun show(
+        manager: FragmentManager,
+        tag: String?,
+    ) {
+        kotlin
+            .runCatching {
+                // 在每个add事务前增加一个remove事务，防止连续的add
+                manager.beginTransaction().remove(this).commit()
+                super.show(manager, tag)
+            }.onFailure {
+                AppLog.put("显示对话框失败 tag:$tag", it)
+            }
     }
 
     override fun onDismiss(dialog: DialogInterface) {
@@ -109,7 +117,7 @@ abstract class BaseDialogFragment(
     fun <T> execute(
         scope: CoroutineScope = lifecycleScope,
         context: CoroutineContext = Dispatchers.IO,
-        block: suspend CoroutineScope.() -> T
+        block: suspend CoroutineScope.() -> T,
     ) = Coroutine.async(scope, context) { block() }
 
     open fun observeLiveBus() {

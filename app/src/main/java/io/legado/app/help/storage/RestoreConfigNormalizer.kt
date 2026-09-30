@@ -20,14 +20,16 @@ internal fun normalizeConfigMap(
         if (!keyIsNotIgnore(key)) return@forEach
         when (key) {
             PreferKey.webDavPassword -> {
-                val password = decryptWebDavPassword(value.toString())
-                    ?: value.toString().takeIf { !hasLocalWebDavPassword }
+                val password =
+                    decryptWebDavPassword(value.toString())
+                        ?: value.toString().takeIf { !hasLocalWebDavPassword }
                 password?.let { finalMap[key] = it }
             }
-
-            else -> when (value) {
-                is Double -> finalMap[key] = value.toFloat()
-                is Int, is Boolean, is Long, is Float, is String -> finalMap[key] = value
+            else -> {
+                when (value) {
+                    is Double -> finalMap[key] = value.toFloat()
+                    is Int, is Boolean, is Long, is Float, is String -> finalMap[key] = value
+                }
             }
         }
     }

@@ -45,7 +45,6 @@ class ReadHighlightRuleDelegate(
     private val host: Host,
     private val highlightRuleRepository: HighlightRuleRepository,
 ) {
-
     interface Host {
         fun showToast(message: String)
 
@@ -95,20 +94,25 @@ class ReadHighlightRuleDelegate(
         _uiState.update { it.copy(editingRule = null, showNewRule = false) }
     }
 
-    fun toggleRule(rule: HighlightRule, enabled: Boolean) {
-        val rules = _uiState.value.rules.map {
-            if (it.id == rule.id) it.copy(enabled = enabled) else it
-        }
+    fun toggleRule(
+        rule: HighlightRule,
+        enabled: Boolean,
+    ) {
+        val rules =
+            _uiState.value.rules.map {
+                if (it.id == rule.id) it.copy(enabled = enabled) else it
+            }
         saveRules(rules)
     }
 
     fun saveRule(rule: HighlightRule) {
         val currentRules = _uiState.value.rules
-        val updatedRules = if (currentRules.any { it.id == rule.id }) {
-            currentRules.map { if (it.id == rule.id) rule else it }
-        } else {
-            currentRules + rule
-        }
+        val updatedRules =
+            if (currentRules.any { it.id == rule.id }) {
+                currentRules.map { if (it.id == rule.id) rule else it }
+            } else {
+                currentRules + rule
+            }
         saveRules(updatedRules)
     }
 
@@ -133,12 +137,16 @@ class ReadHighlightRuleDelegate(
         host.notifyRulesChanged()
     }
 
-    fun moveRule(from: Int, to: Int) {
+    fun moveRule(
+        from: Int,
+        to: Int,
+    ) {
         val rules = _uiState.value.rules
         if (from !in rules.indices || to !in rules.indices) return
-        val reordered = rules.toMutableList().apply {
-            add(to, removeAt(from))
-        }
+        val reordered =
+            rules.toMutableList().apply {
+                add(to, removeAt(from))
+            }
         _uiState.update { it.copy(rules = reordered.toImmutableList()) }
     }
 
@@ -165,92 +173,109 @@ class ReadHighlightRuleDelegate(
 
     fun importSource(text: String) {
         _uiState.update { it.copy(importState = BaseImportUiState.Loading) }
-        Coroutine.async(scope, Dispatchers.IO) {
-            val importedRules = importSourceAwait(text.trim())
-                .map(highlightRuleRepository::sanitizeRule)
-            if (importedRules.isEmpty()) {
-                throw NoStackTraceException(context.getString(R.string.wrong_format))
-            }
-            val oldRules = highlightRuleRepository.load(ReadBookConfig.durConfig.name)
-                .associateBy { it.id }
-            BaseImportUiState.Success(
-                source = text,
-                items = importedRules.map { rule ->
-                    val oldRule = oldRules[rule.id]
-                    val status = when {
-                        oldRule == null -> ImportStatus.New
-                        oldRule != rule -> ImportStatus.Update
-                        else -> ImportStatus.Existing
-                    }
-                    ImportItemWrapper(
-                        data = rule,
-                        oldData = oldRule,
-                        status = status,
-                        isSelected = status != ImportStatus.Existing,
+        Coroutine
+            .async(scope, Dispatchers.IO) {
+                val importedRules =
+                    importSourceAwait(text.trim())
+                        .map(highlightRuleRepository::sanitizeRule)
+                if (importedRules.isEmpty()) {
+                    throw NoStackTraceException(context.getString(R.string.wrong_format))
+                }
+                val oldRules =
+                    highlightRuleRepository
+                        .load(ReadBookConfig.durConfig.name)
+                        .associateBy { it.id }
+                BaseImportUiState.Success(
+                    source = text,
+                    items =
+                    importedRules.map { rule ->
+                        val oldRule = oldRules[rule.id]
+                        val status =
+                            when {
+                                oldRule == null -> ImportStatus.New
+                                oldRule != rule -> ImportStatus.Update
+                                else -> ImportStatus.Existing
+                            }
+                        ImportItemWrapper(
+                            data = rule,
+                            oldData = oldRule,
+                            status = status,
+                            isSelected = status != ImportStatus.Existing,
+                        )
+                    },
+                )
+            }.onSuccess { importState ->
+                _uiState.update { it.copy(importState = importState) }
+            }.onError {
+                AppLog.put("导入高亮规则失败\n${it.localizedMessage}", it, true)
+                _uiState.update { state ->
+                    state.copy(
+                        importState =
+                        BaseImportUiState.Error(
+                            it.localizedMessage ?: context.getString(R.string.wrong_format),
+                        ),
                     )
                 }
-            )
-        }.onSuccess { importState ->
-            _uiState.update { it.copy(importState = importState) }
-        }.onError {
-            AppLog.put("导入高亮规则失败\n${it.localizedMessage}", it, true)
-            _uiState.update { state ->
-                state.copy(
-                    importState = BaseImportUiState.Error(
-                        it.localizedMessage ?: context.getString(R.string.wrong_format)
-                    )
-                )
             }
-        }
     }
 
-    private suspend fun importSourceAwait(text: String): List<HighlightRule> {
-        return when {
-            text.isJsonArray() -> GSON.fromJsonArray<HighlightRule>(text).getOrThrow()
-            text.isJsonObject() -> listOf(
-                GSON.fromJsonObject<HighlightRule>(text).getOrThrow()
+    private suspend fun importSourceAwait(text: String): List<HighlightRule> = when {
+        text.isJsonArray() -> {
+            GSON.fromJsonArray<HighlightRule>(text).getOrThrow()
+        }
+        text.isJsonObject() -> {
+            listOf(
+                GSON.fromJsonObject<HighlightRule>(text).getOrThrow(),
             )
-            text.isAbsUrl() -> {
-                val body = okHttpClient.newCallResponseBody {
-                    if (text.endsWith("#requestWithoutUA")) {
-                        url(text.substringBeforeLast("#requestWithoutUA"))
-                        header(AppConst.UA_NAME, "null")
-                    } else {
-                        url(text)
-                    }
-                }.decompressed().text()
-                importSourceAwait(body)
-            }
-            else -> throw NoStackTraceException(context.getString(R.string.wrong_format))
+        }
+        text.isAbsUrl() -> {
+            val body =
+                okHttpClient
+                    .newCallResponseBody {
+                        if (text.endsWith("#requestWithoutUA")) {
+                            url(text.substringBeforeLast("#requestWithoutUA"))
+                            header(AppConst.UA_NAME, "null")
+                        } else {
+                            url(text)
+                        }
+                    }.decompressed()
+                    .text()
+            importSourceAwait(body)
+        }
+        else -> {
+            throw NoStackTraceException(context.getString(R.string.wrong_format))
         }
     }
 
     fun importFile(uri: Uri) {
-        Coroutine.async<String?>(scope, Dispatchers.IO) {
-            context.contentResolver.openInputStream(uri)?.use {
-                it.reader().readText()
-            }
-        }.onSuccess { text ->
-            if (text.isNullOrBlank()) {
+        Coroutine
+            .async<String?>(scope, Dispatchers.IO) {
+                context.contentResolver.openInputStream(uri)?.use {
+                    it.reader().readText()
+                }
+            }.onSuccess { text ->
+                if (text.isNullOrBlank()) {
+                    _uiState.update { state ->
+                        state.copy(
+                            importState =
+                            BaseImportUiState.Error(
+                                context.getString(R.string.wrong_format),
+                            ),
+                        )
+                    }
+                } else {
+                    importSource(text)
+                }
+            }.onError {
                 _uiState.update { state ->
                     state.copy(
-                        importState = BaseImportUiState.Error(
-                            context.getString(R.string.wrong_format)
-                        )
+                        importState =
+                        BaseImportUiState.Error(
+                            it.localizedMessage ?: context.getString(R.string.wrong_format),
+                        ),
                     )
                 }
-            } else {
-                importSource(text)
             }
-        }.onError {
-            _uiState.update { state ->
-                state.copy(
-                    importState = BaseImportUiState.Error(
-                        it.localizedMessage ?: context.getString(R.string.wrong_format)
-                    )
-                )
-            }
-        }
     }
 
     fun cancelImport() {
@@ -258,8 +283,9 @@ class ReadHighlightRuleDelegate(
     }
 
     fun toggleImportSelection(index: Int) {
-        val importState = _uiState.value.importState
-            as? BaseImportUiState.Success<HighlightRule> ?: return
+        val importState =
+            _uiState.value.importState
+                as? BaseImportUiState.Success<HighlightRule> ?: return
         if (index !in importState.items.indices) return
         val items = importState.items.toMutableList()
         val item = items[index]
@@ -268,45 +294,56 @@ class ReadHighlightRuleDelegate(
     }
 
     fun toggleImportAll(isSelected: Boolean) {
-        val importState = _uiState.value.importState
-            as? BaseImportUiState.Success<HighlightRule> ?: return
+        val importState =
+            _uiState.value.importState
+                as? BaseImportUiState.Success<HighlightRule> ?: return
         _uiState.update {
             it.copy(
-                importState = importState.copy(
-                    items = importState.items.map { item ->
+                importState =
+                importState.copy(
+                    items =
+                    importState.items.map { item ->
                         item.copy(isSelected = isSelected)
-                    }
-                )
+                    },
+                ),
             )
         }
     }
 
-    fun updateImportItem(index: Int, rule: HighlightRule) {
-        val importState = _uiState.value.importState
-            as? BaseImportUiState.Success<HighlightRule> ?: return
+    fun updateImportItem(
+        index: Int,
+        rule: HighlightRule,
+    ) {
+        val importState =
+            _uiState.value.importState
+                as? BaseImportUiState.Success<HighlightRule> ?: return
         if (index !in importState.items.indices) return
         val items = importState.items.toMutableList()
         items[index] = items[index].copy(data = rule)
         _uiState.update {
             it.copy(
-                importState = importState.copy(
+                importState =
+                importState.copy(
                     items = items,
                     version = importState.version + 1,
-                )
+                ),
             )
         }
     }
 
     fun saveImported() {
         val state = _uiState.value
-        val importState = state.importState
-            as? BaseImportUiState.Success<HighlightRule> ?: return
-        val importedRules = importState.items
-            .filter { it.isSelected }
-            .map { highlightRuleRepository.sanitizeRule(it.data) }
+        val importState =
+            state.importState
+                as? BaseImportUiState.Success<HighlightRule> ?: return
+        val importedRules =
+            importState.items
+                .filter { it.isSelected }
+                .map { highlightRuleRepository.sanitizeRule(it.data) }
         if (importedRules.isEmpty()) return
         val importedById = importedRules.associateBy { it.id }
-        val mergedRules = state.rules.map { importedById[it.id] ?: it } +
+        val mergedRules =
+            state.rules.map { importedById[it.id] ?: it } +
                 importedRules.filter { imported -> state.rules.none { it.id == imported.id } }
         saveRules(mergedRules)
         cancelImport()
@@ -316,16 +353,17 @@ class ReadHighlightRuleDelegate(
 
     fun exportToFile(uri: Uri) {
         val rules = _uiState.value.rules
-        Coroutine.async(scope, Dispatchers.IO) {
-            context.contentResolver.openOutputStream(uri)?.use { output ->
-                output.bufferedWriter().use { writer ->
-                    writer.write(GSON.toJson(rules))
-                }
-            } ?: throw NoStackTraceException(context.getString(R.string.error))
-        }.onSuccess {
-            host.showToast(context.getString(R.string.export_success))
-        }.onError {
-            host.showToast(it.localizedMessage ?: context.getString(R.string.error))
-        }
+        Coroutine
+            .async(scope, Dispatchers.IO) {
+                context.contentResolver.openOutputStream(uri)?.use { output ->
+                    output.bufferedWriter().use { writer ->
+                        writer.write(GSON.toJson(rules))
+                    }
+                } ?: throw NoStackTraceException(context.getString(R.string.error))
+            }.onSuccess {
+                host.showToast(context.getString(R.string.export_success))
+            }.onError {
+                host.showToast(it.localizedMessage ?: context.getString(R.string.error))
+            }
     }
 }

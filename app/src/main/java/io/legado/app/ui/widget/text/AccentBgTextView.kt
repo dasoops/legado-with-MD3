@@ -9,11 +9,12 @@ import io.legado.app.utils.ColorUtils
 import io.legado.app.utils.dpToPx
 import io.legado.app.utils.themeColor
 
-class AccentBgTextView @JvmOverloads constructor(
+class AccentBgTextView
+@JvmOverloads
+constructor(
     context: Context,
-    attrs: AttributeSet? = null
+    attrs: AttributeSet? = null,
 ) : MaterialTextView(context, attrs) {
-
     private var radiusPx = 20
 
     init {
@@ -34,11 +35,13 @@ class AccentBgTextView @JvmOverloads constructor(
         val backgroundColor = context.themeColor(com.google.android.material.R.attr.colorSecondaryContainer)
         val textColor = context.themeColor(com.google.android.material.R.attr.colorOnSecondaryContainer)
 
-        background = Selector.shapeBuild()
-            .setCornerRadius(radiusPx)
-            .setDefaultBgColor(backgroundColor)
-            .setPressedBgColor(ColorUtils.darkenColor(backgroundColor))
-            .create()
+        background =
+            Selector
+                .shapeBuild()
+                .setCornerRadius(radiusPx)
+                .setDefaultBgColor(backgroundColor)
+                .setPressedBgColor(ColorUtils.darkenColor(backgroundColor))
+                .create()
 
         setTextColor(textColor)
     }

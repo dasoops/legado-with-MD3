@@ -16,13 +16,16 @@ fun RequestManager.lifecycle(lifecycle: Lifecycle): RequestManager {
         return this
     }
 
-    val observer = object : DefaultLifecycleObserver {
-        override fun onResume(owner: LifecycleOwner) = onStart()
-        override fun onPause(owner: LifecycleOwner) = onStop()
-        override fun onDestroy(owner: LifecycleOwner) {
-            owner.lifecycle.removeObserver(this)
+    val observer =
+        object : DefaultLifecycleObserver {
+            override fun onResume(owner: LifecycleOwner) = onStart()
+
+            override fun onPause(owner: LifecycleOwner) = onStop()
+
+            override fun onDestroy(owner: LifecycleOwner) {
+                owner.lifecycle.removeObserver(this)
+            }
         }
-    }
 
     lifecycle.addObserver(observer)
 

@@ -2,13 +2,13 @@ package io.legado.app.feature.reader.legacy
 
 import io.legado.app.feature.reader.core.model.ReaderPage
 import io.legado.app.feature.reader.core.model.ReaderPageId
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
-import org.junit.Assert.fail
-import org.junit.Assert.assertTrue
-import org.junit.Test
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.runBlocking
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
+import org.junit.Assert.fail
+import org.junit.Test
 
 class LegacyReaderPaginationBatchTest {
     @Test
@@ -19,15 +19,15 @@ class LegacyReaderPaginationBatchTest {
         assertFalse(identity == layoutIdentity(isVolume = true))
         assertFalse(identity == layoutIdentity(sourceHash = 2))
         assertFalse(identity == layoutIdentity(chapterBaseUrl = "https://cdn.example/"))
-        assertFalse(identity == layoutIdentity(bookSourceHash = 2))
         assertEquals(identity, identity.copy())
     }
 
     @Test
     fun chapterExceptionBecomesAnExplicitLocalFailure() = runBlocking {
-        val result = paginateLegacyReaderChapterSafely {
-            error("broken chapter")
-        }
+        val result =
+            paginateLegacyReaderChapterSafely {
+                error("broken chapter")
+            }
 
         assertEquals(
             LegacyReaderChapterPaginationResult.Unsupported("exception:IllegalStateException"),
@@ -51,14 +51,16 @@ class LegacyReaderPaginationBatchTest {
 
     @Test
     fun adjacentFailureKeepsCurrentPagesAndReportsTheFailure() {
-        val batch = collectLegacyReaderPaginationBatch(
-            currentChapterIndex = 2,
-            results = listOf(
-                1 to LegacyReaderChapterPaginationResult.Unsupported("html"),
-                2 to LegacyReaderChapterPaginationResult.Success(listOf(page(2))),
-                3 to LegacyReaderChapterPaginationResult.Success(listOf(page(3))),
-            ),
-        )
+        val batch =
+            collectLegacyReaderPaginationBatch(
+                currentChapterIndex = 2,
+                results =
+                listOf(
+                    1 to LegacyReaderChapterPaginationResult.Unsupported("html"),
+                    2 to LegacyReaderChapterPaginationResult.Success(listOf(page(2))),
+                    3 to LegacyReaderChapterPaginationResult.Success(listOf(page(3))),
+                ),
+            )
 
         assertTrue(batch.hasCurrentChapter)
         assertEquals(listOf(2, 3), batch.pages.map { it.id.chapterIndex })
@@ -67,13 +69,15 @@ class LegacyReaderPaginationBatchTest {
 
     @Test
     fun currentFailureIsExplicitEvenWhenAdjacentPagesSucceeded() {
-        val batch = collectLegacyReaderPaginationBatch(
-            currentChapterIndex = 2,
-            results = listOf(
-                1 to LegacyReaderChapterPaginationResult.Success(listOf(page(1))),
-                2 to LegacyReaderChapterPaginationResult.Unsupported("image-size:x"),
-            ),
-        )
+        val batch =
+            collectLegacyReaderPaginationBatch(
+                currentChapterIndex = 2,
+                results =
+                listOf(
+                    1 to LegacyReaderChapterPaginationResult.Success(listOf(page(1))),
+                    2 to LegacyReaderChapterPaginationResult.Unsupported("image-size:x"),
+                ),
+            )
 
         assertFalse(batch.hasCurrentChapter)
         assertEquals(listOf(1), batch.pages.map { it.id.chapterIndex })
@@ -99,7 +103,6 @@ class LegacyReaderPaginationBatchTest {
         isVolume: Boolean = false,
         sourceHash: Int = 1,
         chapterBaseUrl: String = "https://example/",
-        bookSourceHash: Int = 1,
     ) = LegacyReaderChapterLayoutIdentity(
         chapterIndex = 1,
         chapterUrl = "chapter-url",
@@ -111,6 +114,5 @@ class LegacyReaderPaginationBatchTest {
         sourceHash = sourceHash,
         bookUrl = "book-url",
         bookOrigin = "origin",
-        bookSourceHash = bookSourceHash,
     )
 }

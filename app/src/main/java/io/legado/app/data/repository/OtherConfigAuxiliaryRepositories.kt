@@ -12,10 +12,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
 class LocalPasswordRepository : LocalPasswordGateway {
-
     override suspend fun setPassword(password: String?) {
         AppConfigStore.putAllAndAwait(
-            mapOf(LocalPreferencesKeys.PASSWORD.name to password.orEmpty())
+            mapOf(LocalPreferencesKeys.PASSWORD.name to password.orEmpty()),
         )
     }
 }
@@ -23,15 +22,14 @@ class LocalPasswordRepository : LocalPasswordGateway {
 class OtherConfigSystemRepository(
     private val context: Context,
 ) : OtherConfigSystemGateway {
+    private val componentName =
+        ComponentName(
+            context,
+            SharedReceiverActivity::class.java.name,
+        )
 
-    private val componentName = ComponentName(
-        context,
-        SharedReceiverActivity::class.java.name,
-    )
-
-    override fun isProcessTextEnabled(): Boolean =
-        context.packageManager.getComponentEnabledSetting(componentName) !=
-            PackageManager.COMPONENT_ENABLED_STATE_DISABLED
+    override fun isProcessTextEnabled(): Boolean = context.packageManager.getComponentEnabledSetting(componentName) !=
+        PackageManager.COMPONENT_ENABLED_STATE_DISABLED
 
     override suspend fun setProcessTextEnabled(enabled: Boolean) = withContext(Dispatchers.IO) {
         context.packageManager.setComponentEnabledSetting(

@@ -65,8 +65,9 @@ import org.koin.androidx.compose.koinViewModel
 import sh.calvin.reorderable.rememberReorderableLazyListState
 
 @OptIn(
-    ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class,
-    ExperimentalMaterial3ExpressiveApi::class
+    ExperimentalMaterial3Api::class,
+    ExperimentalFoundationApi::class,
+    ExperimentalMaterial3ExpressiveApi::class,
 )
 @Composable
 fun ReplaceRuleRouteScreen(
@@ -97,8 +98,9 @@ fun ReplaceRuleRouteScreen(
 }
 
 @OptIn(
-    ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class,
-    ExperimentalMaterial3ExpressiveApi::class
+    ExperimentalMaterial3Api::class,
+    ExperimentalFoundationApi::class,
+    ExperimentalMaterial3ExpressiveApi::class,
 )
 @Composable
 fun ReplaceRuleScreen(
@@ -110,7 +112,6 @@ fun ReplaceRuleScreen(
     onBackClick: () -> Unit,
     onNavigateToEdit: (ReplaceEditRoute) -> Unit,
 ) {
-
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
 
@@ -131,38 +132,43 @@ fun ReplaceRuleScreen(
     var showGroupManageSheet by remember { mutableStateOf(false) }
 
     val tabItems = remember(groups) { listOf("全部") + groups }
-    val selectedTabIndex = state.selectedGroup
-        ?.let(tabItems::indexOf)
-        ?.takeIf { it >= 0 }
-        ?: 0
+    val selectedTabIndex =
+        state.selectedGroup
+            ?.let(tabItems::indexOf)
+            ?.takeIf { it >= 0 }
+            ?: 0
 
-    val reorderableState = rememberReorderableLazyListState(listState) { from, to ->
-        onIntent(ReplaceRuleIntent.MoveItem(from.index, to.index))
-        hapticFeedback.performHapticFeedback(HapticFeedbackType.SegmentFrequentTick)
-    }
+    val reorderableState =
+        rememberReorderableLazyListState(listState) { from, to ->
+            onIntent(ReplaceRuleIntent.MoveItem(from.index, to.index))
+            hapticFeedback.performHapticFeedback(HapticFeedbackType.SegmentFrequentTick)
+        }
 
-    val canReorder = remember(state.sortMode) {
-        state.sortMode == "asc" || state.sortMode == "desc"
-    }
+    val canReorder =
+        remember(state.sortMode) {
+            state.sortMode == "asc" || state.sortMode == "desc"
+        }
 
-    val importDoc = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.OpenDocument(),
-        onResult = { uri ->
-            uri?.let {
-                context.contentResolver.openInputStream(it)?.use { stream ->
-                    val text = stream.reader().readText()
-                    onIntent(ReplaceRuleIntent.ImportSource(text))
+    val importDoc =
+        rememberLauncherForActivityResult(
+            contract = ActivityResultContracts.OpenDocument(),
+            onResult = { uri ->
+                uri?.let {
+                    context.contentResolver.openInputStream(it)?.use { stream ->
+                        val text = stream.reader().readText()
+                        onIntent(ReplaceRuleIntent.ImportSource(text))
+                    }
                 }
-            }
-        }
-    )
+            },
+        )
 
-    val exportDoc = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.CreateDocument("application/json"),
-        onResult = { uri ->
-            uri?.let { onIntent(ReplaceRuleIntent.ExportSelection(it)) }
-        }
-    )
+    val exportDoc =
+        rememberLauncherForActivityResult(
+            contract = ActivityResultContracts.CreateDocument("application/json"),
+            onResult = { uri ->
+                uri?.let { onIntent(ReplaceRuleIntent.ExportSelection(it)) }
+            },
+        )
 
     SourceInputDialog(
         show = showUrlInput,
@@ -171,7 +177,7 @@ fun ReplaceRuleScreen(
         onConfirm = {
             showUrlInput = false
             onIntent(ReplaceRuleIntent.ImportSource(it))
-        }
+        },
     )
 
     FilePickerSheet(
@@ -186,7 +192,7 @@ fun ReplaceRuleScreen(
             showUrlInput = true
             showImportSheet = false
         },
-        allowExtensions = arrayOf("json", "txt")
+        allowExtensions = arrayOf("json", "txt"),
     )
 
     FilePickerSheet(
@@ -196,7 +202,7 @@ fun ReplaceRuleScreen(
             showExportSheet = false
             exportDoc.launch("exportReplaceRule.json")
         },
-        allowExtensions = arrayOf("json")
+        allowExtensions = arrayOf("json"),
     )
 
     BatchImportDialog(
@@ -210,7 +216,7 @@ fun ReplaceRuleScreen(
         itemTitle = { rule -> rule.name },
         itemSubtitle = { rule ->
             rule.group?.takeIf { it.isNotBlank() }
-        }
+        },
     )
 
     if (importState is BaseImportUiState.Loading) {
@@ -242,19 +248,20 @@ fun ReplaceRuleScreen(
         events.collect { event ->
             when (event) {
                 is BaseRuleEvent.ShowSnackbar -> {
-                    val result = snackbarHostState.showSnackbar(
-                        message = event.message,
-                        actionLabel = event.actionLabel,
-                        withDismissAction = true
-                    )
+                    val result =
+                        snackbarHostState.showSnackbar(
+                            message = event.message,
+                            actionLabel = event.actionLabel,
+                            withDismissAction = true,
+                        )
                     if (result == SnackbarResult.ActionPerformed && event.url != null) {
                         clipboardManager.setClipEntry(
                             ClipEntry(
                                 ClipData.newPlainText(
                                     "url",
-                                    event.url
-                                )
-                            )
+                                    event.url,
+                                ),
+                            ),
                         )
                     }
                 }
@@ -262,15 +269,13 @@ fun ReplaceRuleScreen(
         }
     }
 
-
     GroupManageBottomSheet(
         show = showGroupManageSheet,
         groups = groups,
         onDismissRequest = { showGroupManageSheet = false },
         onUpdateGroup = { old, new -> onIntent(ReplaceRuleIntent.UpGroup(old, new)) },
-        onDeleteGroup = { onIntent(ReplaceRuleIntent.DeleteGroup(it)) }
+        onDeleteGroup = { onIntent(ReplaceRuleIntent.DeleteGroup(it)) },
     )
-
 
     AppAlertDialog(
         data = showDeleteRuleDialog,
@@ -283,7 +288,7 @@ fun ReplaceRuleScreen(
             showDeleteRuleDialog = null
         },
         dismissText = stringResource(R.string.cancel),
-        onDismiss = { showDeleteRuleDialog = null }
+        onDismiss = { showDeleteRuleDialog = null },
     )
 
     RuleListScaffold(
@@ -296,27 +301,28 @@ fun ReplaceRuleScreen(
         onClearSelection = { onIntent(ReplaceRuleIntent.ClearSelection) },
         onSelectAll = { onIntent(ReplaceRuleIntent.SelectAll) },
         onSelectInvert = { onIntent(ReplaceRuleIntent.InvertSelection) },
-        selectionSecondaryActions = listOf(
+        selectionSecondaryActions =
+        listOf(
             ActionItem(
                 text = stringResource(R.string.enable),
-                onClick = { onIntent(ReplaceRuleIntent.EnableSelection) }
+                onClick = { onIntent(ReplaceRuleIntent.EnableSelection) },
             ),
             ActionItem(
                 text = stringResource(R.string.disable_selection),
-                onClick = { onIntent(ReplaceRuleIntent.DisableSelection) }
+                onClick = { onIntent(ReplaceRuleIntent.DisableSelection) },
             ),
             ActionItem(
                 text = stringResource(R.string.to_top),
-                onClick = { onIntent(ReplaceRuleIntent.TopSelectByIds(selectedIds)) }
+                onClick = { onIntent(ReplaceRuleIntent.TopSelectByIds(selectedIds)) },
             ),
             ActionItem(
                 text = stringResource(R.string.to_bottom),
-                onClick = { onIntent(ReplaceRuleIntent.BottomSelectByIds(selectedIds)) }
+                onClick = { onIntent(ReplaceRuleIntent.BottomSelectByIds(selectedIds)) },
             ),
             ActionItem(
                 text = stringResource(R.string.export),
-                onClick = { showExportSheet = true }
-            )
+                onClick = { showExportSheet = true },
+            ),
         ),
         onDeleteSelected = { ids ->
             @Suppress("UNCHECKED_CAST")
@@ -326,19 +332,21 @@ fun ReplaceRuleScreen(
         bottomContent = {
             if (tabItems.size > 1) {
                 AppTabRow(
-                    modifier = Modifier
+                    modifier =
+                    Modifier
                         .adaptiveHorizontalPadding(),
                     tabTitles = tabItems,
                     selectedTabIndex = selectedTabIndex,
                     onTabSelected = { index ->
                         onIntent(ReplaceRuleIntent.SetGroup(tabItems[index]))
-                    }
+                    },
                 )
             }
         },
         floatingActionButton = {
             AppFloatingActionButton(
-                modifier = Modifier.animateFloatingActionButton(
+                modifier =
+                Modifier.animateFloatingActionButton(
                     visible = !inSelectionMode,
                     alignment = Alignment.BottomEnd,
                 ),
@@ -346,27 +354,39 @@ fun ReplaceRuleScreen(
                     onNavigateToEdit(ReplaceEditRoute(id = -1))
                 },
                 tooltipText = stringResource(R.string.add),
-                icon = Icons.Default.Add
+                icon = Icons.Default.Add,
             )
         },
         snackbarHostState = snackbarHostState,
         dropDownMenuContent = { dismiss ->
             RoundDropdownMenuItem(
                 text = stringResource(R.string.import_str),
-                onClick = { showImportSheet = true; dismiss() }
+                onClick = {
+                    showImportSheet = true
+                    dismiss()
+                },
             )
             RoundDropdownMenuItem(
                 text = stringResource(R.string.group_management),
-                onClick = { showGroupManageSheet = true; dismiss() }
+                onClick = {
+                    showGroupManageSheet = true
+                    dismiss()
+                },
             )
             PillDivider()
             RoundDropdownMenuItem(
                 text = stringResource(R.string.sort_old_first),
-                onClick = { onIntent(ReplaceRuleIntent.SetSortMode("asc")); dismiss() }
+                onClick = {
+                    onIntent(ReplaceRuleIntent.SetSortMode("asc"))
+                    dismiss()
+                },
             )
             RoundDropdownMenuItem(
                 text = stringResource(R.string.sort_new_first),
-                onClick = { onIntent(ReplaceRuleIntent.SetSortMode("desc")); dismiss() }
+                onClick = {
+                    onIntent(ReplaceRuleIntent.SetSortMode("desc"))
+                    dismiss()
+                },
             )
             RoundDropdownMenuItem(
                 text = stringResource(R.string.sort_name_asc),
@@ -376,7 +396,7 @@ fun ReplaceRuleScreen(
                     scope.launch {
                         snackbarHostState.showSnackbar(context.getString(R.string.drag_disabled_in_sort_mode))
                     }
-                }
+                },
             )
             RoundDropdownMenuItem(
                 text = stringResource(R.string.sort_name_desc),
@@ -386,39 +406,45 @@ fun ReplaceRuleScreen(
                     scope.launch {
                         snackbarHostState.showSnackbar(context.getString(R.string.drag_disabled_in_sort_mode))
                     }
-                }
+                },
             )
-        }
+        },
     ) { padding ->
         Box(
-            modifier = Modifier
-                .fillMaxSize()
+            modifier =
+            Modifier
+                .fillMaxSize(),
         ) {
             FastScrollLazyColumn(
                 state = listState,
-                modifier = Modifier
+                modifier =
+                Modifier
                     .fillMaxSize(),
-                contentPadding = adaptiveContentPadding(
+                contentPadding =
+                adaptiveContentPadding(
                     top = padding.calculateTopPadding(),
-                    bottom = 120.dp
+                    bottom = 120.dp,
                 ),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
+                verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 items(rules, key = { it.id }) { ui ->
-                    val enabledState = stringResource(
-                        if (ui.isEnabled) R.string.enabled else R.string.disabled
-                    )
-                    val reorderHint = if (canReorder && !inSelectionMode) {
-                        stringResource(R.string.a11y_long_press_reorder)
-                    } else {
-                        null
-                    }
-                    val itemDescription = listOfNotNull(
-                        ui.name,
-                        ui.pattern.takeIf { it.isNotBlank() },
-                        enabledState,
-                        reorderHint
-                    ).joinToString()
+                    val enabledState =
+                        stringResource(
+                            if (ui.isEnabled) R.string.enabled else R.string.disabled,
+                        )
+                    val reorderHint =
+                        if (canReorder && !inSelectionMode) {
+                            stringResource(R.string.a11y_long_press_reorder)
+                        } else {
+                            null
+                        }
+                    val itemDescription =
+                        listOfNotNull(
+                            ui.name,
+                            ui.pattern.takeIf { it.isNotBlank() },
+                            enabledState,
+                            reorderHint,
+                        ).joinToString()
                     ReorderableSelectionItem(
                         state = reorderableState,
                         key = ui.id,
@@ -437,21 +463,23 @@ fun ReplaceRuleScreen(
                             onIntent(ReplaceRuleIntent.SetRuleEnabled(ui.id, enabled))
                         },
                         contentDescription = itemDescription,
-                        enableSwitchContentDescription = stringResource(
+                        enableSwitchContentDescription =
+                        stringResource(
                             R.string.a11y_rule_enabled_switch,
-                            ui.name
+                            ui.name,
                         ),
                         editContentDescription = stringResource(R.string.a11y_edit_named, ui.name),
-                        moreContentDescription = stringResource(
+                        moreContentDescription =
+                        stringResource(
                             R.string.a11y_more_actions_for,
-                            ui.name
+                            ui.name,
                         ),
                         onClickEdit = {
                             onNavigateToEdit(
                                 ReplaceEditRoute(
                                     id = ui.id,
-                                    pattern = ui.pattern
-                                )
+                                    pattern = ui.pattern,
+                                ),
                             )
                         },
                         modifier = Modifier,
@@ -461,23 +489,23 @@ fun ReplaceRuleScreen(
                                 onClick = {
                                     onIntent(ReplaceRuleIntent.ToTop(ui.toEntity()))
                                     dismiss()
-                                }
+                                },
                             )
                             RoundDropdownMenuItem(
                                 text = stringResource(R.string.move_to_bottom),
                                 onClick = {
                                     onIntent(ReplaceRuleIntent.ToBottom(ui.toEntity()))
                                     dismiss()
-                                }
+                                },
                             )
                             RoundDropdownMenuItem(
                                 text = stringResource(R.string.delete),
                                 onClick = {
                                     showDeleteRuleDialog = ui.toEntity()
                                     dismiss()
-                                }
+                                },
                             )
-                        }
+                        },
                     )
                 }
             }
@@ -488,13 +516,13 @@ fun ReplaceRuleScreen(
                     selectedIds = selectedIds,
                     onSelectionChange = { onIntent(ReplaceRuleIntent.SetSelection(it)) },
                     idProvider = { it.id },
-                    modifier = Modifier
+                    modifier =
+                    Modifier
                         .fillMaxHeight()
                         .width(60.dp)
-                        .align(Alignment.TopStart)
+                        .align(Alignment.TopStart),
                 )
             }
         }
     }
-
 }

@@ -29,12 +29,6 @@ import io.legado.app.utils.normalizeFileName
 import io.legado.app.utils.openOutputStream
 import io.legado.app.utils.outputStream
 import io.legado.app.utils.writeToOutputStream
-import kotlinx.coroutines.Dispatchers.IO
-import kotlinx.coroutines.currentCoroutineContext
-import kotlinx.coroutines.ensureActive
-import kotlinx.coroutines.withContext
-import org.koin.core.context.GlobalContext
-import splitties.init.appCtx
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
@@ -42,12 +36,17 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 import java.util.concurrent.TimeUnit
+import kotlinx.coroutines.Dispatchers.IO
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.ensureActive
+import kotlinx.coroutines.withContext
+import org.koin.core.context.GlobalContext
+import splitties.init.appCtx
 
 /**
  * 备份
  */
 object Backup {
-
     private val readStyleGateway: ReadStyleGateway
         get() = GlobalContext.get().get()
 
@@ -55,7 +54,10 @@ object Backup {
         get() = GlobalContext.get().get()
 
     val backupPath: String by lazy {
-        appCtx.filesDir.getFile("backup").createFolderIfNotExist().absolutePath
+        appCtx.filesDir
+            .getFile("backup")
+            .createFolderIfNotExist()
+            .absolutePath
     }
     val zipFilePath = "${appCtx.externalFiles.absolutePath}${File.separator}tmp_backup.zip"
 
@@ -67,35 +69,31 @@ object Backup {
             "bookmark.json",
             "bookMarking.json",
             "bookGroup.json",
-            "bookSource.json",
             "replaceRule.json",
             "readRecord.json",
             "readRecordDetail.json",
             "readRecordSession.json",
-            "searchHistory.json",
-            "sourceSub.json",
             "txtTocRule.json",
             "keyboardAssists.json",
-            "homepageModules.json",
-            "homepageCustomSets.json",
             "highlightRule.json",
             "highlightTagRule.json",
             "servers.json",
-            ReadBookConfig.configFileName,
-            ReadBookConfig.shareConfigFileName,
-            ThemeConfigStore.configFileName,
-            "config.xml"
+            ReadBookConfig.CONFIG_FILE_NAME,
+            ReadBookConfig.SHARE_CONFIG_FILE_NAME,
+            ThemeConfigStore.CONFIG_FILE_NAME,
+            "config.xml",
         )
     }
 
     private fun getNowZipFileName(): String {
-        val backupDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-            .format(Date(System.currentTimeMillis()))
+        val backupDate =
+            SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+                .format(Date(System.currentTimeMillis()))
         val deviceName = backupSettingsGateway.currentSettings.webDavDeviceName
         return if (deviceName.isNotBlank()) {
-            "backup${backupDate}-${deviceName}.zip"
+            "backup$backupDate-$deviceName.zip"
         } else {
-            "backup${backupDate}.zip"
+            "backup$backupDate.zip"
         }.normalizeFileName()
     }
 
@@ -106,24 +104,29 @@ object Backup {
 
     fun autoBack(context: Context) {
         if (shouldBackup()) {
-            Coroutine.async {
-                BackupRestoreLock.withLock {
-                    if (shouldBackup()) {
-                        val backupZipFileName = getNowZipFileName()
-                        if (!AppWebDav.hasBackUp(backupZipFileName)) {
-                            backup(context, backupSettingsGateway.currentSettings.backupPath)
-                        } else {
-                            LocalConfig.lastBackup = System.currentTimeMillis()
+            Coroutine
+                .async {
+                    BackupRestoreLock.withLock {
+                        if (shouldBackup()) {
+                            val backupZipFileName = getNowZipFileName()
+                            if (!AppWebDav.hasBackUp(backupZipFileName)) {
+                                backup(context, backupSettingsGateway.currentSettings.backupPath)
+                            } else {
+                                LocalConfig.lastBackup = System.currentTimeMillis()
+                            }
                         }
                     }
+                }.onError {
+                    AppLog.put("自动备份失败\n${it.localizedMessage}")
                 }
-            }.onError {
-                AppLog.put("自动备份失败\n${it.localizedMessage}")
-            }
         }
     }
 
-    suspend fun backupLocked(context: Context, path: String?, mode: String = "both") {
+    suspend fun backupLocked(
+        context: Context,
+        path: String?,
+        mode: String = "both",
+    ) {
         BackupRestoreLock.withLock {
             withContext(IO) {
                 backup(context, path, mode)
@@ -131,7 +134,11 @@ object Backup {
         }
     }
 
-    private suspend fun backup(context: Context, path: String?, mode: String = "both") {
+    private suspend fun backup(
+        context: Context,
+        path: String?,
+        mode: String = "both",
+    ) {
         LogUtils.d(TAG, "开始备份 path:$path")
         LocalConfig.lastBackup = System.currentTimeMillis()
         val aes = BackupAES()
@@ -143,130 +150,135 @@ object Backup {
                 "bookshelf.json",
                 backupPath,
             )
-        // 书签与划线/想法笔记（book_marks）视为一体，统一受既有 bookmark 忽略项控制
-        if (BackupConfig.dbIsNotIgnored("bookmark", true)) {
-            writeListToJson(appDb.bookmarkDao.all, "bookmark.json", backupPath)
-            writeListToJson(appDb.bookMarkingDao.all, "bookMarking.json", backupPath)
-        }
-        if (BackupConfig.dbIsNotIgnored("bookGroup", true)) {
-            writeListToJson(appDb.bookGroupDao.all, "bookGroup.json", backupPath)
-        }
-        if (BackupConfig.dbIsNotIgnored("bookSource", true)) {
-            writeListToJson(appDb.bookSourceDao.all, "bookSource.json", backupPath)
-        }
-        if (BackupConfig.dbIsNotIgnored("replaceRule", true)) {
-            writeListToJson(appDb.replaceRuleDao.all, "replaceRule.json", backupPath)
-        }
-        if (BackupConfig.dbIsNotIgnored("readRecord", true)) {
-            writeListToJson(appDb.readRecordDao.all, "readRecord.json", backupPath)
-            writeListToJson(appDb.readRecordDao.allDetail, "readRecordDetail.json", backupPath)
-            writeListToJson(appDb.readRecordDao.allSession, "readRecordSession.json", backupPath)
-        }
-        if (BackupConfig.dbIsNotIgnored("searchHistory", true)) {
-            writeListToJson(appDb.searchKeywordDao.all, "searchHistory.json", backupPath)
-        }
-        if (BackupConfig.dbIsNotIgnored("sourceSub", true)) {
-            writeListToJson(appDb.ruleSubDao.all, "sourceSub.json", backupPath)
-        }
-        if (BackupConfig.dbIsNotIgnored("txtTocRule", true)) {
-            writeListToJson(appDb.txtTocRuleDao.all, "txtTocRule.json", backupPath)
-        }
-        if (BackupConfig.dbIsNotIgnored("keyboardAssists", true)) {
-            writeListToJson(appDb.keyboardAssistsDao.all, "keyboardAssists.json", backupPath)
-        }
-        if (BackupConfig.dbIsNotIgnored("homepageModules", true)) {
-            writeListToJson(appDb.homepageModuleDao.getAll(), "homepageModules.json", backupPath)
-        }
-        if (BackupConfig.dbIsNotIgnored("homepageCustomSets", true)) {
-            writeListToJson(
-                appDb.homepageCustomSetDao.getAll(),
-                "homepageCustomSets.json",
-                backupPath
-            )
-        }
-        if (BackupConfig.dbIsNotIgnored("highlightRule", true)) {
-            writeListToJson(appDb.highlightRuleDao.getAll(), "highlightRule.json", backupPath)
-        }
-        if (BackupConfig.dbIsNotIgnored("highlightTagRule", true)) {
-            writeListToJson(appDb.highlightTagRuleDao.getAll(), "highlightTagRule.json", backupPath)
-        }
-        if (BackupConfig.dbIsNotIgnored("server", true)) {
-            GSON.toJson(appDb.serverDao.all).let { json ->
-                aes.runCatching {
-                    encryptBase64(json)
-                }.getOrDefault(json).let {
-                    FileUtils.createFileIfNotExist(backupPath + File.separator + "servers.json")
-                        .writeText(it)
+            // 书签与划线/想法笔记（book_marks）视为一体，统一受既有 bookmark 忽略项控制
+            if (BackupConfig.dbIsNotIgnored("bookmark", true)) {
+                writeListToJson(appDb.bookmarkDao.all, "bookmark.json", backupPath)
+                writeListToJson(appDb.bookMarkingDao.all, "bookMarking.json", backupPath)
+            }
+            if (BackupConfig.dbIsNotIgnored("bookGroup", true)) {
+                writeListToJson(appDb.bookGroupDao.all, "bookGroup.json", backupPath)
+            }
+            if (BackupConfig.dbIsNotIgnored("replaceRule", true)) {
+                writeListToJson(appDb.replaceRuleDao.all, "replaceRule.json", backupPath)
+            }
+            if (BackupConfig.dbIsNotIgnored("readRecord", true)) {
+                writeListToJson(appDb.readRecordDao.all, "readRecord.json", backupPath)
+                writeListToJson(appDb.readRecordDao.allDetail, "readRecordDetail.json", backupPath)
+                writeListToJson(appDb.readRecordDao.allSession, "readRecordSession.json", backupPath)
+            }
+            if (BackupConfig.dbIsNotIgnored("txtTocRule", true)) {
+                writeListToJson(appDb.txtTocRuleDao.all, "txtTocRule.json", backupPath)
+            }
+            if (BackupConfig.dbIsNotIgnored("keyboardAssists", true)) {
+                writeListToJson(appDb.keyboardAssistsDao.all, "keyboardAssists.json", backupPath)
+            }
+            if (BackupConfig.dbIsNotIgnored("highlightRule", true)) {
+                writeListToJson(appDb.highlightRuleDao.getAll(), "highlightRule.json", backupPath)
+            }
+            if (BackupConfig.dbIsNotIgnored("highlightTagRule", true)) {
+                writeListToJson(appDb.highlightTagRuleDao.getAll(), "highlightTagRule.json", backupPath)
+            }
+            if (BackupConfig.dbIsNotIgnored("server", true)) {
+                GSON.toJson(appDb.serverDao.all).let { json ->
+                    aes
+                        .runCatching {
+                            encryptBase64(json)
+                        }.getOrDefault(json)
+                        .let {
+                            FileUtils
+                                .createFileIfNotExist(backupPath + File.separator + "servers.json")
+                                .writeText(it)
+                        }
                 }
             }
-        }
         }
         currentCoroutineContext().ensureActive()
         if (!BackupConfig.backupIgnoreReadConfig) {
             readStyleGateway.exportConfigsJson().let {
-                FileUtils.createFileIfNotExist(backupPath + File.separator + ReadBookConfig.configFileName)
+                FileUtils
+                    .createFileIfNotExist(backupPath + File.separator + ReadBookConfig.CONFIG_FILE_NAME)
                     .writeText(it)
             }
             readStyleGateway.exportShareConfigJson().let {
-                FileUtils.createFileIfNotExist(backupPath + File.separator + ReadBookConfig.shareConfigFileName)
+                FileUtils
+                    .createFileIfNotExist(backupPath + File.separator + ReadBookConfig.SHARE_CONFIG_FILE_NAME)
                     .writeText(it)
             }
         }
         if (!BackupConfig.backupIgnoreThemeConfig) {
             GSON.toJson(ThemeConfigStore.configList).let {
-                FileUtils.createFileIfNotExist(backupPath + File.separator + ThemeConfigStore.configFileName)
+                FileUtils
+                    .createFileIfNotExist(backupPath + File.separator + ThemeConfigStore.CONFIG_FILE_NAME)
                     .writeText(it)
             }
         }
         currentCoroutineContext().ensureActive()
-        val configMap = AppConfigStore.preferences.asMap()
-            .mapKeys { it.key.name }
+        val configMap =
+            AppConfigStore.preferences
+                .asMap()
+                .mapKeys { it.key.name }
         val xmlBuilder = StringBuilder()
         xmlBuilder.append("<?xml version='1.0' encoding='utf-8' standalone='yes' ?>\n")
         xmlBuilder.append("<map>\n")
         configMap.forEach { (key, value) ->
             if (BackupConfig.keyIsNotIgnore(key, true)) {
-                val finalValue = if (key == PreferKey.webDavPassword) {
-                    aes.runCatching { encryptBase64(value.toString()) }.getOrDefault(value.toString())
-                } else value
+                val finalValue =
+                    if (key == PreferKey.webDavPassword) {
+                        aes.runCatching { encryptBase64(value.toString()) }.getOrDefault(value.toString())
+                    } else {
+                        value
+                    }
 
                 when (finalValue) {
-                    is String -> xmlBuilder.append("    <string name=\"$key\">${finalValue.replace("&", "&amp;").replace("<", "&lt;")}</string>\n")
-                    is Int -> xmlBuilder.append("    <int name=\"$key\" value=\"$finalValue\" />\n")
-                    is Long -> xmlBuilder.append("    <long name=\"$key\" value=\"$finalValue\" />\n")
-                    is Float -> xmlBuilder.append("    <float name=\"$key\" value=\"$finalValue\" />\n")
-                    is Boolean -> xmlBuilder.append("    <boolean name=\"$key\" value=\"$finalValue\" />\n")
+                    is String -> {
+                        xmlBuilder.append(
+                            "    <string name=\"$key\">${finalValue.replace("&", "&amp;").replace("<", "&lt;")}</string>\n",
+                        )
+                    }
+                    is Int -> {
+                        xmlBuilder.append("    <int name=\"$key\" value=\"$finalValue\" />\n")
+                    }
+                    is Long -> {
+                        xmlBuilder.append("    <long name=\"$key\" value=\"$finalValue\" />\n")
+                    }
+                    is Float -> {
+                        xmlBuilder.append("    <float name=\"$key\" value=\"$finalValue\" />\n")
+                    }
+                    is Boolean -> {
+                        xmlBuilder.append("    <boolean name=\"$key\" value=\"$finalValue\" />\n")
+                    }
                 }
             }
         }
         xmlBuilder.append("</map>")
-        FileUtils.createFileIfNotExist(backupPath + File.separator + "config.xml")
+        FileUtils
+            .createFileIfNotExist(backupPath + File.separator + "config.xml")
             .writeText(xmlBuilder.toString())
 
         currentCoroutineContext().ensureActive()
         val zipFileName = getNowZipFileName()
-        val paths = backupFileNames
-            .map { File(backupPath, it) }
-            .filter(File::isFile)
-            .map(File::getAbsolutePath)
+        val paths =
+            backupFileNames
+                .map { File(backupPath, it) }
+                .filter(File::isFile)
+                .map(File::getAbsolutePath)
         FileUtils.delete(zipFilePath)
         FileUtils.delete(zipFilePath.replace("tmp_", ""))
-        val backupFileName = if (backupSettingsGateway.currentSettings.onlyLatestBackup) {
-            "backup.zip"
-        } else {
-            zipFileName
-        }
+        val backupFileName =
+            if (backupSettingsGateway.currentSettings.onlyLatestBackup) {
+                "backup.zip"
+            } else {
+                zipFileName
+            }
         if (ZipUtils.zipFiles(paths, zipFilePath)) {
             if (mode == "both" || mode == "local") {
                 when {
                     path.isNullOrBlank() -> {
                         copyBackup(context.getExternalFilesDir(null)!!, backupFileName)
                     }
-
                     path.isContentScheme() -> {
                         copyBackup(context, path.toUri(), backupFileName)
                     }
-
                     else -> {
                         copyBackup(File(path), backupFileName)
                     }
@@ -285,7 +297,11 @@ object Backup {
         currentCoroutineContext().ensureActive()
     }
 
-    private suspend fun writeListToJson(list: List<Any>, fileName: String, path: String) {
+    private suspend fun writeListToJson(
+        list: List<Any>,
+        fileName: String,
+        path: String,
+    ) {
         currentCoroutineContext().ensureActive()
         withContext(IO) {
             if (list.isNotEmpty()) {
@@ -303,13 +319,19 @@ object Backup {
 
     @Throws(Exception::class)
     @Suppress("SameParameterValue")
-    private fun copyBackup(context: Context, uri: Uri, fileName: String) {
+    private fun copyBackup(
+        context: Context,
+        uri: Uri,
+        fileName: String,
+    ) {
         val treeDoc = DocumentFile.fromTreeUri(context, uri)!!
         treeDoc.findFile(fileName)?.delete()
-        val fileDoc = treeDoc.createFile("", fileName)
-            ?: throw NoStackTraceException("创建文件失败")
-        val outputS = fileDoc.openOutputStream()
-            ?: throw NoStackTraceException("打开OutputStream失败")
+        val fileDoc =
+            treeDoc.createFile("", fileName)
+                ?: throw NoStackTraceException("创建文件失败")
+        val outputS =
+            fileDoc.openOutputStream()
+                ?: throw NoStackTraceException("打开OutputStream失败")
         outputS.use {
             FileInputStream(zipFilePath).use { inputS ->
                 inputS.copyTo(outputS)
@@ -319,7 +341,10 @@ object Backup {
 
     @Throws(Exception::class)
     @Suppress("SameParameterValue")
-    private fun copyBackup(rootFile: File, fileName: String) {
+    private fun copyBackup(
+        rootFile: File,
+        fileName: String,
+    ) {
         FileInputStream(File(zipFilePath)).use { inputS ->
             val file = FileUtils.createFileIfNotExist(rootFile, fileName)
             FileOutputStream(file).use { outputS ->

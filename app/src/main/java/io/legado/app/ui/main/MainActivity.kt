@@ -56,6 +56,8 @@ import io.legado.app.ui.welcome.WelcomeActivity
 import io.legado.app.utils.LogUtils
 import io.legado.app.utils.showDialogFragment
 import io.legado.app.utils.startActivity
+import kotlin.coroutines.resume
+import kotlin.coroutines.suspendCoroutine
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -66,14 +68,11 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
-import kotlin.coroutines.resume
-import kotlin.coroutines.suspendCoroutine
 
 /**
  * 主界面
  */
 open class MainActivity : BaseComposeActivity() {
-
     private data class RouteEvent(
         val route: NavKey,
         val resetToHome: Boolean,
@@ -82,7 +81,11 @@ open class MainActivity : BaseComposeActivity() {
     /** 全局 Compose 文本弹层状态，供遗留命令式路径展示 Markdown/文本内容 */
     private val textSheetFlow = MutableStateFlow<TextSheetData?>(null)
 
-    fun showTextSheet(title: String, content: String, onDismiss: (() -> Unit)? = null) {
+    fun showTextSheet(
+        title: String,
+        content: String,
+        onDismiss: (() -> Unit)? = null,
+    ) {
         textSheetFlow.value = TextSheetData(title, content, onDismiss)
     }
 
@@ -96,13 +99,14 @@ open class MainActivity : BaseComposeActivity() {
         @Volatile
         var hasActiveReadBookRoute: Boolean = false
 
-        fun createLauncherIntent(context: Context): Intent =
-            MainIntent.createLauncherIntent(context)
+        fun createLauncherIntent(context: Context): Intent = MainIntent.createLauncherIntent(context)
 
         fun createHomeIntent(context: Context): Intent = MainIntent.createHomeIntent(context)
 
-        fun createIntent(context: Context, configTag: String? = null): Intent =
-            MainIntent.createIntent(context, configTag)
+        fun createIntent(
+            context: Context,
+            configTag: String? = null,
+        ): Intent = MainIntent.createIntent(context, configTag)
 
         fun createReadBookIntent(
             context: Context,
@@ -122,9 +126,8 @@ open class MainActivity : BaseComposeActivity() {
             author: String? = null,
             bookUrl: String,
             origin: String? = null,
-            coverPath: String? = null
-        ): Intent =
-            MainIntent.createBookInfoIntent(context, name, author, bookUrl, origin, coverPath)
+            coverPath: String? = null,
+        ): Intent = MainIntent.createBookInfoIntent(context, name, author, bookUrl, origin, coverPath)
     }
 
     private val viewModel by viewModel<MainViewModel>()
@@ -144,14 +147,15 @@ open class MainActivity : BaseComposeActivity() {
         super.onCreate(savedInstanceState)
 
         if (checkStartupRoute()) return
-        val shouldAutoCheckUpdate = startupUpdateCheckGate.consume(
-            otherSettingsGateway.currentSettings.autoCheckUpdateOnStart
-        )
+        val shouldAutoCheckUpdate =
+            startupUpdateCheckGate.consume(
+                otherSettingsGateway.currentSettings.autoCheckUpdateOnStart,
+            )
 
         lifecycleScope.launch {
-            //版本更新
+            // 版本更新
             upVersion()
-            //备份同步
+            // 备份同步
             backupSync()
             if (shouldAutoCheckUpdate) {
                 checkUpdateOnStart()
@@ -167,7 +171,7 @@ open class MainActivity : BaseComposeActivity() {
             RouteEvent(
                 route = MainNavigator.resolveStartRoute(intent),
                 resetToHome = MainIntent.shouldOpenRouteWithHomeParent(intent),
-            )
+            ),
         )
     }
 
@@ -178,47 +182,50 @@ open class MainActivity : BaseComposeActivity() {
         val smallestWidthDp = resources.configuration.smallestScreenWidthDp
         val configuration = LocalAppUiConfiguration.current
         val tabletInterface = configuration.appShell.tabletInterface
-        val defaultToReadFlow = remember(otherSettingsGateway) {
-            otherSettingsGateway.settings
-                .map { it.defaultToRead }
-                .distinctUntilChanged()
-        }
+        val defaultToReadFlow =
+            remember(otherSettingsGateway) {
+                otherSettingsGateway.settings
+                    .map { it.defaultToRead }
+                    .distinctUntilChanged()
+            }
         val defaultToRead by defaultToReadFlow.collectAsStateWithLifecycle(
             otherSettingsGateway.currentSettings.defaultToRead,
         )
 
-        val useRail = when (tabletInterface) {
-            "always" -> true
-            "landscape" -> orientation == Configuration.ORIENTATION_LANDSCAPE
-            "off" -> false
-            "auto" -> smallestWidthDp >= 600
-            else -> false
-        }
+        val useRail =
+            when (tabletInterface) {
+                "always" -> true
+                "landscape" -> orientation == Configuration.ORIENTATION_LANDSCAPE
+                "off" -> false
+                "auto" -> smallestWidthDp >= 600
+                else -> false
+            }
 
-        val startRoutes = remember(defaultToRead) {
-            val resolved = MainNavigator.resolveStartRoute(intent)
-            val hasExplicitStartRoute = intent?.hasExplicitStartRoute() == true
-            when {
-                MainIntent.shouldOpenRouteWithHomeParent(intent) -> {
-                    if (resolved == MainRouteBookshelf) {
-                        arrayOf(MainRouteBookshelf)
-                    } else {
-                        arrayOf(MainRouteBookshelf, resolved)
+        val startRoutes =
+            remember(defaultToRead) {
+                val resolved = MainNavigator.resolveStartRoute(intent)
+                val hasExplicitStartRoute = intent?.hasExplicitStartRoute() == true
+                when {
+                    MainIntent.shouldOpenRouteWithHomeParent(intent) -> {
+                        if (resolved == MainRouteBookshelf) {
+                            arrayOf(MainRouteBookshelf)
+                        } else {
+                            arrayOf(MainRouteBookshelf, resolved)
+                        }
                     }
-                }
-                !hasExplicitStartRoute && restoredReadBookRoute != null -> {
-                    arrayOf(MainRouteBookshelf, restoredReadBookRoute!!)
-                }
-                shouldApplyDefaultToRead &&
+                    !hasExplicitStartRoute && restoredReadBookRoute != null -> {
+                        arrayOf(MainRouteBookshelf, restoredReadBookRoute!!)
+                    }
+                    shouldApplyDefaultToRead &&
                         defaultToRead &&
                         resolved == MainRouteBookshelf -> {
-                    arrayOf(MainRouteBookshelf, MainRouteReadBook())
-                }
-                else -> {
-                    arrayOf(resolved)
+                        arrayOf(MainRouteBookshelf, MainRouteReadBook())
+                    }
+                    else -> {
+                        arrayOf(resolved)
+                    }
                 }
             }
-        }
         latestBackStack = startRoutes.toList()
         val backStack = rememberNavBackStack(*startRoutes)
 
@@ -247,62 +254,86 @@ open class MainActivity : BaseComposeActivity() {
         SharedTransitionLayout {
             NavDisplay(
                 backStack = backStack,
-                entryDecorators = listOf(
+                entryDecorators =
+                listOf(
                     rememberSaveableStateHolderNavEntryDecorator(),
                     rememberViewModelStoreNavEntryDecorator(),
                 ),
-                sceneStrategies = listOf(
+                sceneStrategies =
+                listOf(
                     ModalOverlaySceneStrategy(),
                     SinglePaneSceneStrategy(),
                 ),
                 transitionSpec = {
-                    (slideIntoContainer(
-                        towards = AnimatedContentTransitionScope.SlideDirection.Start,
-                        animationSpec = tween(durationMillis = 480, easing = FastOutSlowInEasing),
-                        initialOffset = { fullWidth -> fullWidth }
-                    ) + fadeIn(
-                        animationSpec = tween(
-                            durationMillis = 360,
-                            easing = LinearOutSlowInEasing
+                    (
+                        slideIntoContainer(
+                            towards = AnimatedContentTransitionScope.SlideDirection.Start,
+                            animationSpec = tween(durationMillis = 480, easing = FastOutSlowInEasing),
+                            initialOffset = { fullWidth -> fullWidth },
+                        ) +
+                            fadeIn(
+                                animationSpec =
+                                tween(
+                                    durationMillis = 360,
+                                    easing = LinearOutSlowInEasing,
+                                ),
+                            )
+                        ) togetherWith (
+                        slideOutOfContainer(
+                            towards = AnimatedContentTransitionScope.SlideDirection.Start,
+                            animationSpec = tween(durationMillis = 480, easing = FastOutSlowInEasing),
+                            targetOffset = { fullWidth -> fullWidth / 4 },
+                        ) +
+                            fadeOut(
+                                animationSpec =
+                                tween(
+                                    durationMillis = 360,
+                                    easing = LinearOutSlowInEasing,
+                                ),
+                            )
                         )
-                    )) togetherWith (slideOutOfContainer(
-                        towards = AnimatedContentTransitionScope.SlideDirection.Start,
-                        animationSpec = tween(durationMillis = 480, easing = FastOutSlowInEasing),
-                        targetOffset = { fullWidth -> fullWidth / 4 }
-                    ) + fadeOut(
-                        animationSpec = tween(
-                            durationMillis = 360,
-                            easing = LinearOutSlowInEasing
-                        )
-                    ))
                 },
                 popTransitionSpec = {
-                    (slideIntoContainer(
-                        towards = AnimatedContentTransitionScope.SlideDirection.Start,
-                        animationSpec = tween(durationMillis = 480, easing = FastOutSlowInEasing),
-                        initialOffset = { fullWidth -> -fullWidth / 4 }
-                    ) + fadeIn(
-                        animationSpec = tween(
-                            durationMillis = 360,
-                            easing = LinearOutSlowInEasing
+                    (
+                        slideIntoContainer(
+                            towards = AnimatedContentTransitionScope.SlideDirection.Start,
+                            animationSpec = tween(durationMillis = 480, easing = FastOutSlowInEasing),
+                            initialOffset = { fullWidth -> -fullWidth / 4 },
+                        ) +
+                            fadeIn(
+                                animationSpec =
+                                tween(
+                                    durationMillis = 360,
+                                    easing = LinearOutSlowInEasing,
+                                ),
+                            )
+                        ) togetherWith (
+                        scaleOut(
+                            targetScale = 0.8f,
+                            animationSpec = tween(durationMillis = 480, easing = FastOutSlowInEasing),
+                        ) +
+                            fadeOut(animationSpec = tween(durationMillis = 360))
                         )
-                    )) togetherWith (scaleOut(
-                        targetScale = 0.8f,
-                        animationSpec = tween(durationMillis = 480, easing = FastOutSlowInEasing)
-                    ) + fadeOut(animationSpec = tween(durationMillis = 360)))
                 },
                 predictivePopTransitionSpec = { _ ->
-                    (slideIntoContainer(
-                        towards = AnimatedContentTransitionScope.SlideDirection.Start,
-                        animationSpec = tween(easing = FastOutSlowInEasing),
-                        initialOffset = { fullWidth -> -fullWidth / 4 }
-                    ) + fadeIn(animationSpec = tween(easing = LinearOutSlowInEasing))) togetherWith (scaleOut(
-                        targetScale = 0.8f,
-                        animationSpec = tween(easing = FastOutSlowInEasing)
-                    ) + fadeOut(animationSpec = tween()))
+                    (
+                        slideIntoContainer(
+                            towards = AnimatedContentTransitionScope.SlideDirection.Start,
+                            animationSpec = tween(easing = FastOutSlowInEasing),
+                            initialOffset = { fullWidth -> -fullWidth / 4 },
+                        ) +
+                            fadeIn(animationSpec = tween(easing = LinearOutSlowInEasing))
+                        ) togetherWith (
+                        scaleOut(
+                            targetScale = 0.8f,
+                            animationSpec = tween(easing = FastOutSlowInEasing),
+                        ) +
+                            fadeOut(animationSpec = tween())
+                        )
                 },
                 onBack = { MainNavigator.navigateBack(this@MainActivity, backStack) },
-                entryProvider = mainEntryProvider(
+                entryProvider =
+                mainEntryProvider(
                     backStack = backStack,
                     configuration = configuration,
                     useRail = useRail,
@@ -310,14 +341,14 @@ open class MainActivity : BaseComposeActivity() {
                     onNavigateToRoute = { route ->
                         MainNavigator.navigateToRoute(
                             backStack,
-                            route
+                            route,
                         )
                     },
                     onNavigateBack = { MainNavigator.navigateBack(this@MainActivity, backStack) },
-                )
+                ),
             )
             BackHandler(
-                enabled = !configuration.appShell.predictiveBackEnabled
+                enabled = !configuration.appShell.predictiveBackEnabled,
             ) {
                 MainNavigator.navigateBack(this@MainActivity, backStack)
             }
@@ -341,19 +372,20 @@ open class MainActivity : BaseComposeActivity() {
         }
     }
 
-    private fun checkStartupRoute(): Boolean {
-        return when {
-            LocalConfig.isFirstOpenApp -> {
-                startActivity<WelcomeActivity>()
-                finish()
-                true
-            }
-            else -> false
+    private fun checkStartupRoute(): Boolean = when {
+        LocalConfig.isFirstOpenApp -> {
+            startActivity<WelcomeActivity>()
+            finish()
+            true
+        }
+        else -> {
+            false
         }
     }
 
     private fun checkUpdateOnStart() {
-        AppUpdateGitHub.check(lifecycleScope)
+        AppUpdateGitHub
+            .check(lifecycleScope)
             .onSuccess { updateInfo ->
                 showDialogFragment(UpdateDialog(updateInfo))
             }
@@ -369,7 +401,7 @@ open class MainActivity : BaseComposeActivity() {
         }
         LocalConfig.versionCode = appInfo.versionCode
         if (!BuildConfig.DEBUG) {
-        lifecycleScope.launch {
+            lifecycleScope.launch {
                 try {
                     val info = AppUpdateGitHub.getReleaseByTag(BuildConfig.VERSION_NAME)
                     if (info != null) {
@@ -397,13 +429,14 @@ open class MainActivity : BaseComposeActivity() {
             return
         }
         lifecycleScope.launch {
-            val lastBackupFile = try {
-                withContext(IO) { viewModel.getLatestWebDavBackup() }
-            } catch (error: CancellationException) {
-                throw error
-            } catch (_: Exception) {
-                return@launch
-            } ?: return@launch
+            val lastBackupFile =
+                try {
+                    withContext(IO) { viewModel.getLatestWebDavBackup() }
+                } catch (error: CancellationException) {
+                    throw error
+                } catch (_: Exception) {
+                    return@launch
+                } ?: return@launch
             if (lastBackupFile.lastModify - LocalConfig.lastBackup > DateUtils.MINUTE_IN_MILLIS) {
                 LocalConfig.lastBackup = lastBackupFile.lastModify
                 alert(R.string.restore, R.string.webdav_after_local_restore_confirm) {
@@ -418,8 +451,9 @@ open class MainActivity : BaseComposeActivity() {
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        val readRoute = latestBackStack.lastOrNull() as? MainRouteReadBook
-            ?: activeReadBookRoute
+        val readRoute =
+            latestBackStack.lastOrNull() as? MainRouteReadBook
+                ?: activeReadBookRoute
         if (readRoute != null) {
             outState.putBoolean(KEY_RESTORE_READ_ROUTE, true)
             outState.putString(KEY_RESTORE_READ_BOOK_URL, readRoute.bookUrl)
@@ -437,9 +471,7 @@ open class MainActivity : BaseComposeActivity() {
         )
     }
 
-    private fun Intent.hasExplicitStartRoute(): Boolean {
-        return hasExtra(MainIntent.EXTRA_START_ROUTE)
-    }
+    private fun Intent.hasExplicitStartRoute(): Boolean = hasExtra(MainIntent.EXTRA_START_ROUTE)
 
     override fun dispatchKeyEvent(event: KeyEvent): Boolean {
         val keyCode = event.keyCode
@@ -459,7 +491,7 @@ open class MainActivity : BaseComposeActivity() {
             val axisValue = event.getAxisValue(MotionEvent.AXIS_VSCROLL)
             LogUtils.d("onGenericMotionEvent", "axisValue = $axisValue")
             controller.mouseWheelPage(
-                if (axisValue < 0.0f) PageDirection.NEXT else PageDirection.PREV
+                if (axisValue < 0.0f) PageDirection.NEXT else PageDirection.PREV,
             )
             return true
         }
@@ -469,7 +501,7 @@ open class MainActivity : BaseComposeActivity() {
             val yAxis = event.getAxisValue(MotionEvent.AXIS_Y)
             if (kotlin.math.abs(yAxis) > 0.5f) {
                 controller.handleKeyPage(
-                    if (yAxis > 0) PageDirection.NEXT else PageDirection.PREV
+                    if (yAxis > 0) PageDirection.NEXT else PageDirection.PREV,
                 )
                 return true
             }
@@ -477,12 +509,18 @@ open class MainActivity : BaseComposeActivity() {
         return super.onGenericMotionEvent(event)
     }
 
-    override fun onKeyDown(keyCode: Int, event: KeyEvent): Boolean {
+    override fun onKeyDown(
+        keyCode: Int,
+        event: KeyEvent,
+    ): Boolean {
         if (activeReadBookInputHandler?.onKeyDown(keyCode, event) == true) return true
         return super.onKeyDown(keyCode, event)
     }
 
-    override fun onKeyUp(keyCode: Int, event: KeyEvent): Boolean {
+    override fun onKeyUp(
+        keyCode: Int,
+        event: KeyEvent,
+    ): Boolean {
         if (activeReadBookInputHandler?.onKeyUp(keyCode, event) == true) return true
         return super.onKeyUp(keyCode, event)
     }
@@ -505,7 +543,6 @@ open class MainActivity : BaseComposeActivity() {
             Backup.autoBack(this)
         }
     }
-
 }
 
 data class TextSheetData(
@@ -515,10 +552,17 @@ data class TextSheetData(
 )
 
 class LauncherW : MainActivity()
+
 class Launcher1 : MainActivity()
+
 class Launcher2 : MainActivity()
+
 class Launcher3 : MainActivity()
+
 class Launcher4 : MainActivity()
+
 class Launcher5 : MainActivity()
+
 class Launcher6 : MainActivity()
+
 class Launcher0 : MainActivity()

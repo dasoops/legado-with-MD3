@@ -32,7 +32,6 @@ class ReadContentProcessDelegate(
     private val host: Host,
     private val bookContentProcessGateway: BookContentProcessGateway,
 ) {
-
     interface Host {
         fun showToast(message: String)
     }
@@ -46,7 +45,8 @@ class ReadContentProcessDelegate(
         _uiState.update { it.copy(isLoading = true, errorMessage = null) }
         scope.launch(IO) {
             runCatching {
-                bookContentProcessGateway.getForChapter(book.bookUrl, chapterIndex)
+                bookContentProcessGateway
+                    .getForChapter(book.bookUrl, chapterIndex)
                     .mapNotNull { it.toContentProcessItemUi() }
                     .toImmutableList()
             }.onSuccess { items ->
@@ -57,7 +57,8 @@ class ReadContentProcessDelegate(
                 _uiState.update {
                     it.copy(
                         isLoading = false,
-                        errorMessage = error.localizedMessage
+                        errorMessage =
+                        error.localizedMessage
                             ?: context.getString(R.string.error),
                     )
                 }
@@ -65,7 +66,10 @@ class ReadContentProcessDelegate(
         }
     }
 
-    fun toggle(id: String, enabled: Boolean) {
+    fun toggle(
+        id: String,
+        enabled: Boolean,
+    ) {
         scope.launch(IO) {
             runCatching {
                 bookContentProcessGateway.setEnabled(id, enabled)
@@ -136,10 +140,12 @@ class ReadContentProcessDelegate(
     }
 
     private fun BookContentProcess.toContentProcessItemUi(): ContentProcessItemUi? {
-        val anchor = GSON.fromJsonObject<TextProcessAnchor>(anchorJson).getOrNull()
-            ?: return null
-        val action = GSON.fromJsonObject<TextProcessAction>(actionJson).getOrNull()
-            ?: return null
+        val anchor =
+            GSON.fromJsonObject<TextProcessAnchor>(anchorJson).getOrNull()
+                ?: return null
+        val action =
+            GSON.fromJsonObject<TextProcessAction>(actionJson).getOrNull()
+                ?: return null
         return ContentProcessItemUi(
             id = id,
             kind = kind,

@@ -26,10 +26,14 @@ class ReadRecordTimeTotalsTest {
         assertEquals(merged, ReadRecordTimeTotals.total(0, ReadRecordTimeTotals.legacy(merged, 0)))
     }
 
-    private fun merge(targetTotal: Long, targetSessions: Long, sourceTotal: Long, sourceSessions: Long): Long =
-        ReadRecordTimeTotals.total(
-            targetSessions + sourceSessions,
-            ReadRecordTimeTotals.legacy(targetTotal, targetSessions) +
-                ReadRecordTimeTotals.legacy(sourceTotal, sourceSessions),
-        )
+    private fun merge(
+        targetTotal: Long,
+        targetSessions: Long,
+        sourceTotal: Long,
+        sourceSessions: Long,
+    ): Long = ReadRecordTimeTotals.total(
+        targetSessions + sourceSessions,
+        ReadRecordTimeTotals.legacy(targetTotal, targetSessions) +
+            ReadRecordTimeTotals.legacy(sourceTotal, sourceSessions),
+    )
 }

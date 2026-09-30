@@ -18,15 +18,15 @@ import androidx.vectordrawable.graphics.drawable.AnimatedVectorDrawableCompat
  */
 @Suppress("unused")
 object DrawableUtils {
-
     fun createTransitionDrawable(
         @ColorInt startColor: Int,
-        @ColorInt endColor: Int
-    ): TransitionDrawable {
-        return createTransitionDrawable(ColorDrawable(startColor), ColorDrawable(endColor))
-    }
+        @ColorInt endColor: Int,
+    ): TransitionDrawable = createTransitionDrawable(ColorDrawable(startColor), ColorDrawable(endColor))
 
-    fun createTransitionDrawable(start: Drawable, end: Drawable): TransitionDrawable {
+    fun createTransitionDrawable(
+        start: Drawable,
+        end: Drawable,
+    ): TransitionDrawable {
         val drawables = arrayOfNulls<Drawable>(2)
 
         drawables[0] = start
@@ -34,12 +34,11 @@ object DrawableUtils {
 
         return TransitionDrawable(drawables)
     }
-
 }
 
 fun Drawable.setTintListMutate(
     tint: ColorStateList,
-    tintMode: PorterDuff.Mode = PorterDuff.Mode.SRC_ATOP
+    tintMode: PorterDuff.Mode = PorterDuff.Mode.SRC_ATOP,
 ) {
     val wrappedDrawable = DrawableCompat.wrap(this)
     wrappedDrawable.mutate()
@@ -49,7 +48,7 @@ fun Drawable.setTintListMutate(
 
 fun Drawable.setTintMutate(
     @ColorInt tint: Int,
-    tintMode: PorterDuff.Mode = PorterDuff.Mode.SRC_ATOP
+    tintMode: PorterDuff.Mode = PorterDuff.Mode.SRC_ATOP,
 ) {
     val wrappedDrawable = DrawableCompat.wrap(this)
     wrappedDrawable.mutate()
@@ -59,9 +58,15 @@ fun Drawable.setTintMutate(
 
 fun Drawable.startAnimation() {
     when (this) {
-        is AnimatedVectorDrawable -> start()
-        is AnimatedVectorDrawableCompat -> start()
-        is Animatable -> start()
+        is AnimatedVectorDrawable -> {
+            start()
+        }
+        is AnimatedVectorDrawableCompat -> {
+            start()
+        }
+        is Animatable -> {
+            start()
+        }
         else -> {}
     }
 }

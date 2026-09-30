@@ -4,5 +4,5 @@ import android.util.SparseArray
 
 data class IndexData(
     val table: List<IndexEntry>,
-    val cncx: SparseArray<String>
+    val cncx: SparseArray<String>,
 )

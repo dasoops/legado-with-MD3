@@ -14,7 +14,6 @@ class SolidUnderlineSpan(
     private val underlineWidth: Float = 1f,
     private val underlineOffset: Float = 6f,
 ) : ReplacementSpan() {
-
     private val offsetPx = underlineOffset.toInt().dpToPx()
 
     override fun getSize(
@@ -22,7 +21,7 @@ class SolidUnderlineSpan(
         text: CharSequence,
         start: Int,
         end: Int,
-        fm: Paint.FontMetricsInt?
+        fm: Paint.FontMetricsInt?,
     ): Int {
         if (fm != null) {
             val metrics = paint.fontMetricsInt
@@ -43,7 +42,7 @@ class SolidUnderlineSpan(
         top: Int,
         y: Int,
         bottom: Int,
-        paint: Paint
+        paint: Paint,
     ) {
         val textStr = text.subSequence(start, end).toString()
         paint.color = textColor
@@ -51,12 +50,13 @@ class SolidUnderlineSpan(
 
         val width = paint.measureText(text, start, end)
         val lineY = y + offsetPx
-        val linePaint = Paint(paint).apply {
-            color = underlineColor
-            style = Paint.Style.STROKE
-            strokeWidth = underlineWidth.dpToPx()
-            isAntiAlias = true
-        }
+        val linePaint =
+            Paint(paint).apply {
+                color = underlineColor
+                style = Paint.Style.STROKE
+                strokeWidth = underlineWidth.dpToPx()
+                isAntiAlias = true
+            }
         canvas.drawLine(x, lineY.toFloat(), x + width, lineY.toFloat(), linePaint)
     }
 }

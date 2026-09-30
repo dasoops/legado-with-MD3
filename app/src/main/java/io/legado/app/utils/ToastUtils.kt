@@ -18,11 +18,17 @@ private var toastLegacy: Toast? = null
 private val otherSettingsGateway
     get() = GlobalContext.get().get<OtherSettingsGateway>()
 
-fun Context.toastOnUi(message: Int, duration: Int = Toast.LENGTH_SHORT) {
+fun Context.toastOnUi(
+    message: Int,
+    duration: Int = Toast.LENGTH_SHORT,
+) {
     toastOnUi(getString(message), duration)
 }
 
-fun Context.toastOnUi(message: CharSequence?, duration: Int = Toast.LENGTH_SHORT) {
+fun Context.toastOnUi(
+    message: CharSequence?,
+    duration: Int = Toast.LENGTH_SHORT,
+) {
     runOnUI {
         kotlin.runCatching {
             toast?.cancel()
@@ -71,7 +77,10 @@ fun Context.longToastOnUiLegacy(message: CharSequence) {
 /**
  * JS 专用弹窗，短时间显示
  */
-fun Context.toastForJs(message: CharSequence?, duration: Int = Toast.LENGTH_SHORT) {
+fun Context.toastForJs(
+    message: CharSequence?,
+    duration: Int = Toast.LENGTH_SHORT,
+) {
     runOnUI {
         kotlin.runCatching {
             toastForJs?.cancel()
@@ -86,7 +95,10 @@ fun Context.toastForJs(message: CharSequence?, duration: Int = Toast.LENGTH_SHOR
     }
 }
 
-fun Context.toastForJs(message: Int, duration: Int = Toast.LENGTH_SHORT) {
+fun Context.toastForJs(
+    message: Int,
+    duration: Int = Toast.LENGTH_SHORT,
+) {
     toastForJs(getString(message), duration)
 }
 
@@ -100,8 +112,11 @@ fun Context.longToastForJs(message: Int) {
 
 // Fragment 调用代理
 fun Fragment.toastForJs(message: CharSequence?) = requireContext().toastForJs(message)
+
 fun Fragment.toastForJs(message: Int) = requireContext().toastForJs(message)
+
 fun Fragment.longToastForJs(message: CharSequence?) = requireContext().longToastForJs(message)
+
 fun Fragment.longToastForJs(message: Int) = requireContext().longToastForJs(message)
 
 fun Fragment.toastOnUi(message: Int) = requireActivity().toastOnUi(message)
@@ -111,4 +126,3 @@ fun Fragment.toastOnUi(message: CharSequence) = requireActivity().toastOnUi(mess
 fun Fragment.longToast(message: Int) = requireContext().longToastOnUi(message)
 
 fun Fragment.longToast(message: CharSequence) = requireContext().longToastOnUi(message)
-

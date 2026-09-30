@@ -13,6 +13,8 @@ import io.legado.app.help.config.ReadBookConfig
 import io.legado.app.model.ReadBook
 import io.legado.app.utils.GSON
 import io.legado.app.utils.fromJsonObject
+import kotlin.math.max
+import kotlin.math.min
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.CoroutineScope
@@ -23,8 +25,6 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import kotlin.math.max
-import kotlin.math.min
 
 /**
  * 划线/高亮笔记域：承载一次「选中 → 配置样式/备注 → 保存」的会话。
@@ -44,14 +44,19 @@ class MarkingDelegate(
 
     interface Host {
         fun reloadCurrentChapter()
+
         fun dismissMarkingSheet()
+
         fun showToast(message: String)
     }
 
     private val _uiState = MutableStateFlow(MarkingUiState())
     val uiState = _uiState.asStateFlow()
 
-    fun open(selection: Bookmark, inlineMode: Boolean = false) {
+    fun open(
+        selection: Bookmark,
+        inlineMode: Boolean = false,
+    ) {
         val book = ReadBook.book
         _uiState.update {
             it.copy(
@@ -63,22 +68,24 @@ class MarkingDelegate(
             )
         }
         scope.launch(IO) {
-            val rules = runCatching {
-                highlightRuleRepository.load(ReadBookConfig.durConfig.name)
-            }.getOrDefault(emptyList())
-            val existing = if (book != null) {
+            val rules =
                 runCatching {
-                    saveMarkingUseCase.find(
-                        bookName = book.name,
-                        bookAuthor = book.author,
-                        chapterIndex = selection.chapterIndex,
-                        chapterPosition = selection.chapterPos,
-                        selectedText = selection.bookText,
-                    )
-                }.getOrNull()
-            } else {
-                null
-            }
+                    highlightRuleRepository.load(ReadBookConfig.durConfig.name)
+                }.getOrDefault(emptyList())
+            val existing =
+                if (book != null) {
+                    runCatching {
+                        saveMarkingUseCase.find(
+                            bookName = book.name,
+                            bookAuthor = book.author,
+                            chapterIndex = selection.chapterIndex,
+                            chapterPosition = selection.chapterPos,
+                            selectedText = selection.bookText,
+                        )
+                    }.getOrNull()
+                } else {
+                    null
+                }
             _uiState.update {
                 it.copy(
                     highlightRules = rules.toImmutableList(),
@@ -90,7 +97,10 @@ class MarkingDelegate(
     }
 
     /** 从目录 Sheet 点标记项进入编辑模式：按 id 取完整标记预填。 */
-    fun openForEdit(markingId: String, inlineMode: Boolean = false) {
+    fun openForEdit(
+        markingId: String,
+        inlineMode: Boolean = false,
+    ) {
         val book = ReadBook.book
         _uiState.update {
             it.copy(
@@ -102,14 +112,16 @@ class MarkingDelegate(
             )
         }
         scope.launch(IO) {
-            val rules = runCatching {
-                highlightRuleRepository.load(ReadBookConfig.durConfig.name)
-            }.getOrDefault(emptyList())
-            val marking = if (book != null) {
-                runCatching { saveMarkingUseCase.findById(markingId) }.getOrNull()
-            } else {
-                null
-            }
+            val rules =
+                runCatching {
+                    highlightRuleRepository.load(ReadBookConfig.durConfig.name)
+                }.getOrDefault(emptyList())
+            val marking =
+                if (book != null) {
+                    runCatching { saveMarkingUseCase.findById(markingId) }.getOrNull()
+                } else {
+                    null
+                }
             _uiState.update {
                 it.copy(
                     highlightRules = rules.toImmutableList(),
@@ -120,7 +132,10 @@ class MarkingDelegate(
         }
     }
 
-    fun save(style: TextProcessStyle, note: String) {
+    fun save(
+        style: TextProcessStyle,
+        note: String,
+    ) {
         val current = _uiState.value
         val book = ReadBook.book ?: return
         val saveVersion = ++inlineSaveVersion
@@ -137,7 +152,9 @@ class MarkingDelegate(
                         _uiState.update { state ->
                             if (state.inlineMode && saveVersion == inlineSaveVersion) {
                                 state.copy(editing = saved, loading = false)
-                            } else state
+                            } else {
+                                state
+                            }
                         }
                     }
                     if (!current.inlineMode) {
@@ -225,26 +242,28 @@ class MarkingDelegate(
         }
     }
 
-    private fun BookMarking.anchor(): TextProcessAnchor? =
-        GSON.fromJsonObject<TextProcessAnchor>(anchorJson).getOrNull()
+    private fun BookMarking.anchor(): TextProcessAnchor? = GSON.fromJsonObject<TextProcessAnchor>(anchorJson).getOrNull()
 
     /**
      * 将选中文本附近的正文一并存入锚点，供换源后的文本匹配消歧。
      * 位置来自当前已排版章节；若选区位置和合成正文略有偏差，则在附近窗口寻找选中文本。
      */
     private fun selectionContext(selection: Bookmark): Pair<String, String> {
-        val chapter = ReadBook.readerChapterInputWindow.current
-            ?.takeIf { it.chapter.index == selection.chapterIndex }
-            ?: return "" to ""
+        val chapter =
+            ReadBook.readerChapterInputWindow.current
+                ?.takeIf { it.chapter.index == selection.chapterIndex }
+                ?: return "" to ""
         val content = chapter.source.semanticContent
         val expectedStart = selection.chapterPos.coerceIn(0, content.length)
         val windowStart = max(0, expectedStart - CONTEXT_SEARCH_WINDOW)
-        val nearStart = content.indexOf(selection.bookText, windowStart)
-            .takeIf { it >= 0 && it <= min(content.length, expectedStart + CONTEXT_SEARCH_WINDOW) }
-            ?: expectedStart
+        val nearStart =
+            content
+                .indexOf(selection.bookText, windowStart)
+                .takeIf { it >= 0 && it <= min(content.length, expectedStart + CONTEXT_SEARCH_WINDOW) }
+                ?: expectedStart
         val end = min(content.length, nearStart + selection.bookText.length)
         return content.substring(max(0, nearStart - MARKING_CONTEXT_CHARS), nearStart) to
-                content.substring(end, min(content.length, end + MARKING_CONTEXT_CHARS))
+            content.substring(end, min(content.length, end + MARKING_CONTEXT_CHARS))
     }
 
     private companion object {

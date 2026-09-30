@@ -7,8 +7,6 @@ import android.view.WindowManager
 import androidx.preference.ListPreferenceDialogFragmentCompat
 import androidx.preference.PreferenceDialogFragmentCompat
 import io.legado.app.R
-//import io.legado.app.lib.theme.accentColor
-//import io.legado.app.lib.theme.filletBackground
 import io.legado.app.utils.dpToPx
 
 class ListPreferenceDialog : ListPreferenceDialogFragmentCompat() {
@@ -24,7 +22,6 @@ class ListPreferenceDialog : ListPreferenceDialogFragmentCompat() {
             fragment.arguments = b
             return fragment
         }
-
     }
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
@@ -57,7 +54,7 @@ class ListPreferenceDialog : ListPreferenceDialogFragmentCompat() {
                     Gravity.TOP -> it.decorView.setBackgroundResource(R.drawable.bg_eink_border_bottom)
                     Gravity.BOTTOM -> it.decorView.setBackgroundResource(R.drawable.bg_eink_border_top)
                     else -> {
-                        val padding = 2.dpToPx();
+                        val padding = 2.dpToPx()
                         it.decorView.setPadding(padding, padding, padding, padding)
                         it.decorView.setBackgroundResource(R.drawable.bg_eink_border_dialog)
                     }
@@ -65,5 +62,4 @@ class ListPreferenceDialog : ListPreferenceDialogFragmentCompat() {
             }
         }
     }
-
 }

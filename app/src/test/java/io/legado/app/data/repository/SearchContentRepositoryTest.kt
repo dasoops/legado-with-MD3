@@ -5,7 +5,6 @@ import org.junit.Assert.assertNull
 import org.junit.Test
 
 class SearchContentRepositoryTest {
-
     @Test
     fun `beginSearch remembers latest search parameters for the book`() {
         val repository = SearchContentRepository()

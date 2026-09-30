@@ -20,8 +20,8 @@ import androidx.compose.ui.unit.dp
 import io.legado.app.R
 import io.legado.app.ui.theme.LegadoTheme
 import io.legado.app.ui.theme.ThemeResolver
-import io.legado.app.ui.widget.components.button.ConfirmDismissButtonsRow
 import io.legado.app.ui.widget.components.SplicedColumnDivider
+import io.legado.app.ui.widget.components.button.ConfirmDismissButtonsRow
 import io.legado.app.ui.widget.components.text.AppText
 import top.yukonga.miuix.kmp.basic.BasicComponent
 import top.yukonga.miuix.kmp.basic.TextField as MiuixTextField
@@ -32,7 +32,7 @@ fun InputSettingItem(
     value: String,
     defaultValue: String? = "",
     description: String? = null,
-    onConfirm: (String) -> Unit
+    onConfirm: (String) -> Unit,
 ) {
     // 1. 状态统一提升到外部，两套引擎共用
     var expanded by remember { mutableStateOf(false) }
@@ -54,14 +54,15 @@ fun InputSettingItem(
             BasicComponent(
                 title = title,
                 summary = value,
-                onClick = { expanded = !expanded }
+                onClick = { expanded = !expanded },
             )
 
             AnimatedVisibility(visible = expanded) {
                 Column(
-                    modifier = Modifier
+                    modifier =
+                    Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 4.dp)
+                        .padding(horizontal = 16.dp, vertical = 4.dp),
                 ) {
                     MiuixTextField(
                         state = state,
@@ -70,7 +71,7 @@ fun InputSettingItem(
                         onKeyboardAction = {
                             onConfirm(state.text.toString())
                             expanded = false
-                        }
+                        },
                     )
 
                     ConfirmDismissButtonsRow(
@@ -83,7 +84,7 @@ fun InputSettingItem(
                             expanded = false
                         },
                         dismissText = stringResource(R.string.text_default),
-                        confirmText = stringResource(R.string.confirm)
+                        confirmText = stringResource(R.string.confirm),
                     )
                 }
             }
@@ -98,20 +99,22 @@ fun InputSettingItem(
             expandContent = {
                 TextField(
                     state = state,
-                    modifier = Modifier
+                    modifier =
+                    Modifier
                         .fillMaxWidth()
                         .heightIn(min = 48.dp),
                     label = { AppText(stringResource(R.string.edit)) },
-                    contentPadding = PaddingValues(
+                    contentPadding =
+                    PaddingValues(
                         top = 4.dp,
                         bottom = 4.dp,
                         start = 12.dp,
-                        end = 12.dp
+                        end = 12.dp,
                     ),
                     onKeyboardAction = {
                         onConfirm(state.text.toString())
                         expanded = false
-                    }
+                    },
                 )
 
                 ConfirmDismissButtonsRow(
@@ -124,9 +127,9 @@ fun InputSettingItem(
                         expanded = false
                     },
                     dismissText = stringResource(R.string.text_default),
-                    confirmText = stringResource(R.string.confirm)
+                    confirmText = stringResource(R.string.confirm),
                 )
-            }
+            },
         )
     }
 }

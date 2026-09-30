@@ -36,10 +36,11 @@ private fun BaseCardContent(
 
     Box(modifier = modifier) {
         Spacer(
-            modifier = Modifier
+            modifier =
+            Modifier
                 .matchParentSize()
                 .clip(shape)
-                .appContainerBackground(type = AppContainerBackgroundType.Item)
+                .appContainerBackground(type = AppContainerBackgroundType.Item),
         )
         Column(content = content)
     }
@@ -58,42 +59,47 @@ private fun BaseCard(
     border: BorderStroke? = null,
     alpha: Float = 1f,
     useItemBackground: Boolean = false,
-    content: @Composable ColumnScope.() -> Unit
+    content: @Composable ColumnScope.() -> Unit,
 ) {
-    val resolvedContainerColor = (containerColor ?: LegadoTheme.colorScheme.surfaceContainer)
-        .let { it.copy(alpha = it.alpha * alpha) }
+    val resolvedContainerColor =
+        (containerColor ?: LegadoTheme.colorScheme.surfaceContainer)
+            .let { it.copy(alpha = it.alpha * alpha) }
     val themeSettings = LocalAppUiConfiguration.current.theme
     val isTransparent = containerColor == Color.Transparent
-    val resolvedCornerRadius = if (themeSettings.overrideBaseCardCornerRadius) {
-        themeSettings.baseCardCornerRadius.dp
-    } else {
-        cornerRadius
-    }
-    val resolvedBorder = if (themeSettings.overrideBaseCardBorder) {
-        val configuredColor = if (LegadoTheme.isDark) {
-            themeSettings.baseCardBorderColorNight
+    val resolvedCornerRadius =
+        if (themeSettings.overrideBaseCardCornerRadius) {
+            themeSettings.baseCardCornerRadius.dp
         } else {
-            themeSettings.baseCardBorderColor
+            cornerRadius
         }
-        BorderStroke(
-            themeSettings.baseCardBorderWidth.dp,
-            configuredColor.takeIf { it != 0 }?.let(::Color)
-                ?: LegadoTheme.colorScheme.outlineVariant
-        )
-    } else {
-        border
-    }
-    val resolvedShape = RoundedCornerShape(resolvedCornerRadius)
-    val clickableModifier = if (onClick != null || onLongClick != null) {
-        modifier
-            .clip(resolvedShape)
-            .combinedClickable(
-                onClick = { onClick?.invoke() },
-                onLongClick = onLongClick
+    val resolvedBorder =
+        if (themeSettings.overrideBaseCardBorder) {
+            val configuredColor =
+                if (LegadoTheme.isDark) {
+                    themeSettings.baseCardBorderColorNight
+                } else {
+                    themeSettings.baseCardBorderColor
+                }
+            BorderStroke(
+                themeSettings.baseCardBorderWidth.dp,
+                configuredColor.takeIf { it != 0 }?.let(::Color)
+                    ?: LegadoTheme.colorScheme.outlineVariant,
             )
-    } else {
-        modifier
-    }
+        } else {
+            border
+        }
+    val resolvedShape = RoundedCornerShape(resolvedCornerRadius)
+    val clickableModifier =
+        if (onClick != null || onLongClick != null) {
+            modifier
+                .clip(resolvedShape)
+                .combinedClickable(
+                    onClick = { onClick?.invoke() },
+                    onLongClick = onLongClick,
+                )
+        } else {
+            modifier
+        }
     Surface(
         modifier = clickableModifier,
         shape = resolvedShape,
@@ -101,7 +107,7 @@ private fun BaseCard(
         contentColor = contentColor ?: LegadoTheme.colorScheme.onSurface,
         tonalElevation = 0.dp,
         shadowElevation = elevation,
-        border = resolvedBorder
+        border = resolvedBorder,
     ) {
         BaseCardContent(
             shape = resolvedShape,
@@ -122,7 +128,7 @@ fun GlassCard(
     contentColor: Color? = null,
     elevation: Dp = 0.dp,
     border: BorderStroke? = null,
-    content: @Composable ColumnScope.() -> Unit
+    content: @Composable ColumnScope.() -> Unit,
 ) {
     BaseCard(
         modifier = modifier,
@@ -135,7 +141,7 @@ fun GlassCard(
         border = border,
         alpha = LocalAppUiConfiguration.current.theme.containerOpacity / 100f,
         useItemBackground = true,
-        content = content
+        content = content,
     )
 }
 
@@ -150,7 +156,7 @@ fun NormalCard(
     contentColor: Color? = null,
     elevation: Dp = 0.dp,
     border: BorderStroke? = null,
-    content: @Composable ColumnScope.() -> Unit
+    content: @Composable ColumnScope.() -> Unit,
 ) {
     BaseCard(
         modifier = modifier,
@@ -163,6 +169,6 @@ fun NormalCard(
         border = border,
         alpha = 1f,
         useItemBackground = false,
-        content = content
+        content = content,
     )
 }

@@ -11,7 +11,11 @@ import androidx.annotation.StringRes
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.FragmentActivity
 import androidx.preference.PreferenceViewHolder
-import com.jaredrummler.android.colorpicker.*
+import com.jaredrummler.android.colorpicker.ColorPanelView
+import com.jaredrummler.android.colorpicker.ColorPickerDialog
+import com.jaredrummler.android.colorpicker.ColorPickerDialogListener
+import com.jaredrummler.android.colorpicker.ColorShape
+import com.jaredrummler.android.colorpicker.R
 import io.legado.app.utils.ColorUtils
 import io.legado.app.utils.applyTint
 import io.legado.app.utils.themeColor
@@ -19,7 +23,7 @@ import io.legado.app.utils.themeColor
 @Suppress("MemberVisibilityCanBePrivate", "unused")
 class ColorPreference @JvmOverloads constructor(
     context: Context,
-    attrs: AttributeSet? = null
+    attrs: AttributeSet? = null,
 ) : Preference(context, attrs),
     ColorPickerDialogListener {
 
@@ -123,7 +127,7 @@ class ColorPreference @JvmOverloads constructor(
     override fun onBindView(holder: PreferenceViewHolder) {
         val v = bindView<ColorPanelView>(
             context, holder, icon, title, summary, widgetLayoutResource,
-            R.id.cpv_preference_preview_color_panel, 30, 30
+            R.id.cpv_preference_preview_color_panel, 30, 30,
         )
         if (v is ColorPanelView) {
             v.color = mColor
@@ -141,12 +145,10 @@ class ColorPreference @JvmOverloads constructor(
         }
     }
 
-    override fun onGetDefaultValue(a: TypedArray, index: Int): Any {
-        return a.getInteger(index, Color.BLACK)
-    }
+    override fun onGetDefaultValue(a: TypedArray, index: Int): Any = a.getInteger(index, Color.BLACK)
 
     override fun onColorSelected(dialogId: Int, @ColorInt color: Int) {
-        //返回值为true时说明已经处理过,不再处理
+        // 返回值为true时说明已经处理过,不再处理
         if (onSaveColor?.invoke(color) == true) {
             return
         }
@@ -174,9 +176,7 @@ class ColorPreference @JvmOverloads constructor(
      *
      * @return An array of color ints
      */
-    fun getPresets(): IntArray? {
-        return presets
-    }
+    fun getPresets(): IntArray? = presets
 
     /**
      * Set the colors shown in the [ColorPickerDialog].
@@ -203,15 +203,12 @@ class ColorPreference @JvmOverloads constructor(
      *
      * @return The tag
      */
-    fun getFragmentTag(): String {
-        return "color_$key"
-    }
+    fun getFragmentTag(): String = "color_$key"
 
     interface OnShowDialogListener {
 
         fun onShowColorPickerDialog(title: String, currentColor: Int)
     }
-
 
     internal class ColorPickerDialogCompat : ColorPickerDialog() {
 
@@ -221,11 +218,8 @@ class ColorPreference @JvmOverloads constructor(
             alertDialog?.applyTint()
         }
 
-
         companion object {
-            fun newBuilder(): Builder {
-                return Builder()
-            }
+            fun newBuilder(): Builder = Builder()
 
             private const val ARG_ID = "id"
             private const val ARG_TYPE = "dialogType"
@@ -442,8 +436,6 @@ class ColorPreference @JvmOverloads constructor(
                 dialog.arguments = args
                 return dialog
             }
-
         }
-
     }
 }

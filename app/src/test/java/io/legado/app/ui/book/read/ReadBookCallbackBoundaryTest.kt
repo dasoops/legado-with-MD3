@@ -1,8 +1,8 @@
 package io.legado.app.ui.book.read
 
+import java.io.File
 import org.junit.Assert.assertTrue
 import org.junit.Test
-import java.io.File
 
 /**
  * R2.3（Track B 端游）—— `ReadBook` 的回调不再穿过 `ReadBookViewModel`。
@@ -16,25 +16,26 @@ import java.io.File
  *    `ReadBookEffect` 是 VM 的对外协议，controller 自己 post 给自己的东西不该占位。
  */
 class ReadBookCallbackBoundaryTest {
-
     @Test
     fun `ReadBookViewModel 不再实现 ReadBook CallBack`() {
         // 注释里会照常提到这些名字（说明它们搬去了哪儿），先剥掉注释再断言。
-        val source = stripComments(
-            mainSourceFile("io/legado/app/ui/book/read/ReadBookViewModel.kt").readText()
-        )
+        val source =
+            stripComments(
+                mainSourceFile("io/legado/app/ui/book/read/ReadBookViewModel.kt").readText(),
+            )
         // 只查超类型和注册调用，不查 `override fun upMenuView` 之类的方法名：
         // Kotlin 里没有超类型就写不出 override，方法名检查是多余的；而各 delegate 的
         // Host 完全可以有同名方法（VM 确实实现了 ReadBookLoadDelegate.Host.sureNewProgress），
         // 查方法名会把这种正当写法误报成回归。
-        val violations = buildList {
-            if (CALLBACK_SUPERTYPE.containsMatchIn(source)) add("声明了 ReadBook.CallBack 超类型")
-            if (Regex("""\bReadBook\.(?:register|unregister)\s*\(\s*this\s*\)""")
-                    .containsMatchIn(source)
-            ) {
-                add("ReadBook.register/unregister(this)")
+        val violations =
+            buildList {
+                if (CALLBACK_SUPERTYPE.containsMatchIn(source)) add("声明了 ReadBook.CallBack 超类型")
+                if (Regex("""\bReadBook\.(?:register|unregister)\s*\(\s*this\s*\)""")
+                        .containsMatchIn(source)
+                ) {
+                    add("ReadBook.register/unregister(this)")
+                }
             }
-        }
         assertTrue(
             "ReadBookViewModel 又接回了 ReadBook.CallBack：${violations.joinToString()}。\n" +
                 "状态子集（upMenuView/loadChapterList/notifyBookChanged/sureNewProgress）" +
@@ -46,12 +47,14 @@ class ReadBookCallbackBoundaryTest {
 
     @Test
     fun `controller 内部自用的渲染回调不占用 ReadBookEffect`() {
-        val source = stripComments(
-            mainSourceFile("io/legado/app/ui/book/read/ReadBookContract.kt").readText()
-        )
-        val leaked = CONTROLLER_LOCAL_EFFECTS.filter { effect ->
-            Regex("""\b$effect\b[^\n]*:\s*ReadBookEffect\b""").containsMatchIn(source)
-        }
+        val source =
+            stripComments(
+                mainSourceFile("io/legado/app/ui/book/read/ReadBookContract.kt").readText(),
+            )
+        val leaked =
+            CONTROLLER_LOCAL_EFFECTS.filter { effect ->
+                Regex("""\b$effect\b[^\n]*:\s*ReadBookEffect\b""").containsMatchIn(source)
+            }
         assertTrue(
             "${leaked.joinToString()} 又回到了 ReadBookEffect。\n" +
                 "这几个只由 ReadBookController 的 postRender 产生、又只由它自己的 " +
@@ -62,11 +65,12 @@ class ReadBookCallbackBoundaryTest {
     }
 
     private companion object {
-        val CONTROLLER_LOCAL_EFFECTS = listOf(
-            "PageChanged",
-            "ContentLoadFinish",
-            "LayoutPageCompleted",
-        )
+        val CONTROLLER_LOCAL_EFFECTS =
+            listOf(
+                "PageChanged",
+                "ContentLoadFinish",
+                "LayoutPageCompleted",
+            )
 
         val CALLBACK_SUPERTYPE = Regex("""\bReadBook\.CallBack\b""")
 

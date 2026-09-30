@@ -1,10 +1,8 @@
 package io.legado.app.ui.widget.image.photo
 
 import android.graphics.PointF
-
 import android.graphics.RectF
 import android.widget.ImageView
-
 
 @Suppress("MemberVisibilityCanBePrivate")
 class Info(
@@ -15,7 +13,7 @@ class Info(
     screenCenter: PointF,
     scale: Float,
     degrees: Float,
-    scaleType: ImageView.ScaleType?
+    scaleType: ImageView.ScaleType?,
 ) {
     // 内部图片在整个手机界面的位置
     var mRect = RectF()
@@ -45,5 +43,4 @@ class Info(
         mBaseRect.set(base)
         mScreenCenter.set(screenCenter)
     }
-
 }

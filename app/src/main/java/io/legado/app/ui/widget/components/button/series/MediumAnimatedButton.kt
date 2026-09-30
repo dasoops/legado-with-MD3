@@ -24,7 +24,7 @@ fun MediumAnimatedButton(
     icon: ImageVector? = null,
     iconChecked: ImageVector? = null,
     text: String? = null,
-    contentDescription: String? = null
+    contentDescription: String? = null,
 ) {
     var showText by remember { mutableStateOf(false) }
     val currentIcon = if (checked) (iconChecked ?: icon)!! else icon!!
@@ -46,7 +46,7 @@ fun MediumAnimatedButton(
         selected = checked,
         onLongClick = onLongClick,
         size = if (text == null) MediumSeriesIconButtonSize else null,
-        style = SeriesIconButtonStyle.Tonal
+        style = SeriesIconButtonStyle.Tonal,
     ) { contentColor ->
         SeriesAnimatedButtonContent(
             icon = currentIcon,
@@ -57,7 +57,7 @@ fun MediumAnimatedButton(
             textStyle = LegadoTheme.typography.labelMedium,
             contentColor = contentColor,
             padding = PaddingValues(horizontal = 8.dp),
-            spacing = 8.dp
+            spacing = 8.dp,
         )
     }
 }

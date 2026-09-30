@@ -84,27 +84,30 @@ private data class TimedPageEstimateMetric(
 )
 
 private fun PageEstimateMetric.details(): String = when (this) {
-    is PageEstimateMetric.EstimateCompleted -> buildString {
-        append("chapters=").append(chapterCount)
-        append(",knownLengths=").append(knownLengthCount)
-        append(",totalPages=").append(totalPages)
-        append(",durationMs=").append(durationMillis)
-        append(",slope=").append(calibration.slope)
-        append(",intercept=").append(calibration.intercept)
-        append(",samples=").append(calibration.sampleCount)
-        append(",fitted=").append(calibration.fitted)
+    is PageEstimateMetric.EstimateCompleted -> {
+        buildString {
+            append("chapters=").append(chapterCount)
+            append(",knownLengths=").append(knownLengthCount)
+            append(",totalPages=").append(totalPages)
+            append(",durationMs=").append(durationMillis)
+            append(",slope=").append(calibration.slope)
+            append(",intercept=").append(calibration.intercept)
+            append(",samples=").append(calibration.sampleCount)
+            append(",fitted=").append(calibration.fitted)
+        }
     }
-
-    is PageEstimateMetric.ChapterCorrected -> buildString {
-        append("chapterIndex=").append(chapterIndex)
-        append(",contentLength=").append(contentLength)
-        append(",rawEstimate=").append(rawEstimate)
-        append(",estimatedPages=").append(estimatedPages)
-        append(",realPages=").append(realPages)
-        append(",absoluteError=").append(absoluteError)
-        append(",relativeError=").append(relativeError)
-        append(",slopeBefore=").append(calibrationBefore.slope)
-        append(",slopeAfter=").append(calibrationAfter.slope)
-        append(",samplesAfter=").append(calibrationAfter.sampleCount)
+    is PageEstimateMetric.ChapterCorrected -> {
+        buildString {
+            append("chapterIndex=").append(chapterIndex)
+            append(",contentLength=").append(contentLength)
+            append(",rawEstimate=").append(rawEstimate)
+            append(",estimatedPages=").append(estimatedPages)
+            append(",realPages=").append(realPages)
+            append(",absoluteError=").append(absoluteError)
+            append(",relativeError=").append(relativeError)
+            append(",slopeBefore=").append(calibrationBefore.slope)
+            append(",slopeAfter=").append(calibrationAfter.slope)
+            append(",samplesAfter=").append(calibrationAfter.sampleCount)
+        }
     }
 }

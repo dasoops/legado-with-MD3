@@ -1,11 +1,14 @@
 package io.legado.app.utils
 
-
 /**
  * Search the data byte array for the first occurrence
  * of the byte array pattern.
  */
-fun ByteArray.indexOf(pattern: ByteArray, start: Int = 0, stop: Int = size): Int {
+fun ByteArray.indexOf(
+    pattern: ByteArray,
+    start: Int = 0,
+    stop: Int = size,
+): Int {
     val data = this
     val failure: IntArray = computeFailure(pattern)
 

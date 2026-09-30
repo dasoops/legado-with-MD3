@@ -37,7 +37,6 @@ data class HighlightRule(
     @ColumnInfo(defaultValue = "1")
     var manualNineSlice: Boolean = true,
 ) {
-
     fun styleSummary(): String {
         val parts = ArrayList<String>(4)
         parts.add(targetScopeLabel())
@@ -58,7 +57,8 @@ data class HighlightRule(
                     6 -> "删除线"
                     7 -> "荧光"
                     else -> "下划线"
-                } + underlineColor?.let { " ${it.toHexColor()}" }.orEmpty()
+                } +
+                    underlineColor?.let { " ${it.toHexColor()}" }.orEmpty(),
             )
         }
         if (!bgImage.isNullOrBlank()) {
@@ -68,14 +68,14 @@ data class HighlightRule(
                     2 -> "背景图(裁剪)"
                     3 -> "背景图(九宫格)"
                     else -> "背景图(平铺)"
-                }
+                },
             )
         }
         if (!fontPath.isNullOrBlank()) {
             parts.add("自定义字体")
         }
         if (fontSizeOffset != 0) {
-            parts.add("字号${if (fontSizeOffset > 0) "+" else ""}${fontSizeOffset}")
+            parts.add("字号${if (fontSizeOffset > 0) "+" else ""}$fontSizeOffset")
         }
         if (parts.isEmpty()) {
             parts.add("无样式")
@@ -83,27 +83,19 @@ data class HighlightRule(
         return parts.joinToString(" / ")
     }
 
-    fun targetScopeLabel(): String {
-        return when (targetScope) {
-            TARGET_TITLE -> "作用于标题"
-            TARGET_BODY -> "作用于正文"
-            else -> "作用于全部"
-        }
+    fun targetScopeLabel(): String = when (targetScope) {
+        TARGET_TITLE -> "作用于标题"
+        TARGET_BODY -> "作用于正文"
+        else -> "作用于全部"
     }
 
-    fun displayPattern(): String {
-        return pattern.ifBlank { ".*" }
+    fun displayPattern(): String = pattern.ifBlank { ".*" }
+
+    fun normalizedSampleText(): String = sampleText.ifBlank {
+        "她轻声说：“今晚就出发。”\n最近在重读《百年孤独》（纪念版），节奏依然很稳。"
     }
 
-    fun normalizedSampleText(): String {
-        return sampleText.ifBlank {
-            "她轻声说：“今晚就出发。”\n最近在重读《百年孤独》（纪念版），节奏依然很稳。"
-        }
-    }
-
-    fun copyWithNewId(): HighlightRule {
-        return copy(id = Uuid.random().toString())
-    }
+    fun copyWithNewId(): HighlightRule = copy(id = Uuid.random().toString())
 
     companion object {
         const val TARGET_ALL = 0

@@ -8,24 +8,24 @@ import io.legado.app.utils.GSON
 import io.legado.app.utils.fromJsonObject
 import splitties.init.appCtx
 
-internal val alwaysIgnoredPreferenceKeys = setOf(
-    PreferKey.defaultCover,
-    PreferKey.defaultCoverDark,
-    PreferKey.backupPath,
-    PreferKey.defaultBookTreeUri,
-    PreferKey.webDavDeviceName,
-    PreferKey.launcherIcon,
-    PreferKey.bitmapCacheSize,
-    LocalPreferencesKeys.PASSWORD.name,
-    LocalPreferencesKeys.MIGRATED_TO_SETTINGS.name,
-)
+internal val alwaysIgnoredPreferenceKeys =
+    setOf(
+        PreferKey.defaultCover,
+        PreferKey.defaultCoverDark,
+        PreferKey.backupPath,
+        PreferKey.defaultBookTreeUri,
+        PreferKey.webDavDeviceName,
+        PreferKey.launcherIcon,
+        PreferKey.bitmapCacheSize,
+        LocalPreferencesKeys.PASSWORD.name,
+        LocalPreferencesKeys.MIGRATED_TO_SETTINGS.name,
+    )
 
 /**
  * 备份配置
  */
 @Suppress("ConstPropertyName")
 object BackupConfig {
-
     private val ignoreConfigPath = FileUtils.getPath(appCtx.filesDir, "restoreIgnore.json")
     val ignoreConfig: HashMap<String, Boolean> by lazy {
         val file = FileUtils.createFileIfNotExist(ignoreConfigPath)
@@ -59,51 +59,50 @@ object BackupConfig {
     private const val coverConfigKey = "coverConfig"
     private const val localBookKey = "localBook"
 
-    //数据库忽略key
+    // 数据库忽略key
     private const val dbKeyBookmark = "bookmark"
     private const val dbKeyBookGroup = "bookGroup"
-    private const val dbKeyBookSource = "bookSource"
     private const val dbKeyReplaceRule = "replaceRule"
     private const val dbKeyReadRecord = "readRecord"
-    private const val dbKeySearchHistory = "searchHistory"
-    private const val dbKeySourceSub = "sourceSub"
     private const val dbKeyTxtTocRule = "txtTocRule"
     private const val dbKeyKeyboardAssists = "keyboardAssists"
-    private const val dbKeyHomepageModules = "homepageModules"
-    private const val dbKeyHomepageCustomSets = "homepageCustomSets"
     private const val dbKeyHighlightRule = "highlightRule"
     private const val dbKeyHighlightTagRule = "highlightTagRule"
     private const val dbKeyServer = "server"
 
-    val dbIgnoreKeys = arrayOf(
-        dbKeyBookmark, dbKeyBookGroup, dbKeyBookSource,
-        dbKeyReplaceRule, dbKeyReadRecord, dbKeySearchHistory,
-        dbKeySourceSub, dbKeyTxtTocRule, dbKeyKeyboardAssists,
-        dbKeyHomepageModules, dbKeyHomepageCustomSets,
-        dbKeyHighlightRule, dbKeyHighlightTagRule, dbKeyServer
-    )
+    val dbIgnoreKeys =
+        arrayOf(
+            dbKeyBookmark,
+            dbKeyBookGroup,
+            dbKeyReplaceRule,
+            dbKeyReadRecord,
+            dbKeyTxtTocRule,
+            dbKeyKeyboardAssists,
+            dbKeyHighlightRule,
+            dbKeyHighlightTagRule,
+            dbKeyServer,
+        )
 
-    val dbIgnoreTitle = arrayOf(
-        appCtx.getString(R.string.bookmark),
-        appCtx.getString(R.string.book_group),
-        appCtx.getString(R.string.book_source),
-        appCtx.getString(R.string.replace_rule),
-        appCtx.getString(R.string.read_record),
-        appCtx.getString(R.string.search_history),
-        appCtx.getString(R.string.source_sub),
-        appCtx.getString(R.string.txt_toc_rule),
-        appCtx.getString(R.string.keyboard_assists),
-        appCtx.getString(R.string.homepage_modules),
-        appCtx.getString(R.string.homepage_custom_sets),
-        appCtx.getString(R.string.highlight_rule_config),
-        appCtx.getString(R.string.highlight_tag_config),
-        appCtx.getString(R.string.server_config)
-    )
+    val dbIgnoreTitle =
+        arrayOf(
+            appCtx.getString(R.string.bookmark),
+            appCtx.getString(R.string.book_group),
+            appCtx.getString(R.string.replace_rule),
+            appCtx.getString(R.string.read_record),
+            appCtx.getString(R.string.txt_toc_rule),
+            appCtx.getString(R.string.keyboard_assists),
+            appCtx.getString(R.string.highlight_rule_config),
+            appCtx.getString(R.string.highlight_tag_config),
+            appCtx.getString(R.string.server_config),
+        )
 
     val backupDbIgnoreKeys = dbIgnoreKeys
     val backupDbIgnoreTitle = dbIgnoreTitle
 
-    fun dbIsNotIgnored(key: String, isBackup: Boolean = false): Boolean {
+    fun dbIsNotIgnored(
+        key: String,
+        isBackup: Boolean = false,
+    ): Boolean {
         val config = if (isBackup) backupDbIgnoreConfig else dbIgnoreConfig
         return config[key] != true
     }
@@ -118,222 +117,233 @@ object BackupConfig {
         FileUtils.createFileIfNotExist(backupDbIgnoreConfigPath).writeText(json)
     }
 
-    //配置忽略key
-    val ignoreKeys = arrayOf(
-        readConfigKey,
-        PreferKey.themeMode,
-        themeConfigKey,
-        coverConfigKey,
-        PreferKey.bookshelfLayout,
-        PreferKey.threadCount,
-        localBookKey
-    )
+    // 配置忽略key
+    val ignoreKeys =
+        arrayOf(
+            readConfigKey,
+            PreferKey.themeMode,
+            themeConfigKey,
+            coverConfigKey,
+            PreferKey.bookshelfLayout,
+            PreferKey.threadCount,
+            localBookKey,
+        )
 
-    //配置忽略标题
-    val ignoreTitle = arrayOf(
-        appCtx.getString(R.string.read_config),
-        appCtx.getString(R.string.theme_mode),
-        appCtx.getString(R.string.theme_config),
-        appCtx.getString(R.string.cover_config),
-        appCtx.getString(R.string.bookshelf_layout),
-        appCtx.getString(R.string.thread_count),
-        appCtx.getString(R.string.local_book)
-    )
+    // 配置忽略标题
+    val ignoreTitle =
+        arrayOf(
+            appCtx.getString(R.string.read_config),
+            appCtx.getString(R.string.theme_mode),
+            appCtx.getString(R.string.theme_config),
+            appCtx.getString(R.string.cover_config),
+            appCtx.getString(R.string.bookshelf_layout),
+            appCtx.getString(R.string.thread_count),
+            appCtx.getString(R.string.local_book),
+        )
 
-    //备份忽略key
-    val backupIgnoreKeys = arrayOf(
-        readConfigKey,
-        PreferKey.themeMode,
-        themeConfigKey,
-        coverConfigKey,
-        PreferKey.bookshelfLayout,
-        PreferKey.threadCount,
-        localBookKey
-    )
+    // 备份忽略key
+    val backupIgnoreKeys =
+        arrayOf(
+            readConfigKey,
+            PreferKey.themeMode,
+            themeConfigKey,
+            coverConfigKey,
+            PreferKey.bookshelfLayout,
+            PreferKey.threadCount,
+            localBookKey,
+        )
 
-    //备份忽略标题
-    val backupIgnoreTitle = arrayOf(
-        appCtx.getString(R.string.read_config),
-        appCtx.getString(R.string.theme_mode),
-        appCtx.getString(R.string.theme_config),
-        appCtx.getString(R.string.cover_config),
-        appCtx.getString(R.string.bookshelf_layout),
-        appCtx.getString(R.string.thread_count),
-        appCtx.getString(R.string.local_book)
-    )
+    // 备份忽略标题
+    val backupIgnoreTitle =
+        arrayOf(
+            appCtx.getString(R.string.read_config),
+            appCtx.getString(R.string.theme_mode),
+            appCtx.getString(R.string.theme_config),
+            appCtx.getString(R.string.cover_config),
+            appCtx.getString(R.string.bookshelf_layout),
+            appCtx.getString(R.string.thread_count),
+            appCtx.getString(R.string.local_book),
+        )
 
-    //阅读配置
-    private val readPrefKeys = arrayOf(
-        PreferKey.readStyleSelect,
-        PreferKey.comicStyleSelect,
-        PreferKey.shareLayout,
-        PreferKey.hideStatusBar,
-        PreferKey.hideNavigationBar,
-        PreferKey.autoReadSpeed,
-        PreferKey.clickActionTL,
-        PreferKey.clickActionTC,
-        PreferKey.clickActionTR,
-        PreferKey.clickActionML,
-        PreferKey.clickActionMC,
-        PreferKey.clickActionMR,
-        PreferKey.clickActionBL,
-        PreferKey.clickActionBC,
-        PreferKey.clickActionBR,
-        // 阅读进度条
-        PreferKey.readBarStyle,
-        PreferKey.readBarStyleFollowPage,
-        // 阅读菜单
-        PreferKey.readMenuBgColor,
-        PreferKey.readMenuAccentColor,
-        PreferKey.readMenuContainerColor,
-        PreferKey.readMenuBgColorNight,
-        PreferKey.readMenuAccentColorNight,
-        PreferKey.readMenuContainerColorNight,
-        PreferKey.readMenuTextColor,
-        PreferKey.readMenuTextColorNight,
-        PreferKey.readMenuColorMode,
-        PreferKey.readMenuIconShowText,
-        PreferKey.readMenuIconStyle,
-        PreferKey.readMenuIconItemsPerRow,
-        PreferKey.readMenuIconRowCount,
-        PreferKey.readMenuBottomCornerRadius,
-        PreferKey.readMenuFloatingBottomBar,
-        PreferKey.readMenuTopBarBlurMode,
-        PreferKey.readMenuBottomBarBlurMode,
-        PreferKey.readMenuTopBarLiquidGlassButtons,
-        PreferKey.readMenuTopBarMergeButtons,
-        PreferKey.readMenuTopBarTitleCapsule,
-        PreferKey.readMenuBottomBarLiquidGlassButtons,
-        PreferKey.readMenuFloatingIconLiquidGlass,
-        PreferKey.readMenuTopBarBlurStyle,
-        PreferKey.readMenuBottomBarBlurStyle,
-        PreferKey.readMenuBlurRadius,
-        PreferKey.readMenuBlurAlpha,
-        PreferKey.readMenuBlurColor,
-        PreferKey.readMenuBlurColorNight,
-        PreferKey.readMenuPaletteStyle,
-        PreferKey.readMenuLensRadius,
-        PreferKey.readMenuBorderWidth,
-        PreferKey.readMenuBorderColor,
-        PreferKey.readMenuBorderColorNight,
-        PreferKey.readMenuCustomIcons,
-        // 标题栏
-        PreferKey.titleBarIconStyle,
-        PreferKey.titleBarCustomIcons,
-        PreferKey.titleBarIconPosition,
-        PreferKey.showTitleBarIcons,
-        PreferKey.showMenuIcon,
-        PreferKey.titleBarMode,
-        PreferKey.shouldShowExpandButton,
-    )
+    // 阅读配置
+    private val readPrefKeys =
+        arrayOf(
+            PreferKey.readStyleSelect,
+            PreferKey.comicStyleSelect,
+            PreferKey.shareLayout,
+            PreferKey.hideStatusBar,
+            PreferKey.hideNavigationBar,
+            PreferKey.autoReadSpeed,
+            PreferKey.clickActionTL,
+            PreferKey.clickActionTC,
+            PreferKey.clickActionTR,
+            PreferKey.clickActionML,
+            PreferKey.clickActionMC,
+            PreferKey.clickActionMR,
+            PreferKey.clickActionBL,
+            PreferKey.clickActionBC,
+            PreferKey.clickActionBR,
+            // 阅读进度条
+            PreferKey.readBarStyle,
+            PreferKey.readBarStyleFollowPage,
+            // 阅读菜单
+            PreferKey.readMenuBgColor,
+            PreferKey.readMenuAccentColor,
+            PreferKey.readMenuContainerColor,
+            PreferKey.readMenuBgColorNight,
+            PreferKey.readMenuAccentColorNight,
+            PreferKey.readMenuContainerColorNight,
+            PreferKey.readMenuTextColor,
+            PreferKey.readMenuTextColorNight,
+            PreferKey.readMenuColorMode,
+            PreferKey.readMenuIconShowText,
+            PreferKey.readMenuIconStyle,
+            PreferKey.readMenuIconItemsPerRow,
+            PreferKey.readMenuIconRowCount,
+            PreferKey.readMenuBottomCornerRadius,
+            PreferKey.readMenuFloatingBottomBar,
+            PreferKey.readMenuTopBarBlurMode,
+            PreferKey.readMenuBottomBarBlurMode,
+            PreferKey.readMenuTopBarLiquidGlassButtons,
+            PreferKey.readMenuTopBarMergeButtons,
+            PreferKey.readMenuTopBarTitleCapsule,
+            PreferKey.readMenuBottomBarLiquidGlassButtons,
+            PreferKey.readMenuFloatingIconLiquidGlass,
+            PreferKey.readMenuTopBarBlurStyle,
+            PreferKey.readMenuBottomBarBlurStyle,
+            PreferKey.readMenuBlurRadius,
+            PreferKey.readMenuBlurAlpha,
+            PreferKey.readMenuBlurColor,
+            PreferKey.readMenuBlurColorNight,
+            PreferKey.readMenuPaletteStyle,
+            PreferKey.readMenuLensRadius,
+            PreferKey.readMenuBorderWidth,
+            PreferKey.readMenuBorderColor,
+            PreferKey.readMenuBorderColorNight,
+            PreferKey.readMenuCustomIcons,
+            // 标题栏
+            PreferKey.titleBarIconStyle,
+            PreferKey.titleBarCustomIcons,
+            PreferKey.titleBarIconPosition,
+            PreferKey.showTitleBarIcons,
+            PreferKey.showMenuIcon,
+            PreferKey.titleBarMode,
+            PreferKey.shouldShowExpandButton,
+        )
 
-    private val themePrefKeys = arrayOf(
-        PreferKey.cPrimary,
-        PreferKey.cNPrimary,
-        PreferKey.bgImage,
-        PreferKey.bgImageBlurring,
-        PreferKey.bgImageN,
-        PreferKey.bgImageNBlurring,
-        PreferKey.themeColor,
-        PreferKey.secondaryThemeColor,
-        PreferKey.themeColorNight,
-        PreferKey.secondaryThemeColorNight,
-        PreferKey.paletteStyle,
-        PreferKey.materialVersion,
-        PreferKey.composeEngine,
-        PreferKey.customContrast,
-        PreferKey.customMode,
-        PreferKey.useMiuixMonet,
-        PreferKey.containerOpacity,
-        PreferKey.topBarOpacity,
-        PreferKey.bottomBarOpacity,
-        PreferKey.enableBlur,
-        PreferKey.enableProgressiveBlur,
-        PreferKey.topBarBlurRadius,
-        PreferKey.bottomBarBlurRadius,
-        PreferKey.topBarBlurAlpha,
-        PreferKey.bottomBarBlurAlpha,
-        PreferKey.bottomBarLensRadius,
-        PreferKey.useFlexibleTopAppBar,
-        PreferKey.topBarButtonStyle,
-        PreferKey.mergeTopBarActions,
-        PreferKey.bookInfoFollowCoverColor,
-        PreferKey.bookInfoBackgroundBlur,
-        PreferKey.bookInfoNetworkCoverBackground,
-        PreferKey.bookInfoDefaultCoverBackground,
-        PreferKey.cBackground,
-        PreferKey.cBBackground,
-        PreferKey.cNBackground,
-        PreferKey.cNBBackground,
-        PreferKey.enableDeepPersonalization,
-        PreferKey.primaryTextColor,
-        PreferKey.secondaryTextColor,
-        PreferKey.themeBackgroundColor,
-        PreferKey.labelContainerColor,
-        PreferKey.primaryTextColorNight,
-        PreferKey.secondaryTextColorNight,
-        PreferKey.themeBackgroundColorNight,
-        PreferKey.labelContainerColorNight,
-        PreferKey.eyeProtectionEnabled,
-        PreferKey.colorTemperature,
-        PreferKey.eyeProtectionAutoNight,
-        PreferKey.eyeProtectionSchedule,
-        PreferKey.eyeProtectionStartTime,
-        PreferKey.eyeProtectionEndTime,
-    )
+    private val themePrefKeys =
+        arrayOf(
+            PreferKey.cPrimary,
+            PreferKey.cNPrimary,
+            PreferKey.bgImage,
+            PreferKey.bgImageBlurring,
+            PreferKey.bgImageN,
+            PreferKey.bgImageNBlurring,
+            PreferKey.themeColor,
+            PreferKey.secondaryThemeColor,
+            PreferKey.themeColorNight,
+            PreferKey.secondaryThemeColorNight,
+            PreferKey.paletteStyle,
+            PreferKey.materialVersion,
+            PreferKey.composeEngine,
+            PreferKey.customContrast,
+            PreferKey.customMode,
+            PreferKey.useMiuixMonet,
+            PreferKey.containerOpacity,
+            PreferKey.topBarOpacity,
+            PreferKey.bottomBarOpacity,
+            PreferKey.enableBlur,
+            PreferKey.enableProgressiveBlur,
+            PreferKey.topBarBlurRadius,
+            PreferKey.bottomBarBlurRadius,
+            PreferKey.topBarBlurAlpha,
+            PreferKey.bottomBarBlurAlpha,
+            PreferKey.bottomBarLensRadius,
+            PreferKey.useFlexibleTopAppBar,
+            PreferKey.topBarButtonStyle,
+            PreferKey.mergeTopBarActions,
+            PreferKey.bookInfoFollowCoverColor,
+            PreferKey.bookInfoBackgroundBlur,
+            PreferKey.bookInfoNetworkCoverBackground,
+            PreferKey.bookInfoDefaultCoverBackground,
+            PreferKey.cBackground,
+            PreferKey.cBBackground,
+            PreferKey.cNBackground,
+            PreferKey.cNBBackground,
+            PreferKey.enableDeepPersonalization,
+            PreferKey.primaryTextColor,
+            PreferKey.secondaryTextColor,
+            PreferKey.themeBackgroundColor,
+            PreferKey.labelContainerColor,
+            PreferKey.primaryTextColorNight,
+            PreferKey.secondaryTextColorNight,
+            PreferKey.themeBackgroundColorNight,
+            PreferKey.labelContainerColorNight,
+            PreferKey.eyeProtectionEnabled,
+            PreferKey.colorTemperature,
+            PreferKey.eyeProtectionAutoNight,
+            PreferKey.eyeProtectionSchedule,
+            PreferKey.eyeProtectionStartTime,
+            PreferKey.eyeProtectionEndTime,
+        )
 
-    private val bookshelfPrefKeys = arrayOf(
-        PreferKey.bookshelfLayout,
-        PreferKey.bookshelfLayoutModePortrait,
-        PreferKey.bookshelfLayoutModeLandscape,
-        PreferKey.bookshelfLayoutCompact,
-        PreferKey.bookshelfListCoverCenter,
-        PreferKey.bookshelfListIntroBelowContent,
-        PreferKey.bookshelfShowDivider,
-        PreferKey.bookshelfGridLayout,
-        PreferKey.bookshelfSort,
-        PreferKey.bookshelfSortOrder,
-        PreferKey.bookshelfLayoutGridLandscape,
-        PreferKey.bookshelfLayoutGridPortrait,
-        PreferKey.bookshelfLayoutListLandscape,
-        PreferKey.bookshelfLayoutListPortrait,
-        PreferKey.bookshelfFolderLayoutModePortrait,
-        PreferKey.bookshelfFolderLayoutModeLandscape,
-        PreferKey.bookshelfFolderLayoutGridPortrait,
-        PreferKey.bookshelfFolderLayoutGridLandscape,
-        PreferKey.bookshelfFolderLayoutListPortrait,
-        PreferKey.bookshelfFolderLayoutListLandscape,
-        PreferKey.bookshelfTitleSmallFont,
-        PreferKey.bookshelfTitleCenter,
-        PreferKey.bookshelfTitleMaxLines,
-        PreferKey.bookshelfCoverShadow,
-        PreferKey.bookshelfCardColor,
-        PreferKey.bookshelfCardColorDark,
-        PreferKey.bookshelfGroupListStyle,
-        PreferKey.bookshelfGroupCoverCount,
-        PreferKey.bookshelfListCoverWidth,
-        PreferKey.bookshelfGridCoverWidth,
-        PreferKey.bookshelfRefreshingLimit,
-        PreferKey.bookshelfShowIntro,
-        PreferKey.bookshelfShowTag,
-        PreferKey.bookshelfShowLatestChapter,
-        PreferKey.bookshelfIntroMaxLines
-    )
+    private val bookshelfPrefKeys =
+        arrayOf(
+            PreferKey.bookshelfLayout,
+            PreferKey.bookshelfLayoutModePortrait,
+            PreferKey.bookshelfLayoutModeLandscape,
+            PreferKey.bookshelfLayoutCompact,
+            PreferKey.bookshelfListCoverCenter,
+            PreferKey.bookshelfListIntroBelowContent,
+            PreferKey.bookshelfShowDivider,
+            PreferKey.bookshelfGridLayout,
+            PreferKey.bookshelfSort,
+            PreferKey.bookshelfSortOrder,
+            PreferKey.bookshelfLayoutGridLandscape,
+            PreferKey.bookshelfLayoutGridPortrait,
+            PreferKey.bookshelfLayoutListLandscape,
+            PreferKey.bookshelfLayoutListPortrait,
+            PreferKey.bookshelfFolderLayoutModePortrait,
+            PreferKey.bookshelfFolderLayoutModeLandscape,
+            PreferKey.bookshelfFolderLayoutGridPortrait,
+            PreferKey.bookshelfFolderLayoutGridLandscape,
+            PreferKey.bookshelfFolderLayoutListPortrait,
+            PreferKey.bookshelfFolderLayoutListLandscape,
+            PreferKey.bookshelfTitleSmallFont,
+            PreferKey.bookshelfTitleCenter,
+            PreferKey.bookshelfTitleMaxLines,
+            PreferKey.bookshelfCoverShadow,
+            PreferKey.bookshelfCardColor,
+            PreferKey.bookshelfCardColorDark,
+            PreferKey.bookshelfGroupListStyle,
+            PreferKey.bookshelfGroupCoverCount,
+            PreferKey.bookshelfListCoverWidth,
+            PreferKey.bookshelfGridCoverWidth,
+            PreferKey.bookshelfRefreshingLimit,
+            PreferKey.bookshelfShowIntro,
+            PreferKey.bookshelfShowTag,
+            PreferKey.bookshelfShowLatestChapter,
+            PreferKey.bookshelfIntroMaxLines,
+        )
 
-    private val coverPrefKeys = arrayOf(
-        PreferKey.useDefaultCover,
-        PreferKey.loadCoverOnlyWifi,
-        PreferKey.coverShowShadow,
-        PreferKey.coverShowStroke,
-        PreferKey.coverTextColor,
-        PreferKey.coverTextColorN,
-        PreferKey.coverShadowColor,
-        PreferKey.coverShadowColorN,
-        PreferKey.coverDefaultColor,
-        PreferKey.coverInfoOrientation
-    )
+    private val coverPrefKeys =
+        arrayOf(
+            PreferKey.useDefaultCover,
+            PreferKey.loadCoverOnlyWifi,
+            PreferKey.coverShowShadow,
+            PreferKey.coverShowStroke,
+            PreferKey.coverTextColor,
+            PreferKey.coverTextColorN,
+            PreferKey.coverShadowColor,
+            PreferKey.coverShadowColorN,
+            PreferKey.coverDefaultColor,
+            PreferKey.coverInfoOrientation,
+        )
 
-    fun keyIsNotIgnore(key: String, isBackup: Boolean = false): Boolean {
+    fun keyIsNotIgnore(
+        key: String,
+        isBackup: Boolean = false,
+    ): Boolean {
         if (key in alwaysIgnoredPreferenceKeys) return false
         if (isBackup) {
             return when {
@@ -396,5 +406,4 @@ object BackupConfig {
         val json = GSON.toJson(backupIgnoreConfig)
         FileUtils.createFileIfNotExist(backupIgnoreConfigPath).writeText(json)
     }
-
 }

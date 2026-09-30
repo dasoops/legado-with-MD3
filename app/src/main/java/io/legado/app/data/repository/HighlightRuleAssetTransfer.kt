@@ -7,7 +7,6 @@ import io.legado.app.utils.isContentScheme
 import java.io.File
 
 internal object HighlightRuleAssetTransfer {
-
     data class ExportResult(
         val rules: List<HighlightRule>,
         val files: List<File>,
@@ -19,24 +18,27 @@ internal object HighlightRuleAssetTransfer {
         copyAsset: (source: String, target: File) -> Boolean,
     ): ExportResult {
         val files = ArrayList<File>()
-        val portableRules = rules.mapIndexed { index, rule ->
-            rule.copy(
-                bgImage = exportReference(
-                    reference = rule.bgImage,
-                    prefix = "highlight_rule_bg_$index",
-                    exportDir = exportDir,
-                    files = files,
-                    copyAsset = copyAsset,
-                ),
-                fontPath = exportReference(
-                    reference = rule.fontPath,
-                    prefix = "highlight_rule_font_$index",
-                    exportDir = exportDir,
-                    files = files,
-                    copyAsset = copyAsset,
-                ),
-            )
-        }
+        val portableRules =
+            rules.mapIndexed { index, rule ->
+                rule.copy(
+                    bgImage =
+                    exportReference(
+                        reference = rule.bgImage,
+                        prefix = "highlight_rule_bg_$index",
+                        exportDir = exportDir,
+                        files = files,
+                        copyAsset = copyAsset,
+                    ),
+                    fontPath =
+                    exportReference(
+                        reference = rule.fontPath,
+                        prefix = "highlight_rule_font_$index",
+                        exportDir = exportDir,
+                        files = files,
+                        copyAsset = copyAsset,
+                    ),
+                )
+            }
         return ExportResult(portableRules, files)
     }
 
@@ -47,36 +49,34 @@ internal object HighlightRuleAssetTransfer {
         fontDir: File,
         isReadableBackgroundReference: (String) -> Boolean,
         isReadableFontReference: (String) -> Boolean = isReadableBackgroundReference,
-    ): List<HighlightRule> {
-        return rules.map { rule ->
-            rule.copy(
-                bgImage = restoreReference(
-                    reference = rule.bgImage,
-                    importDir = importDir,
-                    targetDir = backgroundDir,
-                    isReadableReference = isReadableBackgroundReference,
-                ),
-                fontPath = restoreReference(
-                    reference = rule.fontPath,
-                    importDir = importDir,
-                    targetDir = fontDir,
-                    isReadableReference = isReadableFontReference,
-                ),
-            )
-        }
+    ): List<HighlightRule> = rules.map { rule ->
+        rule.copy(
+            bgImage =
+            restoreReference(
+                reference = rule.bgImage,
+                importDir = importDir,
+                targetDir = backgroundDir,
+                isReadableReference = isReadableBackgroundReference,
+            ),
+            fontPath =
+            restoreReference(
+                reference = rule.fontPath,
+                importDir = importDir,
+                targetDir = fontDir,
+                isReadableReference = isReadableFontReference,
+            ),
+        )
     }
 
     fun clearUnreadableReferences(
         rules: List<HighlightRule>,
         isReadableBackgroundReference: (String) -> Boolean,
         isReadableFontReference: (String) -> Boolean,
-    ): List<HighlightRule> {
-        return rules.map { rule ->
-            rule.copy(
-                bgImage = rule.bgImage?.takeIf(isReadableBackgroundReference),
-                fontPath = rule.fontPath?.takeIf(isReadableFontReference),
-            )
-        }
+    ): List<HighlightRule> = rules.map { rule ->
+        rule.copy(
+            bgImage = rule.bgImage?.takeIf(isReadableBackgroundReference),
+            fontPath = rule.fontPath?.takeIf(isReadableFontReference),
+        )
     }
 
     private fun exportReference(
@@ -117,9 +117,7 @@ internal object HighlightRuleAssetTransfer {
         return targetFile.absolutePath
     }
 
-    private fun String.safeFileName(): String {
-        return replace(Regex("[^A-Za-z0-9._-]"), "_").ifBlank { "asset" }
-    }
+    private fun String.safeFileName(): String = replace(Regex("[^A-Za-z0-9._-]"), "_").ifBlank { "asset" }
 }
 
 internal fun Context.isReadableHighlightBackground(path: String): Boolean {
@@ -129,9 +127,10 @@ internal fun Context.isReadableHighlightBackground(path: String): Boolean {
         }.getOrDefault(false)
     }
     if (File(path).isFile) return true
-    val assetPath = path.removePrefix("assets://").let {
-        if (it.startsWith("bg/")) it else "bg/$it"
-    }
+    val assetPath =
+        path.removePrefix("assets://").let {
+            if (it.startsWith("bg/")) it else "bg/$it"
+        }
     return runCatching { assets.open(assetPath).use { true } }.getOrDefault(false)
 }
 

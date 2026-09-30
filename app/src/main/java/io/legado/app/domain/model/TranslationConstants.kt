@@ -1,7 +1,6 @@
 package io.legado.app.domain.model
 
 object TranslationConstants {
-
     const val PROVIDER_OPENAI = "openai"
     const val PROVIDER_APP_AI = "app_ai"
     const val PROVIDER_GOOGLE = "google"
@@ -12,17 +11,18 @@ object TranslationConstants {
     val providerDisplayNames = listOf("Google Translate", "应用 AI 接口")
     val providerValues = listOf(PROVIDER_GOOGLE, PROVIDER_APP_AI)
 
-    val targetLanguages = listOf(
-        "zh" to "简体中文",
-        "en" to "English",
-        "ja" to "日本語",
-        "ko" to "한국어",
-        "fr" to "Français",
-        "de" to "Deutsch",
-        "es" to "Español",
-        "ru" to "Русский",
-        "ar" to "العربية"
-    )
+    val targetLanguages =
+        listOf(
+            "zh" to "简体中文",
+            "en" to "English",
+            "ja" to "日本語",
+            "ko" to "한국어",
+            "fr" to "Français",
+            "de" to "Deutsch",
+            "es" to "Español",
+            "ru" to "Русский",
+            "ar" to "العربية",
+        )
 
     const val DEFAULT_PROMPT =
         """You are a professional literary translator, please translate according to the following requirements:

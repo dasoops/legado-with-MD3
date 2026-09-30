@@ -133,7 +133,8 @@ fun ReplaceEditScreen(
     }
 
     AppScaffold(
-        modifier = Modifier
+        modifier =
+        Modifier
             .nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
             GlassMediumFlexibleTopAppBar(
@@ -144,52 +145,53 @@ fun ReplaceEditScreen(
                             focusManager.clearFocus(force = true)
                             keyboardController?.hide()
                             onBack()
-                        }
+                        },
                     )
                 },
                 actions = {
                     AnimatedVisibility(
                         visible = isKeyboardVisible,
                         enter = fadeIn(),
-                        exit = fadeOut()
+                        exit = fadeOut(),
                     ) {
                         TopBarActionButton(
                             onClick = onSave,
                             imageVector = Icons.Default.Save,
-                            contentDescription = stringResource(R.string.action_save)
+                            contentDescription = stringResource(R.string.action_save),
                         )
                     }
                     TopBarActionButton(
                         onClick = { showMenu = true },
                         imageVector = AppIcons.MoreVert,
-                        contentDescription = stringResource(R.string.more_actions)
+                        contentDescription = stringResource(R.string.more_actions),
                     )
                     RoundDropdownMenu(
                         expanded = showMenu,
-                        onDismissRequest = { showMenu = false }
+                        onDismissRequest = { showMenu = false },
                     ) {
                         RoundDropdownMenuItem(
                             text = stringResource(R.string.copy_rule),
                             onClick = {
                                 showMenu = false
                                 onIntent(ReplaceEditIntent.CopyRule)
-                            }
+                            },
                         )
                         RoundDropdownMenuItem(
                             text = stringResource(R.string.paste_rule),
                             onClick = {
                                 showMenu = false
                                 onIntent(ReplaceEditIntent.PasteRule)
-                            }
+                            },
                         )
                     }
                 },
-                scrollBehavior = scrollBehavior
+                scrollBehavior = scrollBehavior,
             )
         },
         floatingActionButton = {
             AppFloatingActionButton(
-                modifier = Modifier
+                modifier =
+                Modifier
                     .navigationBarsPadding()
                     .animateFloatingActionButton(
                         visible = !isKeyboardVisible,
@@ -197,50 +199,55 @@ fun ReplaceEditScreen(
                     ),
                 onClick = onSave,
                 tooltipText = stringResource(R.string.action_save),
-                icon = Icons.Default.Save
+                icon = Icons.Default.Save,
             )
-        }, contentWindowInsets = WindowInsets(0, 0, 0, 0)
+        },
+        contentWindowInsets = WindowInsets(0, 0, 0, 0),
     ) { innerPadding ->
         Box(
             Modifier
                 .fillMaxSize()
-                .padding(innerPadding)
+                .padding(innerPadding),
         ) {
             AnimatedVisibility(
                 visible = isKeyboardVisible,
-                enter = slideInVertically(
+                enter =
+                slideInVertically(
                     initialOffsetY = { fullHeight -> fullHeight },
                 ),
-                exit = slideOutVertically(
+                exit =
+                slideOutVertically(
                     targetOffsetY = { fullHeight -> fullHeight },
                 ),
-                modifier = Modifier
+                modifier =
+                Modifier
                     .align(Alignment.BottomCenter)
-                    .zIndex(1f)
+                    .zIndex(1f),
             ) {
                 QuickInputBar(
-                    onInsert = { text -> onIntent(ReplaceEditIntent.InsertTextAtCursor(text)) }
+                    onInsert = { text -> onIntent(ReplaceEditIntent.InsertTextAtCursor(text)) },
                 )
             }
             Column(
-                modifier = Modifier
+                modifier =
+                Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp)
                     .verticalScroll(rememberScrollState()),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
+                verticalArrangement = Arrangement.spacedBy(16.dp),
             ) {
-
                 AppTextField(
                     value = state.name,
                     onValueChange = { onIntent(ReplaceEditIntent.OnNameChange(it)) },
                     label = stringResource(R.string.rule_name),
                     backgroundColor = LegadoTheme.colorScheme.surfaceInput,
-                    modifier = Modifier
+                    modifier =
+                    Modifier
                         .fillMaxWidth()
                         .onFocusChanged {
                             if (it.isFocused) onIntent(ReplaceEditIntent.SetActiveField(ActiveField.Name))
                         },
-                    singleLine = true
+                    singleLine = true,
                 )
 
                 GroupSelector(
@@ -257,11 +264,12 @@ fun ReplaceEditScreen(
                     label = stringResource(R.string.match_pattern),
                     placeholder = { AppText(stringResource(R.string.input_regex_or_keyword)) },
                     backgroundColor = LegadoTheme.colorScheme.surfaceInput,
-                    modifier = Modifier
+                    modifier =
+                    Modifier
                         .fillMaxWidth()
                         .onFocusChanged {
                             if (it.isFocused) onIntent(ReplaceEditIntent.SetActiveField(ActiveField.Pattern))
-                        }
+                        },
                 )
 
                 AppTextField(
@@ -270,23 +278,24 @@ fun ReplaceEditScreen(
                     label = stringResource(R.string.replace_with),
                     placeholder = { AppText(stringResource(R.string.input_replacement_or_group)) },
                     backgroundColor = LegadoTheme.colorScheme.surfaceInput,
-                    modifier = Modifier
+                    modifier =
+                    Modifier
                         .fillMaxWidth()
                         .onFocusChanged {
                             if (it.isFocused) onIntent(ReplaceEditIntent.SetActiveField(ActiveField.Replacement))
-                        }
+                        },
                 )
 
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Start
+                    horizontalArrangement = Arrangement.Start,
                 ) {
                     ToggleChip(
                         label = stringResource(R.string.title),
                         selected = state.scopeTitle,
                         checkedContentDescription = stringResource(R.string.title),
-                        onToggle = { onIntent(ReplaceEditIntent.OnScopeTitleChange(!state.scopeTitle)) }
+                        onToggle = { onIntent(ReplaceEditIntent.OnScopeTitleChange(!state.scopeTitle)) },
                     )
 
                     Spacer(Modifier.width(8.dp))
@@ -295,7 +304,7 @@ fun ReplaceEditScreen(
                         label = stringResource(R.string.content),
                         selected = state.scopeContent,
                         checkedContentDescription = stringResource(R.string.content),
-                        onToggle = { onIntent(ReplaceEditIntent.OnScopeContentChange(!state.scopeContent)) }
+                        onToggle = { onIntent(ReplaceEditIntent.OnScopeContentChange(!state.scopeContent)) },
                     )
 
                     Spacer(Modifier.weight(1f))
@@ -304,9 +313,8 @@ fun ReplaceEditScreen(
                         label = stringResource(R.string.use_regex),
                         selected = state.isRegex,
                         checkedContentDescription = stringResource(R.string.regex_enabled),
-                        onToggle = { onIntent(ReplaceEditIntent.OnRegexChange(!state.isRegex)) }
+                        onToggle = { onIntent(ReplaceEditIntent.OnRegexChange(!state.isRegex)) },
                     )
-
                 }
 
                 AppTextField(
@@ -315,11 +323,12 @@ fun ReplaceEditScreen(
                     label = stringResource(R.string.specific_scope),
                     placeholder = { AppText(stringResource(R.string.scope_hint)) },
                     backgroundColor = LegadoTheme.colorScheme.surfaceInput,
-                    modifier = Modifier
+                    modifier =
+                    Modifier
                         .fillMaxWidth()
                         .onFocusChanged {
                             if (it.isFocused) onIntent(ReplaceEditIntent.SetActiveField(ActiveField.Scope))
-                        }
+                        },
                 )
 
                 AppTextField(
@@ -328,11 +337,12 @@ fun ReplaceEditScreen(
                     label = stringResource(R.string.exclude_scope),
                     placeholder = { AppText(stringResource(R.string.exclude_scope_hint)) },
                     backgroundColor = LegadoTheme.colorScheme.surfaceInput,
-                    modifier = Modifier
+                    modifier =
+                    Modifier
                         .fillMaxWidth()
                         .onFocusChanged {
                             if (it.isFocused) onIntent(ReplaceEditIntent.SetActiveField(ActiveField.Exclude))
-                        }
+                        },
                 )
 
                 AppTextField(
@@ -341,23 +351,21 @@ fun ReplaceEditScreen(
                     label = stringResource(R.string.timeout_ms),
                     placeholder = { AppText("3000") },
                     backgroundColor = LegadoTheme.colorScheme.surfaceInput,
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
                 )
 
                 Spacer(Modifier.height(120.dp))
-
             }
 
             ManageGroupDialog(
                 show = state.showGroupDialog,
                 groups = state.allGroups.filter { it != "默认" },
                 onDismiss = { onIntent(ReplaceEditIntent.ToggleGroupDialog(false)) },
-                onDelete = { onIntent(ReplaceEditIntent.DeleteGroups(it)) }
+                onDelete = { onIntent(ReplaceEditIntent.DeleteGroups(it)) },
             )
         }
     }
 }
-
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -374,7 +382,7 @@ fun GroupSelector(
         ExposedDropdownMenuBox(
             expanded = expanded,
             onExpandedChange = { expanded = !expanded },
-            modifier = Modifier.weight(1f)
+            modifier = Modifier.weight(1f),
         ) {
             AppTextField(
                 value = currentGroup,
@@ -383,16 +391,17 @@ fun GroupSelector(
                 backgroundColor = backgroundColor,
                 placeholder = { AppText("默认") },
                 trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
-                modifier = Modifier
+                modifier =
+                Modifier
                     .fillMaxWidth()
                     .menuAnchor(
                         ExposedDropdownMenuAnchorType.PrimaryEditable,
-                        true
-                    )
+                        true,
+                    ),
             )
             RoundDropdownMenu(
                 expanded = expanded,
-                onDismissRequest = { expanded = false }
+                onDismissRequest = { expanded = false },
             ) {
                 allGroups.forEach { selectionOption ->
                     RoundDropdownMenuItem(
@@ -400,7 +409,7 @@ fun GroupSelector(
                         onClick = {
                             onGroupChange(selectionOption)
                             expanded = false
-                        }
+                        },
                     )
                 }
             }
@@ -408,7 +417,7 @@ fun GroupSelector(
         MediumPlainButton(
             onClick = onManageClick,
             icon = Icons.Default.Settings,
-            contentDescription = stringResource(R.string.group_management)
+            contentDescription = stringResource(R.string.group_management),
         )
     }
 }
@@ -418,7 +427,7 @@ fun ManageGroupDialog(
     show: Boolean,
     groups: List<String>,
     onDismiss: () -> Unit,
-    onDelete: (List<String>) -> Unit
+    onDelete: (List<String>) -> Unit,
 ) {
     var selectedGroups by remember(show) { mutableStateOf(emptySet<String>()) }
 
@@ -431,7 +440,7 @@ fun ManageGroupDialog(
                 AppText(stringResource(R.string.no_other_groups))
             } else {
                 Column(
-                    verticalArrangement = Arrangement.spacedBy(2.dp)
+                    verticalArrangement = Arrangement.spacedBy(2.dp),
                 ) {
                     groups.forEach { group ->
                         val isSelected = selectedGroups.contains(group)
@@ -440,12 +449,13 @@ fun ManageGroupDialog(
                             title = group,
                             checked = isSelected,
                             onCheckedChange = { checked ->
-                                selectedGroups = if (checked) {
-                                    selectedGroups + group
-                                } else {
-                                    selectedGroups - group
-                                }
-                            }
+                                selectedGroups =
+                                    if (checked) {
+                                        selectedGroups + group
+                                    } else {
+                                        selectedGroups - group
+                                    }
+                            },
                         )
                     }
                 }
@@ -456,28 +466,29 @@ fun ManageGroupDialog(
             onDelete(selectedGroups.toList())
         },
         dismissText = stringResource(R.string.close),
-        onDismiss = onDismiss
+        onDismiss = onDismiss,
     )
 }
 
 @Composable
 fun QuickInputBar(
     onInsert: (String) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     val symbols = listOf(".*", "\\d+", "\\w+", "[]", "()", "^", "$", "|", "{}", "<>")
 
     BottomAppBar(
-        modifier = modifier
+        modifier =
+        modifier
             .fillMaxWidth()
             .horizontalScroll(rememberScrollState()),
-        contentPadding = PaddingValues(horizontal = 16.dp)
+        contentPadding = PaddingValues(horizontal = 16.dp),
     ) {
         symbols.forEach { symbol ->
             AssistChip(
                 onClick = { onInsert(symbol) },
                 label = { AppText(symbol) },
-                modifier = Modifier.padding(end = 8.dp)
+                modifier = Modifier.padding(end = 8.dp),
             )
         }
     }

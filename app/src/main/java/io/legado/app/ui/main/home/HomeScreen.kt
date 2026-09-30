@@ -105,13 +105,13 @@ import io.legado.app.ui.widget.components.topbar.TopBarActionButton
 import io.legado.app.utils.isContentScheme
 import io.legado.app.utils.takePersistablePermissionSafely
 import io.legado.app.utils.toastOnUi
+import java.text.DateFormat
+import java.util.Date
+import kotlin.math.roundToInt
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
-import java.text.DateFormat
-import java.util.Date
-import kotlin.math.roundToInt
 
 @Composable
 fun HomeRouteScreen(
@@ -129,48 +129,55 @@ fun HomeRouteScreen(
     var pendingBackupDestination by remember {
         mutableStateOf<HomeBackupDestination?>(null)
     }
-    val backupDirectoryLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.OpenDocumentTree(),
-    ) { uri ->
-        val destination = pendingBackupDestination
-        pendingBackupDestination = null
-        if (uri != null && destination != null) {
-            uri.takePersistablePermissionSafely(context)
-            val path = if (uri.isContentScheme()) {
-                uri.toString()
-            } else {
-                uri.path.orEmpty()
-            }
-            if (path.isNotEmpty()) {
-                viewModel.onIntent(
-                    HomeIntent.BackupDirectorySelected(
-                        destination = destination,
-                        path = path,
+    val backupDirectoryLauncher =
+        rememberLauncherForActivityResult(
+            contract = ActivityResultContracts.OpenDocumentTree(),
+        ) { uri ->
+            val destination = pendingBackupDestination
+            pendingBackupDestination = null
+            if (uri != null && destination != null) {
+                uri.takePersistablePermissionSafely(context)
+                val path =
+                    if (uri.isContentScheme()) {
+                        uri.toString()
+                    } else {
+                        uri.path.orEmpty()
+                    }
+                if (path.isNotEmpty()) {
+                    viewModel.onIntent(
+                        HomeIntent.BackupDirectorySelected(
+                            destination = destination,
+                            path = path,
+                        ),
                     )
-                )
+                }
             }
         }
-    }
-    val restoreFileLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.OpenDocument(),
-    ) { uri ->
-        uri?.let {
-            viewModel.onIntent(HomeIntent.RestoreLocalFileSelected(it.toString()))
+    val restoreFileLauncher =
+        rememberLauncherForActivityResult(
+            contract = ActivityResultContracts.OpenDocument(),
+        ) { uri ->
+            uri?.let {
+                viewModel.onIntent(HomeIntent.RestoreLocalFileSelected(it.toString()))
+            }
         }
-    }
 
     LaunchedEffect(viewModel, context) {
         viewModel.effects.collectLatest { effect ->
             when (effect) {
-                is HomeEffect.OpenBook -> onOpenBook(effect.book)
-                HomeEffect.OpenBackupSettings -> onOpenBackupSettings()
+                is HomeEffect.OpenBook -> {
+                    onOpenBook(effect.book)
+                }
+                HomeEffect.OpenBackupSettings -> {
+                    onOpenBackupSettings()
+                }
                 is HomeEffect.SelectBackupDirectory -> {
                     pendingBackupDestination = effect.destination
                     runCatching { backupDirectoryLauncher.launch(null) }
                 }
-
                 is HomeEffect.RequestBackupStoragePermission -> {
-                    PermissionsCompat.Builder()
+                    PermissionsCompat
+                        .Builder()
                         .addPermissions(*Permissions.Group.STORAGE)
                         .rationale(R.string.tip_perm_request_storage)
                         .onGranted {
@@ -178,24 +185,22 @@ fun HomeRouteScreen(
                                 HomeIntent.BackupDirectorySelected(
                                     destination = effect.destination,
                                     path = effect.path,
-                                )
+                                ),
                             )
-                        }
-                        .request()
+                        }.request()
                 }
-
                 HomeEffect.SelectRestoreFile -> {
                     restoreFileLauncher.launch(arrayOf("application/zip"))
                 }
-
                 is HomeEffect.ShowMessage -> {
-                    val message = buildString {
-                        append(context.getString(effect.messageRes))
-                        effect.detail?.takeIf { it.isNotBlank() }?.let {
-                            append('\n')
-                            append(it)
+                    val message =
+                        buildString {
+                            append(context.getString(effect.messageRes))
+                            effect.detail?.takeIf { it.isNotBlank() }?.let {
+                                append('\n')
+                                append(it)
+                            }
                         }
-                    }
                     context.toastOnUi(message)
                 }
             }
@@ -261,12 +266,14 @@ fun HomeScreen(
         },
     ) { paddingValues ->
         Column(
-            modifier = Modifier
+            modifier =
+            Modifier
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState()),
         ) {
             Spacer(
-                modifier = Modifier
+                modifier =
+                Modifier
                     .fillMaxWidth()
                     .height(paddingValues.calculateTopPadding() + 8.dp),
             )
@@ -341,7 +348,8 @@ private fun HomeDashboardContent(
                         modifier = Modifier.weight(1f),
                         icon = Icons.Default.AccessTime,
                         title = stringResource(R.string.home_total_reading_time),
-                        value = String.format(
+                        value =
+                        String.format(
                             "%.1f",
                             state.totalReadTimeMillis / 3_600_000.0,
                         ),
@@ -396,7 +404,8 @@ private fun StatisticCard(
         onClick = onClick,
     ) {
         Row(
-            modifier = Modifier
+            modifier =
+            Modifier
                 .fillMaxWidth()
                 .padding(
                     start = 16.dp,
@@ -424,7 +433,8 @@ private fun StatisticCard(
                         text = value,
                         style = LegadoTheme.typography.titleMediumEmphasized,
                         maxLines = 1,
-                        modifier = Modifier
+                        modifier =
+                        Modifier
                             .alignBy(FirstBaseline)
                             .basicMarquee(),
                     )
@@ -432,7 +442,8 @@ private fun StatisticCard(
                         text = unit,
                         style = LegadoTheme.typography.bodySmall,
                         color = LegadoTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier
+                        modifier =
+                        Modifier
                             .weight(1f)
                             .alignBy(FirstBaseline)
                             .padding(start = 2.dp),
@@ -461,18 +472,20 @@ private fun RecentBookCard(
             book?.chapterProgress?.let { progress ->
                 RecentReadingProgress(
                     progress = progress,
-                    modifier = Modifier
+                    modifier =
+                    Modifier
                         .align(Alignment.BottomCenter)
                         .fillMaxWidth(),
                 )
             }
 
             Column(
-                modifier = Modifier.padding(
+                modifier =
+                Modifier.padding(
                     start = 16.dp,
                     end = 16.dp,
                     top = 16.dp,
-                    bottom = 14.dp
+                    bottom = 14.dp,
                 ),
                 verticalArrangement = Arrangement.spacedBy(10.dp),
             ) {
@@ -493,7 +506,8 @@ private fun RecentBookCard(
 
                 if (book == null) {
                     Row(
-                        modifier = Modifier
+                        modifier =
+                        Modifier
                             .fillMaxWidth()
                             .height(96.dp),
                         verticalAlignment = Alignment.CenterVertically,
@@ -515,7 +529,8 @@ private fun RecentBookCard(
                             author = book.author,
                             path = book.coverPath,
                             sourceOrigin = book.origin,
-                            modifier = Modifier
+                            modifier =
+                            Modifier
                                 .width(56.dp)
                                 .aspectRatio(5f / 7f),
                             coverModifier = Modifier.fillMaxSize(),
@@ -550,7 +565,8 @@ private fun RecentBookCard(
                                     chapterTitle?.let { chapter ->
                                         AppText(
                                             text = chapter,
-                                            modifier = Modifier
+                                            modifier =
+                                            Modifier
                                                 .weight(1f)
                                                 .basicMarquee(),
                                             style = LegadoTheme.typography.bodySmall,
@@ -561,11 +577,12 @@ private fun RecentBookCard(
                                         )
                                     } ?: Spacer(modifier = Modifier.weight(1f))
                                     book.chapterProgress?.let { progress ->
-                                        val percent = remember(progress) {
-                                            (progress * 100f)
-                                                .roundToInt()
-                                                .coerceIn(0, 100)
-                                        }
+                                        val percent =
+                                            remember(progress) {
+                                                (progress * 100f)
+                                                    .roundToInt()
+                                                    .coerceIn(0, 100)
+                                            }
                                         TextCard(
                                             text = "$percent%",
                                             backgroundColor = LegadoTheme.colorScheme.secondaryContainer,
@@ -612,16 +629,20 @@ private fun RecentReadingProgress(
                 val distanceFromTop = (y / glowHeight).coerceIn(0f, 1f)
                 val alpha = 0.18f * distanceFromTop * distanceFromTop
                 val diffusion = maxDiffusion * (1f - distanceFromTop)
-                val fadeStart = (progressWidth - diffusion * 0.15f)
-                    .coerceAtLeast(0f)
-                val fadeEnd = (progressWidth + diffusion)
-                    .coerceAtMost(size.width)
+                val fadeStart =
+                    (progressWidth - diffusion * 0.15f)
+                        .coerceAtLeast(0f)
+                val fadeEnd =
+                    (progressWidth + diffusion)
+                        .coerceAtMost(size.width)
                 val height = stripHeight.coerceAtMost(glowHeight - y)
 
                 if (alpha > 0.001f && fadeEnd > fadeStart) {
                     drawRect(
-                        brush = Brush.horizontalGradient(
-                            colors = listOf(
+                        brush =
+                        Brush.horizontalGradient(
+                            colors =
+                            listOf(
                                 progressColor.copy(alpha = alpha),
                                 progressColor.copy(alpha = 0f),
                             ),
@@ -674,15 +695,15 @@ private fun RecentHistoryBookCard(
     modifier: Modifier = Modifier,
 ) {
     Box(
-        modifier = modifier
+        modifier =
+        modifier
             .width(60.dp)
             .aspectRatio(5f / 7f)
             .clip(RoundedCornerShape(12.dp))
             .clickable(
                 role = Role.Button,
                 onClick = onClick,
-            )
-            .semantics {
+            ).semantics {
                 contentDescription = bookAccessibilityLabel(book.name, book.author)
                 role = Role.Button
             },
@@ -705,15 +726,17 @@ private fun ReadingGoalCard(
     onClick: () -> Unit,
 ) {
     val todayMinutes = (todayReadTimeMillis / 60_000L).toInt()
-    val progress = (todayReadTimeMillis / 60_000f / goalMinutes)
-        .coerceIn(0f, 1f)
+    val progress =
+        (todayReadTimeMillis / 60_000f / goalMinutes)
+            .coerceIn(0f, 1f)
 
     GlassCard(
         modifier = Modifier.fillMaxWidth(),
         onClick = onClick,
     ) {
         Column(
-            modifier = Modifier
+            modifier =
+            Modifier
                 .fillMaxWidth()
                 .padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -743,7 +766,8 @@ private fun ReadingGoalCard(
 
             SemiCircleProgress(
                 progress = progress,
-                modifier = Modifier
+                modifier =
+                Modifier
                     .width(240.dp)
                     .padding(vertical = 8.dp)
                     .aspectRatio(2f),
@@ -752,7 +776,8 @@ private fun ReadingGoalCard(
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
                     AppText(
-                        text = stringResource(
+                        text =
+                        stringResource(
                             R.string.home_today_goal_value,
                             todayMinutes,
                             goalMinutes,
@@ -785,11 +810,13 @@ private fun SemiCircleProgress(
     val progressColor = LegadoTheme.colorScheme.primary
 
     Box(
-        modifier = modifier.semantics {
-            progressBarRangeInfo = ProgressBarRangeInfo(
-                current = animatedProgress.coerceIn(0f, 1f),
-                range = 0f..1f,
-            )
+        modifier =
+        modifier.semantics {
+            progressBarRangeInfo =
+                ProgressBarRangeInfo(
+                    current = animatedProgress.coerceIn(0f, 1f),
+                    range = 0f..1f,
+                )
         },
         contentAlignment = Alignment.BottomCenter,
     ) {
@@ -832,21 +859,29 @@ private fun WebDavBackupCard(
     onOpenSettings: () -> Unit,
     onRetry: () -> Unit,
 ) {
-    val lastBackupText = when {
-        isLoading -> stringResource(R.string.home_loading_webdav_backup)
-        latestBackup != null -> {
-            val date = remember(latestBackup.lastModify) {
-                DateFormat.getDateTimeInstance(
-                    DateFormat.MEDIUM,
-                    DateFormat.SHORT,
-                ).format(Date(latestBackup.lastModify))
+    val lastBackupText =
+        when {
+            isLoading -> {
+                stringResource(R.string.home_loading_webdav_backup)
             }
-            stringResource(R.string.home_latest_backup_value, date)
+            latestBackup != null -> {
+                val date =
+                    remember(latestBackup.lastModify) {
+                        DateFormat
+                            .getDateTimeInstance(
+                                DateFormat.MEDIUM,
+                                DateFormat.SHORT,
+                            ).format(Date(latestBackup.lastModify))
+                    }
+                stringResource(R.string.home_latest_backup_value, date)
+            }
+            isLoadError -> {
+                stringResource(R.string.home_webdav_backup_load_error)
+            }
+            else -> {
+                stringResource(R.string.home_no_webdav_backup)
+            }
         }
-
-        isLoadError -> stringResource(R.string.home_webdav_backup_load_error)
-        else -> stringResource(R.string.home_no_webdav_backup)
-    }
 
     GlassCard(
         modifier = Modifier.fillMaxWidth(),
@@ -873,7 +908,8 @@ private fun WebDavBackupCard(
                     AppText(
                         text = lastBackupText,
                         style = LegadoTheme.typography.bodySmall,
-                        color = if (isLoadError) {
+                        color =
+                        if (isLoadError) {
                             LegadoTheme.colorScheme.error
                         } else {
                             LegadoTheme.colorScheme.onSurfaceVariant
@@ -882,7 +918,7 @@ private fun WebDavBackupCard(
                 }
                 if (isLoading || isActionRunning) {
                     AppContainedLoadingIndicator(
-                        modifier = Modifier.size(24.dp)
+                        modifier = Modifier.size(24.dp),
                     )
                 }
             }
@@ -965,7 +1001,8 @@ private fun HomeDialogs(
         mutableStateOf(goalDialog?.currentMinutes?.toString().orEmpty())
     }
     val goalMinutes = goalInput.toIntOrNull()
-    val isGoalValid = goalMinutes != null &&
+    val isGoalValid =
+        goalMinutes != null &&
             goalMinutes in 1..MAX_DAILY_READING_GOAL_MINUTES
 
     AppAlertDialog(
@@ -987,7 +1024,8 @@ private fun HomeDialogs(
             )
         },
         confirmText = stringResource(R.string.ok),
-        onConfirm = if (isGoalValid) {
+        onConfirm =
+        if (isGoalValid) {
             {
                 onIntent(HomeIntent.UpdateReadingGoal(goalMinutes))
             }
@@ -1003,7 +1041,8 @@ private fun HomeDialogs(
         show = restoreDialog != null,
         onDismissRequest = { onIntent(HomeIntent.DismissDialog) },
         title = stringResource(R.string.restore_confirmation),
-        text = restoreDialog?.let {
+        text =
+        restoreDialog?.let {
             stringResource(R.string.home_webdav_restore_confirmation, it.backupName)
         },
         confirmText = stringResource(R.string.ok),
@@ -1032,17 +1071,17 @@ private fun HomeSheets(
         onDismissRequest = { onIntent(HomeIntent.DismissSheet) },
         onBackupToLocal = {
             onIntent(
-                HomeIntent.BackupDestinationSelected(HomeBackupDestination.Local)
+                HomeIntent.BackupDestinationSelected(HomeBackupDestination.Local),
             )
         },
         onBackupToNetwork = {
             onIntent(
-                HomeIntent.BackupDestinationSelected(HomeBackupDestination.WebDav)
+                HomeIntent.BackupDestinationSelected(HomeBackupDestination.WebDav),
             )
         },
         onBackupToLocalAndNetwork = {
             onIntent(
-                HomeIntent.BackupDestinationSelected(HomeBackupDestination.LocalAndWebDav)
+                HomeIntent.BackupDestinationSelected(HomeBackupDestination.LocalAndWebDav),
             )
         },
     )
@@ -1083,6 +1122,4 @@ private fun HomeDashboardSection.labelRes(): Int = when (this) {
 private fun bookAccessibilityLabel(
     name: String,
     author: String,
-): String {
-    return if (author.isBlank()) name else "$name, $author"
-}
+): String = if (author.isBlank()) name else "$name, $author"

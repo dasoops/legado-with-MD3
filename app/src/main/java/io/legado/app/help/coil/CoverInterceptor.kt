@@ -1,7 +1,5 @@
 package io.legado.app.help.coil
 
-import io.legado.app.data.appDb
-
 import coil3.intercept.Interceptor
 import coil3.request.CachePolicy
 import coil3.request.ImageResult
@@ -10,20 +8,18 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
 class CoverInterceptor : Interceptor {
-
     companion object {
         private const val RESOLVED_URL_CACHE_MAX_SIZE = 100
 
-        /** LRU cache: "$url|$sourceOrigin" -> Pair(resolvedUrl, headers) */
-        private val resolvedUrlCache = object : LinkedHashMap<String, Pair<String, Map<String, String>>>(
-            16, 0.75f, true
-        ) {
-            override fun removeEldestEntry(
-                eldest: MutableMap.MutableEntry<String, Pair<String, Map<String, String>>>?
-            ): Boolean {
-                return size > RESOLVED_URL_CACHE_MAX_SIZE
+        /** LRU cache: "$url" -> Pair(resolvedUrl, headers). */
+        private val resolvedUrlCache =
+            object : LinkedHashMap<String, Pair<String, Map<String, String>>>(
+                16,
+                0.75f,
+                true,
+            ) {
+                override fun removeEldestEntry(eldest: MutableMap.MutableEntry<String, Pair<String, Map<String, String>>>?): Boolean = size > RESOLVED_URL_CACHE_MAX_SIZE
             }
-        }
 
         fun clearResolvedUrlCache() {
             synchronized(resolvedUrlCache) {
@@ -53,8 +49,9 @@ class CoverInterceptor : Interceptor {
             val preferCache = request.extras[CoverExtras.PreferCache] == true
             if (!data.startsWith("data:", true)) {
                 val exactFile = CoverFileCache.read(data)
-                val cachedFile = exactFile
-                    ?: bookUrl?.takeIf { preferCache }?.let { CoverFileCache.readByBookUrl(it) }
+                val cachedFile =
+                    exactFile
+                        ?: bookUrl?.takeIf { preferCache }?.let { CoverFileCache.readByBookUrl(it) }
                 cachedFile?.let { file ->
                     // 精确命中且带 bookUrl 时，顺手把本书别名指向这个文件，
                     // 之后书源轮换 URL 也能靠别名命中，不必重新下载。
@@ -63,51 +60,48 @@ class CoverInterceptor : Interceptor {
                             CoverFileCache.ensureAlias(bookUrl, file)
                         }
                     }
-                    val localRequest = request.newBuilder()
-                        .data(file)
-                        .build()
+                    val localRequest =
+                        request
+                            .newBuilder()
+                            .data(file)
+                            .build()
                     return chain.withRequest(localRequest).proceed()
                 }
             }
 
-            val sourceOrigin = request.extras[CoverExtras.SourceOrigin]
-            val source = sourceOrigin?.let { origin ->
-                withContext(Dispatchers.IO) {
-                    appDb.bookSourceDao.getBookSource(origin)
-                }
-            }
-
-            val cacheKey = "$data|$sourceOrigin"
-            val cached = synchronized(resolvedUrlCache) {
-                resolvedUrlCache[cacheKey]
-            }
-
-            val (finalUrl, headers) = cached ?: withContext(Dispatchers.IO) {
-                AnalyzeUrl(data, source = source).getUrlAndHeaders()
-            }.also { result ->
+            val cacheKey = data
+            val cached =
                 synchronized(resolvedUrlCache) {
-                    resolvedUrlCache[cacheKey] = result
+                    resolvedUrlCache[cacheKey]
                 }
-            }
 
-            val newRequest = request.newBuilder()
-                .data(finalUrl)
-                .apply {
-                    extras[CoverExtras.Source] = source
-                    extras[CoverExtras.Headers] = headers
-                    // 携带原始地址，供 CoverFetcher 回写稳定键的持久缓存
-                    extras[CoverExtras.OriginalUrl] = data
-                    // 关闭 Coil 自带的磁盘缓存（位于 cacheDir/image_cache，系统低存储时会被回收，
-                    // 设置页清缓存也会删）。Coil 磁盘缓存一旦命中就直接返回，CoverFetcher 不会执行，
-                    // filesDir 下的持久缓存也就永远得不到回填；而 cacheDir 被回收后，断网重启会大量丢封面。
-                    // 这里只对“确实会写持久缓存”的请求（带 bookUrl）关闭，保证字节一定经过
-                    // CoverFetcher 落到 filesDir；无 bookUrl 的临时封面（发现页/搜索页）不写持久缓存，
-                    // 保留 Coil 磁盘缓存，避免它们退化成只能重新联网。
-                    if (bookUrl != null) {
-                        diskCachePolicy(CachePolicy.DISABLED)
+            val (finalUrl, headers) =
+                cached ?: withContext(Dispatchers.IO) {
+                    AnalyzeUrl(data).getUrlAndHeaders()
+                }.also { result ->
+                    synchronized(resolvedUrlCache) {
+                        resolvedUrlCache[cacheKey] = result
                     }
                 }
-                .build()
+
+            val newRequest =
+                request
+                    .newBuilder()
+                    .data(finalUrl)
+                    .apply {
+                        extras[CoverExtras.Headers] = headers
+                        // 携带原始地址，供 CoverFetcher 回写稳定键的持久缓存
+                        extras[CoverExtras.OriginalUrl] = data
+                        // 关闭 Coil 自带的磁盘缓存（位于 cacheDir/image_cache，系统低存储时会被回收，
+                        // 设置页清缓存也会删）。Coil 磁盘缓存一旦命中就直接返回，CoverFetcher 不会执行，
+                        // filesDir 下的持久缓存也就永远得不到回填；而 cacheDir 被回收后，断网重启会大量丢封面。
+                        // 这里只对“确实会写持久缓存”的请求（带 bookUrl）关闭，保证字节一定经过
+                        // CoverFetcher 落到 filesDir；无 bookUrl 的临时封面（发现页/搜索页）不写持久缓存，
+                        // 保留 Coil 磁盘缓存，避免它们退化成只能重新联网。
+                        if (bookUrl != null) {
+                            diskCachePolicy(CachePolicy.DISABLED)
+                        }
+                    }.build()
 
             return chain.withRequest(newRequest).proceed()
         }

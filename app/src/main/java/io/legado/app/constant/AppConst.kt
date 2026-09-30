@@ -14,7 +14,6 @@ import splitties.init.appCtx
 @Suppress("ConstPropertyName")
 @SuppressLint("SimpleDateFormat")
 object AppConst {
-
     const val APP_TAG = "Legado"
 
     const val channelIdDownload = "channel_download"
@@ -47,10 +46,11 @@ object AppConst {
 
     const val imagePathKey = "imagePath"
 
-    val menuViewNames = arrayOf(
-        "com.android.internal.view.menu.ListMenuItemView",
-        "androidx.appcompat.view.menu.ListMenuItemView"
-    )
+    val menuViewNames =
+        arrayOf(
+            "com.android.internal.view.menu.ListMenuItemView",
+            "androidx.appcompat.view.menu.ListMenuItemView",
+        )
 
     val androidId: String by lazy {
         Settings.System.getString(appCtx.contentResolver, Settings.Secure.ANDROID_ID) ?: "null"
@@ -59,14 +59,16 @@ object AppConst {
     val appInfo: AppInfo by lazy {
         val appInfo = AppInfo()
         @Suppress("DEPRECATION")
-        appCtx.packageManager.getPackageInfo(appCtx.packageName, PackageManager.GET_ACTIVITIES)
+        appCtx.packageManager
+            .getPackageInfo(appCtx.packageName, PackageManager.GET_ACTIVITIES)
             ?.let {
                 appInfo.versionName = it.versionName!!
-                appInfo.appVariant = when {
-                    isBeta -> AppVariant.BETA_RELEASE
-                    isOfficial -> AppVariant.OFFICIAL
-                    else -> AppVariant.UNKNOWN
-                }
+                appInfo.appVariant =
+                    when {
+                        isBeta -> AppVariant.BETA_RELEASE
+                        isOfficial -> AppVariant.OFFICIAL
+                        else -> AppVariant.UNKNOWN
+                    }
 
                 if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.P) {
                     appInfo.versionCode = it.longVersionCode
@@ -96,12 +98,11 @@ object AppConst {
     data class AppInfo(
         var versionCode: Long = 0L,
         var versionName: String = "",
-        var appVariant: AppVariant = AppVariant.UNKNOWN
+        var appVariant: AppVariant = AppVariant.UNKNOWN,
     )
 
     /**
      * The authority of a FileProvider defined in a <provider> element in your app's manifest.
      */
     const val authority = BuildConfig.APPLICATION_ID + ".fileProvider"
-
 }

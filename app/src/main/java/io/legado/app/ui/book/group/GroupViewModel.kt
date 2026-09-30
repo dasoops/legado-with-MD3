@@ -17,8 +17,10 @@ class GroupViewModel(
     private val bookGroupRepository: BookGroupRepository,
     private val bookGroupMutationGateway: BookGroupMutationGateway,
 ) : BaseViewModel(application) {
-
-    fun upGroup(vararg bookGroup: BookGroup, finally: (() -> Unit)? = null) {
+    fun upGroup(
+        vararg bookGroup: BookGroup,
+        finally: (() -> Unit)? = null,
+    ) {
         execute {
             bookGroupRepository.upsert(*bookGroup)
         }.onFinally {
@@ -35,7 +37,7 @@ class GroupViewModel(
         localDirectoryUri: String? = null,
         isTag: Boolean = false,
         onError: ((Throwable) -> Unit)? = null,
-        onSuccess: () -> Unit
+        onSuccess: () -> Unit,
     ) {
         viewModelScope.launch {
             try {
@@ -48,7 +50,7 @@ class GroupViewModel(
                         pattern = pattern,
                         localDirectoryUri = localDirectoryUri,
                         isTag = isTag,
-                    )
+                    ),
                 )
                 onSuccess()
             } catch (error: Throwable) {
@@ -61,7 +63,7 @@ class GroupViewModel(
     fun saveGroup(
         bookGroup: BookGroup,
         onSuccess: () -> Unit,
-        onError: (Throwable) -> Unit
+        onError: (Throwable) -> Unit,
     ) {
         viewModelScope.launch {
             try {
@@ -76,7 +78,10 @@ class GroupViewModel(
         }
     }
 
-    fun delGroup(bookGroup: BookGroup, finally: () -> Unit) {
+    fun delGroup(
+        bookGroup: BookGroup,
+        finally: () -> Unit,
+    ) {
         execute {
             bookGroupMutationGateway.deleteGroup(bookGroup.groupId)
         }.onFinally {
@@ -84,7 +89,10 @@ class GroupViewModel(
         }
     }
 
-    fun clearCover(bookGroup: BookGroup, finally: () -> Unit) {
+    fun clearCover(
+        bookGroup: BookGroup,
+        finally: () -> Unit,
+    ) {
         execute {
             bookGroupRepository.clearCover(bookGroup.groupId)
         }.onFinally {
@@ -103,5 +111,4 @@ class GroupViewModel(
         localDirectoryUri = localDirectoryUri,
         pattern = pattern,
     )
-
 }

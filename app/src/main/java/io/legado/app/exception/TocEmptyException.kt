@@ -3,4 +3,6 @@ package io.legado.app.exception
 /**
  * 目录为空
  */
-class TocEmptyException(msg: String) : NoStackTraceException(msg)
+class TocEmptyException(
+    msg: String,
+) : NoStackTraceException(msg)

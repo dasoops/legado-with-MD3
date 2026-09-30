@@ -29,9 +29,9 @@ import io.legado.app.ui.book.read.ConfigUpdate
 import io.legado.app.ui.book.read.ReadBookIntent
 import io.legado.app.ui.widget.components.modalBottomSheet.AppModalBottomSheet
 import io.legado.app.ui.widget.components.settingItem.TinySliderSettingItem
-import org.koin.compose.koinInject
 import java.util.Locale
 import kotlin.math.roundToInt
+import org.koin.compose.koinInject
 
 @Composable
 fun AutoReadSheet(
@@ -53,7 +53,8 @@ fun AutoReadSheet(
             onOpenChapterList = onOpenChapterList,
             onStopAutoPage = onStopAutoPage,
             onShowPageAnimConfig = onShowPageAnimConfig,
-            modifier = Modifier
+            modifier =
+            Modifier
                 .padding(bottom = 16.dp),
         )
     }
@@ -70,7 +71,7 @@ fun AutoReadContent(
 ) {
     val readSettingsRepository: ReadSettingsRepository = koinInject()
     val preferences by readSettingsRepository.preferences.collectAsStateWithLifecycle(
-        initialValue = ReadPreferences()
+        initialValue = ReadPreferences(),
     )
     val initialSpeed = remember { preferences.autoReadSpeed.coerceIn(1, 120).toFloat() }
     var speed by remember { mutableFloatStateOf(initialSpeed) }

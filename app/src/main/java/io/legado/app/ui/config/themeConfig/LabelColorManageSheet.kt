@@ -42,12 +42,13 @@ fun LabelColorManageSheet(
     themeColor: Int,
     colors: List<TagColorPair>,
     onColorsChange: (List<TagColorPair>) -> Unit,
-    onDismissRequest: () -> Unit
+    onDismissRequest: () -> Unit,
 ) {
     val primaryColor = LegadoTheme.colorScheme.primary
-    val tagColors = remember(show, colors) {
-        colors.toMutableStateList()
-    }
+    val tagColors =
+        remember(show, colors) {
+            colors.toMutableStateList()
+        }
     var showColorPicker by remember { mutableStateOf(false) }
     var editingIndex by remember { mutableIntStateOf(-1) }
     var editingTextColor by remember { mutableIntStateOf(0) }
@@ -66,7 +67,7 @@ fun LabelColorManageSheet(
                     onColorsChange(tagColors.toList())
                 },
                 icon = Icons.Default.AutoAwesome,
-                contentDescription = stringResource(R.string.ai_generate)
+                contentDescription = stringResource(R.string.ai_generate),
             )
         },
         endAction = {
@@ -78,41 +79,57 @@ fun LabelColorManageSheet(
                     showColorPicker = true
                 },
                 icon = Icons.Default.Add,
-                contentDescription = stringResource(R.string.add)
+                contentDescription = stringResource(R.string.add),
             )
-        }
+        },
     ) {
         LazyColumn(
-            modifier = Modifier
+            modifier =
+            Modifier
                 .fillMaxWidth()
                 .padding(bottom = 24.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+            verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             items(tagColors.size) { index ->
                 val colorPair = tagColors[index]
                 val label = stringResource(R.string.theme_config_label_color_name, index + 1)
                 NormalCard(
                     modifier = Modifier.fillMaxWidth(),
-                    containerColor = LegadoTheme.colorScheme.onSheetContent
+                    containerColor = LegadoTheme.colorScheme.onSheetContent,
                 ) {
                     Row(
-                        modifier = Modifier
+                        modifier =
+                        Modifier
                             .fillMaxWidth()
                             .padding(12.dp),
                         horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
+                        verticalAlignment = Alignment.CenterVertically,
                     ) {
                         TextCard(
                             text = label,
-                            backgroundColor = if (colorPair.bgColor != 0) Color(colorPair.bgColor) else LegadoTheme.colorScheme.surfaceContainerHighest,
-                            contentColor = if (colorPair.textColor != 0) Color(colorPair.textColor) else LegadoTheme.colorScheme.primary,
+                            backgroundColor =
+                            if (colorPair.bgColor !=
+                                0
+                            ) {
+                                Color(colorPair.bgColor)
+                            } else {
+                                LegadoTheme.colorScheme.surfaceContainerHighest
+                            },
+                            contentColor =
+                            if (colorPair.textColor != 0) {
+                                Color(
+                                    colorPair.textColor,
+                                )
+                            } else {
+                                LegadoTheme.colorScheme.primary
+                            },
                             cornerRadius = 4.dp,
                             horizontalPadding = 8.dp,
                             verticalPadding = 4.dp,
-                            textStyle = LegadoTheme.typography.labelSmall
+                            textStyle = LegadoTheme.typography.labelSmall,
                         )
                         Row(
-                            horizontalArrangement = Arrangement.spacedBy(4.dp)
+                            horizontalArrangement = Arrangement.spacedBy(4.dp),
                         ) {
                             SmallPlainButton(
                                 onClick = {
@@ -121,7 +138,7 @@ fun LabelColorManageSheet(
                                     showColorPicker = true
                                 },
                                 icon = Icons.Default.Edit,
-                                contentDescription = stringResource(R.string.edit)
+                                contentDescription = stringResource(R.string.edit),
                             )
                             SmallPlainButton(
                                 onClick = {
@@ -129,7 +146,7 @@ fun LabelColorManageSheet(
                                     onColorsChange(tagColors.toList())
                                 },
                                 icon = Icons.Default.Delete,
-                                contentDescription = stringResource(R.string.delete)
+                                contentDescription = stringResource(R.string.delete),
                             )
                         }
                     }
@@ -149,13 +166,14 @@ fun LabelColorManageSheet(
                 hsl[1] = (hsl[1] * 0.4f).coerceAtMost(0.35f)
                 hsl[2] = 0.90f
                 val bgColor = Color.hsl(hsl[0], hsl[1], hsl[2]).toArgb()
-                tagColors[editingIndex] = TagColorPair(
-                    textColor = selectedColor,
-                    bgColor = bgColor
-                )
+                tagColors[editingIndex] =
+                    TagColorPair(
+                        textColor = selectedColor,
+                        bgColor = bgColor,
+                    )
                 onColorsChange(tagColors.toList())
                 showColorPicker = false
-            }
+            },
         )
     }
 }

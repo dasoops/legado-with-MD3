@@ -214,6 +214,7 @@ object PreferKey {
     const val secondaryTextColorNight = "colorMD3OnPrimaryContainerNight"
     const val themeBackgroundColorNight = "colorMD3BackgroundNight"
     const val labelContainerColorNight = "colorMD3SurfaceContainerLowNight"
+
     // 中间单线间隔设置
     const val enableItemDivider = "enableItemDivider"
     const val enableContainerBackgroundImage = "enableContainerBackgroundImage"
@@ -299,7 +300,6 @@ object PreferKey {
     const val bookshelfListCoverWidth = "bookshelfListCoverWidth"
     const val bookshelfGridCoverWidth = "bookshelfGridCoverWidth"
 
-
     const val tabletInterface = "tabletInterface"
     const val pureBlack = "pure_black"
     const val labelVisibilityMode = "labelVisibilityMode"
@@ -353,7 +353,7 @@ object PreferKey {
     const val moreActionsConfig = "moreActionsConfig"
     const val disableReturnKey = "disableReturnKey"
     const val selectText = "selectText"
-    //我在干什么
+    // 我在干什么
 
     const val disableMangaScrollAnimation = "disableMangaScrollAnimation"
     const val disableMangaCrossFade = "disableMangaCrossFade"
@@ -361,7 +361,6 @@ object PreferKey {
     const val shouldShowExpandButton = "shouldShowExpandButton"
 
     const val exploreFilterState = "explore_filter_state"
-
 
     const val showTip = "showTip"
     const val showBookCount = "showBookCount"
@@ -403,19 +402,19 @@ object PreferKey {
 }
 
 object ReadMenuBlurMode {
-    const val None = 0
-    const val LiquidGlass = 1
-    const val Haze = 2
+    const val NONE = 0
+    const val LIQUID_GLASS = 1
+    const val HAZE = 2
 }
 
 object ReadMenuBlurStyle {
-    const val Solid = 0
-    const val Progressive = 1
+    const val SOLID = 0
+    const val PROGRESSIVE = 1
 }
 
 object CoverRatio {
-    const val Square = 0
-    const val Circle = 1
-    const val Book = 2
-    const val Unrestricted = 3
+    const val SQUARE = 0
+    const val CIRCLE = 1
+    const val BOOK = 2
+    const val UNRESTRICTED = 3
 }

@@ -21,17 +21,25 @@ internal data class ReaderPageDecorationDrawCache(
 ) {
     companion object {
         fun create(page: ReaderPage) = ReaderPageDecorationDrawCache(
-            contentRules = page.elements.filterIsInstance<ReaderElement.Rule>()
+            contentRules =
+            page.elements
+                .filterIsInstance<ReaderElement.Rule>()
                 .filterNot(ReaderElement.Rule::overlayStyledUnderline)
                 .map(::ReaderRuleDrawCommand),
-            halfHighlights = page.underlineRuns().filter { it.underline.mode == 7 }.map { run ->
+            halfHighlights =
+            page.underlineRuns().filter { it.underline.mode == 7 }.map { run ->
                 ReaderHalfHighlightDrawCommand(run.bounds, run.underline.colorArgb)
             },
-            styledUnderlines = page.underlineRuns().filterNot { it.underline.mode == 7 }
+            styledUnderlines =
+            page
+                .underlineRuns()
+                .filterNot { it.underline.mode == 7 }
                 .map { run ->
-                ReaderUnderlineDrawCommand(run.bounds, run.underline)
-            },
-            overlayRules = page.elements.filterIsInstance<ReaderElement.Rule>()
+                    ReaderUnderlineDrawCommand(run.bounds, run.underline)
+                },
+            overlayRules =
+            page.elements
+                .filterIsInstance<ReaderElement.Rule>()
                 .filter(ReaderElement.Rule::overlayStyledUnderline)
                 .map(::ReaderRuleDrawCommand),
         )
@@ -55,17 +63,21 @@ internal class ReaderHalfHighlightDrawCommand(
     }
 }
 
-internal class ReaderRuleDrawCommand(private val rule: ReaderElement.Rule) {
-    private val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = rule.colorArgb
-        strokeWidth = rule.widthPx.coerceAtLeast(1f)
-        if (rule.dashed) {
-            pathEffect = DashPathEffect(
-                floatArrayOf(rule.dashOnPx.coerceAtLeast(0.1f), rule.dashOffPx.coerceAtLeast(0.1f)),
-                0f,
-            )
+internal class ReaderRuleDrawCommand(
+    private val rule: ReaderElement.Rule,
+) {
+    private val paint =
+        Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            color = rule.colorArgb
+            strokeWidth = rule.widthPx.coerceAtLeast(1f)
+            if (rule.dashed) {
+                pathEffect =
+                    DashPathEffect(
+                        floatArrayOf(rule.dashOnPx.coerceAtLeast(0.1f), rule.dashOffPx.coerceAtLeast(0.1f)),
+                        0f,
+                    )
+            }
         }
-    }
 
     fun draw(canvas: Canvas) {
         canvas.drawLine(rule.bounds.left, rule.bounds.top, rule.bounds.right, rule.bounds.bottom, paint)
@@ -76,12 +88,13 @@ internal class ReaderUnderlineDrawCommand(
     private val bounds: ReaderRect,
     private val underline: ReaderUnderline,
 ) {
-    private val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = underline.colorArgb
-        strokeWidth = underline.widthPx.coerceAtLeast(1f)
-        style = Paint.Style.STROKE
-        strokeCap = Paint.Cap.BUTT
-    }
+    private val paint =
+        Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            color = underline.colorArgb
+            strokeWidth = underline.widthPx.coerceAtLeast(1f)
+            style = Paint.Style.STROKE
+            strokeCap = Paint.Cap.BUTT
+        }
     private val wavePath = if (underline.mode == 3) createWavePath(bounds, underline) else null
     private val svgPath = if (underline.mode == 5) ReaderSvgPathCache.parse(underline.svgPath) else null
 
@@ -90,32 +103,47 @@ internal class ReaderUnderlineDrawCommand(
         val end = bounds.right
         val y = bounds.bottom + underline.offsetPx
         when (underline.mode) {
-            1 -> canvas.drawLine(start, y, end, y, paint)
-            2 -> drawDashed(canvas, start, end, y)
-            3 -> wavePath?.let { canvas.drawPath(it, paint) }
+            1 -> {
+                canvas.drawLine(start, y, end, y, paint)
+            }
+            2 -> {
+                drawDashed(canvas, start, end, y)
+            }
+            3 -> {
+                wavePath?.let { canvas.drawPath(it, paint) }
+            }
             4 -> {
                 canvas.drawLine(start, y, end, y, paint)
                 val secondY = y + underline.doubleLineGapPx + underline.widthPx
                 canvas.drawLine(start, secondY, end, secondY, paint)
             }
-            5 -> svgPath?.takeIf { end > start }?.let { path ->
-                canvas.save()
-                canvas.translate(start, y - SVG_BASELINE_Y)
-                canvas.scale((end - start) / SVG_BASE_WIDTH, 1f)
-                canvas.drawPath(path, paint)
-                canvas.restore()
+            5 -> {
+                svgPath?.takeIf { end > start }?.let { path ->
+                    canvas.save()
+                    canvas.translate(start, y - SVG_BASELINE_Y)
+                    canvas.scale((end - start) / SVG_BASE_WIDTH, 1f)
+                    canvas.drawPath(path, paint)
+                    canvas.restore()
+                }
             }
-            6 -> canvas.drawLine(
-                start,
-                bounds.top + bounds.height * 0.52f,
-                end,
-                bounds.top + bounds.height * 0.52f,
-                paint
-            )
+            6 -> {
+                canvas.drawLine(
+                    start,
+                    bounds.top + bounds.height * 0.52f,
+                    end,
+                    bounds.top + bounds.height * 0.52f,
+                    paint,
+                )
+            }
         }
     }
 
-    private fun drawDashed(canvas: Canvas, start: Float, end: Float, y: Float) {
+    private fun drawDashed(
+        canvas: Canvas,
+        start: Float,
+        end: Float,
+        y: Float,
+    ) {
         val dashOn = underline.dashOnPx.coerceAtLeast(MIN_SEGMENT_PX)
         val dashOff = underline.dashOffPx.coerceAtLeast(MIN_SEGMENT_PX)
         var x = start
@@ -130,7 +158,10 @@ internal class ReaderUnderlineDrawCommand(
         const val SVG_BASE_WIDTH = 100f
         const val SVG_BASELINE_Y = 50f
 
-        fun createWavePath(bounds: ReaderRect, underline: ReaderUnderline): Path {
+        fun createWavePath(
+            bounds: ReaderRect,
+            underline: ReaderUnderline,
+        ): Path {
             val y = bounds.bottom + underline.offsetPx
             val waveLength = underline.waveLengthPx.coerceAtLeast(MIN_SEGMENT_PX)
             return Path().apply {

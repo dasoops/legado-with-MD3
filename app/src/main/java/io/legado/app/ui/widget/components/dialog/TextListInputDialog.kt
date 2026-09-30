@@ -21,8 +21,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
-import io.legado.app.R
 import androidx.compose.ui.unit.dp
+import io.legado.app.R
 import io.legado.app.ui.theme.LegadoTheme
 import io.legado.app.ui.widget.components.AppTextField
 import io.legado.app.ui.widget.components.alert.AppAlertDialog
@@ -39,7 +39,7 @@ fun TextListInputDialog(
     initialValue: String = "",
     suggestions: List<String> = emptyList(),
     onDismissRequest: () -> Unit,
-    onConfirm: (String) -> Unit
+    onConfirm: (String) -> Unit,
 ) {
     var text by remember(show) { mutableStateOf(initialValue) }
     val focusManager = LocalFocusManager.current
@@ -56,7 +56,7 @@ fun TextListInputDialog(
                     onValueChange = { text = it },
                     label = hint,
                     modifier = Modifier.fillMaxWidth(),
-                    singleLine = true
+                    singleLine = true,
                 )
 
                 if (suggestions.isNotEmpty()) {
@@ -64,16 +64,16 @@ fun TextListInputDialog(
                     AppText(
                         text = stringResource(R.string.suggestion_label),
                         style = LegadoTheme.typography.labelSmall,
-                        modifier = Modifier.padding(bottom = 4.dp)
+                        modifier = Modifier.padding(bottom = 4.dp),
                     )
                     LazyRow(
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.fillMaxWidth(),
                     ) {
                         items(suggestions) { suggestion ->
                             AssistChip(
                                 onClick = { text = suggestion },
-                                label = { AppText(suggestion) }
+                                label = { AppText(suggestion) },
                             )
                         }
                     }
@@ -87,7 +87,7 @@ fun TextListInputDialog(
             onConfirm(text)
         },
         dismissText = stringResource(android.R.string.cancel),
-        onDismiss = onDismissRequest
+        onDismiss = onDismissRequest,
     )
 }
 
@@ -99,7 +99,7 @@ fun <T> TextListInputDialog(
     initialValue: (T) -> String,
     suggestions: List<String> = emptyList(),
     onDismissRequest: () -> Unit,
-    onConfirm: (T, String) -> Unit
+    onConfirm: (T, String) -> Unit,
 ) {
     var cachedData by remember { mutableStateOf(data) }
     if (data != null) cachedData = data
@@ -113,7 +113,7 @@ fun <T> TextListInputDialog(
             initialValue = initialValue(currentData),
             suggestions = suggestions,
             onDismissRequest = onDismissRequest,
-            onConfirm = { text -> onConfirm(currentData, text) }
+            onConfirm = { text -> onConfirm(currentData, text) },
         )
     }
 }

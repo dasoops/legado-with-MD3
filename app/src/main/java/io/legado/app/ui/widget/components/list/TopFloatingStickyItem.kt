@@ -20,7 +20,7 @@ fun <T : Any> TopFloatingStickyItem(
     modifier: Modifier = Modifier,
     enter: EnterTransition = fadeIn() + slideInVertically { -it },
     exit: ExitTransition = fadeOut() + slideOutVertically { -it },
-    content: @Composable (T) -> Unit
+    content: @Composable (T) -> Unit,
 ) {
     var lastItem by remember { mutableStateOf<T?>(null) }
 
@@ -28,7 +28,7 @@ fun <T : Any> TopFloatingStickyItem(
         visible = item != null,
         modifier = modifier,
         enter = enter,
-        exit = exit
+        exit = exit,
     ) {
         item?.let { lastItem = it }
         val currentItem = lastItem

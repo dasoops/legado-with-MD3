@@ -6,6 +6,8 @@ import io.legado.app.data.AppDatabase
 import io.legado.app.data.entities.readRecord.ReadRecord
 import io.legado.app.data.entities.readRecord.ReadRecordSession
 import io.legado.app.help.config.AppConfigStore
+import java.time.LocalDate
+import java.time.ZoneId
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.junit.After
@@ -16,8 +18,6 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.RuntimeEnvironment
 import org.robolectric.annotation.Config
-import java.time.LocalDate
-import java.time.ZoneId
 
 /**
  * 阅读统计口径回归测试：
@@ -39,7 +39,7 @@ class ReadRecordStatisticsConsistencyTest {
         AppConfigStore.init(RuntimeEnvironment.getApplication())
         database = Room.inMemoryDatabaseBuilder(
             RuntimeEnvironment.getApplication(),
-            AppDatabase::class.java
+            AppDatabase::class.java,
         )
             .allowMainThreadQueries().build()
         repository = ReadRecordRepository(database.readRecordDao, database, SettingsRepository())
@@ -69,12 +69,12 @@ class ReadRecordStatisticsConsistencyTest {
         // 旧版本/上游备份只有 readRecord.readTime，没有 readRecordDetail（升级前无此表）。
         database.readRecordDao.insert(
             ReadRecord(
-                deviceId,
-                bookName,
-                author,
+                DEVICE_ID,
+                BOOK_NAME,
+                AUTHOR,
                 readTime = 3_600_000L,
-                lastRead = 1_700_000_000_000L
-            )
+                lastRead = 1_700_000_000_000L,
+            ),
         )
 
         val recordsTotal = repository.getTotalReadTime().first() // 阅读记录页「累计阅读成就」
@@ -144,11 +144,11 @@ class ReadRecordStatisticsConsistencyTest {
         start: Long,
         end: Long,
         words: Long,
-        device: String = deviceId,
+        device: String = DEVICE_ID,
     ) = ReadRecordSession(
         deviceId = device,
-        bookName = bookName,
-        bookAuthor = author,
+        bookName = BOOK_NAME,
+        bookAuthor = AUTHOR,
         startTime = start,
         endTime = end,
         words = words,
@@ -157,8 +157,8 @@ class ReadRecordStatisticsConsistencyTest {
     private fun String.toEpochDay(): Long = java.time.LocalDate.parse(this).toEpochDay()
 
     private companion object {
-        const val deviceId = "device"
-        const val bookName = "book"
-        const val author = "author"
+        const val DEVICE_ID = "device"
+        const val BOOK_NAME = "book"
+        const val AUTHOR = "author"
     }
 }

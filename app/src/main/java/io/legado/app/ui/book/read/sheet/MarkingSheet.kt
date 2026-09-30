@@ -78,18 +78,21 @@ fun MarkingSheet(
     val editing = state.editing
 
     // 编辑模式无选中文本时，预览取标记锚点里的原文。
-    val editingAnchorText = remember(editing) {
-        editing?.anchorJson
-            ?.let { GSON.fromJsonObject<TextProcessAnchor>(it).getOrNull() }
-            ?.selectedText
-            ?: ""
-    }
+    val editingAnchorText =
+        remember(editing) {
+            editing
+                ?.anchorJson
+                ?.let { GSON.fromJsonObject<TextProcessAnchor>(it).getOrNull() }
+                ?.selectedText
+                ?: ""
+        }
 
     // 状态提升到 Sheet 顶层：底部 ColorPickerSheet 与内容共用；以 show + editing 为键，
     // 每次打开/切到编辑模式时重置（编辑模式的样式/颜色/备注来自已有标记）。
-    val editingStyle = remember(editing) {
-        editing?.styleJson?.let { GSON.fromJsonObject<TextProcessStyle>(it).getOrNull() }
-    }
+    val editingStyle =
+        remember(editing) {
+            editing?.styleJson?.let { GSON.fromJsonObject<TextProcessStyle>(it).getOrNull() }
+        }
     // 新建默认走「复用规则」，编辑已有标记时默认走自定义以展示实际存储的样式
     var useRule by remember(show, editing) { mutableStateOf(editing == null) }
     var selectedRuleId by remember(show, editing) { mutableStateOf<String?>(null) }
@@ -111,9 +114,10 @@ fun MarkingSheet(
         mutableStateOf(editingStyle?.underlineSvgPath)
     }
     var showColorPicker by remember(show, editing) { mutableStateOf(false) }
-    val noteState = key(show, editing) {
-        rememberTextFieldState(initialText = editing?.note ?: "")
-    }
+    val noteState =
+        key(show, editing) {
+            rememberTextFieldState(initialText = editing?.note ?: "")
+        }
 
     AppModalBottomSheet(
         show = show,
@@ -124,34 +128,36 @@ fun MarkingSheet(
                 MediumTonalButton(
                     onClick = onDelete,
                     icon = Icons.Default.Delete,
-                    contentDescription = stringResource(R.string.delete)
+                    contentDescription = stringResource(R.string.delete),
                 )
             }
         },
         endAction = {
             MediumTonalButton(
                 onClick = {
-                    val style = buildStyle(
-                        useRule = useRule,
-                        selectedRule = state.highlightRules.firstOrNull { it.id == selectedRuleId },
-                        effect = effect,
-                        markColor = markColor,
-                        underlineWidth = underlineWidth,
-                        underlineOffset = underlineOffset,
-                        underlineSvgPath = underlineSvgPath,
-                    )
+                    val style =
+                        buildStyle(
+                            useRule = useRule,
+                            selectedRule = state.highlightRules.firstOrNull { it.id == selectedRuleId },
+                            effect = effect,
+                            markColor = markColor,
+                            underlineWidth = underlineWidth,
+                            underlineOffset = underlineOffset,
+                            underlineSvgPath = underlineSvgPath,
+                        )
                     onSave(style, noteState.text.toString())
                 },
                 icon = Icons.Default.Save,
-                contentDescription = stringResource(android.R.string.ok)
+                contentDescription = stringResource(android.R.string.ok),
             )
-        }
+        },
     ) {
         if (selection == null && editing == null) {
             // 编辑模式异步加载标记期间的占位，避免先空再弹内容
             if (state.loading) {
                 Row(
-                    modifier = Modifier
+                    modifier =
+                    Modifier
                         .fillMaxWidth()
                         .height(160.dp),
                     horizontalArrangement = Arrangement.Center,
@@ -163,15 +169,17 @@ fun MarkingSheet(
             return@AppModalBottomSheet
         }
         Column(
-            modifier = Modifier
+            modifier =
+            Modifier
                 .fillMaxWidth()
                 .verticalScroll(rememberScrollState()),
-            verticalArrangement = Arrangement.spacedBy(4.dp)
+            verticalArrangement = Arrangement.spacedBy(4.dp),
         ) {
             TinyDropdownSettingItem(
                 title = stringResource(R.string.bookmark_mark_style_source),
                 selectedValue = if (useRule) STYLE_SOURCE_RULE else STYLE_SOURCE_CUSTOM,
-                displayEntries = arrayOf(
+                displayEntries =
+                arrayOf(
                     stringResource(R.string.bookmark_mark_reuse_rule),
                     stringResource(R.string.bookmark_mark_custom),
                 ),
@@ -184,7 +192,8 @@ fun MarkingSheet(
                 if (rules.isEmpty()) {
                     EmptyMessage(
                         message = stringResource(R.string.bookmark_mark_no_rules),
-                        modifier = Modifier
+                        modifier =
+                        Modifier
                             .fillMaxWidth()
                             .height(200.dp),
                     )
@@ -192,18 +201,19 @@ fun MarkingSheet(
                     rules.forEach { rule ->
                         val selected = selectedRuleId == rule.id
                         Row(
-                            modifier = Modifier
+                            modifier =
+                            Modifier
                                 .fillMaxWidth()
                                 .clickable {
                                     selectedRuleId = if (selected) null else rule.id
-                                }
-                                .padding(horizontal = 16.dp, vertical = 12.dp),
+                                }.padding(horizontal = 16.dp, vertical = 12.dp),
                             verticalAlignment = Alignment.CenterVertically,
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Check,
                                 contentDescription = null,
-                                tint = if (selected) {
+                                tint =
+                                if (selected) {
                                     LegadoTheme.colorScheme.primary
                                 } else {
                                     LegadoTheme.colorScheme.outlineVariant
@@ -242,7 +252,8 @@ fun MarkingSheet(
             // 备注（笔记）
             AppTextField(
                 state = noteState,
-                modifier = Modifier
+                modifier =
+                Modifier
                     .fillMaxWidth(),
                 label = stringResource(R.string.bookmark_mark_note),
                 placeholder = {
@@ -271,7 +282,8 @@ private fun MarkingColorRow(
     onCustomColorClick: () -> Unit,
 ) {
     Row(
-        modifier = Modifier
+        modifier =
+        Modifier
             .fillMaxWidth()
             .horizontalScroll(rememberScrollState())
             .padding(vertical = 8.dp),
@@ -303,19 +315,20 @@ private fun MarkingColorSwatch(
     onClick: () -> Unit,
     custom: Boolean = false,
 ) {
-    val borderColor = if (selected) {
-        LegadoTheme.colorScheme.primary
-    } else {
-        LegadoTheme.colorScheme.outlineVariant
-    }
+    val borderColor =
+        if (selected) {
+            LegadoTheme.colorScheme.primary
+        } else {
+            LegadoTheme.colorScheme.outlineVariant
+        }
     Box(
-        modifier = Modifier
+        modifier =
+        Modifier
             .size(32.dp)
             .clip(CircleShape)
             .background(
-                if (color != null) Color(color) else LegadoTheme.colorScheme.surfaceContainerHigh
-            )
-            .border(2.dp, borderColor, CircleShape)
+                if (color != null) Color(color) else LegadoTheme.colorScheme.surfaceContainerHigh,
+            ).border(2.dp, borderColor, CircleShape)
             .clickable(onClick = onClick),
         contentAlignment = Alignment.Center,
     ) {
@@ -337,14 +350,16 @@ private fun MarkingEffectGrid(
     onEffectSelected: (MarkingEffect) -> Unit,
 ) {
     Row(
-        modifier = Modifier
+        modifier =
+        Modifier
             .fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(4.dp),
     ) {
         MarkingEffect.entries.forEach { entry ->
             val selected = entry == selectedEffect
             Box(
-                modifier = Modifier
+                modifier =
+                Modifier
                     .weight(1f)
                     .clip(RoundedCornerShape(8.dp))
                     .background(
@@ -352,16 +367,16 @@ private fun MarkingEffectGrid(
                             LegadoTheme.colorScheme.secondaryContainer
                         } else {
                             LegadoTheme.colorScheme.surfaceContainer
-                        }
-                    )
-                    .clickable { onEffectSelected(entry) }
+                        },
+                    ).clickable { onEffectSelected(entry) }
                     .padding(vertical = 8.dp),
                 contentAlignment = Alignment.Center,
             ) {
                 AppText(
                     text = stringResource(entry.labelRes()),
                     style = LegadoTheme.typography.labelMediumEmphasized,
-                    color = if (selected) {
+                    color =
+                    if (selected) {
                         LegadoTheme.colorScheme.onSecondaryContainer
                     } else {
                         LegadoTheme.colorScheme.onSurface
@@ -425,18 +440,19 @@ private fun HighlightRule.toProcessStyle(): TextProcessStyle = TextProcessStyle(
 )
 
 /** 自定义模式的预设颜色（尾部之外的自定义色用取色器）。 */
-private val MarkingPresetColors = listOf(
-    0xFFFF5252.toInt(),
-    0xFFFF9800.toInt(),
-    0xFFFFEB3B.toInt(),
-    0xFF4CAF50.toInt(),
-    0xFF26A6D6.toInt(),
-    0xFF2196F3.toInt(),
-    0xFF9C27B0.toInt(),
-    0xFFEC407A.toInt(),
-    0xFF795548.toInt(),
-    0xFF607D8B.toInt(),
-)
+private val MarkingPresetColors =
+    listOf(
+        0xFFFF5252.toInt(),
+        0xFFFF9800.toInt(),
+        0xFFFFEB3B.toInt(),
+        0xFF4CAF50.toInt(),
+        0xFF26A6D6.toInt(),
+        0xFF2196F3.toInt(),
+        0xFF9C27B0.toInt(),
+        0xFFEC407A.toInt(),
+        0xFF795548.toInt(),
+        0xFF607D8B.toInt(),
+    )
 
 private const val STYLE_SOURCE_RULE = "rule"
 private const val STYLE_SOURCE_CUSTOM = "custom"

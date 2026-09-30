@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.layout.width
+import androidx.compose.material3.Slider as M3Slider
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -13,7 +14,6 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import io.legado.app.ui.theme.LegadoTheme.composeEngine
 import io.legado.app.ui.theme.ThemeResolver
-import androidx.compose.material3.Slider as M3Slider
 import top.yukonga.miuix.kmp.basic.Slider as MiuixSlider
 
 /**
@@ -34,17 +34,19 @@ fun AppVerticalSlider(
     accessibilityLabel: String? = null,
     accessibilityValue: String? = null,
 ) {
-    val sliderModifier = Modifier
-        .requiredWidth(height)
-        .requiredHeight(48.dp)
-        .graphicsLayer { rotationZ = -90f }
-        .sliderAccessibility(
-            label = accessibilityLabel,
-            value = accessibilityValue,
-        )
+    val sliderModifier =
+        Modifier
+            .requiredWidth(height)
+            .requiredHeight(48.dp)
+            .graphicsLayer { rotationZ = -90f }
+            .sliderAccessibility(
+                label = accessibilityLabel,
+                value = accessibilityValue,
+            )
 
     Box(
-        modifier = modifier
+        modifier =
+        modifier
             .width(48.dp)
             .height(height),
         contentAlignment = Alignment.Center,

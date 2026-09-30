@@ -13,10 +13,7 @@ import androidx.navigation3.scene.SceneStrategyScope
 
 /** Keeps the previous destination composed while an entry renders its own modal window. */
 class ModalOverlaySceneStrategy : SceneStrategy<NavKey> {
-
-    override fun SceneStrategyScope<NavKey>.calculateScene(
-        entries: List<NavEntry<NavKey>>,
-    ): Scene<NavKey>? {
+    override fun SceneStrategyScope<NavKey>.calculateScene(entries: List<NavEntry<NavKey>>): Scene<NavKey>? {
         val entry = entries.lastOrNull() ?: return null
         entry.metadata[MetadataKey] ?: return null
         val previousEntries = entries.dropLast(1)

@@ -61,7 +61,7 @@ fun SourceInputDialog(
     initialValue: String = "",
     historyValues: List<String> = emptyList(),
     onDismissRequest: () -> Unit,
-    onConfirm: (String) -> Unit
+    onConfirm: (String) -> Unit,
 ) {
     var text by remember(show) { mutableStateOf(initialValue) }
 
@@ -77,7 +77,7 @@ fun SourceInputDialog(
                     backgroundColor = LegadoTheme.colorScheme.onSheetContent,
                     label = hint,
                     modifier = Modifier.fillMaxWidth(),
-                    maxLines = 5
+                    maxLines = 5,
                 )
 
                 if (historyValues.isNotEmpty()) {
@@ -87,7 +87,7 @@ fun SourceInputDialog(
                         items(historyValues) { history ->
                             AssistChip(
                                 onClick = { text = history },
-                                label = { AppText(history, maxLines = 1) }
+                                label = { AppText(history, maxLines = 1) },
                             )
                         }
                     }
@@ -100,11 +100,11 @@ fun SourceInputDialog(
             if (text.isNotBlank()) onConfirm(text)
         },
         dismissText = stringResource(android.R.string.cancel),
-        onDismiss = onDismissRequest
+        onDismiss = onDismissRequest,
     )
 }
 
-//TODO: 动画
+// TODO: 动画
 @SuppressLint("ConfigurationScreenWidthHeight")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -119,7 +119,7 @@ fun <T> BatchImportDialog(
     onUpdateItem: (index: Int, data: T) -> Unit = { _, _ -> },
     topBarActions: @Composable RowScope.() -> Unit = {},
     itemTitle: (data: T) -> String,
-    itemSubtitle: (data: T) -> String? = { null }
+    itemSubtitle: (data: T) -> String? = { null },
 ) {
     AppAlertDialog(
         data = importState as? BaseImportUiState.Loading,
@@ -127,14 +127,15 @@ fun <T> BatchImportDialog(
         title = stringResource(R.string.loading),
         content = {
             Box(
-                modifier = Modifier
+                modifier =
+                Modifier
                     .fillMaxWidth()
                     .padding(vertical = 16.dp),
-                contentAlignment = Alignment.Center
+                contentAlignment = Alignment.Center,
             ) {
                 AppCircularProgressIndicator()
             }
-        }
+        },
     )
 
     AppAlertDialog(
@@ -144,7 +145,7 @@ fun <T> BatchImportDialog(
         onConfirm = { onDismissRequest() },
         content = { error ->
             AppText(error.msg)
-        }
+        },
     )
 
     val show = importState is BaseImportUiState.Success<T>
@@ -163,47 +164,53 @@ fun <T> BatchImportDialog(
     val selectedCount = currentState.items.count { it.isSelected }
     val totalCount = currentState.items.size
     val allSelected = selectedCount == totalCount
-    val sheetTitle = when {
-        isEditing -> itemTitle(editingItem.data)
-        selectedCount > 0 -> {
-            stringResource(
-                R.string.select_count,
-                selectedCount,
-                totalCount
-            )
+    val sheetTitle =
+        when {
+            isEditing -> {
+                itemTitle(editingItem.data)
+            }
+            selectedCount > 0 -> {
+                stringResource(
+                    R.string.select_count,
+                    selectedCount,
+                    totalCount,
+                )
+            }
+            else -> {
+                title
+            }
         }
-
-        else -> title
-    }
 
     AppModalBottomSheet(
         show = show,
         onDismissRequest = onDismissRequest,
         modifier = Modifier.heightIn(max = LocalConfiguration.current.screenHeightDp.dp * 0.8f),
         title = sheetTitle,
-        startAction = if (isEditing) {
+        startAction =
+        if (isEditing) {
             {
                 MediumTonalButton(
                     onClick = { editingIndex = null },
                     icon = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = stringResource(R.string.back)
+                    contentDescription = stringResource(R.string.back),
                 )
             }
         } else {
             {
                 Row(
-                    verticalAlignment = Alignment.CenterVertically
+                    verticalAlignment = Alignment.CenterVertically,
                 ) {
                     topBarActions()
                     MediumTonalButton(
                         onClick = { onToggleAll(!allSelected) },
                         icon = Icons.Default.SelectAll,
-                        contentDescription = stringResource(if (allSelected) R.string.deselect_all else R.string.select_all)
+                        contentDescription = stringResource(if (allSelected) R.string.deselect_all else R.string.select_all),
                     )
                 }
             }
         },
-        endAction = if (!isEditing && selectedCount > 0) {
+        endAction =
+        if (!isEditing && selectedCount > 0) {
             {
                 MediumTonalButton(
                     onClick = {
@@ -211,33 +218,34 @@ fun <T> BatchImportDialog(
                         onConfirm(selectedData)
                     },
                     icon = Icons.Default.FileDownload,
-                    text = stringResource(R.string.import_action)
+                    text = stringResource(R.string.import_action),
                 )
             }
         } else {
             null
-        }
+        },
     ) {
         if (isEditing) {
             BatchImportJsonEditContent(
                 data = editingItem.data,
-                version = currentState.version
+                version = currentState.version,
             ) { data ->
                 editingIndex?.let { onUpdateItem(it, data) }
             }
         } else {
             Box(
-                modifier = Modifier
+                modifier =
+                Modifier
                     .fillMaxWidth()
-                    .heightIn(max = LocalConfiguration.current.screenHeightDp.dp * 0.58f)
+                    .heightIn(max = LocalConfiguration.current.screenHeightDp.dp * 0.58f),
             ) {
                 LazyColumn(
                     contentPadding = PaddingValues(vertical = 8.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
                     itemsIndexed(
                         currentState.items,
-                        key = { _, item -> item.data.hashCode() }
+                        key = { _, item -> item.data.hashCode() },
                     ) { index, itemWrapper ->
                         ImportItemRow(
                             title = itemTitle(itemWrapper.data),
@@ -248,7 +256,7 @@ fun <T> BatchImportDialog(
                             onInfoClick = {
                                 onItemInfoClick(index)
                                 editingIndex = index
-                            }
+                            },
                         )
                     }
                 }
@@ -256,10 +264,11 @@ fun <T> BatchImportDialog(
         }
 
         Spacer(
-            modifier = Modifier
+            modifier =
+            Modifier
                 .fillMaxWidth()
                 .navigationBarsPadding()
-                .height(8.dp)
+                .height(8.dp),
         )
     }
 }
@@ -269,7 +278,7 @@ fun <T> BatchImportDialog(
 private fun <T> BatchImportJsonEditContent(
     data: T,
     version: Int,
-    onDataChange: (T) -> Unit
+    onDataChange: (T) -> Unit,
 ) {
     val jsonObject = remember(version) { data.toImportJsonObject() }
 
@@ -279,15 +288,16 @@ private fun <T> BatchImportJsonEditContent(
     }
 
     LazyColumn(
-        modifier = Modifier
+        modifier =
+        Modifier
             .fillMaxWidth()
             .heightIn(max = LocalConfiguration.current.screenHeightDp.dp * 0.58f),
         contentPadding = PaddingValues(vertical = 8.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
+        verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         items(
             items = jsonObject.entrySet().toList(),
-            key = { it.key }
+            key = { it.key },
         ) { entry ->
             BatchImportJsonField(
                 name = entry.key,
@@ -296,7 +306,7 @@ private fun <T> BatchImportJsonEditContent(
                     val updatedJsonObject = data.toImportJsonObject() ?: return@BatchImportJsonField
                     updatedJsonObject.add(entry.key, value)
                     updatedJsonObject.toImportDataLike(data)?.let(onDataChange)
-                }
+                },
             )
         }
     }
@@ -306,17 +316,17 @@ private fun <T> BatchImportJsonEditContent(
 private fun BatchImportJsonField(
     name: String,
     value: JsonElement,
-    onValueChange: (JsonElement) -> Unit
+    onValueChange: (JsonElement) -> Unit,
 ) {
     val primitive = value.takeIf { it.isJsonPrimitive }?.asJsonPrimitive
     if (primitive?.isBoolean == true) {
         GlassCard(
-            containerColor = LegadoTheme.colorScheme.onSheetContent
+            containerColor = LegadoTheme.colorScheme.onSheetContent,
         ) {
             SwitchSettingItem(
                 title = name,
                 checked = primitive.asBoolean,
-                onCheckedChange = { onValueChange(JsonPrimitive(it)) }
+                onCheckedChange = { onValueChange(JsonPrimitive(it)) },
             )
         }
 
@@ -336,7 +346,7 @@ private fun BatchImportJsonField(
         label = name,
         modifier = Modifier.fillMaxWidth(),
         singleLine = !isJsonText,
-        maxLines = if (isJsonText) 8 else 1
+        maxLines = if (isJsonText) 8 else 1,
     )
 }
 
@@ -347,7 +357,7 @@ fun ImportItemRow(
     isSelected: Boolean,
     status: ImportStatus,
     onClick: () -> Unit,
-    onInfoClick: () -> Unit
+    onInfoClick: () -> Unit,
 ) {
     SelectionItemCard(
         title = title,
@@ -358,34 +368,34 @@ fun ImportItemRow(
         containerColor = LegadoTheme.colorScheme.onSheetContent,
         trailingAction = {
             AppText(
-                text = when (status) {
+                text =
+                when (status) {
                     ImportStatus.New -> stringResource(R.string.import_status_new)
                     ImportStatus.Update -> stringResource(R.string.import_status_update)
                     ImportStatus.Existing -> stringResource(R.string.import_status_existing)
                     ImportStatus.Error -> stringResource(R.string.import_status_error)
                 },
                 style = LegadoTheme.typography.labelMedium,
-                color = when (status) {
+                color =
+                when (status) {
                     ImportStatus.New -> LegadoTheme.colorScheme.primary
                     ImportStatus.Update -> LegadoTheme.colorScheme.secondary
                     ImportStatus.Error -> LegadoTheme.colorScheme.error
                     else -> LegadoTheme.colorScheme.outline
                 },
-                modifier = Modifier.padding(end = 4.dp)
+                modifier = Modifier.padding(end = 4.dp),
             )
 
             SmallPlainButton(
                 onClick = onInfoClick,
                 icon = Icons.Default.Info,
-                contentDescription = stringResource(R.string.details)
+                contentDescription = stringResource(R.string.details),
             )
-        }
+        },
     )
 }
 
-private fun Any?.toImportJsonObject(): JsonObject? {
-    return GSON.toJsonTree(this).takeIf { it.isJsonObject }?.asJsonObject
-}
+private fun Any?.toImportJsonObject(): JsonObject? = GSON.toJsonTree(this).takeIf { it.isJsonObject }?.asJsonObject
 
 @Suppress("UNCHECKED_CAST")
 private fun <T> JsonObject.toImportDataLike(data: T): T? {
@@ -393,13 +403,11 @@ private fun <T> JsonObject.toImportDataLike(data: T): T? {
     return runCatching { GSON.fromJson(this, clazz) as T }.getOrNull()
 }
 
-private fun JsonElement.toImportEditText(): String {
-    return when {
-        this is JsonNull || isJsonNull -> ""
-        isJsonObject || isJsonArray -> GSON.toJson(this)
-        isJsonPrimitive -> asJsonPrimitive.asString
-        else -> toString()
-    }
+private fun JsonElement.toImportEditText(): String = when {
+    this is JsonNull || isJsonNull -> ""
+    isJsonObject || isJsonArray -> GSON.toJson(this)
+    isJsonPrimitive -> asJsonPrimitive.asString
+    else -> toString()
 }
 
 private fun String.toImportJsonElement(oldValue: JsonElement): JsonElement? {
@@ -425,7 +433,8 @@ private fun String.toImportJsonElement(oldValue: JsonElement): JsonElement? {
                     ?: text.toDoubleOrNull()?.let { JsonPrimitive(it) }
             }
         }
-
-        else -> JsonPrimitive(this)
+        else -> {
+            JsonPrimitive(this)
+        }
     }
 }

@@ -5,7 +5,6 @@ import org.junit.Assert.assertEquals
 import org.junit.Test
 
 class BookInfoBackdropStyleTest {
-
     @Test
     fun backgroundModesKeepTheirExpectedCoverTreatment() {
         assertEquals(
@@ -14,7 +13,7 @@ class BookInfoBackdropStyleTest {
                 blurCover = false,
                 applySeedOverlay = true,
             ),
-            resolveBookInfoBackdropStyle(ThemeConfig.BOOK_INFO_BACKGROUND_BLUR_OFF)
+            resolveBookInfoBackdropStyle(ThemeConfig.BOOK_INFO_BACKGROUND_BLUR_OFF),
         )
         assertEquals(
             BookInfoBackdropStyle(
@@ -22,7 +21,7 @@ class BookInfoBackdropStyleTest {
                 blurCover = true,
                 applySeedOverlay = true,
             ),
-            resolveBookInfoBackdropStyle(ThemeConfig.BOOK_INFO_BACKGROUND_BLUR_ON)
+            resolveBookInfoBackdropStyle(ThemeConfig.BOOK_INFO_BACKGROUND_BLUR_ON),
         )
         assertEquals(
             BookInfoBackdropStyle(
@@ -30,7 +29,7 @@ class BookInfoBackdropStyleTest {
                 blurCover = false,
                 applySeedOverlay = false,
             ),
-            resolveBookInfoBackdropStyle(ThemeConfig.BOOK_INFO_BACKGROUND_COVER_HIDDEN)
+            resolveBookInfoBackdropStyle(ThemeConfig.BOOK_INFO_BACKGROUND_COVER_HIDDEN),
         )
     }
 }

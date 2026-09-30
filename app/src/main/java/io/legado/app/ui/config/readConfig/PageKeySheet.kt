@@ -30,7 +30,7 @@ fun PageKeySheet(
     prevKeys: String,
     nextKeys: String,
     onDismissRequest: () -> Unit,
-    onConfirm: (prevKeys: String, nextKeys: String) -> Unit
+    onConfirm: (prevKeys: String, nextKeys: String) -> Unit,
 ) {
     var prevKeysDraft by remember { mutableStateOf(prevKeys) }
     var nextKeysDraft by remember { mutableStateOf(nextKeys) }
@@ -45,63 +45,68 @@ fun PageKeySheet(
     AppModalBottomSheet(
         show = show,
         onDismissRequest = onDismissRequest,
-        title = stringResource(R.string.custom_page_key)
+        title = stringResource(R.string.custom_page_key),
     ) {
         Column(
-            modifier = Modifier
+            modifier =
+            Modifier
                 .fillMaxWidth()
                 .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+            verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             AppTextField(
                 value = prevKeysDraft,
                 onValueChange = { prevKeysDraft = it },
                 label = stringResource(R.string.prev_page_key),
-                modifier = Modifier
+                modifier =
+                Modifier
                     .fillMaxWidth()
                     .onPreviewKeyEvent { event ->
                         if (event.nativeKeyEvent.action == KeyEvent.ACTION_DOWN) {
                             val keyCode = event.nativeKeyEvent.keyCode
                             if (keyCode != KeyEvent.KEYCODE_BACK && keyCode != KeyEvent.KEYCODE_DEL) {
-                                prevKeysDraft = if (prevKeysDraft.isEmpty() || prevKeysDraft.endsWith(",")) {
-                                    prevKeysDraft + keyCode.toString()
-                                } else {
-                                    "$prevKeysDraft,$keyCode"
-                                }
+                                prevKeysDraft =
+                                    if (prevKeysDraft.isEmpty() || prevKeysDraft.endsWith(",")) {
+                                        prevKeysDraft + keyCode.toString()
+                                    } else {
+                                        "$prevKeysDraft,$keyCode"
+                                    }
                                 return@onPreviewKeyEvent true
                             }
                         }
                         false
                     },
-                singleLine = true
+                singleLine = true,
             )
 
             AppTextField(
                 value = nextKeysDraft,
                 onValueChange = { nextKeysDraft = it },
                 label = stringResource(R.string.next_page_key),
-                modifier = Modifier.Companion
+                modifier =
+                Modifier.Companion
                     .fillMaxWidth()
                     .onPreviewKeyEvent { event ->
                         if (event.nativeKeyEvent.action == KeyEvent.ACTION_DOWN) {
                             val keyCode = event.nativeKeyEvent.keyCode
                             if (keyCode != KeyEvent.KEYCODE_BACK && keyCode != KeyEvent.KEYCODE_DEL) {
-                                nextKeysDraft = if (nextKeysDraft.isEmpty() || nextKeysDraft.endsWith(",")) {
-                                    nextKeysDraft + keyCode.toString()
-                                } else {
-                                    "$nextKeysDraft,$keyCode"
-                                }
+                                nextKeysDraft =
+                                    if (nextKeysDraft.isEmpty() || nextKeysDraft.endsWith(",")) {
+                                        nextKeysDraft + keyCode.toString()
+                                    } else {
+                                        "$nextKeysDraft,$keyCode"
+                                    }
                                 return@onPreviewKeyEvent true
                             }
                         }
                         false
                     },
-                singleLine = true
+                singleLine = true,
             )
 
             AppText(
                 text = stringResource(R.string.page_key_set_help),
-                style = LegadoTheme.typography.bodyMedium
+                style = LegadoTheme.typography.bodyMedium,
             )
 
             ConfirmDismissButtonsRow(
@@ -114,7 +119,7 @@ fun PageKeySheet(
                     onConfirm(prevKeysDraft, nextKeysDraft)
                 },
                 dismissText = stringResource(R.string.reset),
-                confirmText = stringResource(R.string.ok)
+                confirmText = stringResource(R.string.ok),
             )
         }
     }

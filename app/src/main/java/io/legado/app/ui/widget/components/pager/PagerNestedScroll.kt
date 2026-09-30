@@ -14,35 +14,29 @@ private class PagerFlingPassThroughConnection(
     private val delegate: NestedScrollConnection,
     private val orientation: Orientation,
 ) : NestedScrollConnection {
-
-    private fun Velocity.reverseOnOrientation(): Velocity {
-        return if (orientation == Orientation.Horizontal) {
-            copy(x = -x, y = 0f)
-        } else {
-            copy(x = 0f, y = -y)
-        }
+    private fun Velocity.reverseOnOrientation(): Velocity = if (orientation == Orientation.Horizontal) {
+        copy(x = -x, y = 0f)
+    } else {
+        copy(x = 0f, y = -y)
     }
 
     override fun onPreScroll(
         available: Offset,
         source: NestedScrollSource,
-    ): Offset {
-        return delegate.onPreScroll(available, source)
-    }
+    ): Offset = delegate.onPreScroll(available, source)
 
     override fun onPostScroll(
         consumed: Offset,
         available: Offset,
         source: NestedScrollSource,
-    ): Offset {
-        return delegate.onPostScroll(consumed, available, source)
-    }
+    ): Offset = delegate.onPostScroll(consumed, available, source)
 
-    override suspend fun onPreFling(available: Velocity): Velocity {
-        return delegate.onPreFling(available)
-    }
+    override suspend fun onPreFling(available: Velocity): Velocity = delegate.onPreFling(available)
 
-    override suspend fun onPostFling(consumed: Velocity, available: Velocity): Velocity {
+    override suspend fun onPostFling(
+        consumed: Velocity,
+        available: Velocity,
+    ): Velocity {
         delegate.onPostFling(consumed, available)
         return consumed.reverseOnOrientation()
     }
@@ -53,10 +47,11 @@ fun rememberPagerFlingPassThroughConnection(
     state: PagerState,
     orientation: Orientation,
 ): NestedScrollConnection {
-    val defaultConnection = PagerDefaults.pageNestedScrollConnection(
-        state = state,
-        orientation = orientation,
-    )
+    val defaultConnection =
+        PagerDefaults.pageNestedScrollConnection(
+            state = state,
+            orientation = orientation,
+        )
     return remember(state, orientation, defaultConnection) {
         PagerFlingPassThroughConnection(
             delegate = defaultConnection,

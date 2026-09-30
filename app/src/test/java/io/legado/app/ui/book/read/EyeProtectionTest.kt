@@ -1,13 +1,12 @@
 package io.legado.app.ui.book.read
 
+import java.time.LocalTime
 import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
-import java.time.LocalTime
 
 class EyeProtectionTest {
-
     @Test
     fun `跟随深色模式开启时护眼配置视为已启用`() {
         assertTrue(EyeProtectionUiState(enabled = false, autoNight = true).configured)
@@ -18,10 +17,26 @@ class EyeProtectionTest {
     fun `零强度不改变颜色`() {
         assertArrayEquals(
             floatArrayOf(
-                1f, 0f, 0f, 0f, 0f,
-                0f, 1f, 0f, 0f, 0f,
-                0f, 0f, 1f, 0f, 0f,
-                0f, 0f, 0f, 1f, 0f,
+                1f,
+                0f,
+                0f,
+                0f,
+                0f,
+                0f,
+                1f,
+                0f,
+                0f,
+                0f,
+                0f,
+                0f,
+                1f,
+                0f,
+                0f,
+                0f,
+                0f,
+                0f,
+                1f,
+                0f,
             ),
             EyeProtection.matrixValuesForIntensity(0),
             0f,
@@ -52,7 +67,13 @@ class EyeProtectionTest {
         start: String = "22:00",
         end: String = "07:00",
     ) = EyeProtection.isActiveAt(
-        enabled, autoNight, isDark, schedule, start, end, LocalTime.of(hour, minute)
+        enabled,
+        autoNight,
+        isDark,
+        schedule,
+        start,
+        end,
+        LocalTime.of(hour, minute),
     )
 
     @Test
@@ -86,13 +107,13 @@ class EyeProtectionTest {
 
     @Test
     fun `跨零点时段仅在窗口内生效`() {
-        assertTrue(activeAt(22))       // 起点
-        assertTrue(activeAt(23, 30))   // 午夜前
-        assertTrue(activeAt(0, 30))    // 午夜后
-        assertTrue(activeAt(6, 59))    // 终点前
-        assertFalse(activeAt(7))       // 终点（不含）
-        assertFalse(activeAt(12))      // 白天
-        assertFalse(activeAt(21, 59))  // 起点前
+        assertTrue(activeAt(22)) // 起点
+        assertTrue(activeAt(23, 30)) // 午夜前
+        assertTrue(activeAt(0, 30)) // 午夜后
+        assertTrue(activeAt(6, 59)) // 终点前
+        assertFalse(activeAt(7)) // 终点（不含）
+        assertFalse(activeAt(12)) // 白天
+        assertFalse(activeAt(21, 59)) // 起点前
     }
 
     @Test

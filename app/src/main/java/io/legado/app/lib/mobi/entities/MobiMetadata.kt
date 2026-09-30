@@ -9,5 +9,5 @@ data class MobiMetadata(
     val published: String,
     val description: String,
     val subject: List<String>,
-    val rights: String
+    val rights: String,
 )

@@ -11,9 +11,8 @@ data class ExploreKind(
     val chars: Array<String?>? = null,
     val default: String? = null,
     var viewName: String? = null,
-    val style: FlexChildStyle? = null
+    val style: FlexChildStyle? = null,
 ) {
-
     @Suppress("ConstPropertyName")
     object Type {
         const val url = "url"
@@ -23,17 +22,15 @@ data class ExploreKind(
         const val select = "select"
     }
 
-    fun style(): FlexChildStyle {
-        return style ?: FlexChildStyle.defaultStyle
-    }
+    fun style(): FlexChildStyle = style ?: FlexChildStyle.defaultStyle
 
     override fun equals(other: Any?): Boolean {
         if (other is ExploreKind) {
-            return other.title == title
-                && other.type == type
-                && other.url == url
-                && other.action == action
-                && other.default == default
+            return other.title == title &&
+                other.type == type &&
+                other.url == url &&
+                other.action == action &&
+                other.default == default
         }
         return false
     }
@@ -45,5 +42,4 @@ data class ExploreKind(
         result = 31 * result + (default?.hashCode() ?: 0)
         return result
     }
-
 }

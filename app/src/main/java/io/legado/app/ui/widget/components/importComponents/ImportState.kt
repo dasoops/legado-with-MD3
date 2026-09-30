@@ -2,18 +2,18 @@ package io.legado.app.ui.widget.components.importComponents
 
 // 单个条目的状态包装
 data class ImportItemWrapper<T>(
-    val data: T,// 具体的数据对象 (ReplaceRule, BookSource, etc.)
+    val data: T,
     val oldData: T? = null,
     val isSelected: Boolean = true,
-    val status: ImportStatus = ImportStatus.New // 用于UI显示颜色
+    val status: ImportStatus = ImportStatus.New,
 )
 
 // 导入状态枚举
 enum class ImportStatus {
-    New,      // 新增 绿
-    Update,   // 更新 黄
+    New, // 新增 绿
+    Update, // 更新 黄
     Existing, // 已有 灰
-    Error     // 错误 红
+    Error, // 错误 红
 }
 
 // 整个导入流程的 UI State
@@ -30,6 +30,6 @@ sealed interface BaseImportUiState<out T> {
         val keepOriginalGroup: Boolean = false,
         val keepOriginalEnable: Boolean = false,
         val customGroup: String? = null,
-        val isAddGroup: Boolean = false
+        val isAddGroup: Boolean = false,
     ) : BaseImportUiState<T>
 }

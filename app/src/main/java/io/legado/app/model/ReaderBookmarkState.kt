@@ -14,7 +14,6 @@ import io.legado.app.data.entities.Bookmark
  * （旧键 vs 新查询键 → 失配 → 不显示角标）。
  */
 object ReaderBookmarkState {
-
     private data class Snapshot(
         val bookName: String,
         val bookAuthor: String,
@@ -46,12 +45,17 @@ object ReaderBookmarkState {
         return positions.any { it >= startPos && it < endPos }
     }
 
-    fun update(bookName: String, bookAuthor: String, bookmarks: List<Bookmark>) {
-        snapshot = Snapshot(
-            bookName = bookName,
-            bookAuthor = bookAuthor,
-            positionsByChapter = bookmarks.groupBy({ it.chapterIndex }, { it.chapterPos }),
-        )
+    fun update(
+        bookName: String,
+        bookAuthor: String,
+        bookmarks: List<Bookmark>,
+    ) {
+        snapshot =
+            Snapshot(
+                bookName = bookName,
+                bookAuthor = bookAuthor,
+                positionsByChapter = bookmarks.groupBy({ it.chapterIndex }, { it.chapterPos }),
+            )
     }
 
     fun clear() {

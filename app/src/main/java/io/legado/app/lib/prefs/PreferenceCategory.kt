@@ -8,13 +8,13 @@ import androidx.preference.PreferenceCategory
 import androidx.preference.PreferenceViewHolder
 import io.legado.app.R
 
-//import io.legado.app.lib.theme.accentColor
-//import io.legado.app.lib.theme.backgroundColor
+// import io.legado.app.lib.theme.accentColor
+// import io.legado.app.lib.theme.backgroundColor
 
-
-class PreferenceCategory(context: Context, attrs: AttributeSet) :
-    PreferenceCategory(context, attrs) {
-
+class PreferenceCategory(
+    context: Context,
+    attrs: AttributeSet,
+) : PreferenceCategory(context, attrs) {
     init {
         isPersistent = true
         layoutResource = R.layout.view_preference_category
@@ -23,23 +23,23 @@ class PreferenceCategory(context: Context, attrs: AttributeSet) :
     override fun onBindViewHolder(holder: PreferenceViewHolder) {
         super.onBindViewHolder(holder)
         val view = holder.findViewById(R.id.preference_title)
-        if (view is TextView) {  //  && !view.isInEditMode
+        if (view is TextView) { //  && !view.isInEditMode
             view.text = title
             if (view.isInEditMode) return
-           // view.setTextColor(context.primaryColor)
+            // view.setTextColor(context.primaryColor)
             view.isVisible = !title.isNullOrEmpty()
 
 //            val da = holder.findViewById(R.id.preference_divider_above)
 //            val dividerColor = if (AppConfig.isNightTheme) {
-////                ColorUtils.withAlpha(
-////                    ColorUtils.shiftColor(context.backgroundColor, 1.05f),
-////                    0.5f
-////                )
+// //                ColorUtils.withAlpha(
+// //                    ColorUtils.shiftColor(context.backgroundColor, 1.05f),
+// //                    0.5f
+// //                )
 //            } else {
-////                ColorUtils.withAlpha(
-////                    ColorUtils.shiftColor(context.backgroundColor, 0.95f),
-////                    0.5f
-////                )
+// //                ColorUtils.withAlpha(
+// //                    ColorUtils.shiftColor(context.backgroundColor, 0.95f),
+// //                    0.5f
+// //                )
 //            }
 //            if (da is View) {
 //                //da.setBackgroundColor(dividerColor)
@@ -52,5 +52,4 @@ class PreferenceCategory(context: Context, attrs: AttributeSet) :
 //            }
         }
     }
-
 }

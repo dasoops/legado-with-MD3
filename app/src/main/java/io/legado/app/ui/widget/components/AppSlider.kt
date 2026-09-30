@@ -22,10 +22,11 @@ fun AppSlider(
     accessibilityLabel: String? = null,
     accessibilityValue: String? = null,
 ) {
-    val sliderModifier = modifier.sliderAccessibility(
-        label = accessibilityLabel,
-        value = accessibilityValue,
-    )
+    val sliderModifier =
+        modifier.sliderAccessibility(
+            label = accessibilityLabel,
+            value = accessibilityValue,
+        )
     if (ThemeResolver.isMiuixEngine(composeEngine)) {
         MiuixSlider(
             value = value,
@@ -34,7 +35,7 @@ fun AppSlider(
             enabled = enabled,
             valueRange = valueRange,
             steps = steps,
-            onValueChangeFinished = onValueChangeFinished
+            onValueChangeFinished = onValueChangeFinished,
         )
     } else {
         Slider(
@@ -44,7 +45,7 @@ fun AppSlider(
             enabled = enabled,
             valueRange = valueRange,
             steps = steps,
-            onValueChangeFinished = onValueChangeFinished
+            onValueChangeFinished = onValueChangeFinished,
         )
     }
 }

@@ -49,7 +49,8 @@ fun CardTabRow(
         tabTitles.forEachIndexed { index, title ->
             val selected = selectedTabIndex == index
             val containerColor by animateColorAsState(
-                targetValue = if (selected) {
+                targetValue =
+                if (selected) {
                     LegadoTheme.colorScheme.secondaryContainer
                 } else {
                     LegadoTheme.colorScheme.surfaceContainerLow
@@ -58,7 +59,8 @@ fun CardTabRow(
                 label = "tabColor",
             )
             val contentColor by animateColorAsState(
-                targetValue = if (selected) {
+                targetValue =
+                if (selected) {
                     LegadoTheme.colorScheme.onSecondaryContainer
                 } else {
                     LegadoTheme.colorScheme.onSurfaceVariant
@@ -73,10 +75,11 @@ fun CardTabRow(
                 modifier = Modifier.weight(1f),
                 containerColor = containerColor,
                 contentColor = contentColor,
-                cornerRadius = 12.dp
+                cornerRadius = 12.dp,
             ) {
                 Box(
-                    modifier = Modifier
+                    modifier =
+                    Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 8.dp, vertical = 8.dp),
                     contentAlignment = Alignment.Center,
@@ -87,7 +90,8 @@ fun CardTabRow(
                         fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal,
                         color = contentColor,
                         maxLines = 1,
-                        modifier = Modifier
+                        modifier =
+                        Modifier
                             .fillMaxWidth()
                             .padding(horizontal = if (tabEndContent == null) 0.dp else 20.dp),
                         textAlign = TextAlign.Center,

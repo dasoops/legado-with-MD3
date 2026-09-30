@@ -49,7 +49,7 @@ class LocalDirectoryViewModel(
     private data class SortConfig(val sort: Int, val sortOrder: Int)
 
     private val appContext = application.applicationContext
-    private val _state = MutableStateFlow(InternalState())
+    private val state = MutableStateFlow(InternalState())
     private val _effects = MutableSharedFlow<LocalDirectoryEffect>(extraBufferCapacity = 16)
     val effects = _effects.asSharedFlow()
 
@@ -60,7 +60,7 @@ class LocalDirectoryViewModel(
 
     private var initialized = false
 
-    val uiState = combine(_state, sortConfigFlow) { state, sortConfig ->
+    val uiState = combine(state, sortConfigFlow) { state, sortConfig ->
         val bookComparator = bookshelfRepository.bookComparator(sortConfig.sort, sortConfig.sortOrder)
         val searching = state.isSearch && state.searchKey.isNotBlank()
         val nodes = if (searching) {
@@ -101,7 +101,7 @@ class LocalDirectoryViewModel(
                     }
                 }
                 .collect { books ->
-                    _state.update { it.copy(books = books) }
+                    state.update { it.copy(books = books) }
                 }
         }
     }
@@ -111,16 +111,16 @@ class LocalDirectoryViewModel(
             LocalDirectoryIntent.Initialize -> initialize()
             LocalDirectoryIntent.Refresh -> rescan()
             is LocalDirectoryIntent.EnterFolder ->
-                _state.update { it.copy(path = it.path + intent.name) }
-            is LocalDirectoryIntent.NavigateToLevel -> _state.update { state ->
+                state.update { it.copy(path = it.path + intent.name) }
+            is LocalDirectoryIntent.NavigateToLevel -> state.update { state ->
                 state.copy(
-                    path = if (intent.index <= 0) emptyList() else state.path.take(intent.index)
+                    path = if (intent.index <= 0) emptyList() else state.path.take(intent.index),
                 )
             }
-            LocalDirectoryIntent.NavigateBack -> _state.update { state ->
+            LocalDirectoryIntent.NavigateBack -> state.update { state ->
                 state.copy(path = state.path.dropLast(1))
             }
-            is LocalDirectoryIntent.SearchChange -> _state.update {
+            is LocalDirectoryIntent.SearchChange -> state.update {
                 it.copy(searchKey = intent.key, isSearch = intent.isSearch)
             }
         }
@@ -131,7 +131,7 @@ class LocalDirectoryViewModel(
         initialized = true
         viewModelScope.launch(Dispatchers.IO) {
             val name = gateway.directoryName(rootUri)
-            _state.update {
+            state.update {
                 it.copy(rootName = name.orEmpty(), isUnavailable = name.isNullOrBlank())
             }
             rescan()
@@ -140,7 +140,7 @@ class LocalDirectoryViewModel(
 
     private fun rescan() {
         viewModelScope.launch(Dispatchers.IO) {
-            _state.update { it.copy(isLoading = true) }
+            state.update { it.copy(isLoading = true) }
             runCatching { gateway.importDirectoryToGroup(groupId, rootUri) }
                 .onFailure {
                     AppLog.put("扫描本地目录失败\n${it.localizedMessage}", it)
@@ -149,7 +149,7 @@ class LocalDirectoryViewModel(
                     _effects.tryEmit(LocalDirectoryEffect.ShowToast(message))
                 }
             withContext(Dispatchers.Main) {
-                _state.update { it.copy(isLoading = false) }
+                state.update { it.copy(isLoading = false) }
             }
         }
     }
@@ -182,8 +182,7 @@ class LocalDirectoryViewModel(
         }
     }
 
-    private fun DirectoryBook.matches(key: String): Boolean =
-        book.name.contains(key, true) ||
-                book.author.contains(key, true) ||
-                book.originName.contains(key, true)
+    private fun DirectoryBook.matches(key: String): Boolean = book.name.contains(key, true) ||
+        book.author.contains(key, true) ||
+        book.originName.contains(key, true)
 }

@@ -13,7 +13,6 @@ import io.legado.app.utils.LogUtils
 import org.koin.core.context.GlobalContext
 
 object AppFreezeMonitor {
-
     private const val TAG = "AppFreezeMonitor"
 
     private val otherGateway by lazy { GlobalContext.get().get<OtherSettingsGateway>() }
@@ -51,42 +50,45 @@ object AppFreezeMonitor {
         if (monitorRunnable != null) return
         var previous = SystemClock.uptimeMillis()
 
-        val runnable = object : Runnable {
-            override fun run() {
-                val current = SystemClock.uptimeMillis()
-                val elapsed = current - previous
-                val extra = elapsed - 3000
+        val runnable =
+            object : Runnable {
+                override fun run() {
+                    val current = SystemClock.uptimeMillis()
+                    val elapsed = current - previous
+                    val extra = elapsed - 3000
 
-                if (extra > 300) {
-                    LogUtils.d(TAG, "检测到应用被系统冻结，时长：$extra 毫秒")
-                }
+                    if (extra > 300) {
+                        LogUtils.d(TAG, "检测到应用被系统冻结，时长：$extra 毫秒")
+                    }
 
-                previous = current
+                    previous = current
 
-                if (otherGateway.currentSettings.recordLog) {
-                    handler.postDelayed(this, 3000)
-                } else {
-                    monitorRunnable = null
+                    if (otherGateway.currentSettings.recordLog) {
+                        handler.postDelayed(this, 3000)
+                    } else {
+                        monitorRunnable = null
+                    }
                 }
             }
-        }
         monitorRunnable = runnable
         handler.postDelayed(runnable, 3000)
     }
 
     class ScreenStatusReceiver : BroadcastReceiver() {
+        val filter =
+            IntentFilter().apply {
+                addAction(Intent.ACTION_SCREEN_ON)
+                addAction(Intent.ACTION_SCREEN_OFF)
+            }
 
-        val filter = IntentFilter().apply {
-            addAction(Intent.ACTION_SCREEN_ON)
-            addAction(Intent.ACTION_SCREEN_OFF)
-        }
-
-        override fun onReceive(context: Context?, intent: Intent?) {
+        override fun onReceive(
+            context: Context?,
+            intent: Intent?,
+        ) {
             when (intent?.action) {
                 Intent.ACTION_SCREEN_ON -> LogUtils.d(TAG, "SCREEN_ON")
                 Intent.ACTION_SCREEN_OFF -> LogUtils.d(TAG, "SCREEN_OFF")
             }
         }
     }
-
 }

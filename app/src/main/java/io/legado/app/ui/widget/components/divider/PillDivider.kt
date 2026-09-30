@@ -22,36 +22,40 @@ fun PillDivider(
     modifier: Modifier = Modifier,
     thickness: Dp = 2.dp,
     widthFraction: Float = 0.2f,
-    color: Color = LegadoTheme.colorScheme.outlineVariant.copy(alpha = 0.6f)
+    color: Color = LegadoTheme.colorScheme.outlineVariant.copy(alpha = 0.6f),
 ) {
     val isMiuix = ThemeResolver.isMiuixEngine(LegadoTheme.composeEngine)
     if (isMiuix) {
         Box(
-            modifier = modifier
+            modifier =
+            modifier
                 .fillMaxWidth()
                 .padding(vertical = 4.dp),
-            contentAlignment = Alignment.Center
+            contentAlignment = Alignment.Center,
         ) {
             Box(
-                modifier = Modifier
+                modifier =
+                Modifier
                     .fillMaxWidth(0.8f)
                     .height(thickness)
-                    .background(MiuixTheme.colorScheme.dividerLine)
+                    .background(MiuixTheme.colorScheme.dividerLine),
             )
         }
     } else {
         Box(
-            modifier = modifier
+            modifier =
+            modifier
                 .fillMaxWidth()
                 .padding(vertical = 4.dp),
-            contentAlignment = Alignment.Center
+            contentAlignment = Alignment.Center,
         ) {
             Box(
-                modifier = Modifier
+                modifier =
+                Modifier
                     .fillMaxWidth(widthFraction)
                     .height(thickness)
                     .clip(CircleShape)
-                    .background(color)
+                    .background(color),
             )
         }
     }

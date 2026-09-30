@@ -56,11 +56,11 @@ import io.legado.app.ui.widget.components.settingItem.TinyClickableSettingItem
 import io.legado.app.ui.widget.components.settingItem.TinySettingItem
 import io.legado.app.ui.widget.components.settingItem.TinySwitchSettingItem
 import io.legado.app.ui.widget.components.text.AppText
+import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.rememberReorderableLazyListState
-import kotlin.time.Duration.Companion.milliseconds
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
@@ -72,7 +72,7 @@ fun TextSelectMenuConfigSheet(
     onExpandTextMenuChange: (Boolean) -> Unit,
     onShowSelectMenuIconChange: (Boolean) -> Unit,
     onDismissRequest: () -> Unit,
-    onSaved: (List<ActionMenuItem>) -> Unit
+    onSaved: (List<ActionMenuItem>) -> Unit,
 ) {
     var draftItems by remember(show, items) {
         mutableStateOf(items)
@@ -86,13 +86,18 @@ fun TextSelectMenuConfigSheet(
     val group2Items = remember(draftItems) { draftItems.filter { it.showState == 1 } }
     val group3Items = remember(draftItems) { draftItems.filter { it.showState == 2 } }
 
-    fun moveWithinGroup(groupItems: List<ActionMenuItem>, from: Int, to: Int) {
+    fun moveWithinGroup(
+        groupItems: List<ActionMenuItem>,
+        from: Int,
+        to: Int,
+    ) {
         val fromIndex = draftItems.indexOfFirst { it.uniqueId == groupItems[from].uniqueId }
         val toIndex = draftItems.indexOfFirst { it.uniqueId == groupItems[to].uniqueId }
         if (fromIndex >= 0 && toIndex >= 0) {
-            draftItems = draftItems.toMutableList().apply {
-                add(toIndex, removeAt(fromIndex))
-            }
+            draftItems =
+                draftItems.toMutableList().apply {
+                    add(toIndex, removeAt(fromIndex))
+                }
         }
     }
 
@@ -104,23 +109,25 @@ fun TextSelectMenuConfigSheet(
             lazyListState.scrollToItem(0)
         }
     }
-    val reorderableState = rememberReorderableLazyListState(lazyListState) { from, to ->
-        val fromKey = from.key
-        val toKey = to.key
+    val reorderableState =
+        rememberReorderableLazyListState(lazyListState) { from, to ->
+            val fromKey = from.key
+            val toKey = to.key
 
-        val fromIndexInDraft = draftItems.indexOfFirst { it.uniqueId == fromKey }
-        val toIndexInDraft = draftItems.indexOfFirst { it.uniqueId == toKey }
+            val fromIndexInDraft = draftItems.indexOfFirst { it.uniqueId == fromKey }
+            val toIndexInDraft = draftItems.indexOfFirst { it.uniqueId == toKey }
 
-        if (fromIndexInDraft != -1 && toIndexInDraft != -1) {
-            val fromItem = draftItems[fromIndexInDraft]
-            val toItem = draftItems[toIndexInDraft]
-            if (fromItem.showState == toItem.showState) {
-                draftItems = draftItems.toMutableList().apply {
-                    add(toIndexInDraft, removeAt(fromIndexInDraft))
+            if (fromIndexInDraft != -1 && toIndexInDraft != -1) {
+                val fromItem = draftItems[fromIndexInDraft]
+                val toItem = draftItems[toIndexInDraft]
+                if (fromItem.showState == toItem.showState) {
+                    draftItems =
+                        draftItems.toMutableList().apply {
+                            add(toIndexInDraft, removeAt(fromIndexInDraft))
+                        }
                 }
             }
         }
-    }
 
     AppModalBottomSheet(
         show = show,
@@ -133,12 +140,13 @@ fun TextSelectMenuConfigSheet(
                     onDismissRequest()
                 },
                 icon = Icons.Default.Save,
-                contentDescription = stringResource(R.string.save)
+                contentDescription = stringResource(R.string.save),
             )
-        }
+        },
     ) {
         Column(
-            modifier = Modifier
+            modifier =
+            Modifier
                 .fillMaxWidth()
                 .fillMaxHeight(0.8f)
                 .padding(bottom = 16.dp),
@@ -146,25 +154,27 @@ fun TextSelectMenuConfigSheet(
             LazyColumn(
                 state = lazyListState,
                 verticalArrangement = Arrangement.spacedBy(4.dp),
-                modifier = Modifier
+                modifier =
+                Modifier
                     .weight(1f),
             ) {
                 item {
                     Column(
-                        modifier = Modifier
+                        modifier =
+                        Modifier
                             .animateItem()
                             .padding(top = 12.dp),
-                        verticalArrangement = Arrangement.spacedBy(4.dp)
+                        verticalArrangement = Arrangement.spacedBy(4.dp),
                     ) {
                         TinySwitchSettingItem(
                             title = stringResource(R.string.expand_text_menu),
                             checked = expandTextMenu,
-                            onCheckedChange = onExpandTextMenuChange
+                            onCheckedChange = onExpandTextMenuChange,
                         )
                         TinySwitchSettingItem(
                             title = stringResource(R.string.show_select_menu_icon),
                             checked = showSelectMenuIcon,
-                            onCheckedChange = onShowSelectMenuIconChange
+                            onCheckedChange = onShowSelectMenuIconChange,
                         )
                     }
                 }
@@ -173,7 +183,7 @@ fun TextSelectMenuConfigSheet(
                     SheetHeader(
                         isCollapsed = !group1Expanded,
                         onToggle = { group1Expanded = !group1Expanded },
-                        title = stringResource(R.string.primary_menu)
+                        title = stringResource(R.string.primary_menu),
                     )
                 }
 
@@ -185,7 +195,7 @@ fun TextSelectMenuConfigSheet(
                                 elevation = elevation,
                                 cornerRadius = 12.dp,
                                 containerColor = LegadoTheme.colorScheme.surfaceContainerLow,
-                                modifier = Modifier.animateItem()
+                                modifier = Modifier.animateItem(),
                             ) {
                                 SelectMenuItemRow(
                                     item = item,
@@ -193,33 +203,35 @@ fun TextSelectMenuConfigSheet(
                                     groupActionIcon = Icons.Default.Remove,
                                     groupActionContentDescription = stringResource(R.string.collapsed_menu),
                                     onGroupAction = {
-                                        draftItems = draftItems.map {
-                                            if (it.uniqueId == item.uniqueId) it.copy(showState = 1) else it
-                                        }
+                                        draftItems =
+                                            draftItems.map {
+                                                if (it.uniqueId == item.uniqueId) it.copy(showState = 1) else it
+                                            }
                                     },
                                     onMoveToHidden = {
-                                        draftItems = draftItems.map {
-                                            if (it.uniqueId == item.uniqueId) it.copy(showState = 2) else it
-                                        }
+                                        draftItems =
+                                            draftItems.map {
+                                                if (it.uniqueId == item.uniqueId) it.copy(showState = 2) else it
+                                            }
                                     },
-                                    dragHandleModifier = Modifier
+                                    dragHandleModifier =
+                                    Modifier
                                         .reorderAccessibility(
                                             index = index,
                                             itemCount = group1Items.size,
-                                            description = stringResource(
+                                            description =
+                                            stringResource(
                                                 R.string.a11y_reorder_named,
                                                 item.title,
                                             ),
                                         ) { from, to ->
                                             moveWithinGroup(group1Items, from, to)
-                                        }
-                                        .draggableHandle(),
+                                        }.draggableHandle(),
                                 )
                             }
                         }
                     }
                 }
-
 
                 stickyHeader(key = "group2") {
                     val subtitle = if (expandTextMenu) stringResource(R.string.merged_in_multiline) else null
@@ -227,7 +239,7 @@ fun TextSelectMenuConfigSheet(
                         isCollapsed = !group2Expanded,
                         onToggle = { group2Expanded = !group2Expanded },
                         title = stringResource(R.string.collapsed_menu),
-                        subtitle = subtitle
+                        subtitle = subtitle,
                     )
                 }
 
@@ -239,7 +251,7 @@ fun TextSelectMenuConfigSheet(
                                 elevation = elevation,
                                 cornerRadius = 12.dp,
                                 containerColor = LegadoTheme.colorScheme.surfaceContainerLow,
-                                modifier = Modifier.animateItem()
+                                modifier = Modifier.animateItem(),
                             ) {
                                 SelectMenuItemRow(
                                     item = item,
@@ -247,41 +259,44 @@ fun TextSelectMenuConfigSheet(
                                     groupActionIcon = Icons.Default.Add,
                                     groupActionContentDescription = stringResource(R.string.primary_menu),
                                     onGroupAction = {
-                                        draftItems = draftItems.map {
-                                            if (it.uniqueId == item.uniqueId) it.copy(showState = 0) else it
-                                        }
+                                        draftItems =
+                                            draftItems.map {
+                                                if (it.uniqueId == item.uniqueId) it.copy(showState = 0) else it
+                                            }
                                     },
                                     onMoveToHidden = {
-                                        draftItems = draftItems.map {
-                                            if (it.uniqueId == item.uniqueId) it.copy(showState = 2) else it
-                                        }
+                                        draftItems =
+                                            draftItems.map {
+                                                if (it.uniqueId == item.uniqueId) it.copy(showState = 2) else it
+                                            }
                                     },
-                                    dragHandleModifier = Modifier
+                                    dragHandleModifier =
+                                    Modifier
                                         .reorderAccessibility(
                                             index = index,
                                             itemCount = group2Items.size,
-                                            description = stringResource(
+                                            description =
+                                            stringResource(
                                                 R.string.a11y_reorder_named,
                                                 item.title,
                                             ),
                                         ) { from, to ->
                                             moveWithinGroup(group2Items, from, to)
-                                        }
-                                        .draggableHandle(),
+                                        }.draggableHandle(),
                                 )
                             }
                         }
                     }
                 }
 
-
-                item (key="group_3"){
+                item(key = "group_3") {
                     Box(
-                        modifier = Modifier
+                        modifier =
+                        Modifier
                             .fillMaxWidth()
                             .animateItem()
                             .background(LegadoTheme.colorScheme.surfaceContainer)
-                            .padding(top = 12.dp)
+                            .padding(top = 12.dp),
                     ) {
                         TinySettingItem(
                             title = stringResource(R.string.hidden_items),
@@ -304,9 +319,10 @@ fun TextSelectMenuConfigSheet(
                                     items = group3Items,
                                     showIcon = showSelectMenuIcon,
                                     onRestore = { item ->
-                                        draftItems = draftItems.map {
-                                            if (it.uniqueId == item.uniqueId) it.copy(showState = 0) else it
-                                        }
+                                        draftItems =
+                                            draftItems.map {
+                                                if (it.uniqueId == item.uniqueId) it.copy(showState = 0) else it
+                                            }
                                         coroutineScope.launch {
                                             delay(200.milliseconds)
                                             val targetIndex = lazyListState.layoutInfo.totalItemsCount - 1
@@ -314,9 +330,9 @@ fun TextSelectMenuConfigSheet(
                                                 lazyListState.scrollToItem(targetIndex)
                                             }
                                         }
-                                    }
+                                    },
                                 )
-                            }
+                            },
                         )
                     }
                 }
@@ -336,7 +352,8 @@ private fun SelectMenuItemRow(
     dragHandleModifier: Modifier = Modifier,
 ) {
     ConfigListEntryRow(
-        entry = ConfigListEntry(
+        entry =
+        ConfigListEntry(
             id = item.uniqueId,
             enabled = item.showState != 2,
             label = item.title,
@@ -375,14 +392,15 @@ private fun HiddenItemsFlowView(
     items: List<ActionMenuItem>,
     showIcon: Boolean,
     modifier: Modifier = Modifier,
-    onRestore: (ActionMenuItem) -> Unit
+    onRestore: (ActionMenuItem) -> Unit,
 ) {
     FlowRow(
-        modifier = modifier
+        modifier =
+        modifier
             .fillMaxWidth()
             .padding(vertical = 8.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
+        verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         items.forEach { item ->
             NormalCard(
@@ -392,14 +410,15 @@ private fun HiddenItemsFlowView(
             ) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.padding(start = 8.dp, end = 4.dp, top = 4.dp, bottom = 4.dp)
+                    modifier = Modifier.padding(start = 8.dp, end = 4.dp, top = 4.dp, bottom = 4.dp),
                 ) {
                     if (showIcon && item.iconDrawable != null) {
                         AsyncImage(
                             model = item.iconDrawable,
                             contentDescription = item.title,
-                            modifier = Modifier
-                                .size(16.dp)
+                            modifier =
+                            Modifier
+                                .size(16.dp),
                         )
                         Spacer(modifier = Modifier.width(4.dp))
                     }
@@ -413,7 +432,7 @@ private fun HiddenItemsFlowView(
                         imageVector = Icons.Default.Add,
                         contentDescription = null,
                         tint = LegadoTheme.colorScheme.primary,
-                        modifier = Modifier.size(16.dp)
+                        modifier = Modifier.size(16.dp),
                     )
                 }
             }
@@ -427,18 +446,19 @@ private fun LazyItemScope.SheetHeader(
     title: String,
     subtitle: String? = null,
     isCollapsed: Boolean,
-    onToggle: () -> Unit
+    onToggle: () -> Unit,
 ) {
     val rotation by animateFloatAsState(
         targetValue = if (!isCollapsed) 180f else 0f,
-        label = "sheetHeaderArrow"
+        label = "sheetHeaderArrow",
     )
     Box(
-        modifier = Modifier
+        modifier =
+        Modifier
             .fillMaxWidth()
             .animateItem()
             .background(LegadoTheme.colorScheme.surfaceContainer)
-            .padding(top = 12.dp)
+            .padding(top = 12.dp),
     ) {
         TinyClickableSettingItem(
             title = title,
@@ -449,12 +469,13 @@ private fun LazyItemScope.SheetHeader(
                     imageVector = Icons.Default.KeyboardArrowDown,
                     contentDescription = null,
                     tint = LegadoTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier
+                    modifier =
+                    Modifier
                         .size(20.dp)
                         .rotate(rotation),
                 )
             },
-            onClick = onToggle
+            onClick = onToggle,
         )
     }
 }

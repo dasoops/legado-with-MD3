@@ -109,10 +109,11 @@ internal fun SystemMenuPage(
     val pagerState = rememberPagerState(pageCount = { 3 })
     var selectedTab by remember { mutableIntStateOf(0) }
     var clickScrollCount by remember { mutableIntStateOf(0) }
-    val childPagerNestedScrollConnection = rememberPagerFlingPassThroughConnection(
-        state = pagerState,
-        orientation = Orientation.Horizontal,
-    )
+    val childPagerNestedScrollConnection =
+        rememberPagerFlingPassThroughConnection(
+            state = pagerState,
+            orientation = Orientation.Horizontal,
+        )
 
     val pageHeights = remember { mutableStateMapOf<Int, Int>() }
     val animatedHeight by rememberPagerAnimatedHeight(pagerState, pageHeights)
@@ -134,11 +135,12 @@ internal fun SystemMenuPage(
     Column(
         modifier = modifier.fillMaxWidth(),
     ) {
-        val tabTitles = listOf(
-            stringResource(R.string.read_config_menu_system),
-            stringResource(R.string.read_menu_bottom_bar_layout),
-            stringResource(R.string.title_bar_layout),
-        )
+        val tabTitles =
+            listOf(
+                stringResource(R.string.read_config_menu_system),
+                stringResource(R.string.read_menu_bottom_bar_layout),
+                stringResource(R.string.title_bar_layout),
+            )
         CardTabRow(
             tabTitles = tabTitles,
             selectedTabIndex = selectedTab,
@@ -149,7 +151,7 @@ internal fun SystemMenuPage(
                     try {
                         pagerState.animateScrollToPage(
                             page = index,
-                            animationSpec = tween(durationMillis = 300, easing = FastOutSlowInEasing)
+                            animationSpec = tween(durationMillis = 300, easing = FastOutSlowInEasing),
                         )
                     } finally {
                         clickScrollCount = (clickScrollCount - 1).coerceAtLeast(0)
@@ -163,43 +165,49 @@ internal fun SystemMenuPage(
             state = pagerState,
             verticalAlignment = Alignment.Top,
             pageNestedScrollConnection = childPagerNestedScrollConnection,
-            modifier = Modifier
+            modifier =
+            Modifier
                 .weight(1f, fill = false)
                 .clipToBounds()
                 .pagerHeight(animatedHeight),
         ) { page ->
             Box(
-                modifier = Modifier
+                modifier =
+                Modifier
                     .fillMaxWidth()
                     .onSizeChanged { size ->
                         pageHeights[page] = size.height
-                    }
+                    },
             ) {
                 when (page) {
-                    0 -> GlobalMenuTab(
-                        preferences = preferences,
-                        styleConfig = styleConfig,
-                        onIntent = onIntent,
-                        onShowColorPicker = { id, initial ->
-                            colorPickerId = id
-                            colorPickerInitial = initial
-                            showColorPicker = true
-                        },
-                    )
-
-                    1 -> BottomBarTab(
-                        preferences = preferences,
-                        customIcons = customIcons,
-                        onIntent = onIntent,
-                        onShowIconSheet = { showIconSheet = true },
-                        onShowColorPicker = { id, initial ->
-                            colorPickerId = id
-                            colorPickerInitial = initial
-                            showColorPicker = true
-                        },
-                    )
-
-                    2 -> TopBarTab(preferences = preferences, onIntent = onIntent)
+                    0 -> {
+                        GlobalMenuTab(
+                            preferences = preferences,
+                            styleConfig = styleConfig,
+                            onIntent = onIntent,
+                            onShowColorPicker = { id, initial ->
+                                colorPickerId = id
+                                colorPickerInitial = initial
+                                showColorPicker = true
+                            },
+                        )
+                    }
+                    1 -> {
+                        BottomBarTab(
+                            preferences = preferences,
+                            customIcons = customIcons,
+                            onIntent = onIntent,
+                            onShowIconSheet = { showIconSheet = true },
+                            onShowColorPicker = { id, initial ->
+                                colorPickerId = id
+                                colorPickerInitial = initial
+                                showColorPicker = true
+                            },
+                        )
+                    }
+                    2 -> {
+                        TopBarTab(preferences = preferences, onIntent = onIntent)
+                    }
                 }
             }
         }
@@ -247,32 +255,40 @@ private fun GlobalMenuTab(
     onIntent: (ReadBookIntent) -> Unit,
     onShowColorPicker: (Int, Int) -> Unit,
 ) {
-    val customIconCount = remember(preferences.titleBarCustomIcons) {
-        countCustomIcons(preferences.titleBarCustomIcons)
-    }
+    val customIconCount =
+        remember(preferences.titleBarCustomIcons) {
+            countCustomIcons(preferences.titleBarCustomIcons)
+        }
     val bottomMode = preferences.readBarStyle
     val colorMode = preferences.readMenuColorMode.coerceIn(0, 1)
-    val dayMenuBgColor = preferences.readMenuBgColor
-        .takeIf { it != 0 }
-        ?: styleConfig.menuBgColorDay
-    val nightMenuBgColor = preferences.readMenuBgColorNight
-        .takeIf { it != 0 }
-        ?: styleConfig.menuBgColorNight
-    val dayMenuAccentColor = preferences.readMenuAccentColor
-        .takeIf { it != 0 }
-        ?: styleConfig.menuAccentColorDay
-    val nightMenuAccentColor = preferences.readMenuAccentColorNight
-        .takeIf { it != 0 }
-        ?: styleConfig.menuAccentColorNight
-    val dayMenuContainerColor = preferences.readMenuContainerColor
-        .takeIf { it != 0 }
-        ?: dayMenuBgColor
-    val nightMenuContainerColor = preferences.readMenuContainerColorNight
-        .takeIf { it != 0 }
-        ?: nightMenuBgColor
+    val dayMenuBgColor =
+        preferences.readMenuBgColor
+            .takeIf { it != 0 }
+            ?: styleConfig.menuBgColorDay
+    val nightMenuBgColor =
+        preferences.readMenuBgColorNight
+            .takeIf { it != 0 }
+            ?: styleConfig.menuBgColorNight
+    val dayMenuAccentColor =
+        preferences.readMenuAccentColor
+            .takeIf { it != 0 }
+            ?: styleConfig.menuAccentColorDay
+    val nightMenuAccentColor =
+        preferences.readMenuAccentColorNight
+            .takeIf { it != 0 }
+            ?: styleConfig.menuAccentColorNight
+    val dayMenuContainerColor =
+        preferences.readMenuContainerColor
+            .takeIf { it != 0 }
+            ?: dayMenuBgColor
+    val nightMenuContainerColor =
+        preferences.readMenuContainerColorNight
+            .takeIf { it != 0 }
+            ?: nightMenuBgColor
 
     Column(
-        modifier = Modifier
+        modifier =
+        Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp)
             .verticalScroll(rememberScrollState()),
@@ -280,7 +296,8 @@ private fun GlobalMenuTab(
         TinyDropdownSettingItem(
             title = stringResource(R.string.tool_bar_style),
             selectedValue = bottomMode.toString(),
-            displayEntries = arrayOf(
+            displayEntries =
+            arrayOf(
                 stringResource(R.string.flow_sys),
                 stringResource(R.string.follow_read_background),
                 stringResource(R.string.custom),
@@ -313,7 +330,8 @@ private fun GlobalMenuTab(
                 TinyDropdownSettingItem(
                     title = stringResource(R.string.read_menu_color_source),
                     selectedValue = colorMode.toString(),
-                    displayEntries = arrayOf(
+                    displayEntries =
+                    arrayOf(
                         stringResource(R.string.seed_color),
                         stringResource(R.string.custom_theme_colors),
                     ),
@@ -388,7 +406,6 @@ private fun GlobalMenuTab(
                 }
             }
         }
-
 
         SectionTitle(stringResource(R.string.show_brightness_view))
 
@@ -480,9 +497,12 @@ private fun GlobalMenuTab(
             onClearColor = { isNight ->
                 onIntent(
                     ReadBookIntent.UpdateConfig(
-                        if (isNight) ConfigUpdate.MenuTextColorNight(0)
-                        else ConfigUpdate.MenuTextColor(0)
-                    )
+                        if (isNight) {
+                            ConfigUpdate.MenuTextColorNight(0)
+                        } else {
+                            ConfigUpdate.MenuTextColor(0)
+                        },
+                    ),
                 )
             },
             onClickColor = { isNight ->
@@ -520,7 +540,8 @@ private fun GlobalMenuTab(
             Column {
                 TinyClickableSettingItem(
                     title = stringResource(R.string.title_bar_icons),
-                    description = if (customIconCount == 0) {
+                    description =
+                    if (customIconCount == 0) {
                         stringResource(R.string.read_menu_custom_icons_none)
                     } else {
                         stringResource(R.string.read_menu_custom_icons_count, customIconCount)
@@ -532,7 +553,8 @@ private fun GlobalMenuTab(
                 TinyDropdownSettingItem(
                     title = stringResource(R.string.title_bar_icon_position),
                     selectedValue = preferences.titleBarIconPosition.toString(),
-                    displayEntries = arrayOf(
+                    displayEntries =
+                    arrayOf(
                         stringResource(R.string.position_top_start),
                         stringResource(R.string.position_top_end),
                         stringResource(R.string.position_bottom_start),
@@ -542,8 +564,8 @@ private fun GlobalMenuTab(
                     onValueChange = {
                         onIntent(
                             ReadBookIntent.UpdateConfig(
-                                ConfigUpdate.TitleBarIconPosition(it.toInt())
-                            )
+                                ConfigUpdate.TitleBarIconPosition(it.toInt()),
+                            ),
                         )
                     },
                 )
@@ -554,9 +576,9 @@ private fun GlobalMenuTab(
                         onIntent(
                             ReadBookIntent.UpdateConfig(
                                 ConfigUpdate.MenuFloatingIconLiquidGlass(
-                                    it
-                                )
-                            )
+                                    it,
+                                ),
+                            ),
                         )
                     },
                 )
@@ -576,17 +598,19 @@ private fun BottomBarTab(
     onShowColorPicker: (Int, Int) -> Unit,
 ) {
     val floatingBottomBar = preferences.readMenuFloatingBottomBar
-    val bottomBarBlurMode = if (
-        !floatingBottomBar &&
-        preferences.readMenuBottomBarBlurMode == ReadMenuBlurMode.LiquidGlass
-    ) {
-        ReadMenuBlurMode.Haze
-    } else {
-        preferences.readMenuBottomBarBlurMode
-    }
+    val bottomBarBlurMode =
+        if (
+            !floatingBottomBar &&
+            preferences.readMenuBottomBarBlurMode == ReadMenuBlurMode.LIQUID_GLASS
+        ) {
+            ReadMenuBlurMode.HAZE
+        } else {
+            preferences.readMenuBottomBarBlurMode
+        }
 
     Column(
-        modifier = Modifier
+        modifier =
+        Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp)
             .verticalScroll(rememberScrollState()),
@@ -616,7 +640,8 @@ private fun BottomBarTab(
         TinyDropdownSettingItem(
             title = stringResource(R.string.read_menu_icon_container_style),
             selectedValue = preferences.readMenuIconStyle.toString(),
-            displayEntries = arrayOf(
+            displayEntries =
+            arrayOf(
                 stringResource(R.string.read_menu_icon_style_plain),
                 stringResource(R.string.read_menu_icon_style_tonal),
                 stringResource(R.string.read_menu_icon_style_outlined),
@@ -634,8 +659,8 @@ private fun BottomBarTab(
             onValueChange = {
                 onIntent(
                     ReadBookIntent.UpdateConfig(
-                        ConfigUpdate.MenuIconItemsPerRow(it.toInt())
-                    )
+                        ConfigUpdate.MenuIconItemsPerRow(it.toInt()),
+                    ),
                 )
             },
         )
@@ -647,14 +672,15 @@ private fun BottomBarTab(
             onValueChange = {
                 onIntent(
                     ReadBookIntent.UpdateConfig(
-                        ConfigUpdate.MenuIconRowCount(it.toInt())
-                    )
+                        ConfigUpdate.MenuIconRowCount(it.toInt()),
+                    ),
                 )
             },
         )
         TinyClickableSettingItem(
             title = stringResource(R.string.config_btn),
-            description = if (customIcons.isEmpty()) {
+            description =
+            if (customIcons.isEmpty()) {
                 stringResource(R.string.read_menu_custom_icons_none)
             } else {
                 stringResource(R.string.read_menu_custom_icons_count, customIcons.size)
@@ -672,8 +698,8 @@ private fun BottomBarTab(
             onValueChange = {
                 onIntent(
                     ReadBookIntent.UpdateConfig(
-                        ConfigUpdate.MenuBottomCornerRadius(it.toInt())
-                    )
+                        ConfigUpdate.MenuBottomCornerRadius(it.toInt()),
+                    ),
                 )
             },
         )
@@ -686,14 +712,14 @@ private fun BottomBarTab(
         )
         TinySwitchSettingItem(
             title = stringResource(R.string.read_menu_bar_blur),
-            checked = bottomBarBlurMode != ReadMenuBlurMode.None,
+            checked = bottomBarBlurMode != ReadMenuBlurMode.NONE,
             onCheckedChange = {
                 onIntent(
                     ReadBookIntent.UpdateConfig(
                         ConfigUpdate.MenuBottomBarBlurMode(
-                            if (it) ReadMenuBlurMode.Haze else ReadMenuBlurMode.None
-                        )
-                    )
+                            if (it) ReadMenuBlurMode.HAZE else ReadMenuBlurMode.NONE,
+                        ),
+                    ),
                 )
             },
         )
@@ -701,19 +727,21 @@ private fun BottomBarTab(
             TinyDropdownSettingItem(
                 title = stringResource(R.string.read_menu_bar_blur_style),
                 selectedValue = preferences.readMenuBottomBarBlurStyle.toString(),
-                displayEntries = arrayOf(
+                displayEntries =
+                arrayOf(
                     stringResource(R.string.read_menu_blur_style_solid),
                     stringResource(R.string.read_menu_blur_style_progressive),
                 ),
-                entryValues = arrayOf(
-                    ReadMenuBlurStyle.Solid.toString(),
-                    ReadMenuBlurStyle.Progressive.toString(),
+                entryValues =
+                arrayOf(
+                    ReadMenuBlurStyle.SOLID.toString(),
+                    ReadMenuBlurStyle.PROGRESSIVE.toString(),
                 ),
                 onValueChange = {
                     onIntent(
                         ReadBookIntent.UpdateConfig(
-                            ConfigUpdate.MenuBottomBarBlurStyle(it.toInt())
-                        )
+                            ConfigUpdate.MenuBottomBarBlurStyle(it.toInt()),
+                        ),
                     )
                 },
             )
@@ -722,20 +750,20 @@ private fun BottomBarTab(
             TinySwitchSettingItem(
                 title = stringResource(R.string.read_menu_bar_liquid_glass),
                 description = stringResource(R.string.read_menu_bar_liquid_glass_summary),
-                checked = preferences.readMenuBottomBarBlurMode == ReadMenuBlurMode.LiquidGlass,
+                checked = preferences.readMenuBottomBarBlurMode == ReadMenuBlurMode.LIQUID_GLASS,
                 onCheckedChange = {
                     onIntent(
                         ReadBookIntent.UpdateConfig(
                             ConfigUpdate.MenuBottomBarBlurMode(
                                 if (it) {
-                                    ReadMenuBlurMode.LiquidGlass
-                                } else if (bottomBarBlurMode != ReadMenuBlurMode.None) {
-                                    ReadMenuBlurMode.Haze
+                                    ReadMenuBlurMode.LIQUID_GLASS
+                                } else if (bottomBarBlurMode != ReadMenuBlurMode.NONE) {
+                                    ReadMenuBlurMode.HAZE
                                 } else {
-                                    ReadMenuBlurMode.None
-                                }
-                            )
-                        )
+                                    ReadMenuBlurMode.NONE
+                                },
+                            ),
+                        ),
                     )
                 },
             )
@@ -758,13 +786,14 @@ private fun TopBarTab(
     preferences: ReadPreferences,
     onIntent: (ReadBookIntent) -> Unit,
 ) {
-    val topBarBlurEnabled = preferences.readMenuTopBarBlurMode == ReadMenuBlurMode.Haze
+    val topBarBlurEnabled = preferences.readMenuTopBarBlurMode == ReadMenuBlurMode.HAZE
 
     val titleBarModeEntries = stringArrayResource(R.array.title_bar_mode)
     val titleBarModeValues = stringArrayResource(R.array.title_bar_mode_value)
 
     Column(
-        modifier = Modifier
+        modifier =
+        Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp)
             .verticalScroll(rememberScrollState()),
@@ -776,9 +805,9 @@ private fun TopBarTab(
                 onIntent(
                     ReadBookIntent.UpdateConfig(
                         ConfigUpdate.MenuTopBarTitleCapsule(
-                            it
-                        )
-                    )
+                            it,
+                        ),
+                    ),
                 )
             },
         )
@@ -803,7 +832,8 @@ private fun TopBarTab(
         TinyDropdownSettingItem(
             title = stringResource(R.string.read_menu_icon_container_style),
             selectedValue = preferences.titleBarIconStyle.toString(),
-            displayEntries = arrayOf(
+            displayEntries =
+            arrayOf(
                 stringResource(R.string.read_menu_icon_style_plain),
                 stringResource(R.string.read_menu_icon_style_tonal),
                 stringResource(R.string.read_menu_icon_style_outlined),
@@ -820,23 +850,25 @@ private fun TopBarTab(
                 onIntent(
                     ReadBookIntent.UpdateConfig(
                         ConfigUpdate.MenuTopBarBlurSelection(
-                            mode = if (it) ReadMenuBlurMode.Haze else ReadMenuBlurMode.None,
+                            mode = if (it) ReadMenuBlurMode.HAZE else ReadMenuBlurMode.NONE,
                             style = preferences.readMenuTopBarBlurStyle,
-                        )
-                    )
+                        ),
+                    ),
                 )
             },
         )
         TinyDropdownSettingItem(
             title = stringResource(R.string.read_menu_bar_blur_style),
             selectedValue = preferences.readMenuTopBarBlurStyle.toString(),
-            displayEntries = arrayOf(
+            displayEntries =
+            arrayOf(
                 stringResource(R.string.read_menu_blur_style_solid),
                 stringResource(R.string.read_menu_blur_style_progressive),
             ),
-            entryValues = arrayOf(
-                ReadMenuBlurStyle.Solid.toString(),
-                ReadMenuBlurStyle.Progressive.toString(),
+            entryValues =
+            arrayOf(
+                ReadMenuBlurStyle.SOLID.toString(),
+                ReadMenuBlurStyle.PROGRESSIVE.toString(),
             ),
             onValueChange = {
                 onIntent(
@@ -844,8 +876,8 @@ private fun TopBarTab(
                         ConfigUpdate.MenuTopBarBlurSelection(
                             mode = preferences.readMenuTopBarBlurMode,
                             style = it.toInt(),
-                        )
-                    )
+                        ),
+                    ),
                 )
             },
         )
@@ -857,9 +889,9 @@ private fun TopBarTab(
                 onIntent(
                     ReadBookIntent.UpdateConfig(
                         ConfigUpdate.MenuTopBarLiquidGlassButtons(
-                            it
-                        )
-                    )
+                            it,
+                        ),
+                    ),
                 )
             },
         )
@@ -870,8 +902,8 @@ private fun TopBarTab(
             onCheckedChange = {
                 onIntent(
                     ReadBookIntent.UpdateConfig(
-                        ConfigUpdate.MenuTopBarMergeButtons(it)
-                    )
+                        ConfigUpdate.MenuTopBarMergeButtons(it),
+                    ),
                 )
             },
         )
@@ -880,7 +912,8 @@ private fun TopBarTab(
 
 private fun countCustomIcons(value: String): Int {
     if (value.isBlank()) return 0
-    return GSON.fromJsonObject<Map<String, String>>(value)
+    return GSON
+        .fromJsonObject<Map<String, String>>(value)
         .getOrNull()
         ?.count { it.value.isNotBlank() }
         ?: 0
@@ -907,41 +940,43 @@ internal fun readMenuButtonInfos(context: Context): List<ReadMenuButtonInfo> = l
     ReadMenuButtonInfo(
         "replace",
         Icons.Default.FindReplace,
-        context.getString(R.string.text_processing)
+        context.getString(R.string.text_processing),
     ),
     ReadMenuButtonInfo(
         "replace_badge",
         Icons.Default.FindReplace,
-        context.getString(R.string.text_processing)
+        context.getString(R.string.text_processing),
     ),
     ReadMenuButtonInfo(
         "refresh_current",
         Icons.Default.Refresh,
-        context.getString(R.string.menu_refresh_dur)
+        context.getString(R.string.menu_refresh_dur),
     ),
     ReadMenuButtonInfo(
         "more_actions",
         Icons.Default.MoreVert,
-        context.getString(R.string.more_actions)
+        context.getString(R.string.more_actions),
     ),
 )
 
 // ========== Color Swatch ==========
 
 @Composable
-private fun TinyColorSwatch(
-    color: Int,
-) {
+private fun TinyColorSwatch(color: Int) {
     val swatchColor = if (color != 0) Color(color) else LegadoTheme.colorScheme.onSurfaceVariant
     val borderColor = LegadoTheme.colorScheme.outline
     Box(
-        modifier = Modifier
+        modifier =
+        Modifier
             .size(28.dp)
             .clip(CircleShape)
             .background(swatchColor)
             .then(
-                if (color == 0) Modifier.border(1.5.dp, borderColor, CircleShape)
-                else Modifier
+                if (color == 0) {
+                    Modifier.border(1.5.dp, borderColor, CircleShape)
+                } else {
+                    Modifier
+                },
             ),
         contentAlignment = Alignment.Center,
     ) {

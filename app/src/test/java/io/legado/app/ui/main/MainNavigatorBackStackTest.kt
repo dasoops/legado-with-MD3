@@ -5,7 +5,6 @@ import org.junit.Assert.assertEquals
 import org.junit.Test
 
 class MainNavigatorBackStackTest {
-
     @Test
     fun `reader with reset to home replaces stale route with home parent`() {
         val bookInfo = MainRouteBookInfo("Book", "Author", "book-url")

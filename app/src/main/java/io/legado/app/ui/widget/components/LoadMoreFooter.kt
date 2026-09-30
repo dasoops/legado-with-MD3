@@ -78,47 +78,45 @@ fun LoadMoreFooter(
                     style = LegadoTheme.typography.bodyMedium,
                 )
             }
-        }
+        },
     )
 
     Box(
-        modifier = Modifier
+        modifier =
+        Modifier
             .fillMaxWidth()
             .adaptiveHorizontalPadding(vertical = 8.dp),
-        contentAlignment = Alignment.Center
+        contentAlignment = Alignment.Center,
     ) {
-
         AnimatedContent(
             targetState = Triple(isLoading, errorMsg, isEnd),
-            label = "LoadMoreFooter"
+            label = "LoadMoreFooter",
         ) { (loading, error, end) ->
 
             when {
                 error != null -> {
-
                     GlassCard(
                         onClick = { showFullError = error },
                         containerColor = LegadoTheme.colorScheme.errorContainer.copy(alpha = 0.6f),
                     ) {
                         Column(
-                            modifier = Modifier.fillMaxWidth()
+                            modifier = Modifier.fillMaxWidth(),
                         ) {
-
                             // 信息区域
                             Row(
-                                modifier = Modifier
+                                modifier =
+                                Modifier
                                     .fillMaxWidth()
                                     .padding(
-                                        all = 16.dp
+                                        all = 16.dp,
                                     ),
                                 verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                                horizontalArrangement = Arrangement.spacedBy(12.dp),
                             ) {
-
                                 AppIcon(
                                     imageVector = Icons.Outlined.Info,
                                     contentDescription = null,
-                                    tint = LegadoTheme.colorScheme.error
+                                    tint = LegadoTheme.colorScheme.error,
                                 )
 
                                 AppText(
@@ -132,56 +130,52 @@ fun LoadMoreFooter(
                             }
 
                             HorizontalDivider(
-                                color = LegadoTheme.colorScheme.outlineVariant.copy(alpha = 0.3f)
+                                color = LegadoTheme.colorScheme.outlineVariant.copy(alpha = 0.3f),
                             )
 
                             // 操作区域
                             Box(
-                                modifier = Modifier
+                                modifier =
+                                Modifier
                                     .fillMaxWidth()
                                     .clickable(onClick = onRetry)
                                     .padding(vertical = 10.dp),
-                                contentAlignment = Alignment.Center
+                                contentAlignment = Alignment.Center,
                             ) {
-
                                 Row(
                                     horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                    verticalAlignment = Alignment.CenterVertically
+                                    verticalAlignment = Alignment.CenterVertically,
                                 ) {
-
                                     AppIcon(
                                         imageVector = Icons.Default.Refresh,
                                         contentDescription = null,
-                                        tint = LegadoTheme.colorScheme.error
+                                        tint = LegadoTheme.colorScheme.error,
                                     )
 
                                     AppText(
                                         text = stringResource(R.string.reload),
                                         color = LegadoTheme.colorScheme.error,
-                                        style = LegadoTheme.typography.labelMedium
+                                        style = LegadoTheme.typography.labelMedium,
                                     )
                                 }
                             }
                         }
                     }
                 }
-
                 loading -> {
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                        verticalArrangement = Arrangement.spacedBy(12.dp),
                     ) {
-
                         AppContainedLoadingIndicator()
 
                         AppText(
                             text = stringResource(R.string.loading),
                             color = LegadoTheme.colorScheme.outline,
-                            style = LegadoTheme.typography.bodySmall
+                            style = LegadoTheme.typography.bodySmall,
                         )
                     }
                 }
-
                 end -> {
                     if (onLoadMore != null) {
                         GlassCard(
@@ -190,16 +184,17 @@ fun LoadMoreFooter(
                         ) {
                             Column(modifier = Modifier.fillMaxWidth()) {
                                 Row(
-                                    modifier = Modifier
+                                    modifier =
+                                    Modifier
                                         .fillMaxWidth()
                                         .padding(all = 16.dp),
                                     verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                                    horizontalArrangement = Arrangement.spacedBy(12.dp),
                                 ) {
                                     AppIcon(
                                         imageVector = Icons.Outlined.Info,
                                         contentDescription = null,
-                                        tint = LegadoTheme.colorScheme.onSurface
+                                        tint = LegadoTheme.colorScheme.onSurface,
                                     )
                                     AppText(
                                         text = stringResource(R.string.no_more_data),
@@ -212,29 +207,30 @@ fun LoadMoreFooter(
                                 }
 
                                 HorizontalDivider(
-                                    color = LegadoTheme.colorScheme.outlineVariant.copy(alpha = 0.3f)
+                                    color = LegadoTheme.colorScheme.outlineVariant.copy(alpha = 0.3f),
                                 )
 
                                 Box(
-                                    modifier = Modifier
+                                    modifier =
+                                    Modifier
                                         .fillMaxWidth()
                                         .clickable(onClick = onLoadMore)
                                         .padding(vertical = 10.dp),
-                                    contentAlignment = Alignment.Center
+                                    contentAlignment = Alignment.Center,
                                 ) {
                                     Row(
                                         horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                        verticalAlignment = Alignment.CenterVertically
+                                        verticalAlignment = Alignment.CenterVertically,
                                     ) {
                                         AppIcon(
                                             imageVector = Icons.Default.Refresh,
                                             contentDescription = null,
-                                            tint = LegadoTheme.colorScheme.primary
+                                            tint = LegadoTheme.colorScheme.primary,
                                         )
                                         AppText(
                                             text = stringResource(R.string.load_next_page),
                                             color = LegadoTheme.colorScheme.primary,
-                                            style = LegadoTheme.typography.labelMedium
+                                            style = LegadoTheme.typography.labelMedium,
                                         )
                                     }
                                 }
@@ -247,16 +243,17 @@ fun LoadMoreFooter(
                         ) {
                             Column(modifier = Modifier.fillMaxWidth()) {
                                 Row(
-                                    modifier = Modifier
+                                    modifier =
+                                    Modifier
                                         .fillMaxWidth()
                                         .padding(all = 16.dp),
                                     verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                                    horizontalArrangement = Arrangement.spacedBy(12.dp),
                                 ) {
                                     AppIcon(
                                         imageVector = Icons.Outlined.Info,
                                         contentDescription = null,
-                                        tint = LegadoTheme.colorScheme.onSurface
+                                        tint = LegadoTheme.colorScheme.onSurface,
                                     )
                                     AppText(
                                         text = stringResource(R.string.no_more_data),
@@ -271,32 +268,32 @@ fun LoadMoreFooter(
                         }
                     }
                 }
-
                 else -> {
                     if (!autoLoad) {
                         GlassCard(
-                            modifier = Modifier
+                            modifier =
+                            Modifier
                                 .fillMaxWidth(),
                             containerColor = LegadoTheme.colorScheme.surfaceContainer,
-                            onClick = onRetry
+                            onClick = onRetry,
                         ) {
                             Column(
-                                modifier = Modifier.fillMaxWidth()
+                                modifier = Modifier.fillMaxWidth(),
                             ) {
                                 Row(
-                                    modifier = Modifier
+                                    modifier =
+                                    Modifier
                                         .fillMaxWidth()
                                         .padding(
-                                            all = 16.dp
+                                            all = 16.dp,
                                         ),
                                     verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                                    horizontalArrangement = Arrangement.spacedBy(12.dp),
                                 ) {
-
                                     AppIcon(
                                         imageVector = Icons.Outlined.Info,
                                         contentDescription = null,
-                                        tint = LegadoTheme.colorScheme.onSurface
+                                        tint = LegadoTheme.colorScheme.onSurface,
                                     )
 
                                     AppText(

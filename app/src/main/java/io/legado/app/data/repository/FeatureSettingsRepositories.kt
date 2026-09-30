@@ -30,9 +30,10 @@ class AppShellSettingsRepository : AppShellSettingsGateway {
     override val currentSettings: AppShellSettings
         get() = AppConfigStore.preferences.toAppShellSettings()
 
-    override val settings: Flow<AppShellSettings> = AppConfigStore.preferencesFlow
-        .map(Preferences::toAppShellSettings)
-        .distinctUntilChanged()
+    override val settings: Flow<AppShellSettings> =
+        AppConfigStore.preferencesFlow
+            .map(Preferences::toAppShellSettings)
+            .distinctUntilChanged()
 
     override suspend fun update(transform: (AppShellSettings) -> AppShellSettings) {
         AppConfigStore.atomicUpdate(
@@ -47,9 +48,10 @@ class ThemeSettingsRepository : ThemeSettingsGateway {
     override val currentSettings: ThemeSettings
         get() = AppConfigStore.preferences.toThemeSettings()
 
-    override val settings: Flow<ThemeSettings> = AppConfigStore.preferencesFlow
-        .map(Preferences::toThemeSettings)
-        .distinctUntilChanged()
+    override val settings: Flow<ThemeSettings> =
+        AppConfigStore.preferencesFlow
+            .map(Preferences::toThemeSettings)
+            .distinctUntilChanged()
 
     override suspend fun update(transform: (ThemeSettings) -> ThemeSettings) {
         AppConfigStore.atomicUpdate(
@@ -64,9 +66,10 @@ class DownloadCacheSettingsRepository : DownloadCacheSettingsGateway {
     override val currentSettings: DownloadCacheSettings
         get() = AppConfigStore.preferences.toDownloadCacheSettings()
 
-    override val settings: Flow<DownloadCacheSettings> = AppConfigStore.preferencesFlow
-        .map { it.toDownloadCacheSettings() }
-        .distinctUntilChanged()
+    override val settings: Flow<DownloadCacheSettings> =
+        AppConfigStore.preferencesFlow
+            .map { it.toDownloadCacheSettings() }
+            .distinctUntilChanged()
 
     override suspend fun update(transform: (DownloadCacheSettings) -> DownloadCacheSettings) {
         AppConfigStore.atomicUpdateAndAwait(
@@ -81,9 +84,10 @@ class CoverSettingsRepository : CoverSettingsGateway {
     override val currentSettings: CoverSettings
         get() = AppConfigStore.preferences.toCoverSettings()
 
-    override val settings: Flow<CoverSettings> = AppConfigStore.preferencesFlow
-        .map { it.toCoverSettings() }
-        .distinctUntilChanged()
+    override val settings: Flow<CoverSettings> =
+        AppConfigStore.preferencesFlow
+            .map { it.toCoverSettings() }
+            .distinctUntilChanged()
 
     override suspend fun update(transform: (CoverSettings) -> CoverSettings) {
         AppConfigStore.atomicUpdate(
@@ -98,9 +102,10 @@ class LabSettingsRepository : LabSettingsGateway {
     override val currentSettings: LabSettings
         get() = AppConfigStore.preferences.toLabSettings()
 
-    override val settings: Flow<LabSettings> = AppConfigStore.preferencesFlow
-        .map { it.toLabSettings() }
-        .distinctUntilChanged()
+    override val settings: Flow<LabSettings> =
+        AppConfigStore.preferencesFlow
+            .map { it.toLabSettings() }
+            .distinctUntilChanged()
 
     override suspend fun update(transform: (LabSettings) -> LabSettings) {
         AppConfigStore.atomicUpdate(
@@ -115,9 +120,10 @@ class BackupSettingsRepository : BackupSettingsGateway {
     override val currentSettings: BackupSettings
         get() = AppConfigStore.preferences.toBackupSettings()
 
-    override val settings: Flow<BackupSettings> = AppConfigStore.preferencesFlow
-        .map { it.toBackupSettings() }
-        .distinctUntilChanged()
+    override val settings: Flow<BackupSettings> =
+        AppConfigStore.preferencesFlow
+            .map { it.toBackupSettings() }
+            .distinctUntilChanged()
 
     override suspend fun update(transform: (BackupSettings) -> BackupSettings) {
         AppConfigStore.atomicUpdate(
@@ -128,16 +134,16 @@ class BackupSettingsRepository : BackupSettingsGateway {
     }
 }
 
-internal fun Preferences.toDownloadCacheSettings(): DownloadCacheSettings =
-    DownloadCacheSettings(
-        bitmapCacheSize = compatDsInt(PreferKey.bitmapCacheSize) ?: 50,
-        imageRetainNum = compatDsInt(PreferKey.imageRetainNum) ?: 0,
-        preDownloadNum = compatDsInt(PreferKey.preDownloadNum) ?: 10,
-        threadCount = compatDsInt(PreferKey.threadCount) ?: 16,
-        userAgent = compatDsString(PreferKey.userAgent).orEmpty().ifBlank {
-            AppConst.DEFAULT_USER_AGENT
-        },
-    )
+internal fun Preferences.toDownloadCacheSettings(): DownloadCacheSettings = DownloadCacheSettings(
+    bitmapCacheSize = compatDsInt(PreferKey.bitmapCacheSize) ?: 50,
+    imageRetainNum = compatDsInt(PreferKey.imageRetainNum) ?: 0,
+    preDownloadNum = compatDsInt(PreferKey.preDownloadNum) ?: 10,
+    threadCount = compatDsInt(PreferKey.threadCount) ?: 16,
+    userAgent =
+    compatDsString(PreferKey.userAgent).orEmpty().ifBlank {
+        AppConst.DEFAULT_USER_AGENT
+    },
+)
 
 internal fun DownloadCacheSettings.toPrefMap(): Map<String, Any?> = mapOf(
     PreferKey.bitmapCacheSize to bitmapCacheSize,
@@ -230,11 +236,12 @@ internal fun Preferences.toAppShellSettings(): AppShellSettings = AppShellSettin
     showBottomView = compatDsBoolean(PreferKey.showBottomView) ?: true,
     useFloatingBottomBar = compatDsBoolean(PreferKey.useFloatingBottomBar) ?: false,
     useFloatingBottomBarLiquidGlass =
-        compatDsBoolean(PreferKey.useFloatingBottomBarLiquidGlass) ?: false,
+    compatDsBoolean(PreferKey.useFloatingBottomBarLiquidGlass) ?: false,
     tabletInterface = compatDsString(PreferKey.tabletInterface) ?: "auto",
     labelVisibilityMode = compatDsString(PreferKey.labelVisibilityMode) ?: "auto",
     defaultHomePage = compatDsString(PreferKey.defaultHomePage) ?: "home",
-    mainNavigationOrder = compatDsString(PreferKey.mainNavigationOrder)
+    mainNavigationOrder =
+    compatDsString(PreferKey.mainNavigationOrder)
         ?: "home,bookshelf,my",
     navExtended = compatDsBoolean(PreferKey.navExtended) ?: false,
     navIconHome = compatDsString(PreferKey.navIconHome) ?: "",
@@ -305,14 +312,14 @@ internal fun Preferences.toThemeSettings(): ThemeSettings = ThemeSettings(
     labelContainerColorNight = compatDsInt(PreferKey.labelContainerColorNight) ?: 0,
     containerOpacity = compatDsInt(PreferKey.containerOpacity) ?: 100,
     overrideBaseCardCornerRadius =
-        compatDsBoolean(PreferKey.overrideBaseCardCornerRadius) ?: false,
+    compatDsBoolean(PreferKey.overrideBaseCardCornerRadius) ?: false,
     baseCardCornerRadius = compatDsFloat(PreferKey.baseCardCornerRadius) ?: 16f,
     overrideBaseCardBorder = compatDsBoolean(PreferKey.overrideBaseCardBorder) ?: false,
     baseCardBorderWidth = compatDsFloat(PreferKey.baseCardBorderWidth) ?: 1f,
     baseCardBorderColor = compatDsInt(PreferKey.baseCardBorderColor) ?: 0,
     baseCardBorderColorNight = compatDsInt(PreferKey.baseCardBorderColorNight) ?: 0,
     disableSplicedColumnGroupCornerRadius =
-        compatDsBoolean(PreferKey.disableSplicedColumnGroupCornerRadius) ?: false,
+    compatDsBoolean(PreferKey.disableSplicedColumnGroupCornerRadius) ?: false,
     topBarOpacity = compatDsInt(PreferKey.topBarOpacity) ?: 100,
     bottomBarOpacity = compatDsInt(PreferKey.bottomBarOpacity) ?: 100,
     enableBlur = compatDsBoolean(PreferKey.enableBlur) ?: false,
@@ -327,9 +334,9 @@ internal fun Preferences.toThemeSettings(): ThemeSettings = ThemeSettings(
     mergeTopBarActions = compatDsBoolean(PreferKey.mergeTopBarActions) ?: false,
     bookInfoFollowCoverColor = compatDsBoolean(PreferKey.bookInfoFollowCoverColor) ?: true,
     bookInfoNetworkCoverBackground =
-        compatDsString(PreferKey.bookInfoNetworkCoverBackground) ?: "on",
+    compatDsString(PreferKey.bookInfoNetworkCoverBackground) ?: "on",
     bookInfoDefaultCoverBackground =
-        compatDsString(PreferKey.bookInfoDefaultCoverBackground) ?: "on",
+    compatDsString(PreferKey.bookInfoDefaultCoverBackground) ?: "on",
     bookInfoInputColor = compatDsInt(PreferKey.bookInfoInputColor) ?: 0,
     backgroundImageLight = compatDsString(PreferKey.bgImage),
     backgroundImageDark = compatDsString(PreferKey.bgImageN),
@@ -352,8 +359,9 @@ internal fun Preferences.toThemeSettings(): ThemeSettings = ThemeSettings(
     eyeProtectionSchedule = compatDsBoolean(PreferKey.eyeProtectionSchedule) ?: false,
     eyeProtectionStartTime = compatDsString(PreferKey.eyeProtectionStartTime) ?: "22:00",
     eyeProtectionEndTime = compatDsString(PreferKey.eyeProtectionEndTime) ?: "07:00",
-    showRefactorTip = compatDsBoolean(
-        io.legado.app.data.local.preferences.LocalPreferencesKeys.SHOW_THEME_REFACTOR_TIP.name
+    showRefactorTip =
+    compatDsBoolean(
+        io.legado.app.data.local.preferences.LocalPreferencesKeys.SHOW_THEME_REFACTOR_TIP.name,
     ) ?: true,
     enableCustomTagColors = compatDsBoolean(PreferKey.enableCustomTagColors) ?: false,
     customTagColorsJson = compatDsString(PreferKey.customTagColors),
@@ -487,9 +495,10 @@ class OtherSettingsRepository : OtherSettingsGateway {
     override val currentSettings: OtherSettings
         get() = AppConfigStore.preferences.toOtherSettings()
 
-    override val settings: Flow<OtherSettings> = AppConfigStore.preferencesFlow
-        .map { it.toOtherSettings() }
-        .distinctUntilChanged()
+    override val settings: Flow<OtherSettings> =
+        AppConfigStore.preferencesFlow
+            .map { it.toOtherSettings() }
+            .distinctUntilChanged()
 
     override suspend fun update(transform: (OtherSettings) -> OtherSettings) {
         AppConfigStore.atomicUpdateAndAwait(

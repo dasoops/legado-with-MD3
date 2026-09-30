@@ -4,7 +4,6 @@ import org.junit.Assert.assertEquals
 import org.junit.Test
 
 class GroupCoverFileExtensionTest {
-
     @Test
     fun `uses the image MIME subtype instead of forcing png`() {
         assertEquals("jpg", groupCoverFileExtension("image/jpeg"))

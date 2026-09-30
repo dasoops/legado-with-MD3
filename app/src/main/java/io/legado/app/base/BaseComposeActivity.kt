@@ -49,9 +49,8 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme
 abstract class BaseComposeActivity(
     private val toolBarTheme: Theme = Theme.Auto,
     private val transparent: Boolean = false,
-    private val imageBg: Boolean = true
+    private val imageBg: Boolean = true,
 ) : AppCompatActivity() {
-
     private val appLocaleGateway by inject<AppLocaleGateway>()
     private val appUiConfigurationGateway by inject<AppUiConfigurationGateway>()
     private val themeSettingsGateway by inject<ThemeSettingsGateway>()
@@ -82,21 +81,22 @@ abstract class BaseComposeActivity(
                 SyncWindowBackground()
                 val themeSettings by themeSettingsGateway.settings
                     .collectAsStateWithLifecycle(initialThemeSettings)
-                val eyeProtectionActive = rememberEyeProtectionActive(
-                    enabled = themeSettings.eyeProtectionEnabled,
-                    autoNight = themeSettings.eyeProtectionAutoNight,
-                    isDark = uiConfiguration.isDarkTheme,
-                    schedule = themeSettings.eyeProtectionSchedule,
-                    startTime = themeSettings.eyeProtectionStartTime,
-                    endTime = themeSettings.eyeProtectionEndTime,
-                )
+                val eyeProtectionActive =
+                    rememberEyeProtectionActive(
+                        enabled = themeSettings.eyeProtectionEnabled,
+                        autoNight = themeSettings.eyeProtectionAutoNight,
+                        isDark = uiConfiguration.isDarkTheme,
+                        schedule = themeSettings.eyeProtectionSchedule,
+                        startTime = themeSettings.eyeProtectionStartTime,
+                        endTime = themeSettings.eyeProtectionEndTime,
+                    )
                 Box(
                     Modifier
                         .fillMaxSize()
                         .eyeProtectionColorFilter(
                             enabled = eyeProtectionActive,
                             intensity = themeSettings.colorTemperature,
-                        )
+                        ),
                 ) {
                     Content()
                 }
@@ -141,7 +141,7 @@ abstract class BaseComposeActivity(
 
         setStatusBarColorAuto(
             themeColor(com.google.android.material.R.attr.colorSurface),
-            true
+            true,
         )
 
         toggleSystemBar(appUiConfigurationGateway.currentConfiguration.appShell.showStatusBar)
@@ -157,10 +157,11 @@ abstract class BaseComposeActivity(
                 hasWindowBgImage = false
                 lastWindowBgColor = null
                 window.setBackgroundDrawable(
-                    themeColor(com.google.android.material.R.attr.colorSurface).toDrawable()
+                    themeColor(com.google.android.material.R.attr.colorSurface).toDrawable(),
                 )
             }
-        } catch (_: Exception) {}
+        } catch (_: Exception) {
+        }
     }
 
     protected var hasWindowBgImage = false
@@ -174,11 +175,12 @@ abstract class BaseComposeActivity(
     @Composable
     private fun SyncWindowBackground() {
         if (transparent) return
-        val backgroundColor = if (ThemeResolver.isMiuixEngine(LegadoTheme.composeEngine)) {
-            MiuixTheme.colorScheme.surface
-        } else {
-            LegadoTheme.colorScheme.background
-        }
+        val backgroundColor =
+            if (ThemeResolver.isMiuixEngine(LegadoTheme.composeEngine)) {
+                MiuixTheme.colorScheme.surface
+            } else {
+                LegadoTheme.colorScheme.background
+            }
         SideEffect {
             if (!hasWindowBgImage) {
                 val colorInt = backgroundColor.toArgb()
@@ -221,7 +223,7 @@ abstract class BaseComposeActivity(
     override fun onDestroy() {
         traceConfiguration(
             "onDestroy changingConfigurations=0x${changingConfigurations.toString(16)} " +
-                "isChangingConfigurations=$isChangingConfigurations isFinishing=$isFinishing"
+                "isChangingConfigurations=$isChangingConfigurations isFinishing=$isFinishing",
         )
         super.onDestroy()
     }
@@ -233,5 +235,4 @@ abstract class BaseComposeActivity(
             "${javaClass.simpleName}@${System.identityHashCode(this)} $event",
         )
     }
-
 }

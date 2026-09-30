@@ -1,8 +1,8 @@
 package io.legado.app.utils
 
 import io.legado.app.model.analyzeRule.AnalyzeUrl
-import org.jsoup.Jsoup
 import java.net.URL
+import org.jsoup.Jsoup
 
 @Suppress("RegExpRedundantEscape")
 object HtmlFormatter {
@@ -10,26 +10,30 @@ object HtmlFormatter {
     private val espRegex = "(&ensp;|&emsp;)".toRegex()
     private val noPrintRegex = "(&thinsp;|&zwnj;|&zwj;|\u2009|\u200C|\u200D)".toRegex()
     private val wrapHtmlRegex = "</?(?:div|p|br|hr|h\\d|article|dd|dl)[^>]*>".toRegex()
-    private val commentRegex = "<!--[^>]*-->".toRegex() //注释
+    private val commentRegex = "<!--[^>]*-->".toRegex() // 注释
     private val notImgHtmlRegex = "</?(?!img)[a-zA-Z]+(?=[ >])[^<>]*>".toRegex()
     private val otherHtmlRegex = "</?[a-zA-Z]+(?=[ >])[^<>]*>".toRegex()
 
     // 字数统计专用：正文里携带的图片 Base64/SVG 源码不能计入字数。
     // 容器型媒体标签整体连内容一起删除(base64、SVG 路径数据都藏在标签内部)
     private val mediaBlockRegex = Regex(
-        "(?is)<(script|style|svg|math|video|audio|canvas|picture|iframe|object|embed|figure|template)\\b[^>]*>.*?</\\1\\s*>"
+        "(?is)<(script|style|svg|math|video|audio|canvas|picture|iframe|object|embed|figure|template)\\b[^>]*>.*?</\\1\\s*>",
     )
+
     // 未闭合的 <svg>(后面没有 </svg>): 删到结尾, 避免剩余矢量数据被当成正文
     private val unclosedSvgRegex = Regex("(?is)<svg\\b[^>]*>[\\s\\S]*$")
+
     // 自闭合/空元素标签(img 的 src 里就是整段 data:image;base64)
     private val voidMediaRegex = Regex(
-        "(?is)<(?:img|br|hr|input|source|track|area|col|link|meta)\\b[^>]*/?>"
+        "(?is)<(?:img|br|hr|input|source|track|area|col|link|meta)\\b[^>]*/?>",
     )
+
     // 散落在属性之外的 data: URI 与 XML 声明/doctype
     private val dataUriRegex = Regex(
-        "(?i)['\"(]?data:[a-z0-9.+-]+/[a-z0-9.+,-]+(?:;[a-z0-9.+-]+)?(?:;base64)?[^\\s'\"<>)]*['\")]?"
+        "(?i)['\"(]?data:[a-z0-9.+-]+/[a-z0-9.+,-]+(?:;[a-z0-9.+-]+)?(?:;base64)?[^\\s'\"<>)]*['\")]?",
     )
     private val xmlDeclRegex = Regex("(?is)<\\?[\\s\\S]*?\\?>|<!doctype[^>]*>")
+
     // Markdown 图片/链接语法 ![alt](url)
     private val markdownMediaRegex = Regex("!\\[[^\\]]*\\]\\([^)]*\\)")
 
@@ -39,39 +43,44 @@ object HtmlFormatter {
 
     private val formatImagePattern = Regex(
         "<img[^>]*\\ssrc\\s*=\\s*['\"]([^'\"{>]*\\{(?:[^{}]|\\{[^}>]+\\})+\\})['\"][^>]*>|<img[^>]*\\s(?:data-src|src)\\s*=\\s*['\"]([^'\">]+)['\"][^>]*>|<img[^>]*\\sdata-[^=>]*=\\s*['\"]([^'\">]*)['\"][^>]*>",
-        RegexOption.IGNORE_CASE
+        RegexOption.IGNORE_CASE,
     )
     private val indent1Regex = "\\s*\\n+\\s*".toRegex()
     private val indent2Regex = "^[\\n\\s]+".toRegex()
     private val lastRegex = "[\\n\\s]+$".toRegex()
     private const val PARAGRAPH_INDENT = "　　"
 
-    //半角空白由 indent 正则处理, 这里去掉全角及特殊宽度空格
+    // 半角空白由 indent 正则处理, 这里去掉全角及特殊宽度空格
     private val blankChars = charArrayOf(
-        ' ', '\t', '\u00a0', '\u2002', '\u2003', '\u2009', '\u3000'
+        ' ',
+        '\t',
+        '\u00a0',
+        '\u2002',
+        '\u2003',
+        '\u2009',
+        '\u3000',
     )
 
-    //简介里重复书籍信息的字段, 整行丢弃
-    private const val metaLabels =
+    // 简介里重复书籍信息的字段, 整行丢弃
+    private const val META_LABELS =
         "书名|名称|书籍名称|作者|译者|分类|类别|类型|题材|状态|连载状态|字数|标签|关键字|来源|首发|" +
             "更新时间|最后更新|最近更新|最新章节|最新更新"
 
-    //简介自身的标题, 只去标题保留正文
-    private const val introLabels = "内容简介|作品简介|小说简介|内容介绍|简介|文案|摘要"
+    // 简介自身的标题, 只去标题保留正文
+    private const val INTRO_LABELS = "内容简介|作品简介|小说简介|内容介绍|简介|文案|摘要"
     private val metaLineRegex =
-        "^(?:[【\\[(（](?:$metaLabels)[】\\])）]|(?:$metaLabels)\\s*[：:])\\s*.{0,40}$".toRegex()
+        "^(?:[【\\[(（](?:$META_LABELS)[】\\])）]|(?:$META_LABELS)\\s*[：:])\\s*.{0,40}$".toRegex()
     private val introLabelRegex =
-        "^(?:[【\\[(（](?:$introLabels)[】\\])）]|(?:$introLabels)\\s*[：:])\\s*".toRegex()
+        "^(?:[【\\[(（](?:$INTRO_LABELS)[】\\])）]|(?:$INTRO_LABELS)\\s*[：:])\\s*".toRegex()
 
-    //聚合类书源常把服务/登录状态排版进简介, 统一是"图标 + 短标签：值"的整行, 标签词无法穷举
-    private const val lineIcons = "(?:\\p{So}[\\uFE0F\\u200D\\s\\u200E]*)+"
-    private val iconMetaLineRegex = "^$lineIcons[^：:\\s]{1,8}\\s*[：:]\\s*.{0,40}$".toRegex()
+    // 聚合类书源常把服务/登录状态排版进简介, 统一是"图标 + 短标签：值"的整行, 标签词无法穷举
+    private const val LINE_ICONS = "(?:\\p{So}[\\uFE0F\\u200D\\s\\u200E]*)+"
+    private val iconMetaLineRegex = "^$LINE_ICONS[^：:\\s]{1,8}\\s*[：:]\\s*.{0,40}$".toRegex()
 
-    //只有符号没有文字的分隔行/占位行
+    // 只有符号没有文字的分隔行/占位行
     private val decorationLineRegex = "^[^\\p{L}\\p{N}]+$".toRegex()
 
-    fun format(html: String?, otherRegex: Regex = otherHtmlRegex): String =
-        format(html, otherRegex, "　　")
+    fun format(html: String?, otherRegex: Regex = otherHtmlRegex): String = format(html, otherRegex, "　　")
 
     private fun format(html: String?, otherRegex: Regex, paragraphIndent: String): String {
         html ?: return ""
@@ -126,39 +135,36 @@ object HtmlFormatter {
      * 即"📡 当前服务：xxx"这类图标开头的整行, 以及纯符号的分隔行。
      * 详情页不做这一步 —— 那里是书源和用户交互的地方(登录提示等), 状态面板有用。
      */
-    fun formatIntroText(html: String?): String {
-        return formatDisplayText(html)
-            .lineSequence()
-            .map { it.trim(*blankChars) }
-            .filterNot {
-                it.isEmpty() || decorationLineRegex.matches(it) || iconMetaLineRegex.matches(it)
-            }
-            .joinToString("\n") { PARAGRAPH_INDENT + it }
-    }
+    fun formatIntroText(html: String?): String = formatDisplayText(html)
+        .lineSequence()
+        .map { it.trim(*blankChars) }
+        .filterNot {
+            it.isEmpty() || decorationLineRegex.matches(it) || iconMetaLineRegex.matches(it)
+        }
+        .joinToString("\n") { PARAGRAPH_INDENT + it }
 
     /**
      * 与 [formatIntroText] 同样清洗, 但压成单行摘要。
      * 列表/卡片只显示一两行并 ellipsis, 保留换行会让首段之后的内容被直接截断。
      */
-    fun formatSummaryText(html: String?): String {
-        return formatIntroText(html)
-            .lineSequence()
-            .map { it.trim(*blankChars) }
-            .filterNot { it.isEmpty() }
-            .joinToString(" ")
-    }
+    fun formatSummaryText(html: String?): String = formatIntroText(html)
+        .lineSequence()
+        .map { it.trim(*blankChars) }
+        .filterNot { it.isEmpty() }
+        .joinToString(" ")
 
     fun formatKeepImg(html: String?, redirectUrl: URL? = null): String {
         html ?: return ""
         val keepImgHtml = format(html, notImgHtmlRegex)
 
-        //正则的“|”处于顶端而不处于（）中时，具有类似||的熔断效果，故以此机制简化原来的代码
+        // 正则的“|”处于顶端而不处于（）中时，具有类似||的熔断效果，故以此机制简化原来的代码
         var appendPos = 0
         val sb = StringBuilder()
         for (m in formatImagePattern.findAll(keepImgHtml)) {
             var param = ""
             sb.append(
-                keepImgHtml.substring(appendPos, m.range.first), "<img src=\"${
+                keepImgHtml.substring(appendPos, m.range.first),
+                "<img src=\"${
                     NetworkUtils.getAbsoluteURL(
                         redirectUrl,
                         m.groups[1]?.value?.let {
@@ -166,19 +172,24 @@ object HtmlFormatter {
                             if (urlMatch != null) {
                                 param = ',' + it.substring(urlMatch.range.last + 1)
                                 it.substring(0, urlMatch.range.first)
-                            } else it
-                        } ?: m.groups[2]?.value ?: m.groups[3]!!.value
-                    ) + param
-                }\">"
+                            } else {
+                                it
+                            }
+                        } ?: m.groups[2]?.value ?: m.groups[3]!!.value,
+                    ) +
+                        param
+                }\">",
             )
             appendPos = m.range.last + 1
         }
-        if (appendPos < keepImgHtml.length) sb.append(
-            keepImgHtml.substring(
-                appendPos,
-                keepImgHtml.length
+        if (appendPos < keepImgHtml.length) {
+            sb.append(
+                keepImgHtml.substring(
+                    appendPos,
+                    keepImgHtml.length,
+                ),
             )
-        )
+        }
         return sb.toString()
     }
 

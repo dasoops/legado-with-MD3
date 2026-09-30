@@ -14,12 +14,10 @@ import android.widget.FrameLayout
 import android.widget.FrameLayout.LayoutParams
 import androidx.appcompat.widget.AppCompatTextView
 import io.legado.app.R
-//import io.legado.app.lib.theme.accentColor
 import io.legado.app.utils.ColorUtils
 import io.legado.app.utils.getCompatColor
 import io.legado.app.utils.invisible
 import io.legado.app.utils.visible
-
 
 /**
  * Created by milad heydari on 5/6/2016.
@@ -27,7 +25,7 @@ import io.legado.app.utils.visible
 @Suppress("MemberVisibilityCanBePrivate", "unused")
 class BadgeView @JvmOverloads constructor(
     context: Context,
-    attrs: AttributeSet? = null
+    attrs: AttributeSet? = null,
 ) : AppCompatTextView(context, attrs) {
 
     var isHideOnNull = true
@@ -67,7 +65,7 @@ class BadgeView @JvmOverloads constructor(
                 params.leftMargin,
                 params.topMargin,
                 params.rightMargin,
-                params.bottomMargin
+                params.bottomMargin,
             )
         }
 
@@ -83,18 +81,18 @@ class BadgeView @JvmOverloads constructor(
             val layoutParams = LayoutParams(
                 ViewGroup.LayoutParams.WRAP_CONTENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT,
-                Gravity.CENTER
+                Gravity.CENTER,
             )
             setLayoutParams(layoutParams)
         }
 
-        //setTypeface(Typeface.DEFAULT_BOLD);
+        // setTypeface(Typeface.DEFAULT_BOLD);
         setTextSize(TypedValue.COMPLEX_UNIT_SP, 11f)
         setPadding(dip2Px(5f), dip2Px(1f), dip2Px(5f), dip2Px(1f))
         radius = radios.toFloat()
 
         // set default background
-        //setBackground(radius, context.accentColor)
+        // setBackground(radius, context.accentColor)
 
         gravity = Gravity.CENTER
 
@@ -130,7 +128,7 @@ class BadgeView @JvmOverloads constructor(
                 Color.BLACK
             } else {
                 Color.WHITE
-            }
+            },
         )
     }
 
@@ -152,7 +150,7 @@ class BadgeView @JvmOverloads constructor(
 
     fun setHighlight(highlight: Boolean) {
         if (highlight) {
-            //setBackgroundColor(context.accentColor)
+            // setBackgroundColor(context.accentColor)
         } else {
             setBackgroundColor(context.getCompatColor(R.color.darker_gray))
         }
@@ -166,7 +164,7 @@ class BadgeView @JvmOverloads constructor(
         leftDipMargin: Int,
         topDipMargin: Int,
         rightDipMargin: Int,
-        bottomDipMargin: Int
+        bottomDipMargin: Int,
     ) {
         val params = layoutParams as LayoutParams
         params.leftMargin = dip2Px(leftDipMargin.toFloat())
@@ -204,7 +202,6 @@ class BadgeView @JvmOverloads constructor(
 
         if (target.parent is FrameLayout) {
             (target.parent as FrameLayout).addView(this)
-
         } else if (target.parent is ViewGroup) {
             // use a new FrameLayout container for adding badge
             val parentContainer = target.parent as ViewGroup
@@ -216,7 +213,8 @@ class BadgeView @JvmOverloads constructor(
 
             badgeContainer.layoutParams = parentLayoutParams
             target.layoutParams = ViewGroup.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT,
             )
 
             parentContainer.addView(badgeContainer, groupIndex, parentLayoutParams)
@@ -224,13 +222,10 @@ class BadgeView @JvmOverloads constructor(
 
             badgeContainer.addView(this)
         }
-
     }
 
     /**
      * converts dip to px
      */
-    private fun dip2Px(dip: Float): Int {
-        return (dip * context.resources.displayMetrics.density + 0.5f).toInt()
-    }
+    private fun dip2Px(dip: Float): Int = (dip * context.resources.displayMetrics.density + 0.5f).toInt()
 }

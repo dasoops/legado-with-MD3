@@ -64,23 +64,25 @@ fun SettingItem(
     semanticToggleState: Boolean? = null,
     expanded: Boolean = false,
     onExpandChange: ((Boolean) -> Unit)? = null,
-    expandContent: (@Composable ColumnScope.() -> Unit)? = null
+    expandContent: (@Composable ColumnScope.() -> Unit)? = null,
 ) {
-
     var showMenu by remember { mutableStateOf(false) }
     val isExpandable = expandContent != null && onExpandChange != null
 
     SettingCard(
-        modifier = modifier
+        modifier =
+        modifier
             .fillMaxWidth(),
         cornerRadius = cornerRadius,
-        colors = CardDefaults.cardColors(
-            containerColor = color ?: MaterialTheme.colorScheme.surfaceContainerLow
+        colors =
+        CardDefaults.cardColors(
+            containerColor = color ?: MaterialTheme.colorScheme.surfaceContainerLow,
         ),
     ) {
         Column {
             ListItem(
-                modifier = Modifier
+                modifier =
+                Modifier
                     .semantics(mergeDescendants = true) {
                         semanticRole?.let { role = it }
                         semanticStateDescription?.let { stateDescription = it }
@@ -88,8 +90,7 @@ fun SettingItem(
                             toggleableState = if (it) ToggleableState.On else ToggleableState.Off
                         }
                         if (!enabled) disabled()
-                    }
-                    .combinedClickable(
+                    }.combinedClickable(
                         enabled = enabled,
                         role = semanticRole,
                         onClick = {
@@ -102,56 +103,62 @@ fun SettingItem(
                         onLongClick = {
                             if (dropdownMenu != null) showMenu = true
                             onLongClick?.invoke()
-                        }
+                        },
                     ),
-                leadingContent = if (painter != null || imageVector != null) {
+                leadingContent =
+                if (painter != null || imageVector != null) {
                     {
                         if (painter != null) {
                             Icon(
                                 painter = painter,
                                 contentDescription = null,
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
                         } else if (imageVector != null) {
                             Icon(
                                 imageVector = imageVector,
                                 contentDescription = null,
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
                         }
                     }
-                } else null,
-                supportingContent = if (description != null || option != null) {
+                } else {
+                    null
+                },
+                supportingContent =
+                if (description != null || option != null) {
                     {
                         Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
                             description?.let {
                                 AppText(
                                     it,
                                     style = LegadoTheme.typography.bodySmallEmphasized,
-                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
                                 )
                             }
                             option?.let {
                                 AppText(
                                     it,
                                     style = LegadoTheme.typography.labelMediumEmphasized,
-                                    color = MaterialTheme.colorScheme.primary
+                                    color = MaterialTheme.colorScheme.primary,
                                 )
                             }
                         }
                     }
-                } else null,
+                } else {
+                    null
+                },
                 trailingContent = {
                     Box(contentAlignment = Alignment.Center) {
                         if (isExpandable && trailingContent == null) {
                             val rotation by animateFloatAsState(
                                 if (expanded) 180f else 0f,
-                                label = "arrow"
+                                label = "arrow",
                             )
                             Icon(
                                 imageVector = Icons.Default.KeyboardArrowDown,
                                 contentDescription = null,
-                                modifier = Modifier.rotate(rotation)
+                                modifier = Modifier.rotate(rotation),
                             )
                         } else {
                             trailingContent?.invoke()
@@ -160,7 +167,8 @@ fun SettingItem(
                         dropdownMenu?.let { menu ->
                             RoundDropdownMenu(
                                 expanded = showMenu,
-                                onDismissRequest = { showMenu = false }) {
+                                onDismissRequest = { showMenu = false },
+                            ) {
                                 menu { showMenu = false }
                             }
                         }
@@ -170,7 +178,7 @@ fun SettingItem(
             ) {
                 AppText(
                     text = title,
-                    style = LegadoTheme.typography.titleMedium
+                    style = LegadoTheme.typography.titleMedium,
                 )
             }
 
@@ -178,12 +186,13 @@ fun SettingItem(
                 AnimatedVisibility(
                     visible = expanded,
                     enter = expandVertically(expandFrom = Alignment.Top),
-                    exit = shrinkVertically(shrinkTowards = Alignment.Top)
+                    exit = shrinkVertically(shrinkTowards = Alignment.Top),
                 ) {
                     Column(
-                        modifier = Modifier
+                        modifier =
+                        Modifier
                             .fillMaxWidth()
-                            .padding(start = 16.dp, end = 16.dp, bottom = 12.dp, top = 8.dp)
+                            .padding(start = 16.dp, end = 16.dp, bottom = 12.dp, top = 8.dp),
                     ) {
                         expandContent.invoke(this)
                     }

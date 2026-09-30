@@ -2,14 +2,12 @@ package io.legado.app.model.reader
 
 import io.legado.app.data.entities.Book
 import io.legado.app.data.entities.BookChapter
-import io.legado.app.data.entities.BookSource
-import io.legado.app.help.book.BookContent
 import io.legado.app.feature.reader.core.source.ReaderChapterSource
+import io.legado.app.help.book.BookContent
 
 /** Processed chapter input published before any View-era page layout is consumed. */
 data class ReaderChapterInput(
     val book: Book,
-    val bookSource: BookSource?,
     val chapter: BookChapter,
     val displayTitle: String,
     val content: BookContent,
@@ -18,7 +16,6 @@ data class ReaderChapterInput(
     val contentHash: Int,
     val contentProcessesHash: Int,
     val sourceHash: Int,
-    val bookSourceHash: Int,
     val pageEstimateGeneration: Long,
 )
 

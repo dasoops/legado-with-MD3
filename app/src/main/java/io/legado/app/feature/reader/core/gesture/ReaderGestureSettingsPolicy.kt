@@ -2,9 +2,11 @@ package io.legado.app.feature.reader.core.gesture
 
 object ReaderGestureSettingsPolicy {
     /** The legacy preference is stored as raw pixels; zero delegates to the platform default. */
-    fun touchSlopPx(platformTouchSlopPx: Float, configuredTouchSlopPx: Int): Float =
-        configuredTouchSlopPx.takeIf { it > 0 }?.toFloat()
-            ?: platformTouchSlopPx.coerceAtLeast(0f)
+    fun touchSlopPx(
+        platformTouchSlopPx: Float,
+        configuredTouchSlopPx: Int,
+    ): Float = configuredTouchSlopPx.takeIf { it > 0 }?.toFloat()
+        ?: platformTouchSlopPx.coerceAtLeast(0f)
 
     /**
      * 滚动点击翻页是否播放动画。

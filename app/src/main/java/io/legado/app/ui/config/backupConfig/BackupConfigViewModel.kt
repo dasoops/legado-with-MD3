@@ -24,15 +24,16 @@ class BackupConfigViewModel(
     private val webDavBackupUseCase: WebDavBackupUseCase,
     private val backupRestoreUseCase: BackupRestoreUseCase,
 ) : ViewModel() {
-    private val _uiState = MutableStateFlow(
-        BackupConfigUiState(
-            settings = settingsGateway.currentSettings,
-            ignoreItems = loadIgnoreItems(),
-            backupIgnoreItems = loadBackupIgnoreItems(),
-            dbIgnoreItems = loadDbIgnoreItems(),
-            backupDbIgnoreItems = loadBackupDbIgnoreItems(),
+    private val _uiState =
+        MutableStateFlow(
+            BackupConfigUiState(
+                settings = settingsGateway.currentSettings,
+                ignoreItems = loadIgnoreItems(),
+                backupIgnoreItems = loadBackupIgnoreItems(),
+                dbIgnoreItems = loadDbIgnoreItems(),
+                backupDbIgnoreItems = loadBackupDbIgnoreItems(),
+            ),
         )
-    )
     val uiState = _uiState.asStateFlow()
 
     private val _effects = MutableSharedFlow<BackupConfigEffect>(extraBufferCapacity = 16)
@@ -48,60 +49,123 @@ class BackupConfigViewModel(
 
     fun onIntent(intent: BackupConfigIntent) {
         when (intent) {
-            is BackupConfigIntent.SetWebDavUrl -> update { it.copy(webDavUrl = intent.value) }
-            is BackupConfigIntent.SetWebDavDir -> update { it.copy(webDavDir = intent.value) }
-            is BackupConfigIntent.SetWebDavDeviceName ->
+            is BackupConfigIntent.SetWebDavUrl -> {
+                update { it.copy(webDavUrl = intent.value) }
+            }
+            is BackupConfigIntent.SetWebDavDir -> {
+                update { it.copy(webDavDir = intent.value) }
+            }
+            is BackupConfigIntent.SetWebDavDeviceName -> {
                 update { it.copy(webDavDeviceName = intent.value) }
-            is BackupConfigIntent.SetSyncBookProgress -> setSyncBookProgress(intent.value)
-            is BackupConfigIntent.SetSyncBookProgressPlus ->
+            }
+            is BackupConfigIntent.SetSyncBookProgress -> {
+                setSyncBookProgress(intent.value)
+            }
+            is BackupConfigIntent.SetSyncBookProgressPlus -> {
                 update { it.copy(syncBookProgressPlus = intent.value) }
-            is BackupConfigIntent.SetAutoCheckNewBackup ->
+            }
+            is BackupConfigIntent.SetAutoCheckNewBackup -> {
                 update { it.copy(autoCheckNewBackup = intent.value) }
-            is BackupConfigIntent.SetOnlyLatestBackup ->
+            }
+            is BackupConfigIntent.SetOnlyLatestBackup -> {
                 update { it.copy(onlyLatestBackup = intent.value) }
-            is BackupConfigIntent.SetBackupSyncMode ->
+            }
+            is BackupConfigIntent.SetBackupSyncMode -> {
                 update { it.copy(backupSyncMode = intent.value) }
-            is BackupConfigIntent.OpenSheet -> _uiState.update { it.copy(activeSheet = intent.sheet) }
-            BackupConfigIntent.DismissSheet -> _uiState.update { it.copy(activeSheet = null) }
-            BackupConfigIntent.OpenWebDavAuth -> openWebDavAuth()
-            is BackupConfigIntent.EditWebDavAccount -> updateAuth { it.copy(account = intent.value) }
-            is BackupConfigIntent.EditWebDavPassword -> updateAuth { it.copy(password = intent.value) }
-            BackupConfigIntent.TogglePasswordVisibility ->
+            }
+            is BackupConfigIntent.OpenSheet -> {
+                _uiState.update { it.copy(activeSheet = intent.sheet) }
+            }
+            BackupConfigIntent.DismissSheet -> {
+                _uiState.update { it.copy(activeSheet = null) }
+            }
+            BackupConfigIntent.OpenWebDavAuth -> {
+                openWebDavAuth()
+            }
+            is BackupConfigIntent.EditWebDavAccount -> {
+                updateAuth { it.copy(account = intent.value) }
+            }
+            is BackupConfigIntent.EditWebDavPassword -> {
+                updateAuth { it.copy(password = intent.value) }
+            }
+            BackupConfigIntent.TogglePasswordVisibility -> {
                 updateAuth { it.copy(passwordVisible = !it.passwordVisible) }
-            BackupConfigIntent.SaveWebDavAuth -> saveWebDavAuth()
-            BackupConfigIntent.TestWebDav -> testWebDav()
-            BackupConfigIntent.OpenIgnoreDialog ->
+            }
+            BackupConfigIntent.SaveWebDavAuth -> {
+                saveWebDavAuth()
+            }
+            BackupConfigIntent.TestWebDav -> {
+                testWebDav()
+            }
+            BackupConfigIntent.OpenIgnoreDialog -> {
                 _uiState.update { it.copy(activeSheet = BackupConfigSheet.IgnoreRestoreItems) }
-            is BackupConfigIntent.ToggleIgnoreItem -> toggleIgnoreItem(intent.key, intent.value)
-            BackupConfigIntent.SaveIgnoreItems -> saveIgnoreItems()
-            BackupConfigIntent.OpenBackupIgnoreDialog ->
+            }
+            is BackupConfigIntent.ToggleIgnoreItem -> {
+                toggleIgnoreItem(intent.key, intent.value)
+            }
+            BackupConfigIntent.SaveIgnoreItems -> {
+                saveIgnoreItems()
+            }
+            BackupConfigIntent.OpenBackupIgnoreDialog -> {
                 _uiState.update { it.copy(activeSheet = BackupConfigSheet.IgnoreBackupItems) }
-
-            is BackupConfigIntent.ToggleBackupIgnoreItem -> toggleBackupIgnoreItem(
-                intent.key,
-                intent.value
-            )
-
-            BackupConfigIntent.SaveBackupIgnoreItems -> saveBackupIgnoreItems()
-            is BackupConfigIntent.ToggleDbIgnoreItem -> toggleDbIgnoreItem(intent.key, intent.value)
-            BackupConfigIntent.SaveDbIgnoreItems -> saveDbIgnoreItems()
-            is BackupConfigIntent.ToggleBackupDbIgnoreItem -> toggleBackupDbIgnoreItem(
-                intent.key,
-                intent.value
-            )
-
-            BackupConfigIntent.SaveBackupDbIgnoreItems -> saveBackupDbIgnoreItems()
-            BackupConfigIntent.DismissDialog -> _uiState.update { it.copy(activeDialog = null) }
-            BackupConfigIntent.SelectBackupDirectory -> launchDirectoryPicker(runBackup = false)
-            BackupConfigIntent.SelectBackupAndRunDirectory -> launchDirectoryPicker(runBackup = true)
-            is BackupConfigIntent.BackupDirectorySelected -> saveBackupPath(intent.path, intent.runBackup)
-            is BackupConfigIntent.RequestBackup -> requestBackup(intent.mode)
-            is BackupConfigIntent.PerformBackup -> performBackup(intent.path, intent.mode)
-            BackupConfigIntent.RequestLocalRestore -> requestLocalRestore()
-            is BackupConfigIntent.RestoreLocal -> restoreLocal(intent.uri)
-            BackupConfigIntent.RequestNetworkRestore -> loadNetworkBackups()
-            is BackupConfigIntent.RestoreNetwork -> restoreNetwork(intent.name)
-            BackupConfigIntent.ConfirmLocalRestoreFallback -> requestLocalRestore()
+            }
+            is BackupConfigIntent.ToggleBackupIgnoreItem -> {
+                toggleBackupIgnoreItem(
+                    intent.key,
+                    intent.value,
+                )
+            }
+            BackupConfigIntent.SaveBackupIgnoreItems -> {
+                saveBackupIgnoreItems()
+            }
+            is BackupConfigIntent.ToggleDbIgnoreItem -> {
+                toggleDbIgnoreItem(intent.key, intent.value)
+            }
+            BackupConfigIntent.SaveDbIgnoreItems -> {
+                saveDbIgnoreItems()
+            }
+            is BackupConfigIntent.ToggleBackupDbIgnoreItem -> {
+                toggleBackupDbIgnoreItem(
+                    intent.key,
+                    intent.value,
+                )
+            }
+            BackupConfigIntent.SaveBackupDbIgnoreItems -> {
+                saveBackupDbIgnoreItems()
+            }
+            BackupConfigIntent.DismissDialog -> {
+                _uiState.update { it.copy(activeDialog = null) }
+            }
+            BackupConfigIntent.SelectBackupDirectory -> {
+                launchDirectoryPicker(runBackup = false)
+            }
+            BackupConfigIntent.SelectBackupAndRunDirectory -> {
+                launchDirectoryPicker(runBackup = true)
+            }
+            is BackupConfigIntent.BackupDirectorySelected -> {
+                saveBackupPath(intent.path, intent.runBackup)
+            }
+            is BackupConfigIntent.RequestBackup -> {
+                requestBackup(intent.mode)
+            }
+            is BackupConfigIntent.PerformBackup -> {
+                performBackup(intent.path, intent.mode)
+            }
+            BackupConfigIntent.RequestLocalRestore -> {
+                requestLocalRestore()
+            }
+            is BackupConfigIntent.RestoreLocal -> {
+                restoreLocal(intent.uri)
+            }
+            BackupConfigIntent.RequestNetworkRestore -> {
+                loadNetworkBackups()
+            }
+            is BackupConfigIntent.RestoreNetwork -> {
+                restoreNetwork(intent.name)
+            }
+            BackupConfigIntent.ConfirmLocalRestoreFallback -> {
+                requestLocalRestore()
+            }
         }
     }
 
@@ -124,10 +188,11 @@ class BackupConfigViewModel(
         val settings = _uiState.value.settings
         _uiState.update {
             it.copy(
-                activeDialog = BackupConfigDialog.WebDavAuth(
+                activeDialog =
+                BackupConfigDialog.WebDavAuth(
                     account = settings.webDavAccount,
                     password = settings.webDavPassword,
-                )
+                ),
             )
         }
     }
@@ -152,24 +217,30 @@ class BackupConfigViewModel(
     private fun testWebDav() {
         _uiState.update { it.copy(activeDialog = BackupConfigDialog.Loading(R.string.test_sync_loading_text)) }
         viewModelScope.launch {
-            val success = withContext(Dispatchers.IO) {
-                runCatching { webDavBackupUseCase.test() }.getOrDefault(false)
-            }
+            val success =
+                withContext(Dispatchers.IO) {
+                    runCatching { webDavBackupUseCase.test() }.getOrDefault(false)
+                }
             _uiState.update { it.copy(activeDialog = null) }
             _effects.tryEmit(
                 BackupConfigEffect.ShowMessage(
-                    if (success) R.string.test_sync_status_success else R.string.test_sync_status_fail
-                )
+                    if (success) R.string.test_sync_status_success else R.string.test_sync_status_fail,
+                ),
             )
         }
     }
 
-    private fun toggleIgnoreItem(key: String, value: Boolean) {
+    private fun toggleIgnoreItem(
+        key: String,
+        value: Boolean,
+    ) {
         _uiState.update { state ->
             state.copy(
-                ignoreItems = state.ignoreItems.map { item ->
-                    if (item.key == key) item.copy(checked = value) else item
-                }.toImmutableList()
+                ignoreItems =
+                state.ignoreItems
+                    .map { item ->
+                        if (item.key == key) item.copy(checked = value) else item
+                    }.toImmutableList(),
             )
         }
     }
@@ -181,17 +252,24 @@ class BackupConfigViewModel(
         _uiState.value.dbIgnoreItems.forEach { item ->
             io.legado.app.help.storage.BackupConfig.dbIgnoreConfig[item.key] = item.checked
         }
-        io.legado.app.help.storage.BackupConfig.saveIgnoreConfig()
-        io.legado.app.help.storage.BackupConfig.saveDbIgnoreConfig()
+        io.legado.app.help.storage.BackupConfig
+            .saveIgnoreConfig()
+        io.legado.app.help.storage.BackupConfig
+            .saveDbIgnoreConfig()
         _uiState.update { it.copy(activeSheet = null) }
     }
 
-    private fun toggleBackupIgnoreItem(key: String, value: Boolean) {
+    private fun toggleBackupIgnoreItem(
+        key: String,
+        value: Boolean,
+    ) {
         _uiState.update { state ->
             state.copy(
-                backupIgnoreItems = state.backupIgnoreItems.map { item ->
-                    if (item.key == key) item.copy(checked = value) else item
-                }.toImmutableList()
+                backupIgnoreItems =
+                state.backupIgnoreItems
+                    .map { item ->
+                        if (item.key == key) item.copy(checked = value) else item
+                    }.toImmutableList(),
             )
         }
     }
@@ -203,17 +281,24 @@ class BackupConfigViewModel(
         _uiState.value.backupDbIgnoreItems.forEach { item ->
             io.legado.app.help.storage.BackupConfig.backupDbIgnoreConfig[item.key] = item.checked
         }
-        io.legado.app.help.storage.BackupConfig.saveBackupIgnoreConfig()
-        io.legado.app.help.storage.BackupConfig.saveBackupDbIgnoreConfig()
+        io.legado.app.help.storage.BackupConfig
+            .saveBackupIgnoreConfig()
+        io.legado.app.help.storage.BackupConfig
+            .saveBackupDbIgnoreConfig()
         _uiState.update { it.copy(activeSheet = null) }
     }
 
-    private fun toggleDbIgnoreItem(key: String, value: Boolean) {
+    private fun toggleDbIgnoreItem(
+        key: String,
+        value: Boolean,
+    ) {
         _uiState.update { state ->
             state.copy(
-                dbIgnoreItems = state.dbIgnoreItems.map { item ->
-                    if (item.key == key) item.copy(checked = value) else item
-                }.toImmutableList()
+                dbIgnoreItems =
+                state.dbIgnoreItems
+                    .map { item ->
+                        if (item.key == key) item.copy(checked = value) else item
+                    }.toImmutableList(),
             )
         }
     }
@@ -222,15 +307,21 @@ class BackupConfigViewModel(
         _uiState.value.dbIgnoreItems.forEach { item ->
             io.legado.app.help.storage.BackupConfig.dbIgnoreConfig[item.key] = item.checked
         }
-        io.legado.app.help.storage.BackupConfig.saveDbIgnoreConfig()
+        io.legado.app.help.storage.BackupConfig
+            .saveDbIgnoreConfig()
     }
 
-    private fun toggleBackupDbIgnoreItem(key: String, value: Boolean) {
+    private fun toggleBackupDbIgnoreItem(
+        key: String,
+        value: Boolean,
+    ) {
         _uiState.update { state ->
             state.copy(
-                backupDbIgnoreItems = state.backupDbIgnoreItems.map { item ->
-                    if (item.key == key) item.copy(checked = value) else item
-                }.toImmutableList()
+                backupDbIgnoreItems =
+                state.backupDbIgnoreItems
+                    .map { item ->
+                        if (item.key == key) item.copy(checked = value) else item
+                    }.toImmutableList(),
             )
         }
     }
@@ -239,27 +330,39 @@ class BackupConfigViewModel(
         _uiState.value.backupDbIgnoreItems.forEach { item ->
             io.legado.app.help.storage.BackupConfig.backupDbIgnoreConfig[item.key] = item.checked
         }
-        io.legado.app.help.storage.BackupConfig.saveBackupDbIgnoreConfig()
+        io.legado.app.help.storage.BackupConfig
+            .saveBackupDbIgnoreConfig()
     }
 
     private fun launchDirectoryPicker(runBackup: Boolean) {
         _uiState.update { it.copy(activeSheet = null) }
         _effects.tryEmit(
-            if (runBackup) BackupConfigEffect.LaunchBackupAndRunDirectoryPicker
-            else BackupConfigEffect.LaunchBackupDirectoryPicker
+            if (runBackup) {
+                BackupConfigEffect.LaunchBackupAndRunDirectoryPicker
+            } else {
+                BackupConfigEffect.LaunchBackupDirectoryPicker
+            },
         )
     }
 
-    private fun saveBackupPath(path: String, runBackup: Boolean) {
+    private fun saveBackupPath(
+        path: String,
+        runBackup: Boolean,
+    ) {
         viewModelScope.launch {
             settingsGateway.update { it.copy(backupPath = path) }
             if (runBackup && path.isNotEmpty()) requestBackup("both", path)
         }
     }
 
-    private fun requestBackup(mode: String, selectedPath: String? = null) {
+    private fun requestBackup(
+        mode: String,
+        selectedPath: String? = null,
+    ) {
         _uiState.update { it.copy(activeSheet = null) }
-        val path = selectedPath ?: _uiState.value.settings.backupPath.orEmpty()
+        val path =
+            selectedPath ?: _uiState.value.settings.backupPath
+                .orEmpty()
         if (path.isEmpty() && mode != "webdav") return
         if (path.isNotEmpty() && !path.isContentScheme()) {
             _effects.tryEmit(BackupConfigEffect.RequestStoragePermission(path, mode))
@@ -268,7 +371,10 @@ class BackupConfigViewModel(
         }
     }
 
-    private fun performBackup(path: String, mode: String) {
+    private fun performBackup(
+        path: String,
+        mode: String,
+    ) {
         _uiState.update { it.copy(activeDialog = BackupConfigDialog.Loading(R.string.backup)) }
         viewModelScope.launch(Dispatchers.IO) {
             runCatching { backupRestoreUseCase.backup(path, mode) }
@@ -277,12 +383,11 @@ class BackupConfigViewModel(
                         _uiState.update { it.copy(activeDialog = null) }
                         _effects.tryEmit(BackupConfigEffect.ShowMessage(R.string.backup_success))
                     }
-                }
-                .onFailure { error ->
+                }.onFailure { error ->
                     withContext(Dispatchers.Main) {
                         _uiState.update { it.copy(activeDialog = null) }
                         _effects.tryEmit(
-                            BackupConfigEffect.ShowMessage(R.string.backup_fail, error.localizedMessage)
+                            BackupConfigEffect.ShowMessage(R.string.backup_fail, error.localizedMessage),
                         )
                     }
                 }
@@ -321,14 +426,14 @@ class BackupConfigViewModel(
                             )
                         }
                     }
-                }
-                .onFailure { error ->
+                }.onFailure { error ->
                     withContext(Dispatchers.Main) {
                         _uiState.update {
                             it.copy(
-                                activeDialog = BackupConfigDialog.ConfirmLocalRestoreFallback(
-                                    error.localizedMessage
-                                )
+                                activeDialog =
+                                BackupConfigDialog.ConfirmLocalRestoreFallback(
+                                    error.localizedMessage,
+                                ),
                             )
                         }
                     }
@@ -354,16 +459,18 @@ class BackupConfigViewModel(
         _effects.tryEmit(BackupConfigEffect.ShowMessage(R.string.restore_success))
     }
 
-    private suspend fun finishRestoreFailure(message: String?, webDav: Boolean = false) =
-        withContext(Dispatchers.Main) {
-            _uiState.update { it.copy(activeDialog = null) }
-            _effects.tryEmit(
-                BackupConfigEffect.ShowMessage(
-                    if (webDav) R.string.webdav_restore_fail else R.string.restore_fail_with_error,
-                    message,
-                )
-            )
-        }
+    private suspend fun finishRestoreFailure(
+        message: String?,
+        webDav: Boolean = false,
+    ) = withContext(Dispatchers.Main) {
+        _uiState.update { it.copy(activeDialog = null) }
+        _effects.tryEmit(
+            BackupConfigEffect.ShowMessage(
+                if (webDav) R.string.webdav_restore_fail else R.string.restore_fail_with_error,
+                message,
+            ),
+        )
+    }
 
     private companion object {
         fun loadIgnoreItems() = io.legado.app.help.storage.BackupConfig.ignoreKeys
@@ -373,19 +480,18 @@ class BackupConfigViewModel(
                     title = io.legado.app.help.storage.BackupConfig.ignoreTitle[index],
                     checked = io.legado.app.help.storage.BackupConfig.ignoreConfig[key] ?: false,
                 )
-            }
-            .toImmutableList()
+            }.toImmutableList()
 
         fun loadBackupIgnoreItems() = io.legado.app.help.storage.BackupConfig.backupIgnoreKeys
             .mapIndexed { index, key ->
                 BackupIgnoreItem(
                     key = key,
                     title = io.legado.app.help.storage.BackupConfig.backupIgnoreTitle[index],
-                    checked = io.legado.app.help.storage.BackupConfig.backupIgnoreConfig[key]
+                    checked =
+                    io.legado.app.help.storage.BackupConfig.backupIgnoreConfig[key]
                         ?: false,
                 )
-            }
-            .toImmutableList()
+            }.toImmutableList()
 
         fun loadDbIgnoreItems() = io.legado.app.help.storage.BackupConfig.dbIgnoreKeys
             .mapIndexed { index, key ->
@@ -394,18 +500,17 @@ class BackupConfigViewModel(
                     title = io.legado.app.help.storage.BackupConfig.dbIgnoreTitle[index],
                     checked = io.legado.app.help.storage.BackupConfig.dbIgnoreConfig[key] ?: false,
                 )
-            }
-            .toImmutableList()
+            }.toImmutableList()
 
         fun loadBackupDbIgnoreItems() = io.legado.app.help.storage.BackupConfig.backupDbIgnoreKeys
             .mapIndexed { index, key ->
                 BackupIgnoreItem(
                     key = key,
                     title = io.legado.app.help.storage.BackupConfig.backupDbIgnoreTitle[index],
-                    checked = io.legado.app.help.storage.BackupConfig.backupDbIgnoreConfig[key]
+                    checked =
+                    io.legado.app.help.storage.BackupConfig.backupDbIgnoreConfig[key]
                         ?: false,
                 )
-            }
-            .toImmutableList()
+            }.toImmutableList()
     }
 }

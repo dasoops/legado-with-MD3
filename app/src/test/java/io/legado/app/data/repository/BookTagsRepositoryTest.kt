@@ -11,7 +11,11 @@ import io.legado.app.domain.model.BookTags
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.junit.After
-import org.junit.Assert.*
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -35,13 +39,15 @@ class BookTagsRepositoryTest {
     }
 
     @After
-    fun tearDown() { db.close() }
+    fun tearDown() {
+        db.close()
+    }
 
     @Test
     fun `批量添加合并标签且保持目录位和阅读信息`() = runBlocking {
         db.bookDao.insert(
             Book(bookUrl = "a", customTag = "原标签", group = 3, durChapterIndex = 2),
-            Book(bookUrl = "b", customTag = "Shared", group = 4)
+            Book(bookUrl = "b", customTag = "Shared", group = 4),
         )
         books.addTags(setOf("a", "b", "missing"), setOf(" Shared ", "新标签", "已读"))
         val a = db.bookDao.getBook("a")!!
@@ -83,7 +89,7 @@ class BookTagsRepositoryTest {
             listOf(BookGroup.IdAll, tagId),
             groups.flowAll().first()
                 .map { it.groupId }
-                .filter { it == BookGroup.IdAll || it == tagId }
+                .filter { it == BookGroup.IdAll || it == tagId },
         )
     }
 
@@ -109,7 +115,7 @@ class BookTagsRepositoryTest {
 
         assertEquals(
             setOf(-23L, -1L, BookTags.groupId("标签"), 2L, 4L),
-            db.bookGroupDao.all.map { it.groupId }.toSet()
+            db.bookGroupDao.all.map { it.groupId }.toSet(),
         )
         assertNull(db.bookDao.getBook("old"))
         assertEquals(2L, db.bookDao.getBook("shared")?.group)
@@ -139,10 +145,12 @@ class BookTagsRepositoryTest {
     @Test
     fun `批量添加失败时事务回滚`() = runBlocking {
         db.bookDao.insert(Book(bookUrl = "a", customTag = "原标签"), Book(bookUrl = "b"))
-        db.openHelper.writableDatabase.execSQL("""
+        db.openHelper.writableDatabase.execSQL(
+            """
             CREATE TRIGGER reject_tag BEFORE UPDATE OF customTag ON books
             WHEN NEW.bookUrl = 'b' BEGIN SELECT RAISE(ABORT, 'test failure'); END
-        """.trimIndent())
+            """.trimIndent(),
+        )
         assertTrue(runCatching { books.addTags(linkedSetOf("a", "b"), setOf("新标签")) }.isFailure)
         assertEquals("原标签", db.bookDao.getBook("a")!!.customTag)
         assertNull(db.bookDao.getBook("b")!!.customTag)
@@ -266,9 +274,8 @@ class BookTagsRepositoryTest {
     fun `详情页分组名称去重`() = runBlocking {
         db.bookGroupDao.insert(
             BookGroup(1, "Books", localDirectoryUri = "content://books"),
-            BookGroup(2, "Books", localDirectoryUri = "content://books")
+            BookGroup(2, "Books", localDirectoryUri = "content://books"),
         )
         assertEquals(listOf("Books"), groups.getGroupNames(3L))
     }
-
 }

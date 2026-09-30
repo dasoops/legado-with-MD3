@@ -5,7 +5,6 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class ProcessStartupUpdateCheckGateTest {
-
     @Test
     fun `enabled check runs only once per process`() {
         val gate = ProcessStartupUpdateCheckGate()

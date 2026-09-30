@@ -58,29 +58,33 @@ fun BookshelfCover(
         )
 
         // 使用 animatedVisibilityScope 的 animateEnterExit 为叠加层添加同步动画
-        val overlayModifier = Modifier.then(
-            if (animatedVisibilityScope != null) {
-                with(animatedVisibilityScope) {
-                    Modifier.animateEnterExit(
-                        enter = fadeIn(),
-                        exit = fadeOut()
-                    )
-                }
-            } else Modifier
-        )
+        val overlayModifier =
+            Modifier.then(
+                if (animatedVisibilityScope != null) {
+                    with(animatedVisibilityScope) {
+                        Modifier.animateEnterExit(
+                            enter = fadeIn(),
+                            exit = fadeOut(),
+                        )
+                    }
+                } else {
+                    Modifier
+                },
+            )
 
         if (!badgeText.isNullOrEmpty()) {
             TextCard(
                 text = badgeText,
                 icon = if (showBadgeDot) Icons.Default.Update else null,
                 iconSize = 12.dp,
-                modifier = Modifier
+                modifier =
+                Modifier
                     .align(Alignment.TopEnd)
                     .padding(2.dp)
                     .then(overlayModifier),
                 cornerRadius = 4.dp,
                 horizontalPadding = 4.dp,
-                verticalPadding = 2.dp
+                verticalPadding = 2.dp,
             )
         }
 
@@ -89,24 +93,26 @@ fun BookshelfCover(
                 text = leftBottomText,
                 backgroundColor = LegadoTheme.colorScheme.cardContainer,
                 contentColor = LegadoTheme.colorScheme.onCardContainer,
-                modifier = Modifier
+                modifier =
+                Modifier
                     .align(Alignment.BottomStart)
                     .padding(2.dp)
                     .then(overlayModifier),
                 cornerRadius = 4.dp,
                 horizontalPadding = 4.dp,
-                verticalPadding = 2.dp
+                verticalPadding = 2.dp,
             )
         }
 
         if (isUpdating) {
             AppLinearProgressIndicator(
-                modifier = Modifier
+                modifier =
+                Modifier
                     .align(Alignment.BottomCenter)
                     .fillMaxWidth()
                     .padding(horizontal = 4.dp, vertical = 6.dp)
                     .height(3.dp)
-                    .then(overlayModifier)
+                    .then(overlayModifier),
             )
         }
     }

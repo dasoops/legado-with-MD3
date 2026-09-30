@@ -27,48 +27,53 @@ import java.io.ByteArrayOutputStream
  * 显示图片
  */
 class PhotoDialog() : BaseBottomSheetDialogFragment(R.layout.dialog_photo_view) {
-
     constructor(src: String, sourceOrigin: String? = null, isBook: Boolean = false) : this() {
-        arguments = Bundle().apply {
-            putString("src", src)
-            putString("sourceOrigin", sourceOrigin)
-            putBoolean("isBook", isBook)
-        }
+        arguments =
+            Bundle().apply {
+                putString("src", src)
+                putString("sourceOrigin", sourceOrigin)
+                putBoolean("isBook", isBook)
+            }
     }
 
     override fun onStart() {
         super.onStart()
-        val sheet = dialog
-            ?.findViewById<View>(com.google.android.material.R.id.design_bottom_sheet)
+        val sheet =
+            dialog
+                ?.findViewById<View>(com.google.android.material.R.id.design_bottom_sheet)
         sheet?.layoutParams?.height = ViewGroup.LayoutParams.MATCH_PARENT
     }
 
     private val binding by viewBinding(DialogPhotoViewBinding::bind)
 
     @SuppressLint("CheckResult")
-    override fun onFragmentCreated(view: View, savedInstanceState: Bundle?) {
+    override fun onFragmentCreated(
+        view: View,
+        savedInstanceState: Bundle?,
+    ) {
         val arguments = arguments ?: return
         val src = arguments.getString("src") ?: return
         ImageProvider.get(src)?.let {
             binding.photoView.setImageBitmap(it)
             return
         }
-        val file = ReadBook.book?.let { book ->
-            BookHelp.getImage(book, src)
-        }
+        val file =
+            ReadBook.book?.let { book ->
+                BookHelp.getImage(book, src)
+            }
         if (file?.exists() == true) {
-            ImageLoader.load(requireContext(), file)
+            ImageLoader
+                .load(requireContext(), file)
                 .error(R.drawable.image_loading_error)
                 .dontTransform()
                 .downsample(DownsampleStrategy.NONE)
                 .diskCacheStrategy(DiskCacheStrategy.NONE)
                 .into(binding.photoView)
         } else {
-            ImageLoader.load(requireContext(), src).apply {
-                arguments.getString("sourceOrigin")?.let { sourceOrigin ->
-                    apply(RequestOptions().set(OkHttpModelLoader.sourceOriginOption, sourceOrigin))
-                }
-            }.error(BookCover.defaultDrawable)
+            ImageLoader
+                .load(requireContext(), src)
+                .apply {
+                }.error(BookCover.defaultDrawable)
                 .dontTransform()
                 .downsample(DownsampleStrategy.NONE)
                 .into(binding.photoView)
@@ -83,16 +88,16 @@ class PhotoDialog() : BaseBottomSheetDialogFragment(R.layout.dialog_photo_view) 
         val drawable = binding.photoView.drawable ?: return
         val bitmap = (drawable as? BitmapDrawable)?.bitmap ?: return
 
-        val byteArray = ByteArrayOutputStream().use { stream ->
-            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream)
-            stream.toByteArray()
-        }
+        val byteArray =
+            ByteArrayOutputStream().use { stream ->
+                bitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream)
+                stream.toByteArray()
+            }
 
         val success = saveImageToGallery(requireContext(), byteArray)
 
         toastOnUi(
-            if (success) "已保存到相册" else "保存失败"
+            if (success) "已保存到相册" else "保存失败",
         )
     }
-
 }

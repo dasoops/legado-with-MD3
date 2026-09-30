@@ -39,6 +39,7 @@ import io.legado.app.model.localBook.LocalBook
 import io.legado.app.ui.main.MainIntent
 import io.legado.app.ui.widget.components.image.cover.buildCoverImageRequest
 import io.legado.app.utils.ImageSaveUtils
+import java.io.ByteArrayOutputStream
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -56,7 +57,6 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import java.io.ByteArrayOutputStream
 
 class BookInfoViewModel(
     application: Application,
@@ -74,11 +74,11 @@ class BookInfoViewModel(
         .map { tags -> tags.filterNot { it in BookTags.builtIn }.toImmutableList() }
 
     // 仅保存“每本书/屏幕”状态；外观与其他设置不在此存储，避免整体重置时被抹掉。
-    private val _screenState = MutableStateFlow(BookInfoUiState())
+    private val screenState = MutableStateFlow(BookInfoUiState())
 
     // 设置类字段始终从各自 gateway（唯一 SSOT）派生叠加，重置屏幕状态无法影响它们。
     val uiState: StateFlow<BookInfoUiState> = combine(
-        _screenState,
+        screenState,
         themeSettingsGateway.settings,
         coverSettingsGateway.settings,
     ) { screen, theme, cover ->
@@ -151,7 +151,7 @@ class BookInfoViewModel(
             name = intent.getStringExtra(MainIntent.EXTRA_BOOK_NAME),
             author = intent.getStringExtra(MainIntent.EXTRA_BOOK_AUTHOR),
             origin = intent.getStringExtra(MainIntent.EXTRA_BOOK_ORIGIN),
-            coverPath = intent.getStringExtra(MainIntent.EXTRA_BOOK_COVER)
+            coverPath = intent.getStringExtra(MainIntent.EXTRA_BOOK_COVER),
         )
     }
 
@@ -160,7 +160,7 @@ class BookInfoViewModel(
         name: String? = null,
         author: String? = null,
         origin: String? = null,
-        coverPath: String? = null
+        coverPath: String? = null,
     ) {
         val current = currentBook
         if (current != null) return
@@ -170,7 +170,7 @@ class BookInfoViewModel(
                 name = name,
                 author = author,
                 origin = origin ?: BookType.localTag,
-                coverUrl = coverPath
+                coverUrl = coverPath,
             ).apply {
                 addType(BookType.notShelf)
             }
@@ -205,13 +205,13 @@ class BookInfoViewModel(
             BookInfoIntent.DismissDialog -> dismissDialog()
             is BookInfoIntent.MenuAction -> handleMenuAction(intent.action)
             BookInfoIntent.ReadClick -> onReadClick()
-            BookInfoIntent.OpenLocalBookExternally -> currentBook
-                ?.takeIf { it.isLocal }
-                ?.let { emitEffect(BookInfoEffect.OpenLocalBookExternally(Uri.parse(it.bookUrl))) }
+            BookInfoIntent.OpenLocalBookExternally ->
+                currentBook
+                    ?.takeIf { it.isLocal }
+                    ?.let { emitEffect(BookInfoEffect.OpenLocalBookExternally(Uri.parse(it.bookUrl))) }
             BookInfoIntent.TocClick -> onTocClick()
             BookInfoIntent.CoverPreviewClick -> currentBook?.getDisplayCover()?.takeIf { it.isNotBlank() }
                 ?.let { showDialog(BookInfoDialog.PhotoPreview(it)) }
-
             BookInfoIntent.GroupClick -> setSheet(BookInfoSheet.GroupPicker)
             BookInfoIntent.ReadRecordClick -> setSheet(BookInfoSheet.ReadRecord)
             BookInfoIntent.RemarkClick -> showDialog(BookInfoDialog.EditRemark(currentBook?.remark))
@@ -222,11 +222,9 @@ class BookInfoViewModel(
                 dismissDialog()
                 saveRemark(intent.remark)
             }
-
             is BookInfoIntent.AddTags -> addTags(intent.tags)
-
             is BookInfoIntent.IntroImageLongClick -> showDialog(
-                BookInfoDialog.PhotoPreview(intent.source)
+                BookInfoDialog.PhotoPreview(intent.source),
             )
         }
     }
@@ -328,7 +326,7 @@ class BookInfoViewModel(
                 data = path,
                 sourceOrigin = null,
                 loadOnlyWifi = coverSettingsGateway.currentSettings.loadOnlyOnWifi,
-                crossfade = false
+                crossfade = false,
             )
             val result = imageLoader.execute(request)
             if (result is SuccessResult) {
@@ -423,7 +421,6 @@ class BookInfoViewModel(
                 is ObjectNotFoundException -> {
                     book.origin = BookType.localTag
                 }
-
                 else -> AppLog.put("刷新书籍失败", it)
             }
         }.onFinally {
@@ -602,16 +599,16 @@ class BookInfoViewModel(
         readRecordObserveJob = viewModelScope.launch {
             combine(
                 readRecordRepository.getBookReadTime(book.name, book.author),
-                readRecordRepository.getBookTimelineDays(book.name, book.author)
+                readRecordRepository.getBookTimelineDays(book.name, book.author),
             ) { totalTime, timelineDays ->
                 totalTime to timelineDays
             }.collectLatest { (totalTime, timelineDays) ->
                 currentReadRecordTotalTime = totalTime
                 currentReadRecordTimelineDays = timelineDays
-                _screenState.update {
+                screenState.update {
                     it.copy(
                         readRecordTotalTime = currentReadRecordTotalTime,
-                        readRecordTimelineDays = currentReadRecordTimelineDays
+                        readRecordTimelineDays = currentReadRecordTimelineDays,
                     )
                 }
             }
@@ -631,7 +628,7 @@ class BookInfoViewModel(
     }
 
     private fun setSheet(sheet: BookInfoSheet) {
-        _screenState.update { it.copy(sheet = sheet) }
+        screenState.update { it.copy(sheet = sheet) }
     }
 
     private fun dismissDialog() {
@@ -639,15 +636,15 @@ class BookInfoViewModel(
     }
 
     private fun showDialog(dialog: BookInfoDialog?) {
-        _screenState.update { it.copy(dialog = dialog) }
+        screenState.update { it.copy(dialog = dialog) }
     }
 
     private fun setBusy(isBusy: Boolean) {
-        _screenState.update { it.copy(isBusy = isBusy) }
+        screenState.update { it.copy(isBusy = isBusy) }
     }
 
-    private fun syncUiState(isTocLoading: Boolean = _screenState.value.isTocLoading) {
-        _screenState.update {
+    private fun syncUiState(isTocLoading: Boolean = screenState.value.isTocLoading) {
+        screenState.update {
             it.copy(
                 book = currentBook?.toBookInfoBookUi(),
                 hasChapters = currentChapterList.isNotEmpty(),
@@ -674,29 +671,25 @@ class BookInfoViewModel(
         _effects.tryEmit(effect)
     }
 
-    private fun Book.toBookInfoBookUi(): BookInfoBookUi {
-        return BookInfoBookUi(
-            bookUrl = bookUrl,
-            name = name,
-            author = author,
-            realAuthor = getRealAuthor(),
-            coverPath = getDisplayCover(),
-            isLocal = isLocal,
-            durChapterTitle = durChapterTitle,
-            latestChapterTitle = latestChapterTitle,
-            totalChapterNum = totalChapterNum,
-            durChapterIndex = durChapterIndex,
-            durChapterPos = durChapterPos,
-            remark = remark,
-            intro = getDisplayIntro(),
-        )
-    }
+    private fun Book.toBookInfoBookUi(): BookInfoBookUi = BookInfoBookUi(
+        bookUrl = bookUrl,
+        name = name,
+        author = author,
+        realAuthor = getRealAuthor(),
+        coverPath = getDisplayCover(),
+        isLocal = isLocal,
+        durChapterTitle = durChapterTitle,
+        latestChapterTitle = latestChapterTitle,
+        totalChapterNum = totalChapterNum,
+        durChapterIndex = durChapterIndex,
+        durChapterPos = durChapterPos,
+        remark = remark,
+        intro = getDisplayIntro(),
+    )
 
-    private fun Book.uiCopy(): Book {
-        return copy().also { snapshot ->
-            snapshot.infoHtml = infoHtml
-            snapshot.tocHtml = tocHtml
-        }
+    private fun Book.uiCopy(): Book = copy().also { snapshot ->
+        snapshot.infoHtml = infoHtml
+        snapshot.tocHtml = tocHtml
     }
 }
 

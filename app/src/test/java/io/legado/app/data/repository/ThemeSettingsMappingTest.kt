@@ -13,13 +13,13 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class ThemeSettingsMappingTest {
-
     @Test
     fun `手动护眼和跟随深色模式是独立配置来源`() {
-        val automatic = ThemeSettings(
-            eyeProtectionEnabled = false,
-            eyeProtectionAutoNight = true,
-        )
+        val automatic =
+            ThemeSettings(
+                eyeProtectionEnabled = false,
+                eyeProtectionAutoNight = true,
+            )
 
         assertFalse(automatic.eyeProtectionEnabled)
         assertTrue(automatic.eyeProtectionAutoNight)
@@ -50,10 +50,11 @@ class ThemeSettingsMappingTest {
 
     @Test
     fun `gateway 排除字段仍由 Theme 读模型读取`() {
-        val preferences = mutablePreferencesOf(
-            stringPreferencesKey(PreferKey.customMode) to "accent",
-            intPreferencesKey(PreferKey.bookInfoInputColor) to 0x102030,
-        )
+        val preferences =
+            mutablePreferencesOf(
+                stringPreferencesKey(PreferKey.customMode) to "accent",
+                intPreferencesKey(PreferKey.bookInfoInputColor) to 0x102030,
+            )
 
         val settings = preferences.toThemeSettings()
 
@@ -63,14 +64,15 @@ class ThemeSettingsMappingTest {
 
     @Test
     fun `关闭模糊通过真实原子路径同时关闭渐进模糊`() {
-        val values = captureAtomicUpdateValues(
-            current = ThemeSettings(enableBlur = true, enableProgressiveBlur = true),
-            read = { it.toThemeSettings() },
-            toPrefMap = ThemeSettings::toGatewayPrefMap,
-            transform = {
-                it.copy(enableBlur = false, enableProgressiveBlur = false)
-            },
-        )
+        val values =
+            captureAtomicUpdateValues(
+                current = ThemeSettings(enableBlur = true, enableProgressiveBlur = true),
+                read = { it.toThemeSettings() },
+                toPrefMap = ThemeSettings::toGatewayPrefMap,
+                transform = {
+                    it.copy(enableBlur = false, enableProgressiveBlur = false)
+                },
+            )
 
         assertEquals(
             mapOf(
@@ -90,7 +92,8 @@ class ThemeSettingsMappingTest {
             transform = {
                 it.copy(
                     useMiuixMonet = true,
-                    appTheme = if (it.appTheme != "0" && it.appTheme != "12") {
+                    appTheme =
+                    if (it.appTheme != "0" && it.appTheme != "12") {
                         "0"
                     } else {
                         it.appTheme
@@ -114,12 +117,13 @@ class ThemeSettingsMappingTest {
 
     @Test
     fun `透明主题通过真实原子路径同时写主题与容器透明度`() {
-        val values = captureAtomicUpdateValues(
-            current = ThemeSettings(appTheme = "0", containerOpacity = 80),
-            read = { it.toThemeSettings() },
-            toPrefMap = ThemeSettings::toGatewayPrefMap,
-            transform = { it.copy(appTheme = "13", containerOpacity = 0) },
-        )
+        val values =
+            captureAtomicUpdateValues(
+                current = ThemeSettings(appTheme = "0", containerOpacity = 80),
+                read = { it.toThemeSettings() },
+                toPrefMap = ThemeSettings::toGatewayPrefMap,
+                transform = { it.copy(appTheme = "13", containerOpacity = 0) },
+            )
 
         assertEquals(
             mapOf(
@@ -132,91 +136,93 @@ class ThemeSettingsMappingTest {
 
     @Test
     fun `清空背景路径通过真实原子路径删除对应键`() {
-        val values = captureAtomicUpdateValues(
-            current = ThemeSettings(backgroundImageLight = "old-background"),
-            read = { it.toThemeSettings() },
-            toPrefMap = ThemeSettings::toGatewayPrefMap,
-            transform = { it.copy(backgroundImageLight = null) },
-        )
+        val values =
+            captureAtomicUpdateValues(
+                current = ThemeSettings(backgroundImageLight = "old-background"),
+                read = { it.toThemeSettings() },
+                toPrefMap = ThemeSettings::toGatewayPrefMap,
+                transform = { it.copy(backgroundImageLight = null) },
+            )
 
         assertEquals(mapOf(PreferKey.bgImage to null), values)
     }
 }
 
 private fun themeMappingSamples(): List<ThemeSettings> {
-    val base = ThemeSettings(
-        appTheme = "app-theme",
-        useMiuixMonet = false,
-        isPureBlack = false,
-        paletteStyle = "palette-style",
-        materialVersion = "material-version",
-        customContrast = "custom-contrast",
-        customMode = "tonalSpot",
-        appFontPath = "app-font",
-        customPrimary = 101,
-        customNightPrimary = 102,
-        enableDeepPersonalization = false,
-        themeColor = 103,
-        secondaryThemeColor = 104,
-        primaryTextColor = 105,
-        secondaryTextColor = 106,
-        themeBackgroundColor = 107,
-        labelContainerColor = 108,
-        themeColorNight = 109,
-        secondaryThemeColorNight = 110,
-        primaryTextColorNight = 111,
-        secondaryTextColorNight = 112,
-        themeBackgroundColorNight = 113,
-        labelContainerColorNight = 114,
-        containerOpacity = 115,
-        overrideBaseCardCornerRadius = false,
-        baseCardCornerRadius = 1.25f,
-        overrideBaseCardBorder = false,
-        baseCardBorderWidth = 2.5f,
-        baseCardBorderColor = 116,
-        baseCardBorderColorNight = 117,
-        disableSplicedColumnGroupCornerRadius = false,
-        topBarOpacity = 118,
-        bottomBarOpacity = 119,
-        enableBlur = false,
-        enableProgressiveBlur = false,
-        topBarBlurRadius = 120,
-        bottomBarBlurRadius = 121,
-        topBarBlurAlpha = 122,
-        bottomBarBlurAlpha = 123,
-        bottomBarLensRadius = 3.75f,
-        useFlexibleTopAppBar = false,
-        topBarButtonStyle = "glass",
-        mergeTopBarActions = true,
-        bookInfoFollowCoverColor = false,
-        bookInfoNetworkCoverBackground = "network-background",
-        bookInfoDefaultCoverBackground = "default-background",
-        bookInfoInputColor = 0,
-        backgroundImageLight = "light-background",
-        backgroundImageDark = "dark-background",
-        backgroundImageBlurring = 124,
-        backgroundImageDarkBlurring = 125,
-        largeContainerBackgroundImageLight = "large-container-light",
-        largeContainerBackgroundImageDark = "large-container-dark",
-        itemBackgroundImageLight = "item-light",
-        itemBackgroundImageDark = "item-dark",
-        enableContainerBackgroundImage = true,
-        appColumnBackgroundOpacity = 127,
-        glassCardBackgroundOpacity = 128,
-        enableItemDivider = false,
-        itemDividerWidth = 4.5f,
-        itemDividerLength = 5.75f,
-        itemDividerColor = 126,
-        eyeProtectionEnabled = false,
-        colorTemperature = 127,
-        eyeProtectionAutoNight = false,
-        eyeProtectionSchedule = false,
-        eyeProtectionStartTime = "start-time",
-        eyeProtectionEndTime = "end-time",
-        showRefactorTip = false,
-        enableCustomTagColors = false,
-        customTagColorsJson = "tag-colors",
-    )
+    val base =
+        ThemeSettings(
+            appTheme = "app-theme",
+            useMiuixMonet = false,
+            isPureBlack = false,
+            paletteStyle = "palette-style",
+            materialVersion = "material-version",
+            customContrast = "custom-contrast",
+            customMode = "tonalSpot",
+            appFontPath = "app-font",
+            customPrimary = 101,
+            customNightPrimary = 102,
+            enableDeepPersonalization = false,
+            themeColor = 103,
+            secondaryThemeColor = 104,
+            primaryTextColor = 105,
+            secondaryTextColor = 106,
+            themeBackgroundColor = 107,
+            labelContainerColor = 108,
+            themeColorNight = 109,
+            secondaryThemeColorNight = 110,
+            primaryTextColorNight = 111,
+            secondaryTextColorNight = 112,
+            themeBackgroundColorNight = 113,
+            labelContainerColorNight = 114,
+            containerOpacity = 115,
+            overrideBaseCardCornerRadius = false,
+            baseCardCornerRadius = 1.25f,
+            overrideBaseCardBorder = false,
+            baseCardBorderWidth = 2.5f,
+            baseCardBorderColor = 116,
+            baseCardBorderColorNight = 117,
+            disableSplicedColumnGroupCornerRadius = false,
+            topBarOpacity = 118,
+            bottomBarOpacity = 119,
+            enableBlur = false,
+            enableProgressiveBlur = false,
+            topBarBlurRadius = 120,
+            bottomBarBlurRadius = 121,
+            topBarBlurAlpha = 122,
+            bottomBarBlurAlpha = 123,
+            bottomBarLensRadius = 3.75f,
+            useFlexibleTopAppBar = false,
+            topBarButtonStyle = "glass",
+            mergeTopBarActions = true,
+            bookInfoFollowCoverColor = false,
+            bookInfoNetworkCoverBackground = "network-background",
+            bookInfoDefaultCoverBackground = "default-background",
+            bookInfoInputColor = 0,
+            backgroundImageLight = "light-background",
+            backgroundImageDark = "dark-background",
+            backgroundImageBlurring = 124,
+            backgroundImageDarkBlurring = 125,
+            largeContainerBackgroundImageLight = "large-container-light",
+            largeContainerBackgroundImageDark = "large-container-dark",
+            itemBackgroundImageLight = "item-light",
+            itemBackgroundImageDark = "item-dark",
+            enableContainerBackgroundImage = true,
+            appColumnBackgroundOpacity = 127,
+            glassCardBackgroundOpacity = 128,
+            enableItemDivider = false,
+            itemDividerWidth = 4.5f,
+            itemDividerLength = 5.75f,
+            itemDividerColor = 126,
+            eyeProtectionEnabled = false,
+            colorTemperature = 127,
+            eyeProtectionAutoNight = false,
+            eyeProtectionSchedule = false,
+            eyeProtectionStartTime = "start-time",
+            eyeProtectionEndTime = "end-time",
+            showRefactorTip = false,
+            enableCustomTagColors = false,
+            customTagColorsJson = "tag-colors",
+        )
     return listOf(
         base,
         base.copy(useMiuixMonet = true),

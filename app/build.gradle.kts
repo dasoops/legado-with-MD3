@@ -59,7 +59,7 @@ android {
                 arguments += mapOf(
                     "room.incremental" to "true",
                     "room.expandProjection" to "true",
-                    "room.schemaLocation" to "$projectDir/schemas"
+                    "room.schemaLocation" to "$projectDir/schemas",
                 )
             }
         }
@@ -81,7 +81,7 @@ android {
             isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
+                "proguard-rules.pro",
             )
         }
         create("noR8") {
@@ -101,7 +101,7 @@ android {
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
+                "proguard-rules.pro",
             )
         }
     }
@@ -200,7 +200,6 @@ dependencies {
     implementation(libs.gson)
     implementation(libs.lifecycle.common.java8)
     implementation(libs.lifecycle.service)
-    implementation(libs.media.media)
     implementation(libs.splitties.appctx)
     implementation(libs.splitties.systemservices)
     implementation(libs.splitties.views)
@@ -211,7 +210,6 @@ dependencies {
     implementation(libs.liveeventbus)
     implementation(libs.jsoup)
     implementation(libs.json.path)
-    implementation(libs.jsoupxpath)
     implementation(libs.intellij.markdown)
     implementation(project(":modules:book"))
     implementation(libs.okhttp)

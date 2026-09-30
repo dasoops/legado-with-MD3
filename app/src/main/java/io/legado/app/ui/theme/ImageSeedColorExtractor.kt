@@ -35,20 +35,25 @@ suspend fun ImageLoader.extractSeedColor(
     data: Any,
     configureRequest: ImageRequest.Builder.() -> Unit = {},
 ): Color? {
-    val request = ImageRequest.Builder(context)
-        .data(data)
-        .allowHardware(false)
-        .size(Size(IMAGE_COLOR_EXTRACT_SIZE_PX, IMAGE_COLOR_EXTRACT_SIZE_PX))
-        .apply(configureRequest)
-        .build()
+    val request =
+        ImageRequest
+            .Builder(context)
+            .data(data)
+            .allowHardware(false)
+            .size(Size(IMAGE_COLOR_EXTRACT_SIZE_PX, IMAGE_COLOR_EXTRACT_SIZE_PX))
+            .apply(configureRequest)
+            .build()
 
-    val result = withContext(Dispatchers.IO) {
-        execute(request)
-    } as? SuccessResult ?: return null
+    val result =
+        withContext(Dispatchers.IO) {
+            execute(request)
+        } as? SuccessResult ?: return null
 
     return withContext(Dispatchers.Default) {
-        val bitmap = result.image.asDrawable(context.resources)
-            .toSafeBitmap(IMAGE_COLOR_EXTRACT_SIZE_PX)
+        val bitmap =
+            result.image
+                .asDrawable(context.resources)
+                .toSafeBitmap(IMAGE_COLOR_EXTRACT_SIZE_PX)
         Color(bitmap.extractSeedColor())
     }
 }
@@ -67,11 +72,12 @@ fun rememberImageSeedColor(
         if (data == null) {
             seedColor = null
         } else {
-            val extracted = imageLoader.extractSeedColor(
-                context = context,
-                data = data,
-                configureRequest = configureRequest
-            )
+            val extracted =
+                imageLoader.extractSeedColor(
+                    context = context,
+                    data = data,
+                    configureRequest = configureRequest,
+                )
             if (extracted != null) {
                 seedColor = extracted
             }
@@ -87,18 +93,20 @@ internal fun Bitmap.extractSeedColor(
     val needsScaling =
         width > IMAGE_QUANTIZE_BITMAP_MAX_SIZE || height > IMAGE_QUANTIZE_BITMAP_MAX_SIZE
 
-    val scaledBitmap = if (needsScaling) {
-        val scale = minOf(
-            IMAGE_QUANTIZE_BITMAP_MAX_SIZE.toFloat() / width,
-            IMAGE_QUANTIZE_BITMAP_MAX_SIZE.toFloat() / height
-        )
-        scale(
-            (width * scale).toInt().coerceAtLeast(1),
-            (height * scale).toInt().coerceAtLeast(1)
-        )
-    } else {
-        this
-    }
+    val scaledBitmap =
+        if (needsScaling) {
+            val scale =
+                minOf(
+                    IMAGE_QUANTIZE_BITMAP_MAX_SIZE.toFloat() / width,
+                    IMAGE_QUANTIZE_BITMAP_MAX_SIZE.toFloat() / height,
+                )
+            scale(
+                (width * scale).toInt().coerceAtLeast(1),
+                (height * scale).toInt().coerceAtLeast(1),
+            )
+        } else {
+            this
+        }
 
     return try {
         val pixels = IntArray(scaledBitmap.width * scaledBitmap.height)
@@ -109,7 +117,7 @@ internal fun Bitmap.extractSeedColor(
             0,
             0,
             scaledBitmap.width,
-            scaledBitmap.height
+            scaledBitmap.height,
         )
 
         val quantized = QuantizerCelebi.quantize(pixels, maxColors)
@@ -128,14 +136,15 @@ internal fun Drawable.toSafeBitmap(maxSizePx: Int): Bitmap {
             return rawBitmap
         }
 
-        val scale = minOf(
-            1f,
-            maxSizePx.toFloat() / rawBitmap.width,
-            maxSizePx.toFloat() / rawBitmap.height
-        )
+        val scale =
+            minOf(
+                1f,
+                maxSizePx.toFloat() / rawBitmap.width,
+                maxSizePx.toFloat() / rawBitmap.height,
+            )
         return rawBitmap.scale(
             (rawBitmap.width * scale).toInt().coerceAtLeast(1),
-            (rawBitmap.height * scale).toInt().coerceAtLeast(1)
+            (rawBitmap.height * scale).toInt().coerceAtLeast(1),
         )
     }
 
@@ -145,6 +154,6 @@ internal fun Drawable.toSafeBitmap(maxSizePx: Int): Bitmap {
 
     return toBitmap(
         width = (rawWidth * scale).toInt().coerceAtLeast(1),
-        height = (rawHeight * scale).toInt().coerceAtLeast(1)
+        height = (rawHeight * scale).toInt().coerceAtLeast(1),
     )
 }

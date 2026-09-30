@@ -16,28 +16,28 @@ fun SmallOutlinedButton(
     selected: Boolean = false,
     icon: ImageVector? = null,
     text: String? = null,
-    contentDescription: String? = null
+    contentDescription: String? = null,
 ) {
     SeriesButton(
-            onClick = onClick,
-            modifier = modifier,
-            enabled = enabled,
-            selected = selected,
-            onLongClick = onLongClick,
-            size = if (text == null) smallContainerSize() else null,
+        onClick = onClick,
+        modifier = modifier,
+        enabled = enabled,
+        selected = selected,
+        onLongClick = onLongClick,
+        size = if (text == null) smallContainerSize() else null,
         enforceMinimumInteractiveSize = false,
         shape = SmallButtonShape,
-            style = SeriesIconButtonStyle.Outlined
-        ) { contentColor ->
-            SeriesButtonContent(
-                icon = icon,
-                text = text,
-                contentDescription = contentDescription,
-                iconSize = smallIconSize,
-                textStyle = LegadoTheme.typography.labelMedium,
-                contentColor = contentColor,
-                padding = PaddingValues(horizontal = 8.dp, vertical = 6.dp),
-                spacing = 4.dp
-            )
+        style = SeriesIconButtonStyle.Outlined,
+    ) { contentColor ->
+        SeriesButtonContent(
+            icon = icon,
+            text = text,
+            contentDescription = contentDescription,
+            iconSize = smallIconSize,
+            textStyle = LegadoTheme.typography.labelMedium,
+            contentColor = contentColor,
+            padding = PaddingValues(horizontal = 8.dp, vertical = 6.dp),
+            spacing = 4.dp,
+        )
     }
 }

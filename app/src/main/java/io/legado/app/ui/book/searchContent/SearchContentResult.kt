@@ -12,7 +12,6 @@ import kotlinx.coroutines.flow.asSharedFlow
  * the search route is on top of the NavDisplay back stack).
  */
 object SearchContentResult {
-
     sealed interface Event {
         val bookUrl: String
     }
@@ -24,7 +23,9 @@ object SearchContentResult {
         val query: String,
     ) : Event
 
-    data class Clear(override val bookUrl: String) : Event
+    data class Clear(
+        override val bookUrl: String,
+    ) : Event
 
     private val _results = MutableSharedFlow<Event>(replay = 1)
     val results = _results.asSharedFlow()

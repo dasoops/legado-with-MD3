@@ -23,9 +23,9 @@ import io.legado.app.ui.theme.LegadoTheme
 import io.legado.app.ui.theme.LegadoTheme.composeEngine
 import io.legado.app.ui.theme.ThemeResolver
 import io.legado.app.ui.widget.components.card.NormalCard
-import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.basic.Icon as MiuixIcon
 import top.yukonga.miuix.kmp.basic.Text as MiuixText
+import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 @Composable
 fun ToggleChip(
@@ -34,59 +34,66 @@ fun ToggleChip(
     onToggle: () -> Unit,
     modifier: Modifier = Modifier,
     checkedContentDescription: String = "已选择",
-    uncheckedContentDescription: String = "未选择"
+    uncheckedContentDescription: String = "未选择",
 ) {
     if (ThemeResolver.isMiuixEngine(composeEngine)) {
-        NormalCard (
-            modifier = modifier
+        NormalCard(
+            modifier =
+            modifier
                 .padding(vertical = 2.dp)
                 .semantics {
-                    toggleableState = if (selected) {
-                        ToggleableState.On
-                    } else {
-                        ToggleableState.Off
-                    }
-                    stateDescription = if (selected) {
-                        checkedContentDescription
-                    } else {
-                        uncheckedContentDescription
-                    }
+                    toggleableState =
+                        if (selected) {
+                            ToggleableState.On
+                        } else {
+                            ToggleableState.Off
+                        }
+                    stateDescription =
+                        if (selected) {
+                            checkedContentDescription
+                        } else {
+                            uncheckedContentDescription
+                        }
                 },
             cornerRadius = 12.dp,
             onClick = onToggle,
-            containerColor = if (selected) {
+            containerColor =
+            if (selected) {
                 MiuixTheme.colorScheme.secondaryContainer
             } else {
                 MiuixTheme.colorScheme.surfaceContainer
-            }
+            },
         ) {
             Row(
-                modifier = Modifier
+                modifier =
+                Modifier
                     .padding(horizontal = 12.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.Center,
             ) {
                 AnimatedVisibility(
-                    visible = selected
+                    visible = selected,
                 ) {
                     MiuixIcon(
                         imageVector = Icons.Default.Check,
                         contentDescription = checkedContentDescription,
-                        modifier = Modifier
+                        modifier =
+                        Modifier
                             .padding(end = 8.dp)
                             .size(16.dp),
-                        tint = if (selected) MiuixTheme.colorScheme.primary else MiuixTheme.colorScheme.onSurface
+                        tint = if (selected) MiuixTheme.colorScheme.primary else MiuixTheme.colorScheme.onSurface,
                     )
                 }
 
                 MiuixText(
-                    modifier = Modifier
+                    modifier =
+                    Modifier
                         .padding(vertical = 8.dp),
                     text = label,
                     style = LegadoTheme.typography.labelMediumEmphasized,
                     maxLines = 1,
                     softWrap = false,
-                    color = if (selected) MiuixTheme.colorScheme.onSurface else MiuixTheme.colorScheme.onSurface
+                    color = if (selected) MiuixTheme.colorScheme.onSurface else MiuixTheme.colorScheme.onSurface,
                 )
             }
         }
@@ -96,15 +103,18 @@ fun ToggleChip(
             onClick = onToggle,
             modifier = modifier,
             label = { Text(label) },
-            leadingIcon = if (selected) {
+            leadingIcon =
+            if (selected) {
                 {
                     Icon(
                         Icons.Default.Check,
                         contentDescription = checkedContentDescription,
-                        Modifier.size(FilterChipDefaults.IconSize)
+                        Modifier.size(FilterChipDefaults.IconSize),
                     )
                 }
-            } else null
+            } else {
+                null
+            },
         )
     }
 }

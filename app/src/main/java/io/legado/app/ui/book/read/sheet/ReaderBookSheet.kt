@@ -32,16 +32,13 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Block
 import androidx.compose.material.icons.filled.BookmarkAdd
 import androidx.compose.material.icons.filled.Clear
-import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Numbers
-import androidx.compose.material.icons.filled.Payment
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.SelectAll
@@ -57,7 +54,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import io.legado.app.utils.HtmlFormatter
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -75,7 +71,6 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.legado.app.R
 import io.legado.app.data.entities.Book
-import io.legado.app.data.entities.BookSource
 import io.legado.app.data.entities.Bookmark
 import io.legado.app.help.book.isLocal
 import io.legado.app.help.book.isLocalTxt
@@ -97,18 +92,18 @@ import io.legado.app.ui.widget.components.card.NormalCard
 import io.legado.app.ui.widget.components.card.TextCard
 import io.legado.app.ui.widget.components.image.cover.CoilBookCover
 import io.legado.app.ui.widget.components.lazylist.FastScrollLazyColumn
-import io.legado.app.ui.widget.components.menuItem.MenuItemIcon
 import io.legado.app.ui.widget.components.menuItem.RoundDropdownMenu
 import io.legado.app.ui.widget.components.menuItem.RoundDropdownMenuItem
 import io.legado.app.ui.widget.components.modalBottomSheet.AppModalBottomSheet
 import io.legado.app.ui.widget.components.tabRow.CardTabRow
 import io.legado.app.ui.widget.components.text.AppText
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.launch
-import org.koin.androidx.compose.koinViewModel
+import io.legado.app.utils.HtmlFormatter
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
+import org.koin.androidx.compose.koinViewModel
 
 enum class ReaderBookSheetTab {
     Information,
@@ -133,39 +128,39 @@ fun ReaderBookSheetRoute(
     onMarkingNavigate: (TocMarkingItemUi) -> Unit = { _ -> },
     /** 笔记页点击进入 MarkingSheet 编辑。 */
     onMarkingEdit: (markingId: String) -> Unit = {},
-    bookSource: BookSource? = null,
-    onOpenChapterUrl: () -> Unit = {},
-    sourceActions: ReaderBookSourceActions? = null,
     viewModel: TocViewModel = koinViewModel(key = "reader-book-sheet-$bookUrl"),
 ) {
     val state by viewModel.screenState.collectAsStateWithLifecycle()
     val context = LocalContext.current
     var pendingExportMarkdown by remember { mutableStateOf(false) }
 
-    val exportLauncher = rememberLauncherForActivityResult(
-        ActivityResultContracts.CreateDocument("*/*")
-    ) { uri: Uri? ->
-        uri?.let { viewModel.onIntent(TocIntent.ExportBookmarks(it, pendingExportMarkdown)) }
-    }
-    val tocRegexLauncher = rememberLauncherForActivityResult(
-        ActivityResultContracts.StartActivityForResult()
-    ) { result ->
-        if (result.resultCode == Activity.RESULT_OK) {
-            viewModel.onIntent(
-                TocIntent.SaveTocRegex(result.data?.getStringExtra("tocRegex").orEmpty())
-            )
+    val exportLauncher =
+        rememberLauncherForActivityResult(
+            ActivityResultContracts.CreateDocument("*/*"),
+        ) { uri: Uri? ->
+            uri?.let { viewModel.onIntent(TocIntent.ExportBookmarks(it, pendingExportMarkdown)) }
         }
-    }
-    val fullTocLauncher = rememberLauncherForActivityResult(
-        ActivityResultContracts.StartActivityForResult()
-    ) { result ->
-        if (result.resultCode == Activity.RESULT_OK) {
-            onChapterClick(
-                result.data?.getIntExtra("index", 0) ?: 0,
-                result.data?.getIntExtra("chapterPos", 0) ?: 0,
-            )
+    val tocRegexLauncher =
+        rememberLauncherForActivityResult(
+            ActivityResultContracts.StartActivityForResult(),
+        ) { result ->
+            if (result.resultCode == Activity.RESULT_OK) {
+                viewModel.onIntent(
+                    TocIntent.SaveTocRegex(result.data?.getStringExtra("tocRegex").orEmpty()),
+                )
+            }
         }
-    }
+    val fullTocLauncher =
+        rememberLauncherForActivityResult(
+            ActivityResultContracts.StartActivityForResult(),
+        ) { result ->
+            if (result.resultCode == Activity.RESULT_OK) {
+                onChapterClick(
+                    result.data?.getIntExtra("index", 0) ?: 0,
+                    result.data?.getIntExtra("chapterPos", 0) ?: 0,
+                )
+            }
+        }
 
     LaunchedEffect(bookUrl) {
         viewModel.onIntent(TocIntent.LoadBook(bookUrl))
@@ -173,8 +168,9 @@ fun ReaderBookSheetRoute(
     LaunchedEffect(viewModel) {
         viewModel.effects.collectLatest { effect ->
             when (effect) {
-                is TocEffect.ShowMessage ->
+                is TocEffect.ShowMessage -> {
                     Toast.makeText(context, effect.message, Toast.LENGTH_SHORT).show()
+                }
             }
         }
     }
@@ -196,7 +192,9 @@ fun ReaderBookSheetRoute(
         onMarkingEdit = onMarkingEdit,
         onOpenFullScreen = { tab ->
             when (tab) {
-                ReaderBookSheetTab.Information -> onOpenFullBookInfo()
+                ReaderBookSheetTab.Information -> {
+                    onOpenFullBookInfo()
+                }
                 ReaderBookSheetTab.Toc -> {
                     if (onOpenFullToc != null) {
                         onOpenFullToc()
@@ -204,38 +202,35 @@ fun ReaderBookSheetRoute(
                         fullTocLauncher.launch(
                             Intent(context, TocActivity::class.java)
                                 .putExtra("bookUrl", bookUrl)
-                                .putExtra("initialPage", 0)
+                                .putExtra("initialPage", 0),
                         )
                     }
                 }
-
                 ReaderBookSheetTab.Bookmarks -> {
                     fullTocLauncher.launch(
                         Intent(context, TocActivity::class.java)
                             .putExtra("bookUrl", bookUrl)
-                            .putExtra("initialPage", 1)
+                            .putExtra("initialPage", 1),
                     )
                 }
-
                 // 笔记页无全屏落地（TocActivity 暂无对应页）
-                ReaderBookSheetTab.Marks -> Unit
+                ReaderBookSheetTab.Marks -> {
+                    Unit
+                }
             }
         },
         onEditLocalTocRule = { regex ->
             tocRegexLauncher.launch(
                 Intent(context, TxtTocRulePreviewActivity::class.java)
                     .putExtra("bookUrl", bookUrl)
-                    .putExtra("tocRegex", regex)
+                    .putExtra("tocRegex", regex),
             )
         },
         onExportBookmarks = { isMarkdown, fileName ->
             pendingExportMarkdown = isMarkdown
             exportLauncher.launch(fileName)
         },
-        bookSource = bookSource,
         onOpenFullBookInfo = onOpenFullBookInfo,
-        onOpenChapterUrl = onOpenChapterUrl,
-        sourceActions = sourceActions,
     )
 }
 
@@ -254,10 +249,7 @@ private fun ReaderBookSheet(
     onOpenFullScreen: (ReaderBookSheetTab) -> Unit,
     onEditLocalTocRule: (String?) -> Unit,
     onExportBookmarks: (isMarkdown: Boolean, fileName: String) -> Unit,
-    bookSource: BookSource? = null,
     onOpenFullBookInfo: () -> Unit = {},
-    onOpenChapterUrl: () -> Unit = {},
-    sourceActions: ReaderBookSourceActions? = null,
 ) {
     val initialPage = initialTab.ordinal
     val pagerState = rememberPagerState(initialPage = initialPage) { ReaderBookSheetTab.entries.size }
@@ -265,9 +257,12 @@ private fun ReaderBookSheet(
     var editingBookmark by remember { mutableStateOf<Bookmark?>(null) }
 
     val density = LocalDensity.current
-    val maxHeight = with(density) {
-        LocalWindowInfo.current.containerSize.height.toDp() * 0.72f
-    }
+    val maxHeight =
+        with(density) {
+            LocalWindowInfo.current.containerSize.height
+                .toDp() *
+                0.72f
+        }
 
     LaunchedEffect(show, initialPage) {
         if (show) pagerState.scrollToPage(initialPage)
@@ -281,20 +276,19 @@ private fun ReaderBookSheet(
         onDismissRequest = onDismissRequest,
         animateContentSize = false,
         contentPaddingEnabled = false,
-        modifier = Modifier
+        modifier =
+        Modifier
             .heightIn(max = maxHeight),
     ) {
         Box(modifier = Modifier.padding(horizontal = 16.dp)) {
             ReaderBookHeader(
                 book = state.book,
-                bookSource = bookSource,
                 onOpenBookInfo = onOpenFullBookInfo,
-                onOpenChapterUrl = onOpenChapterUrl,
-                sourceActions = sourceActions,
             )
         }
         CardTabRow(
-            tabTitles = listOf(
+            tabTitles =
+            listOf(
                 stringResource(R.string.information),
                 stringResource(R.string.chapter_list),
                 stringResource(R.string.bookmark),
@@ -313,49 +307,57 @@ private fun ReaderBookSheet(
                     onOpenFullScreen(tab)
                 }
             },
-            modifier = Modifier
+            modifier =
+            Modifier
                 .fillMaxWidth()
                 .padding(start = 16.dp, top = 8.dp, end = 16.dp),
         )
         HorizontalPager(
             state = pagerState,
-            modifier = Modifier
+            modifier =
+            Modifier
                 .fillMaxWidth()
                 .weight(1f),
         ) { page ->
             Box(
-                modifier = Modifier
+                modifier =
+                Modifier
                     .fillMaxSize()
                     .padding(start = 16.dp, end = 16.dp, bottom = 16.dp),
             ) {
                 when (ReaderBookSheetTab.entries[page]) {
-                    ReaderBookSheetTab.Information -> ReaderBookInformation(
-                        book = state.book,
-                    )
-
-                    ReaderBookSheetTab.Toc -> ReaderBookTocPage(
-                        state = state,
-                        onIntent = onIntent,
-                        onChapterClick = onChapterClick,
-                        currentChapterIndex = currentChapterIndex,
-                        onEditLocalTocRule = onEditLocalTocRule,
-                    )
-
-                    ReaderBookSheetTab.Bookmarks -> ReaderBookBookmarksPage(
-                        state = state,
-                        onIntent = onIntent,
-                        onBookmarkNavigate = onBookmarkNavigate,
-                        onEditBookmark = { editingBookmark = it },
-                        onExportBookmarks = onExportBookmarks,
-                    )
-
-                    ReaderBookSheetTab.Marks -> ReaderBookMarkingsPage(
-                        markings = state.markings,
-                        currentChapterIndex = state.book?.durChapterIndex,
-                        currentBookUrl = state.book?.bookUrl,
-                        onMarkingNavigate = onMarkingNavigate,
-                        onMarkingEdit = onMarkingEdit,
-                    )
+                    ReaderBookSheetTab.Information -> {
+                        ReaderBookInformation(
+                            book = state.book,
+                        )
+                    }
+                    ReaderBookSheetTab.Toc -> {
+                        ReaderBookTocPage(
+                            state = state,
+                            onIntent = onIntent,
+                            onChapterClick = onChapterClick,
+                            currentChapterIndex = currentChapterIndex,
+                            onEditLocalTocRule = onEditLocalTocRule,
+                        )
+                    }
+                    ReaderBookSheetTab.Bookmarks -> {
+                        ReaderBookBookmarksPage(
+                            state = state,
+                            onIntent = onIntent,
+                            onBookmarkNavigate = onBookmarkNavigate,
+                            onEditBookmark = { editingBookmark = it },
+                            onExportBookmarks = onExportBookmarks,
+                        )
+                    }
+                    ReaderBookSheetTab.Marks -> {
+                        ReaderBookMarkingsPage(
+                            markings = state.markings,
+                            currentChapterIndex = state.book?.durChapterIndex,
+                            currentBookUrl = state.book?.bookUrl,
+                            onMarkingNavigate = onMarkingNavigate,
+                            onMarkingEdit = onMarkingEdit,
+                        )
+                    }
                 }
             }
         }
@@ -377,28 +379,18 @@ private fun ReaderBookSheet(
     )
 }
 
-data class ReaderBookSourceActions(
-    val onPay: () -> Unit = {},
-    val onEdit: () -> Unit = {},
-    val onDisable: () -> Unit = {},
-)
-
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 internal fun ReaderBookHeader(
     book: Book?,
-    bookSource: BookSource? = null,
     onOpenBookInfo: (() -> Unit)? = null,
-    onOpenChapterUrl: (() -> Unit)? = null,
-    sourceActions: ReaderBookSourceActions? = null,
 ) {
     val current = ((book?.durChapterIndex ?: -1) + 1).coerceAtLeast(0)
     val total = book?.totalChapterNum?.coerceAtLeast(0) ?: 0
-    val isLocal = book?.isLocal == true
-    var sourceMenuExpanded by remember { mutableStateOf(false) }
 
     Row(
-        modifier = Modifier
+        modifier =
+        Modifier
             .fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(12.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -418,7 +410,8 @@ internal fun ReaderBookHeader(
         ) {
             AppText(
                 text = book?.name.orEmpty(),
-                modifier = if (onOpenBookInfo != null) {
+                modifier =
+                if (onOpenBookInfo != null) {
                     Modifier.clickable { onOpenBookInfo() }
                 } else {
                     Modifier
@@ -431,17 +424,11 @@ internal fun ReaderBookHeader(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 AppText(
-                    modifier = Modifier
+                    modifier =
+                    Modifier
                         .padding(end = 16.dp)
                         .basicMarquee()
-                        .weight(1f)
-                        .then(
-                            if (!isLocal && onOpenChapterUrl != null) {
-                                Modifier.clickable { onOpenChapterUrl() }
-                            } else {
-                                Modifier
-                            }
-                        ),
+                        .weight(1f),
                     text = book?.durChapterTitle.orEmpty(),
                     style = LegadoTheme.typography.labelSmallEmphasized,
                     color = LegadoTheme.colorScheme.onSurfaceVariant,
@@ -452,26 +439,6 @@ internal fun ReaderBookHeader(
                     backgroundColor = LegadoTheme.colorScheme.onSheetContent,
                     text = if (total > 0) "$current / $total" else "--",
                 )
-            }
-            if (!isLocal && sourceActions != null && !book?.originName.isNullOrBlank()) {
-                Box {
-                    AppText(
-                        text = book.originName,
-                        modifier = Modifier
-                            .clickable { sourceMenuExpanded = true }
-                            .padding(top = 4.dp),
-                        style = LegadoTheme.typography.labelSmall,
-                        color = LegadoTheme.colorScheme.onSurfaceVariant,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                    )
-                    ReaderBookSourceDropdown(
-                        expanded = sourceMenuExpanded,
-                        onDismiss = { sourceMenuExpanded = false },
-                        bookSource = bookSource,
-                        sourceActions = sourceActions,
-                    )
-                }
             }
         }
     }
@@ -494,7 +461,8 @@ data class ReaderBookHeaderState(
 @Composable
 internal fun ReaderBookHeader(state: ReaderBookHeaderState) {
     ReaderBookHeader(
-        book = Book(
+        book =
+        Book(
             bookUrl = state.bookUrl,
             origin = state.sourceUrl,
             originName = state.sourceName,
@@ -510,49 +478,7 @@ internal fun ReaderBookHeader(state: ReaderBookHeaderState) {
 }
 
 @Composable
-private fun ReaderBookSourceDropdown(
-    expanded: Boolean,
-    onDismiss: () -> Unit,
-    bookSource: BookSource?,
-    sourceActions: ReaderBookSourceActions,
-) {
-    RoundDropdownMenu(
-        expanded = expanded,
-        onDismissRequest = onDismiss,
-    ) {
-        if (!bookSource?.getContentRule()?.payAction.isNullOrBlank()) {
-            RoundDropdownMenuItem(
-                leadingIcon = { MenuItemIcon(Icons.Default.Payment) },
-                text = stringResource(R.string.chapter_pay),
-                onClick = {
-                    onDismiss()
-                    sourceActions.onPay()
-                },
-            )
-        }
-        RoundDropdownMenuItem(
-            leadingIcon = { MenuItemIcon(Icons.Default.Edit) },
-            text = stringResource(R.string.edit_source),
-            onClick = {
-                onDismiss()
-                sourceActions.onEdit()
-            },
-        )
-        RoundDropdownMenuItem(
-            leadingIcon = { MenuItemIcon(Icons.Default.Block) },
-            text = stringResource(R.string.disable_source),
-            onClick = {
-                onDismiss()
-                sourceActions.onDisable()
-            },
-        )
-    }
-}
-
-@Composable
-private fun ReaderBookInformation(
-    book: Book?,
-) {
+private fun ReaderBookInformation(book: Book?) {
     // 简介直接以 book.intro 原样塑进 Text 会有问题：部分书源的简介带
     // <usehtml>/<useweb>/<md> 前缀、<button>@onclick:JS</button> 与 HTML 标签，
     // 展示出来就是一堆调用源码；formatDisplayText 还会给每行补段首缩进
@@ -562,9 +488,10 @@ private fun ReaderBookInformation(
     // 注意：LazyColumn 的 content lambda 不是 composable 作用域，remember 必须
     // 提在本函数体开头调用。
     val rawIntro = book?.getDisplayIntro()?.takeIf { it.isNotBlank() }
-    val formattedIntro = remember(rawIntro) {
-        rawIntro?.let { HtmlFormatter.formatReadableText(it) }
-    }
+    val formattedIntro =
+        remember(rawIntro) {
+            rawIntro?.let { HtmlFormatter.formatReadableText(it) }
+        }
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(vertical = 8.dp),
@@ -587,7 +514,10 @@ private fun ReaderBookInformation(
 }
 
 @Composable
-private fun InformationRow(label: String, value: String) {
+private fun InformationRow(
+    label: String,
+    value: String,
+) {
     NormalCard(
         cornerRadius = 14.dp,
         containerColor = LegadoTheme.colorScheme.surfaceContainerLow,
@@ -622,18 +552,21 @@ private fun CompactSearchField(
     BasicTextField(
         value = query,
         onValueChange = onQueryChange,
-        modifier = modifier
+        modifier =
+        modifier
             .height(32.dp)
             .clip(shape)
             .background(LegadoTheme.colorScheme.surfaceContainerLow),
         singleLine = true,
-        textStyle = LegadoTheme.typography.bodySmall.copy(
+        textStyle =
+        LegadoTheme.typography.bodySmall.copy(
             color = LegadoTheme.colorScheme.onSurface,
         ),
         cursorBrush = SolidColor(LegadoTheme.colorScheme.primary),
         decorationBox = { innerTextField ->
             Row(
-                modifier = Modifier
+                modifier =
+                Modifier
                     .fillMaxSize()
                     .padding(horizontal = 8.dp),
                 verticalAlignment = Alignment.CenterVertically,
@@ -672,18 +605,21 @@ private fun CompactToolIconBox(
     contentDescription: String,
     onClick: () -> Unit,
 ) {
-    val containerColor = if (selected) {
-        LegadoTheme.colorScheme.secondaryContainer
-    } else {
-        LegadoTheme.colorScheme.surfaceContainerLow
-    }
-    val contentColor = if (selected) {
-        LegadoTheme.colorScheme.onSecondaryContainer
-    } else {
-        LegadoTheme.colorScheme.onSurfaceVariant
-    }
+    val containerColor =
+        if (selected) {
+            LegadoTheme.colorScheme.secondaryContainer
+        } else {
+            LegadoTheme.colorScheme.surfaceContainerLow
+        }
+    val contentColor =
+        if (selected) {
+            LegadoTheme.colorScheme.onSecondaryContainer
+        } else {
+            LegadoTheme.colorScheme.onSurfaceVariant
+        }
     Box(
-        modifier = Modifier
+        modifier =
+        Modifier
             .size(32.dp)
             .clip(RoundedCornerShape(10.dp))
             .background(containerColor)
@@ -717,29 +653,30 @@ private fun ReaderBookTocPage(
     val invertText = stringResource(R.string.invert_selection)
     val bookmarkText = stringResource(R.string.bookmark_add)
     val cancelText = stringResource(R.string.cancel)
-    val fabItems = remember(
-        selected,
-        action.selectedIds,
-        selectAllText,
-        invertText,
-        bookmarkText,
-        cancelText,
-    ) {
-        listOf(
-            FabMenuItem(Icons.Default.SelectAll, selectAllText) {
-                onIntent(TocIntent.SelectAll)
-            },
-            FabMenuItem(Icons.Default.SwapVert, invertText) {
-                onIntent(TocIntent.InvertSelection)
-            },
-            FabMenuItem(Icons.Default.BookmarkAdd, bookmarkText) {
-                onIntent(TocIntent.AddBookmarksForSelected)
-            },
-            FabMenuItem(Icons.Default.Clear, cancelText) {
-                onIntent(TocIntent.ClearSelection)
-            },
-        )
-    }
+    val fabItems =
+        remember(
+            selected,
+            action.selectedIds,
+            selectAllText,
+            invertText,
+            bookmarkText,
+            cancelText,
+        ) {
+            listOf(
+                FabMenuItem(Icons.Default.SelectAll, selectAllText) {
+                    onIntent(TocIntent.SelectAll)
+                },
+                FabMenuItem(Icons.Default.SwapVert, invertText) {
+                    onIntent(TocIntent.InvertSelection)
+                },
+                FabMenuItem(Icons.Default.BookmarkAdd, bookmarkText) {
+                    onIntent(TocIntent.AddBookmarksForSelected)
+                },
+                FabMenuItem(Icons.Default.Clear, cancelText) {
+                    onIntent(TocIntent.ClearSelection)
+                },
+            )
+        }
     LaunchedEffect(selected) {
         fabExpanded = false
     }
@@ -749,15 +686,17 @@ private fun ReaderBookTocPage(
         action.items.isNotEmpty(),
         currentChapterIndex,
     ) {
-        val currentIndex = action.items.indexOfFirst {
-            it.id == (currentChapterIndex ?: state.book?.durChapterIndex)
-        }
+        val currentIndex =
+            action.items.indexOfFirst {
+                it.id == (currentChapterIndex ?: state.book?.durChapterIndex)
+            }
         if (currentIndex >= 0) listState.scrollToItem(currentIndex)
     }
 
     Column(modifier = Modifier.fillMaxSize()) {
         Row(
-            modifier = Modifier
+            modifier =
+            Modifier
                 .fillMaxWidth()
                 .padding(vertical = 8.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -815,7 +754,8 @@ private fun ReaderBookTocPage(
                 items = fabItems,
                 visible = selected,
                 focusRequester = focusRequester,
-                modifier = Modifier
+                modifier =
+                Modifier
                     .align(Alignment.BottomEnd)
                     .offset(x = 8.dp, y = 8.dp),
             )
@@ -852,7 +792,8 @@ private fun ReaderSheetChapterList(
                 )
             } else {
                 ReaderSheetChapterItem(
-                    item = item.copy(
+                    item =
+                    item.copy(
                         isDur = item.id == (currentChapterIndex ?: state.book?.durChapterIndex),
                     ),
                     showWordCount = state.action.showWordCount,
@@ -883,7 +824,8 @@ private fun ReaderSheetVolumeItem(
         onClick = onClick,
         cornerRadius = 12.dp,
         containerColor = LegadoTheme.colorScheme.surfaceContainerLow,
-        modifier = modifier
+        modifier =
+        modifier
             .fillMaxWidth()
             .padding(start = (item.tocLevel.coerceIn(0, 6) * 10).dp),
     ) {
@@ -894,7 +836,8 @@ private fun ReaderSheetVolumeItem(
             Icon(
                 imageVector = Icons.Default.ExpandMore,
                 contentDescription = null,
-                modifier = Modifier
+                modifier =
+                Modifier
                     .size(18.dp)
                     .rotate(if (collapsed) -90f else 0f),
                 tint = LegadoTheme.colorScheme.primary,
@@ -919,23 +862,26 @@ private fun ReaderSheetChapterItem(
     onLongClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val containerColor = when {
-        item.isSelected -> LegadoTheme.colorScheme.primaryContainer
-        item.isDur -> LegadoTheme.colorScheme.secondaryContainer
-        else -> LegadoTheme.colorScheme.surfaceContainerLow
-    }
-    val contentColor = when {
-        item.isSelected -> LegadoTheme.colorScheme.onPrimaryContainer
-        item.isDur -> LegadoTheme.colorScheme.onSecondaryContainer
-        else -> LegadoTheme.colorScheme.onSurface
-    }
+    val containerColor =
+        when {
+            item.isSelected -> LegadoTheme.colorScheme.primaryContainer
+            item.isDur -> LegadoTheme.colorScheme.secondaryContainer
+            else -> LegadoTheme.colorScheme.surfaceContainerLow
+        }
+    val contentColor =
+        when {
+            item.isSelected -> LegadoTheme.colorScheme.onPrimaryContainer
+            item.isDur -> LegadoTheme.colorScheme.onSecondaryContainer
+            else -> LegadoTheme.colorScheme.onSurface
+        }
     NormalCard(
         onClick = onClick,
         onLongClick = onLongClick,
         cornerRadius = 12.dp,
         containerColor = containerColor,
         contentColor = contentColor,
-        modifier = modifier
+        modifier =
+        modifier
             .fillMaxWidth()
             .padding(start = (item.tocLevel.coerceIn(0, 6) * 10).dp),
     ) {
@@ -953,7 +899,8 @@ private fun ReaderSheetChapterItem(
                             imageVector = Icons.Default.Lock,
                             contentDescription = stringResource(R.string.a11y_vip_locked),
                             tint = LegadoTheme.colorScheme.error,
-                            modifier = Modifier
+                            modifier =
+                            Modifier
                                 .size(14.dp)
                                 .padding(end = 4.dp),
                         )
@@ -991,39 +938,44 @@ private fun ReaderSheetChapterStatus(
 ) {
     val showCount = showWordCount && !item.wordCount.isNullOrBlank()
     when {
-        showCount -> NormalCard(
-            cornerRadius = 8.dp,
-            containerColor = if (item.isDur) {
-                LegadoTheme.colorScheme.primaryContainer
-            } else {
-                LegadoTheme.colorScheme.surfaceContainer
-            },
-            modifier = Modifier.padding(horizontal = 8.dp),
-        ) {
-            AppText(
-                text = item.wordCount,
-                style = LegadoTheme.typography.labelSmallEmphasized.copy(fontSize = 8.sp),
-                color = if (item.isDur) {
-                    LegadoTheme.colorScheme.onPrimaryContainer
+        showCount -> {
+            NormalCard(
+                cornerRadius = 8.dp,
+                containerColor =
+                if (item.isDur) {
+                    LegadoTheme.colorScheme.primaryContainer
                 } else {
-                    LegadoTheme.colorScheme.onSurfaceVariant
+                    LegadoTheme.colorScheme.surfaceContainer
                 },
-                modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
-            )
+                modifier = Modifier.padding(horizontal = 8.dp),
+            ) {
+                AppText(
+                    text = item.wordCount,
+                    style = LegadoTheme.typography.labelSmallEmphasized.copy(fontSize = 8.sp),
+                    color =
+                    if (item.isDur) {
+                        LegadoTheme.colorScheme.onPrimaryContainer
+                    } else {
+                        LegadoTheme.colorScheme.onSurfaceVariant
+                    },
+                    modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+                )
+            }
         }
-        item.isDur -> ReaderSheetStatusIcon(Icons.Default.LocationOn)
+        item.isDur -> {
+            ReaderSheetStatusIcon(Icons.Default.LocationOn)
+        }
     }
 }
 
 @Composable
-private fun ReaderSheetStatusIcon(
-    imageVector: ImageVector,
-) {
+private fun ReaderSheetStatusIcon(imageVector: ImageVector) {
     Icon(
         imageVector = imageVector,
         contentDescription = null,
         tint = LegadoTheme.colorScheme.secondary,
-        modifier = Modifier
+        modifier =
+        Modifier
             .padding(horizontal = 8.dp)
             .size(16.dp),
     )
@@ -1037,6 +989,7 @@ private fun ReaderBookTocMenu(
     onEditLocalTocRule: (String?) -> Unit,
 ) {
     val book = state.book
+
     fun dispatch(intent: TocIntent) {
         onDismiss()
         onIntent(intent)
@@ -1080,7 +1033,8 @@ private fun ReaderBookBookmarksPage(
     val date = remember { SimpleDateFormat("yyyyMMdd_HHmm", Locale.getDefault()).format(Date()) }
     Column(modifier = Modifier.fillMaxSize()) {
         Row(
-            modifier = Modifier
+            modifier =
+            Modifier
                 .fillMaxWidth()
                 .padding(vertical = 8.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End),
@@ -1141,9 +1095,10 @@ private fun ReaderSheetBookmarkList(
 
     LaunchedEffect(bookmarks, currentChapterIndex) {
         if (bookmarks.isNotEmpty() && currentChapterIndex != null) {
-            val currentPosition = bookmarks
-                .indexOfLast { it.chapterIndex <= currentChapterIndex }
-                .coerceAtLeast(0)
+            val currentPosition =
+                bookmarks
+                    .indexOfLast { it.chapterIndex <= currentChapterIndex }
+                    .coerceAtLeast(0)
             listState.scrollToItem(currentPosition)
         }
     }
@@ -1188,16 +1143,18 @@ private fun ReaderSheetBookmarkItem(
     onLongClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val containerColor = if (item.isDur) {
-        LegadoTheme.colorScheme.secondaryContainer
-    } else {
-        LegadoTheme.colorScheme.surfaceContainerLow
-    }
-    val contentColor = if (item.isDur) {
-        LegadoTheme.colorScheme.onSecondaryContainer
-    } else {
-        LegadoTheme.colorScheme.onSurface
-    }
+    val containerColor =
+        if (item.isDur) {
+            LegadoTheme.colorScheme.secondaryContainer
+        } else {
+            LegadoTheme.colorScheme.surfaceContainerLow
+        }
+    val contentColor =
+        if (item.isDur) {
+            LegadoTheme.colorScheme.onSecondaryContainer
+        } else {
+            LegadoTheme.colorScheme.onSurface
+        }
 
     NormalCard(
         onClick = onClick,
@@ -1284,9 +1241,10 @@ private fun ReaderBookMarkingsPage(
         ) { marking ->
             ReaderSheetMarkingItem(
                 item = marking,
-                isOtherSource = currentBookUrl != null &&
-                        marking.bookUrl.isNotBlank() &&
-                        marking.bookUrl != currentBookUrl,
+                isOtherSource =
+                currentBookUrl != null &&
+                    marking.bookUrl.isNotBlank() &&
+                    marking.bookUrl != currentBookUrl,
                 onClick = { onMarkingEdit(marking.id) },
                 onLongClick = { onMarkingNavigate(marking) },
                 modifier = Modifier.animateItem(),
@@ -1303,20 +1261,23 @@ private fun ReaderSheetMarkingItem(
     onLongClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val containerColor = if (item.isDur) {
-        LegadoTheme.colorScheme.secondaryContainer
-    } else {
-        LegadoTheme.colorScheme.surfaceContainerLow
-    }
-    val contentColor = if (item.isDur) {
-        LegadoTheme.colorScheme.onSecondaryContainer
-    } else {
-        LegadoTheme.colorScheme.onSurface
-    }
-    val createdTime = remember(item.raw.createdAt) {
-        SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault())
-            .format(Date(item.raw.createdAt))
-    }
+    val containerColor =
+        if (item.isDur) {
+            LegadoTheme.colorScheme.secondaryContainer
+        } else {
+            LegadoTheme.colorScheme.surfaceContainerLow
+        }
+    val contentColor =
+        if (item.isDur) {
+            LegadoTheme.colorScheme.onSecondaryContainer
+        } else {
+            LegadoTheme.colorScheme.onSurface
+        }
+    val createdTime =
+        remember(item.raw.createdAt) {
+            SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault())
+                .format(Date(item.raw.createdAt))
+        }
 
     NormalCard(
         onClick = onClick,
@@ -1340,7 +1301,8 @@ private fun ReaderSheetMarkingItem(
                     modifier = Modifier.weight(1f),
                 )
                 AppText(
-                    text = item.chapterName.ifBlank {
+                    text =
+                    item.chapterName.ifBlank {
                         stringResource(R.string.chapter_index_format, item.chapterIndex + 1)
                     },
                     style = LegadoTheme.typography.labelSmallEmphasized,

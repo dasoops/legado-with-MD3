@@ -5,24 +5,25 @@ import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.os.Build
 import io.legado.app.constant.AppLog
-import okhttp3.internal.publicsuffix.PublicSuffixDatabase
-import splitties.systemservices.connectivityManager
 import java.net.InetAddress
 import java.net.NetworkInterface
 import java.net.SocketException
 import java.net.URL
 import java.util.BitSet
 import java.util.Enumeration
+import okhttp3.internal.publicsuffix.PublicSuffixDatabase
+import splitties.systemservices.connectivityManager
 
 @Suppress("unused", "MemberVisibilityCanBePrivate")
 object NetworkUtils {
-
     private val ipv4Pattern =
-        Regex("^(25[0-5]|2[0-4]\\d|[0-1]?\\d?\\d)\\.(25[0-5]|2[0-4]\\d|[0-1]?\\d?\\d)\\.(25[0-5]|2[0-4]\\d|[0-1]?\\d?\\d)\\.(25[0-5]|2[0-4]\\d|[0-1]?\\d?\\d)$")
-    private val ipv6Pattern = Regex(
-        "(([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]+|::(ffff(:0{1,4})?:)?((25[0-5]|(2[0-4]|1?[0-9])?[0-9])\\.){3}(25[0-5]|(2[0-4]|1?[0-9])?[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1?[0-9])?[0-9])\\.){3}(25[0-5]|(2[0-4]|1?[0-9])?[0-9]))"
-    )
-
+        Regex(
+            "^(25[0-5]|2[0-4]\\d|[0-1]?\\d?\\d)\\.(25[0-5]|2[0-4]\\d|[0-1]?\\d?\\d)\\.(25[0-5]|2[0-4]\\d|[0-1]?\\d?\\d)\\.(25[0-5]|2[0-4]\\d|[0-1]?\\d?\\d)$",
+        )
+    private val ipv6Pattern =
+        Regex(
+            "(([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]+|::(ffff(:0{1,4})?:)?((25[0-5]|(2[0-4]|1?[0-9])?[0-9])\\.){3}(25[0-5]|(2[0-4]|1?[0-9])?[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1?[0-9])?[0-9])\\.){3}(25[0-5]|(2[0-4]|1?[0-9])?[0-9]))",
+        )
 
     /**
      * 判断是否联网
@@ -35,12 +36,12 @@ object NetworkUtils {
             if (mWiFiNetworkInfo != null) {
                 // WIFI
                 return mWiFiNetworkInfo.type == ConnectivityManager.TYPE_WIFI ||
-                        // 移动数据
-                        mWiFiNetworkInfo.type == ConnectivityManager.TYPE_MOBILE ||
-                        // 以太网
-                        mWiFiNetworkInfo.type == ConnectivityManager.TYPE_ETHERNET ||
-                        // VPN
-                        mWiFiNetworkInfo.type == ConnectivityManager.TYPE_VPN
+                    // 移动数据
+                    mWiFiNetworkInfo.type == ConnectivityManager.TYPE_MOBILE ||
+                    // 以太网
+                    mWiFiNetworkInfo.type == ConnectivityManager.TYPE_ETHERNET ||
+                    // VPN
+                    mWiFiNetworkInfo.type == ConnectivityManager.TYPE_VPN
             }
         } else {
             val network = connectivityManager.activeNetwork
@@ -49,12 +50,12 @@ object NetworkUtils {
                 if (nc != null) {
                     // WIFI
                     return nc.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) ||
-                            // 移动数据
-                            nc.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) ||
-                            // 以太网
-                            nc.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET) ||
-                            // VPN
-                            nc.hasTransport(NetworkCapabilities.TRANSPORT_VPN)
+                        // 移动数据
+                        nc.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) ||
+                        // 以太网
+                        nc.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET) ||
+                        // VPN
+                        nc.hasTransport(NetworkCapabilities.TRANSPORT_VPN)
                 }
             }
         }
@@ -156,14 +157,15 @@ object NetworkUtils {
     /**
      * 判断c是否是16进制的字符
      */
-    private fun isDigit16Char(c: Char): Boolean {
-        return c in '0'..'9' || c in 'A'..'F' || c in 'a'..'f'
-    }
+    private fun isDigit16Char(c: Char): Boolean = c in '0'..'9' || c in 'A'..'F' || c in 'a'..'f'
 
     /**
      * 获取绝对地址
      */
-    fun getAbsoluteURL(baseURL: String?, relativePath: String): String {
+    fun getAbsoluteURL(
+        baseURL: String?,
+        relativePath: String,
+    ): String {
         if (baseURL.isNullOrEmpty()) return relativePath.trim()
         var absoluteUrl: URL? = null
         try {
@@ -177,7 +179,10 @@ object NetworkUtils {
     /**
      * 获取绝对地址
      */
-    fun getAbsoluteURL(baseURL: URL?, relativePath: String): String {
+    fun getAbsoluteURL(
+        baseURL: URL?,
+        relativePath: String,
+    ): String {
         val relativePathTrim = relativePath.trim()
         if (baseURL == null) return relativePathTrim
         if (relativePathTrim.isAbsUrl()) return relativePathTrim
@@ -196,13 +201,15 @@ object NetworkUtils {
 
     fun getBaseUrl(url: String?): String? {
         url ?: return null
-        if (url.startsWith("http://", true)
-            || url.startsWith("https://", true)
+        if (url.startsWith("http://", true) ||
+            url.startsWith("https://", true)
         ) {
             val index = url.indexOf("/", 9)
             return if (index == -1) {
                 url
-            } else url.substring(0, index)
+            } else {
+                url.substring(0, index)
+            }
         }
         return null
     }
@@ -216,35 +223,38 @@ object NetworkUtils {
      */
     fun getSubDomain(url: String): String {
         val baseUrl = getBaseUrl(url) ?: return url
-        return kotlin.runCatching {
-            val mURL = URL(baseUrl)
-            val host: String = mURL.host
-            //mURL.scheme https/http
-            //判断是否为ip
-            if (isIPAddress(host)) return host
-            //PublicSuffixDatabase处理域名
-            PublicSuffixDatabase.get().getEffectiveTldPlusOne(host) ?: host
-        }.getOrDefault(baseUrl)
+        return kotlin
+            .runCatching {
+                val mURL = URL(baseUrl)
+                val host: String = mURL.host
+                // mURL.scheme https/http
+                // 判断是否为ip
+                if (isIPAddress(host)) return host
+                // PublicSuffixDatabase处理域名
+                PublicSuffixDatabase.get().getEffectiveTldPlusOne(host) ?: host
+            }.getOrDefault(baseUrl)
     }
 
     fun getSubDomainOrNull(url: String): String? {
         val baseUrl = getBaseUrl(url) ?: return null
-        return kotlin.runCatching {
-            val mURL = URL(baseUrl)
-            val host: String = mURL.host
-            //mURL.scheme https/http
-            //判断是否为ip
-            if (isIPAddress(host)) return host
-            //PublicSuffixDatabase处理域名
-            PublicSuffixDatabase.get().getEffectiveTldPlusOne(host) ?: host
-        }.getOrDefault(null)
+        return kotlin
+            .runCatching {
+                val mURL = URL(baseUrl)
+                val host: String = mURL.host
+                // mURL.scheme https/http
+                // 判断是否为ip
+                if (isIPAddress(host)) return host
+                // PublicSuffixDatabase处理域名
+                PublicSuffixDatabase.get().getEffectiveTldPlusOne(host) ?: host
+            }.getOrDefault(null)
     }
 
     fun getDomain(url: String): String {
         val baseUrl = getBaseUrl(url) ?: return url
-        return kotlin.runCatching {
-            URL(baseUrl).host
-        }.getOrDefault(baseUrl)
+        return kotlin
+            .runCatching {
+                URL(baseUrl).host
+            }.getOrDefault(baseUrl)
     }
 
     /**
@@ -280,25 +290,19 @@ object NetworkUtils {
      * @param input the address string to check for validity.
      * @return True if the input parameter is a valid IPv4 address.
      */
-    fun isIPv4Address(input: String?): Boolean {
-        return input != null && input.isNotEmpty()
-                && input[0] in '1'..'9'
-                && input.count { it == '.' } == 3
-                && ipv4Pattern.matches(input)
-    }
+    fun isIPv4Address(input: String?): Boolean = input != null &&
+        input.isNotEmpty() &&
+        input[0] in '1'..'9' &&
+        input.count { it == '.' } == 3 &&
+        ipv4Pattern.matches(input)
 
     /**
      * Check if valid IPV6 address.
      */
-    fun isIPv6Address(input: String?): Boolean {
-        return input != null && input.contains(":") && ipv6Pattern.matches(input)
-    }
+    fun isIPv6Address(input: String?): Boolean = input != null && input.contains(":") && ipv6Pattern.matches(input)
 
     /**
      * Check if valid IP address.
      */
-    fun isIPAddress(input: String?): Boolean {
-        return isIPv4Address(input) || isIPv6Address(input)
-    }
-
+    fun isIPAddress(input: String?): Boolean = isIPv4Address(input) || isIPv6Address(input)
 }

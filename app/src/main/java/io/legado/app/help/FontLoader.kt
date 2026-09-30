@@ -8,7 +8,10 @@ import io.legado.app.utils.isContentScheme
 import io.legado.app.utils.listFileDocs
 import java.io.File
 
-fun loadFontFiles(context: Context, folderUri: Uri?): List<FileDoc> {
+fun loadFontFiles(
+    context: Context,
+    folderUri: Uri?,
+): List<FileDoc> {
     val fontRegex = Regex("(?i).*\\.[ot]tf")
     if (folderUri != null) {
         try {

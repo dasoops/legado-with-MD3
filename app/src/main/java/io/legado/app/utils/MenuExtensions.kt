@@ -10,7 +10,6 @@ import android.widget.ImageButton
 import androidx.appcompat.view.menu.MenuBuilder
 import io.legado.app.R
 import io.legado.app.constant.Theme
-//import io.legado.app.lib.theme.primaryTextColor
 import java.lang.reflect.Method
 
 @SuppressLint("RestrictedApi")
@@ -33,7 +32,7 @@ fun Menu.applyTint(context: Context, theme: Theme = Theme.Auto): Menu = this.let
 
 @SuppressLint("RestrictedApi")
 fun Menu.applyOpenTint(context: Context) {
-    //展开菜单显示图标
+    // 展开菜单显示图标
     if (this.javaClass.simpleName.equals("MenuBuilder", ignoreCase = true)) {
 //        val defaultTextColor = context.getCompatColor(R.color.primaryText)
         kotlin.runCatching {
@@ -104,5 +103,4 @@ object MenuExtensions {
 //            else -> context.getCompatColor(R.color.md_black_1000)
 //        }
 //    }
-
 }

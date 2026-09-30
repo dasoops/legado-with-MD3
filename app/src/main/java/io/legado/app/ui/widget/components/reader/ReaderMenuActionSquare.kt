@@ -41,17 +41,22 @@ fun ReaderMenuActionSquare(
     onMoreClick: (() -> Unit)? = null,
 ) {
     Column(
-        modifier = modifier
+        modifier =
+        modifier
             .fillMaxWidth()
             .aspectRatio(1f)
             .clip(RoundedCornerShape(16.dp))
             .background(
-                if (selected) LegadoTheme.colorScheme.secondaryContainer
-                else LegadoTheme.colorScheme.surfaceContainerLow
+                if (selected) {
+                    LegadoTheme.colorScheme.secondaryContainer
+                } else {
+                    LegadoTheme.colorScheme.surfaceContainerLow
+                },
             ),
     ) {
         Column(
-            modifier = Modifier
+            modifier =
+            Modifier
                 .fillMaxWidth()
                 .weight(1f)
                 .clickable(onClick = onClick),

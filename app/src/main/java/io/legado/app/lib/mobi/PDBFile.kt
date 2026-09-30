@@ -8,7 +8,9 @@ import java.io.FileInputStream
 import java.nio.ByteBuffer
 import java.nio.channels.FileChannel
 
-class PDBFile(private val pfd: ParcelFileDescriptor) {
+class PDBFile(
+    private val pfd: ParcelFileDescriptor,
+) {
     private val fc: FileChannel = FileInputStream(pfd.fileDescriptor).channel
     private val offsets: IntArray
     val name: String
@@ -26,9 +28,10 @@ class PDBFile(private val pfd: ParcelFileDescriptor) {
 
         buffer = ByteBuffer.allocate(recordCount * 8)
         fc.read(buffer, 78)
-        offsets = IntArray(recordCount) {
-            buffer.readUInt32(it * 8)
-        }
+        offsets =
+            IntArray(recordCount) {
+                buffer.readUInt32(it * 8)
+            }
     }
 
     fun getRecordData(index: Int): ByteBuffer {
@@ -45,5 +48,4 @@ class PDBFile(private val pfd: ParcelFileDescriptor) {
         fc.close()
         pfd.close()
     }
-
 }

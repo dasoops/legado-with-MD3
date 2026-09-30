@@ -12,14 +12,18 @@ import org.json.JSONObject
 import org.koin.core.context.GlobalContext
 
 class DebugStateProvider : ContentProvider() {
-
     override fun onCreate(): Boolean = true
 
-    override fun call(method: String, arg: String?, extras: Bundle?): Bundle = Bundle().apply {
-        val json = when (method) {
-            METHOD_TOGGLE_READER_DAY_NIGHT -> toggleReaderDayNight()
-            else -> error("unsupported method: $method")
-        }
+    override fun call(
+        method: String,
+        arg: String?,
+        extras: Bundle?,
+    ): Bundle = Bundle().apply {
+        val json =
+            when (method) {
+                METHOD_TOGGLE_READER_DAY_NIGHT -> toggleReaderDayNight()
+                else -> error("unsupported method: $method")
+            }
         putString(
             RESULT_BASE64,
             Base64.encodeToString(json.toString().toByteArray(), Base64.NO_WRAP),
@@ -42,8 +46,18 @@ class DebugStateProvider : ContentProvider() {
     ): Cursor? = null
 
     override fun getType(uri: Uri): String? = null
-    override fun insert(uri: Uri, values: ContentValues?): Uri? = null
-    override fun delete(uri: Uri, selection: String?, selectionArgs: Array<out String>?): Int = 0
+
+    override fun insert(
+        uri: Uri,
+        values: ContentValues?,
+    ): Uri? = null
+
+    override fun delete(
+        uri: Uri,
+        selection: String?,
+        selectionArgs: Array<out String>?,
+    ): Int = 0
+
     override fun update(
         uri: Uri,
         values: ContentValues?,
@@ -55,5 +69,4 @@ class DebugStateProvider : ContentProvider() {
         const val METHOD_TOGGLE_READER_DAY_NIGHT = "toggleReaderDayNight"
         const val RESULT_BASE64 = "resultB64"
     }
-
 }

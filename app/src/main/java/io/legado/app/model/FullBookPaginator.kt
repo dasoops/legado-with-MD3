@@ -26,13 +26,16 @@ object FullBookPaginator {
         if (job?.isActive == true &&
             activeBookUrl == bookUrl &&
             activeLayoutGeneration == layoutGeneration
-        ) return
+        ) {
+            return
+        }
         stop()
         activeBookUrl = bookUrl
         activeLayoutGeneration = layoutGeneration
-        job = scope.launch {
-            ReadBook.paginateLocalBookPages(layoutGeneration)
-        }
+        job =
+            scope.launch {
+                ReadBook.paginateLocalBookPages(layoutGeneration)
+            }
     }
 
     fun stop() {
@@ -43,7 +46,8 @@ object FullBookPaginator {
     }
 
     fun isNeeded(): Boolean = hasActiveFullBookPageTip(
-        selections = listOf(
+        selections =
+        listOf(
             FullBookPageTipSelection(
                 ReadBookConfig.tipHeaderLeft,
                 ReadBookConfig.customTipHeaderLeft,
@@ -87,11 +91,17 @@ internal fun hasActiveFullBookPageTip(
     wholeBookPageAndProgressTipValue: Int,
 ): Boolean = selections.any { selection ->
     when (selection.value) {
-        wholeBookPageTipValue, wholeBookPageAndProgressTipValue -> true
-        customTipValue -> CustomTipPlaceholder.extractPlaceholders(selection.customTemplate).any {
-            it == CustomTipPlaceholder.FULL_PAGE_INDEX.key ||
-                it == CustomTipPlaceholder.FULL_PAGE_SIZE.key
+        wholeBookPageTipValue, wholeBookPageAndProgressTipValue -> {
+            true
         }
-        else -> false
+        customTipValue -> {
+            CustomTipPlaceholder.extractPlaceholders(selection.customTemplate).any {
+                it == CustomTipPlaceholder.FULL_PAGE_INDEX.key ||
+                    it == CustomTipPlaceholder.FULL_PAGE_SIZE.key
+            }
+        }
+        else -> {
+            false
+        }
     }
 }

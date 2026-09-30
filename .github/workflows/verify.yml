@@ -38,10 +38,11 @@ jobs:
         run: |
           sed -i '/maven.aliyun.com/d' settings.gradle
 
-      - name: Run tests, lint, architecture check, and debug build
+      - name: Run formatting, tests, lint, architecture check, and debug build
         run: |
           chmod +x gradlew
           ./gradlew \
+            spotlessCheck \
             testAppDebugUnitTest \
             lintAppDebug \
             verifyConfigArchitecture \

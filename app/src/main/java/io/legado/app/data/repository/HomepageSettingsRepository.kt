@@ -15,9 +15,10 @@ class HomepageSettingsRepository : HomepageSettingsGateway {
     override val currentSettings: HomepageSettings
         get() = AppConfigStore.preferences.toHomepageSettings()
 
-    override val settings: Flow<HomepageSettings> = AppConfigStore.preferencesFlow
-        .map { it.toHomepageSettings() }
-        .distinctUntilChanged()
+    override val settings: Flow<HomepageSettings> =
+        AppConfigStore.preferencesFlow
+            .map { it.toHomepageSettings() }
+            .distinctUntilChanged()
 
     override suspend fun setHiddenSourceUrlsJson(value: String) {
         AppConfigStore.putAll(mapOf(HOMEPAGE_SOURCE_HIDDEN to value))

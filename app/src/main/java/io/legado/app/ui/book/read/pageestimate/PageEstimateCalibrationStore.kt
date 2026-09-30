@@ -1,9 +1,9 @@
 package io.legado.app.ui.book.read.pageestimate
 
 import android.content.Context
-import splitties.init.appCtx
 import kotlin.math.ceil
 import kotlin.math.roundToInt
+import splitties.init.appCtx
 
 /**
  * 桶内的仿射修正：`真实页数 ≈ slope × 估算连续页数 + intercept`。
@@ -44,15 +44,23 @@ interface PageEstimateCalibrationStore {
     fun get(bucket: Long): PageEstimateCalibration
 
     /** 累积一条样本并返回该桶更新后的拟合结果。 */
-    fun record(bucket: Long, estimatedPages: Float, realPages: Int): PageEstimateCalibration
+    fun record(
+        bucket: Long,
+        estimatedPages: Float,
+        realPages: Int,
+    ): PageEstimateCalibration
 
     companion object {
-        val None = object : PageEstimateCalibrationStore {
-            override fun get(bucket: Long) = PageEstimateCalibration()
+        val None =
+            object : PageEstimateCalibrationStore {
+                override fun get(bucket: Long) = PageEstimateCalibration()
 
-            override fun record(bucket: Long, estimatedPages: Float, realPages: Int) =
-                PageEstimateCalibration()
-        }
+                override fun record(
+                    bucket: Long,
+                    estimatedPages: Float,
+                    realPages: Int,
+                ) = PageEstimateCalibration()
+            }
     }
 }
 
@@ -67,12 +75,16 @@ internal data class PageEstimateSamples(
     val sumXX: Double = 0.0,
     val sumXY: Double = 0.0,
 ) {
-    fun plus(x: Double, y: Double): PageEstimateSamples {
-        val retention = if (count >= MAX_EFFECTIVE_SAMPLES) {
-            (MAX_EFFECTIVE_SAMPLES - 1).toDouble() / count
-        } else {
-            1.0
-        }
+    fun plus(
+        x: Double,
+        y: Double,
+    ): PageEstimateSamples {
+        val retention =
+            if (count >= MAX_EFFECTIVE_SAMPLES) {
+                (MAX_EFFECTIVE_SAMPLES - 1).toDouble() / count
+            } else {
+                1.0
+            }
         return PageEstimateSamples(
             count = (count + 1).coerceAtMost(MAX_EFFECTIVE_SAMPLES),
             sumX = sumX * retention + x,
@@ -135,7 +147,8 @@ object LocalPageEstimateCalibrationStore : PageEstimateCalibrationStore {
         }
         val updated = read(bucket).plus(estimatedPages.toDouble(), realPages.toDouble())
         val key = bucket.toULong().toString(16)
-        preferences.edit()
+        preferences
+            .edit()
             .putInt("n_$key", updated.count)
             .putFloat("sx_$key", updated.sumX.toFloat())
             .putFloat("sy_$key", updated.sumY.toFloat())

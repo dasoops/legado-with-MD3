@@ -13,8 +13,7 @@ enum class ReaderSelectionEndpoint {
     FOCUS,
 }
 
-fun ReaderPageWindow.selectionPages(): List<ReaderPage> =
-    listOfNotNull(previous, current, next, nextPlus)
+fun ReaderPageWindow.selectionPages(): List<ReaderPage> = listOfNotNull(previous, current, next, nextPlus)
 
 @Stable
 data class ReaderSelection(
@@ -34,10 +33,15 @@ data class ReaderSelection(
     // Title offsets and body offsets are independent. Document order puts the title first
     // and the body after it; the chapter is the outermost key.
     private val forward: Boolean
-        get() = comparePosition(
-            chapterIndex, anchorIsTitle, anchor,
-            focusChapterIndex, focusIsTitle, focus,
-        ) <= 0
+        get() =
+            comparePosition(
+                chapterIndex,
+                anchorIsTitle,
+                anchor,
+                focusChapterIndex,
+                focusIsTitle,
+                focus,
+            ) <= 0
     val startChapterIndex: Int get() = if (forward) chapterIndex else focusChapterIndex
     val endChapterIndex: Int get() = if (forward) focusChapterIndex else chapterIndex
     private val startIsTitle: Boolean get() = if (forward) anchorIsTitle else focusIsTitle
@@ -45,89 +49,109 @@ data class ReaderSelection(
     val start: Int get() = if (forward) anchor else focus
     val endInclusive: Int get() = if (forward) focus else anchor
     val includesTitle: Boolean get() = anchorIsTitle || focusIsTitle
-    val bodyStart: Int? get() = when {
-        anchorIsTitle && focusIsTitle -> null
-        includesTitle -> 0
-        else -> start
-    }
+    val bodyStart: Int? get() =
+        when {
+            anchorIsTitle && focusIsTitle -> null
+            includesTitle -> 0
+            else -> start
+        }
 
-    fun contains(element: ReaderElement.Text, pageChapterIndex: Int): Boolean =
+    fun contains(
+        element: ReaderElement.Text,
+        pageChapterIndex: Int,
+    ): Boolean = comparePosition(
+        pageChapterIndex,
+        element.emphasized,
+        element.chapterPosition,
+        startChapterIndex,
+        startIsTitle,
+        start,
+    ) >= 0 &&
         comparePosition(
-            pageChapterIndex, element.emphasized, element.chapterPosition,
-            startChapterIndex, startIsTitle, start,
-        ) >= 0 && comparePosition(
-            pageChapterIndex, element.emphasized, element.chapterPosition,
-            endChapterIndex, endIsTitle, endInclusive,
+            pageChapterIndex,
+            element.emphasized,
+            element.chapterPosition,
+            endChapterIndex,
+            endIsTitle,
+            endInclusive,
         ) <= 0
 
     fun moveStart(
         position: Int,
         isTitle: Boolean = false,
         chapter: Int = startChapterIndex,
-    ): ReaderSelection =
-        if (forward) copy(anchor = position, anchorIsTitle = isTitle, chapterIndex = chapter)
-        else copy(focus = position, focusIsTitle = isTitle, focusChapterIndex = chapter)
+    ): ReaderSelection = if (forward) {
+        copy(anchor = position, anchorIsTitle = isTitle, chapterIndex = chapter)
+    } else {
+        copy(focus = position, focusIsTitle = isTitle, focusChapterIndex = chapter)
+    }
 
     fun moveEnd(
         position: Int,
         isTitle: Boolean = false,
         chapter: Int = endChapterIndex,
-    ): ReaderSelection =
-        if (forward) copy(focus = position, focusIsTitle = isTitle, focusChapterIndex = chapter)
-        else copy(anchor = position, anchorIsTitle = isTitle, chapterIndex = chapter)
+    ): ReaderSelection = if (forward) {
+        copy(focus = position, focusIsTitle = isTitle, focusChapterIndex = chapter)
+    } else {
+        copy(anchor = position, anchorIsTitle = isTitle, chapterIndex = chapter)
+    }
 
-    fun visualStartEndpoint(): ReaderSelectionEndpoint =
-        if (forward) ReaderSelectionEndpoint.ANCHOR else ReaderSelectionEndpoint.FOCUS
+    fun visualStartEndpoint(): ReaderSelectionEndpoint = if (forward) ReaderSelectionEndpoint.ANCHOR else ReaderSelectionEndpoint.FOCUS
 
-    fun visualEndEndpoint(): ReaderSelectionEndpoint =
-        if (forward) ReaderSelectionEndpoint.FOCUS else ReaderSelectionEndpoint.ANCHOR
+    fun visualEndEndpoint(): ReaderSelectionEndpoint = if (forward) ReaderSelectionEndpoint.FOCUS else ReaderSelectionEndpoint.ANCHOR
 
     fun moveEndpoint(
         endpoint: ReaderSelectionEndpoint,
         position: Int,
         isTitle: Boolean = false,
-        chapter: Int = when (endpoint) {
-            ReaderSelectionEndpoint.ANCHOR -> chapterIndex
-            ReaderSelectionEndpoint.FOCUS -> focusChapterIndex
-        },
+        chapter: Int =
+            when (endpoint) {
+                ReaderSelectionEndpoint.ANCHOR -> chapterIndex
+                ReaderSelectionEndpoint.FOCUS -> focusChapterIndex
+            },
     ): ReaderSelection = when (endpoint) {
-        ReaderSelectionEndpoint.ANCHOR ->
+        ReaderSelectionEndpoint.ANCHOR -> {
             copy(anchor = position, anchorIsTitle = isTitle, chapterIndex = chapter)
-
-        ReaderSelectionEndpoint.FOCUS ->
+        }
+        ReaderSelectionEndpoint.FOCUS -> {
             copy(focus = position, focusIsTitle = isTitle, focusChapterIndex = chapter)
+        }
     }
 
-    fun selectedText(page: ReaderPage): String {
-        return selectedText(listOf(page))
-    }
+    fun selectedText(page: ReaderPage): String = selectedText(listOf(page))
 
     /**
      * Collects a selection across every available page without duplicating page-boundary
      * glyphs. Pages from neighbouring chapters are included when the selection spans them.
      */
     fun selectedText(pages: List<ReaderPage>): String {
-        val ordered = pages.asSequence()
-            .flatMap { page ->
-                page.elements.asSequence()
-                    .filterIsInstance<ReaderElement.Text>()
-                    .map { page.id.chapterIndex to it }
-            }
-            .filter { (chapter, text) -> contains(text, chapter) }
-            .distinctBy { (chapter, text) ->
-                Triple(chapter, text.emphasized, text.chapterPosition) to text.value
-            }
-            .sortedWith(documentOrderByChapter)
-            .toList()
+        val ordered =
+            pages
+                .asSequence()
+                .flatMap { page ->
+                    page.elements
+                        .asSequence()
+                        .filterIsInstance<ReaderElement.Text>()
+                        .map { page.id.chapterIndex to it }
+                }.filter { (chapter, text) -> contains(text, chapter) }
+                .distinctBy { (chapter, text) ->
+                    Triple(chapter, text.emphasized, text.chapterPosition) to text.value
+                }.sortedWith(documentOrderByChapter)
+                .toList()
         return buildString {
             var previous: Pair<Int, ReaderElement.Text>? = null
             ordered.forEach { (chapter, text) ->
                 previous?.let { (priorChapter, prior) ->
                     if (priorChapter != chapter ||
                         prior.emphasized != text.emphasized ||
-                        (prior.paragraphIndex >= 0 && text.paragraphIndex >= 0 &&
-                                prior.paragraphIndex != text.paragraphIndex)
-                    ) append('\n')
+                        (
+                            prior.paragraphIndex >= 0 &&
+                                text.paragraphIndex >= 0 &&
+                                prior.paragraphIndex != text.paragraphIndex
+                            )
+                    ) {
+                        append('\n')
+                    }
                 }
                 append(text.value)
                 previous = chapter to text
@@ -143,9 +167,10 @@ data class ReaderSelection(
 
     private companion object {
         val documentOrder = compareBy<ReaderElement.Text> { !it.emphasized }.thenBy { it.chapterPosition }
-        val documentOrderByChapter = compareBy<Pair<Int, ReaderElement.Text>> { it.first }
-            .thenBy { !it.second.emphasized }
-            .thenBy { it.second.chapterPosition }
+        val documentOrderByChapter =
+            compareBy<Pair<Int, ReaderElement.Text>> { it.first }
+                .thenBy { !it.second.emphasized }
+                .thenBy { it.second.chapterPosition }
 
         fun comparePosition(
             leftChapter: Int,
@@ -156,29 +181,41 @@ data class ReaderSelection(
             right: Int,
         ): Int {
             if (leftChapter != rightChapter) return leftChapter.compareTo(rightChapter)
-            return if (leftIsTitle == rightIsTitle) left.compareTo(right)
-            else if (leftIsTitle) -1 else 1
+            return if (leftIsTitle == rightIsTitle) {
+                left.compareTo(right)
+            } else if (leftIsTitle) {
+                -1
+            } else {
+                1
+            }
         }
     }
 }
 
 object ReaderSelectionPolicy {
-    fun start(page: ReaderPage, x: Float, y: Float): ReaderSelection? =
-        (page.elementAt(x, y) as? ReaderElement.Text)?.let {
-            ReaderSelection(page.id.chapterIndex, it.chapterPosition, it.chapterPosition, it.emphasized)
-        }
+    fun start(
+        page: ReaderPage,
+        x: Float,
+        y: Float,
+    ): ReaderSelection? = (page.elementAt(x, y) as? ReaderElement.Text)?.let {
+        ReaderSelection(page.id.chapterIndex, it.chapterPosition, it.chapterPosition, it.emphasized)
+    }
 
     /**
      * Selection handles hang below the text row, so a handle drag often moves through the
      * leading where [ReaderPage.elementAt] misses. Snap a miss to the nearest row by vertical
      * distance, then to the glyph closest to the finger's x within that row.
      */
-    fun snapToText(page: ReaderPage, x: Float, y: Float): ReaderElement.Text? {
+    fun snapToText(
+        page: ReaderPage,
+        x: Float,
+        y: Float,
+    ): ReaderElement.Text? {
         (page.elementAt(x, y) as? ReaderElement.Text)?.let { return it }
         val textElements = page.elements.filterIsInstance<ReaderElement.Text>()
         if (textElements.isEmpty()) return null
-        fun verticalDistance(bounds: ReaderRect): Float =
-            (y - bounds.bottom).coerceAtLeast(0f).coerceAtLeast(bounds.top - y)
+
+        fun verticalDistance(bounds: ReaderRect): Float = (y - bounds.bottom).coerceAtLeast(0f).coerceAtLeast(bounds.top - y)
         val nearest = textElements.minByOrNull { verticalDistance(it.bounds) } ?: return null
         if (verticalDistance(nearest.bounds) > nearest.bounds.height) return null
         return textElements
@@ -203,12 +240,13 @@ object ReaderSelectionPolicy {
         // Glyph bounds intentionally omit letter- and justification-spacing. Long presses in
         // those visual gaps should start selection just like handle drags do.
         val hit = snapToText(page, x, y) ?: return null
-        val paragraph = page.elements.filterIsInstance<ReaderElement.Text>()
-            .filter {
-                it.emphasized == hit.emphasized &&
-                    (hit.paragraphIndex < 0 || it.paragraphIndex == hit.paragraphIndex)
-            }
-            .sortedBy(ReaderElement.Text::chapterPosition)
+        val paragraph =
+            page.elements
+                .filterIsInstance<ReaderElement.Text>()
+                .filter {
+                    it.emphasized == hit.emphasized &&
+                        (hit.paragraphIndex < 0 || it.paragraphIndex == hit.paragraphIndex)
+                }.sortedBy(ReaderElement.Text::chapterPosition)
         val hitIndex = paragraph.indexOf(hit)
         if (hitIndex < 0) return null
 

@@ -10,8 +10,6 @@ import io.legado.app.constant.AppConst
 import io.legado.app.constant.AppLog
 import io.legado.app.domain.gateway.OtherSettingsGateway
 import io.legado.app.help.globalExecutor
-import org.koin.core.context.GlobalContext
-import splitties.init.appCtx
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.logging.FileHandler
@@ -19,6 +17,8 @@ import java.util.logging.Level
 import java.util.logging.LogRecord
 import java.util.logging.Logger
 import kotlin.time.Duration.Companion.days
+import org.koin.core.context.GlobalContext
+import splitties.init.appCtx
 
 @SuppressLint("SimpleDateFormat")
 @Suppress("unused")
@@ -30,24 +30,34 @@ object LogUtils {
         get() = GlobalContext.get().get<OtherSettingsGateway>()
 
     fun init(context: Context) {
-        fileHandler = createFileHandler(context)?.also {
-            logger.addHandler(it)
-        }
+        fileHandler =
+            createFileHandler(context)?.also {
+                logger.addHandler(it)
+            }
     }
 
     @JvmStatic
-    fun d(tag: String, msg: String) {
+    fun d(
+        tag: String,
+        msg: String,
+    ) {
         logger.log(Level.INFO, "$tag $msg")
     }
 
-    inline fun d(tag: String, lazyMsg: () -> String) {
+    inline fun d(
+        tag: String,
+        lazyMsg: () -> String,
+    ) {
         if (logger.isLoggable(Level.INFO)) {
             logger.log(Level.INFO, "$tag ${lazyMsg()}")
         }
     }
 
     @JvmStatic
-    fun e(tag: String, msg: String) {
+    fun e(
+        tag: String,
+        msg: String,
+    ) {
         logger.log(Level.WARNING, "$tag $msg")
     }
 
@@ -72,17 +82,19 @@ object LogUtils {
             val date = getCurrentDateStr(TIME_PATTERN)
             val logPath = FileUtils.getPath(root = logFolder, "appLog-$date.txt")
             return AsyncFileHandler(logPath).apply {
-                formatter = object : java.util.logging.Formatter() {
-                    override fun format(record: LogRecord): String {
-                        // 设置文件输出格式
-                        return getCurrentDateStr(TIME_PATTERN) + ": " + record.message + "\n"
+                formatter =
+                    object : java.util.logging.Formatter() {
+                        override fun format(record: LogRecord): String {
+                            // 设置文件输出格式
+                            return getCurrentDateStr(TIME_PATTERN) + ": " + record.message + "\n"
+                        }
                     }
-                }
-                level = if (otherSettingsGateway.currentSettings.recordLog) {
-                    Level.INFO
-                } else {
-                    Level.OFF
-                }
+                level =
+                    if (otherSettingsGateway.currentSettings.recordLog) {
+                        Level.INFO
+                    } else {
+                        Level.OFF
+                    }
             }
         } catch (e: Exception) {
             e.printStackTrace()
@@ -92,11 +104,12 @@ object LogUtils {
     }
 
     fun upLevel() {
-        val level = if (otherSettingsGateway.currentSettings.recordLog) {
-            Level.INFO
-        } else {
-            Level.OFF
-        }
+        val level =
+            if (otherSettingsGateway.currentSettings.recordLog) {
+                Level.INFO
+            } else {
+                Level.OFF
+            }
         fileHandler?.level = level
     }
 
@@ -114,7 +127,7 @@ object LogUtils {
         d("DeviceInfo") {
             buildString {
                 kotlin.runCatching {
-                    //获取系统信息
+                    // 获取系统信息
                     append("MANUFACTURER=").append(Build.MANUFACTURER).append("\n")
                     append("BRAND=").append(Build.BRAND).append("\n")
                     append("MODEL=").append(Build.MODEL).append("\n")
@@ -123,7 +136,7 @@ object LogUtils {
                     append("userAgent=").append(AppConst.DEFAULT_USER_AGENT).append("\n")
                     append("packageName=").append(appCtx.packageName).append("\n")
                     append("heapSize=").append(Runtime.getRuntime().maxMemory()).append("\n")
-                    //获取app版本信息
+                    // 获取app版本信息
                     AppConst.appInfo.let {
                         append("versionName=").append(it.versionName).append("\n")
                         append("versionCode=").append(it.versionCode).append("\n")
@@ -132,7 +145,6 @@ object LogUtils {
             }
         }
     }
-
 }
 
 fun Throwable.printOnDebug() {

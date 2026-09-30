@@ -23,8 +23,9 @@ import io.legado.app.utils.getFile
 import io.legado.app.utils.list
 import io.legado.app.utils.openInputStream
 import io.legado.app.utils.openOutputStream
+import java.io.File
+import java.io.FileFilter
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -33,18 +34,17 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
-import java.io.File
-import java.io.FileFilter
+import kotlinx.coroutines.launch
 
 class AboutViewModel(
     application: Application,
     private val otherSettingsGateway: OtherSettingsGateway,
     private val backupSettingsGateway: BackupSettingsGateway,
 ) : BaseViewModel(application) {
-
-    private val _uiState = MutableStateFlow(
-        AboutUiState(updateToVariant = otherSettingsGateway.currentSettings.updateToVariant)
-    )
+    private val _uiState =
+        MutableStateFlow(
+            AboutUiState(updateToVariant = otherSettingsGateway.currentSettings.updateToVariant),
+        )
     val uiState: StateFlow<AboutUiState> = _uiState.asStateFlow()
 
     private val _effects = MutableSharedFlow<AboutEffect>(extraBufferCapacity = 8)
@@ -85,13 +85,13 @@ class AboutViewModel(
                     _uiState.update {
                         it.copy(
                             dialog = null,
-                            sheet = AboutSheet.Update(updateInfo)
+                            sheet = AboutSheet.Update(updateInfo),
                         )
                     }
                 }.onError { e ->
                     _uiState.update { it.copy(dialog = null) }
                     _effects.tryEmit(
-                        AboutEffect.ShowToast("${context.getString(R.string.check_update)}\n${e.localizedMessage}")
+                        AboutEffect.ShowToast("${context.getString(R.string.check_update)}\n${e.localizedMessage}"),
                     )
                 }.onFinally {
                     _uiState.update { it.copy(dialog = null) }
@@ -99,7 +99,10 @@ class AboutViewModel(
         }
     }
 
-    private fun showMdFile(title: String, fileName: String) {
+    private fun showMdFile(
+        title: String,
+        fileName: String,
+    ) {
         execute {
             String(context.assets.open(fileName).readBytes())
         }.onSuccess { content ->
@@ -114,7 +117,7 @@ class AboutViewModel(
             _uiState.update {
                 it.copy(
                     crashLogFiles = files,
-                    sheet = AboutSheet.CrashLogs
+                    sheet = AboutSheet.CrashLogs,
                 )
             }
         }
@@ -138,7 +141,8 @@ class AboutViewModel(
             val backupPath = backupSettingsGateway.currentSettings.backupPath
             if (!backupPath.isNullOrEmpty()) {
                 val uri = Uri.parse(backupPath)
-                FileDoc.fromUri(uri, true)
+                FileDoc
+                    .fromUri(uri, true)
                     .find("crash")
                     ?.delete()
             }
@@ -162,7 +166,8 @@ class AboutViewModel(
         val backupPath = backupSettingsGateway.currentSettings.backupPath
         if (!backupPath.isNullOrEmpty()) {
             val uri = Uri.parse(backupPath)
-            FileDoc.fromUri(uri, true)
+            FileDoc
+                .fromUri(uri, true)
                 .find("crash")
                 ?.list { !it.isDir }
                 ?.let { list.addAll(it) }
@@ -172,10 +177,11 @@ class AboutViewModel(
 
     private fun saveLog() {
         execute {
-            val backupPath = backupSettingsGateway.currentSettings.backupPath ?: run {
-                _effects.tryEmit(AboutEffect.ShowToast(context.getString(R.string.about_backup_dir_not_set)))
-                return@execute
-            }
+            val backupPath =
+                backupSettingsGateway.currentSettings.backupPath ?: run {
+                    _effects.tryEmit(AboutEffect.ShowToast(context.getString(R.string.about_backup_dir_not_set)))
+                    return@execute
+                }
             if (!otherSettingsGateway.currentSettings.recordLog) {
                 _effects.tryEmit(AboutEffect.ShowToast(context.getString(R.string.about_log_recording_disabled)))
                 delay(3000)
@@ -191,10 +197,11 @@ class AboutViewModel(
 
     private fun createHeapDump() {
         execute {
-            val backupPath = backupSettingsGateway.currentSettings.backupPath ?: run {
-                _effects.tryEmit(AboutEffect.ShowToast(context.getString(R.string.about_backup_dir_not_set)))
-                return@execute
-            }
+            val backupPath =
+                backupSettingsGateway.currentSettings.backupPath ?: run {
+                    _effects.tryEmit(AboutEffect.ShowToast(context.getString(R.string.about_backup_dir_not_set)))
+                    return@execute
+                }
             if (!otherSettingsGateway.currentSettings.recordHeapDump) {
                 _effects.tryEmit(AboutEffect.ShowToast(context.getString(R.string.about_heap_dump_recording_disabled)))
                 delay(3000)
@@ -235,19 +242,28 @@ class AboutViewModel(
         ZipUtils.zipFiles(arrayListOf(logFiles, crashFiles, logcatFile), zipFile)
         doc.find("logs.zip")?.delete()
         zipFile.inputStream().use { input ->
-            doc.createFileIfNotExist("logs.zip").openOutputStream().getOrNull()
+            doc
+                .createFileIfNotExist("logs.zip")
+                .openOutputStream()
+                .getOrNull()
                 ?.use { input.copyTo(it) }
         }
         zipFile.delete()
     }
 
     private fun copyHeapDump(doc: FileDoc): Boolean {
-        val heapFile = FileDoc.fromFile(File(context.externalCache, "heapDump")).list()
-            ?.firstOrNull() ?: return false
+        val heapFile =
+            FileDoc
+                .fromFile(File(context.externalCache, "heapDump"))
+                .list()
+                ?.firstOrNull() ?: return false
         doc.find("heapDump")?.delete()
         val heapDumpDoc = doc.createFolderIfNotExist("heapDump")
         heapFile.openInputStream().getOrNull()?.use { input ->
-            heapDumpDoc.createFileIfNotExist(heapFile.name).openOutputStream().getOrNull()
+            heapDumpDoc
+                .createFileIfNotExist(heapFile.name)
+                .openOutputStream()
+                .getOrNull()
                 ?.use { input.copyTo(it) }
         }
         return true

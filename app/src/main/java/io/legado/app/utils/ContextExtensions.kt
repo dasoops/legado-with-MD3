@@ -36,19 +36,19 @@ import androidx.core.net.toUri
 import io.legado.app.R
 import io.legado.app.constant.AppConst
 import io.legado.app.data.entities.Book
+import io.legado.app.domain.gateway.BookshelfSettingsGateway
 import io.legado.app.help.IntentHelp
 import io.legado.app.help.config.AppConfigStore
 import io.legado.app.help.config.SettingsWriter
-import io.legado.app.domain.gateway.BookshelfSettingsGateway
 import io.legado.app.ui.main.MainActivity
 import io.legado.app.ui.main.bookshelf.BookShelfItem
+import java.io.File
+import kotlin.system.exitProcess
 import kotlinx.coroutines.runBlocking
 import org.koin.core.context.GlobalContext
 import splitties.systemservices.clipboardManager
 import splitties.systemservices.connectivityManager
 import splitties.systemservices.uiModeManager
-import java.io.File
-import kotlin.system.exitProcess
 
 inline fun <reified A : Activity> Context.startActivity(configIntent: Intent.() -> Unit = {}) {
     val intent = Intent(this, A::class.java)
@@ -97,11 +97,12 @@ inline fun <reified T : Service> Context.servicePendingIntent(
     val intent = Intent(this, T::class.java)
     intent.action = action
     configIntent.invoke(intent)
-    val flags = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-        FLAG_UPDATE_CURRENT or FLAG_MUTABLE
-    } else {
-        FLAG_UPDATE_CURRENT
-    }
+    val flags =
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            FLAG_UPDATE_CURRENT or FLAG_MUTABLE
+        } else {
+            FLAG_UPDATE_CURRENT
+        }
     return getService(this, requestCode, intent, flags)
 }
 
@@ -111,11 +112,12 @@ fun Context.activityPendingIntent(
     action: String,
 ): PendingIntent? {
     intent.action = action
-    val flags = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-        FLAG_UPDATE_CURRENT or FLAG_MUTABLE
-    } else {
-        FLAG_UPDATE_CURRENT
-    }
+    val flags =
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            FLAG_UPDATE_CURRENT or FLAG_MUTABLE
+        } else {
+            FLAG_UPDATE_CURRENT
+        }
     return getActivity(this, 0, intent, flags)
 }
 
@@ -127,11 +129,12 @@ inline fun <reified T : Activity> Context.activityPendingIntent(
     val intent = Intent(this, T::class.java)
     intent.action = action
     configIntent.invoke(intent)
-    val flags = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-        FLAG_UPDATE_CURRENT or FLAG_MUTABLE
-    } else {
-        FLAG_UPDATE_CURRENT
-    }
+    val flags =
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            FLAG_UPDATE_CURRENT or FLAG_MUTABLE
+        } else {
+            FLAG_UPDATE_CURRENT
+        }
     return getActivity(this, 0, intent, flags)
 }
 
@@ -143,11 +146,12 @@ inline fun <reified T : BroadcastReceiver> Context.broadcastPendingIntent(
     val intent = Intent(this, T::class.java)
     intent.action = action
     configIntent.invoke(intent)
-    val flags = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-        FLAG_UPDATE_CURRENT or FLAG_MUTABLE
-    } else {
-        FLAG_UPDATE_CURRENT
-    }
+    val flags =
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            FLAG_UPDATE_CURRENT or FLAG_MUTABLE
+        } else {
+            FLAG_UPDATE_CURRENT
+        }
     return getBroadcast(this, 0, intent, flags)
 }
 
@@ -162,48 +166,75 @@ fun Context.startForegroundServiceCompat(intent: Intent) {
 // getPref*/putPref* 门面：读写统一走 AppConfigStore 内存快照（DataStore 唯一真源），
 // 主线程零 IO。须在 App.onCreate 首行 AppConfigStore.init() 之后使用。
 
-fun Context.getPrefBoolean(key: String, defValue: Boolean = false): Boolean =
-    AppConfigStore.getBoolean(key) ?: defValue
+fun Context.getPrefBoolean(
+    key: String,
+    defValue: Boolean = false,
+): Boolean = AppConfigStore.getBoolean(key) ?: defValue
 
-fun Context.putPrefBoolean(key: String, value: Boolean = false) {
+fun Context.putPrefBoolean(
+    key: String,
+    value: Boolean = false,
+) {
     AppConfigStore.putBoolean(key, value)
 }
 
-fun Context.getPrefInt(key: String, defValue: Int = 0): Int =
-    AppConfigStore.getInt(key) ?: defValue
+fun Context.getPrefInt(
+    key: String,
+    defValue: Int = 0,
+): Int = AppConfigStore.getInt(key) ?: defValue
 
-fun Context.putPrefInt(key: String, value: Int) {
+fun Context.putPrefInt(
+    key: String,
+    value: Int,
+) {
     AppConfigStore.putInt(key, value)
 }
 
-fun Context.getPrefLong(key: String, defValue: Long = 0L): Long =
-    AppConfigStore.getLong(key) ?: defValue
+fun Context.getPrefLong(
+    key: String,
+    defValue: Long = 0L,
+): Long = AppConfigStore.getLong(key) ?: defValue
 
-fun Context.putPrefLong(key: String, value: Long) {
+fun Context.putPrefLong(
+    key: String,
+    value: Long,
+) {
     AppConfigStore.putLong(key, value)
 }
 
-fun Context.getPrefFloat(key: String, defValue: Float = 0f): Float =
-    AppConfigStore.getFloat(key) ?: defValue
+fun Context.getPrefFloat(
+    key: String,
+    defValue: Float = 0f,
+): Float = AppConfigStore.getFloat(key) ?: defValue
 
-fun Context.putPrefFloat(key: String, value: Float) {
+fun Context.putPrefFloat(
+    key: String,
+    value: Float,
+) {
     AppConfigStore.putFloat(key, value)
 }
 
-fun Context.getPrefString(key: String, defValue: String? = null): String? =
-    AppConfigStore.getString(key) ?: defValue
+fun Context.getPrefString(
+    key: String,
+    defValue: String? = null,
+): String? = AppConfigStore.getString(key) ?: defValue
 
-fun Context.putPrefString(key: String, value: String?) {
+fun Context.putPrefString(
+    key: String,
+    value: String?,
+) {
     AppConfigStore.putString(key, value)
 }
 
 fun Context.getPrefStringSet(
     key: String,
     defValue: MutableSet<String>? = null,
-): MutableSet<String>? =
-    AppConfigStore.getStringSet(key)?.toMutableSet() ?: defValue
+): MutableSet<String>? = AppConfigStore.getStringSet(key)?.toMutableSet() ?: defValue
 
-fun Context.putPrefStringSet(key: String, value: MutableSet<String>) {
+fun Context.putPrefStringSet(
+    key: String,
+    value: MutableSet<String>,
+) {
     AppConfigStore.putStringSet(key, value.toSet())
 }
 
@@ -211,30 +242,36 @@ fun Context.removePref(key: String) {
     AppConfigStore.remove(key)
 }
 
+fun Context.getCompatColor(
+    @ColorRes id: Int,
+): Int = ContextCompat.getColor(this, id)
 
-fun Context.getCompatColor(@ColorRes id: Int): Int = ContextCompat.getColor(this, id)
+fun Context.getCompatDrawable(
+    @DrawableRes id: Int,
+): Drawable? = ContextCompat.getDrawable(this, id)
 
-fun Context.getCompatDrawable(@DrawableRes id: Int): Drawable? = ContextCompat.getDrawable(this, id)
+fun Context.getCompatColorStateList(
+    @ColorRes id: Int,
+): ColorStateList? = ContextCompat.getColorStateList(this, id)
 
-fun Context.getCompatColorStateList(@ColorRes id: Int): ColorStateList? =
-    ContextCompat.getColorStateList(this, id)
-
-fun Context.checkSelfUriPermission(uri: Uri, modeFlags: Int): Int =
-    checkUriPermission(uri, Process.myPid(), Process.myUid(), modeFlags)
+fun Context.checkSelfUriPermission(
+    uri: Uri,
+    modeFlags: Int,
+): Int = checkUriPermission(uri, Process.myPid(), Process.myUid(), modeFlags)
 
 fun Context.restart() {
     val intent: Intent? = packageManager.getLaunchIntentForPackage(packageName)
     intent?.let {
         intent.addFlags(
             Intent.FLAG_ACTIVITY_NEW_TASK
-                    or Intent.FLAG_ACTIVITY_CLEAR_TASK
-                    or Intent.FLAG_ACTIVITY_CLEAR_TOP
+                or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                or Intent.FLAG_ACTIVITY_CLEAR_TOP,
         )
         runBlocking {
             SettingsWriter.awaitPendingWrites()
         }
         startActivity(intent)
-        //杀掉以前进程
+        // 杀掉以前进程
         Process.killProcess(Process.myPid())
         exitProcess(0)
     }
@@ -245,11 +282,12 @@ fun Context.restart() {
  */
 val Context.sysScreenOffTime: Int
     get() {
-        return kotlin.runCatching {
-            Settings.System.getInt(contentResolver, Settings.System.SCREEN_OFF_TIMEOUT)
-        }.onFailure {
-            it.printOnDebug()
-        }.getOrDefault(0)
+        return kotlin
+            .runCatching {
+                Settings.System.getInt(contentResolver, Settings.System.SCREEN_OFF_TIMEOUT)
+            }.onFailure {
+                it.printOnDebug()
+            }.getOrDefault(0)
     }
 
 val Context.statusBarHeight: Int
@@ -269,7 +307,10 @@ val Context.navigationBarHeight: Int
         return resources.getDimensionPixelSize(resourceId)
     }
 
-fun Context.share(text: String, title: String = getString(R.string.share)) {
+fun Context.share(
+    text: String,
+    title: String = getString(R.string.share),
+) {
     kotlin.runCatching {
         val intent = Intent(Intent.ACTION_SEND)
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
@@ -280,7 +321,10 @@ fun Context.share(text: String, title: String = getString(R.string.share)) {
     }
 }
 
-fun Context.share(file: File, type: String = "text/*") {
+fun Context.share(
+    file: File,
+    type: String = "text/*",
+) {
     val fileUri = FileProvider.getUriForFile(this, AppConst.authority, file)
     val intent = Intent(Intent.ACTION_SEND)
     intent.type = type
@@ -290,8 +334,8 @@ fun Context.share(file: File, type: String = "text/*") {
     startActivity(
         Intent.createChooser(
             intent,
-            getString(R.string.share_selected_source)
-        )
+            getString(R.string.share_selected_source),
+        ),
     )
 }
 
@@ -304,7 +348,11 @@ fun Context.sendToClip(text: String) {
 fun Context.getClipText(): String? {
     clipboardManager.primaryClip?.let {
         if (it.itemCount > 0) {
-            return it.getItemAt(0).text.toString().trim()
+            return it
+                .getItemAt(0)
+                .text
+                .toString()
+                .trim()
         }
     }
     return null
@@ -356,16 +404,23 @@ fun Context.openUrl(uri: Uri) {
 }
 
 @SuppressLint("ObsoleteSdkInt")
-fun Context.openFileUri(uri: Uri, type: String? = null) {
+fun Context.openFileUri(
+    uri: Uri,
+    type: String? = null,
+) {
     val intent = Intent()
     intent.action = Intent.ACTION_VIEW
     intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-        //7.0版本以上
+        // 7.0版本以上
         intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
     }
-    val uri = if (uri.isContentScheme()) uri
-    else FileProvider.getUriForFile(this, AppConst.authority, File(uri.path!!))
+    val uri =
+        if (uri.isContentScheme()) {
+            uri
+        } else {
+            FileProvider.getUriForFile(this, AppConst.authority, File(uri.path!!))
+        }
     intent.setDataAndType(uri, type ?: IntentType.from(uri))
     try {
         startActivity(intent)
@@ -407,18 +462,20 @@ val Context.isDebuggable: Boolean
     get() = applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE != 0
 
 val Context.bookshelfLayoutMode: Int
-    get() = if (resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
-        bookshelfSettingsGateway.currentSettings.bookshelfLayoutModeLandscape
-    } else {
-        bookshelfSettingsGateway.currentSettings.bookshelfLayoutModePortrait
-    }
+    get() =
+        if (resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            bookshelfSettingsGateway.currentSettings.bookshelfLayoutModeLandscape
+        } else {
+            bookshelfSettingsGateway.currentSettings.bookshelfLayoutModePortrait
+        }
 
 val Context.bookshelfLayoutGrid: Int
-    get() = if (resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
-        bookshelfSettingsGateway.currentSettings.bookshelfLayoutGridLandscape
-    } else {
-        bookshelfSettingsGateway.currentSettings.bookshelfLayoutGridPortrait
-    }
+    get() =
+        if (resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            bookshelfSettingsGateway.currentSettings.bookshelfLayoutGridLandscape
+        } else {
+            bookshelfSettingsGateway.currentSettings.bookshelfLayoutGridPortrait
+        }
 
 fun Context.themeColor(attr: Int): Int {
     val typedValue = TypedValue()

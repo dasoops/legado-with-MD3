@@ -64,19 +64,20 @@ fun <T> ListScaffold(
         onAddClick?.let { onClick ->
             AppFloatingActionButton(
                 onClick = onClick,
-                modifier = Modifier.animateFloatingActionButton(
+                modifier =
+                Modifier.animateFloatingActionButton(
                     visible = state.selectedIds.isEmpty(),
                     alignment = Alignment.BottomEnd,
                 ),
                 tooltipText = stringResource(R.string.add),
-                icon = Icons.Default.Add
+                icon = Icons.Default.Add,
             )
         }
     },
     snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
     contentWindowInsets: WindowInsets = ScaffoldDefaults.contentWindowInsets,
     scrollBehavior: GlassTopAppBarScrollBehavior? = null,
-    content: @Composable (PaddingValues) -> Unit
+    content: @Composable (PaddingValues) -> Unit,
 ) {
     val scrollBehavior = scrollBehavior ?: GlassTopAppBarDefaults.defaultScrollBehavior()
     AppScaffold(
@@ -84,8 +85,9 @@ fun <T> ListScaffold(
         snackbarHost = {
             SnackbarHost(
                 hostState = snackbarHostState,
-                modifier = Modifier
-                    .padding(bottom = 72.dp)
+                modifier =
+                Modifier
+                    .padding(bottom = 72.dp),
             )
         },
         topBar = {
@@ -105,32 +107,33 @@ fun <T> ListScaffold(
                 onClearSelection = { onClearSelection?.invoke() ?: selectionActions?.onClearSelection?.invoke() },
                 topBarActions = topBarActions,
                 dropDownMenuContent = dropDownMenuContent,
-                bottomContent = bottomContent
+                bottomContent = bottomContent,
             )
         },
         floatingActionButton = floatingActionButton,
-        contentWindowInsets = contentWindowInsets
+        contentWindowInsets = contentWindowInsets,
     ) { paddingValues ->
         Box(
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier.fillMaxSize(),
         ) {
             content(paddingValues)
 
             AnimatedVisibility(
                 visible = state.selectedIds.isNotEmpty() && selectionActions != null,
-                modifier = Modifier
+                modifier =
+                Modifier
                     .align(Alignment.BottomCenter)
                     .padding(bottom = 16.dp + ScreenOffset)
                     .zIndex(1f),
                 enter = slideInVertically { it } + fadeIn(),
-                exit = slideOutVertically { it } + fadeOut()
+                exit = slideOutVertically { it } + fadeOut(),
             ) {
                 selectionActions?.let { actions ->
                     SelectionBottomBar(
                         onSelectAll = actions.onSelectAll,
                         onSelectInvert = actions.onSelectInvert,
                         primaryAction = actions.primaryAction,
-                        secondaryActions = actions.secondaryActions
+                        secondaryActions = actions.secondaryActions,
                     )
                 }
             }

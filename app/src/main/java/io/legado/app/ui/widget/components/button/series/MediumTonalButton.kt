@@ -16,7 +16,7 @@ fun MediumTonalButton(
     selected: Boolean = false,
     icon: ImageVector? = null,
     text: String? = null,
-    contentDescription: String? = null
+    contentDescription: String? = null,
 ) {
     SeriesButton(
         onClick = onClick,
@@ -26,7 +26,7 @@ fun MediumTonalButton(
         onLongClick = onLongClick,
         enforceMinimumInteractiveSize = false,
         size = if (text == null) MediumSeriesIconButtonSize else null,
-        style = SeriesIconButtonStyle.Tonal
+        style = SeriesIconButtonStyle.Tonal,
     ) { contentColor ->
         SeriesButtonContent(
             icon = icon,
@@ -36,7 +36,7 @@ fun MediumTonalButton(
             textStyle = LegadoTheme.typography.labelMedium,
             contentColor = contentColor,
             padding = PaddingValues(horizontal = 16.dp, vertical = 10.dp),
-            spacing = 8.dp
+            spacing = 8.dp,
         )
     }
 }

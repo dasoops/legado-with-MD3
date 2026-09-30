@@ -2,29 +2,32 @@ package io.legado.app.constant
 
 @Suppress("RegExpRedundantEscape", "unused")
 object AppPattern {
-    //匹配格式化后的图片格式
+    // 匹配格式化后的图片格式
     val imgPattern: Regex = Regex("<img[^>]*src=\"([^\"]*(?:\"[^>]+\\})?)\"[^>]*>")
 
-    //匹配自定义html格式字符串
-    val useHtmlRegex = Regex("<usehtml>.*?</usehtml>", RegexOption.DOT_MATCHES_ALL) //.包含换行
+    // 匹配自定义html格式字符串
+    val useHtmlRegex = Regex("<usehtml>.*?</usehtml>", RegexOption.DOT_MATCHES_ALL) // .包含换行
 
-    //匹配html字符串中的head
+    // 匹配html字符串中的head
     val htmlHeadRegex = Regex("<head[^>]*>", RegexOption.IGNORE_CASE)
 
-    //dataURL图片类型
+    // dataURL图片类型
     val dataUriRegex = Regex("^data:.*?;base64,(.*)")
-    //提取标题中的段评
+
+    // 提取标题中的段评
     val imgRegex = Regex("(.*)((?:data|https?):[\\s\\S]+)$")
-    //自定义图片样式
+
+    // 自定义图片样式
     val imgStyRegex = Regex("style[\"'\\s]*:\\s*[\"']([^\"']*)[\"']")
-    //匹配章节信息中的字数
+
+    // 匹配章节信息中的字数
     val wordCountRegex = Regex("(?:^|字数[：:、]?|\\s+)([0-9万千百\\.]{1,6}字)")
 
-    //正文不计入字数的字符
+    // 正文不计入字数的字符
     val noWordCountRegex = Regex("[\\s\\u200B-\\u200F\\uFEFF]")
 
-    //提取链接中的域名
-    val domainRegex = Regex("^https?://([^:/]+)",RegexOption.IGNORE_CASE)
+    // 提取链接中的域名
+    val domainRegex = Regex("^https?://([^:/]+)", RegexOption.IGNORE_CASE)
 
     val nameRegex = Regex("\\s+作\\s*者.*|\\s+\\S+\\s+著")
     val authorRegex = Regex("^\\s*作\\s*者[:：\\s]+|\\s+著")
@@ -33,12 +36,13 @@ object AppPattern {
     val splitGroupRegex = Regex("[,;，；]")
     val titleNumPattern: Regex = Regex("(第)(.+?)(章)")
 
-    //书源调试信息中的各种符号
+    // 书源调试信息中的各种符号
     val debugMessageSymbolRegex = Regex("[⇒◇┌└≡]")
 
-    //本地书籍支持类型
+    // 本地书籍支持类型
     val bookFileRegex = Regex(".*\\.(txt|epub|umd|pdf|mobi|azw3|azw)", RegexOption.IGNORE_CASE)
-    //压缩文件支持类型
+
+    // 压缩文件支持类型
     val archiveFileRegex = Regex(".*\\.(zip|cbz|rar|7z)$", RegexOption.IGNORE_CASE)
 
     /**

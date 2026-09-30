@@ -7,16 +7,16 @@ import android.view.WindowManager
 import androidx.preference.EditTextPreferenceDialogFragmentCompat
 import androidx.preference.PreferenceDialogFragmentCompat
 import io.legado.app.R
-//import io.legado.app.lib.theme.accentColor
-//import io.legado.app.lib.theme.filletBackground
-
+// import io.legado.app.lib.theme.accentColor
+// import io.legado.app.lib.theme.filletBackground
 
 class EditTextPreferenceDialog : EditTextPreferenceDialogFragmentCompat() {
-
-    private val themeSettingsGateway get() = org.koin.core.context.GlobalContext.get().get<io.legado.app.domain.gateway.ThemeSettingsGateway>()
+    private val themeSettingsGateway get() =
+        org.koin.core.context.GlobalContext
+            .get()
+            .get<io.legado.app.domain.gateway.ThemeSettingsGateway>()
 
     companion object {
-
         fun newInstance(key: String): EditTextPreferenceDialog {
             val fragment = EditTextPreferenceDialog()
             val b = Bundle(1)
@@ -24,7 +24,6 @@ class EditTextPreferenceDialog : EditTextPreferenceDialogFragmentCompat() {
             fragment.arguments = b
             return fragment
         }
-
     }
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
@@ -51,8 +50,12 @@ class EditTextPreferenceDialog : EditTextPreferenceDialogFragmentCompat() {
                 it.attributes = attr
                 it.setBackgroundDrawableResource(R.color.transparent)
                 when (attr.gravity) {
-                    Gravity.TOP -> it.decorView.setBackgroundResource(R.drawable.bg_eink_border_bottom)
-                    Gravity.BOTTOM -> it.decorView.setBackgroundResource(R.drawable.bg_eink_border_top)
+                    Gravity.TOP -> {
+                        it.decorView.setBackgroundResource(R.drawable.bg_eink_border_bottom)
+                    }
+                    Gravity.BOTTOM -> {
+                        it.decorView.setBackgroundResource(R.drawable.bg_eink_border_top)
+                    }
                     else -> {
 //                        val padding = 2.dpToPx();
 //                        it.decorView.setPadding(padding, padding, padding, padding)
@@ -62,5 +65,4 @@ class EditTextPreferenceDialog : EditTextPreferenceDialogFragmentCompat() {
             }
         }
     }
-
 }

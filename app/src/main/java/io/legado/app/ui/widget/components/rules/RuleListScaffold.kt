@@ -58,17 +58,18 @@ fun <T> RuleListScaffold(
         onAddClick?.let { onClick ->
             AppFloatingActionButton(
                 onClick = onClick,
-                modifier = Modifier.animateFloatingActionButton(
+                modifier =
+                Modifier.animateFloatingActionButton(
                     visible = state.selectedIds.isEmpty(),
                     alignment = Alignment.BottomEnd,
                 ),
                 tooltipText = stringResource(R.string.add),
-                icon = Icons.Default.Add
+                icon = Icons.Default.Add,
             )
         }
     },
     snackbarHostState: SnackbarHostState,
-    content: @Composable (PaddingValues) -> Unit
+    content: @Composable (PaddingValues) -> Unit,
 ) {
     var showDeleteConfirmDialog by remember { mutableStateOf(false) }
 
@@ -83,7 +84,7 @@ fun <T> RuleListScaffold(
             showDeleteConfirmDialog = false
         },
         dismissText = stringResource(R.string.cancel),
-        onDismiss = { showDeleteConfirmDialog = false }
+        onDismiss = { showDeleteConfirmDialog = false },
     )
 
     ListScaffold(
@@ -100,17 +101,19 @@ fun <T> RuleListScaffold(
         onAddClick = onAddClick,
         floatingActionButton = floatingActionButton,
         snackbarHostState = snackbarHostState,
-        selectionActions = SelectionActions(
+        selectionActions =
+        SelectionActions(
             onClearSelection = onClearSelection,
             onSelectAll = onSelectAll,
             onSelectInvert = onSelectInvert,
-            primaryAction = ActionItem(
+            primaryAction =
+            ActionItem(
                 text = stringResource(R.string.delete),
                 icon = Icons.Default.Delete,
-                onClick = { showDeleteConfirmDialog = true }
+                onClick = { showDeleteConfirmDialog = true },
             ),
-            secondaryActions = selectionSecondaryActions
+            secondaryActions = selectionSecondaryActions,
         ),
-        content = content
+        content = content,
     )
 }

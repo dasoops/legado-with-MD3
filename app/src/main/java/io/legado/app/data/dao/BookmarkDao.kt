@@ -1,9 +1,13 @@
 package io.legado.app.data.dao
 
-import androidx.room.*
+import androidx.room.Dao
+import androidx.room.Delete
+import androidx.room.Insert
+import androidx.room.OnConflictStrategy
+import androidx.room.Query
+import androidx.room.Update
 import io.legado.app.data.entities.Bookmark
 import kotlinx.coroutines.flow.Flow
-
 
 @Dao
 interface BookmarkDao {
@@ -11,7 +15,7 @@ interface BookmarkDao {
     @get:Query(
         """
         select * from bookmarks order by bookName collate localized, bookAuthor collate localized, chapterIndex, chapterPos
-    """
+    """,
     )
     val all: List<Bookmark>
 
@@ -21,7 +25,7 @@ interface BookmarkDao {
     @Query(
         """select * from bookmarks 
         where bookName = :bookName and bookAuthor = :bookAuthor 
-        order by chapterIndex"""
+        order by chapterIndex""",
     )
     fun flowByBook(bookName: String, bookAuthor: String): Flow<List<Bookmark>>
 
@@ -29,14 +33,14 @@ interface BookmarkDao {
         """SELECT * FROM bookmarks 
         where bookName = :bookName and bookAuthor = :bookAuthor 
         and chapterName like '%'||:key||'%' or content like '%'||:key||'%'
-        order by chapterIndex"""
+        order by chapterIndex""",
     )
     fun flowSearch(bookName: String, bookAuthor: String, key: String): Flow<List<Bookmark>>
 
     @Query(
         """select * from bookmarks 
         where bookName = :bookName and bookAuthor = :bookAuthor 
-        order by chapterIndex"""
+        order by chapterIndex""",
     )
     fun getByBook(bookName: String, bookAuthor: String): List<Bookmark>
 
@@ -44,19 +48,21 @@ interface BookmarkDao {
         """SELECT * FROM bookmarks 
         where bookName = :bookName and bookAuthor = :bookAuthor 
         and chapterName like '%'||:key||'%' or content like '%'||:key||'%'
-        order by chapterIndex"""
+        order by chapterIndex""",
     )
     fun search(bookName: String, bookAuthor: String, key: String): List<Bookmark>
 
     // 模糊搜索
-    @Query("""
+    @Query(
+        """
         SELECT * FROM bookmarks 
         WHERE (bookName LIKE '%'||:query||'%' 
            OR bookText LIKE '%'||:query||'%' 
            OR chapterName LIKE '%'||:query||'%' 
            OR content LIKE '%'||:query||'%')
         ORDER BY bookName COLLATE LOCALIZED, bookAuthor COLLATE LOCALIZED, chapterIndex, chapterPos
-    """)
+    """,
+    )
     fun flowSearchAll(query: String): Flow<List<Bookmark>>
 
     /** 落在某章某段位置区间内的书签，供「本页是否已有书签」判定使用。 */
@@ -64,7 +70,7 @@ interface BookmarkDao {
         """select * from bookmarks
         where bookName = :bookName and bookAuthor = :bookAuthor
         and chapterIndex = :chapterIndex
-        and chapterPos >= :startPos and chapterPos < :endPos"""
+        and chapterPos >= :startPos and chapterPos < :endPos""",
     )
     fun getByChapterRange(
         bookName: String,
@@ -82,5 +88,4 @@ interface BookmarkDao {
 
     @Delete
     fun delete(vararg bookmark: Bookmark)
-
 }

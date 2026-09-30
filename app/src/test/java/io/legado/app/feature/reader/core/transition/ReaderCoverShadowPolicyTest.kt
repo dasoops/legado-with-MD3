@@ -7,10 +7,10 @@ import org.junit.Test
 class ReaderCoverShadowPolicyTest {
     @Test
     fun `cover shadow stays broad and translucent`() {
-        val alpha = (ReaderCoverShadowPolicy.colorArgb ushr 24) and 0xFF
+        val alpha = (ReaderCoverShadowPolicy.COLOR_ARGB ushr 24) and 0xFF
 
         assertTrue(alpha in 32..64)
-        assertTrue(ReaderCoverShadowPolicy.widthDp >= 32f)
+        assertTrue(ReaderCoverShadowPolicy.WIDTH_DP >= 32f)
     }
 
     @Test

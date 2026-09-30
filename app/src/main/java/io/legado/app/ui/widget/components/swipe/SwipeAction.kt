@@ -8,5 +8,5 @@ data class SwipeAction(
     val background: Color,
     val onSwipe: () -> Unit,
     val hapticFeedback: Boolean = true,
-    val contentDescription: String? = null
+    val contentDescription: String? = null,
 )

@@ -19,13 +19,13 @@ class ReadConfigViewModel(
     private val themeSettingsGateway: ThemeSettingsGateway,
     private val applyReadSetting: ApplyReadSettingUseCase,
 ) : ViewModel() {
-
-    private val _uiState = MutableStateFlow(
-        settingsGateway.currentSettings.toUiState(
-            activeSheet = null,
-            eyeProtection = themeSettingsGateway.currentSettings.toEyeProtectionUiState(),
+    private val _uiState =
+        MutableStateFlow(
+            settingsGateway.currentSettings.toUiState(
+                activeSheet = null,
+                eyeProtection = themeSettingsGateway.currentSettings.toEyeProtectionUiState(),
+            ),
         )
-    )
     val uiState = _uiState.asStateFlow()
 
     private val _effects = MutableSharedFlow<ReadConfigEffect>(extraBufferCapacity = 16)
@@ -51,29 +51,51 @@ class ReadConfigViewModel(
 
     fun onIntent(intent: ReadConfigIntent) {
         when (intent) {
-            ReadConfigIntent.OpenPageKeys -> setSheet(ReadConfigSheet.PageKeys)
-            ReadConfigIntent.OpenClickActions -> setSheet(ReadConfigSheet.ClickActions)
-            ReadConfigIntent.OpenEyeProtection -> setSheet(ReadConfigSheet.EyeProtection)
-            ReadConfigIntent.DismissSheet -> setSheet(null)
-            is ReadConfigIntent.EyeProtectionEnabledChanged -> updateEyeProtection {
-                it.copy(eyeProtectionEnabled = intent.value)
+            ReadConfigIntent.OpenPageKeys -> {
+                setSheet(ReadConfigSheet.PageKeys)
             }
-            is ReadConfigIntent.EyeProtectionIntensityChanged -> updateEyeProtection {
-                it.copy(colorTemperature = intent.value.coerceIn(0, 100))
+            ReadConfigIntent.OpenClickActions -> {
+                setSheet(ReadConfigSheet.ClickActions)
             }
-            is ReadConfigIntent.EyeProtectionAutoNightChanged -> updateEyeProtection {
-                it.copy(eyeProtectionAutoNight = intent.value)
+            ReadConfigIntent.OpenEyeProtection -> {
+                setSheet(ReadConfigSheet.EyeProtection)
             }
-            is ReadConfigIntent.EyeProtectionScheduleChanged -> updateEyeProtection {
-                it.copy(eyeProtectionSchedule = intent.value)
+            ReadConfigIntent.DismissSheet -> {
+                setSheet(null)
             }
-            is ReadConfigIntent.EyeProtectionStartTimeChanged -> updateEyeProtection {
-                it.copy(eyeProtectionStartTime = intent.value)
+            is ReadConfigIntent.EyeProtectionEnabledChanged -> {
+                updateEyeProtection {
+                    it.copy(eyeProtectionEnabled = intent.value)
+                }
             }
-            is ReadConfigIntent.EyeProtectionEndTimeChanged -> updateEyeProtection {
-                it.copy(eyeProtectionEndTime = intent.value)
+            is ReadConfigIntent.EyeProtectionIntensityChanged -> {
+                updateEyeProtection {
+                    it.copy(colorTemperature = intent.value.coerceIn(0, 100))
+                }
             }
-            else -> updateSetting(intent)
+            is ReadConfigIntent.EyeProtectionAutoNightChanged -> {
+                updateEyeProtection {
+                    it.copy(eyeProtectionAutoNight = intent.value)
+                }
+            }
+            is ReadConfigIntent.EyeProtectionScheduleChanged -> {
+                updateEyeProtection {
+                    it.copy(eyeProtectionSchedule = intent.value)
+                }
+            }
+            is ReadConfigIntent.EyeProtectionStartTimeChanged -> {
+                updateEyeProtection {
+                    it.copy(eyeProtectionStartTime = intent.value)
+                }
+            }
+            is ReadConfigIntent.EyeProtectionEndTimeChanged -> {
+                updateEyeProtection {
+                    it.copy(eyeProtectionEndTime = intent.value)
+                }
+            }
+            else -> {
+                updateSetting(intent)
+            }
         }
     }
 
@@ -91,12 +113,11 @@ class ReadConfigViewModel(
                 .onSuccess {
                     applyReadSetting(intent)
                     if (intent is ReadConfigIntent.PageKeysChanged) setSheet(null)
-                }
-                .onFailure { error ->
+                }.onFailure { error ->
                     _effects.tryEmit(
                         ReadConfigEffect.SettingsUpdateFailed(
-                            error.message ?: error.javaClass.simpleName
-                        )
+                            error.message ?: error.javaClass.simpleName,
+                        ),
                     )
                 }
         }
@@ -104,57 +125,134 @@ class ReadConfigViewModel(
 }
 
 private fun ReadConfigIntent.toSettingsTransform(): (ReadSettings) -> ReadSettings = when (this) {
-    is ReadConfigIntent.ScreenOrientationChanged -> { settings -> settings.copy(screenOrientation = value) }
-    is ReadConfigIntent.KeepLightChanged -> { settings -> settings.copy(keepLight = value) }
-    is ReadConfigIntent.HideStatusBarChanged -> { settings -> settings.copy(hideStatusBar = value) }
-    is ReadConfigIntent.HideNavigationBarChanged -> { settings -> settings.copy(hideNavigationBar = value) }
-    is ReadConfigIntent.PaddingDisplayCutoutsChanged -> { settings -> settings.copy(paddingDisplayCutouts = value) }
-    is ReadConfigIntent.TitleBarModeChanged -> { settings -> settings.copy(titleBarMode = value) }
-    is ReadConfigIntent.ReadMenuBlurAlphaChanged -> { settings -> settings.copy(readMenuBlurAlpha = value) }
-    is ReadConfigIntent.ReadBodyToLhChanged -> { settings -> settings.copy(readBodyToLh = value) }
-    is ReadConfigIntent.TextFullJustifyChanged -> { settings -> settings.copy(textFullJustify = value) }
-    is ReadConfigIntent.TextBottomJustifyChanged -> { settings -> settings.copy(textBottomJustify = value) }
-    is ReadConfigIntent.AdaptSpecialStyleChanged -> { settings -> settings.copy(adaptSpecialStyle = value) }
-    is ReadConfigIntent.UseZhLayoutChanged -> { settings -> settings.copy(useZhLayout = value) }
-    is ReadConfigIntent.ShowBrightnessViewChanged -> { settings -> settings.copy(showBrightnessView = value) }
-    is ReadConfigIntent.BrightnessVwPosChanged -> { settings -> settings.copy(brightnessVwPos = value) }
-    is ReadConfigIntent.UseUnderlineChanged -> { settings -> settings.copy(useUnderline = value) }
-    is ReadConfigIntent.ReadSliderModeChanged -> { settings -> settings.copy(readSliderMode = value) }
-    is ReadConfigIntent.DoubleHorizontalPageChanged -> { settings -> settings.copy(doubleHorizontalPage = value) }
-    is ReadConfigIntent.ProgressBarBehaviorChanged -> { settings -> settings.copy(progressBarBehavior = value) }
-    is ReadConfigIntent.MouseWheelPageChanged -> { settings -> settings.copy(mouseWheelPage = value) }
-    is ReadConfigIntent.VolumeKeyPageChanged -> { settings -> settings.copy(volumeKeyPage = value) }
-    is ReadConfigIntent.KeyPageOnLongPressChanged -> { settings -> settings.copy(keyPageOnLongPress = value) }
-    is ReadConfigIntent.PageTouchSlopChanged -> { settings -> settings.copy(pageTouchSlop = value) }
-    is ReadConfigIntent.SliderVibratorChanged -> { settings -> settings.copy(sliderVibrator = value) }
-    is ReadConfigIntent.UseNewTocSheetChanged -> { settings -> settings.copy(useNewTocSheet = value) }
-    is ReadConfigIntent.MaxLengthWithNoTocChanged -> {
-        settings -> settings.copy(maxLengthWithNoToc = value.coerceIn(3000, 100000))
+    is ReadConfigIntent.ScreenOrientationChanged -> {
+        { settings -> settings.copy(screenOrientation = value) }
     }
-    is ReadConfigIntent.SelectVibratorChanged -> { settings -> settings.copy(selectVibrator = value) }
-    is ReadConfigIntent.AutoSuggestDayNightChanged -> { settings -> settings.copy(autoSuggestDayNight = value) }
-    is ReadConfigIntent.ReadingAnchorChanged -> { settings -> settings.copy(readingAnchorEnabled = value) }
-    is ReadConfigIntent.SelectTextChanged -> { settings -> settings.copy(selectText = value) }
-    is ReadConfigIntent.NoAnimScrollPageChanged -> { settings -> settings.copy(noAnimScrollPage = value) }
-    is ReadConfigIntent.ClickImgWayChanged -> { settings -> settings.copy(clickImgWay = value) }
-    is ReadConfigIntent.OptimizeRenderChanged -> { settings -> settings.copy(optimizeRender = value) }
-    is ReadConfigIntent.DisableReturnKeyChanged -> { settings -> settings.copy(disableReturnKey = value) }
-    is ReadConfigIntent.ShowReadTitleAdditionChanged -> { settings -> settings.copy(showReadTitleAddition = value) }
-    is ReadConfigIntent.ShowMenuIconChanged -> { settings -> settings.copy(showMenuIcon = value) }
-    is ReadConfigIntent.PageKeysChanged -> { settings ->
-        settings.copy(prevKeys = prevKeys, nextKeys = nextKeys)
+    is ReadConfigIntent.KeepLightChanged -> {
+        { settings -> settings.copy(keepLight = value) }
+    }
+    is ReadConfigIntent.HideStatusBarChanged -> {
+        { settings -> settings.copy(hideStatusBar = value) }
+    }
+    is ReadConfigIntent.HideNavigationBarChanged -> {
+        { settings -> settings.copy(hideNavigationBar = value) }
+    }
+    is ReadConfigIntent.PaddingDisplayCutoutsChanged -> {
+        { settings -> settings.copy(paddingDisplayCutouts = value) }
+    }
+    is ReadConfigIntent.TitleBarModeChanged -> {
+        { settings -> settings.copy(titleBarMode = value) }
+    }
+    is ReadConfigIntent.ReadMenuBlurAlphaChanged -> {
+        { settings -> settings.copy(readMenuBlurAlpha = value) }
+    }
+    is ReadConfigIntent.ReadBodyToLhChanged -> {
+        { settings -> settings.copy(readBodyToLh = value) }
+    }
+    is ReadConfigIntent.TextFullJustifyChanged -> {
+        { settings -> settings.copy(textFullJustify = value) }
+    }
+    is ReadConfigIntent.TextBottomJustifyChanged -> {
+        { settings -> settings.copy(textBottomJustify = value) }
+    }
+    is ReadConfigIntent.AdaptSpecialStyleChanged -> {
+        { settings -> settings.copy(adaptSpecialStyle = value) }
+    }
+    is ReadConfigIntent.UseZhLayoutChanged -> {
+        { settings -> settings.copy(useZhLayout = value) }
+    }
+    is ReadConfigIntent.ShowBrightnessViewChanged -> {
+        { settings -> settings.copy(showBrightnessView = value) }
+    }
+    is ReadConfigIntent.BrightnessVwPosChanged -> {
+        { settings -> settings.copy(brightnessVwPos = value) }
+    }
+    is ReadConfigIntent.UseUnderlineChanged -> {
+        { settings -> settings.copy(useUnderline = value) }
+    }
+    is ReadConfigIntent.ReadSliderModeChanged -> {
+        { settings -> settings.copy(readSliderMode = value) }
+    }
+    is ReadConfigIntent.DoubleHorizontalPageChanged -> {
+        { settings -> settings.copy(doubleHorizontalPage = value) }
+    }
+    is ReadConfigIntent.ProgressBarBehaviorChanged -> {
+        { settings -> settings.copy(progressBarBehavior = value) }
+    }
+    is ReadConfigIntent.MouseWheelPageChanged -> {
+        { settings -> settings.copy(mouseWheelPage = value) }
+    }
+    is ReadConfigIntent.VolumeKeyPageChanged -> {
+        { settings -> settings.copy(volumeKeyPage = value) }
+    }
+    is ReadConfigIntent.KeyPageOnLongPressChanged -> {
+        { settings -> settings.copy(keyPageOnLongPress = value) }
+    }
+    is ReadConfigIntent.PageTouchSlopChanged -> {
+        { settings -> settings.copy(pageTouchSlop = value) }
+    }
+    is ReadConfigIntent.SliderVibratorChanged -> {
+        { settings -> settings.copy(sliderVibrator = value) }
+    }
+    is ReadConfigIntent.UseNewTocSheetChanged -> {
+        { settings -> settings.copy(useNewTocSheet = value) }
+    }
+    is ReadConfigIntent.MaxLengthWithNoTocChanged -> {
+        { settings ->
+            settings.copy(maxLengthWithNoToc = value.coerceIn(3000, 100000))
+        }
+    }
+    is ReadConfigIntent.SelectVibratorChanged -> {
+        { settings -> settings.copy(selectVibrator = value) }
+    }
+    is ReadConfigIntent.AutoSuggestDayNightChanged -> {
+        { settings -> settings.copy(autoSuggestDayNight = value) }
+    }
+    is ReadConfigIntent.ReadingAnchorChanged -> {
+        { settings -> settings.copy(readingAnchorEnabled = value) }
+    }
+    is ReadConfigIntent.SelectTextChanged -> {
+        { settings -> settings.copy(selectText = value) }
+    }
+    is ReadConfigIntent.NoAnimScrollPageChanged -> {
+        { settings -> settings.copy(noAnimScrollPage = value) }
+    }
+    is ReadConfigIntent.ClickImgWayChanged -> {
+        { settings -> settings.copy(clickImgWay = value) }
+    }
+    is ReadConfigIntent.OptimizeRenderChanged -> {
+        { settings -> settings.copy(optimizeRender = value) }
+    }
+    is ReadConfigIntent.DisableReturnKeyChanged -> {
+        { settings -> settings.copy(disableReturnKey = value) }
+    }
+    is ReadConfigIntent.ShowReadTitleAdditionChanged -> {
+        { settings -> settings.copy(showReadTitleAddition = value) }
+    }
+    is ReadConfigIntent.ShowMenuIconChanged -> {
+        { settings -> settings.copy(showMenuIcon = value) }
+    }
+    is ReadConfigIntent.PageKeysChanged -> {
+        { settings ->
+            settings.copy(prevKeys = prevKeys, nextKeys = nextKeys)
+        }
     }
     is ReadConfigIntent.EyeProtectionEnabledChanged,
     is ReadConfigIntent.EyeProtectionIntensityChanged,
     is ReadConfigIntent.EyeProtectionAutoNightChanged,
     is ReadConfigIntent.EyeProtectionScheduleChanged,
     is ReadConfigIntent.EyeProtectionStartTimeChanged,
-    is ReadConfigIntent.EyeProtectionEndTimeChanged ->
+    is ReadConfigIntent.EyeProtectionEndTimeChanged,
+    -> {
         error("Eye protection intents update ThemeSettings")
+    }
     ReadConfigIntent.OpenPageKeys,
     ReadConfigIntent.OpenClickActions,
     ReadConfigIntent.OpenEyeProtection,
-    ReadConfigIntent.DismissSheet -> error("Sheet intents do not update settings")
+    ReadConfigIntent.DismissSheet,
+    -> {
+        error("Sheet intents do not update settings")
+    }
 }
 
 private fun ThemeSettings.toEyeProtectionUiState(): EyeProtectionUiState = EyeProtectionUiState(
@@ -169,49 +267,48 @@ private fun ThemeSettings.toEyeProtectionUiState(): EyeProtectionUiState = EyePr
 private fun ReadSettings.toUiState(
     activeSheet: ReadConfigSheet?,
     eyeProtection: EyeProtectionUiState,
-): ReadConfigUiState =
-    ReadConfigUiState(
-        screenOrientation = screenOrientation,
-        keepLight = keepLight,
-        hideStatusBar = hideStatusBar,
-        hideNavigationBar = hideNavigationBar,
-        paddingDisplayCutouts = paddingDisplayCutouts,
-        titleBarMode = titleBarMode,
-        readMenuBlurAlpha = readMenuBlurAlpha,
-        readBodyToLh = readBodyToLh,
-        textFullJustify = textFullJustify,
-        textBottomJustify = textBottomJustify,
-        adaptSpecialStyle = adaptSpecialStyle,
-        useZhLayout = useZhLayout,
-        eyeProtection = eyeProtection,
-        showBrightnessView = showBrightnessView,
-        brightnessVwPos = brightnessVwPos,
-        brightnessAuto = brightnessAuto,
-        useUnderline = useUnderline,
-        readSliderMode = readSliderMode,
-        doubleHorizontalPage = doubleHorizontalPage,
-        progressBarBehavior = progressBarBehavior,
-        mouseWheelPage = mouseWheelPage,
-        volumeKeyPage = volumeKeyPage,
-        keyPageOnLongPress = keyPageOnLongPress,
-        pageTouchSlop = pageTouchSlop,
-        sliderVibrator = sliderVibrator,
-        useNewTocSheet = useNewTocSheet,
-        maxLengthWithNoToc = maxLengthWithNoToc,
-        selectVibrator = selectVibrator,
-        autoSuggestDayNight = autoSuggestDayNight,
-        readingAnchorEnabled = readingAnchorEnabled,
-        selectText = selectText,
-        noAnimScrollPage = noAnimScrollPage,
-        clickImgWay = clickImgWay,
-        optimizeRender = optimizeRender,
-        disableReturnKey = disableReturnKey,
-        expandTextMenu = expandTextMenu,
-        showSelectMenuIcon = showSelectMenuIcon,
-        showReadTitleAddition = showReadTitleAddition,
-        autoReadSpeed = autoReadSpeed,
-        prevKeys = prevKeys,
-        nextKeys = nextKeys,
-        showMenuIcon = showMenuIcon,
-        activeSheet = activeSheet,
-    )
+): ReadConfigUiState = ReadConfigUiState(
+    screenOrientation = screenOrientation,
+    keepLight = keepLight,
+    hideStatusBar = hideStatusBar,
+    hideNavigationBar = hideNavigationBar,
+    paddingDisplayCutouts = paddingDisplayCutouts,
+    titleBarMode = titleBarMode,
+    readMenuBlurAlpha = readMenuBlurAlpha,
+    readBodyToLh = readBodyToLh,
+    textFullJustify = textFullJustify,
+    textBottomJustify = textBottomJustify,
+    adaptSpecialStyle = adaptSpecialStyle,
+    useZhLayout = useZhLayout,
+    eyeProtection = eyeProtection,
+    showBrightnessView = showBrightnessView,
+    brightnessVwPos = brightnessVwPos,
+    brightnessAuto = brightnessAuto,
+    useUnderline = useUnderline,
+    readSliderMode = readSliderMode,
+    doubleHorizontalPage = doubleHorizontalPage,
+    progressBarBehavior = progressBarBehavior,
+    mouseWheelPage = mouseWheelPage,
+    volumeKeyPage = volumeKeyPage,
+    keyPageOnLongPress = keyPageOnLongPress,
+    pageTouchSlop = pageTouchSlop,
+    sliderVibrator = sliderVibrator,
+    useNewTocSheet = useNewTocSheet,
+    maxLengthWithNoToc = maxLengthWithNoToc,
+    selectVibrator = selectVibrator,
+    autoSuggestDayNight = autoSuggestDayNight,
+    readingAnchorEnabled = readingAnchorEnabled,
+    selectText = selectText,
+    noAnimScrollPage = noAnimScrollPage,
+    clickImgWay = clickImgWay,
+    optimizeRender = optimizeRender,
+    disableReturnKey = disableReturnKey,
+    expandTextMenu = expandTextMenu,
+    showSelectMenuIcon = showSelectMenuIcon,
+    showReadTitleAddition = showReadTitleAddition,
+    autoReadSpeed = autoReadSpeed,
+    prevKeys = prevKeys,
+    nextKeys = nextKeys,
+    showMenuIcon = showMenuIcon,
+    activeSheet = activeSheet,
+)

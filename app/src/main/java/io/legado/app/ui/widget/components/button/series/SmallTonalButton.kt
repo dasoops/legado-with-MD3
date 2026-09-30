@@ -21,7 +21,7 @@ fun SmallTonalButton(
     containerColor: Color? = null,
     selectedContainerColor: Color = LegadoTheme.colorScheme.primaryContainer,
     selectedContentColor: Color = LegadoTheme.colorScheme.onPrimaryContainer,
-    contentDescription: String? = null
+    contentDescription: String? = null,
 ) {
     SeriesButton(
         onClick = onClick,
@@ -36,7 +36,7 @@ fun SmallTonalButton(
         contentColor = contentColor,
         containerColor = containerColor,
         selectedContainerColor = selectedContainerColor,
-        selectedContentColor = selectedContentColor
+        selectedContentColor = selectedContentColor,
     ) { contentColor ->
         SeriesButtonContent(
             icon = icon,
@@ -46,7 +46,7 @@ fun SmallTonalButton(
             textStyle = LegadoTheme.typography.labelMedium,
             contentColor = contentColor,
             padding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
-            spacing = 4.dp
+            spacing = 4.dp,
         )
     }
 }

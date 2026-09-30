@@ -4,9 +4,9 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
 import android.util.LruCache
-import splitties.init.appCtx
 import java.io.File
 import java.io.InputStream
+import splitties.init.appCtx
 
 /** Android resource boundary shared by background measurement and Canvas drawing. */
 object ReaderTextBackgroundLoader {
@@ -16,9 +16,14 @@ object ReaderTextBackgroundLoader {
         val top: Float,
         val bottom: Float,
     )
-    private val bitmaps = object : LruCache<String, Bitmap>(16 * 1024 * 1024) {
-        override fun sizeOf(key: String, value: Bitmap): Int = value.allocationByteCount
-    }
+
+    private val bitmaps =
+        object : LruCache<String, Bitmap>(16 * 1024 * 1024) {
+            override fun sizeOf(
+                key: String,
+                value: Bitmap,
+            ): Int = value.allocationByteCount
+        }
 
     fun dimensions(source: String): Pair<Int, Int> = runCatching {
         open(source)?.use { input ->
@@ -36,12 +41,17 @@ object ReaderTextBackgroundLoader {
         cached(source)?.let { return it }
         val dimensions = dimensions(source)
         if (dimensions.first <= 0 || dimensions.second <= 0) return null
-        val sampleSize = if (isRawNinePatch(source)) 1 else calculateInSampleSize(
-            width = dimensions.first,
-            height = dimensions.second,
-            requestedWidth = appCtx.resources.displayMetrics.widthPixels,
-            requestedHeight = appCtx.resources.displayMetrics.heightPixels,
-        )
+        val sampleSize =
+            if (isRawNinePatch(source)) {
+                1
+            } else {
+                calculateInSampleSize(
+                    width = dimensions.first,
+                    height = dimensions.second,
+                    requestedWidth = appCtx.resources.displayMetrics.widthPixels,
+                    requestedHeight = appCtx.resources.displayMetrics.heightPixels,
+                )
+            }
         return runCatching {
             open(source)?.use { input ->
                 BitmapFactory.decodeStream(
@@ -53,7 +63,8 @@ object ReaderTextBackgroundLoader {
         }.getOrNull()?.takeUnless(Bitmap::isRecycled)?.also { bitmaps.put(key, it) }
     }
 
-    fun cached(source: String): Bitmap? = source.takeIf(String::isNotBlank)
+    fun cached(source: String): Bitmap? = source
+        .takeIf(String::isNotBlank)
         ?.let(::cacheKey)
         ?.let(bitmaps::get)
         ?.takeUnless(Bitmap::isRecycled)
@@ -63,12 +74,16 @@ object ReaderTextBackgroundLoader {
         if (!isRawNinePatch(source)) return null
         val bitmap = load(source) ?: return null
         if (bitmap.width < 3 || bitmap.height < 3) return null
-        fun marked(color: Int): Boolean = android.graphics.Color.alpha(color) > 0 &&
-                android.graphics.Color.red(color) < 32 &&
-                android.graphics.Color.green(color) < 32 &&
-                android.graphics.Color.blue(color) < 32
 
-        fun run(length: Int, colorAt: (Int) -> Int): IntRange? {
+        fun marked(color: Int): Boolean = android.graphics.Color.alpha(color) > 0 &&
+            android.graphics.Color.red(color) < 32 &&
+            android.graphics.Color.green(color) < 32 &&
+            android.graphics.Color.blue(color) < 32
+
+        fun run(
+            length: Int,
+            colorAt: (Int) -> Int,
+        ): IntRange? {
             val start = (1 until length - 1).firstOrNull { marked(colorAt(it)) } ?: return null
             val end = (start until length - 1).takeWhile { marked(colorAt(it)) }.last()
             return start..end
@@ -96,11 +111,19 @@ object ReaderTextBackgroundLoader {
     private fun open(source: String): InputStream? {
         if (source.isBlank()) return null
         return when {
-            source.startsWith("assets://") -> appCtx.assets.open(source.removePrefix("assets://"))
-            source.startsWith("content://") -> appCtx.contentResolver.openInputStream(Uri.parse(source))
-            File(source).exists() -> File(source).inputStream()
-            else -> assetCandidates(source).firstNotNullOfOrNull { asset ->
-                runCatching { appCtx.assets.open(asset) }.getOrNull()
+            source.startsWith("assets://") -> {
+                appCtx.assets.open(source.removePrefix("assets://"))
+            }
+            source.startsWith("content://") -> {
+                appCtx.contentResolver.openInputStream(Uri.parse(source))
+            }
+            File(source).exists() -> {
+                File(source).inputStream()
+            }
+            else -> {
+                assetCandidates(source).firstNotNullOfOrNull { asset ->
+                    runCatching { appCtx.assets.open(asset) }.getOrNull()
+                }
             }
         }
     }
@@ -110,8 +133,7 @@ object ReaderTextBackgroundLoader {
         return if (file.isFile) "$source:${file.length()}:${file.lastModified()}" else source
     }
 
-    private fun isRawNinePatch(source: String): Boolean =
-        source.substringBefore('?').substringBefore('#').endsWith(".9.png", ignoreCase = true)
+    private fun isRawNinePatch(source: String): Boolean = source.substringBefore('?').substringBefore('#').endsWith(".9.png", ignoreCase = true)
 
     private fun calculateInSampleSize(
         width: Int,

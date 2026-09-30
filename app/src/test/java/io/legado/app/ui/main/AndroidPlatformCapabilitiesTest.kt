@@ -4,7 +4,6 @@ import org.junit.Assert.assertEquals
 import org.junit.Test
 
 class AndroidPlatformCapabilitiesTest {
-
     @Test fun selectCornerRadiusTakesMinOfNonZeroCorners() {
         assertEquals(
             80f,

@@ -1,7 +1,7 @@
 package io.legado.app.ui.widget.components.menuItem
 
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Spacer
@@ -42,7 +42,7 @@ fun RoundDropdownMenu(
     shape: Shape = MaterialTheme.shapes.medium,
     shadowElevation: Dp = 4.dp,
     verticalSpacing: Dp = 8.dp,
-    content: @Composable ColumnScope.(dismiss: () -> Unit) -> Unit
+    content: @Composable ColumnScope.(dismiss: () -> Unit) -> Unit,
 ) {
     val isMiuix = ThemeResolver.isMiuixEngine(LegadoTheme.composeEngine)
     val popupContainerColor = LegadoTheme.colorScheme.surfaceContainer
@@ -52,7 +52,7 @@ fun RoundDropdownMenu(
         WindowListPopup(
             show = expanded,
             onDismissRequest = onDismissRequest,
-            popupModifier = modifier
+            popupModifier = modifier,
         ) {
             ProvideAppDensity {
                 ProvideAppContentColor(popupContentColor) {
@@ -76,17 +76,17 @@ fun RoundDropdownMenu(
             modifier = modifier,
             shape = shape,
             shadowElevation = shadowElevation,
-            containerColor = popupContainerColor
+            containerColor = popupContainerColor,
         ) {
             ProvideAppDensity {
                 MaterialExpressiveTheme(
                     colorScheme = colorScheme,
                     typography = Typography(),
                     motionScheme = MotionScheme.expressive(),
-                    shapes = Shapes()
+                    shapes = Shapes(),
                 ) {
                     Column(
-                        verticalArrangement = Arrangement.spacedBy(verticalSpacing)
+                        verticalArrangement = Arrangement.spacedBy(verticalSpacing),
                     ) {
                         content(onDismissRequest)
                     }
@@ -106,7 +106,7 @@ fun RoundDropdownMenuLazy(
     shadowElevation: Dp = 4.dp,
     verticalSpacing: Dp = 8.dp,
     maxHeight: Dp = 320.dp,
-    content: LazyListScope.(dismiss: () -> Unit) -> Unit
+    content: LazyListScope.(dismiss: () -> Unit) -> Unit,
 ) {
     val isMiuix = ThemeResolver.isMiuixEngine(LegadoTheme.composeEngine)
     val popupContainerColor = LegadoTheme.colorScheme.surfaceContainer
@@ -116,16 +116,17 @@ fun RoundDropdownMenuLazy(
         WindowListPopup(
             show = expanded,
             onDismissRequest = onDismissRequest,
-            popupModifier = modifier
+            popupModifier = modifier,
         ) {
             ProvideAppDensity {
                 ProvideAppContentColor(popupContentColor) {
                     ListPopupColumn {
                         LazyColumn(
-                            modifier = Modifier
+                            modifier =
+                            Modifier
                                 .background(popupContainerColor)
                                 .heightIn(max = maxHeight),
-                            verticalArrangement = Arrangement.spacedBy(verticalSpacing)
+                            verticalArrangement = Arrangement.spacedBy(verticalSpacing),
                         ) {
                             item { Spacer(Modifier.height(12.dp)) }
                             content(onDismissRequest)
@@ -145,18 +146,18 @@ fun RoundDropdownMenuLazy(
             modifier = modifier,
             shape = shape,
             shadowElevation = shadowElevation,
-            containerColor = popupContainerColor
+            containerColor = popupContainerColor,
         ) {
             ProvideAppDensity {
                 MaterialExpressiveTheme(
                     colorScheme = colorScheme,
                     typography = Typography(),
                     motionScheme = MotionScheme.expressive(),
-                    shapes = Shapes()
+                    shapes = Shapes(),
                 ) {
                     LazyColumn(
                         modifier = Modifier.heightIn(max = maxHeight),
-                        verticalArrangement = Arrangement.spacedBy(verticalSpacing)
+                        verticalArrangement = Arrangement.spacedBy(verticalSpacing),
                     ) {
                         content(onDismissRequest)
                     }

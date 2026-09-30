@@ -31,7 +31,8 @@ fun HighlightTagRow(
         HighlightTagItem(tag = tags[0])
     } else {
         Row(
-            modifier = modifier
+            modifier =
+            modifier
                 .fillMaxWidth()
                 .height(IntrinsicSize.Max),
             horizontalArrangement = Arrangement.SpaceEvenly,
@@ -40,7 +41,8 @@ fun HighlightTagRow(
             tags.forEachIndexed { index, tag ->
                 if (index > 0) {
                     VerticalDivider(
-                        modifier = Modifier
+                        modifier =
+                        Modifier
                             .padding(horizontal = 12.dp)
                             .fillMaxHeight(0.5f),
                         thickness = 0.5.dp,

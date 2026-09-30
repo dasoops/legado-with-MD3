@@ -10,7 +10,9 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import io.legado.app.R
 import io.legado.app.help.config.AppConfig
 
-internal class AndroidAlertBuilder(override val ctx: Context) : AlertBuilder<AlertDialog> {
+internal class AndroidAlertBuilder(
+    override val ctx: Context,
+) : AlertBuilder<AlertDialog> {
     private val builder = MaterialAlertDialogBuilder(ctx)
 
     override fun setTitle(title: CharSequence) {
@@ -59,42 +61,42 @@ internal class AndroidAlertBuilder(override val ctx: Context) : AlertBuilder<Ale
 
     override fun positiveButton(
         buttonText: String,
-        onClicked: ((dialog: DialogInterface) -> Unit)?
+        onClicked: ((dialog: DialogInterface) -> Unit)?,
     ) {
         builder.setPositiveButton(buttonText) { dialog, _ -> onClicked?.invoke(dialog) }
     }
 
     override fun positiveButton(
         buttonTextResource: Int,
-        onClicked: ((dialog: DialogInterface) -> Unit)?
+        onClicked: ((dialog: DialogInterface) -> Unit)?,
     ) {
         builder.setPositiveButton(buttonTextResource) { dialog, _ -> onClicked?.invoke(dialog) }
     }
 
     override fun negativeButton(
         buttonText: String,
-        onClicked: ((dialog: DialogInterface) -> Unit)?
+        onClicked: ((dialog: DialogInterface) -> Unit)?,
     ) {
         builder.setNegativeButton(buttonText) { dialog, _ -> onClicked?.invoke(dialog) }
     }
 
     override fun negativeButton(
         buttonTextResource: Int,
-        onClicked: ((dialog: DialogInterface) -> Unit)?
+        onClicked: ((dialog: DialogInterface) -> Unit)?,
     ) {
         builder.setNegativeButton(buttonTextResource) { dialog, _ -> onClicked?.invoke(dialog) }
     }
 
     override fun neutralButton(
         buttonText: String,
-        onClicked: ((dialog: DialogInterface) -> Unit)?
+        onClicked: ((dialog: DialogInterface) -> Unit)?,
     ) {
         builder.setNeutralButton(buttonText) { dialog, _ -> onClicked?.invoke(dialog) }
     }
 
     override fun neutralButton(
         buttonTextResource: Int,
-        onClicked: ((dialog: DialogInterface) -> Unit)?
+        onClicked: ((dialog: DialogInterface) -> Unit)?,
     ) {
         builder.setNeutralButton(buttonTextResource) { dialog, _ -> onClicked?.invoke(dialog) }
     }
@@ -105,7 +107,7 @@ internal class AndroidAlertBuilder(override val ctx: Context) : AlertBuilder<Ale
 
     override fun items(
         items: List<CharSequence>,
-        onItemSelected: (dialog: DialogInterface, index: Int) -> Unit
+        onItemSelected: (dialog: DialogInterface, index: Int) -> Unit,
     ) {
         builder.setItems(Array(items.size) { i -> items[i].toString() }) { dialog, which ->
             onItemSelected(dialog, which)
@@ -114,7 +116,7 @@ internal class AndroidAlertBuilder(override val ctx: Context) : AlertBuilder<Ale
 
     override fun <T> items(
         items: List<T>,
-        onItemSelected: (dialog: DialogInterface, item: T, index: Int) -> Unit
+        onItemSelected: (dialog: DialogInterface, item: T, index: Int) -> Unit,
     ) {
         builder.setItems(Array(items.size) { i -> items[i].toString() }) { dialog, which ->
             onItemSelected(dialog, items[which], which)
@@ -124,7 +126,7 @@ internal class AndroidAlertBuilder(override val ctx: Context) : AlertBuilder<Ale
     override fun multiChoiceItems(
         items: Array<String>,
         checkedItems: BooleanArray,
-        onClick: (dialog: DialogInterface, which: Int, isChecked: Boolean) -> Unit
+        onClick: (dialog: DialogInterface, which: Int, isChecked: Boolean) -> Unit,
     ) {
         builder.setMultiChoiceItems(items, checkedItems) { dialog, which, isChecked ->
             onClick(dialog, which, isChecked)
@@ -134,7 +136,7 @@ internal class AndroidAlertBuilder(override val ctx: Context) : AlertBuilder<Ale
     override fun singleChoiceItems(
         items: Array<String>,
         checkedItem: Int,
-        onClick: ((dialog: DialogInterface, which: Int) -> Unit)?
+        onClick: ((dialog: DialogInterface, which: Int) -> Unit)?,
     ) {
         builder.setSingleChoiceItems(items, checkedItem) { dialog, which ->
             onClick?.invoke(dialog, which)
@@ -143,29 +145,29 @@ internal class AndroidAlertBuilder(override val ctx: Context) : AlertBuilder<Ale
 
     override fun build(): AlertDialog {
         val dialog = builder.create()
-        //if (AppConfig.isEInkMode) {
-            //dialog.window?.run {
-                //val attr = attributes
-                //attr.dimAmount = 0f
-                //attr.windowAnimations = 0
-                //attributes = attr
-                //setBackgroundDrawableResource(R.drawable.bg_eink_border_dialog)
-                //   }
-                //}
+        // if (AppConfig.isEInkMode) {
+        // dialog.window?.run {
+        // val attr = attributes
+        // attr.dimAmount = 0f
+        // attr.windowAnimations = 0
+        // attributes = attr
+        // setBackgroundDrawableResource(R.drawable.bg_eink_border_dialog)
+        //   }
+        // }
         return dialog
     }
 
     override fun show(): AlertDialog {
         val dialog = builder.show()
-        //if (AppConfig.isEInkMode) {
-            //dialog.window?.run {
-                //val attr = attributes
-                //attr.dimAmount = 0f
-                //attr.windowAnimations = 0
-                //attributes = attr
-                //setBackgroundDrawableResource(R.drawable.bg_eink_border_dialog)
+        // if (AppConfig.isEInkMode) {
+        // dialog.window?.run {
+        // val attr = attributes
+        // attr.dimAmount = 0f
+        // attr.windowAnimations = 0
+        // attributes = attr
+        // setBackgroundDrawableResource(R.drawable.bg_eink_border_dialog)
         //    }
-        //}
+        // }
         return dialog
     }
 }

@@ -5,7 +5,6 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class HeuristicPageEstimatorTest {
-
     private val estimator = HeuristicPageEstimator()
 
     /**
@@ -39,21 +38,22 @@ class HeuristicPageEstimatorTest {
     /** 正文不足一页，但标题和章末留白把它顶过 1.0，取整后成为第 2 页。 */
     @Test
     fun `fixed chapter chrome can push content onto another page`() {
-        val fraction = estimator.estimate(
-            input(
-                contentLength = 42,
-                titleLength = 1,
-                textSizePx = 10f,
-                textHeightPx = 10f,
-                lineSpacingPx = 0f,
-                paragraphSpacingPx = 0f,
-                contentWidthPx = 100,
-                contentHeightPx = 100,
-                titleTopSpacingPx = 10f,
-                titleBottomSpacingPx = 10f,
-                endPaddingPx = 20f,
+        val fraction =
+            estimator.estimate(
+                input(
+                    contentLength = 42,
+                    titleLength = 1,
+                    textSizePx = 10f,
+                    textHeightPx = 10f,
+                    lineSpacingPx = 0f,
+                    paragraphSpacingPx = 0f,
+                    contentWidthPx = 100,
+                    contentHeightPx = 100,
+                    titleTopSpacingPx = 10f,
+                    titleBottomSpacingPx = 10f,
+                    endPaddingPx = 20f,
+                ),
             )
-        )
 
         assertTrue("expected >1f but was $fraction", fraction > 1f)
         assertEquals(2, PageEstimateCalibration().apply(fraction))
@@ -71,23 +71,22 @@ class HeuristicPageEstimatorTest {
         titleTopSpacingPx: Float = 20f,
         titleBottomSpacingPx: Float = 20f,
         endPaddingPx: Float = 20f,
-    ) =
-        ChapterPageEstimateInput(
-            readerType = 0,
-            titleLength = titleLength,
-            includeTitle = true,
-            contentLength = contentLength,
-            textSizePx = textSizePx,
-            textHeightPx = textHeightPx,
-            lineSpacingPx = lineSpacingPx,
-            paragraphSpacingPx = paragraphSpacingPx,
-            titleTextSizePx = textSizePx * 1.25f,
-            titleTextHeightPx = textHeightPx * 1.25f,
-            titleLineSpacingPx = 0f,
-            titleTopSpacingPx = titleTopSpacingPx,
-            titleBottomSpacingPx = titleBottomSpacingPx,
-            endPaddingPx = endPaddingPx,
-            contentWidthPx = contentWidthPx,
-            contentHeightPx = contentHeightPx,
-        )
+    ) = ChapterPageEstimateInput(
+        readerType = 0,
+        titleLength = titleLength,
+        includeTitle = true,
+        contentLength = contentLength,
+        textSizePx = textSizePx,
+        textHeightPx = textHeightPx,
+        lineSpacingPx = lineSpacingPx,
+        paragraphSpacingPx = paragraphSpacingPx,
+        titleTextSizePx = textSizePx * 1.25f,
+        titleTextHeightPx = textHeightPx * 1.25f,
+        titleLineSpacingPx = 0f,
+        titleTopSpacingPx = titleTopSpacingPx,
+        titleBottomSpacingPx = titleBottomSpacingPx,
+        endPaddingPx = endPaddingPx,
+        contentWidthPx = contentWidthPx,
+        contentHeightPx = contentHeightPx,
+    )
 }

@@ -21,23 +21,33 @@ fun OnboardingRouteScreen(
     val context = LocalContext.current
     val state by viewModel.uiState.collectAsStateWithLifecycle()
 
-    val restoreFilePicker = rememberLauncherForActivityResult(
-        ActivityResultContracts.OpenDocument()
-    ) { uri ->
-        if (uri != null) {
-            viewModel.onIntent(OnboardingIntent.RestoreLocalFile(uri.toString()))
+    val restoreFilePicker =
+        rememberLauncherForActivityResult(
+            ActivityResultContracts.OpenDocument(),
+        ) { uri ->
+            if (uri != null) {
+                viewModel.onIntent(OnboardingIntent.RestoreLocalFile(uri.toString()))
+            }
         }
-    }
 
     LaunchedEffect(Unit) {
         viewModel.effects.collectLatest { effect ->
             when (effect) {
-                OnboardingEffect.NavigateHome -> onNavigateHome()
-                OnboardingEffect.Finish -> onFinish()
-                OnboardingEffect.OpenRestoreFilePicker ->
+                OnboardingEffect.NavigateHome -> {
+                    onNavigateHome()
+                }
+                OnboardingEffect.Finish -> {
+                    onFinish()
+                }
+                OnboardingEffect.OpenRestoreFilePicker -> {
                     restoreFilePicker.launch(arrayOf("application/zip"))
-                OnboardingEffect.ApplyDayNight -> ThemeConfigStore.applyDayNightLive()
-                is OnboardingEffect.ShowToast -> context.toastOnUi(effect.resId)
+                }
+                OnboardingEffect.ApplyDayNight -> {
+                    ThemeConfigStore.applyDayNightLive()
+                }
+                is OnboardingEffect.ShowToast -> {
+                    context.toastOnUi(effect.resId)
+                }
             }
         }
     }

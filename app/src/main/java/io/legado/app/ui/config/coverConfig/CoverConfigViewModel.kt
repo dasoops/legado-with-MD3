@@ -17,10 +17,10 @@ class CoverConfigViewModel(
     private val coverAlbumUseCase: CoverAlbumUseCase,
     private val settingsGateway: CoverSettingsGateway,
 ) : ViewModel() {
-
-    private val _uiState = MutableStateFlow(
-        CoverConfigUiState(settings = settingsGateway.currentSettings)
-    )
+    private val _uiState =
+        MutableStateFlow(
+            CoverConfigUiState(settings = settingsGateway.currentSettings),
+        )
     val uiState = _uiState.asStateFlow()
 
     init {
@@ -30,10 +30,11 @@ class CoverConfigViewModel(
                 coverAlbumUseCase.selection,
                 settingsGateway.settings,
             ) { albums, selection, settings ->
-                settings to CoverAlbumSelectionUiState(
-                    albums = albums.map { it.toUi() }.toImmutableList(),
-                    selectedAlbumId = selection.albumId,
-                )
+                settings to
+                    CoverAlbumSelectionUiState(
+                        albums = albums.map { it.toUi() }.toImmutableList(),
+                        selectedAlbumId = selection.albumId,
+                    )
             }.collect { (settings, albumSelection) ->
                 _uiState.update {
                     it.copy(settings = settings, albumSelection = albumSelection)
@@ -44,35 +45,49 @@ class CoverConfigViewModel(
 
     fun onIntent(intent: CoverConfigIntent) {
         when (intent) {
-            is CoverConfigIntent.SetLoadOnlyOnWifi ->
+            is CoverConfigIntent.SetLoadOnlyOnWifi -> {
                 updateSettings { it.copy(loadOnlyOnWifi = intent.value) }
-            is CoverConfigIntent.SetUseDefaultCover ->
+            }
+            is CoverConfigIntent.SetUseDefaultCover -> {
                 updateSettings { it.copy(useDefaultCover = intent.value) }
-            is CoverConfigIntent.SetShowShadow ->
+            }
+            is CoverConfigIntent.SetShowShadow -> {
                 updateSettings { it.copy(showShadow = intent.value) }
-            is CoverConfigIntent.SetShowStroke ->
+            }
+            is CoverConfigIntent.SetShowStroke -> {
                 updateSettings { it.copy(showStroke = intent.value) }
-            is CoverConfigIntent.SetUseDefaultColor ->
+            }
+            is CoverConfigIntent.SetUseDefaultColor -> {
                 updateSettings { it.copy(useDefaultColor = intent.value) }
-            is CoverConfigIntent.SetInfoOrientation ->
+            }
+            is CoverConfigIntent.SetInfoOrientation -> {
                 updateSettings { it.copy(infoOrientation = intent.value) }
-            is CoverConfigIntent.SetExploreFilterState ->
+            }
+            is CoverConfigIntent.SetExploreFilterState -> {
                 updateSettings { it.copy(exploreFilterState = intent.value) }
-            is CoverConfigIntent.SetTextColor ->
+            }
+            is CoverConfigIntent.SetTextColor -> {
                 updateSettings { it.copy(textColor = intent.value) }
-            is CoverConfigIntent.SetShadowColor ->
+            }
+            is CoverConfigIntent.SetShadowColor -> {
                 updateSettings { it.copy(shadowColor = intent.value) }
-            is CoverConfigIntent.SetTextColorDark ->
+            }
+            is CoverConfigIntent.SetTextColorDark -> {
                 updateSettings { it.copy(textColorDark = intent.value) }
-            is CoverConfigIntent.SetShadowColorDark ->
+            }
+            is CoverConfigIntent.SetShadowColorDark -> {
                 updateSettings { it.copy(shadowColorDark = intent.value) }
+            }
             is CoverConfigIntent.ShowSheet -> {
                 _uiState.update { it.copy(activeSheet = intent.sheet) }
             }
-            CoverConfigIntent.DismissSheet ->
+            CoverConfigIntent.DismissSheet -> {
                 _uiState.update { it.copy(activeSheet = null) }
-            is CoverConfigIntent.SelectAlbum -> viewModelScope.launch(Dispatchers.IO) {
-                coverAlbumUseCase.selectAlbum(intent.id)
+            }
+            is CoverConfigIntent.SelectAlbum -> {
+                viewModelScope.launch(Dispatchers.IO) {
+                    coverAlbumUseCase.selectAlbum(intent.id)
+                }
             }
         }
     }
@@ -85,10 +100,14 @@ class CoverConfigViewModel(
 internal fun io.legado.app.domain.model.CoverAlbum.toUi() = CoverAlbumItemUi(
     id = id,
     name = name,
-    lightImages = lightImages.map {
-        CoverAlbumImageUi(id = it.id, path = it.path)
-    }.toImmutableList(),
-    darkImages = darkImages.map {
-        CoverAlbumImageUi(id = it.id, path = it.path)
-    }.toImmutableList(),
+    lightImages =
+    lightImages
+        .map {
+            CoverAlbumImageUi(id = it.id, path = it.path)
+        }.toImmutableList(),
+    darkImages =
+    darkImages
+        .map {
+            CoverAlbumImageUi(id = it.id, path = it.path)
+        }.toImmutableList(),
 )

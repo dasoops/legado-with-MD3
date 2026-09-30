@@ -20,7 +20,6 @@ import androidx.lifecycle.lifecycleScope
 import io.legado.app.R
 import io.legado.app.constant.AppLog
 import io.legado.app.constant.BookType
-
 import io.legado.app.data.entities.BookProgress
 import io.legado.app.data.repository.HighlightRuleRepository
 import io.legado.app.feature.reader.core.gesture.ReaderTapAction
@@ -78,6 +77,7 @@ import io.legado.app.utils.share
 import io.legado.app.utils.sysScreenOffTime
 import io.legado.app.utils.throttle
 import io.legado.app.utils.toastOnUi
+import java.util.concurrent.ConcurrentHashMap
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Deferred
@@ -95,8 +95,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
-import java.util.concurrent.ConcurrentHashMap
-
 
 /**
  * Encapsulates all the reader logic that used to be in ReadBookActivity.
@@ -141,21 +139,18 @@ class ReadBookController(
     private fun readerImageCacheKey(
         element: ReaderElement.Image,
         generation: Long = readerImageGenerations[element.source] ?: 0L,
-    ): String =
-        ReaderImageCachePolicy.withGeneration(
-            ReaderImageCachePolicy.key(element),
-            generation,
-        )
+    ): String = ReaderImageCachePolicy.withGeneration(
+        ReaderImageCachePolicy.key(element),
+        generation,
+    )
 
-    fun cachedReaderImage(element: ReaderElement.Image): android.graphics.Bitmap? =
-        readerImageCache.get(readerImageCacheKey(element))?.takeUnless(android.graphics.Bitmap::isRecycled)
+    fun cachedReaderImage(element: ReaderElement.Image): android.graphics.Bitmap? = readerImageCache.get(readerImageCacheKey(element))?.takeUnless(android.graphics.Bitmap::isRecycled)
 
-    private fun activeReaderImageKeys(window: ReaderPageWindow): Set<String> =
-        listOfNotNull(window.previous, window.current, window.next, window.nextPlus)
-            .asSequence()
-            .flatMap { page -> page.elements.asSequence().filterIsInstance<ReaderElement.Image>() }
-            .map(::readerImageCacheKey)
-            .toSet()
+    private fun activeReaderImageKeys(window: ReaderPageWindow): Set<String> = listOfNotNull(window.previous, window.current, window.next, window.nextPlus)
+        .asSequence()
+        .flatMap { page -> page.elements.asSequence().filterIsInstance<ReaderElement.Image>() }
+        .map(::readerImageCacheKey)
+        .toSet()
 
     private fun cancelReaderImageLoadsExcept(allowedKeys: Set<String>) {
         readerImageLoads.entries
@@ -170,44 +165,43 @@ class ReadBookController(
      * affected pages. Publishing a new generation before its bitmaps exist showed a placeholder
      * frame; cancelling the previous request could also leave that placeholder stuck.
      */
-    private suspend fun replaceReaderImages(sources: Set<String>) =
-        readerImageRefreshMutex.withLock {
-            if (sources.isEmpty()) return@withLock
-            val targetGenerations = sources.associateWith { source ->
-                (readerImageGenerations[source] ?: 0L) + 1L
+    private suspend fun replaceReaderImages(sources: Set<String>) = readerImageRefreshMutex.withLock {
+        if (sources.isEmpty()) return@withLock
+        val targetGenerations = sources.associateWith { source ->
+            (readerImageGenerations[source] ?: 0L) + 1L
         }
-            val elementsBySource = directReaderPages
-                .asSequence()
-                .flatMap { page ->
-                    page.elements.asSequence().filterIsInstance<ReaderElement.Image>()
+        val elementsBySource = directReaderPages
+            .asSequence()
+            .flatMap { page ->
+                page.elements.asSequence().filterIsInstance<ReaderElement.Image>()
+            }
+            .filter { it.source in targetGenerations }
+            .distinctBy { element ->
+                "${element.source}|${element.bounds.width.toInt()}|${element.bounds.height.toInt()}"
+            }
+            .groupBy(ReaderElement.Image::source)
+        val readySources = buildSet {
+            elementsBySource.forEach { (source, elements) ->
+                val generation = targetGenerations.getValue(source)
+                val allLoaded = elements.all { element ->
+                    loadReaderImage(element, readerImageCacheKey(element, generation))
+                        ?.takeUnless(ImageProvider::isErrorBitmap) != null
                 }
-                .filter { it.source in targetGenerations }
-                .distinctBy { element ->
-                    "${element.source}|${element.bounds.width.toInt()}|${element.bounds.height.toInt()}"
-                }
-                .groupBy(ReaderElement.Image::source)
-            val readySources = buildSet {
-                elementsBySource.forEach { (source, elements) ->
-                    val generation = targetGenerations.getValue(source)
-                    val allLoaded = elements.all { element ->
-                        loadReaderImage(element, readerImageCacheKey(element, generation))
-                            ?.takeUnless(ImageProvider::isErrorBitmap) != null
-                    }
-                    if (allLoaded) {
-                        add(source)
-                    } else {
-                        // The target generation has not been published, so retaining its error
-                        // placeholder would make a later refresh reuse it instead of retrying.
-                        elements.forEach { element ->
-                            readerImageCache.remove(readerImageCacheKey(element, generation))
-                        }
+                if (allLoaded) {
+                    add(source)
+                } else {
+                    // The target generation has not been published, so retaining its error
+                    // placeholder would make a later refresh reuse it instead of retrying.
+                    elements.forEach { element ->
+                        readerImageCache.remove(readerImageCacheKey(element, generation))
                     }
                 }
             }
-            if (readySources.isEmpty()) return@withLock
-            readySources.forEach { source ->
-                readerImageGenerations[source] = targetGenerations.getValue(source)
-            }
+        }
+        if (readySources.isEmpty()) return@withLock
+        readySources.forEach { source ->
+            readerImageGenerations[source] = targetGenerations.getValue(source)
+        }
         val revisionSalt = System.nanoTime()
         var changed = false
         directReaderPages = directReaderPages.map { page ->
@@ -234,7 +228,7 @@ class ReadBookController(
                     window.previous,
                     window.current,
                     window.next,
-                    window.nextPlus
+                    window.nextPlus,
                 )
             }
             .asSequence()
@@ -251,9 +245,7 @@ class ReadBookController(
     }
 
     /** Android image capability used by the Compose Canvas renderer. */
-    suspend fun loadReaderImage(element: ReaderElement.Image): android.graphics.Bitmap? {
-        return loadReaderImage(element, readerImageCacheKey(element))
-    }
+    suspend fun loadReaderImage(element: ReaderElement.Image): android.graphics.Bitmap? = loadReaderImage(element, readerImageCacheKey(element))
 
     private suspend fun loadReaderImage(
         element: ReaderElement.Image,
@@ -313,7 +305,7 @@ class ReadBookController(
         ReaderBackgroundState(
             drawable = ReadSessionState.background,
             meanColorArgb = ReadSessionState.backgroundMeanColor,
-        )
+        ),
     )
     val readerBackground = _readerBackground.asStateFlow()
     private var readerBackgroundLoadJob: Job? = null
@@ -356,6 +348,7 @@ class ReadBookController(
     private var directReaderChapterPageCounts = emptyMap<Int, Int>()
     private var directReaderPageIndex: Int? = null
     private val menuMutex = Mutex()
+
     @Volatile
     private var cachedActionMenuItems: List<ActionMenuItem>? = null
 
@@ -402,8 +395,8 @@ class ReadBookController(
 
     private val menuLayoutIsVisible: Boolean
         get() = bottomDialogCount > 0 ||
-                viewModel.uiState.value.menuVisible ||
-                viewModel.uiState.value.searchMenuVisible
+            viewModel.uiState.value.menuVisible ||
+            viewModel.uiState.value.searchMenuVisible
 
     private val nextPageDebounce by lazy { Debounce { keyPage(PageDirection.NEXT) } }
     private val prevPageDebounce by lazy { Debounce { keyPage(PageDirection.PREV) } }
@@ -427,11 +420,13 @@ class ReadBookController(
     }
 
     private fun publishReaderRenderState() {
-        readerSessionViewModel.submit(ReaderRenderUiState(
-            pageWindow = _readerPageWindow.value,
-            paginationError = _readerPaginationError.value,
-            background = _readerBackground.value,
-        ))
+        readerSessionViewModel.submit(
+            ReaderRenderUiState(
+                pageWindow = _readerPageWindow.value,
+                paginationError = _readerPaginationError.value,
+                background = _readerBackground.value,
+            ),
+        )
     }
 
     private fun updateReaderPageWindow(value: ReaderPageWindow): ReaderPageWindow {
@@ -476,9 +471,10 @@ class ReadBookController(
         val requestVersion = ++textMenuRequestVersion
         activity.lifecycleScope.launch {
             val items = getActionMenuItems().filterNot {
-                selection.includesTitle && it.id in setOf(
-                    R.id.menu_mark,
-                )
+                selection.includesTitle &&
+                    it.id in setOf(
+                        R.id.menu_mark,
+                    )
             }
             if (textMenuRequestVersion != requestVersion) return@launch
             _textMenuState.value = TextMenuState(
@@ -495,7 +491,10 @@ class ReadBookController(
 
     fun onComposeReaderElementClick(element: ReaderElement): Boolean = when (element) {
         is ReaderElement.Text -> when {
-            element.markingId != null -> { onMarkingClick(element.markingId); true }
+            element.markingId != null -> {
+                onMarkingClick(element.markingId)
+                true
+            }
             element.link != null -> {
                 activity.openUrl(element.link)
                 true
@@ -503,8 +502,14 @@ class ReadBookController(
             else -> false
         }
         is ReaderElement.Image -> handleComposeImageClick(element)
-        is ReaderElement.Review -> { activity.toastOnUi("Button Pressed!"); true }
-        is ReaderElement.Action -> { activity.toastOnUi("Button Pressed!"); true }
+        is ReaderElement.Review -> {
+            activity.toastOnUi("Button Pressed!")
+            true
+        }
+        is ReaderElement.Action -> {
+            activity.toastOnUi("Button Pressed!")
+            true
+        }
         is ReaderElement.Spacer -> false
         is ReaderElement.ParagraphMarker -> false
         is ReaderElement.Rule -> false
@@ -530,12 +535,14 @@ class ReadBookController(
             ReaderTapAction.NONE,
             ReaderTapAction.MENU,
             ReaderTapAction.NEXT_PAGE,
-            ReaderTapAction.PREVIOUS_PAGE -> Unit
+            ReaderTapAction.PREVIOUS_PAGE,
+            -> Unit
             ReaderTapAction.NEXT_CHAPTER -> viewModel.onIntent(ReadBookIntent.NextChapter)
             ReaderTapAction.PREVIOUS_CHAPTER -> viewModel.onIntent(ReadBookIntent.PrevChapter)
             ReaderTapAction.READ_ALOUD_PREVIOUS_PARAGRAPH,
             ReaderTapAction.READ_ALOUD_NEXT_PARAGRAPH,
-            ReaderTapAction.TOGGLE_READ_ALOUD_PAUSE -> Unit
+            ReaderTapAction.TOGGLE_READ_ALOUD_PAUSE,
+            -> Unit
             ReaderTapAction.ADD_BOOKMARK -> viewModel.onIntent(ReadBookIntent.AddBookmark)
             ReaderTapAction.OPEN_CONTENT_EDIT -> viewModel.onIntent(ReadBookIntent.OpenContentEdit)
             ReaderTapAction.TOGGLE_REPLACE -> viewModel.onIntent(ReadBookIntent.MenuEnableReplace)
@@ -551,18 +558,36 @@ class ReadBookController(
         composeImageClickAt = now
         composeImageDoubleClick = if (debounce) !composeImageDoubleClick else false
         return when (readSettingsGateway.currentSettings.clickImgWay) {
-            "1" -> { viewModel.onIntent(ReadBookIntent.ShowSheet(ReadBookSheet.Photo(image.source))); true }
+            "1" -> {
+                viewModel.onIntent(ReadBookIntent.ShowSheet(ReadBookSheet.Photo(image.source)))
+                true
+            }
             "2" -> if (!debounce && ReadBook.book?.isOnLineTxt == true) {
-                image.action?.takeIf(String::isNotBlank)?.let { clickImg(it, image.source); true }
+                image.action?.takeIf(String::isNotBlank)?.let {
+                    clickImg(it, image.source)
+                    true
+                }
                     ?: oldClickImg(image.source)
-            } else false
+            } else {
+                false
+            }
             "3" -> false
             "4" -> if (composeImageDoubleClick) {
-                image.action?.takeIf(String::isNotBlank)?.let { clickImg(it, image.source); true } ?: false
-            } else true
+                image.action?.takeIf(String::isNotBlank)?.let {
+                    clickImg(it, image.source)
+                    true
+                } ?: false
+            } else {
+                true
+            }
             else -> if (!debounce) {
-                image.action?.takeIf(String::isNotBlank)?.let { clickImg(it, image.source); true } ?: false
-            } else false
+                image.action?.takeIf(String::isNotBlank)?.let {
+                    clickImg(it, image.source)
+                    true
+                } ?: false
+            } else {
+                false
+            }
         }
     }
 
@@ -580,7 +605,7 @@ class ReadBookController(
         )
         val viewportChanged = layoutController.viewport.value != viewport
         layoutController.updateViewport(
-            viewport
+            viewport,
         )
         var viewportPaginationStyle: ReaderAndroidPaginationStyle? = null
         if (viewportChanged) {
@@ -744,9 +769,11 @@ class ReadBookController(
         missingChapters.forEach { chapterIndex ->
             // Match the View reader's three-chapter hand-off: cached chapter content waits for
             // its Canvas pagination rather than being presented as a network/content load.
-            if (chapterIndex !in cachedChapterIndexes) placeholderReaderPage(chapterIndex)?.let {
-                updated.add(it)
-                added++
+            if (chapterIndex !in cachedChapterIndexes) {
+                placeholderReaderPage(chapterIndex)?.let {
+                    updated.add(it)
+                    added++
+                }
             }
         }
         if (added == 0) return index
@@ -834,7 +861,7 @@ class ReadBookController(
             pages.any { it.id.chapterIndex == result.chapterIndex }
         }?.let { pages ->
             publishDirectReaderWindow(
-                ReaderPageNavigator.locate(pages, result.chapterIndex, bodyPosition)
+                ReaderPageNavigator.locate(pages, result.chapterIndex, bodyPosition),
             )
         }
     }
@@ -886,7 +913,6 @@ class ReadBookController(
             sourceHash = chapter.sourceHash,
             bookUrl = chapter.book.bookUrl,
             bookOrigin = chapter.book.origin,
-            bookSourceHash = chapter.bookSourceHash,
         )
         val paginationEnvironmentKey = buildString {
             append('|').append(width).append('x').append(height)
@@ -936,7 +962,13 @@ class ReadBookController(
                     publishDirectReaderWindow(index)
                 }
             scheduleAdjacentReaderPagination(
-                key, chapter, chapters, width, height, contentPadding, resolvedPaginationStyle
+                key,
+                chapter,
+                chapters,
+                width,
+                height,
+                contentPadding,
+                resolvedPaginationStyle,
             )
             return true
         }
@@ -952,12 +984,12 @@ class ReadBookController(
                         pages,
                         chapter.chapter.index,
                         ReadBook.durChapterPos,
-                    )
+                    ),
                 )
             }
         if (directReaderLayoutKey != key) {
             val environmentChanged = directReaderPaginationEnvironmentKey != null &&
-                    directReaderPaginationEnvironmentKey != paginationEnvironmentKey
+                directReaderPaginationEnvironmentKey != paginationEnvironmentKey
             if (environmentChanged) {
                 // 当前章先提交、相邻章后台预排的两阶段策略只适用于同一排版环境。
                 // 主题/高亮规则变化后继续保留相邻旧页，会在翻到该章时先显示旧几何再跳变。
@@ -974,28 +1006,26 @@ class ReadBookController(
             directReaderLayoutJob = activity.lifecycleScope.launch(IO) {
                 val highlightRules = HighlightRuleRepository()
                     .loadEnabled(ReadBookConfig.durConfig.name)
-                suspend fun paginate(candidate: ReaderChapterInput, phase: String) =
-                    candidate.chapter.index to ReaderPerfTrace.suspendSection("pagination.$phase") {
-                        paginateLegacyReaderChapterSafely {
+                suspend fun paginate(candidate: ReaderChapterInput, phase: String) = candidate.chapter.index to ReaderPerfTrace.suspendSection("pagination.$phase") {
+                    paginateLegacyReaderChapterSafely {
                         LegacyReaderChapterPaginator.paginate(
-                                book = candidate.book,
-                                bookSource = candidate.bookSource,
-                                chapter = candidate.chapter,
-                                displayTitle = candidate.displayTitle,
-                                content = candidate.content,
-                                source = candidate.source,
-                                revision = 31L * key.hashCode() + candidate.chapter.index,
-                                viewportWidthPx = width,
-                                viewportHeightPx = height,
-                                contentPaddingLeftPx = contentPadding.left,
-                                contentPaddingTopPx = contentPadding.top,
-                                contentPaddingRightPx = contentPadding.right,
-                                contentPaddingBottomPx = contentPadding.bottom,
-                                paginationStyle = resolvedPaginationStyle,
-                                highlightRules = highlightRules,
-                            )
-                        }
+                            book = candidate.book,
+                            chapter = candidate.chapter,
+                            displayTitle = candidate.displayTitle,
+                            content = candidate.content,
+                            source = candidate.source,
+                            revision = 31L * key.hashCode() + candidate.chapter.index,
+                            viewportWidthPx = width,
+                            viewportHeightPx = height,
+                            contentPaddingLeftPx = contentPadding.left,
+                            contentPaddingTopPx = contentPadding.top,
+                            contentPaddingRightPx = contentPadding.right,
+                            contentPaddingBottomPx = contentPadding.bottom,
+                            paginationStyle = resolvedPaginationStyle,
+                            highlightRules = highlightRules,
+                        )
                     }
+                }
 
                 val currentResult = paginate(chapter, "current")
                 val currentBatch = collectLegacyReaderPaginationBatch(
@@ -1019,7 +1049,7 @@ class ReadBookController(
                             width,
                             height,
                             contentPadding,
-                            resolvedPaginationStyle
+                            resolvedPaginationStyle,
                         )
                     }
                 }
@@ -1040,7 +1070,7 @@ class ReadBookController(
         if (directReaderLayoutKey != key) return
         val missing = chapters.filter { candidate ->
             candidate.chapter.index != current.chapter.index &&
-                    directReaderPages.none { it.id.chapterIndex == candidate.chapter.index && !it.isPlaceholder }
+                directReaderPages.none { it.id.chapterIndex == candidate.chapter.index && !it.isPlaceholder }
         }
         if (missing.isEmpty()) return
         directReaderAdjacentLayoutJob?.cancel()
@@ -1052,7 +1082,6 @@ class ReadBookController(
                     paginateLegacyReaderChapterSafely {
                         LegacyReaderChapterPaginator.paginate(
                             book = candidate.book,
-                            bookSource = candidate.bookSource,
                             chapter = candidate.chapter,
                             displayTitle = candidate.displayTitle,
                             content = candidate.content,
@@ -1072,9 +1101,12 @@ class ReadBookController(
             }
             withContext(Main) {
                 applyDirectReaderPaginationBatch(
-                    key, current, chapters,
+                    key,
+                    current,
+                    chapters,
                     collectLegacyReaderPaginationBatch(current.chapter.index, results),
-                    generation, layoutComplete = true,
+                    generation,
+                    layoutComplete = true,
                 )
                 if (directReaderAdjacentLayoutJob === coroutineContext[Job]) {
                     directReaderAdjacentLayoutJob = null
@@ -1093,66 +1125,66 @@ class ReadBookController(
     ) {
         ReaderPerfTrace.section("pagination.commit") {
             if (directReaderLayoutKey != key) return@section
-        if (layoutComplete) directReaderLayoutJob = null
-        batch.unsupportedChapters.forEach { (chapterIndex, reason) ->
-            AppLog.putDebug("Compose reader pagination unsupported: chapter=$chapterIndex reason=$reason")
-        }
-        updateReaderPaginationError(batch.failureReasonFor(currentChapter.chapter.index))
-        val previousPages = directReaderPages.associateBy { it.id }
-        val replacementChapterIndexes = batch.pages.mapTo(mutableSetOf()) { it.id.chapterIndex }
+            if (layoutComplete) directReaderLayoutJob = null
+            batch.unsupportedChapters.forEach { (chapterIndex, reason) ->
+                AppLog.putDebug("Compose reader pagination unsupported: chapter=$chapterIndex reason=$reason")
+            }
+            updateReaderPaginationError(batch.failureReasonFor(currentChapter.chapter.index))
+            val previousPages = directReaderPages.associateBy { it.id }
+            val replacementChapterIndexes = batch.pages.mapTo(mutableSetOf()) { it.id.chapterIndex }
             val retainedPages = if (directReaderMayReuseAdjacentPages ||
                 currentChapter.chapter.index !in replacementChapterIndexes
             ) {
-            directReaderPages.filterNot { it.id.chapterIndex in replacementChapterIndexes }
-        } else {
-            emptyList()
-        }
-            val replacementPages = batch.pages.map { page ->
-            previousPages[page.id]?.takeIf(page::hasSameGeometryAs)?.let { previous ->
-                page.copy(layoutRevision = previous.layoutRevision)
-            } ?: page
+                directReaderPages.filterNot { it.id.chapterIndex in replacementChapterIndexes }
+            } else {
+                emptyList()
             }
-        // Pagination deliberately publishes the current chapter before the adjacent chapters.
-        // Keep an already shaped adjacent page during that first batch: replacing the whole
-        // window here made every chapter turn recreate a "loading" placeholder even when the
-        // target page was still valid in memory.
-        directReaderPages = (retainedPages + replacementPages)
-            .sortedWith(compareBy({ it.id.chapterIndex }, { it.id.pageIndex }))
-        if (layoutComplete) {
-            // A complete batch establishes one shared pagination environment. Subsequent
-            // chapter-window changes may retain its already-shaped adjacent pages.
-            directReaderMayReuseAdjacentPages = true
-        }
-        // 重排可能改变元素位置与页 endPosition，页上下文缓存全部失效。
-        directReaderPageContexts.clear()
-        directReaderChapterPageCounts = directReaderPages.groupingBy { it.id.chapterIndex }.eachCount()
+            val replacementPages = batch.pages.map { page ->
+                previousPages[page.id]?.takeIf(page::hasSameGeometryAs)?.let { previous ->
+                    page.copy(layoutRevision = previous.layoutRevision)
+                } ?: page
+            }
+            // Pagination deliberately publishes the current chapter before the adjacent chapters.
+            // Keep an already shaped adjacent page during that first batch: replacing the whole
+            // window here made every chapter turn recreate a "loading" placeholder even when the
+            // target page was still valid in memory.
+            directReaderPages = (retainedPages + replacementPages)
+                .sortedWith(compareBy({ it.id.chapterIndex }, { it.id.pageIndex }))
+            if (layoutComplete) {
+                // A complete batch establishes one shared pagination environment. Subsequent
+                // chapter-window changes may retain its already-shaped adjacent pages.
+                directReaderMayReuseAdjacentPages = true
+            }
+            // 重排可能改变元素位置与页 endPosition，页上下文缓存全部失效。
+            directReaderPageContexts.clear()
+            directReaderChapterPageCounts = directReaderPages.groupingBy { it.id.chapterIndex }.eachCount()
             directReaderPageIndex = directReaderPages.takeIf { it.isNotEmpty() }?.let { pages ->
                 // 当前章在批次结果中缺失时 locate 会折叠成 0（全书首页）：保留原下标，
                 // 由下面的 publishDirectReaderWindow 重新收敛到合法范围，避免跳回书首。
                 ReaderPageNavigator.locateOrNull(
                     pages,
                     currentChapter.chapter.index,
-                    ReadBook.durChapterPos
+                    ReadBook.durChapterPos,
                 )
                     ?: directReaderPageIndex?.coerceIn(pages.indices)
                     ?: 0
-        }
-        ReadBook.publishReaderPagination(
-            directReaderPages.groupBy { it.id.chapterIndex }.mapNotNull { (chapterIndex, pages) ->
-                chapters.firstOrNull { it.chapter.index == chapterIndex } ?: return@mapNotNull null
-                val contentEnd = ReaderPageNavigator.pageContext(
-                    pages,
-                    pages.lastIndex,
-                )?.endPosition ?: return@mapNotNull null
-                ReaderChapterPaginationSnapshot(
-                    chapterIndex = chapterIndex,
-                    pageStarts = pages.map(ReaderPageNavigator::pageStart),
-                    contentEnd = contentEnd,
-                    generation = paginationGeneration,
-                )
             }
-        )
-        directReaderPageIndex?.let(::publishDirectReaderWindow)
+            ReadBook.publishReaderPagination(
+                directReaderPages.groupBy { it.id.chapterIndex }.mapNotNull { (chapterIndex, pages) ->
+                    chapters.firstOrNull { it.chapter.index == chapterIndex } ?: return@mapNotNull null
+                    val contentEnd = ReaderPageNavigator.pageContext(
+                        pages,
+                        pages.lastIndex,
+                    )?.endPosition ?: return@mapNotNull null
+                    ReaderChapterPaginationSnapshot(
+                        chapterIndex = chapterIndex,
+                        pageStarts = pages.map(ReaderPageNavigator::pageStart),
+                        contentEnd = contentEnd,
+                        generation = paginationGeneration,
+                    )
+                },
+            )
+            directReaderPageIndex?.let(::publishDirectReaderWindow)
         }
     }
 
@@ -1160,7 +1192,9 @@ class ReadBookController(
         if (
             appliedDarkTheme == isDarkTheme &&
             ReadSessionState.isDarkThemeOverride == isDarkTheme
-        ) return
+        ) {
+            return
+        }
         val startedAt = System.nanoTime()
         val previous = ReadSessionState.isDarkThemeOverride
         // ToggleDayNight installs the target override before DataStore publishes the app
@@ -1190,11 +1224,14 @@ class ReadBookController(
             oldPageUnderlineArgb = oldPageUnderlineColor,
             newPageUnderlineArgb = newPageUnderlineColor,
         )
-        if (directReaderPages.isNotEmpty() && colorChange.run {
-                oldBodyArgb != newBodyArgb || oldTitleArgb != newTitleArgb ||
+        if (directReaderPages.isNotEmpty() &&
+            colorChange.run {
+                oldBodyArgb != newBodyArgb ||
+                    oldTitleArgb != newTitleArgb ||
                     oldShadowArgb != newShadowArgb ||
                     oldPageUnderlineArgb != newPageUnderlineArgb
-            }) {
+            }
+        ) {
             val salt = 31L * isDarkTheme.hashCode() + colorChange.hashCode()
             directReaderPages = directReaderPages.map { it.remapThemeColors(colorChange, salt) }
             directReaderPageIndex?.let(::publishDirectReaderWindow)
@@ -1213,7 +1250,7 @@ class ReadBookController(
         LogUtils.d(
             "ReadBookTheme",
             "apply dark=$isDarkTheme previous=$previous " +
-                "durationMs=${(System.nanoTime() - startedAt) / 1_000_000}"
+                "durationMs=${(System.nanoTime() - startedAt) / 1_000_000}",
         )
     }
 
@@ -1269,9 +1306,11 @@ class ReadBookController(
         }
 
         // Legacy flags
-        var flag = (View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+        var flag = (
+            View.SYSTEM_UI_FLAG_LAYOUT_STABLE
                 or View.SYSTEM_UI_FLAG_IMMERSIVE
-                or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY)
+                or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+            )
         if (!isInMultiWindow) {
             flag = flag or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
         }
@@ -1313,7 +1352,7 @@ class ReadBookController(
                 SelectItem(activity.getString(R.string.refresh), "refresh"),
                 SelectItem("保存到相册", "save"),
                 SelectItem(activity.getString(R.string.menu), "menu"),
-            )
+            ),
         )
         popupAction.onActionClick = {
             when (it) {
@@ -1328,7 +1367,7 @@ class ReadBookController(
             anchor,
             Gravity.BOTTOM or Gravity.LEFT,
             x.toInt(),
-            anchor.height - y.toInt()
+            anchor.height - y.toInt(),
         )
     }
 
@@ -1336,13 +1375,10 @@ class ReadBookController(
         viewModel.onIntent(ReadBookIntent.OpenQuickMarkingEdit(markingId))
     }
 
-    fun oldClickImg(src: String): Boolean {
-        return false
-    }
+    fun oldClickImg(src: String): Boolean = false
 
     fun clickImg(click: String, src: String) {
     }
-
 
     val selectedText: String get() = composeSelectedText.orEmpty()
 
@@ -1374,24 +1410,20 @@ class ReadBookController(
                 } ?: activity.toastOnUi(R.string.create_bookmark_error)
                 return true
             }
-
             R.id.menu_mark -> {
                 composeSelectionBookmark(bodyOnly = true)?.let {
                     viewModel.onIntent(ReadBookIntent.OpenMarking(it))
                 } ?: activity.toastOnUi(R.string.create_bookmark_error)
                 return true
             }
-
             R.id.menu_edit -> {
                 viewModel.onIntent(ReadBookIntent.OpenContentEdit)
                 return true
             }
-
             R.id.menu_replace -> {
                 viewModel.onIntent(ReadBookIntent.TextActionReplace(selectedText))
                 return true
             }
-
             R.id.menu_search_content -> {
                 viewModel.onIntent(ReadBookIntent.TextActionSearchContent(selectedText))
                 return true
@@ -1431,11 +1463,13 @@ class ReadBookController(
                         .setAction(Intent.ACTION_PROCESS_TEXT)
                         .putExtra(Intent.EXTRA_PROCESS_TEXT_READONLY, false)
                         .setClassName(resolveInfo.activityInfo.packageName, resolveInfo.activityInfo.name)
-                    
+
                     val title = resolveInfo.loadLabel(pm).toString()
                     val icon = if (readSettingsGateway.currentSettings.showSelectMenuIcon) {
                         runCatching { resolveInfo.loadIcon(pm) }.getOrNull()
-                    } else null
+                    } else {
+                        null
+                    }
 
                     thirdPartyItems.add(ActionMenuItem(id = -1, title = title, iconDrawable = icon, intent = processIntent))
                 }
@@ -1489,7 +1523,7 @@ class ReadBookController(
             SelectionMenuConfigItem(
                 id = item.uniqueId,
                 enabled = item.showState == 0,
-                showState = item.showState
+                showState = item.showState,
             )
         }
         viewModel.setTextSelectMenuConfig(GSON.toJson(configs))
@@ -1544,7 +1578,7 @@ class ReadBookController(
     override fun upContent(
         relativePosition: Int,
         resetPageOffset: Boolean,
-        success: (() -> Unit)?
+        success: (() -> Unit)?,
     ) {
         postRender(ReadBookEffect.UpContent(relativePosition, resetPageOffset, success))
     }
@@ -1552,7 +1586,7 @@ class ReadBookController(
     override suspend fun upContentAwait(
         relativePosition: Int,
         resetPageOffset: Boolean,
-        success: (() -> Unit)?
+        success: (() -> Unit)?,
     ) {
         if (layoutController.awaitViewport() == null) {
             AppLog.putDebug("upContentAwait 等待 ReaderViewport 超时，继续旧内容更新路径")
@@ -1627,8 +1661,8 @@ class ReadBookController(
                         ConfigUpdateAction.UpdateStyle,
                         ConfigUpdateAction.UpdateBackgroundAlpha,
                         ConfigUpdateAction.UpdatePageSlopSquare,
-                        ConfigUpdateAction.RefreshInlineImages -> Unit
-
+                        ConfigUpdateAction.RefreshInlineImages,
+                        -> Unit
                         // 旧事件 5。带 RefreshInlineImages 的路径（样式方案/预设切换）由
                         // refreshInlineImagesThenReload() 在图片替换完成后统一重载，避免两次重排。
                         ConfigUpdateAction.ReloadContent -> if (
@@ -1652,7 +1686,8 @@ class ReadBookController(
                         ConfigUpdateAction.UpdateWholeBookPageDemand ->
                             ReadBook.updateWholeBookPageDemand()
                         ConfigUpdateAction.SubmitRenderTask,
-                        ConfigUpdateAction.UpdatePageAnim -> Unit
+                        ConfigUpdateAction.UpdatePageAnim,
+                        -> Unit
                     }
                 }
                 if (refreshInlineImages) refreshInlineImagesThenReload()
@@ -1660,14 +1695,12 @@ class ReadBookController(
                     rebuildDirectReaderPages()
                 }
             }
-
             is ReadBookEffect.UpContent -> {
                 publishReaderPageWindow()
                 effect.success?.invoke()
                 if (effect.relativePosition == 0) onUnhandledEffect(ReadBookEffect.UpSeekBar)
                 if (effect.relativePosition == 0) viewModel.refreshSeekState()
             }
-
             is ReadBookEffect.UpPageAnim -> publishReaderPageWindow()
             is ReadBookEffect.UpTime -> {
                 directReaderPageIndex?.let(::publishDirectReaderWindow)
@@ -1679,7 +1712,6 @@ class ReadBookController(
             is ReadBookEffect.PageAnimChanged -> {
                 ReadBook.loadContent(false)
             }
-
             is ReadBookEffect.CancelSelect -> {
                 dismissTextActionMenu()
                 composeSelection = null
@@ -1690,11 +1722,9 @@ class ReadBookController(
             is ReadBookEffect.InvalidateReaderImage -> {
                 activity.lifecycleScope.launch { replaceReaderImages(setOf(effect.source)) }
             }
-
             is ReadBookEffect.InvalidateReaderImages -> {
                 activity.lifecycleScope.launch { replaceReaderImages(effect.sources) }
             }
-
             // ── Simple Activity-API effects ──
             is ReadBookEffect.ShowToast -> activity.toastOnUi(effect.message)
             is ReadBookEffect.LongToast -> activity.longToastOnUi(effect.message)
@@ -1703,29 +1733,25 @@ class ReadBookController(
                 lp.screenBrightness = effect.value / 100f
                 activity.window.attributes = lp
             }
-
             // ── Launcher-dependent effects — now handled by route layer ──
 
             // ── DB query + bookmark effects — now handled by ViewModel ──
 
             // ── Phase 2: ViewRefs-only effects ──
-            is ReadBookEffect.UpSeekBar -> { /* no-op: Compose menu reads from state */
+            is ReadBookEffect.UpSeekBar -> {
+                /* no-op: Compose menu reads from state */
             }
-
-            is ReadBookEffect.UpMenuView -> { /* no-op: Compose menu reads from state */
+            is ReadBookEffect.UpMenuView -> {
+                /* no-op: Compose menu reads from state */
             }
-
             is ReadBookEffect.UpTextSelectAble -> Unit
-
             is ReadBookEffect.RefreshBookContent -> {
                 ReadBook.clearTextChapter()
                 ReadBook.book?.let { viewModel.refreshContentDur(it) }
             }
-
             is ReadBookEffect.UpScreenTimeOut -> {
                 upScreenTimeOut()
             }
-
             is ReadBookEffect.ToggleBrightnessAuto -> {
                 val lp = activity.window.attributes
                 if (effect.auto) {
@@ -1735,7 +1761,6 @@ class ReadBookController(
                 }
                 activity.window.attributes = lp
             }
-
             // ── Phase 4: Activity-dependent effects ──
             is ReadBookEffect.ToggleAutoPage -> onToggleAutoPage?.invoke() ?: toggleAutoPage()
             is ReadBookEffect.StopAutoPage -> onStopAutoPage?.invoke() ?: stopAutoPage()
@@ -1760,19 +1785,18 @@ class ReadBookController(
                     }
                 }
             }
-
             is ReadBookEffect.ExitSearch -> {
                 pendingSearchNavigation = null
                 searchSelection = null
                 directReaderPageIndex?.let(::publishDirectReaderWindow)
             }
-
             is ReadBookEffect.SyncBookProgress -> {
-                viewModel.onIntent(ReadBookIntent.ShowDialog(
-                    ReadBookDialog.SureSyncProgress(BookProgress(effect.book))
-                ))
+                viewModel.onIntent(
+                    ReadBookIntent.ShowDialog(
+                        ReadBookDialog.SureSyncProgress(BookProgress(effect.book)),
+                    ),
+                )
             }
-
             is ReadBookEffect.ShowConfirmSkipToChapter -> {
                 viewModel.onIntent(ReadBookIntent.ShowDialog(ReadBookDialog.ConfirmSkipToChapter))
             }
@@ -1783,36 +1807,28 @@ class ReadBookController(
             is ReadBookEffect.RegisterTimeBatteryReceiver -> {
                 registerTimeBatteryReceiver()
             }
-
             is ReadBookEffect.UnregisterTimeBatteryReceiver -> {
                 unregisterTimeBatteryReceiver()
             }
-
             is ReadBookEffect.RegisterNetworkListener -> {
                 networkChangedListener.register()
                 networkChangedListener.onNetworkChanged = {
                     viewModel.onNetworkChanged()
                 }
             }
-
             is ReadBookEffect.UnregisterNetworkListener -> {
                 networkChangedListener.unRegister()
             }
-
             is ReadBookEffect.SetOrientation -> {
                 setOrientation()
             }
-
             is ReadBookEffect.BackupNow -> {
                 Backup.autoBack(activity)
             }
-
             // Launcher-dependent effects — handled by route layer, ignored here
-            is ReadBookEffect.OpenSourceEdit,
             is ReadBookEffect.OpenChapterList,
             is ReadBookEffect.OpenBookInfo,
             is ReadBookEffect.OpenSearch,
-            is ReadBookEffect.RunSourceCustomButton,
             is ReadBookEffect.MenuSettingReplace,
             is ReadBookEffect.TextActionReplace,
             is ReadBookEffect.OpenReplaceEditor,
@@ -1829,10 +1845,10 @@ class ReadBookController(
             is ReadBookEffect.OpenHighlightRuleExportPicker,
             is ReadBookEffect.ExportJson,
             // DB query + bookmark effects — handled by ViewModel, ignored here
-            is ReadBookEffect.AddBookmark -> {
+            is ReadBookEffect.AddBookmark,
+            -> {
                 // Handled by route/ViewModel — no-op here
             }
-
             is ReadBookEffect.UpBookmarkBadge -> directReaderPageIndex?.let(::publishDirectReaderWindow)
         }
     }
@@ -1870,7 +1886,6 @@ class ReadBookController(
                 handleKeyPage(PageDirection.PREV, longPress)
                 return true
             }
-
             isNextKey(keyCode) -> {
                 handleKeyPage(PageDirection.NEXT, longPress)
                 return true
@@ -1880,43 +1895,35 @@ class ReadBookController(
             KeyEvent.KEYCODE_VOLUME_UP -> if (volumeKeyPage(PageDirection.PREV, longPress)) {
                 return true
             }
-
             KeyEvent.KEYCODE_VOLUME_DOWN -> if (volumeKeyPage(PageDirection.NEXT, longPress)) {
                 return true
             }
-
             KeyEvent.KEYCODE_PAGE_UP -> {
                 handleKeyPage(PageDirection.PREV, longPress)
                 return true
             }
-
             KeyEvent.KEYCODE_PAGE_DOWN -> {
                 handleKeyPage(PageDirection.NEXT, longPress)
                 return true
             }
-
             KeyEvent.KEYCODE_SPACE -> {
                 handleKeyPage(PageDirection.NEXT, longPress)
                 return true
             }
-
             KeyEvent.KEYCODE_DPAD_UP, KeyEvent.KEYCODE_DPAD_LEFT -> {
                 handleKeyPage(PageDirection.PREV, longPress)
                 return true
             }
-
             KeyEvent.KEYCODE_DPAD_DOWN, KeyEvent.KEYCODE_DPAD_RIGHT -> {
                 handleKeyPage(PageDirection.NEXT, longPress)
                 return true
             }
-
             KeyEvent.KEYCODE_MEDIA_NEXT -> {
                 if (ReadBook.book != null) {
                     ReadBook.moveToNextChapter(true)
                 }
                 return true
             }
-
             KeyEvent.KEYCODE_MEDIA_PREVIOUS -> {
                 if (ReadBook.book != null) {
                     ReadBook.moveToPrevChapter(upContent = true, toLast = false)
@@ -1970,11 +1977,13 @@ class ReadBookController(
             withContext(Main.immediate) {
                 if (generation != readerBackgroundLoadGeneration) return@withContext
                 ReadSessionState.applyBackground(snapshot)
-                updateReaderBackground(ReaderBackgroundState(
-                    drawable = snapshot.drawable,
-                    meanColorArgb = snapshot.meanColor,
-                    revision = _readerBackground.value.revision + 1L,
-                ))
+                updateReaderBackground(
+                    ReaderBackgroundState(
+                        drawable = snapshot.drawable,
+                        meanColorArgb = snapshot.meanColor,
+                        revision = _readerBackground.value.revision + 1L,
+                    ),
+                )
             }
         }
     }
@@ -2034,8 +2043,7 @@ class ReadBookController(
      * 或直接启动该章排版；早期实现用 window.next != null 放行，导致这一窗口期
      * 只能弹出"没有下一页"并且不会触发装载（表现为读完本章无法进入下一章）。
      */
-    fun hasNextComposeChapter(): Boolean =
-        ReadBook.durChapterIndex < ReadBook.simulatedChapterSize - 1
+    fun hasNextComposeChapter(): Boolean = ReadBook.durChapterIndex < ReadBook.simulatedChapterSize - 1
 
     fun hasPreviousComposeChapter(): Boolean = ReadBook.durChapterIndex > 0
 
@@ -2139,8 +2147,9 @@ class ReadBookController(
         val left = viewport.contentPadding.left.toFloat()
         val width = viewport.contentWidthPx.toFloat()
         val x = left + ((width - textWidth) / 2f).coerceAtLeast(0f)
-        val y = contentTop + ((contentBottom - contentTop - paginationStyle.bodyTextHeightPx) / 2f)
-            .coerceAtLeast(0f)
+        val y = contentTop +
+            ((contentBottom - contentTop - paginationStyle.bodyTextHeightPx) / 2f)
+                .coerceAtLeast(0f)
         val element = ReaderElement.Text(
             bounds = ReaderRect(x, y, x + textWidth, y + paginationStyle.bodyTextHeightPx),
             baselinePx = y + paginationStyle.bodyBaselineOffsetPx,
@@ -2169,7 +2178,7 @@ class ReadBookController(
     private fun keyPageDebounce(
         direction: PageDirection,
         mouseWheel: Boolean = false,
-        longPress: Boolean
+        longPress: Boolean,
     ) {
         if (longPress) {
             return
@@ -2197,9 +2206,12 @@ class ReadBookController(
             PageDirection.NEXT -> ReaderTurnDirection.NEXT
             PageDirection.NONE -> null
         }
-        if (directReaderPages.isNotEmpty() && composeDirection != null &&
+        if (directReaderPages.isNotEmpty() &&
+            composeDirection != null &&
             _composePageTurns.tryEmit(composeDirection)
-        ) return
+        ) {
+            return
+        }
         completeComposePageTurn(direction)
     }
 
@@ -2259,8 +2271,10 @@ class ReadBookController(
     private fun registerTimeBatteryReceiver() {
         if (timeBatteryReceiverRegistered) return
         ContextCompat.registerReceiver(
-            activity, timeBatteryReceiver, timeBatteryReceiver.filter,
-            ContextCompat.RECEIVER_EXPORTED
+            activity,
+            timeBatteryReceiver,
+            timeBatteryReceiver.filter,
+            ContextCompat.RECEIVER_EXPORTED,
         )
         timeBatteryReceiverRegistered = true
     }
@@ -2297,7 +2311,6 @@ class ReadBookController(
             "5" -> activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE
         }
     }
-
 }
 
 private fun ConfigUpdateAction.invalidatesDirectReaderPages(): Boolean = when (this) {
@@ -2307,7 +2320,8 @@ private fun ConfigUpdateAction.invalidatesDirectReaderPages(): Boolean = when (t
     ConfigUpdateAction.UpdateContent,
     ConfigUpdateAction.UpdateChapterStyle,
     ConfigUpdateAction.InvalidateTextPage,
-    ConfigUpdateAction.UpdateLayout -> true
+    ConfigUpdateAction.UpdateLayout,
+    -> true
     ConfigUpdateAction.UpdateSystemUi,
     ConfigUpdateAction.UpdateBackground,
     ConfigUpdateAction.UpdateBackgroundAlpha,
@@ -2316,7 +2330,8 @@ private fun ConfigUpdateAction.invalidatesDirectReaderPages(): Boolean = when (t
     ConfigUpdateAction.RebuildWholeBookPageIndex,
     ConfigUpdateAction.UpdateWholeBookPageDemand,
     ConfigUpdateAction.SubmitRenderTask,
-    ConfigUpdateAction.UpdatePageAnim -> false
+    ConfigUpdateAction.UpdatePageAnim,
+    -> false
 }
 
 data class ReaderBackgroundState(
@@ -2325,7 +2340,6 @@ data class ReaderBackgroundState(
     val revision: Long = 0L,
 )
 
-
 data class TextMenuState(
     val selectedText: String,
     val startX: Int,
@@ -2333,7 +2347,7 @@ data class TextMenuState(
     val startBottomY: Int,
     val endX: Int,
     val endBottomY: Int,
-    val items: List<ActionMenuItem>
+    val items: List<ActionMenuItem>,
 )
 
 data class ActionMenuItem(
@@ -2341,7 +2355,7 @@ data class ActionMenuItem(
     val title: String,
     val iconDrawable: android.graphics.drawable.Drawable? = null,
     val intent: Intent? = null,
-    val showState: Int = 0 // 0: 一级, 1: 折叠, 2: 隐藏
+    val showState: Int = 0,
 ) {
     val enabled: Boolean
         get() = showState == 0
@@ -2368,5 +2382,5 @@ data class ActionMenuItem(
 data class SelectionMenuConfigItem(
     val id: String,
     val enabled: Boolean? = null,
-    val showState: Int? = null
+    val showState: Int? = null,
 )

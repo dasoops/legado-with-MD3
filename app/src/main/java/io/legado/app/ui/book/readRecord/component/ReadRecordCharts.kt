@@ -40,28 +40,44 @@ import java.time.LocalDate
 fun ReadingTimeBarChartCard(
     data: List<Pair<LocalDate, Long>>,
     period: ReadPeriod,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
-    val bars = data.mapIndexed { index, (date, time) ->
-        ChartBar(
-            value = time,
-            label = when (period) {
-                ReadPeriod.YEAR -> "${date.monthValue}月"
-                ReadPeriod.WEEK -> when (date.dayOfWeek.value) {
-                    1 -> "一"; 2 -> "二"; 3 -> "三"; 4 -> "四"; 5 -> "五"; 6 -> "六"; 7 -> "日"; else -> ""
-                }
-                else -> date.dayOfMonth.toString()
-            },
-            showLabel = when (period) {
-                ReadPeriod.DAY -> true
-                ReadPeriod.WEEK -> true
-                ReadPeriod.MONTH -> date.dayOfMonth == 1 || date.dayOfMonth == 15 || index == data.lastIndex
-                ReadPeriod.YEAR -> true
-                else -> false
-            },
-            barWidthFraction = if (period == ReadPeriod.MONTH) 0.8f else 0.6f,
-        )
-    }
+    val bars =
+        data.mapIndexed { index, (date, time) ->
+            ChartBar(
+                value = time,
+                label =
+                when (period) {
+                    ReadPeriod.YEAR -> {
+                        "${date.monthValue}月"
+                    }
+                    ReadPeriod.WEEK -> {
+                        when (date.dayOfWeek.value) {
+                            1 -> "一"
+                            2 -> "二"
+                            3 -> "三"
+                            4 -> "四"
+                            5 -> "五"
+                            6 -> "六"
+                            7 -> "日"
+                            else -> ""
+                        }
+                    }
+                    else -> {
+                        date.dayOfMonth.toString()
+                    }
+                },
+                showLabel =
+                when (period) {
+                    ReadPeriod.DAY -> true
+                    ReadPeriod.WEEK -> true
+                    ReadPeriod.MONTH -> date.dayOfMonth == 1 || date.dayOfMonth == 15 || index == data.lastIndex
+                    ReadPeriod.YEAR -> true
+                    else -> false
+                },
+                barWidthFraction = if (period == ReadPeriod.MONTH) 0.8f else 0.6f,
+            )
+        }
 
     ReadingTimeBarChartCardContent(bars = bars, modifier = modifier)
 }
@@ -71,14 +87,15 @@ fun HourlyReadingTimeBarChartCard(
     data: List<Pair<Int, Long>>,
     modifier: Modifier = Modifier,
 ) {
-    val bars = data.map { (hour, time) ->
-        ChartBar(
-            value = time,
-            label = (hour + 1).toString(),
-            showLabel = true,
-            barWidthFraction = 0.9f,
-        )
-    }
+    val bars =
+        data.map { (hour, time) ->
+            ChartBar(
+                value = time,
+                label = (hour + 1).toString(),
+                showLabel = true,
+                barWidthFraction = 0.9f,
+            )
+        }
     ReadingTimeBarChartCardContent(bars = bars, modifier = modifier)
 }
 
@@ -97,18 +114,20 @@ private fun ReadingTimeBarChartCardContent(
     val rawMaxTime = bars.maxOfOrNull { it.value }?.coerceAtLeast(1L) ?: 1L
 
     // 向上取整让不同跨度的图表共享稳定的 Y 轴刻度。
-    val roundedMaxTime = when {
-        rawMaxTime < 60_000 -> 60_000L
-        rawMaxTime < 10 * 60_000 -> ((rawMaxTime + 59_999) / 60_000) * 60_000L
-        rawMaxTime < 60 * 60_000 -> ((rawMaxTime + 5 * 60_000 - 1) / (5 * 60_000)) * 5 * 60_000L
-        rawMaxTime < 12 * 3600_000 -> ((rawMaxTime + 3600_000 - 1) / 3600_000) * 3600_000L
-        else -> ((rawMaxTime + 4 * 3600_000 - 1) / (4 * 3600_000)) * 4 * 3600_000L
-    }
+    val roundedMaxTime =
+        when {
+            rawMaxTime < 60_000 -> 60_000L
+            rawMaxTime < 10 * 60_000 -> ((rawMaxTime + 59_999) / 60_000) * 60_000L
+            rawMaxTime < 60 * 60_000 -> ((rawMaxTime + 5 * 60_000 - 1) / (5 * 60_000)) * 5 * 60_000L
+            rawMaxTime < 12 * 3600_000 -> ((rawMaxTime + 3600_000 - 1) / 3600_000) * 3600_000L
+            else -> ((rawMaxTime + 4 * 3600_000 - 1) / (4 * 3600_000)) * 4 * 3600_000L
+        }
 
     GlassCard(
-        modifier = modifier
+        modifier =
+        modifier
             .fillMaxWidth()
-            .adaptiveHorizontalPadding(vertical = 8.dp)
+            .adaptiveHorizontalPadding(vertical = 8.dp),
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -116,7 +135,7 @@ private fun ReadingTimeBarChartCardContent(
                     imageVector = Icons.Default.BarChart,
                     contentDescription = null,
                     tint = LegadoTheme.colorScheme.primary,
-                    modifier = Modifier.size(20.dp)
+                    modifier = Modifier.size(20.dp),
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 AppText("阅读时长分布", style = LegadoTheme.typography.titleMedium)
@@ -124,30 +143,32 @@ private fun ReadingTimeBarChartCardContent(
             Spacer(modifier = Modifier.height(16.dp))
 
             Row(
-                modifier = Modifier
+                modifier =
+                Modifier
                     .fillMaxWidth()
-                    .height(140.dp)
+                    .height(140.dp),
             ) {
                 // Y-Axis
                 Column(
-                    modifier = Modifier
+                    modifier =
+                    Modifier
                         .width(32.dp)
                         .fillMaxHeight()
                         .padding(bottom = 20.dp),
                     verticalArrangement = Arrangement.SpaceBetween,
-                    horizontalAlignment = Alignment.End
+                    horizontalAlignment = Alignment.End,
                 ) {
                     AppText(
                         text = ReadRecordFormatter.formatDuration(roundedMaxTime),
                         style = LegadoTheme.typography.labelSmall,
                         fontSize = 8.sp,
-                        color = LegadoTheme.colorScheme.onSurfaceVariant
+                        color = LegadoTheme.colorScheme.onSurfaceVariant,
                     )
                     AppText(
                         text = "0",
                         style = LegadoTheme.typography.labelSmall,
                         fontSize = 8.sp,
-                        color = LegadoTheme.colorScheme.onSurfaceVariant
+                        color = LegadoTheme.colorScheme.onSurfaceVariant,
                     )
                 }
 
@@ -155,43 +176,50 @@ private fun ReadingTimeBarChartCardContent(
 
                 // Chart
                 Row(
-                    modifier = Modifier
+                    modifier =
+                    Modifier
                         .weight(1f)
                         .fillMaxHeight(),
                     verticalAlignment = Alignment.Bottom,
-                    horizontalArrangement = Arrangement.SpaceEvenly
+                    horizontalArrangement = Arrangement.SpaceEvenly,
                 ) {
                     bars.forEachIndexed { index, bar ->
                         val targetHeightFactor = bar.value.toFloat() / roundedMaxTime
                         val heightFactor by animateFloatAsState(
                             targetValue = targetHeightFactor,
                             animationSpec = tween(durationMillis = 320, delayMillis = index * 20),
-                            label = "BarHeight"
+                            label = "BarHeight",
                         )
 
                         Column(
-                            modifier = Modifier
+                            modifier =
+                            Modifier
                                 .weight(1f)
                                 .fillMaxHeight(),
-                            horizontalAlignment = Alignment.CenterHorizontally
+                            horizontalAlignment = Alignment.CenterHorizontally,
                         ) {
                             Box(
-                                modifier = Modifier
+                                modifier =
+                                Modifier
                                     .weight(1f)
                                     .widthIn(max = 16.dp)
                                     .fillMaxWidth(),
-                                contentAlignment = Alignment.BottomCenter
+                                contentAlignment = Alignment.BottomCenter,
                             ) {
                                 Box(
-                                    modifier = Modifier
+                                    modifier =
+                                    Modifier
                                         .fillMaxWidth(bar.barWidthFraction)
                                         .fillMaxHeight(heightFactor.coerceAtLeast(0.01f))
                                         .padding(horizontal = 1.dp)
                                         .clip(RoundedCornerShape(topStart = 4.dp, topEnd = 4.dp))
                                         .background(
-                                            if (bar.value > 0) LegadoTheme.colorScheme.primary
-                                            else LegadoTheme.colorScheme.surfaceVariant
-                                        )
+                                            if (bar.value > 0) {
+                                                LegadoTheme.colorScheme.primary
+                                            } else {
+                                                LegadoTheme.colorScheme.surfaceVariant
+                                            },
+                                        ),
                                 )
                             }
 
@@ -204,7 +232,7 @@ private fun ReadingTimeBarChartCardContent(
                                         color = LegadoTheme.colorScheme.onSurfaceVariant,
                                         softWrap = false,
                                         overflow = TextOverflow.Visible,
-                                        modifier = Modifier.wrapContentWidth(unbounded = true)
+                                        modifier = Modifier.wrapContentWidth(unbounded = true),
                                     )
                                 }
                             }

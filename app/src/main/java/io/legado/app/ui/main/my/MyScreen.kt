@@ -39,12 +39,11 @@ import io.legado.app.ui.widget.components.settingItem.ClickableSettingItem
 import io.legado.app.ui.widget.components.topbar.GlassMediumFlexibleTopAppBar
 import io.legado.app.ui.widget.components.topbar.GlassTopAppBarDefaults
 
-
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun MyRouteScreen(
     onOpenSettings: () -> Unit,
-    onNavigate: (PrefClickEvent) -> Unit
+    onNavigate: (PrefClickEvent) -> Unit,
 ) {
     MyScreen(
         onOpenSettings = onOpenSettings,
@@ -61,26 +60,28 @@ fun MyScreen(
     val scrollBehavior = GlassTopAppBarDefaults.defaultScrollBehavior()
     AppScaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
-        contentWindowInsets = WindowInsets.systemBars
+        contentWindowInsets =
+        WindowInsets.systemBars
             .only(WindowInsetsSides.Horizontal + WindowInsetsSides.Top),
         topBar = {
             GlassMediumFlexibleTopAppBar(
                 title = stringResource(R.string.my),
                 actions = {},
-                scrollBehavior = scrollBehavior
+                scrollBehavior = scrollBehavior,
             )
-        }
+        },
     ) { padding ->
         Column(
-            modifier = Modifier
+            modifier =
+            Modifier
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
                 .padding(
                     adaptiveContentPadding(
                         top = padding.calculateTopPadding(),
-                        bottom = 120.dp
-                    )
-                )
+                        bottom = 120.dp,
+                    ),
+                ),
         ) {
             SplicedColumnGroup(
                 title = stringResource(R.string.rule_segment),
@@ -90,70 +91,70 @@ fun MyScreen(
                     imageVector = Icons.Default.FindReplace,
                     onClick = {
                         onNavigate(
-                            PrefClickEvent.StartActivity(ReplaceRuleActivity::class.java)
+                            PrefClickEvent.StartActivity(ReplaceRuleActivity::class.java),
                         )
-                    }
+                    },
                 )
                 ClickableSettingItem(
                     title = stringResource(R.string.txt_toc_rule),
                     imageVector = Icons.AutoMirrored.Filled.Rule,
                     onClick = {
                         onNavigate(
-                            PrefClickEvent.StartActivity(TxtTocRuleActivity::class.java)
+                            PrefClickEvent.StartActivity(TxtTocRuleActivity::class.java),
                         )
-                    }
+                    },
                 )
                 ClickableSettingItem(
                     title = stringResource(R.string.highlight_tag_config),
                     imageVector = Icons.Default.Sell,
-                    onClick = { onNavigate(PrefClickEvent.OpenHighlightTagRule) }
+                    onClick = { onNavigate(PrefClickEvent.OpenHighlightTagRule) },
                 )
             }
 
             SplicedColumnGroup(
-                title = stringResource(R.string.other)
+                title = stringResource(R.string.other),
             ) {
                 ClickableSettingItem(
                     title = stringResource(R.string.setting),
                     imageVector = Icons.Default.Settings,
                     onClick = {
                         onOpenSettings()
-                    }
+                    },
                 )
                 ClickableSettingItem(
                     title = stringResource(R.string.bookmark),
                     imageVector = Icons.Default.Bookmark,
                     onClick = {
                         onNavigate(PrefClickEvent.StartActivity(AllBookmarkActivity::class.java))
-                    }
+                    },
                 )
                 ClickableSettingItem(
                     title = stringResource(R.string.read_record),
                     imageVector = Icons.Default.History,
                     onClick = {
                         onNavigate(PrefClickEvent.OpenReadRecord)
-                    }
+                    },
                 )
                 ClickableSettingItem(
                     title = stringResource(R.string.file_manage),
                     imageVector = Icons.Default.Folder,
                     onClick = {
                         onNavigate(PrefClickEvent.StartActivity(FileManageActivity::class.java))
-                    }
+                    },
                 )
                 ClickableSettingItem(
                     title = stringResource(R.string.about),
                     imageVector = Icons.Default.Info,
                     onClick = {
                         onNavigate(PrefClickEvent.OpenAbout)
-                    }
+                    },
                 )
                 ClickableSettingItem(
                     title = stringResource(R.string.exit),
                     imageVector = Icons.AutoMirrored.Filled.ExitToApp,
                     onClick = {
                         onNavigate(PrefClickEvent.ExitApp)
-                    }
+                    },
                 )
             }
         }

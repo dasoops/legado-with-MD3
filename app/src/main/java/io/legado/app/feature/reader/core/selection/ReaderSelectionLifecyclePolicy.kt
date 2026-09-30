@@ -6,8 +6,7 @@ enum class ReaderPageChangeOrigin {
 }
 
 object ReaderSelectionLifecyclePolicy {
-    fun shouldClearForPageChange(origin: ReaderPageChangeOrigin): Boolean =
-        origin == ReaderPageChangeOrigin.PROGRAMMATIC
+    fun shouldClearForPageChange(origin: ReaderPageChangeOrigin): Boolean = origin == ReaderPageChangeOrigin.PROGRAMMATIC
 
     fun shouldPauseAutoPage(hasSelection: Boolean): Boolean = hasSelection
 

@@ -6,7 +6,6 @@ import androidx.core.graphics.ColorUtils
 import io.legado.app.ui.config.themeConfig.TagColorPair
 
 object TagColorGenerator {
-
     fun generateTagColors(baseColor: Color): List<TagColorPair> {
         val baseHsl = FloatArray(3)
         ColorUtils.colorToHSL(baseColor.toArgb(), baseHsl)

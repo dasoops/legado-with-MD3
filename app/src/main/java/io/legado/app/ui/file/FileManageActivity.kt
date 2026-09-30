@@ -19,7 +19,6 @@ import io.legado.app.constant.AppConst
 import io.legado.app.databinding.ActivityFileManageBinding
 import io.legado.app.databinding.ItemFileBinding
 import io.legado.app.databinding.ItemPathPickerBinding
-//import io.legado.app.lib.theme.primaryTextColor
 import io.legado.app.ui.file.utils.FilePickerIcon
 import io.legado.app.ui.widget.recycler.VerticalDivider
 import io.legado.app.utils.ConvertUtils
@@ -68,13 +67,11 @@ class FileManageActivity : VMBaseActivity<ActivityFileManageBinding, FileManageV
     }
 
     private fun initSearchView() {
-        //searchView.applyTint(primaryTextColor)
+        // searchView.applyTint(primaryTextColor)
         searchView.queryHint = getString(R.string.screen) + " • " + getString(R.string.file_manage)
         searchView.isSubmitButtonEnabled = true
         searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
-            override fun onQueryTextSubmit(query: String?): Boolean {
-                return false
-            }
+            override fun onQueryTextSubmit(query: String?): Boolean = false
 
             override fun onQueryTextChange(newText: String?): Boolean {
                 updateFiles()
@@ -130,10 +127,8 @@ class FileManageActivity : VMBaseActivity<ActivityFileManageBinding, FileManageV
             }
         }
 
-        override fun getViewBinding(parent: ViewGroup): ItemPathPickerBinding {
-            return ItemPathPickerBinding.inflate(inflater, parent, false).apply {
-                imageView.setImageDrawable(arrowIcon)
-            }
+        override fun getViewBinding(parent: ViewGroup): ItemPathPickerBinding = ItemPathPickerBinding.inflate(inflater, parent, false).apply {
+            imageView.setImageDrawable(arrowIcon)
         }
 
         override fun registerListener(holder: ItemViewHolder, binding: ItemPathPickerBinding) {
@@ -148,11 +143,10 @@ class FileManageActivity : VMBaseActivity<ActivityFileManageBinding, FileManageV
             holder: ItemViewHolder,
             binding: ItemPathPickerBinding,
             item: File,
-            payloads: MutableList<Any>
+            payloads: MutableList<Any>,
         ) {
             binding.textView.text = item.name
         }
-
     }
 
     inner class FileAdapter : RecyclerAdapter<File, ItemFileBinding>(this@FileManageActivity) {
@@ -160,9 +154,7 @@ class FileManageActivity : VMBaseActivity<ActivityFileManageBinding, FileManageV
         private val folderIcon = ConvertUtils.toDrawable(FilePickerIcon.getFolder())!!
         private val fileIcon = ConvertUtils.toDrawable(FilePickerIcon.getFile())!!
 
-        override fun getViewBinding(parent: ViewGroup): ItemFileBinding {
-            return ItemFileBinding.inflate(inflater, parent, false)
-        }
+        override fun getViewBinding(parent: ViewGroup): ItemFileBinding = ItemFileBinding.inflate(inflater, parent, false)
 
         override fun registerListener(holder: ItemViewHolder, binding: ItemFileBinding) {
             binding.root.setOnClickListener {
@@ -179,8 +171,8 @@ class FileManageActivity : VMBaseActivity<ActivityFileManageBinding, FileManageV
                             FileProvider.getUriForFile(
                                 this@FileManageActivity,
                                 AppConst.authority,
-                                item
-                            )
+                                item,
+                            ),
                         )
                     }
                 }
@@ -201,7 +193,7 @@ class FileManageActivity : VMBaseActivity<ActivityFileManageBinding, FileManageV
             holder: ItemViewHolder,
             binding: ItemFileBinding,
             item: File,
-            payloads: MutableList<Any>
+            payloads: MutableList<Any>,
         ) {
             if (item == viewModel.lastDir) {
                 binding.imageView.setImageDrawable(upIcon)
@@ -226,7 +218,5 @@ class FileManageActivity : VMBaseActivity<ActivityFileManageBinding, FileManageV
             }
             popupMenu.show()
         }
-
     }
-
 }

@@ -2,8 +2,9 @@ package io.legado.app.utils
 
 import android.view.Choreographer
 
-class SyncedRenderer(val doFrame: (frameTime: Double) -> Unit) {
-
+class SyncedRenderer(
+    val doFrame: (frameTime: Double) -> Unit,
+) {
     private var callback: (Long) -> Unit = {}
 
     fun start() {

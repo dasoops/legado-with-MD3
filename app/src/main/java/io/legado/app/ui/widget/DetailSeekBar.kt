@@ -15,9 +15,11 @@ import io.legado.app.databinding.ViewDetailSeekBarBinding
 import io.legado.app.ui.widget.seekbar.SeekBarChangeListener
 
 @SuppressLint("ClickableViewAccessibility")
-class DetailSeekBar @JvmOverloads constructor(
+class DetailSeekBar
+@JvmOverloads
+constructor(
     context: Context,
-    attrs: AttributeSet? = null
+    attrs: AttributeSet? = null,
 ) : FrameLayout(context, attrs),
     SeekBarChangeListener {
     private var binding: ViewDetailSeekBarBinding =
@@ -78,16 +80,18 @@ class DetailSeekBar @JvmOverloads constructor(
             }
         }
 
-        binding.slider.addOnSliderTouchListener(object : Slider.OnSliderTouchListener {
-            override fun onStartTrackingTouch(slider: Slider) {
-                onStartTracking?.invoke()
-            }
+        binding.slider.addOnSliderTouchListener(
+            object : Slider.OnSliderTouchListener {
+                override fun onStartTrackingTouch(slider: Slider) {
+                    onStartTracking?.invoke()
+                }
 
-            override fun onStopTrackingTouch(slider: Slider) {
-                onStopTracking?.invoke()
-                onChanged?.invoke(slider.value.toInt())
-            }
-        })
+                override fun onStopTrackingTouch(slider: Slider) {
+                    onStopTracking?.invoke()
+                    onChanged?.invoke(slider.value.toInt())
+                }
+            },
+        )
 
         upValue()
     }
@@ -98,7 +102,11 @@ class DetailSeekBar @JvmOverloads constructor(
         ViewCompat.setStateDescription(binding.slider, displayValue)
     }
 
-    override fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean) {
+    override fun onProgressChanged(
+        seekBar: SeekBar,
+        progress: Int,
+        fromUser: Boolean,
+    ) {
         upValue(progress)
     }
 

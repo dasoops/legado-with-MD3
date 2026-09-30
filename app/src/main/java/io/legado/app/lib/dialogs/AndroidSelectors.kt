@@ -23,7 +23,7 @@ import android.content.DialogInterface
 
 fun Context.selector(
     items: List<CharSequence>,
-    onClick: (DialogInterface, Int) -> Unit
+    onClick: (DialogInterface, Int) -> Unit,
 ) {
     with(AndroidAlertBuilder(this)) {
         items(items, onClick)
@@ -33,7 +33,7 @@ fun Context.selector(
 
 fun <T> Context.selector(
     items: List<T>,
-    onClick: (DialogInterface, T, Int) -> Unit
+    onClick: (DialogInterface, T, Int) -> Unit,
 ) {
     with(AndroidAlertBuilder(this)) {
         items(items, onClick)
@@ -44,7 +44,7 @@ fun <T> Context.selector(
 fun Context.selector(
     title: CharSequence,
     items: List<CharSequence>,
-    onClick: (DialogInterface, Int) -> Unit
+    onClick: (DialogInterface, Int) -> Unit,
 ) {
     with(AndroidAlertBuilder(this)) {
         this.setTitle(title)
@@ -56,7 +56,7 @@ fun Context.selector(
 fun <T> Context.selector(
     title: CharSequence,
     items: List<T>,
-    onClick: (DialogInterface, T, Int) -> Unit
+    onClick: (DialogInterface, T, Int) -> Unit,
 ) {
     with(AndroidAlertBuilder(this)) {
         this.setTitle(title)
@@ -68,7 +68,7 @@ fun <T> Context.selector(
 fun Context.selector(
     titleSource: Int,
     items: List<CharSequence>,
-    onClick: (DialogInterface, Int) -> Unit
+    onClick: (DialogInterface, Int) -> Unit,
 ) {
     with(AndroidAlertBuilder(this)) {
         this.setTitle(titleSource)
@@ -80,7 +80,7 @@ fun Context.selector(
 fun <T> Context.selector(
     titleSource: Int,
     items: List<T>,
-    onClick: (DialogInterface, T, Int) -> Unit
+    onClick: (DialogInterface, T, Int) -> Unit,
 ) {
     with(AndroidAlertBuilder(this)) {
         this.setTitle(titleSource)

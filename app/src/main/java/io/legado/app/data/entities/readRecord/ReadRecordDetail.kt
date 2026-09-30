@@ -5,7 +5,7 @@ import androidx.room.Entity
 
 @Entity(
     tableName = "readRecordDetail",
-    primaryKeys = ["deviceId", "bookName", "bookAuthor", "date"]
+    primaryKeys = ["deviceId", "bookName", "bookAuthor", "date"],
 )
 data class ReadRecordDetail(
     val deviceId: String = "",
@@ -13,11 +13,9 @@ data class ReadRecordDetail(
     @ColumnInfo(defaultValue = "")
     val bookAuthor: String = "",
     val date: String = "",
-
     // 当天阅读总时长
     @ColumnInfo(defaultValue = "0")
     var readTime: Long = 0L,
-
     // 当天阅读总字数
     @ColumnInfo(defaultValue = "0")
     var readWords: Long = 0L,
@@ -26,5 +24,5 @@ data class ReadRecordDetail(
     var firstReadTime: Long = 0L,
     // 当天最后一次阅读时间
     @ColumnInfo(defaultValue = "0")
-    var lastReadTime: Long = 0L
+    var lastReadTime: Long = 0L,
 )

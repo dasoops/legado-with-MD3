@@ -3,7 +3,6 @@ package io.legado.app.data.dao
 import androidx.room.Room
 import io.legado.app.data.AppDatabase
 import io.legado.app.data.entities.Book
-import io.legado.app.data.entities.SearchBook
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.junit.After
@@ -12,17 +11,16 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
-import org.robolectric.annotation.Config
 import org.robolectric.RuntimeEnvironment
+import org.robolectric.annotation.Config
 
 /**
- * 书架投影的简介优先级: 用户改的 > 书源列表规则 > 书源详情规则。
+ * 书架投影的简介优先级: 用户改的 > 列表简介 > 详情简介。
  * 走真实的 Room 查询, 因为优先级是写在 SQL 里的。
  */
 @RunWith(RobolectricTestRunner::class)
 @Config(application = android.app.Application::class, sdk = [35])
 class BookShelfIntroQueryTest {
-
     private lateinit var db: AppDatabase
 
     private val detailIntro = "📡 当前服务：https://example.cf"
@@ -30,10 +28,13 @@ class BookShelfIntroQueryTest {
 
     @Before
     fun setUp() {
-        db = Room.inMemoryDatabaseBuilder(
-            RuntimeEnvironment.getApplication(),
-            AppDatabase::class.java
-        ).allowMainThreadQueries().build()
+        db =
+            Room
+                .inMemoryDatabaseBuilder(
+                    RuntimeEnvironment.getApplication(),
+                    AppDatabase::class.java,
+                ).allowMainThreadQueries()
+                .build()
     }
 
     @After
@@ -42,18 +43,22 @@ class BookShelfIntroQueryTest {
     }
 
     private fun shelfIntro(): String? = runBlocking {
-        db.bookDao.flowBookShelf().first().single().intro
+        db.bookDao
+            .flowBookShelf()
+            .first()
+            .single()
+            .intro
     }
 
-    private fun newBook() = SearchBook(
+    private fun newBook() = Book(
         bookUrl = "http://example.com/book/1",
-        origin = "http://example.com",
+        origin = "loc_book",
         name = "某某传",
         author = "张三",
-        intro = listIntro
-    ).toBook().apply {
-        //详情规则随后覆盖 intro, 模拟聚合书源把服务状态写进详情简介
+        intro = listIntro,
+    ).apply {
         intro = detailIntro
+        listIntro = this@BookShelfIntroQueryTest.listIntro
     }
 
     @Test

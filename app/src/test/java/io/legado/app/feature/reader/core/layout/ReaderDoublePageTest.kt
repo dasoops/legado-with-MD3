@@ -11,14 +11,31 @@ import org.junit.Test
 
 class ReaderDoublePageTest {
     private val style = ReaderTextStyle(0, 10f)
-    private val config = ReaderPaginationConfig(
-        chapterIndex = 2, chapterTitle = "", viewportWidthPx = 100, viewportHeightPx = 40,
-        paddingLeftPx = 5f, paddingRightPx = 5f, paddingTopPx = 0f, paddingBottomPx = 0f,
-        lineHeightPx = 20f, baselineOffsetPx = 15f, columnCount = 2,
-    )
+    private val config =
+        ReaderPaginationConfig(
+            chapterIndex = 2,
+            chapterTitle = "",
+            viewportWidthPx = 100,
+            viewportHeightPx = 40,
+            paddingLeftPx = 5f,
+            paddingRightPx = 5f,
+            paddingTopPx = 0f,
+            paddingBottomPx = 0f,
+            lineHeightPx = 20f,
+            baselineOffsetPx = 15f,
+            columnCount = 2,
+        )
     private val text = "甲乙丙丁戊己庚辛壬癸子丑寅卯辰巳午未申酉"
-    private fun paragraph(value: String, position: Int = 0) = ReaderMeasuredParagraph(
-        value, value.map(Char::toString), List(value.length) { 10f }, style, position,
+
+    private fun paragraph(
+        value: String,
+        position: Int = 0,
+    ) = ReaderMeasuredParagraph(
+        value,
+        value.map(Char::toString),
+        List(value.length) { 10f },
+        style,
+        position,
     )
 
     @Test
@@ -38,25 +55,39 @@ class ReaderDoublePageTest {
 
     @Test
     fun inlineParagraphFlowsAcrossColumnsAndSelectionFollowsReadingOrder() {
-        val blocks = listOf(ReaderMeasuredBlock.InlineParagraph(
-            items = text.mapIndexed { index, char -> ReaderMeasuredInlineItem.Text(char.toString(), 10f, style, index) },
-            indentCharacters = 0, alignment = ReaderTextAlignment.START,
-            lineHeightPx = 20f, baselineOffsetPx = 15f, baseTextSizePx = 10f,
-        ))
+        val blocks =
+            listOf(
+                ReaderMeasuredBlock.InlineParagraph(
+                    items = text.mapIndexed { index, char -> ReaderMeasuredInlineItem.Text(char.toString(), 10f, style, index) },
+                    indentCharacters = 0,
+                    alignment = ReaderTextAlignment.START,
+                    lineHeightPx = 20f,
+                    baselineOffsetPx = 15f,
+                    baseTextSizePx = 10f,
+                ),
+            )
         val page = ReaderPaginator.paginateBlocks(blocks, config).first()
         val hit = ReaderSelectionPolicy.start(page, 56f, 1f)
         assertEquals(8, hit?.anchor)
         assertEquals(text.substring(6, 11), ReaderSelection(2, 6, 10).selectedText(page))
-        assertEquals(2, page.elements.filterIsInstance<ReaderElement.Text>().map { it.bounds.left >= 50f }.distinct().size)
+        assertEquals(
+            2,
+            page.elements
+                .filterIsInstance<ReaderElement.Text>()
+                .map { it.bounds.left >= 50f }
+                .distinct()
+                .size,
+        )
     }
 
     @Test
     fun imageBreaksAndRulesStayInsideTheirOwnColumnWithoutBlankExtraPage() {
-        val blocks = listOf(
-            ReaderMeasuredBlock.Image("left", 80f, 80f, 0, pageBreakBefore = true, pageBreakAfter = true),
-            ReaderMeasuredBlock.Image("right", 80f, 80f, 1, pageBreakBefore = true, pageBreakAfter = true),
-            ReaderMeasuredBlock.Rule(0, 2f, 0f),
-        )
+        val blocks =
+            listOf(
+                ReaderMeasuredBlock.Image("left", 80f, 80f, 0, pageBreakBefore = true, pageBreakAfter = true),
+                ReaderMeasuredBlock.Image("right", 80f, 80f, 1, pageBreakBefore = true, pageBreakAfter = true),
+                ReaderMeasuredBlock.Rule(0, 2f, 0f),
+            )
         val pages = ReaderPaginator.paginateBlocks(blocks, config)
         assertEquals(2, pages.size)
         assertEquals(listOf(5f, 55f), pages.first().elements.map { it.bounds.left })
@@ -68,16 +99,26 @@ class ReaderDoublePageTest {
 
     @Test
     fun explicitBreakAdvancesColumnAndShortChapterLeavesRightColumnEmpty() {
-        val pages = ReaderPaginator.paginateBlocks(listOf(
-            ReaderMeasuredBlock.Paragraph(paragraph("甲")),
-            ReaderMeasuredBlock.PageBreak,
-            ReaderMeasuredBlock.Paragraph(paragraph("乙", 2)),
-        ), config)
+        val pages =
+            ReaderPaginator.paginateBlocks(
+                listOf(
+                    ReaderMeasuredBlock.Paragraph(paragraph("甲")),
+                    ReaderMeasuredBlock.PageBreak,
+                    ReaderMeasuredBlock.Paragraph(paragraph("乙", 2)),
+                ),
+                config,
+            )
         assertEquals(1, pages.size)
         assertEquals(listOf(5f, 55f), pages.single().elements.map { it.bounds.left })
         val short = ReaderPaginator.paginate(listOf(paragraph("甲")), config).single()
         assertEquals(1, short.elements.size)
-        assertEquals(5f, short.elements.single().bounds.left, 0f)
+        assertEquals(
+            5f,
+            short.elements
+                .single()
+                .bounds.left,
+            0f,
+        )
     }
 
     @Test

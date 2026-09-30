@@ -23,66 +23,77 @@ class CoverAlbumManageViewModel(
     private val context: Context,
     private val coverAlbumUseCase: CoverAlbumUseCase,
 ) : ViewModel() {
-
     private val editingAlbumId = MutableStateFlow<String?>(null)
     private val dialog = MutableStateFlow<CoverAlbumDialog?>(null)
     private val _effects = MutableSharedFlow<CoverAlbumEffect>(extraBufferCapacity = 8)
     val effects = _effects.asSharedFlow()
 
-    val uiState = combine(
-        coverAlbumUseCase.albums,
-        coverAlbumUseCase.selection,
-        editingAlbumId,
-        dialog,
-    ) { albums, selection, editingId, activeDialog ->
-        CoverAlbumManageUiState(
-            albums = albums.map { it.toUi() }.toImmutableList(),
-            selectedAlbumId = selection.albumId,
-            editingAlbumId = editingId,
-            dialog = activeDialog,
+    val uiState =
+        combine(
+            coverAlbumUseCase.albums,
+            coverAlbumUseCase.selection,
+            editingAlbumId,
+            dialog,
+        ) { albums, selection, editingId, activeDialog ->
+            CoverAlbumManageUiState(
+                albums = albums.map { it.toUi() }.toImmutableList(),
+                selectedAlbumId = selection.albumId,
+                editingAlbumId = editingId,
+                dialog = activeDialog,
+            )
+        }.stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5_000),
+            initialValue = CoverAlbumManageUiState(),
         )
-    }.stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(5_000),
-        initialValue = CoverAlbumManageUiState(),
-    )
 
     fun onIntent(intent: CoverAlbumIntent) {
         when (intent) {
-            CoverAlbumIntent.CreateClick -> dialog.value = CoverAlbumDialog.Create
-            is CoverAlbumIntent.EditClick -> editingAlbumId.value = intent.albumId
+            CoverAlbumIntent.CreateClick -> {
+                dialog.value = CoverAlbumDialog.Create
+            }
+            is CoverAlbumIntent.EditClick -> {
+                editingAlbumId.value = intent.albumId
+            }
             is CoverAlbumIntent.RenameClick -> {
                 val album = uiState.value.albums.firstOrNull { it.id == intent.albumId } ?: return
                 dialog.value = CoverAlbumDialog.Rename(album.id, album.name)
             }
-
             is CoverAlbumIntent.DeleteClick -> {
                 val album = uiState.value.albums.firstOrNull { it.id == intent.albumId } ?: return
                 dialog.value = CoverAlbumDialog.Delete(album.id, album.name)
             }
-
-            is CoverAlbumIntent.SaveName -> saveName(intent.name)
-            CoverAlbumIntent.ConfirmDelete -> confirmDelete()
+            is CoverAlbumIntent.SaveName -> {
+                saveName(intent.name)
+            }
+            CoverAlbumIntent.ConfirmDelete -> {
+                confirmDelete()
+            }
             is CoverAlbumIntent.AddImagesClick -> {
                 _effects.tryEmit(
-                    CoverAlbumEffect.SelectImages(intent.albumId, intent.isDark)
+                    CoverAlbumEffect.SelectImages(intent.albumId, intent.isDark),
                 )
             }
-
-            is CoverAlbumIntent.ImagesSelected -> addImages(
-                albumId = intent.albumId,
-                isDark = intent.isDark,
-                uriStrings = intent.uriStrings,
-            )
-
-            is CoverAlbumIntent.RemoveImage -> removeImage(
-                albumId = intent.albumId,
-                isDark = intent.isDark,
-                imageId = intent.imageId,
-            )
-
-            CoverAlbumIntent.DismissEditor -> editingAlbumId.value = null
-            CoverAlbumIntent.DismissDialog -> dialog.value = null
+            is CoverAlbumIntent.ImagesSelected -> {
+                addImages(
+                    albumId = intent.albumId,
+                    isDark = intent.isDark,
+                    uriStrings = intent.uriStrings,
+                )
+            }
+            is CoverAlbumIntent.RemoveImage -> {
+                removeImage(
+                    albumId = intent.albumId,
+                    isDark = intent.isDark,
+                    imageId = intent.imageId,
+                )
+            }
+            CoverAlbumIntent.DismissEditor -> {
+                editingAlbumId.value = null
+            }
+            CoverAlbumIntent.DismissDialog -> {
+                dialog.value = null
+            }
         }
     }
 
@@ -97,12 +108,12 @@ class CoverAlbumManageViewModel(
                     val id = coverAlbumUseCase.createAlbum(trimmedName)
                     editingAlbumId.value = id
                 }
-
                 is CoverAlbumDialog.Rename -> {
                     coverAlbumUseCase.renameAlbum(activeDialog.albumId, trimmedName)
                 }
-
-                else -> Unit
+                else -> {
+                    Unit
+                }
             }
         }
     }
@@ -116,31 +127,40 @@ class CoverAlbumManageViewModel(
         }
     }
 
-    private fun addImages(albumId: String, isDark: Boolean, uriStrings: List<String>) {
+    private fun addImages(
+        albumId: String,
+        isDark: Boolean,
+        uriStrings: List<String>,
+    ) {
         if (uriStrings.isEmpty()) return
         launchOperation {
-            val inputs = uriStrings.map { uriString ->
-                val uri = Uri.parse(uriString)
-                CoverAlbumImageInput(
-                    displayName = queryDisplayName(uri),
-                    openStream = {
-                        context.contentResolver.openInputStream(uri)
-                            ?: error("无法读取图片")
-                    },
-                )
-            }
+            val inputs =
+                uriStrings.map { uriString ->
+                    val uri = Uri.parse(uriString)
+                    CoverAlbumImageInput(
+                        displayName = queryDisplayName(uri),
+                        openStream = {
+                            context.contentResolver.openInputStream(uri)
+                                ?: error("无法读取图片")
+                        },
+                    )
+                }
             coverAlbumUseCase.addImages(albumId, isDark, inputs)
         }
     }
 
-    private fun removeImage(albumId: String, isDark: Boolean, imageId: String) {
+    private fun removeImage(
+        albumId: String,
+        isDark: Boolean,
+        imageId: String,
+    ) {
         launchOperation {
             coverAlbumUseCase.removeImage(albumId, isDark, imageId)
         }
     }
 
-    private fun queryDisplayName(uri: Uri): String {
-        return context.contentResolver.query(
+    private fun queryDisplayName(uri: Uri): String = context.contentResolver
+        .query(
             uri,
             arrayOf(OpenableColumns.DISPLAY_NAME),
             null,
@@ -149,7 +169,6 @@ class CoverAlbumManageViewModel(
         )?.use { cursor ->
             if (cursor.moveToFirst()) cursor.getString(0) else null
         } ?: "cover_image"
-    }
 
     private fun launchOperation(block: suspend () -> Unit) {
         viewModelScope.launch(Dispatchers.IO) {
@@ -160,8 +179,8 @@ class CoverAlbumManageViewModel(
             } catch (error: Exception) {
                 _effects.emit(
                     CoverAlbumEffect.ShowMessage(
-                        error.localizedMessage ?: error.javaClass.simpleName
-                    )
+                        error.localizedMessage ?: error.javaClass.simpleName,
+                    ),
                 )
             }
         }

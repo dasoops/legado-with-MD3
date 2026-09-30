@@ -5,7 +5,10 @@ import kotlin.math.abs
 import kotlin.math.atan2
 import kotlin.math.hypot
 
-data class CurlPoint(val x: Float, val y: Float) {
+data class CurlPoint(
+    val x: Float,
+    val y: Float,
+) {
     val isFinite: Boolean get() = x.isFinite() && y.isFinite()
 }
 
@@ -33,9 +36,19 @@ data class PageCurlFrame(
     val touchToCornerDistance: Float,
     val mirror: CurlMirror,
 ) {
-    val isValid: Boolean get() = listOf(
-        touch, corner, control1, control2, start1, start2, end1, end2, vertex1, vertex2,
-    ).all(CurlPoint::isFinite)
+    val isValid: Boolean get() =
+        listOf(
+            touch,
+            corner,
+            control1,
+            control2,
+            start1,
+            start2,
+            end1,
+            end2,
+            vertex1,
+            vertex2,
+        ).all(CurlPoint::isFinite)
 }
 
 /**
@@ -122,8 +135,10 @@ object ReaderCurlTouchPolicy {
         ReaderTurnDirection.NEXT -> if (capturedY <= pageHeight / 2f) 0f else pageHeight
     }
 
-    fun settledY(cornerY: Float, pageHeight: Float): Float =
-        if (cornerY <= pageHeight / 2f) 1f else pageHeight
+    fun settledY(
+        cornerY: Float,
+        pageHeight: Float,
+    ): Float = if (cornerY <= pageHeight / 2f) 1f else pageHeight
 
     fun dragY(
         direction: ReaderTurnDirection,
@@ -160,17 +175,20 @@ object PageCurlGeometry {
         lockedCorner: CurlPoint? = null,
     ): PageCurlFrame? {
         if (width <= 0f || height <= 0f) return null
-        val corner = lockedCorner ?: CurlPoint(
-            if (inputX <= width / 2f) 0f else width,
-            if (inputY <= height / 2f) 0f else height,
-        )
+        val corner =
+            lockedCorner ?: CurlPoint(
+                if (inputX <= width / 2f) 0f else width,
+                if (inputY <= height / 2f) 0f else height,
+            )
         // 收尾动画把触点送出页外让折页连同阴影滑出屏幕；页外触点保持原值走原始
         // 贝塞尔计算（对照原版 calcPoints 仅在触点页内时做收拢修正），页内仍收敛
         // 到 .1f 边界避免 0 值退化。
-        var touch = CurlPoint(
-            if (inputX < 0f || inputX > width) inputX else inputX.coerceIn(.1f, width - .1f),
-            inputY.coerceIn(.1f, height - .1f),
-        )
+        var touch =
+            CurlPoint(
+                if (inputX < 0f || inputX > width) inputX else inputX.coerceIn(.1f, width - .1f),
+                inputY.coerceIn(.1f, height - .1f),
+            )
+
         fun controls(point: CurlPoint): Pair<CurlPoint, CurlPoint> {
             val middleX = (point.x + corner.x) / 2f
             val middleY = (point.y + corner.y) / 2f
@@ -201,10 +219,29 @@ object PageCurlGeometry {
         val distance = hypot((touch.x - corner.x).toDouble(), (touch.y - corner.y).toDouble()).toFloat()
         val degrees = (atan2((control1.x - corner.x).toDouble(), (control2.y - corner.y).toDouble()) * 180.0 / PI).toFloat()
         val mirror = mirror(corner, control1, control2)
-        return PageCurlFrame(touch, corner, control1, control2, start1, start2, end1, end2, vertex1, vertex2, degrees, distance, mirror).takeIf(PageCurlFrame::isValid)
+        return PageCurlFrame(
+            touch,
+            corner,
+            control1,
+            control2,
+            start1,
+            start2,
+            end1,
+            end2,
+            vertex1,
+            vertex2,
+            degrees,
+            distance,
+            mirror,
+        ).takeIf(PageCurlFrame::isValid)
     }
 
-    private fun cross(p1: CurlPoint, p2: CurlPoint, p3: CurlPoint, p4: CurlPoint): CurlPoint? {
+    private fun cross(
+        p1: CurlPoint,
+        p2: CurlPoint,
+        p3: CurlPoint,
+        p4: CurlPoint,
+    ): CurlPoint? {
         val dx1 = p2.x - p1.x
         val dx2 = p4.x - p3.x
         if (abs(dx1) < .0001f || abs(dx2) < .0001f) return null
@@ -217,7 +254,11 @@ object PageCurlGeometry {
         return CurlPoint(x, a1 * x + b1)
     }
 
-    private fun mirror(corner: CurlPoint, c1: CurlPoint, c2: CurlPoint): CurlMirror {
+    private fun mirror(
+        corner: CurlPoint,
+        c1: CurlPoint,
+        c2: CurlPoint,
+    ): CurlMirror {
         val distance = hypot((corner.x - c1.x).toDouble(), (c2.y - corner.y).toDouble()).toFloat().coerceAtLeast(.0001f)
         val f8 = (corner.x - c1.x) / distance
         val f9 = (c2.y - corner.y) / distance

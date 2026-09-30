@@ -4,21 +4,8 @@ import org.junit.Assert.assertEquals
 import org.junit.Test
 
 class ReaderTapActionTest {
-    private val grid = ReaderTapActionGrid(
-        ReaderTapAction.PREVIOUS_CHAPTER,
-        ReaderTapAction.READ_ALOUD_PREVIOUS_PARAGRAPH,
-        ReaderTapAction.NEXT_CHAPTER,
-        ReaderTapAction.PREVIOUS_PAGE,
-        ReaderTapAction.MENU,
-        ReaderTapAction.NEXT_PAGE,
-        ReaderTapAction.OPEN_CONTENT_EDIT,
-        ReaderTapAction.ADD_BOOKMARK,
-        ReaderTapAction.OPEN_SEARCH,
-    )
-
-    @Test
-    fun `nine regions resolve independently using legacy 33 and 66 percent boundaries`() {
-        val expected = listOf(
+    private val grid =
+        ReaderTapActionGrid(
             ReaderTapAction.PREVIOUS_CHAPTER,
             ReaderTapAction.READ_ALOUD_PREVIOUS_PARAGRAPH,
             ReaderTapAction.NEXT_CHAPTER,
@@ -29,8 +16,33 @@ class ReaderTapActionTest {
             ReaderTapAction.ADD_BOOKMARK,
             ReaderTapAction.OPEN_SEARCH,
         )
-        val points = listOf(10f to 10f, 50f to 10f, 90f to 10f, 10f to 50f, 50f to 50f,
-            90f to 50f, 10f to 90f, 50f to 90f, 90f to 90f)
+
+    @Test
+    fun `nine regions resolve independently using legacy 33 and 66 percent boundaries`() {
+        val expected =
+            listOf(
+                ReaderTapAction.PREVIOUS_CHAPTER,
+                ReaderTapAction.READ_ALOUD_PREVIOUS_PARAGRAPH,
+                ReaderTapAction.NEXT_CHAPTER,
+                ReaderTapAction.PREVIOUS_PAGE,
+                ReaderTapAction.MENU,
+                ReaderTapAction.NEXT_PAGE,
+                ReaderTapAction.OPEN_CONTENT_EDIT,
+                ReaderTapAction.ADD_BOOKMARK,
+                ReaderTapAction.OPEN_SEARCH,
+            )
+        val points =
+            listOf(
+                10f to 10f,
+                50f to 10f,
+                90f to 10f,
+                10f to 50f,
+                50f to 50f,
+                90f to 50f,
+                10f to 90f,
+                50f to 90f,
+                90f to 90f,
+            )
 
         assertEquals(expected, points.map { (x, y) -> grid.actionAt(x, y, 100f, 100f) })
         assertEquals(ReaderTapAction.MENU, grid.actionAt(33f, 33f, 100f, 100f))

@@ -12,10 +12,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import io.legado.app.ui.theme.LegadoTheme
 import io.legado.app.ui.util.shouldShowSplitPane
+import kotlin.math.floor
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import top.yukonga.miuix.kmp.blur.isRuntimeShaderSupported
-import kotlin.math.floor
 
 @Composable
 fun BgEffectBackground(
@@ -43,9 +43,10 @@ fun BgEffectBackground(
         val isDarkTheme = LegadoTheme.isDark
         val painter = remember(isOs3Effect) { BgEffectPainter(isOs3Effect) }
 
-        val defaultPreset = remember(deviceType, isDarkTheme, isOs3Effect) {
-            BgEffectConfig.get(deviceType, isDarkTheme, isOs3Effect)
-        }
+        val defaultPreset =
+            remember(deviceType, isDarkTheme, isOs3Effect) {
+                BgEffectConfig.get(deviceType, isDarkTheme, isOs3Effect)
+            }
         val preset = customPreset ?: defaultPreset
 
         val colorStage = remember { Animatable(0f) }
@@ -68,7 +69,8 @@ fun BgEffectBackground(
         }
 
         Spacer(
-            modifier = Modifier
+            modifier =
+            Modifier
                 .fillMaxSize()
                 .then(bgModifier)
                 .bgEffectDraw(

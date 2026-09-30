@@ -6,20 +6,29 @@ import android.view.Gravity
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.annotation.StringRes
+import androidx.core.content.withStyledAttributes
 import io.legado.app.R
 import io.legado.app.utils.dpToPx
-import androidx.core.content.withStyledAttributes
 
-class EmptyMessageView @JvmOverloads constructor(
-    context: Context, attrs: AttributeSet? = null
+class EmptyMessageView
+@JvmOverloads
+constructor(
+    context: Context,
+    attrs: AttributeSet? = null,
 ) : LinearLayout(context, attrs) {
-
     private val faceTextView: TextView
     private val messageTextView: TextView
 
-    private val faces = listOf(
-        "(；′⌒`)", "(つ﹏⊂)", "(•̀ᴗ•́)و", "(๑•́ ₃ •̀๑)", "(눈‸눈)", "(ಥ﹏ಥ)", "(｡•́︿•̀｡)"
-    )
+    private val faces =
+        listOf(
+            "(；′⌒`)",
+            "(つ﹏⊂)",
+            "(•̀ᴗ•́)و",
+            "(๑•́ ₃ •̀๑)",
+            "(눈‸눈)",
+            "(ಥ﹏ಥ)",
+            "(｡•́︿•̀｡)",
+        )
 
     init {
         orientation = VERTICAL
@@ -34,20 +43,23 @@ class EmptyMessageView @JvmOverloads constructor(
             }
         }
 
-        faceTextView = TextView(context).apply {
-            layoutParams = LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT)
-            gravity = Gravity.CENTER
-            textSize = 32f
-            text = faces.random()
-        }
-
-        messageTextView = TextView(context).apply {
-            layoutParams = LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT).apply {
-                topMargin = 8.dpToPx()
+        faceTextView =
+            TextView(context).apply {
+                layoutParams = LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT)
+                gravity = Gravity.CENTER
+                textSize = 32f
+                text = faces.random()
             }
-            gravity = Gravity.CENTER
-            text = R.string.empty.toString()
-        }
+
+        messageTextView =
+            TextView(context).apply {
+                layoutParams =
+                    LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT).apply {
+                        topMargin = 8.dpToPx()
+                    }
+                gravity = Gravity.CENTER
+                text = R.string.empty.toString()
+            }
 
         addView(faceTextView)
         addView(messageTextView)
@@ -62,12 +74,13 @@ class EmptyMessageView @JvmOverloads constructor(
     }
 
     /** 设置文字消息 */
-    fun setMessage(@StringRes resId: Int) {
+    fun setMessage(
+        @StringRes resId: Int,
+    ) {
         messageTextView.setText(resId)
     }
 
     fun setMessage(msg: String) {
         messageTextView.text = msg
     }
-
 }

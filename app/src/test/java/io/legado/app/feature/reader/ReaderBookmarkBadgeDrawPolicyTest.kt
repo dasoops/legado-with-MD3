@@ -6,14 +6,15 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class ReaderBookmarkBadgeDrawPolicyTest {
-    private val custom = ReaderBookmarkBadge(
-        leftPx = 0f,
-        topPx = 0f,
-        widthPx = 24,
-        heightPx = 48,
-        imageSource = "bookmark.png",
-        imageVersion = "1",
-    )
+    private val custom =
+        ReaderBookmarkBadge(
+            leftPx = 0f,
+            topPx = 0f,
+            widthPx = 24,
+            heightPx = 48,
+            imageSource = "bookmark.png",
+            imageVersion = "1",
+        )
 
     @Test
     fun customBadgeWaitsForItsOwnLoadResult() {

@@ -70,17 +70,17 @@ import io.legado.app.ui.widget.components.text.AppText
 import io.legado.app.ui.widget.components.topbar.GlassMediumFlexibleTopAppBar
 import io.legado.app.ui.widget.components.topbar.GlassTopAppBarDefaults
 import io.legado.app.ui.widget.components.topbar.TopBarNavigationButton
-import org.koin.androidx.compose.koinViewModel
 import java.time.LocalDate
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter
+import org.koin.androidx.compose.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ReadRecordOverviewRouteScreen(
     viewModel: ReadRecordOverviewViewModel = koinViewModel(),
     onBackClick: () -> Unit,
-    onBookClick: (String, String) -> Unit
+    onBookClick: (String, String) -> Unit,
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     ReadRecordOverviewScreen(
@@ -111,32 +111,32 @@ fun ReadRecordOverviewScreen(
                 scrollBehavior = scrollBehavior,
                 navigationIcon = {
                     TopBarNavigationButton(onClick = onBackClick)
-                }
+                },
             )
-        }
+        },
     ) { padding ->
         Column(
-            modifier = Modifier
+            modifier =
+            Modifier
                 .fillMaxSize()
-                .padding(padding)
+                .padding(padding),
         ) {
             PeriodSelector(
                 selectedPeriod = state.period,
-                onPeriodSelected = { onIntent(ReadRecordOverviewIntent.SetPeriod(it)) }
+                onPeriodSelected = { onIntent(ReadRecordOverviewIntent.SetPeriod(it)) },
             )
 
             DateNavigator(
                 period = state.period,
                 referenceDate = state.referenceDate,
                 onPrevClick = { onIntent(ReadRecordOverviewIntent.PreviousDate) },
-                onNextClick = { onIntent(ReadRecordOverviewIntent.NextDate) }
+                onNextClick = { onIntent(ReadRecordOverviewIntent.NextDate) },
             )
 
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(bottom = 16.dp)
+                contentPadding = PaddingValues(bottom = 16.dp),
             ) {
-
                 if (state.period == ReadPeriod.DAY) {
                     item {
                         HourlyReadingTimeBarChartCard(data = state.hourlyTimeData)
@@ -149,34 +149,42 @@ fun ReadRecordOverviewScreen(
 
                 item {
                     val readingTime = ReadRecordFormatter.hourMinuteDuration(state.totalTime)
-                    val readingTimeText = when {
-                        readingTime.hours > 0 && readingTime.minutes > 0 -> stringResource(
-                            R.string.hours_minutes_format,
-                            readingTime.hours,
-                            readingTime.minutes,
+                    val readingTimeText =
+                        when {
+                            readingTime.hours > 0 && readingTime.minutes > 0 -> {
+                                stringResource(
+                                    R.string.hours_minutes_format,
+                                    readingTime.hours,
+                                    readingTime.minutes,
+                                )
+                            }
+                            readingTime.hours > 0 -> {
+                                stringResource(
+                                    R.string.whole_hours_format,
+                                    readingTime.hours,
+                                )
+                            }
+                            else -> {
+                                stringResource(
+                                    R.string.minutes_format,
+                                    readingTime.minutes,
+                                )
+                            }
+                        }
+                    val stats =
+                        listOf(
+                            StatItem(
+                                stringResource(R.string.reading_time),
+                                readingTimeText,
+                            ),
+                            StatItem(stringResource(R.string.reading_days), stringResource(R.string.days_format, state.readingDays)),
+                            StatItem(stringResource(R.string.total_read_books), stringResource(R.string.books_format, state.totalBooks)),
+                            StatItem(stringResource(R.string.finished_books), stringResource(R.string.books_format, state.finishedBooks)),
+                            StatItem(
+                                stringResource(R.string.reading_books),
+                                stringResource(R.string.books_format, state.readingBooks),
+                            ),
                         )
-                        readingTime.hours > 0 -> stringResource(
-                            R.string.whole_hours_format,
-                            readingTime.hours,
-                        )
-                        else -> stringResource(
-                            R.string.minutes_format,
-                            readingTime.minutes,
-                        )
-                    }
-                    val stats = listOf(
-                        StatItem(
-                            stringResource(R.string.reading_time),
-                            readingTimeText,
-                        ),
-                        StatItem(stringResource(R.string.reading_days), stringResource(R.string.days_format, state.readingDays)),
-                        StatItem(stringResource(R.string.total_read_books), stringResource(R.string.books_format, state.totalBooks)),
-                        StatItem(stringResource(R.string.finished_books), stringResource(R.string.books_format, state.finishedBooks)),
-                        StatItem(
-                            stringResource(R.string.reading_books),
-                            stringResource(R.string.books_format, state.readingBooks)
-                        )
-                    )
                     StatsGridCard(title = stringResource(R.string.reading_data), items = stats)
                 }
 
@@ -201,23 +209,24 @@ fun ReadRecordOverviewScreen(
 @Composable
 fun PeriodSelector(
     selectedPeriod: ReadPeriod,
-    onPeriodSelected: (ReadPeriod) -> Unit
+    onPeriodSelected: (ReadPeriod) -> Unit,
 ) {
-    val periods = remember {
-        listOf(
-            ReadPeriod.DAY to "日",
-            ReadPeriod.WEEK to "周",
-            ReadPeriod.MONTH to "月",
-            ReadPeriod.YEAR to "年",
-            ReadPeriod.ALL to "总"
-        )
-    }
+    val periods =
+        remember {
+            listOf(
+                ReadPeriod.DAY to "日",
+                ReadPeriod.WEEK to "周",
+                ReadPeriod.MONTH to "月",
+                ReadPeriod.YEAR to "年",
+                ReadPeriod.ALL to "总",
+            )
+        }
 
     AppTabRow(
         tabTitles = periods.map { it.second },
         selectedTabIndex = periods.indexOfFirst { it.first == selectedPeriod },
         onTabSelected = { index -> onPeriodSelected(periods[index].first) },
-        isScrollable = false
+        isScrollable = false,
     )
 }
 
@@ -226,21 +235,22 @@ fun DateNavigator(
     period: ReadPeriod,
     referenceDate: LocalDate,
     onPrevClick: () -> Unit,
-    onNextClick: () -> Unit
+    onNextClick: () -> Unit,
 ) {
     if (period == ReadPeriod.ALL) return
 
     Row(
-        modifier = Modifier
+        modifier =
+        Modifier
             .fillMaxWidth()
             .padding(vertical = 8.dp, horizontal = 12.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = Alignment.CenterVertically,
     ) {
         MediumPlainButton(
             onClick = onPrevClick,
             icon = Icons.AutoMirrored.Filled.ArrowLeft,
-            contentDescription = stringResource(R.string.previous)
+            contentDescription = stringResource(R.string.previous),
         )
         AnimatedContent(
             targetState = referenceDate,
@@ -251,34 +261,42 @@ fun DateNavigator(
                     (slideInHorizontally { -it / 2 } + fadeIn()).togetherWith(slideOutHorizontally { it / 2 } + fadeOut())
                 }.using(SizeTransform(clip = false))
             },
-            label = "DateNavigator"
+            label = "DateNavigator",
         ) { targetDate ->
-            val text = when (period) {
-                ReadPeriod.DAY -> targetDate.format(DateTimeFormatter.ofPattern("yyyy年M月d日"))
-                ReadPeriod.WEEK -> {
-                    val start = targetDate.with(java.time.DayOfWeek.MONDAY)
-                    val end = targetDate.with(java.time.DayOfWeek.SUNDAY)
-                    "${start.format(DateTimeFormatter.ofPattern("M.d"))} - ${
-                        end.format(
-                            DateTimeFormatter.ofPattern("M.d")
-                        )
-                    }"
+            val text =
+                when (period) {
+                    ReadPeriod.DAY -> {
+                        targetDate.format(DateTimeFormatter.ofPattern("yyyy年M月d日"))
+                    }
+                    ReadPeriod.WEEK -> {
+                        val start = targetDate.with(java.time.DayOfWeek.MONDAY)
+                        val end = targetDate.with(java.time.DayOfWeek.SUNDAY)
+                        "${start.format(DateTimeFormatter.ofPattern("M.d"))} - ${
+                            end.format(
+                                DateTimeFormatter.ofPattern("M.d"),
+                            )
+                        }"
+                    }
+                    ReadPeriod.MONTH -> {
+                        targetDate.format(DateTimeFormatter.ofPattern("yyyy年M月"))
+                    }
+                    ReadPeriod.YEAR -> {
+                        targetDate.format(DateTimeFormatter.ofPattern("yyyy年"))
+                    }
+                    ReadPeriod.ALL -> {
+                        ""
+                    }
                 }
-
-                ReadPeriod.MONTH -> targetDate.format(DateTimeFormatter.ofPattern("yyyy年M月"))
-                ReadPeriod.YEAR -> targetDate.format(DateTimeFormatter.ofPattern("yyyy年"))
-                ReadPeriod.ALL -> ""
-            }
             AppText(
                 text = text,
                 style = LegadoTheme.typography.titleMedium,
-                modifier = Modifier.padding(horizontal = 16.dp)
+                modifier = Modifier.padding(horizontal = 16.dp),
             )
         }
         MediumPlainButton(
             onClick = onNextClick,
             icon = Icons.AutoMirrored.Filled.ArrowRight,
-            contentDescription = stringResource(R.string.next)
+            contentDescription = stringResource(R.string.next),
         )
     }
 }
@@ -286,9 +304,10 @@ fun DateNavigator(
 @Composable
 fun HeatmapCard(state: ReadRecordOverviewUiState) {
     GlassCard(
-        modifier = Modifier
+        modifier =
+        Modifier
             .fillMaxWidth()
-            .adaptiveHorizontalPadding(vertical = 8.dp)
+            .adaptiveHorizontalPadding(vertical = 8.dp),
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -296,7 +315,7 @@ fun HeatmapCard(state: ReadRecordOverviewUiState) {
                     imageVector = Icons.Default.GridOn,
                     contentDescription = null,
                     tint = LegadoTheme.colorScheme.primary,
-                    modifier = Modifier.size(20.dp)
+                    modifier = Modifier.size(20.dp),
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 AppText(stringResource(R.string.reading_heatmap), style = LegadoTheme.typography.titleMedium)
@@ -307,7 +326,7 @@ fun HeatmapCard(state: ReadRecordOverviewUiState) {
                 dailyReadTimes = state.allReadTimes,
                 currentMode = HeatmapMode.TIME,
                 selectedDate = null,
-                onDateSelected = null
+                onDateSelected = null,
             )
         }
     }
@@ -317,68 +336,70 @@ fun HeatmapCard(state: ReadRecordOverviewUiState) {
 fun TopReadingListCard(
     topBooks: List<ReadBookRanking>,
     loadBookCover: suspend (String, String) -> String?,
-    onBookClick: (String, String) -> Unit
+    onBookClick: (String, String) -> Unit,
 ) {
     GlassCard(
-        modifier = Modifier
+        modifier =
+        Modifier
             .fillMaxWidth()
-            .adaptiveHorizontalPadding(vertical = 8.dp)
+            .adaptiveHorizontalPadding(vertical = 8.dp),
     ) {
         Column(modifier = Modifier.padding(vertical = 16.dp)) {
             Row(
                 modifier = Modifier.padding(horizontal = 16.dp),
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically,
             ) {
                 Icon(
                     imageVector = Icons.Default.Leaderboard,
                     contentDescription = null,
                     tint = LegadoTheme.colorScheme.primary,
-                    modifier = Modifier.size(20.dp)
+                    modifier = Modifier.size(20.dp),
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 AppText(
                     text = stringResource(R.string.reading_time_ranking),
-                    style = LegadoTheme.typography.titleMedium
+                    style = LegadoTheme.typography.titleMedium,
                 )
             }
             Spacer(modifier = Modifier.height(8.dp))
-            
+
             topBooks.forEachIndexed { index, book ->
                 var coverPath by remember { mutableStateOf<String?>(null) }
                 LaunchedEffect(book.bookName, book.bookAuthor) {
                     coverPath = loadBookCover(book.bookName, book.bookAuthor)
                 }
-                val rankingDescription = stringResource(
-                    R.string.a11y_reading_ranking_item,
-                    index + 1,
-                    book.bookName,
-                    book.bookAuthor,
-                    ReadRecordFormatter.formatDuration(book.readTime)
-                )
+                val rankingDescription =
+                    stringResource(
+                        R.string.a11y_reading_ranking_item,
+                        index + 1,
+                        book.bookName,
+                        book.bookAuthor,
+                        ReadRecordFormatter.formatDuration(book.readTime),
+                    )
 
                 Row(
-                    modifier = Modifier
+                    modifier =
+                    Modifier
                         .fillMaxWidth()
                         .clickable { onBookClick(book.bookName, book.bookAuthor) }
                         .semantics(mergeDescendants = true) {
                             contentDescription = rankingDescription
                             role = Role.Button
-                        }
-                        .padding(vertical = 8.dp, horizontal = 8.dp),
-                    verticalAlignment = Alignment.CenterVertically
+                        }.padding(vertical = 8.dp, horizontal = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
                 ) {
                     AppText(
                         text = "${index + 1}",
                         style = LegadoTheme.typography.titleMedium,
                         modifier = Modifier.padding(start = 12.dp, end = 16.dp),
                         textAlign = TextAlign.Center,
-                        color = if (index < 3) LegadoTheme.colorScheme.primary else LegadoTheme.colorScheme.onSurfaceVariant
+                        color = if (index < 3) LegadoTheme.colorScheme.primary else LegadoTheme.colorScheme.onSurfaceVariant,
                     )
                     CoilBookCover(
                         name = book.bookName,
                         author = book.bookAuthor,
                         path = coverPath,
-                        modifier = Modifier.width(40.dp)
+                        modifier = Modifier.width(40.dp),
                     )
                     Spacer(modifier = Modifier.width(12.dp))
                     Column(modifier = Modifier.weight(1f)) {
@@ -386,19 +407,19 @@ fun TopReadingListCard(
                             modifier = Modifier.padding(end = 8.dp),
                             text = ReadRecordFormatter.formatDuration(book.readTime),
                             style = LegadoTheme.typography.bodySmall,
-                            color = LegadoTheme.colorScheme.primary
+                            color = LegadoTheme.colorScheme.primary,
                         )
                         AppText(
                             text = book.bookName,
                             style = LegadoTheme.typography.bodyMedium,
                             fontWeight = FontWeight.Bold,
                             maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
+                            overflow = TextOverflow.Ellipsis,
                         )
                         AppText(
                             text = book.bookAuthor,
                             style = LegadoTheme.typography.labelSmall,
-                            color = LegadoTheme.colorScheme.onSurfaceVariant
+                            color = LegadoTheme.colorScheme.onSurfaceVariant,
                         )
                     }
                 }
@@ -418,9 +439,10 @@ fun ReadingCalendarCard(
     val firstDayOfWeek = firstDayOfMonth.dayOfWeek.value % 7 // 0 for Sunday
 
     GlassCard(
-        modifier = Modifier
+        modifier =
+        Modifier
             .fillMaxWidth()
-            .adaptiveHorizontalPadding(vertical = 8.dp)
+            .adaptiveHorizontalPadding(vertical = 8.dp),
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -428,13 +450,13 @@ fun ReadingCalendarCard(
                     imageVector = Icons.Default.CalendarMonth,
                     contentDescription = null,
                     tint = LegadoTheme.colorScheme.primary,
-                    modifier = Modifier.size(20.dp)
+                    modifier = Modifier.size(20.dp),
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 AppText(stringResource(R.string.reading_calendar), style = LegadoTheme.typography.titleMedium)
             }
             Spacer(modifier = Modifier.height(16.dp))
-            
+
             Row(modifier = Modifier.fillMaxWidth()) {
                 val days = listOf("日", "一", "二", "三", "四", "五", "六")
                 days.forEach { day ->
@@ -442,11 +464,11 @@ fun ReadingCalendarCard(
                         text = day,
                         modifier = Modifier.weight(1f),
                         textAlign = TextAlign.Center,
-                        style = LegadoTheme.typography.labelSmall
+                        style = LegadoTheme.typography.labelSmall,
                     )
                 }
             }
-            
+
             Spacer(modifier = Modifier.height(8.dp))
 
             val totalCells = ((daysInMonth + firstDayOfWeek + 6) / 7) * 7
@@ -455,13 +477,14 @@ fun ReadingCalendarCard(
                     for (j in 0 until 7) {
                         val cellIndex = i + j
                         val dayOfMonth = cellIndex - firstDayOfWeek + 1
-                        
+
                         Box(
-                            modifier = Modifier
+                            modifier =
+                            Modifier
                                 .weight(1f)
                                 .aspectRatio(0.75f)
                                 .padding(2.dp),
-                            contentAlignment = Alignment.Center
+                            contentAlignment = Alignment.Center,
                         ) {
                             if (dayOfMonth in 1..daysInMonth) {
                                 val date = currentMonth.atDay(dayOfMonth)
@@ -483,49 +506,52 @@ fun CalendarDayCell(
 ) {
     val topBook = state.dailyTopBook[date]
     var coverPath by remember { mutableStateOf<String?>(null) }
-    
+
     LaunchedEffect(topBook) {
         topBook?.let { (name, author) ->
             coverPath = loadBookCover(name, author)
         }
     }
-    val dayDescription = if (topBook != null) {
-        stringResource(
-            R.string.a11y_reading_calendar_day_with_book,
-            date.toString(),
-            topBook.first,
-            topBook.second
-        )
-    } else {
-        stringResource(R.string.a11y_reading_calendar_day_empty, date.toString())
-    }
-    
+    val dayDescription =
+        if (topBook != null) {
+            stringResource(
+                R.string.a11y_reading_calendar_day_with_book,
+                date.toString(),
+                topBook.first,
+                topBook.second,
+            )
+        } else {
+            stringResource(R.string.a11y_reading_calendar_day_empty, date.toString())
+        }
+
     Box(
-        modifier = Modifier
+        modifier =
+        Modifier
             .fillMaxSize()
             .clip(RoundedCornerShape(4.dp))
             .background(LegadoTheme.colorScheme.surfaceVariant)
             .semantics {
                 contentDescription = dayDescription
             },
-        contentAlignment = Alignment.Center
+        contentAlignment = Alignment.Center,
     ) {
         if (topBook != null) {
             CoilBookCover(
                 name = topBook.first,
                 author = topBook.second,
                 path = coverPath,
-                modifier = Modifier
+                modifier =
+                Modifier
                     .fillMaxSize()
-                    .alpha(0.4f)
+                    .alpha(0.4f),
             )
         }
-        
+
         AppText(
             text = date.dayOfMonth.toString(),
             style = LegadoTheme.typography.bodySmall,
             fontWeight = if (topBook != null) FontWeight.Bold else FontWeight.Normal,
-            color = if (topBook != null) LegadoTheme.colorScheme.primary else LegadoTheme.colorScheme.onSurface
+            color = if (topBook != null) LegadoTheme.colorScheme.primary else LegadoTheme.colorScheme.onSurface,
         )
     }
 }

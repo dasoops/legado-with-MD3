@@ -4,7 +4,6 @@ import io.legado.app.help.coroutine.Coroutine
 import kotlinx.coroutines.CoroutineScope
 
 object AppUpdate {
-
     val gitHubUpdate: AppUpdateInterface? by lazy {
         AppUpdateGitHub
     }
@@ -13,13 +12,10 @@ object AppUpdate {
         val tagName: String,
         val updateLog: String,
         val downloadUrl: String,
-        val fileName: String
+        val fileName: String,
     )
 
     interface AppUpdateInterface {
-
         fun check(scope: CoroutineScope): Coroutine<UpdateInfo>
-
     }
-
 }

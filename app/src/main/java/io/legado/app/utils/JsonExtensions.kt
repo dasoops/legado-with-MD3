@@ -1,12 +1,16 @@
 package io.legado.app.utils
 
-import com.jayway.jsonpath.*
+import com.jayway.jsonpath.Configuration
+import com.jayway.jsonpath.JsonPath
+import com.jayway.jsonpath.Option
+import com.jayway.jsonpath.ParseContext
+import com.jayway.jsonpath.ReadContext
 
 val jsonPath: ParseContext by lazy {
     JsonPath.using(
         Configuration.builder()
             .options(Option.SUPPRESS_EXCEPTIONS)
-            .build()
+            .build(),
     )
 }
 
@@ -65,4 +69,3 @@ fun com.google.gson.JsonObject.getBoolean(name: String, default: Boolean = false
         else -> default
     }
 }
-

@@ -18,8 +18,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.LocalTextStyle
-import androidx.compose.material3.MenuDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MenuDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -35,10 +35,10 @@ import androidx.compose.ui.unit.dp
 import io.legado.app.ui.theme.LegadoTheme
 import io.legado.app.ui.theme.ThemeResolver
 import io.legado.app.ui.widget.components.icon.AppIcon
+import top.yukonga.miuix.kmp.basic.Text as MiuixText
 import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.basic.Check
 import top.yukonga.miuix.kmp.theme.MiuixTheme
-import top.yukonga.miuix.kmp.basic.Text as MiuixText
 
 @Composable
 fun RoundDropdownMenuItem(
@@ -66,16 +66,16 @@ fun RoundDropdownMenuItem(
         Row(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween,
-            modifier = modifier
+            modifier =
+            modifier
                 .fillMaxWidth()
                 .drawBehind { drawRect(backgroundColor) }
                 .clickable(
                     interactionSource = interaction,
                     indication = LocalIndication.current,
                     enabled = enabled,
-                    onClick = onClick
-                )
-                .padding(horizontal = 20.dp, vertical = 12.dp)
+                    onClick = onClick,
+                ).padding(horizontal = 20.dp, vertical = 12.dp),
         ) {
             CompositionLocalProvider(LocalContentColor provides textColor) {
                 if (leadingIcon != null) {
@@ -85,7 +85,7 @@ fun RoundDropdownMenuItem(
 
                 Box(
                     modifier = Modifier.weight(1f),
-                    contentAlignment = Alignment.CenterStart
+                    contentAlignment = Alignment.CenterStart,
                 ) {
                     MiuixText(
                         modifier = Modifier.widthIn(max = 200.dp),
@@ -105,7 +105,7 @@ fun RoundDropdownMenuItem(
                         imageVector = MiuixIcons.Basic.Check,
                         contentDescription = null,
                         modifier = Modifier.size(20.dp),
-                        tint = checkColor
+                        tint = checkColor,
                     )
                 }
             }
@@ -114,38 +114,41 @@ fun RoundDropdownMenuItem(
         val legadoColorScheme = LegadoTheme.colorScheme
         val selectedContentColor = legadoColorScheme.primary
         val defaultContentColor = legadoColorScheme.onSurface
-        val contentColor = if (enabled) {
-            when {
-                hasCustomContentColor -> color
-                isSelected -> selectedContentColor
-                else -> defaultContentColor
+        val contentColor =
+            if (enabled) {
+                when {
+                    hasCustomContentColor -> color
+                    isSelected -> selectedContentColor
+                    else -> defaultContentColor
+                }
+            } else {
+                when {
+                    hasCustomContentColor -> color.copy(alpha = 0.38f)
+                    isSelected -> selectedContentColor.copy(alpha = 0.38f)
+                    else -> defaultContentColor.copy(alpha = 0.38f)
+                }
             }
-        } else {
-            when {
-                hasCustomContentColor -> color.copy(alpha = 0.38f)
-                isSelected -> selectedContentColor.copy(alpha = 0.38f)
-                else -> defaultContentColor.copy(alpha = 0.38f)
-            }
-        }
         val containerColor = legadoColorScheme.surface
 
         Surface(
             onClick = onClick,
-            modifier = modifier
+            modifier =
+            modifier
                 .padding(horizontal = 8.dp)
                 .fillMaxWidth(),
             enabled = enabled,
             shape = MaterialTheme.shapes.small,
             color = containerColor,
             contentColor = contentColor,
-            interactionSource = interaction
+            interactionSource = interaction,
         ) {
             Row(
-                modifier = Modifier
+                modifier =
+                Modifier
                     .padding(contentPadding)
                     .heightIn(min = 48.dp)
                     .widthIn(min = 120.dp),
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically,
             ) {
                 if (leadingIcon != null) {
                     leadingIcon()
@@ -154,13 +157,13 @@ fun RoundDropdownMenuItem(
 
                 Box(
                     modifier = Modifier.weight(1f),
-                    contentAlignment = Alignment.CenterStart
+                    contentAlignment = Alignment.CenterStart,
                 ) {
                     Text(
                         modifier = Modifier.widthIn(max = 200.dp),
                         text = text,
                         style = LegadoTheme.typography.labelLargeEmphasized,
-                        color = contentColor
+                        color = contentColor,
                     )
                 }
 
@@ -173,7 +176,7 @@ fun RoundDropdownMenuItem(
                         imageVector = Icons.Default.Check,
                         contentDescription = null,
                         modifier = Modifier.size(18.dp),
-                        tint = if (isSelected) contentColor else Color.Transparent
+                        tint = if (isSelected) contentColor else Color.Transparent,
                     )
                 }
             }
@@ -186,12 +189,12 @@ fun MenuItemIcon(
     imageVector: ImageVector,
     modifier: Modifier = Modifier,
     contentDescription: String? = null,
-    tint: Color = Color.Unspecified
+    tint: Color = Color.Unspecified,
 ) {
     AppIcon(
         imageVector = imageVector,
         contentDescription = contentDescription,
         modifier = modifier.size(18.dp),
-        tint = tint
+        tint = tint,
     )
 }

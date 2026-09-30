@@ -4,12 +4,12 @@ import android.app.Application
 import android.content.Context
 import android.database.sqlite.SQLiteConstraintException
 import android.net.Uri
-import io.legado.app.domain.model.BookTags
 import io.legado.app.base.BaseViewModel
 import io.legado.app.constant.AppLog
 import io.legado.app.constant.BookType
 import io.legado.app.data.entities.Book
 import io.legado.app.data.repository.BookRepository
+import io.legado.app.domain.model.BookTags
 import io.legado.app.help.book.BookHelp
 import io.legado.app.help.book.addType
 import io.legado.app.help.book.isAudio
@@ -22,16 +22,16 @@ import io.legado.app.utils.MD5Utils
 import io.legado.app.utils.externalFiles
 import io.legado.app.utils.inputStream
 import io.legado.app.utils.splitNotBlank
+import java.io.File
+import java.io.FileOutputStream
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import java.io.File
-import java.io.FileOutputStream
 
 enum class BookInfoEditType {
     TEXT,
     AUDIO,
-    IMAGE
+    IMAGE,
 }
 
 data class BookInfoEditUiState(
@@ -60,26 +60,36 @@ class BookInfoEditViewModel(
         execute {
             book = bookRepository.getBook(bookUrl)
             book?.let {
-                val selectedType = when {
-                    it.isImage -> BookInfoEditType.IMAGE
-                    it.isAudio -> BookInfoEditType.AUDIO
-                    else -> BookInfoEditType.TEXT
-                }
-                val sourceKinds = it.kind?.splitNotBlank(",", "\n").orEmpty().distinct()
-                val customTags = it.customTag?.splitNotBlank(",", "\n").orEmpty().distinct()
-                _uiState.value = BookInfoEditUiState(
-                    name = it.name,
-                    author = it.author,
-                    coverUrl = it.getDisplayCover(),
-                    intro = it.getDisplayIntro(),
-                    remark = it.remark,
-                    sourceKindList = sourceKinds,
-                    kindList = customTags,
-                    originalKindList = customTags,
-                    selectedType = selectedType,
-                    fixedType = it.config.fixedType,
-                    book = it
-                )
+                val selectedType =
+                    when {
+                        it.isImage -> BookInfoEditType.IMAGE
+                        it.isAudio -> BookInfoEditType.AUDIO
+                        else -> BookInfoEditType.TEXT
+                    }
+                val sourceKinds =
+                    it.kind
+                        ?.splitNotBlank(",", "\n")
+                        .orEmpty()
+                        .distinct()
+                val customTags =
+                    it.customTag
+                        ?.splitNotBlank(",", "\n")
+                        .orEmpty()
+                        .distinct()
+                _uiState.value =
+                    BookInfoEditUiState(
+                        name = it.name,
+                        author = it.author,
+                        coverUrl = it.getDisplayCover(),
+                        intro = it.getDisplayIntro(),
+                        remark = it.remark,
+                        sourceKindList = sourceKinds,
+                        kindList = customTags,
+                        originalKindList = customTags,
+                        selectedType = selectedType,
+                        fixedType = it.config.fixedType,
+                        book = it,
+                    )
             }
         }
     }
@@ -133,11 +143,12 @@ class BookInfoEditViewModel(
                 book.author = currentState.author
                 book.remark = currentState.remark
                 val local = if (book.isLocal) BookType.local else 0
-                val bookType = when (currentState.selectedType) {
-                    BookInfoEditType.IMAGE -> BookType.image or local
-                    BookInfoEditType.AUDIO -> BookType.audio or local
-                    else -> BookType.text or local
-                }
+                val bookType =
+                    when (currentState.selectedType) {
+                        BookInfoEditType.IMAGE -> BookType.image or local
+                        BookInfoEditType.AUDIO -> BookType.audio or local
+                        else -> BookType.text or local
+                    }
                 book.removeType(BookType.local, BookType.image, BookType.audio, BookType.text)
                 book.addType(bookType)
                 book.config.fixedType = currentState.fixedType
@@ -163,7 +174,10 @@ class BookInfoEditViewModel(
         }
     }
 
-    fun coverChangeTo(context: Context, uri: Uri) {
+    fun coverChangeTo(
+        context: Context,
+        uri: Uri,
+    ) {
         execute {
             runCatching {
                 val suffix = context.contentResolver.getType(uri)?.substringAfterLast("/") ?: "jpg"

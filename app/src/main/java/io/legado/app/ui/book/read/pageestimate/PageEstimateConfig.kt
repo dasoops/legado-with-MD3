@@ -38,33 +38,34 @@ data class PageEstimateConfig(
     val calibrationBucket: Long
         get() = stableHash(includeContentKey = false)
 
-    private fun stableHash(includeContentKey: Boolean): Long = StablePageHash().apply {
-        add(readerType)
-        add(textSizePx)
-        add(textHeightPx)
-        add(lineSpacingPx)
-        add(paragraphSpacingPx)
-        add(titleTextSizePx)
-        add(titleTextHeightPx)
-        add(titleLineSpacingPx)
-        add(titleTopSpacingPx)
-        add(titleBottomSpacingPx)
-        add(endPaddingPx)
-        add(contentWidthPx)
-        add(contentHeightPx)
-        add(fontKey)
-        add(titleFontKey)
-        add(letterSpacing)
-        add(paragraphIndent)
-        add(titleMode)
-        add(doublePage)
-        add(useZhLayout)
-        add(textFullJustify)
-        add(imageLayoutKey)
-        add(textEngineVersion)
-        add(titleLayoutKey)
-        if (includeContentKey) add(contentKey)
-    }.value
+    private fun stableHash(includeContentKey: Boolean): Long = StablePageHash()
+        .apply {
+            add(readerType)
+            add(textSizePx)
+            add(textHeightPx)
+            add(lineSpacingPx)
+            add(paragraphSpacingPx)
+            add(titleTextSizePx)
+            add(titleTextHeightPx)
+            add(titleLineSpacingPx)
+            add(titleTopSpacingPx)
+            add(titleBottomSpacingPx)
+            add(endPaddingPx)
+            add(contentWidthPx)
+            add(contentHeightPx)
+            add(fontKey)
+            add(titleFontKey)
+            add(letterSpacing)
+            add(paragraphIndent)
+            add(titleMode)
+            add(doublePage)
+            add(useZhLayout)
+            add(textFullJustify)
+            add(imageLayoutKey)
+            add(textEngineVersion)
+            add(titleLayoutKey)
+            if (includeContentKey) add(contentKey)
+        }.value
 
     private companion object {
         const val TEXT_ENGINE_VERSION = 1
@@ -123,18 +124,25 @@ object ChapterContentHasher {
         prefix = content.take(PREFIX_LENGTH),
     )
 
-    fun fromLengthAndPrefix(contentLength: Int, prefix: String): Long =
-        StablePageHash().apply {
+    fun fromLengthAndPrefix(
+        contentLength: Int,
+        prefix: String,
+    ): Long = StablePageHash()
+        .apply {
             add(contentLength)
             add(prefix.take(PREFIX_LENGTH))
         }.value
 
-    fun fromLocalOffsets(start: Long?, end: Long?): Long? {
+    fun fromLocalOffsets(
+        start: Long?,
+        end: Long?,
+    ): Long? {
         if (start == null || end == null || end <= start) return null
-        return StablePageHash().apply {
-            add(start)
-            add(end)
-        }.value
+        return StablePageHash()
+            .apply {
+                add(start)
+                add(end)
+            }.value
     }
 }
 

@@ -100,9 +100,7 @@ private data class MarkdownImageHandlers(
 
 private val LocalMarkdownImageHandlers = staticCompositionLocalOf { MarkdownImageHandlers() }
 
-private fun parseMarkdown(content: String): MarkdownParseResult {
-    return MarkdownParseResult(content, parser.buildMarkdownTreeFromString(content))
-}
+private fun parseMarkdown(content: String): MarkdownParseResult = MarkdownParseResult(content, parser.buildMarkdownTreeFromString(content))
 
 // ---- Main composable ----
 
@@ -135,11 +133,12 @@ fun MarkdownBlock(
     }
 
     CompositionLocalProvider(
-        LocalMarkdownImageHandlers provides MarkdownImageHandlers(
-            model = imageModel,
-            onClick = onImageClick,
-            onLongClick = onImageLongClick,
-        )
+        LocalMarkdownImageHandlers provides
+            MarkdownImageHandlers(
+                model = imageModel,
+                onClick = onImageClick,
+                onLongClick = onImageLongClick,
+            ),
     ) {
         ProvideTextStyle(style) {
             Column(modifier = modifier.padding(horizontal = 4.dp)) {
@@ -171,24 +170,20 @@ private fun MarkdownNode(
                 MarkdownNode(node = child, content = content, modifier = modifier, onClickLink = onClickLink)
             }
         }
-
         MarkdownElementTypes.PARAGRAPH -> {
             MarkdownParagraph(node = node, content = content, modifier = modifier, onClickLink = onClickLink)
         }
-
         MarkdownElementTypes.ATX_1, MarkdownElementTypes.ATX_2, MarkdownElementTypes.ATX_3,
-        MarkdownElementTypes.ATX_4, MarkdownElementTypes.ATX_5, MarkdownElementTypes.ATX_6 -> {
+        MarkdownElementTypes.ATX_4, MarkdownElementTypes.ATX_5, MarkdownElementTypes.ATX_6,
+        -> {
             MarkdownHeading(node = node, content = content, modifier = modifier, onClickLink = onClickLink)
         }
-
         MarkdownElementTypes.UNORDERED_LIST -> {
             MarkdownUnorderedList(node = node, content = content, modifier = modifier, onClickLink = onClickLink, level = listLevel)
         }
-
         MarkdownElementTypes.ORDERED_LIST -> {
             MarkdownOrderedList(node = node, content = content, modifier = modifier, onClickLink = onClickLink, level = listLevel)
         }
-
         GFMTokenTypes.CHECK_BOX -> {
             val isChecked = node.getTextInNode(content).trim() == "[x]"
             AppText(
@@ -196,15 +191,12 @@ private fun MarkdownNode(
                 color = LegadoTheme.colorScheme.primary,
             )
         }
-
         MarkdownElementTypes.BLOCK_QUOTE -> {
             MarkdownBlockquote(node = node, content = content, modifier = modifier, onClickLink = onClickLink)
         }
-
         MarkdownElementTypes.INLINE_LINK -> {
             MarkdownInlineLink(node = node, content = content, modifier = modifier, onClickLink = onClickLink)
         }
-
         MarkdownElementTypes.EMPH -> {
             ProvideTextStyle(TextStyle(fontStyle = FontStyle.Italic)) {
                 node.children.fastForEach { child ->
@@ -212,7 +204,6 @@ private fun MarkdownNode(
                 }
             }
         }
-
         MarkdownElementTypes.STRONG -> {
             ProvideTextStyle(TextStyle(fontWeight = FontWeight.SemiBold)) {
                 node.children.fastForEach { child ->
@@ -220,7 +211,6 @@ private fun MarkdownNode(
                 }
             }
         }
-
         GFMElementTypes.STRIKETHROUGH -> {
             AppText(
                 text = node.getTextInNode(content),
@@ -228,11 +218,9 @@ private fun MarkdownNode(
                 modifier = modifier,
             )
         }
-
         GFMElementTypes.TABLE -> {
             MarkdownTable(node = node, content = content, modifier = modifier, onClickLink = onClickLink)
         }
-
         MarkdownTokenTypes.HORIZONTAL_RULE -> {
             HorizontalDivider(
                 modifier = Modifier.padding(vertical = 16.dp),
@@ -240,7 +228,6 @@ private fun MarkdownNode(
                 thickness = 0.5.dp,
             )
         }
-
         MarkdownElementTypes.IMAGE -> {
             val altText = node.findChildOfTypeRecursive(MarkdownElementTypes.LINK_TEXT)?.getTextInNode(content) ?: ""
             val imageUrl = node.findChildOfTypeRecursive(MarkdownElementTypes.LINK_DESTINATION)?.getTextInNode(content) ?: ""
@@ -250,13 +237,13 @@ private fun MarkdownNode(
                     text = "🖼 $altText",
                     style = LegadoTheme.typography.bodySmall,
                     color = LegadoTheme.colorScheme.primary,
-                    modifier = modifier.clickable {
+                    modifier =
+                    modifier.clickable {
                         context.startActivity(Intent(Intent.ACTION_VIEW, imageUrl.toUri()))
-                    }
+                    },
                 )
             }
         }
-
         GFMElementTypes.INLINE_MATH -> {
             val formula = node.getTextInNode(content)
             AppText(
@@ -265,13 +252,13 @@ private fun MarkdownNode(
                 modifier = modifier.padding(horizontal = 1.dp),
             )
         }
-
         GFMElementTypes.BLOCK_MATH -> {
             val formula = node.getTextInNode(content)
             AppText(
                 text = formula,
                 style = LocalTextStyle.current.copy(fontFamily = FontFamily.Monospace),
-                modifier = modifier
+                modifier =
+                modifier
                     .fillMaxWidth()
                     .padding(vertical = 8.dp)
                     .clip(RoundedCornerShape(4.dp))
@@ -279,32 +266,28 @@ private fun MarkdownNode(
                     .padding(8.dp),
             )
         }
-
         MarkdownElementTypes.CODE_SPAN -> {
             val code = node.getTextInNode(content).trim('`')
             AppText(
                 text = code,
-                style = LocalTextStyle.current.copy(
+                style =
+                LocalTextStyle.current.copy(
                     fontFamily = FontFamily.Monospace,
                     fontSize = 0.9.em,
                 ),
                 color = LegadoTheme.colorScheme.primary,
             )
         }
-
         MarkdownElementTypes.CODE_FENCE -> {
             MarkdownCodeFence(node = node, content = content, modifier = modifier)
         }
-
         MarkdownElementTypes.CODE_BLOCK -> {
             val code = node.getTextInNode(content)
             MarkdownCodeBlock(code = code, language = null, modifier = modifier)
         }
-
         MarkdownTokenTypes.TEXT -> {
             AppText(text = node.getTextInNode(content), modifier = modifier)
         }
-
         else -> {
             node.children.fastForEach { child ->
                 MarkdownNode(node = child, content = content, modifier = modifier, onClickLink = onClickLink)
@@ -326,23 +309,28 @@ private fun MarkdownParagraph(
     val textStyle = LocalTextStyle.current
 
     FlowRow(
-        modifier = modifier.then(
-            if (node.nextSibling() != null) Modifier.padding(bottom = with(LocalDensity.current) { LocalTextStyle.current.fontSize.toDp() })
-            else Modifier
-        )
+        modifier =
+        modifier.then(
+            if (node.nextSibling() != null) {
+                Modifier.padding(bottom = with(LocalDensity.current) { LocalTextStyle.current.fontSize.toDp() })
+            } else {
+                Modifier
+            },
+        ),
     ) {
-        val annotatedString = remember(content) {
-            buildAnnotatedString {
-                node.children.fastForEach { child ->
-                    appendMarkdownInline(
-                        node = child,
-                        content = content,
-                        colorScheme = colorScheme,
-                        onClickLink = onClickLink,
-                    )
+        val annotatedString =
+            remember(content) {
+                buildAnnotatedString {
+                    node.children.fastForEach { child ->
+                        appendMarkdownInline(
+                            node = child,
+                            content = content,
+                            colorScheme = colorScheme,
+                            onClickLink = onClickLink,
+                        )
+                    }
                 }
             }
-        }
         AppText(
             text = annotatedString,
             style = textStyle,
@@ -352,24 +340,34 @@ private fun MarkdownParagraph(
             .filter { it.type == MarkdownElementTypes.IMAGE }
             .forEach { imageNode ->
                 MarkdownImage(
-                    source = imageNode.findChildOfTypeRecursive(MarkdownElementTypes.LINK_DESTINATION)
-                        ?.getTextInNode(content).orEmpty(),
-                    description = imageNode.findChildOfTypeRecursive(MarkdownElementTypes.LINK_TEXT)
-                        ?.getTextInNode(content).orEmpty(),
+                    source =
+                    imageNode
+                        .findChildOfTypeRecursive(MarkdownElementTypes.LINK_DESTINATION)
+                        ?.getTextInNode(content)
+                        .orEmpty(),
+                    description =
+                    imageNode
+                        .findChildOfTypeRecursive(MarkdownElementTypes.LINK_TEXT)
+                        ?.getTextInNode(content)
+                        .orEmpty(),
                 )
             }
     }
 }
 
 @Composable
-private fun MarkdownImage(source: String, description: String) {
+private fun MarkdownImage(
+    source: String,
+    description: String,
+) {
     if (source.isBlank()) return
     val handlers = LocalMarkdownImageHandlers.current
     AsyncImage(
         model = handlers.model(source),
         contentDescription = description.ifBlank { null },
         contentScale = ContentScale.Fit,
-        modifier = Modifier
+        modifier =
+        Modifier
             .fillMaxWidth()
             .heightIn(max = 480.dp)
             .padding(vertical = 4.dp)
@@ -387,25 +385,39 @@ private fun MarkdownHeading(
     modifier: Modifier = Modifier,
     onClickLink: ((String) -> Unit)? = null,
 ) {
-    val level = when (node.type) {
-        MarkdownElementTypes.ATX_1 -> 1
-        MarkdownElementTypes.ATX_2 -> 2
-        MarkdownElementTypes.ATX_3 -> 3
-        MarkdownElementTypes.ATX_4 -> 4
-        MarkdownElementTypes.ATX_5 -> 5
-        else -> 6
-    }
-    val fontSize = when (level) {
-        1 -> 24.sp; 2 -> 22.sp; 3 -> 20.sp; 4 -> 18.sp; 5 -> 16.sp; else -> 14.sp
-    }
-    val verticalPadding = when (level) {
-        1 -> 16.dp; 2 -> 14.dp; 3 -> 12.dp; 4 -> 10.dp; 5 -> 8.dp; else -> 6.dp
-    }
-    val headingStyle = TextStyle(
-        fontWeight = FontWeight.Bold,
-        fontSize = fontSize,
-        lineHeight = fontSize * 1.25f,
-    )
+    val level =
+        when (node.type) {
+            MarkdownElementTypes.ATX_1 -> 1
+            MarkdownElementTypes.ATX_2 -> 2
+            MarkdownElementTypes.ATX_3 -> 3
+            MarkdownElementTypes.ATX_4 -> 4
+            MarkdownElementTypes.ATX_5 -> 5
+            else -> 6
+        }
+    val fontSize =
+        when (level) {
+            1 -> 24.sp
+            2 -> 22.sp
+            3 -> 20.sp
+            4 -> 18.sp
+            5 -> 16.sp
+            else -> 14.sp
+        }
+    val verticalPadding =
+        when (level) {
+            1 -> 16.dp
+            2 -> 14.dp
+            3 -> 12.dp
+            4 -> 10.dp
+            5 -> 8.dp
+            else -> 6.dp
+        }
+    val headingStyle =
+        TextStyle(
+            fontWeight = FontWeight.Bold,
+            fontSize = fontSize,
+            lineHeight = fontSize * 1.25f,
+        )
 
     ProvideTextStyle(headingStyle) {
         FlowRow(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
@@ -431,9 +443,12 @@ private fun MarkdownUnorderedList(
     onClickLink: ((String) -> Unit)? = null,
     level: Int = 0,
 ) {
-    val bullet = when (level % 3) {
-        0 -> "• "; 1 -> "◦ "; else -> "▪ "
-    }
+    val bullet =
+        when (level % 3) {
+            0 -> "• "
+            1 -> "◦ "
+            else -> "▪ "
+        }
     Column(modifier = modifier.padding(start = (level * 8).dp)) {
         node.children.fastForEach { child ->
             if (child.type == MarkdownElementTypes.LIST_ITEM) {
@@ -461,8 +476,10 @@ private fun MarkdownOrderedList(
         var index = 1
         node.children.fastForEach { child ->
             if (child.type == MarkdownElementTypes.LIST_ITEM) {
-                val numberText = child.findChildOfTypeRecursive(MarkdownTokenTypes.LIST_NUMBER)
-                    ?.getTextInNode(content) ?: "$index. "
+                val numberText =
+                    child
+                        .findChildOfTypeRecursive(MarkdownTokenTypes.LIST_NUMBER)
+                        ?.getTextInNode(content) ?: "$index. "
                 MarkdownListItem(
                     node = child,
                     content = content,
@@ -542,13 +559,13 @@ private fun MarkdownBlockquote(
         val borderColor = LegadoTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f)
         val bgColor = LegadoTheme.colorScheme.surfaceVariant.copy(alpha = 0.2f)
         Column(
-            modifier = Modifier
+            modifier =
+            Modifier
                 .drawWithContent {
                     drawRect(color = bgColor, size = size)
                     drawContent()
                     drawRect(color = borderColor, size = Size(10f, size.height))
-                }
-                .padding(8.dp)
+                }.padding(8.dp),
         ) {
             node.children.fastForEach { child ->
                 MarkdownNode(node = child, content = content, onClickLink = onClickLink)
@@ -571,13 +588,14 @@ private fun MarkdownInlineLink(
         text = linkText,
         color = LegadoTheme.colorScheme.primary,
         textDecoration = TextDecoration.Underline,
-        modifier = modifier.clickable {
+        modifier =
+        modifier.clickable {
             if (onClickLink != null) {
                 onClickLink(linkDest)
             } else {
                 context.startActivity(Intent(Intent.ACTION_VIEW, linkDest.toUri()))
             }
-        }
+        },
     )
 }
 
@@ -612,18 +630,20 @@ private fun MarkdownCodeBlock(
     val canCollapse = codeLines.size > collapsedLines
 
     Column(
-        modifier = modifier
+        modifier =
+        modifier
             .fillMaxWidth()
             .padding(vertical = 4.dp)
             .clip(RoundedCornerShape(8.dp))
             .background(LegadoTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
             .border(
                 BorderStroke(0.5.dp, LegadoTheme.colorScheme.outlineVariant),
-                RoundedCornerShape(8.dp)
-            )
+                RoundedCornerShape(8.dp),
+            ),
     ) {
         Row(
-            modifier = Modifier
+            modifier =
+            Modifier
                 .fillMaxWidth()
                 .background(LegadoTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f))
                 .padding(horizontal = 12.dp, vertical = 4.dp),
@@ -640,29 +660,32 @@ private fun MarkdownCodeBlock(
             Icon(
                 painter = painterResource(R.drawable.ic_copy),
                 contentDescription = null,
-                modifier = Modifier
+                modifier =
+                Modifier
                     .clip(RoundedCornerShape(4.dp))
                     .clickable {
                         val clip = android.content.ClipData.newPlainText("code", code)
                         clipboardManager.setPrimaryClip(clip)
-                    }
-                    .padding(4.dp)
+                    }.padding(4.dp)
                     .size(16.dp),
                 tint = LegadoTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
             )
         }
         Row(
-            modifier = Modifier.then(
-                if (true) Modifier else Modifier.horizontalScroll(scrollState)
-            )
+            modifier =
+            Modifier.then(
+                if (true) Modifier else Modifier.horizontalScroll(scrollState),
+            ),
         ) {
             val displayCode = if (isExpanded) code else codeLines.take(collapsedLines).joinToString("\n")
             AppText(
                 text = displayCode,
-                style = LegadoTheme.typography.bodySmall.copy(
+                style =
+                LegadoTheme.typography.bodySmall.copy(
                     fontFamily = FontFamily.Monospace,
                 ),
-                modifier = Modifier
+                modifier =
+                Modifier
                     .weight(1f)
                     .padding(horizontal = 12.dp, vertical = 8.dp),
             )
@@ -672,7 +695,8 @@ private fun MarkdownCodeBlock(
                 text = if (isExpanded) "▲ 收起" else "▼ 展开 (${codeLines.size} 行)",
                 style = LegadoTheme.typography.labelSmall,
                 color = LegadoTheme.colorScheme.primary,
-                modifier = Modifier
+                modifier =
+                Modifier
                     .fillMaxWidth()
                     .clickable { isExpanded = !isExpanded }
                     .padding(vertical = 4.dp)
@@ -694,26 +718,31 @@ private fun MarkdownTable(
     val columnCount = headerNode?.children?.count { it.type == GFMTokenTypes.CELL } ?: 0
     if (columnCount == 0) return
 
-    val headerCells = headerNode?.children
-        ?.filter { it.type == GFMTokenTypes.CELL }
-        ?.map { it.getTextInNode(content).trim() } ?: emptyList()
+    val headerCells =
+        headerNode
+            ?.children
+            ?.filter { it.type == GFMTokenTypes.CELL }
+            ?.map { it.getTextInNode(content).trim() } ?: emptyList()
 
-    val rows = rowNodes.map { rowNode ->
-        rowNode.children.filter { it.type == GFMTokenTypes.CELL }.map { it.getTextInNode(content).trim() }
-    }
+    val rows =
+        rowNodes.map { rowNode ->
+            rowNode.children.filter { it.type == GFMTokenTypes.CELL }.map { it.getTextInNode(content).trim() }
+        }
 
     Column(
-        modifier = modifier
+        modifier =
+        modifier
             .padding(vertical = 8.dp)
             .clip(RoundedCornerShape(8.dp))
             .border(
                 BorderStroke(0.5.dp, LegadoTheme.colorScheme.outlineVariant),
-                RoundedCornerShape(8.dp)
-            )
+                RoundedCornerShape(8.dp),
+            ),
     ) {
         // Header
         Row(
-            modifier = Modifier
+            modifier =
+            Modifier
                 .fillMaxWidth()
                 .background(LegadoTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f))
                 .padding(horizontal = 8.dp, vertical = 6.dp),
@@ -732,13 +761,16 @@ private fun MarkdownTable(
         // Rows
         rows.forEachIndexed { index, row ->
             Row(
-                modifier = Modifier
+                modifier =
+                Modifier
                     .fillMaxWidth()
                     .background(
-                        if (index % 2 == 0) LegadoTheme.colorScheme.surface
-                        else LegadoTheme.colorScheme.surfaceVariant.copy(alpha = 0.15f)
-                    )
-                    .padding(horizontal = 8.dp, vertical = 4.dp),
+                        if (index % 2 == 0) {
+                            LegadoTheme.colorScheme.surface
+                        } else {
+                            LegadoTheme.colorScheme.surfaceVariant.copy(alpha = 0.15f)
+                        },
+                    ).padding(horizontal = 8.dp, vertical = 4.dp),
             ) {
                 row.forEach { cell ->
                     AppText(
@@ -766,7 +798,6 @@ private fun androidx.compose.ui.text.AnnotatedString.Builder.appendMarkdownInlin
         node is LeafASTNode -> {
             append(node.getTextInNode(content))
         }
-
         node.type == MarkdownElementTypes.EMPH -> {
             withStyle(SpanStyle(fontStyle = FontStyle.Italic)) {
                 node.children.trimSurrounding(MarkdownTokenTypes.EMPH, 1).fastForEach {
@@ -774,7 +805,6 @@ private fun androidx.compose.ui.text.AnnotatedString.Builder.appendMarkdownInlin
                 }
             }
         }
-
         node.type == MarkdownElementTypes.STRONG -> {
             withStyle(SpanStyle(fontWeight = FontWeight.SemiBold)) {
                 node.children.trimSurrounding(MarkdownTokenTypes.EMPH, 2).fastForEach {
@@ -782,7 +812,6 @@ private fun androidx.compose.ui.text.AnnotatedString.Builder.appendMarkdownInlin
                 }
             }
         }
-
         node.type == GFMElementTypes.STRIKETHROUGH -> {
             withStyle(SpanStyle(textDecoration = TextDecoration.LineThrough)) {
                 node.children.trimSurrounding(GFMTokenTypes.TILDE, 2).fastForEach {
@@ -790,18 +819,19 @@ private fun androidx.compose.ui.text.AnnotatedString.Builder.appendMarkdownInlin
                 }
             }
         }
-
         node.type == MarkdownElementTypes.INLINE_LINK -> {
             val linkDest = node.findChildOfTypeRecursive(MarkdownElementTypes.LINK_DESTINATION)?.getTextInNode(content) ?: ""
-            val linkText = node.findChildOfTypeRecursive(MarkdownElementTypes.LINK_TEXT)?.getTextInNode(content)
-                ?.trim { it == '[' || it == ']' } ?: linkDest
+            val linkText =
+                node
+                    .findChildOfTypeRecursive(MarkdownElementTypes.LINK_TEXT)
+                    ?.getTextInNode(content)
+                    ?.trim { it == '[' || it == ']' } ?: linkDest
             withLink(LinkAnnotation.Url(linkDest)) {
                 withStyle(SpanStyle(color = colorScheme.primary, textDecoration = TextDecoration.Underline)) {
                     append(linkText)
                 }
             }
         }
-
         node.type == MarkdownElementTypes.AUTOLINK -> {
             val link = node.children.trimSurrounding(MarkdownTokenTypes.LT, 1).trimSurrounding(MarkdownTokenTypes.GT, 1)
             link.fastForEach { l ->
@@ -812,7 +842,6 @@ private fun androidx.compose.ui.text.AnnotatedString.Builder.appendMarkdownInlin
                 }
             }
         }
-
         node.type == MarkdownElementTypes.CODE_SPAN -> {
             val code = node.getTextInNode(content).trim('`')
             withStyle(
@@ -820,21 +849,19 @@ private fun androidx.compose.ui.text.AnnotatedString.Builder.appendMarkdownInlin
                     fontFamily = FontFamily.Monospace,
                     fontSize = 0.9.em,
                     color = colorScheme.primary,
-                )
+                ),
             ) {
                 append(' ')
                 append(code)
                 append(' ')
             }
         }
-
         node.type == GFMElementTypes.INLINE_MATH -> {
             val formula = node.getTextInNode(content)
             withStyle(SpanStyle(fontFamily = FontFamily.Monospace, fontSize = 0.95.em)) {
                 append(formula)
             }
         }
-
         node.type == GFMTokenTypes.GFM_AUTOLINK -> {
             val link = node.getTextInNode(content)
             withLink(LinkAnnotation.Url(link)) {
@@ -843,7 +870,6 @@ private fun androidx.compose.ui.text.AnnotatedString.Builder.appendMarkdownInlin
                 }
             }
         }
-
         else -> {
             node.children.fastForEach { child ->
                 appendMarkdownInline(child, content, colorScheme, onClickLink)
@@ -854,9 +880,7 @@ private fun androidx.compose.ui.text.AnnotatedString.Builder.appendMarkdownInlin
 
 // ---- Utility extensions ----
 
-private fun ASTNode.getTextInNode(text: String): String {
-    return text.substring(startOffset, endOffset)
-}
+private fun ASTNode.getTextInNode(text: String): String = text.substring(startOffset, endOffset)
 
 private fun ASTNode.nextSibling(): ASTNode? {
     val siblings = this.parent?.children ?: return null
@@ -877,14 +901,23 @@ private fun ASTNode.findChildOfTypeRecursive(vararg types: IElementType): ASTNod
     return null
 }
 
-private fun List<ASTNode>.trimSurrounding(type: IElementType, size: Int): List<ASTNode> {
+private fun List<ASTNode>.trimSurrounding(
+    type: IElementType,
+    size: Int,
+): List<ASTNode> {
     if (isEmpty() || size <= 0) return this
     var start = 0
     var end = this.size
     var trimmed = 0
-    while (start < end && trimmed < size && this[start].type == type) { start++; trimmed++ }
+    while (start < end && trimmed < size && this[start].type == type) {
+        start++
+        trimmed++
+    }
     trimmed = 0
-    while (end > start && trimmed < size && this[end - 1].type == type) { end--; trimmed++ }
+    while (end > start && trimmed < size && this[end - 1].type == type) {
+        end--
+        trimmed++
+    }
     return this.subList(start, end)
 }
 

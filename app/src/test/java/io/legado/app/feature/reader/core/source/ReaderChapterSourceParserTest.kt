@@ -7,9 +7,14 @@ import org.junit.Test
 class ReaderChapterSourceParserTest {
     @Test
     fun titleCanBeShownAfterHiddenLoadWithoutChangingBodyAnchors() {
-        val source = ReaderChapterSourceParser.parse(
-            2, "章名\n副题", listOf("甲<img src=\"a.jpg\">乙", "后段"), false, true,
-        )
+        val source =
+            ReaderChapterSourceParser.parse(
+                2,
+                "章名\n副题",
+                listOf("甲<img src=\"a.jpg\">乙", "后段"),
+                false,
+                true,
+            )
         val shown = source.withTitleVisibility(true)
         val titles = shown.blocks.take(2).filterIsInstance<ReaderChapterSourceBlock.Text>()
         assertEquals(listOf("章名", "副题"), titles.map { it.value })
@@ -23,13 +28,14 @@ class ReaderChapterSourceParserTest {
 
     @Test
     fun parsesMixedTextImagesAndSpecialBlocksWithStablePositions() {
-        val source = ReaderChapterSourceParser.parse(
-            chapterIndex = 2,
-            title = "章名",
-            paragraphs = listOf("甲<img src=\"a.jpg\">乙", "[newpage]", "<usehtml><b>丙</b></usehtml>"),
-            includeTitle = true,
-            adaptSpecialStyle = true,
-        )
+        val source =
+            ReaderChapterSourceParser.parse(
+                chapterIndex = 2,
+                title = "章名",
+                paragraphs = listOf("甲<img src=\"a.jpg\">乙", "[newpage]", "<usehtml><b>丙</b></usehtml>"),
+                includeTitle = true,
+                adaptSpecialStyle = true,
+            )
         assertTrue((source.blocks.first() as ReaderChapterSourceBlock.Text).isTitle)
         val body = source.blocks.drop(1)
         val paragraph = body[0] as ReaderChapterSourceBlock.Paragraph
@@ -49,9 +55,14 @@ class ReaderChapterSourceParserTest {
 
     @Test
     fun htmlUsesRenderedCharacterLengthForFollowingPositions() {
-        val source = ReaderChapterSourceParser.parse(
-            0, "", listOf("<usehtml><b>甲</b>&amp;乙<img src=\"x\"></usehtml>", "后"), false, true,
-        )
+        val source =
+            ReaderChapterSourceParser.parse(
+                0,
+                "",
+                listOf("<usehtml><b>甲</b>&amp;乙<img src=\"x\"></usehtml>", "后"),
+                false,
+                true,
+            )
         val html = source.blocks[0] as ReaderChapterSourceBlock.Html
         val following = source.blocks[1] as ReaderChapterSourceBlock.Paragraph
         assertEquals(4, html.semanticLength)

@@ -3,8 +3,9 @@ package io.legado.app.utils.canvasrecorder.pools
 import android.graphics.Canvas
 import androidx.core.util.Pools
 
-class CanvasPool(size: Int) {
-
+class CanvasPool(
+    size: Int,
+) {
     private val pool = Pools.SynchronizedPool<Canvas>(size)
 
     fun obtain(): Canvas {
@@ -17,5 +18,4 @@ class CanvasPool(size: Int) {
         canvas.restoreToCount(1)
         pool.release(canvas)
     }
-
 }

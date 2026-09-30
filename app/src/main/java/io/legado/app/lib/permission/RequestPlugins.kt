@@ -1,7 +1,6 @@
 package io.legado.app.lib.permission
 
 internal object RequestPlugins {
-
     @Volatile
     var sRequestCallback: OnRequestPermissionsResultCallback? = null
 
@@ -15,6 +14,4 @@ internal object RequestPlugins {
     fun setOnPermissionsResultCallback(callback: OnPermissionsResultCallback) {
         sResultCallback = callback
     }
-
-
 }

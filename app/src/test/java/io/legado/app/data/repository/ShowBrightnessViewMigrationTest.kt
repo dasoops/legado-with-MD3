@@ -11,7 +11,6 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class ShowBrightnessViewMigrationTest {
-
     private val booleanKey = booleanPreferencesKey(PreferKey.showBrightnessView)
     private val stringKey = stringPreferencesKey(PreferKey.showBrightnessView)
 

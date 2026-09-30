@@ -74,9 +74,10 @@ fun ReorderableConfigList(
 ) {
     var entries by remember(initialEntries) { mutableStateOf(initialEntries) }
     val listState = rememberLazyListState()
-    val reorderState = rememberReorderableLazyListState(listState) { from, to ->
-        entries = entries.toMutableList().apply { add(to.index, removeAt(from.index)) }
-    }
+    val reorderState =
+        rememberReorderableLazyListState(listState) { from, to ->
+            entries = entries.toMutableList().apply { add(to.index, removeAt(from.index)) }
+        }
 
     Column(modifier = modifier.fillMaxWidth()) {
         LazyColumn(
@@ -100,20 +101,22 @@ fun ReorderableConfigList(
                             },
                             onSelectIcon = onSelectIcon?.let { { it(entry.id) } },
                             onClearIcon = onClearIcon?.let { { it(entry.id) } },
-                            dragHandleModifier = Modifier
+                            dragHandleModifier =
+                            Modifier
                                 .reorderAccessibility(
                                     index = index,
                                     itemCount = entries.size,
-                                    description = stringResource(
+                                    description =
+                                    stringResource(
                                         R.string.a11y_reorder_named,
                                         entry.label,
                                     ),
                                 ) { from, to ->
-                                    entries = entries.toMutableList().apply {
-                                        add(to, removeAt(from))
-                                    }
-                                }
-                                .draggableHandle(),
+                                    entries =
+                                        entries.toMutableList().apply {
+                                            add(to, removeAt(from))
+                                        }
+                                }.draggableHandle(),
                         )
                     }
                 }
@@ -146,7 +149,8 @@ fun ConfigListEntryRow(
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(4.dp),
-        modifier = Modifier
+        modifier =
+        Modifier
             .fillMaxWidth()
             .padding(horizontal = 12.dp, vertical = 8.dp),
     ) {
@@ -177,7 +181,8 @@ fun ConfigListEntryRow(
         }
 
         Column(
-            modifier = Modifier
+            modifier =
+            Modifier
                 .weight(1f)
                 .padding(end = 12.dp),
         ) {
@@ -210,7 +215,7 @@ fun ConfigListEntryRow(
                     SmallPlainButton(
                         onClick = onClearIcon,
                         icon = Icons.Default.Close,
-                        contentDescription = stringResource(R.string.delete)
+                        contentDescription = stringResource(R.string.delete),
                     )
                 } else {
                     SmallTonalButton(
@@ -224,13 +229,15 @@ fun ConfigListEntryRow(
             onToggleEnabled?.let { toggle ->
                 SmallOutlinedButton(
                     onClick = toggle,
-                    icon = if (entry.enabled) {
+                    icon =
+                    if (entry.enabled) {
                         Icons.Default.Visibility
                     } else {
                         Icons.Default.VisibilityOff
                     },
-                    contentDescription = stringResource(
-                        if (entry.enabled) R.string.disable_selection else R.string.enable_selection
+                    contentDescription =
+                    stringResource(
+                        if (entry.enabled) R.string.disable_selection else R.string.enable_selection,
                     ),
                 )
             }
@@ -244,7 +251,7 @@ fun ConfigListEntryRow(
                 Icons.Default.Menu,
                 contentDescription = null,
                 modifier = Modifier.size(24.dp),
-                tint = LegadoTheme.colorScheme.onSurfaceVariant
+                tint = LegadoTheme.colorScheme.onSurfaceVariant,
             )
         }
     }
@@ -261,12 +268,14 @@ private fun List<ConfigListEntry>.toggleEnabled(
         return toMutableList().apply { set(index, toggled) }
     }
     val remaining = toMutableList().apply { removeAt(index) }
-    val insertIndex = if (toggled.enabled) {
-        remaining.indexOfLast { it.enabled } + 1
-    } else {
-        remaining.indexOfFirst { !it.enabled }
-            .takeIf { it >= 0 }
-            ?: remaining.size
-    }
+    val insertIndex =
+        if (toggled.enabled) {
+            remaining.indexOfLast { it.enabled } + 1
+        } else {
+            remaining
+                .indexOfFirst { !it.enabled }
+                .takeIf { it >= 0 }
+                ?: remaining.size
+        }
     return remaining.apply { add(insertIndex.coerceIn(0, size), toggled) }
 }

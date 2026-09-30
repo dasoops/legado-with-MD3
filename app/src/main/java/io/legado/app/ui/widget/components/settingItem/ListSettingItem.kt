@@ -23,36 +23,37 @@ fun DropdownListSettingItem(
     entryValues: Array<String>,
     description: String? = null,
     imageVector: ImageVector? = null,
-    onValueChange: (String) -> Unit
+    onValueChange: (String) -> Unit,
 ) {
     val composeEngine = LegadoTheme.composeEngine
     SplicedColumnDivider()
 
     if (ThemeResolver.isMiuixEngine(composeEngine)) {
         val selectedIndex = entryValues.indexOf(selectedValue).coerceAtLeast(0)
-        val spinnerItems = displayEntries.map { display ->
-            DropdownItem(title = display)
-        }
+        val spinnerItems =
+            displayEntries.map { display ->
+                DropdownItem(title = display)
+            }
 
         OverlaySpinnerPreference(
             title = title,
             summary = description,
             items = spinnerItems,
             selectedIndex = selectedIndex,
-            startAction = imageVector?.let { icon ->
+            startAction =
+            imageVector?.let { icon ->
                 {
                     Icon(
                         imageVector = icon,
-                        contentDescription = null
+                        contentDescription = null,
                     )
                 }
             },
             onSelectedIndexChange = { index ->
                 onValueChange(entryValues[index])
-            }
+            },
         )
     } else {
-
         val currentEntry =
             displayEntries.getOrNull(entryValues.indexOf(selectedValue)) ?: selectedValue
 
@@ -70,18 +71,21 @@ fun DropdownListSettingItem(
                             onValueChange(entryValues[index])
                             onDismiss()
                         },
-                        trailingIcon = if (selectedValue == entryValues[index]) {
+                        trailingIcon =
+                        if (selectedValue == entryValues[index]) {
                             {
                                 Icon(
                                     Icons.Default.Check,
                                     contentDescription = null,
-                                    modifier = Modifier.size(18.dp)
+                                    modifier = Modifier.size(18.dp),
                                 )
                             }
-                        } else null
+                        } else {
+                            null
+                        },
                     )
                 }
-            }
+            },
         )
     }
 }

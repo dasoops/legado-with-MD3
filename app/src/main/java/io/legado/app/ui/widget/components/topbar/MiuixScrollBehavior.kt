@@ -5,7 +5,6 @@ import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import top.yukonga.miuix.kmp.basic.ScrollBehavior
 
-
 interface GlassTopAppBarScrollBehavior {
     // 滚动连接器
     val nestedScrollConnection: NestedScrollConnection
@@ -16,7 +15,7 @@ interface GlassTopAppBarScrollBehavior {
 
 @OptIn(ExperimentalMaterial3Api::class)
 class M3GlassScrollBehavior(
-    val m3Behavior: TopAppBarScrollBehavior
+    val m3Behavior: TopAppBarScrollBehavior,
 ) : GlassTopAppBarScrollBehavior {
     override val nestedScrollConnection: NestedScrollConnection
         get() = m3Behavior.nestedScrollConnection
@@ -26,7 +25,7 @@ class M3GlassScrollBehavior(
 }
 
 class MiuixGlassScrollBehavior(
-    val miuixBehavior: ScrollBehavior
+    val miuixBehavior: ScrollBehavior,
 ) : GlassTopAppBarScrollBehavior {
     override val nestedScrollConnection: NestedScrollConnection
         get() = miuixBehavior.nestedScrollConnection

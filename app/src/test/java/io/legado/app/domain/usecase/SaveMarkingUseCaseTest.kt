@@ -16,7 +16,6 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class SaveMarkingUseCaseTest {
-
     private val bookName = "书名"
     private val bookAuthor = "作者"
     private val bookUrl = "book-url"
@@ -59,14 +58,30 @@ class SaveMarkingUseCaseTest {
         val gateway = FakeBookMarkingGateway()
         val useCase = SaveMarkingUseCase(gateway)
 
-        val first = useCase.save(
-            bookName, bookAuthor, bookUrl, 2, 100, "看见桌上的信",
-            TextProcessStyle(underlineMode = 1), "第三章", "旧备注",
-        )
-        val second = useCase.save(
-            bookName, bookAuthor, bookUrl, 2, 100, "看见桌上的信",
-            TextProcessStyle(bgColor = 0x33FFD54F.toInt()), "第三章", "新备注",
-        )
+        val first =
+            useCase.save(
+                bookName,
+                bookAuthor,
+                bookUrl,
+                2,
+                100,
+                "看见桌上的信",
+                TextProcessStyle(underlineMode = 1),
+                "第三章",
+                "旧备注",
+            )
+        val second =
+            useCase.save(
+                bookName,
+                bookAuthor,
+                bookUrl,
+                2,
+                100,
+                "看见桌上的信",
+                TextProcessStyle(bgColor = 0x33FFD54F.toInt()),
+                "第三章",
+                "新备注",
+            )
 
         // 保留 id 与 createdAt，只改 style/note —— 同锚点只有一条标记
         assertEquals(first.id, second.id)
@@ -82,8 +97,15 @@ class SaveMarkingUseCaseTest {
         val gateway = FakeBookMarkingGateway()
         val useCase = SaveMarkingUseCase(gateway)
         useCase.save(
-            bookName, bookAuthor, bookUrl, 2, 100, "看见桌上的信",
-            TextProcessStyle(underlineMode = 2), "第三章", "备注",
+            bookName,
+            bookAuthor,
+            bookUrl,
+            2,
+            100,
+            "看见桌上的信",
+            TextProcessStyle(underlineMode = 2),
+            "第三章",
+            "备注",
         )
 
         val found = useCase.find(bookName, bookAuthor, 2, 100, "看见桌上的信")
@@ -98,10 +120,18 @@ class SaveMarkingUseCaseTest {
     fun `findById 按 id 取标记，供编辑模式预填`() = runBlocking {
         val gateway = FakeBookMarkingGateway()
         val useCase = SaveMarkingUseCase(gateway)
-        val mark = useCase.save(
-            bookName, bookAuthor, bookUrl, 2, 100, "看见桌上的信",
-            TextProcessStyle(underlineMode = 1), "第三章", "备注",
-        )
+        val mark =
+            useCase.save(
+                bookName,
+                bookAuthor,
+                bookUrl,
+                2,
+                100,
+                "看见桌上的信",
+                TextProcessStyle(underlineMode = 1),
+                "第三章",
+                "备注",
+            )
 
         val found = useCase.findById(mark.id)
         assertEquals(mark.id, found?.id)
@@ -113,10 +143,16 @@ class SaveMarkingUseCaseTest {
     fun `delete 只删 book_marks 行`() = runBlocking {
         val gateway = FakeBookMarkingGateway()
         val useCase = SaveMarkingUseCase(gateway)
-        val mark = useCase.save(
-            bookName, bookAuthor, bookUrl, 2, 100, "看见桌上的信",
-            TextProcessStyle(underlineMode = 1),
-        )
+        val mark =
+            useCase.save(
+                bookName,
+                bookAuthor,
+                bookUrl,
+                2,
+                100,
+                "看见桌上的信",
+                TextProcessStyle(underlineMode = 1),
+            )
 
         useCase.delete(mark.id)
 
@@ -133,13 +169,23 @@ class SaveMarkingUseCaseTest {
         coroutineScope {
             launch {
                 useCase.save(
-                    bookName, bookAuthor, bookUrl, 2, 100, "看见桌上的信",
+                    bookName,
+                    bookAuthor,
+                    bookUrl,
+                    2,
+                    100,
+                    "看见桌上的信",
                     TextProcessStyle(underlineMode = 1),
                 )
             }
             launch {
                 useCase.save(
-                    bookName, bookAuthor, bookUrl, 2, 100, "看见桌上的信",
+                    bookName,
+                    bookAuthor,
+                    bookUrl,
+                    2,
+                    100,
+                    "看见桌上的信",
                     TextProcessStyle(underlineMode = 2),
                 )
             }
@@ -157,7 +203,12 @@ class SaveMarkingUseCaseTest {
         var threw = false
         try {
             useCase.save(
-                bookName, bookAuthor, bookUrl, 2, 100, "   ",
+                bookName,
+                bookAuthor,
+                bookUrl,
+                2,
+                100,
+                "   ",
                 TextProcessStyle(),
             )
         } catch (_: IllegalArgumentException) {
@@ -172,17 +223,18 @@ class SaveMarkingUseCaseTest {
         val gateway = FakeBookMarkingGateway()
         val useCase = SaveMarkingUseCase(gateway)
 
-        val mark = useCase.save(
-            bookName = bookName,
-            bookAuthor = bookAuthor,
-            bookUrl = bookUrl,
-            chapterIndex = 2,
-            chapterPosition = 100,
-            selectedText = "看见桌上的信",
-            style = TextProcessStyle(),
-            contextBefore = "她停在门前。",
-            contextAfter = "信封已经泛黄。",
-        )
+        val mark =
+            useCase.save(
+                bookName = bookName,
+                bookAuthor = bookAuthor,
+                bookUrl = bookUrl,
+                chapterIndex = 2,
+                chapterPosition = 100,
+                selectedText = "看见桌上的信",
+                style = TextProcessStyle(),
+                contextBefore = "她停在门前。",
+                contextAfter = "信封已经泛黄。",
+            )
 
         val anchor = GSON.fromJsonObject<TextProcessAnchor>(mark.anchorJson).getOrNull()!!
         assertEquals("她停在门前。", anchor.contextBefore)
@@ -209,22 +261,23 @@ class SaveMarkingUseCaseTest {
             bookName: String,
             bookAuthor: String,
             chapterIndex: Int?,
-        ): List<BookMarking> =
-            marks.filter {
-                it.bookName == bookName &&
-                        it.bookAuthor == bookAuthor &&
-                        (chapterIndex == null || it.chapterIndex == chapterIndex)
-            }
+        ): List<BookMarking> = marks.filter {
+            it.bookName == bookName &&
+                it.bookAuthor == bookAuthor &&
+                (chapterIndex == null || it.chapterIndex == chapterIndex)
+        }
 
-        override suspend fun getById(id: String): BookMarking? =
-            marks.firstOrNull { it.id == id }
+        override suspend fun getById(id: String): BookMarking? = marks.firstOrNull { it.id == id }
 
         override suspend fun upsert(bookMarking: BookMarking) {
             marks.removeAll { it.id == bookMarking.id }
             marks.add(bookMarking)
         }
 
-        override suspend fun setEnabled(id: String, enabled: Boolean) {
+        override suspend fun setEnabled(
+            id: String,
+            enabled: Boolean,
+        ) {
             marks.indexOfFirst { it.id == id }.takeIf { it >= 0 }?.let { i ->
                 marks[i] = marks[i].copy(enabled = enabled)
             }

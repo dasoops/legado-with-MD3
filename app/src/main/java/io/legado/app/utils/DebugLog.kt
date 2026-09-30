@@ -4,14 +4,20 @@ import android.util.Log
 import io.legado.app.BuildConfig
 
 object DebugLog {
-
-    fun e(tag: String, throwable: Throwable) {
+    fun e(
+        tag: String,
+        throwable: Throwable,
+    ) {
         if (BuildConfig.DEBUG) {
             Log.e(tag, throwable.stackTraceToString())
         }
     }
 
-    fun e(tag: String, msg: String, throwable: Throwable? = null) {
+    fun e(
+        tag: String,
+        msg: String,
+        throwable: Throwable? = null,
+    ) {
         if (BuildConfig.DEBUG) {
             if (throwable == null) {
                 Log.e(tag, msg)
@@ -21,7 +27,11 @@ object DebugLog {
         }
     }
 
-    fun d(tag: String, msg: String, throwable: Throwable? = null) {
+    fun d(
+        tag: String,
+        msg: String,
+        throwable: Throwable? = null,
+    ) {
         if (BuildConfig.DEBUG) {
             if (throwable == null) {
                 Log.d(tag, msg)
@@ -31,7 +41,11 @@ object DebugLog {
         }
     }
 
-    fun i(tag: String, msg: String, throwable: Throwable? = null) {
+    fun i(
+        tag: String,
+        msg: String,
+        throwable: Throwable? = null,
+    ) {
         if (BuildConfig.DEBUG) {
             if (throwable == null) {
                 Log.i(tag, msg)
@@ -41,7 +55,11 @@ object DebugLog {
         }
     }
 
-    fun w(tag: String, msg: String, throwable: Throwable? = null) {
+    fun w(
+        tag: String,
+        msg: String,
+        throwable: Throwable? = null,
+    ) {
         if (BuildConfig.DEBUG) {
             if (throwable == null) {
                 Log.w(tag, msg)
@@ -50,5 +68,4 @@ object DebugLog {
             }
         }
     }
-
 }

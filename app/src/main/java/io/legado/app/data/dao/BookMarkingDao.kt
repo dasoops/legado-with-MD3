@@ -9,12 +9,11 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface BookMarkingDao {
-
     @get:Query(
         """
         select * from book_marks
         order by bookName collate localized, bookAuthor collate localized, chapterIndex, createdAt
-    """
+    """,
     )
     val all: List<BookMarking>
 
@@ -22,7 +21,7 @@ interface BookMarkingDao {
         """
         select * from book_marks
         order by bookName collate localized, bookAuthor collate localized, chapterIndex, createdAt
-        """
+        """,
     )
     fun flowAll(): Flow<List<BookMarking>>
 
@@ -40,9 +39,12 @@ interface BookMarkingDao {
         where bookUrl = :bookUrl
           and (:chapterIndex is null or chapterIndex is null or chapterIndex = :chapterIndex)
         order by createdAt
-        """
+        """,
     )
-    fun getForChapterSync(bookUrl: String, chapterIndex: Int?): List<BookMarking>
+    fun getForChapterSync(
+        bookUrl: String,
+        chapterIndex: Int?,
+    ): List<BookMarking>
 
     /** 按「书名+作者」查（含跨源全部标记），供保存去重/定位；chapterIndex 可空。 */
     @Query(
@@ -51,12 +53,12 @@ interface BookMarkingDao {
         where bookName = :bookName and bookAuthor = :bookAuthor
           and (:chapterIndex is null or chapterIndex is null or chapterIndex = :chapterIndex)
         order by createdAt
-        """
+        """,
     )
     suspend fun getByBook(
         bookName: String,
         bookAuthor: String,
-        chapterIndex: Int?
+        chapterIndex: Int?,
     ): List<BookMarking>
 
     /** 按「书名+作者」流式订阅全部章节的标记，供目录 Sheet 笔记页跨源展示。 */
@@ -65,9 +67,12 @@ interface BookMarkingDao {
         select * from book_marks
         where bookName = :bookName and bookAuthor = :bookAuthor
         order by chapterIndex, createdAt
-        """
+        """,
     )
-    fun flowByBook(bookName: String, bookAuthor: String): Flow<List<BookMarking>>
+    fun flowByBook(
+        bookName: String,
+        bookAuthor: String,
+    ): Flow<List<BookMarking>>
 
     @Query("select * from book_marks where id = :id")
     suspend fun getById(id: String): BookMarking?
@@ -79,7 +84,7 @@ interface BookMarkingDao {
     suspend fun setEnabled(
         id: String,
         enabled: Boolean,
-        updatedAt: Long = System.currentTimeMillis()
+        updatedAt: Long = System.currentTimeMillis(),
     )
 
     @Query("delete from book_marks where id = :id")

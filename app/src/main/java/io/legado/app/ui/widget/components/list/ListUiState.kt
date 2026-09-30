@@ -11,7 +11,7 @@ interface ListUiState<T> {
 data class InteractionState(
     val isSearchMode: Boolean = false,
     val isUploading: Boolean = false,
-    val isLoading: Boolean = false
+    val isLoading: Boolean = false,
 )
 
 interface SelectableItem<T> {

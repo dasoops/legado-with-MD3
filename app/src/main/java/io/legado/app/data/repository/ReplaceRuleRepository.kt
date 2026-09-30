@@ -12,26 +12,15 @@ import kotlinx.coroutines.withContext
 class ReplaceRuleRepository(
     private val dao: ReplaceRuleDao,
 ) {
+    fun flowGroups(): Flow<List<String>> = dao.flowGroups().flowOn(Dispatchers.IO)
 
-    fun flowGroups(): Flow<List<String>> {
-        return dao.flowGroups().flowOn(Dispatchers.IO)
-    }
+    fun flowAll(): Flow<List<ReplaceRule>> = dao.flowAll().flowOn(Dispatchers.IO)
 
-    fun flowAll(): Flow<List<ReplaceRule>> {
-        return dao.flowAll().flowOn(Dispatchers.IO)
-    }
+    fun flowNoGroup(): Flow<List<ReplaceRule>> = dao.flowNoGroup().flowOn(Dispatchers.IO)
 
-    fun flowNoGroup(): Flow<List<ReplaceRule>> {
-        return dao.flowNoGroup().flowOn(Dispatchers.IO)
-    }
+    fun flowGroupSearch(key: String): Flow<List<ReplaceRule>> = dao.flowGroupSearch(key).flowOn(Dispatchers.IO)
 
-    fun flowGroupSearch(key: String): Flow<List<ReplaceRule>> {
-        return dao.flowGroupSearch(key).flowOn(Dispatchers.IO)
-    }
-
-    fun flowSearch(key: String): Flow<List<ReplaceRule>> {
-        return dao.flowSearch(key).flowOn(Dispatchers.IO)
-    }
+    fun flowSearch(key: String): Flow<List<ReplaceRule>> = dao.flowSearch(key).flowOn(Dispatchers.IO)
 
     suspend fun findById(id: Long): ReplaceRule? = withContext(Dispatchers.IO) {
         dao.findById(id)
@@ -47,7 +36,10 @@ class ReplaceRuleRepository(
         }
     }
 
-    suspend fun setEnabled(id: Long, enabled: Boolean) {
+    suspend fun setEnabled(
+        id: Long,
+        enabled: Boolean,
+    ) {
         withContext(Dispatchers.IO) {
             dao.updateEnabled(id, enabled)
         }
@@ -65,7 +57,10 @@ class ReplaceRuleRepository(
         }
     }
 
-    suspend fun toTop(rule: ReplaceRule, isDesc: Boolean = false) {
+    suspend fun toTop(
+        rule: ReplaceRule,
+        isDesc: Boolean = false,
+    ) {
         withContext(Dispatchers.IO) {
             if (isDesc) {
                 rule.order = dao.maxOrder + 1
@@ -76,7 +71,10 @@ class ReplaceRuleRepository(
         }
     }
 
-    suspend fun toBottom(rule: ReplaceRule, isDesc: Boolean = false) {
+    suspend fun toBottom(
+        rule: ReplaceRule,
+        isDesc: Boolean = false,
+    ) {
         withContext(Dispatchers.IO) {
             if (isDesc) {
                 rule.order = dao.minOrder - 1
@@ -110,14 +108,18 @@ class ReplaceRuleRepository(
         }
     }
 
-    suspend fun upGroup(oldGroup: String, newGroup: String?) {
+    suspend fun upGroup(
+        oldGroup: String,
+        newGroup: String?,
+    ) {
         withContext(Dispatchers.IO) {
             val sources = dao.getByGroup(oldGroup)
             sources.forEach { source ->
                 source.group?.splitNotBlank(",")?.toHashSet()?.let {
                     it.remove(oldGroup)
-                    if (!newGroup.isNullOrEmpty())
+                    if (!newGroup.isNullOrEmpty()) {
                         it.add(newGroup)
+                    }
                     source.group = TextUtils.join(",", it)
                 }
             }
@@ -142,74 +144,83 @@ class ReplaceRuleRepository(
         dao.clearGroups(groups)
     }
 
-    suspend fun enableByIds(ids: Set<Long>) =
-        withContext(Dispatchers.IO) {
-            if (ids.isEmpty()) return@withContext
-            dao.updateEnabled(ids.toList(), true)
-        }
+    suspend fun enableByIds(ids: Set<Long>) = withContext(Dispatchers.IO) {
+        if (ids.isEmpty()) return@withContext
+        dao.updateEnabled(ids.toList(), true)
+    }
 
-    suspend fun disableByIds(ids: Set<Long>) =
-        withContext(Dispatchers.IO) {
-            if (ids.isEmpty()) return@withContext
-            dao.updateEnabled(ids.toList(), false)
-        }
+    suspend fun disableByIds(ids: Set<Long>) = withContext(Dispatchers.IO) {
+        if (ids.isEmpty()) return@withContext
+        dao.updateEnabled(ids.toList(), false)
+    }
 
-    suspend fun deleteByIds(ids: Set<Long>) =
-        withContext(Dispatchers.IO) {
-            if (ids.isEmpty()) return@withContext
+    suspend fun deleteByIds(ids: Set<Long>) = withContext(Dispatchers.IO) {
+        if (ids.isEmpty()) return@withContext
 
-            val rules = dao.getByIds(ids)
-            dao.delete(*rules.toTypedArray())
-        }
+        val rules = dao.getByIds(ids)
+        dao.delete(*rules.toTypedArray())
+    }
 
-    suspend fun topByIds(ids: Set<Long>, isDesc: Boolean = false) =
-        withContext(Dispatchers.IO) {
-            if (ids.isEmpty()) return@withContext
-            val rules = dao.getByIds(ids)
-            if (isDesc) {
-                var maxOrder = dao.maxOrder
-                val updated = rules.map {
+    suspend fun topByIds(
+        ids: Set<Long>,
+        isDesc: Boolean = false,
+    ) = withContext(Dispatchers.IO) {
+        if (ids.isEmpty()) return@withContext
+        val rules = dao.getByIds(ids)
+        if (isDesc) {
+            var maxOrder = dao.maxOrder
+            val updated =
+                rules.map {
                     maxOrder++
                     it.copy(order = maxOrder)
                 }
-                dao.update(*updated.toTypedArray())
-            } else {
-                var minOrder = dao.minOrder
-                val updated = rules.map {
+            dao.update(*updated.toTypedArray())
+        } else {
+            var minOrder = dao.minOrder
+            val updated =
+                rules.map {
                     minOrder--
                     it.copy(order = minOrder)
                 }
-                dao.update(*updated.toTypedArray())
-            }
+            dao.update(*updated.toTypedArray())
         }
+    }
 
-    suspend fun bottomByIds(ids: Set<Long>, isDesc: Boolean = false) =
-        withContext(Dispatchers.IO) {
-            if (ids.isEmpty()) return@withContext
+    suspend fun bottomByIds(
+        ids: Set<Long>,
+        isDesc: Boolean = false,
+    ) = withContext(Dispatchers.IO) {
+        if (ids.isEmpty()) return@withContext
 
-            val rules = dao.getByIds(ids)
-            if (isDesc) {
-                var minOrder = dao.minOrder
-                val updated = rules.map {
+        val rules = dao.getByIds(ids)
+        if (isDesc) {
+            var minOrder = dao.minOrder
+            val updated =
+                rules.map {
                     minOrder--
                     it.copy(order = minOrder)
                 }
-                dao.update(*updated.toTypedArray())
-            } else {
-                var maxOrder = dao.maxOrder
-                val updated = rules.map {
+            dao.update(*updated.toTypedArray())
+        } else {
+            var maxOrder = dao.maxOrder
+            val updated =
+                rules.map {
                     maxOrder++
                     it.copy(order = maxOrder)
                 }
-                dao.update(*updated.toTypedArray())
-            }
+            dao.update(*updated.toTypedArray())
         }
+    }
 
     /**
      * 把 [draggedId] 规则移动到 [anchorId] 规则旁边（[afterAnchor] 为 true 时在其后，否则在其前）。
      * 列表顺序始终按 sortOrder 升序，移动后统一重写全部规则序号。
      */
-    suspend fun moveReplaceRule(draggedId: Long, anchorId: Long, afterAnchor: Boolean) {
+    suspend fun moveReplaceRule(
+        draggedId: Long,
+        anchorId: Long,
+        afterAnchor: Boolean,
+    ) {
         withContext(Dispatchers.IO) {
             val rules = dao.all
             val draggedIndex = rules.indexOfFirst { it.id == draggedId }
@@ -225,15 +236,18 @@ class ReplaceRuleRepository(
         }
     }
 
-    suspend fun moveOrder(currentRules: List<ReplaceRule>, isDesc: Boolean = false) {
+    suspend fun moveOrder(
+        currentRules: List<ReplaceRule>,
+        isDesc: Boolean = false,
+    ) {
         withContext(Dispatchers.IO) {
             val size = currentRules.size
-            val updatedRules = currentRules.mapIndexed { index, rule ->
-                val order = if (isDesc) size - index else index + 1
-                rule.copy(order = order)
-            }
+            val updatedRules =
+                currentRules.mapIndexed { index, rule ->
+                    val order = if (isDesc) size - index else index + 1
+                    rule.copy(order = order)
+                }
             dao.update(*updatedRules.toTypedArray())
         }
     }
-
 }

@@ -13,8 +13,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.legado.app.R
@@ -22,13 +22,13 @@ import io.legado.app.ui.theme.LegadoTheme
 import io.legado.app.ui.theme.adaptiveContentPadding
 import io.legado.app.ui.widget.components.AppScaffold
 import io.legado.app.ui.widget.components.SplicedColumnGroup
-import io.legado.app.ui.widget.components.settingItem.SwitchSettingItem
 import io.legado.app.ui.widget.components.settingItem.ClickableSettingItem
+import io.legado.app.ui.widget.components.settingItem.SwitchSettingItem
 import io.legado.app.ui.widget.components.topbar.GlassMediumFlexibleTopAppBar
 import io.legado.app.ui.widget.components.topbar.GlassTopAppBarDefaults
 import io.legado.app.ui.widget.components.topbar.TopBarNavigationButton
-import org.koin.androidx.compose.koinViewModel
 import kotlinx.coroutines.flow.collectLatest
+import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun LabConfigRouteScreen(
@@ -41,10 +41,11 @@ fun LabConfigRouteScreen(
         viewModel.effects.collectLatest { effect ->
             when (effect) {
                 is LabConfigEffect.SharePageEstimateDiagnostics -> {
-                    val sendIntent = Intent(Intent.ACTION_SEND).apply {
-                        putExtra(Intent.EXTRA_TEXT, effect.text)
-                        type = "text/plain"
-                    }
+                    val sendIntent =
+                        Intent(Intent.ACTION_SEND).apply {
+                            putExtra(Intent.EXTRA_TEXT, effect.text)
+                            type = "text/plain"
+                        }
                     context.startActivity(Intent.createChooser(sendIntent, shareTitle))
                 }
             }
@@ -78,7 +79,8 @@ fun LabConfigScreen(
     ) { paddingValues ->
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
-            contentPadding = adaptiveContentPadding(
+            contentPadding =
+            adaptiveContentPadding(
                 top = paddingValues.calculateTopPadding(),
                 bottom = 120.dp,
             ),
@@ -108,10 +110,12 @@ fun LabConfigScreen(
                 SplicedColumnGroup(title = stringResource(R.string.lab_diagnostics)) {
                     ClickableSettingItem(
                         title = stringResource(R.string.lab_page_estimate_diagnostics_title),
-                        description = stringResource(
-                            R.string.lab_page_estimate_diagnostics_summary
+                        description =
+                        stringResource(
+                            R.string.lab_page_estimate_diagnostics_summary,
                         ),
-                        option = stringResource(
+                        option =
+                        stringResource(
                             R.string.lab_page_estimate_diagnostics_count,
                             state.pageEstimateDiagnosticCount,
                         ),

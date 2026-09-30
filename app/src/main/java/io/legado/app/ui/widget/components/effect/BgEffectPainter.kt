@@ -3,16 +3,15 @@ package io.legado.app.ui.widget.components.effect
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.ui.graphics.Brush
-import top.yukonga.miuix.kmp.blur.RuntimeShader
-import top.yukonga.miuix.kmp.blur.asBrush
 import kotlin.math.cos
 import kotlin.math.sin
+import top.yukonga.miuix.kmp.blur.RuntimeShader
+import top.yukonga.miuix.kmp.blur.asBrush
 
 @RequiresApi(Build.VERSION_CODES.TIRAMISU)
 internal class BgEffectPainter(
     private val isOs3: Boolean = true,
 ) {
-
     val runtimeShader by lazy {
         val shaderCode = OS3_BG_FRAG
         RuntimeShader(shaderCode).also {
@@ -41,7 +40,6 @@ internal class BgEffectPainter(
     private var cachedPointsAnimPreset: BgEffectConfig.Config? = null
 
     companion object {
-
         private const val U_TRANSLATE_Y = 0f
         private const val U_ALPHA_MULTI = 1f
         private const val U_NOISE_SCALE = 1.5f
@@ -55,7 +53,10 @@ internal class BgEffectPainter(
         shader.setFloatUniform("uAlphaMulti", U_ALPHA_MULTI)
     }
 
-    fun updateResolution(width: Float, height: Float) {
+    fun updateResolution(
+        width: Float,
+        height: Float,
+    ) {
         if (resolution[0] == width && resolution[1] == height) return
         resolution[0] = width
         resolution[1] = height
@@ -68,7 +69,10 @@ internal class BgEffectPainter(
         runtimeShader.setFloatUniform("uAnimTime", animTime)
     }
 
-    fun updatePointsAnim(time: Float, preset: BgEffectConfig.Config) {
+    fun updatePointsAnim(
+        time: Float,
+        preset: BgEffectConfig.Config,
+    ) {
         if (cachedPointsAnimTime == time && cachedPointsAnimPreset === preset) return
 
         val offset = preset.pointOffset
@@ -88,7 +92,10 @@ internal class BgEffectPainter(
         cachedPointsAnimPreset = preset
     }
 
-    fun updateColors(preset: BgEffectConfig.Config, stage: Float) {
+    fun updateColors(
+        preset: BgEffectConfig.Config,
+        stage: Float,
+    ) {
         if (cachedColorsPreset === preset && cachedColorStage == stage) return
 
         val base = stage.toInt()
@@ -104,12 +111,14 @@ internal class BgEffectPainter(
         cachedColorStage = stage
     }
 
-    private fun colorsForCycleIndex(preset: BgEffectConfig.Config, index: Int): FloatArray =
-        when (index.mod(4)) {
-            1 -> preset.colors1
-            3 -> preset.colors3
-            else -> preset.colors2
-        }
+    private fun colorsForCycleIndex(
+        preset: BgEffectConfig.Config,
+        index: Int,
+    ): FloatArray = when (index.mod(4)) {
+        1 -> preset.colors1
+        3 -> preset.colors3
+        else -> preset.colors2
+    }
 
     fun updateBoundIfNeeded(
         logoHeight: Float,

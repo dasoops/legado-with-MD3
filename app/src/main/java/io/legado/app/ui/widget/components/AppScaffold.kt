@@ -32,9 +32,9 @@ import io.legado.app.ui.theme.LocalHazeState
 import io.legado.app.ui.theme.LocalTopBarBackdrop
 import io.legado.app.ui.theme.ThemeResolver
 import io.legado.app.ui.theme.responsiveHazeSource
-import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.basic.FabPosition as MiuixFabPosition
 import top.yukonga.miuix.kmp.basic.Scaffold as MiuixScaffold
+import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -58,7 +58,7 @@ fun AppScaffold(
      * 因此 WebView 类页面必须把两个采样源一起关掉。
      */
     disableContentSampling: Boolean = false,
-    content: @Composable (PaddingValues) -> Unit
+    content: @Composable (PaddingValues) -> Unit,
 ) {
     val isDark = LegadoTheme.isDark
     val configuration = LocalAppUiConfiguration.current
@@ -70,27 +70,31 @@ fun AppScaffold(
     val contentDrawsBehindBars =
         alwaysDrawBehindBars || themeSettings.enableBlur || themeSettings.enableProgressiveBlur
 
-    val containerColor = if (hasImageBg) {
-        Color.Transparent
-    } else {
-        LegadoTheme.colorScheme.background
-    }
+    val containerColor =
+        if (hasImageBg) {
+            Color.Transparent
+        } else {
+            LegadoTheme.colorScheme.background
+        }
 
-    val miuixContainerColor = if (hasImageBg) {
-        Color.Transparent
-    } else {
-        MiuixTheme.colorScheme.surface
-    }
+    val miuixContainerColor =
+        if (hasImageBg) {
+            Color.Transparent
+        } else {
+            MiuixTheme.colorScheme.surface
+        }
     val topBarBackdropBaseColor = LegadoTheme.colorScheme.background
-    val topBarBackgroundBackdrop = rememberLayerBackdrop {
-        drawRect(topBarBackdropBaseColor)
-        drawContent()
-    }
+    val topBarBackgroundBackdrop =
+        rememberLayerBackdrop {
+            drawRect(topBarBackdropBaseColor)
+            drawContent()
+        }
     val topBarContentBackdrop = rememberLayerBackdrop { drawContent() }
-    val topBarBackdrop = rememberCombinedBackdrop(
-        topBarBackgroundBackdrop,
-        topBarContentBackdrop
-    )
+    val topBarBackdrop =
+        rememberCombinedBackdrop(
+            topBarBackgroundBackdrop,
+            topBarContentBackdrop,
+        )
 
     CompositionLocalProvider(
         LocalHazeState provides if (themeSettings.enableBlur) hazeState else null,
@@ -98,22 +102,24 @@ fun AppScaffold(
     ) {
         when {
             ThemeResolver.isMiuixEngine(composeEngine) -> {
-                val miuixFabPosition = when (floatingActionButtonPosition) {
-                    FabPosition.End -> MiuixFabPosition.End
-                    FabPosition.Center -> MiuixFabPosition.Center
-                    else -> MiuixFabPosition.End
-                }
+                val miuixFabPosition =
+                    when (floatingActionButtonPosition) {
+                        FabPosition.End -> MiuixFabPosition.End
+                        FabPosition.Center -> MiuixFabPosition.Center
+                        else -> MiuixFabPosition.End
+                    }
                 Box(modifier = modifier.fillMaxSize()) {
                     Box(
-                        modifier = Modifier
+                        modifier =
+                        Modifier
                             .fillMaxSize()
                             .then(
                                 if (liquidGlassEnabled) {
                                     Modifier.layerBackdrop(topBarBackgroundBackdrop)
                                 } else {
                                     Modifier
-                                }
-                            )
+                                },
+                            ),
                     ) {
                         BackgroundImageContent(isDark = isDark, hazeState = hazeState)
                     }
@@ -127,57 +133,66 @@ fun AppScaffold(
                         floatingActionButton = floatingActionButton,
                         floatingActionButtonPosition = miuixFabPosition,
                         containerColor = miuixContainerColor,
-                        contentWindowInsets = contentWindowInsets
+                        contentWindowInsets = contentWindowInsets,
                     ) { paddingValues ->
-                        val scaffoldPadding = if (configuration.appShell.useFloatingBottomBar) {
-                            PaddingValues(top = paddingValues.calculateTopPadding())
-                        } else {
-                            paddingValues
-                        }
+                        val scaffoldPadding =
+                            if (configuration.appShell.useFloatingBottomBar) {
+                                PaddingValues(top = paddingValues.calculateTopPadding())
+                            } else {
+                                paddingValues
+                            }
                         Box(
-                            modifier = Modifier
+                            modifier =
+                            Modifier
                                 .fillMaxSize()
                                 .then(
                                     if (liquidGlassEnabled && !disableContentSampling) {
                                         Modifier.layerBackdrop(topBarContentBackdrop)
                                     } else {
                                         Modifier
-                                    }
-                                )
-                                .then(
-                                    if (!disableContentSampling) Modifier.responsiveHazeSource(
-                                        hazeState
-                                    )
-                                    else Modifier
-                                )
-                                .then(
-                                    if (contentDrawsBehindBars) Modifier
-                                    else Modifier
-                                        .padding(scaffoldPadding)
-                                        .consumeWindowInsets(scaffoldPadding)
-                                )
+                                    },
+                                ).then(
+                                    if (!disableContentSampling) {
+                                        Modifier.responsiveHazeSource(
+                                            hazeState,
+                                        )
+                                    } else {
+                                        Modifier
+                                    },
+                                ).then(
+                                    if (contentDrawsBehindBars) {
+                                        Modifier
+                                    } else {
+                                        Modifier
+                                            .padding(scaffoldPadding)
+                                            .consumeWindowInsets(scaffoldPadding)
+                                    },
+                                ),
                         ) {
                             content(
-                                if (contentDrawsBehindBars) scaffoldPadding
-                                else PaddingValues(0.dp)
+                                if (contentDrawsBehindBars) {
+                                    scaffoldPadding
+                                } else {
+                                    PaddingValues(0.dp)
+                                },
                             )
                         }
                     }
                 }
             }
-
             else -> {
                 Box(modifier = modifier.fillMaxSize()) {
                     Box(
-                        modifier = Modifier
+                        modifier =
+                        Modifier
                             .fillMaxSize()
                             .then(
                                 if (liquidGlassEnabled) {
                                     Modifier.layerBackdrop(topBarBackgroundBackdrop)
                                 } else {
                                     Modifier
-                                }
-                            )
+                                },
+                            ),
                     ) {
                         BackgroundImageContent(isDark = isDark, hazeState = hazeState)
                     }
@@ -192,39 +207,48 @@ fun AppScaffold(
                         floatingActionButtonPosition = floatingActionButtonPosition,
                         containerColor = containerColor,
                         contentColor = contentColor,
-                        contentWindowInsets = contentWindowInsets
+                        contentWindowInsets = contentWindowInsets,
                     ) { paddingValues ->
-                        val scaffoldPadding = if (configuration.appShell.useFloatingBottomBar) {
-                            PaddingValues(top = paddingValues.calculateTopPadding())
-                        } else {
-                            paddingValues
-                        }
+                        val scaffoldPadding =
+                            if (configuration.appShell.useFloatingBottomBar) {
+                                PaddingValues(top = paddingValues.calculateTopPadding())
+                            } else {
+                                paddingValues
+                            }
                         Box(
-                            modifier = Modifier
+                            modifier =
+                            Modifier
                                 .fillMaxSize()
                                 .then(
                                     if (liquidGlassEnabled && !disableContentSampling) {
                                         Modifier.layerBackdrop(topBarContentBackdrop)
                                     } else {
                                         Modifier
-                                    }
-                                )
-                                .then(
-                                    if (!disableContentSampling) Modifier.responsiveHazeSource(
-                                        hazeState
-                                    )
-                                    else Modifier
-                                )
-                                .then(
-                                    if (contentDrawsBehindBars) Modifier
-                                    else Modifier
-                                        .padding(scaffoldPadding)
-                                        .consumeWindowInsets(scaffoldPadding)
-                                )
+                                    },
+                                ).then(
+                                    if (!disableContentSampling) {
+                                        Modifier.responsiveHazeSource(
+                                            hazeState,
+                                        )
+                                    } else {
+                                        Modifier
+                                    },
+                                ).then(
+                                    if (contentDrawsBehindBars) {
+                                        Modifier
+                                    } else {
+                                        Modifier
+                                            .padding(scaffoldPadding)
+                                            .consumeWindowInsets(scaffoldPadding)
+                                    },
+                                ),
                         ) {
                             content(
-                                if (contentDrawsBehindBars) scaffoldPadding
-                                else PaddingValues(0.dp)
+                                if (contentDrawsBehindBars) {
+                                    scaffoldPadding
+                                } else {
+                                    PaddingValues(0.dp)
+                                },
                             )
                         }
                     }
@@ -234,24 +258,25 @@ fun AppScaffold(
     }
 }
 
-
 @Composable
 private fun BackgroundImageContent(
     isDark: Boolean,
-    hazeState: HazeState
+    hazeState: HazeState,
 ) {
     val themeSettings = LocalAppUiConfiguration.current.theme
     val hasImageBg = themeSettings.hasBackgroundImage(isDark)
-    val bgImagePath = if (isDark) {
-        themeSettings.backgroundImageDark
-    } else {
-        themeSettings.backgroundImageLight
-    }
-    val blur = if (isDark) {
-        themeSettings.backgroundImageDarkBlurring
-    } else {
-        themeSettings.backgroundImageBlurring
-    }
+    val bgImagePath =
+        if (isDark) {
+            themeSettings.backgroundImageDark
+        } else {
+            themeSettings.backgroundImageLight
+        }
+    val blur =
+        if (isDark) {
+            themeSettings.backgroundImageDarkBlurring
+        } else {
+            themeSettings.backgroundImageBlurring
+        }
 
     if (hasImageBg && !bgImagePath.isNullOrBlank()) {
         if (themeSettings.enableBlur) {
@@ -259,20 +284,22 @@ private fun BackgroundImageContent(
                 model = bgImagePath,
                 contentDescription = null,
                 imageLoader = org.koin.compose.koinInject(),
-                modifier = Modifier
+                modifier =
+                Modifier
                     .fillMaxSize()
                     .hazeSource(hazeState),
-                contentScale = ContentScale.Crop
+                contentScale = ContentScale.Crop,
             )
         } else {
             AsyncImage(
                 model = bgImagePath,
                 contentDescription = null,
                 imageLoader = org.koin.compose.koinInject(),
-                modifier = Modifier
+                modifier =
+                Modifier
                     .fillMaxSize()
                     .blur(blur.dp),
-                contentScale = ContentScale.Crop
+                contentScale = ContentScale.Crop,
             )
         }
     }

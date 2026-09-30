@@ -2,8 +2,9 @@ package io.legado.app.lib.mobi.decompress
 
 import androidx.core.util.Pools.SynchronizedPool
 
-class Lz77Decompressor(private val textRecordSize: Int) : Decompressor {
-
+class Lz77Decompressor(
+    private val textRecordSize: Int,
+) : Decompressor {
     val pool = SynchronizedPool<ByteArray>(2)
 
     override fun decompress(data: ByteArray): ByteArray {
@@ -45,5 +46,4 @@ class Lz77Decompressor(private val textRecordSize: Int) : Decompressor {
         System.arraycopy(out, 0, result, 0, o)
         return result.also { pool.release(out) }
     }
-
 }

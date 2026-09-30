@@ -12,7 +12,6 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface BookGroupDao {
-
     @Query("select * from book_groups where groupId = :id")
     fun getByID(id: Long): BookGroup?
 
@@ -40,7 +39,9 @@ interface BookGroupDao {
     @Query("update book_groups set show = 1 where groupId = :groupId")
     fun enableGroup(groupId: Long)
 
-    @Query("select groupName from book_groups where groupId > 0 and NULLIF(TRIM(COALESCE(localDirectoryUri, '')), '') IS NOT NULL and (groupId & :id) > 0")
+    @Query(
+        "select groupName from book_groups where groupId > 0 and NULLIF(TRIM(COALESCE(localDirectoryUri, '')), '') IS NOT NULL and (groupId & :id) > 0",
+    )
     fun getGroupNames(id: Long): List<String>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)

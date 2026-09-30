@@ -3,8 +3,8 @@ package io.legado.app.help
 import io.legado.app.R
 import io.legado.app.data.entities.Book
 import io.legado.app.data.entities.BookProgress
-import io.legado.app.exception.NoStackTraceException
 import io.legado.app.domain.gateway.BackupSettingsGateway
+import io.legado.app.exception.NoStackTraceException
 import io.legado.app.help.config.LocalConfig
 import io.legado.app.help.storage.Backup
 import io.legado.app.help.storage.BackupRestoreLock
@@ -12,22 +12,22 @@ import io.legado.app.help.storage.Restore
 import io.legado.app.lib.webdav.Authorization
 import io.legado.app.lib.webdav.WebDav
 import io.legado.app.lib.webdav.WebDavException
+import io.legado.app.lib.webdav.WebDavFile
 import io.legado.app.utils.AlphanumComparator
 import io.legado.app.utils.FileUtils
-import io.legado.app.utils.NetworkUtils
 import io.legado.app.utils.GSON
+import io.legado.app.utils.NetworkUtils
 import io.legado.app.utils.UrlUtil
 import io.legado.app.utils.compress.ZipUtils
 import io.legado.app.utils.fromJsonObject
 import io.legado.app.utils.isJson
 import io.legado.app.utils.normalizeFileName
 import io.legado.app.utils.toastOnUi
+import java.io.File
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import splitties.init.appCtx
 import org.koin.core.context.GlobalContext
-import java.io.File
-import io.legado.app.lib.webdav.WebDavFile
+import splitties.init.appCtx
 
 /**
  * webDav初始化会访问网络,不要放到主线程
@@ -37,7 +37,7 @@ object AppWebDav {
     private const val MAX_BACKUP_COUNT = 10
     private val backupGateway by lazy { GlobalContext.get().get<BackupSettingsGateway>() }
 
-    private const val defaultWebDavUrl = "https://dav.jianguoyun.com/dav/"
+    private const val DEFAULT_WEBDAV_URL = "https://dav.jianguoyun.com/dav/"
 
     private val configMutex = Mutex()
     private var appliedConfig: AppliedWebDavConfig? = null
@@ -48,16 +48,16 @@ object AppWebDav {
 
     val isOk get() = authorization != null
 
-    val isJianGuoYun get() = rootWebDavUrl.startsWith(defaultWebDavUrl, true)
+    val isJianGuoYun get() = rootWebDavUrl.startsWith(DEFAULT_WEBDAV_URL, true)
 
     private val rootWebDavUrl: String
         get() {
             val configUrl = backupGateway.currentSettings.webDavUrl.trim()
-            var url = if (configUrl.isEmpty()) defaultWebDavUrl else configUrl
-            if (!url.endsWith("/")) url = "${url}/"
+            var url = if (configUrl.isEmpty()) DEFAULT_WEBDAV_URL else configUrl
+            if (!url.endsWith("/")) url = "$url/"
             backupGateway.currentSettings.webDavDir.trim().let {
                 if (it.isNotEmpty()) {
-                    url = "${url}${it}/"
+                    url = "${url}$it/"
                 }
             }
             return url
@@ -97,7 +97,7 @@ object AppWebDav {
     @Throws(WebDavException::class)
     private suspend fun checkAuthorization(authorization: Authorization) {
         if (!WebDav(rootWebDavUrl, authorization).check()) {
-            //appCtx.removePref(PreferKey.webDavPassword)
+            // appCtx.removePref(PreferKey.webDavPassword)
             appCtx.toastOnUi(R.string.webdav_application_authorization_error)
             throw WebDavException(appCtx.getString(R.string.webdav_application_authorization_error))
         }
@@ -137,7 +137,7 @@ object AppWebDav {
 
     suspend fun hasBackUp(backUpName: String): Boolean {
         authorization?.let {
-            val url = "$rootWebDavUrl${backUpName}"
+            val url = "$rootWebDavUrl$backUpName"
             return WebDav(url, it).exists()
         }
         return false
@@ -147,8 +147,9 @@ object AppWebDav {
         val auth = authorization ?: return null
         return runCatching {
             val fileName = UrlUtil.replaceReservedChar(
-                "${book.name}_${book.author}".normalizeFileName()
-            ) + ".json"
+                "${book.name}_${book.author}".normalizeFileName(),
+            ) +
+                ".json"
             val json = String(WebDav("${rootWebDavUrl}bookProgress/$fileName", auth).download())
             if (json.isJson()) GSON.fromJsonObject<BookProgress>(json).getOrNull() else null
         }.getOrNull()
@@ -157,27 +158,26 @@ object AppWebDav {
     suspend fun uploadBookProgress(book: Book) {
         val auth = authorization ?: return
         val fileName = UrlUtil.replaceReservedChar(
-            "${book.name}_${book.author}".normalizeFileName()
-        ) + ".json"
+            "${book.name}_${book.author}".normalizeFileName(),
+        ) +
+            ".json"
         val json = GSON.toJson(BookProgress(book)).toByteArray()
         WebDav("${rootWebDavUrl}bookProgress/$fileName", auth).upload(json, "application/json")
     }
 
-    suspend fun lastBackUp(): Result<WebDavFile?> {
-        return kotlin.runCatching {
-            authorization?.let {
-                var lastBackupFile: WebDavFile? = null
-                WebDav(rootWebDavUrl, it).listFiles().reversed().forEach { webDavFile ->
-                    if (webDavFile.displayName.startsWith("backup")) {
-                        if (lastBackupFile == null
-                            || webDavFile.lastModify > lastBackupFile.lastModify
-                        ) {
-                            lastBackupFile = webDavFile
-                        }
+    suspend fun lastBackUp(): Result<WebDavFile?> = kotlin.runCatching {
+        authorization?.let {
+            var lastBackupFile: WebDavFile? = null
+            WebDav(rootWebDavUrl, it).listFiles().reversed().forEach { webDavFile ->
+                if (webDavFile.displayName.startsWith("backup")) {
+                    if (lastBackupFile == null ||
+                        webDavFile.lastModify > lastBackupFile.lastModify
+                    ) {
+                        lastBackupFile = webDavFile
                     }
                 }
-                lastBackupFile
             }
+            lastBackupFile
         }
     }
 
@@ -204,8 +204,6 @@ object AppWebDav {
         }
     }
 
-
-
     /**
      * webDav备份
      * @param fileName 备份文件名
@@ -229,5 +227,4 @@ object AppWebDav {
             it.delete()
         }
     }
-
 }

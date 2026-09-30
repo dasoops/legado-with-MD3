@@ -4,19 +4,20 @@ import org.junit.Assert.assertEquals
 import org.junit.Test
 
 class ReaderTipValueFormatterTest {
-    private val context = ReaderTipValueContext(
-        bookName = "书名",
-        chapterTitle = "第三章",
-        time = "12:34",
-        batteryPercent = 76,
-        chapterIndex = 2,
-        chapterCount = 10,
-        pageIndex = 1,
-        pageCount = 5,
-        readProgress = "24.0%",
-        wholeBookPageIndex = 42,
-        wholeBookPageCount = 100,
-    )
+    private val context =
+        ReaderTipValueContext(
+            bookName = "书名",
+            chapterTitle = "第三章",
+            time = "12:34",
+            batteryPercent = 76,
+            chapterIndex = 2,
+            chapterCount = 10,
+            pageIndex = 1,
+            pageCount = 5,
+            readProgress = "24.0%",
+            wholeBookPageIndex = 42,
+            wholeBookPageCount = 100,
+        )
 
     @Test
     fun formatsBuiltInPageTips() {
@@ -28,8 +29,9 @@ class ReaderTipValueFormatterTest {
 
     @Test
     fun resolvesEveryCustomPlaceholder() {
-        val template = "{BookName}|{ChapterTitle}|{Time}|{BatteryPercent}|{ChapterIndex}/{ChapterSize}|" +
-            "{PageIndex}/{PageSize}|{PageRemaining}|{ReadProgress}|{FullPageIndex}/{FullPageSize}"
+        val template =
+            "{BookName}|{ChapterTitle}|{Time}|{BatteryPercent}|{ChapterIndex}/{ChapterSize}|" +
+                "{PageIndex}/{PageSize}|{PageRemaining}|{ReadProgress}|{FullPageIndex}/{FullPageSize}"
         assertEquals(
             "书名|第三章|12:34|76%|3/10|2/5|3|24.0%|42/100",
             ReaderTipValueFormatter.format(ReaderTipValueType.CUSTOM, context, template),

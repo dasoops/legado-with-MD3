@@ -494,61 +494,6 @@
     <issue
         id="TrimLambda"
         message="The lambda argument (`{ it &lt;= &apos; &apos; }`) is unnecessary"
-        errorLine1="                    val text = item.text().trim { it &lt;= &apos; &apos; }"
-        errorLine2="                                                ~~~~~~~~~~~~~">
-        <location
-            file="src/main/java/io/legado/app/model/analyzeRule/AnalyzeByJSoup.kt"
-            line="243"
-            column="49"/>
-    </issue>
-
-    <issue
-        id="TrimLambda"
-        message="The lambda argument (`{ it &lt;= &apos; &apos; }`) is unnecessary"
-        errorLine1="            val rus = rule.trim { it &lt;= &apos; &apos; }"
-        errorLine2="                                ~~~~~~~~~~~~~">
-        <location
-            file="src/main/java/io/legado/app/model/analyzeRule/AnalyzeByJSoup.kt"
-            line="408"
-            column="33"/>
-    </issue>
-
-    <issue
-        id="TrimLambda"
-        message="The lambda argument (`{ it &lt;= &apos; &apos; }`) is unnecessary"
-        errorLine1="            ruleStr.substring(5).trim { it &lt;= &apos; &apos; }"
-        errorLine2="                                      ~~~~~~~~~~~~~">
-        <location
-            file="src/main/java/io/legado/app/model/analyzeRule/AnalyzeByJSoup.kt"
-            line="518"
-            column="39"/>
-    </issue>
-
-    <issue
-        id="TrimLambda"
-        message="The lambda argument (`{ it &lt;= &apos; &apos; }`) is unnecessary"
-        errorLine1="                tmp = ruleStr.substring(start, jsMatcher.start()).trim { it &lt;= &apos; &apos; }"
-        errorLine2="                                                                       ~~~~~~~~~~~~~">
-        <location
-            file="src/main/java/io/legado/app/model/analyzeRule/AnalyzeRule.kt"
-            line="548"
-            column="72"/>
-    </issue>
-
-    <issue
-        id="TrimLambda"
-        message="The lambda argument (`{ it &lt;= &apos; &apos; }`) is unnecessary"
-        errorLine1="            tmp = ruleStr.substring(start).trim { it &lt;= &apos; &apos; }"
-        errorLine2="                                                ~~~~~~~~~~~~~">
-        <location
-            file="src/main/java/io/legado/app/model/analyzeRule/AnalyzeRule.kt"
-            line="570"
-            column="49"/>
-    </issue>
-
-    <issue
-        id="TrimLambda"
-        message="The lambda argument (`{ it &lt;= &apos; &apos; }`) is unnecessary"
         errorLine1="                    ruleUrl.replace(matcher.group(), pages[page - 1].trim { it &lt;= &apos; &apos; })"
         errorLine2="                                                                          ~~~~~~~~~~~~~">
         <location

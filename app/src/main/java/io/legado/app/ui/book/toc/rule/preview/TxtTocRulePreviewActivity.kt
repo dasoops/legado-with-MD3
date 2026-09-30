@@ -6,7 +6,6 @@ import io.legado.app.base.BaseComposeActivity
 import io.legado.app.ui.book.toc.rule.TxtTocRuleActivity
 
 class TxtTocRulePreviewActivity : BaseComposeActivity() {
-
     @Composable
     override fun Content() {
         val bookUrl = intent.getStringExtra("bookUrl") ?: ""
@@ -17,9 +16,10 @@ class TxtTocRulePreviewActivity : BaseComposeActivity() {
             currentTocRegex = currentTocRegex,
             onBack = { finish() },
             onApplyRule = { rule ->
-                val data = Intent().apply {
-                    putExtra("tocRegex", rule)
-                }
+                val data =
+                    Intent().apply {
+                        putExtra("tocRegex", rule)
+                    }
                 setResult(RESULT_OK, data)
                 finish()
             },

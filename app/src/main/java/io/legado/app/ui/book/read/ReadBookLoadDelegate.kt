@@ -17,13 +17,13 @@ import io.legado.app.help.book.simulatedTotalChapterNum
 import io.legado.app.help.coroutine.Coroutine
 import io.legado.app.model.ReadBook
 import io.legado.app.model.localBook.LocalBook
+import java.io.FileNotFoundException
+import kotlin.coroutines.coroutineContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.io.FileNotFoundException
-import kotlin.coroutines.coroutineContext
 
 /**
  * 开书 / 目录加载 / 进度同步域（R2.2 续批）。
@@ -43,7 +43,6 @@ class ReadBookLoadDelegate(
     private val backupSettingsGateway: BackupSettingsGateway,
     private val webDavBackupUseCase: WebDavBackupUseCase,
 ) {
-
     interface Host {
         /** 刚 initData 完的一次性标记：此时不再弹进度冲突确认。 */
         var justInitData: Boolean
@@ -61,17 +60,21 @@ class ReadBookLoadDelegate(
         /** 把 ReadPreferences 快照刷成最新，开书流程依赖它。 */
         suspend fun syncReadPreferencesSnapshot()
 
-        fun openChapter(index: Int, durChapterPos: Int)
+        fun openChapter(
+            index: Int,
+            durChapterPos: Int,
+        )
 
         suspend fun checkReadRecordAlias(book: Book)
     }
 
     suspend fun initReadBookConfig(request: ReadBookInitRequest): Book? = withContext(Dispatchers.IO) {
         val bookUrl = request.bookUrl
-        val book = when {
-            bookUrl.isNullOrEmpty() -> bookRepository.getLastReadBook()
-            else -> bookRepository.getBook(bookUrl)
-        } ?: return@withContext null
+        val book =
+            when {
+                bookUrl.isNullOrEmpty() -> bookRepository.getLastReadBook()
+                else -> bookRepository.getBook(bookUrl)
+            } ?: return@withContext null
         ReadBook.upReadBookConfig(book)
         book
     }
@@ -81,39 +84,43 @@ class ReadBookLoadDelegate(
         initialBook: Book? = null,
         success: (() -> Unit)? = null,
     ) {
-        Coroutine.async(scope, Dispatchers.IO) {
-            ReaderPerfTrace.suspendSection("open.init") {
-                host.syncReadPreferencesSnapshot()
-                ReadBook.inBookshelf = request.inBookshelf
-                ReadBook.chapterChanged = request.chapterChanged
-                val bookUrl = request.bookUrl
-                val book = initialBook ?: when {
-                    bookUrl.isNullOrEmpty() -> bookRepository.getLastReadBook()
-                    else -> bookRepository.getBook(bookUrl)
-                } ?: ReadBook.book
-                when {
-                    book != null -> initBook(book)
-                    else -> {
-                        ReadBook.upMsg(context.getString(R.string.no_book))
-                        AppLog.put("未找到书籍\nbookUrl:$bookUrl")
+        Coroutine
+            .async(scope, Dispatchers.IO) {
+                ReaderPerfTrace.suspendSection("open.init") {
+                    host.syncReadPreferencesSnapshot()
+                    ReadBook.inBookshelf = request.inBookshelf
+                    ReadBook.chapterChanged = request.chapterChanged
+                    val bookUrl = request.bookUrl
+                    val book =
+                        initialBook ?: when {
+                            bookUrl.isNullOrEmpty() -> bookRepository.getLastReadBook()
+                            else -> bookRepository.getBook(bookUrl)
+                        } ?: ReadBook.book
+                    when {
+                        book != null -> {
+                            initBook(book)
+                        }
+                        else -> {
+                            ReadBook.upMsg(context.getString(R.string.no_book))
+                            AppLog.put("未找到书籍\nbookUrl:$bookUrl")
+                        }
+                    }
+                    val index = request.chapterIndex
+                    val chapterPos = request.chapterPos
+                    if (index >= 0 && chapterPos >= 0) {
+                        ReadBook.saveCurrentBookProgress()
+                        host.openChapter(index, chapterPos)
                     }
                 }
-                val index = request.chapterIndex
-                val chapterPos = request.chapterPos
-                if (index >= 0 && chapterPos >= 0) {
-                    ReadBook.saveCurrentBookProgress()
-                    host.openChapter(index, chapterPos)
-                }
+            }.onSuccess {
+                success?.invoke()
+            }.onError {
+                val msg = "初始化数据失败\n${it.localizedMessage}"
+                ReadBook.upMsg(msg)
+                AppLog.put(msg, it)
+            }.onFinally {
+                ReadBook.saveRead()
             }
-        }.onSuccess {
-            success?.invoke()
-        }.onError {
-            val msg = "初始化数据失败\n${it.localizedMessage}"
-            ReadBook.upMsg(msg)
-            AppLog.put(msg, it)
-        }.onFinally {
-            ReadBook.saveRead()
-        }
     }
 
     /** 换书/重装目录后重走开书流程。VM 的「模拟阅读切换」和目录权限回来后也调它。 */
@@ -151,39 +158,47 @@ class ReadBookLoadDelegate(
     }
 
     private fun syncBookProgress(book: Book) {
-        Coroutine.async(scope, Dispatchers.IO) {
-            webDavBackupUseCase.getBookProgress(book)
-        }.onError {
-            AppLog.put("拉取 WebDAV 阅读进度失败《${book.name}》\n${it.localizedMessage}", it)
-        }.onSuccess { progress ->
-            progress ?: return@onSuccess
-            if (progress.durChapterIndex > book.durChapterIndex ||
-                (progress.durChapterIndex == book.durChapterIndex &&
-                    progress.durChapterPos > book.durChapterPos)
-            ) {
-                host.sureNewProgress(progress)
+        Coroutine
+            .async(scope, Dispatchers.IO) {
+                webDavBackupUseCase.getBookProgress(book)
+            }.onError {
+                AppLog.put("拉取 WebDAV 阅读进度失败《${book.name}》\n${it.localizedMessage}", it)
+            }.onSuccess { progress ->
+                progress ?: return@onSuccess
+                if (progress.durChapterIndex > book.durChapterIndex ||
+                    (
+                        progress.durChapterIndex == book.durChapterIndex &&
+                            progress.durChapterPos > book.durChapterPos
+                        )
+                ) {
+                    host.sureNewProgress(progress)
+                }
             }
-        }
     }
 
     fun getBookProgress(book: Book) {
-        Coroutine.async(scope, Dispatchers.IO) {
-            webDavBackupUseCase.getBookProgress(book)
-        }.onError {
-            AppLog.put("拉取 WebDAV 阅读进度失败《${book.name}》\n${it.localizedMessage}", it)
-        }.onSuccess { progress ->
-            progress?.let(host::sureNewProgress)
-        }
+        Coroutine
+            .async(scope, Dispatchers.IO) {
+                webDavBackupUseCase.getBookProgress(book)
+            }.onError {
+                AppLog.put("拉取 WebDAV 阅读进度失败《${book.name}》\n${it.localizedMessage}", it)
+            }.onSuccess { progress ->
+                progress?.let(host::sureNewProgress)
+            }
     }
 
-    fun uploadBookProgress(book: Book, onSuccess: (() -> Unit)? = null) {
-        Coroutine.async(scope, Dispatchers.IO) {
-            webDavBackupUseCase.uploadBookProgress(book)
-        }.onError {
-            AppLog.put("上传 WebDAV 阅读进度失败《${book.name}》\n${it.localizedMessage}", it)
-        }.onSuccess {
-            onSuccess?.invoke()
-        }
+    fun uploadBookProgress(
+        book: Book,
+        onSuccess: (() -> Unit)? = null,
+    ) {
+        Coroutine
+            .async(scope, Dispatchers.IO) {
+                webDavBackupUseCase.uploadBookProgress(book)
+            }.onError {
+                AppLog.put("上传 WebDAV 阅读进度失败《${book.name}》\n${it.localizedMessage}", it)
+            }.onSuccess {
+                onSuccess?.invoke()
+            }
     }
 
     fun syncBookProgressOnNetwork(book: Book) {
@@ -191,26 +206,31 @@ class ReadBookLoadDelegate(
     }
 
     private fun syncBookProgressPlus(book: Book) {
-        Coroutine.async(scope, Dispatchers.IO) {
-            webDavBackupUseCase.getBookProgress(book)
-        }.onError {
-            AppLog.put("拉取 WebDAV 阅读进度失败《${book.name}》\n${it.localizedMessage}", it)
-        }.onSuccess { progress ->
-            if (progress == null || progress.durChapterIndex < book.durChapterIndex ||
-                (progress.durChapterIndex == book.durChapterIndex &&
-                    progress.durChapterPos < book.durChapterPos)
-            ) {
-                Coroutine.async(scope, Dispatchers.IO) {
-                    webDavBackupUseCase.uploadBookProgress(book)
-                }.onError {
-                    AppLog.put("上传 WebDAV 阅读进度失败《${book.name}》\n${it.localizedMessage}", it)
+        Coroutine
+            .async(scope, Dispatchers.IO) {
+                webDavBackupUseCase.getBookProgress(book)
+            }.onError {
+                AppLog.put("拉取 WebDAV 阅读进度失败《${book.name}》\n${it.localizedMessage}", it)
+            }.onSuccess { progress ->
+                if (progress == null ||
+                    progress.durChapterIndex < book.durChapterIndex ||
+                    (
+                        progress.durChapterIndex == book.durChapterIndex &&
+                            progress.durChapterPos < book.durChapterPos
+                        )
+                ) {
+                    Coroutine
+                        .async(scope, Dispatchers.IO) {
+                            webDavBackupUseCase.uploadBookProgress(book)
+                        }.onError {
+                            AppLog.put("上传 WebDAV 阅读进度失败《${book.name}》\n${it.localizedMessage}", it)
+                        }
+                } else if (progress.durChapterIndex > book.durChapterIndex ||
+                    progress.durChapterPos > book.durChapterPos
+                ) {
+                    host.sureNewProgress(progress)
                 }
-            } else if (progress.durChapterIndex > book.durChapterIndex ||
-                progress.durChapterPos > book.durChapterPos
-            ) {
-                host.sureNewProgress(progress)
             }
-        }
     }
 
     private fun checkLocalBookFileExist(book: Book): Boolean {
@@ -240,24 +260,25 @@ class ReadBookLoadDelegate(
     }
 
     private suspend fun loadChapterListAwait(book: Book): Boolean {
-        kotlin.runCatching {
-            LocalBook.getChapterList(book).let {
-                bookRepository.replaceChaptersAndUpdateBook(book, it)
-                ReadBook.onChapterListUpdated(book)
-            }
-            return true
-        }.onFailure {
-            when (it) {
-                is SecurityException, is FileNotFoundException -> {
-                    host.requestBooksDirPicker(reloadChapterList = true)
+        kotlin
+            .runCatching {
+                LocalBook.getChapterList(book).let {
+                    bookRepository.replaceChaptersAndUpdateBook(book, it)
+                    ReadBook.onChapterListUpdated(book)
                 }
-                else -> {
-                    AppLog.put("LoadTocError:${it.localizedMessage}", it)
-                    ReadBook.upMsg("LoadTocError:${it.localizedMessage}")
+                return true
+            }.onFailure {
+                when (it) {
+                    is SecurityException, is FileNotFoundException -> {
+                        host.requestBooksDirPicker(reloadChapterList = true)
+                    }
+                    else -> {
+                        AppLog.put("LoadTocError:${it.localizedMessage}", it)
+                        ReadBook.upMsg("LoadTocError:${it.localizedMessage}")
+                    }
                 }
+                return false
             }
-            return false
-        }
         return true
     }
 
@@ -267,7 +288,7 @@ class ReadBookLoadDelegate(
         durChapterIndex = durChapterIndex,
         durChapterPos = durChapterPos,
         durChapterTime = durChapterTime,
-        durChapterTitle = durChapterTitle
+        durChapterTitle = durChapterTitle,
     )
 
     private fun ReadingProgress.toBookProgress() = BookProgress(
@@ -276,7 +297,6 @@ class ReadBookLoadDelegate(
         durChapterIndex = durChapterIndex,
         durChapterPos = durChapterPos,
         durChapterTime = durChapterTime,
-        durChapterTitle = durChapterTitle
+        durChapterTitle = durChapterTitle,
     )
-
 }

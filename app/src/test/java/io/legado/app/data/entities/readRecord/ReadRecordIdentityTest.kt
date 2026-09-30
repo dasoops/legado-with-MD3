@@ -32,8 +32,9 @@ class ReadRecordIdentityTest {
         val key = ReadRecordAliasDecision.key("书 ", " 作者")
         val encoded = ReadRecordAliasDecision.encode(key, ReadRecordAliasAction.MERGE)
         assertEquals(ReadRecordAliasAction.MERGE, ReadRecordAliasDecision.decode(encoded, key))
-        val replaced = ReadRecordAliasDecision.removeForKey(encoded, key) +
-            if (ReadRecordAliasDecision.removeForKey(encoded, key).isBlank()) "" else "\n"
+        val replaced =
+            ReadRecordAliasDecision.removeForKey(encoded, key) +
+                if (ReadRecordAliasDecision.removeForKey(encoded, key).isBlank()) "" else "\n"
         assertTrue(ReadRecordAliasDecision.decode(replaced, key) == null)
     }
 }

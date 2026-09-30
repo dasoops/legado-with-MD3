@@ -7,8 +7,9 @@ import androidx.appcompat.app.AppCompatActivity
 /**
  * 平台能力采样（对照 shutiao 版 AndroidPlatformCapabilities，按需增量补充，不预先铺接口）。
  */
-class AndroidPlatformCapabilities(private val activity: AppCompatActivity) {
-
+class AndroidPlatformCapabilities(
+    private val activity: AppCompatActivity,
+) {
     /**
      * 屏幕圆角半径 px：四角中非零者的最小值（忽略报告为 0 的角），
      * 取不到或全 0 时回退 [DEFAULT_DISPLAY_CORNER_RADIUS_PX]
@@ -22,12 +23,13 @@ class AndroidPlatformCapabilities(private val activity: AppCompatActivity) {
                 return DEFAULT_DISPLAY_CORNER_RADIUS_PX
             }
             val display = activity.display ?: return DEFAULT_DISPLAY_CORNER_RADIUS_PX
-            val radii = listOf(
-                RoundedCorner.POSITION_TOP_LEFT,
-                RoundedCorner.POSITION_TOP_RIGHT,
-                RoundedCorner.POSITION_BOTTOM_RIGHT,
-                RoundedCorner.POSITION_BOTTOM_LEFT,
-            ).map { display.getRoundedCorner(it)?.radius?.toFloat() ?: 0f }
+            val radii =
+                listOf(
+                    RoundedCorner.POSITION_TOP_LEFT,
+                    RoundedCorner.POSITION_TOP_RIGHT,
+                    RoundedCorner.POSITION_BOTTOM_RIGHT,
+                    RoundedCorner.POSITION_BOTTOM_LEFT,
+                ).map { display.getRoundedCorner(it)?.radius?.toFloat() ?: 0f }
             return selectCornerRadiusPx(radii)
         }
 

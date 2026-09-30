@@ -1,9 +1,5 @@
 package io.legado.app.ui.book.group
 
-import androidx.compose.runtime.setValue
-
-import androidx.compose.runtime.getValue
-
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
@@ -23,8 +19,10 @@ import androidx.compose.material.icons.filled.FolderOpen
 import androidx.compose.material.icons.filled.Restore
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -34,13 +32,13 @@ import io.legado.app.R
 import io.legado.app.data.entities.BookGroup
 import io.legado.app.ui.theme.LegadoTheme
 import io.legado.app.ui.widget.components.AppTextField
-import io.legado.app.ui.widget.components.text.AppText
 import io.legado.app.ui.widget.components.alert.AppAlertDialog
 import io.legado.app.ui.widget.components.button.ConfirmDismissButtonsRow
 import io.legado.app.ui.widget.components.button.series.MediumTonalButton
 import io.legado.app.ui.widget.components.image.cover.CoilBookCover
 import io.legado.app.ui.widget.components.modalBottomSheet.AppModalBottomSheet
 import io.legado.app.ui.widget.components.settingItem.CompactSwitchSettingItem
+import io.legado.app.ui.widget.components.text.AppText
 import io.legado.app.utils.FileUtils
 import io.legado.app.utils.MD5Utils
 import io.legado.app.utils.SelectImageContract
@@ -48,9 +46,9 @@ import io.legado.app.utils.externalFiles
 import io.legado.app.utils.launch
 import io.legado.app.utils.takePersistablePermissionSafely
 import io.legado.app.utils.toastOnUi
+import java.io.FileOutputStream
 import org.koin.androidx.compose.koinViewModel
 import splitties.init.appCtx
-import java.io.FileOutputStream
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -58,19 +56,20 @@ fun GroupEditSheet(
     show: Boolean,
     group: BookGroup? = null,
     onDismissRequest: () -> Unit,
-    viewModel: GroupViewModel = koinViewModel()
+    viewModel: GroupViewModel = koinViewModel(),
 ) {
     var coverPath by remember(group) { mutableStateOf(group?.cover) }
 
     AppModalBottomSheet(
         show = show,
         onDismissRequest = onDismissRequest,
-        startAction = if (group != null && (group.isLocalDirectory || group.isAdvanced || group.groupId == Long.MIN_VALUE || group.isTag)) {
+        startAction =
+        if (group != null && (group.isLocalDirectory || group.isAdvanced || group.groupId == Long.MIN_VALUE || group.isTag)) {
             {
                 GroupDeleteAction(
                     group = group,
                     onDismissRequest = onDismissRequest,
-                    viewModel = viewModel
+                    viewModel = viewModel,
                 )
             }
         } else {
@@ -80,16 +79,16 @@ fun GroupEditSheet(
             GroupResetCoverAction(
                 group = group,
                 onCoverPathChange = { coverPath = it },
-                viewModel = viewModel
+                viewModel = viewModel,
             )
-        }
+        },
     ) {
         GroupEditContent(
             group = group,
             onDismissRequest = onDismissRequest,
             coverPath = coverPath,
             onCoverPathChange = { coverPath = it },
-            viewModel = viewModel
+            viewModel = viewModel,
         )
     }
 }
@@ -102,7 +101,7 @@ fun GroupEditContent(
     onDismissRequest: () -> Unit,
     coverPath: String?,
     onCoverPathChange: (String?) -> Unit,
-    viewModel: GroupViewModel = koinViewModel()
+    viewModel: GroupViewModel = koinViewModel(),
 ) {
     val context = LocalContext.current
     var groupName by remember(group) { mutableStateOf(group?.groupName ?: "") }
@@ -115,41 +114,45 @@ fun GroupEditContent(
     val isLocalDirectory = group?.isLocalDirectory == true
     val advanced = isAdvanced || group?.isAdvanced == true
 
-    val directoryPicker = rememberLauncherForActivityResult(
-        ActivityResultContracts.OpenDocumentTree()
-    ) { uri ->
-        if (uri != null) {
-            uri.takePersistablePermissionSafely(context)
-            localDirectoryUri = uri.toString()
+    val directoryPicker =
+        rememberLauncherForActivityResult(
+            ActivityResultContracts.OpenDocumentTree(),
+        ) { uri ->
+            if (uri != null) {
+                uri.takePersistablePermissionSafely(context)
+                localDirectoryUri = uri.toString()
+            }
         }
-    }
 
     // 动态分组没有固定的私有语义, 不提供私有开关.
     val canSetPrivate = group?.isLocalDirectory == true
 
-    val selectImage = rememberLauncherForActivityResult(SelectImageContract()) { result ->
-        result.uri?.let { uri ->
-            try {
-                val inputStream = context.contentResolver.openInputStream(uri)
-                    ?: return@rememberLauncherForActivityResult
-                inputStream.use { input ->
-                    val extension = groupCoverFileExtension(context.contentResolver.getType(uri))
-                    val fileName = MD5Utils.md5Encode(input) + ".$extension"
-                    val file =
-                        FileUtils.createFileIfNotExist(context.externalFiles, "covers", fileName)
-                    FileOutputStream(file).use { output ->
-                        context.contentResolver.openInputStream(uri)?.use { it.copyTo(output) }
+    val selectImage =
+        rememberLauncherForActivityResult(SelectImageContract()) { result ->
+            result.uri?.let { uri ->
+                try {
+                    val inputStream =
+                        context.contentResolver.openInputStream(uri)
+                            ?: return@rememberLauncherForActivityResult
+                    inputStream.use { input ->
+                        val extension = groupCoverFileExtension(context.contentResolver.getType(uri))
+                        val fileName = MD5Utils.md5Encode(input) + ".$extension"
+                        val file =
+                            FileUtils.createFileIfNotExist(context.externalFiles, "covers", fileName)
+                        FileOutputStream(file).use { output ->
+                            context.contentResolver.openInputStream(uri)?.use { it.copyTo(output) }
+                        }
+                        onCoverPathChange(file.absolutePath)
                     }
-                    onCoverPathChange(file.absolutePath)
+                } catch (e: Exception) {
+                    appCtx.toastOnUi(e.localizedMessage)
                 }
-            } catch (e: Exception) {
-                appCtx.toastOnUi(e.localizedMessage)
             }
         }
-    }
 
     Column(
-        modifier = Modifier
+        modifier =
+        Modifier
             .fillMaxWidth()
             .padding(bottom = 16.dp)
             .verticalScroll(rememberScrollState()),
@@ -158,21 +161,22 @@ fun GroupEditContent(
         Row(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.Top,
-            horizontalArrangement = Arrangement.spacedBy(16.dp)
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             CoilBookCover(
                 name = null,
                 author = null,
                 sourceOrigin = group?.groupName,
                 path = coverPath,
-                modifier = Modifier
+                modifier =
+                Modifier
                     .width(96.dp)
-                    .clickable { selectImage.launch() }
+                    .clickable { selectImage.launch() },
             )
 
             Column(
                 modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
+                verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 AppTextField(
                     value = groupName,
@@ -180,7 +184,7 @@ fun GroupEditContent(
                     backgroundColor = LegadoTheme.colorScheme.onSheetContent,
                     label = stringResource(R.string.group_name),
                     modifier = Modifier.fillMaxWidth(),
-                    singleLine = true
+                    singleLine = true,
                 )
             }
         }
@@ -195,7 +199,7 @@ fun GroupEditContent(
                 label = stringResource(R.string.local_directory),
                 modifier = Modifier.fillMaxWidth(),
                 readOnly = true,
-                singleLine = true
+                singleLine = true,
             )
 
             Spacer(modifier = Modifier.height(8.dp))
@@ -204,7 +208,7 @@ fun GroupEditContent(
                 onClick = { directoryPicker.launch(null) },
                 icon = Icons.Default.FolderOpen,
                 text = stringResource(R.string.reselect_directory),
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
             )
         } else {
             if (advanced) {
@@ -224,7 +228,8 @@ fun GroupEditContent(
                     text = stringResource(R.string.advanced_group_pattern_hint),
                     style = LegadoTheme.typography.bodySmall,
                     color = LegadoTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier
+                    modifier =
+                    Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 4.dp, vertical = 4.dp),
                 )
@@ -243,13 +248,11 @@ fun GroupEditContent(
                         } else {
                             isPrivate = checked
                         }
-                    }
+                    },
                 )
             }
 
             Spacer(modifier = Modifier.height(8.dp))
-
-
         }
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -264,18 +267,19 @@ fun GroupEditContent(
                     isSaving = true
                     if (group != null) {
                         viewModel.saveGroup(
-                            bookGroup = group.copy(
+                            bookGroup =
+                            group.copy(
                                 groupName = groupName,
                                 cover = coverPath,
                                 isPrivate = isPrivate,
                                 localDirectoryUri = localDirectoryUri,
-                                pattern = pattern.takeIf(String::isNotBlank)
+                                pattern = pattern.takeIf(String::isNotBlank),
                             ),
                             onSuccess = onDismissRequest,
                             onError = { error ->
                                 isSaving = false
                                 appCtx.toastOnUi(error.localizedMessage ?: "分组保存失败")
-                            }
+                            },
                         )
                     } else {
                         viewModel.addGroup(
@@ -288,7 +292,7 @@ fun GroupEditContent(
                             onError = { error ->
                                 isSaving = false
                                 appCtx.toastOnUi(error.localizedMessage ?: "分组保存失败")
-                            }
+                            },
                         ) {
                             onDismissRequest()
                         }
@@ -298,7 +302,7 @@ fun GroupEditContent(
             dismissText = stringResource(R.string.cancel),
             confirmText = stringResource(R.string.ok),
             dismissEnabled = !isSaving,
-            confirmEnabled = !isSaving
+            confirmEnabled = !isSaving,
         )
     }
 
@@ -313,23 +317,30 @@ fun GroupEditContent(
             showDisablePrivateDialog = false
         },
         dismissText = stringResource(android.R.string.cancel),
-        onDismiss = { showDisablePrivateDialog = false }
+        onDismiss = { showDisablePrivateDialog = false },
     )
 }
 
 internal fun groupCoverFileExtension(mimeType: String?): String {
-    val subtype = mimeType
-        ?.substringAfter('/', missingDelimiterValue = "")
-        ?.substringBefore(';')
-        ?.lowercase()
-        ?.takeIf { it.isNotBlank() }
-        ?: return "jpg"
+    val subtype =
+        mimeType
+            ?.substringAfter('/', missingDelimiterValue = "")
+            ?.substringBefore(';')
+            ?.lowercase()
+            ?.takeIf { it.isNotBlank() }
+            ?: return "jpg"
     return when (subtype) {
-        "jpeg", "jpg", "pjpeg" -> "jpg"
-        "svg+xml" -> "svg"
-        else -> subtype.substringBefore('+').takeIf {
-            it.length in 1..10 && it.all(Char::isLetterOrDigit)
-        } ?: "jpg"
+        "jpeg", "jpg", "pjpeg" -> {
+            "jpg"
+        }
+        "svg+xml" -> {
+            "svg"
+        }
+        else -> {
+            subtype.substringBefore('+').takeIf {
+                it.length in 1..10 && it.all(Char::isLetterOrDigit)
+            } ?: "jpg"
+        }
     }
 }
 
@@ -337,7 +348,7 @@ internal fun groupCoverFileExtension(mimeType: String?): String {
 fun GroupDeleteAction(
     group: BookGroup,
     onDismissRequest: () -> Unit,
-    viewModel: GroupViewModel = koinViewModel()
+    viewModel: GroupViewModel = koinViewModel(),
 ) {
     var showDeleteDialog by remember { mutableStateOf(false) }
 
@@ -353,8 +364,9 @@ fun GroupDeleteAction(
         show = showDeleteDialog,
         onDismissRequest = { showDeleteDialog = false },
         title = stringResource(R.string.delete),
-        text = stringResource(
-            if (group.isPrivate) R.string.sure_del_private_group else R.string.sure_del
+        text =
+        stringResource(
+            if (group.isPrivate) R.string.sure_del_private_group else R.string.sure_del,
         ),
         confirmText = stringResource(android.R.string.ok),
         onConfirm = {
@@ -364,7 +376,7 @@ fun GroupDeleteAction(
             }
         },
         dismissText = stringResource(android.R.string.cancel),
-        onDismiss = { showDeleteDialog = false }
+        onDismiss = { showDeleteDialog = false },
     )
 }
 
@@ -372,7 +384,7 @@ fun GroupDeleteAction(
 fun GroupResetCoverAction(
     group: BookGroup? = null,
     onCoverPathChange: (String?) -> Unit,
-    viewModel: GroupViewModel = koinViewModel()
+    viewModel: GroupViewModel = koinViewModel(),
 ) {
     MediumTonalButton(
         onClick = {

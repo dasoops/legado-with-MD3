@@ -3,12 +3,13 @@ package io.legado.app.ui.widget.text
 import android.content.Context
 import android.util.AttributeSet
 import androidx.appcompat.widget.AppCompatTextView
-//import io.legado.app.lib.theme.bottomBackground
+// import io.legado.app.lib.theme.bottomBackground
 
-class AccentStrokeTextView(context: Context, attrs: AttributeSet) :
-    AppCompatTextView(context, attrs) {
-
-//    private var radius = 3.dpToPx()
+class AccentStrokeTextView(
+    context: Context,
+    attrs: AttributeSet,
+) : AppCompatTextView(context, attrs) {
+    //    private var radius = 3.dpToPx()
 //    private val isBottomBackground: Boolean
 //
 //    init {
@@ -50,5 +51,4 @@ class AccentStrokeTextView(context: Context, attrs: AttributeSet) :
 //                .create()
 //        )
 //    }
-
 }

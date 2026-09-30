@@ -1,16 +1,21 @@
 package io.legado.app.help.http.api
 
 interface CookieManagerInterface {
-
     /**
      * 保存cookie
      */
-    fun setCookie(url: String, cookie: String?)
+    fun setCookie(
+        url: String,
+        cookie: String?,
+    )
 
     /**
      * 替换cookie
      */
-    fun replaceCookie(url: String, cookie: String)
+    fun replaceCookie(
+        url: String,
+        cookie: String,
+    )
 
     /**
      * 获取cookie

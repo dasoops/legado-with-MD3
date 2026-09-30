@@ -38,7 +38,7 @@ fun GroupManageBottomSheet(
     groups: List<String>,
     onDismissRequest: () -> Unit,
     onUpdateGroup: (oldGroup: String, newGroup: String) -> Unit,
-    onDeleteGroup: (group: String) -> Unit
+    onDeleteGroup: (group: String) -> Unit,
 ) {
     var groupToDelete by remember { mutableStateOf<String?>(null) }
     AppAlertDialog(
@@ -65,7 +65,7 @@ fun GroupManageBottomSheet(
                 GroupItem(
                     group = group,
                     onUpdateGroup = onUpdateGroup,
-                    onDeleteGroup = { groupToDelete = it }
+                    onDeleteGroup = { groupToDelete = it },
                 )
             }
         }
@@ -76,7 +76,7 @@ fun GroupManageBottomSheet(
 private fun GroupItem(
     group: String,
     onUpdateGroup: (oldGroup: String, newGroup: String) -> Unit,
-    onDeleteGroup: (group: String) -> Unit
+    onDeleteGroup: (group: String) -> Unit,
 ) {
     var expanded by remember { mutableStateOf(false) }
     val state = rememberTextFieldState(initialText = group)
@@ -100,13 +100,13 @@ private fun GroupItem(
                 IconButton(onClick = { expanded = !expanded }) {
                     Icon(
                         Icons.Default.Edit,
-                        contentDescription = stringResource(id = R.string.edit)
+                        contentDescription = stringResource(id = R.string.edit),
                     )
                 }
                 IconButton(onClick = { onDeleteGroup(group) }) {
                     Icon(
                         Icons.Default.Delete,
-                        contentDescription = stringResource(id = R.string.delete)
+                        contentDescription = stringResource(id = R.string.delete),
                     )
                 }
             }
@@ -114,25 +114,27 @@ private fun GroupItem(
         expandContent = {
             AppTextField(
                 state = state,
-                modifier = Modifier
+                modifier =
+                Modifier
                     .fillMaxWidth()
                     .heightIn(min = 48.dp),
                 label = stringResource(R.string.edit),
-                contentPadding = PaddingValues(
+                contentPadding =
+                PaddingValues(
                     top = 4.dp,
                     bottom = 4.dp,
                     start = 12.dp,
-                    end = 12.dp
+                    end = 12.dp,
                 ),
                 onKeyboardAction = {
                     onUpdateGroup(group, state.text.toString())
                     expanded = false
-                }
+                },
             )
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.End
+                horizontalArrangement = Arrangement.End,
             ) {
                 SmallPlainButton(
                     onClick = {
@@ -140,10 +142,9 @@ private fun GroupItem(
                         expanded = false
                     },
                     icon = Icons.Default.Check,
-                    text = stringResource(id = R.string.ok)
+                    text = stringResource(id = R.string.ok),
                 )
             }
-        }
+        },
     )
 }
-

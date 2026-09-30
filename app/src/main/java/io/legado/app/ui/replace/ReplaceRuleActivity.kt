@@ -30,14 +30,14 @@ import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
 
 class ReplaceRuleActivity : BaseComposeActivity() {
-
     companion object {
         const val EXTRA_START_ROUTE = "start_route"
         const val EXTRA_BOOK_URL = "book_url"
+
         fun startIntent(
             context: Context,
             editRoute: ReplaceEditRoute? = null,
-            bookUrl: String? = null
+            bookUrl: String? = null,
         ): Intent = Intent(context, ReplaceRuleActivity::class.java).apply {
             editRoute?.let {
                 putExtra(EXTRA_START_ROUTE, Json.encodeToString(it))
@@ -48,147 +48,130 @@ class ReplaceRuleActivity : BaseComposeActivity() {
 
     @Composable
     override fun Content() {
-            val configuration = LocalAppUiConfiguration.current
-            val context = LocalActivity.current
+        val configuration = LocalAppUiConfiguration.current
+        val context = LocalActivity.current
         val focusManager = LocalFocusManager.current
         val keyboardController = LocalSoftwareKeyboardController.current
+
         fun leaveScreen(action: () -> Unit) {
             focusManager.clearFocus(force = true)
             keyboardController?.hide()
             action()
         }
-            val startRouteJson = intent.getStringExtra(EXTRA_START_ROUTE)
-            val bookUrl = intent.getStringExtra(EXTRA_BOOK_URL)
-            val backStack = rememberNavBackStack(
+        val startRouteJson = intent.getStringExtra(EXTRA_START_ROUTE)
+        val bookUrl = intent.getStringExtra(EXTRA_BOOK_URL)
+        val backStack =
+            rememberNavBackStack(
                 remember(startRouteJson) {
                     resolveStartRoute(startRouteJson)
-                }
+                },
             )
 
-            LaunchedEffect(Unit) {
-                context?.setResult(RESULT_OK)
-            }
+        LaunchedEffect(Unit) {
+            context?.setResult(RESULT_OK)
+        }
 
-            NavDisplay(
-                backStack = backStack,
-                transitionSpec = {
-                    (slideIntoContainer(
+        NavDisplay(
+            backStack = backStack,
+            transitionSpec = {
+                (
+                    slideIntoContainer(
                         towards = AnimatedContentTransitionScope.SlideDirection.Start,
-                        animationSpec = tween(
+                        animationSpec =
+                        tween(
                             durationMillis = 480,
-                            easing = FastOutSlowInEasing
+                            easing = FastOutSlowInEasing,
                         ),
-                        initialOffset = { fullWidth -> fullWidth }
-                    ) + fadeIn(
-                        animationSpec = tween(
-                            durationMillis = 360,
-                            easing = LinearOutSlowInEasing
+                        initialOffset = { fullWidth -> fullWidth },
+                    ) +
+                        fadeIn(
+                            animationSpec =
+                            tween(
+                                durationMillis = 360,
+                                easing = LinearOutSlowInEasing,
+                            ),
                         )
-                    )) togetherWith (slideOutOfContainer(
+                    ) togetherWith (
+                    slideOutOfContainer(
                         towards = AnimatedContentTransitionScope.SlideDirection.Start,
-                        animationSpec = tween(
+                        animationSpec =
+                        tween(
                             durationMillis = 480,
-                            easing = FastOutSlowInEasing
+                            easing = FastOutSlowInEasing,
                         ),
-                        targetOffset = { fullWidth -> fullWidth / 4 }
-                    ) + fadeOut(
-                        animationSpec = tween(
-                            durationMillis = 360,
-                            easing = LinearOutSlowInEasing
+                        targetOffset = { fullWidth -> fullWidth / 4 },
+                    ) +
+                        fadeOut(
+                            animationSpec =
+                            tween(
+                                durationMillis = 360,
+                                easing = LinearOutSlowInEasing,
+                            ),
                         )
-                    ))
-                },
-                popTransitionSpec = {
-                    (slideIntoContainer(
+                    )
+            },
+            popTransitionSpec = {
+                (
+                    slideIntoContainer(
                         towards = AnimatedContentTransitionScope.SlideDirection.Start,
-                        animationSpec = tween(
+                        animationSpec =
+                        tween(
                             durationMillis = 480,
-                            easing = FastOutSlowInEasing
+                            easing = FastOutSlowInEasing,
                         ),
-                        initialOffset = { fullWidth -> -fullWidth / 4 }
-                    ) + fadeIn(
-                        animationSpec = tween(
-                            durationMillis = 360,
-                            easing = LinearOutSlowInEasing
+                        initialOffset = { fullWidth -> -fullWidth / 4 },
+                    ) +
+                        fadeIn(
+                            animationSpec =
+                            tween(
+                                durationMillis = 360,
+                                easing = LinearOutSlowInEasing,
+                            ),
                         )
-                    )) togetherWith (scaleOut(
+                    ) togetherWith (
+                    scaleOut(
                         targetScale = 0.8f,
-                        animationSpec = tween(
+                        animationSpec =
+                        tween(
                             durationMillis = 480,
-                            easing = FastOutSlowInEasing
-                        )
-                    ) + fadeOut(
-                        animationSpec = tween(durationMillis = 360)
-                    ))
-                },
-                predictivePopTransitionSpec = { _ ->
-                    (slideIntoContainer(
-                        towards = AnimatedContentTransitionScope.SlideDirection.Start,
-                        animationSpec = tween(
-                            easing = FastOutSlowInEasing
+                            easing = FastOutSlowInEasing,
                         ),
-                        initialOffset = { fullWidth -> -fullWidth / 4 }
-                    ) + fadeIn(
-                        animationSpec = tween(
-                            easing = LinearOutSlowInEasing
+                    ) +
+                        fadeOut(
+                            animationSpec = tween(durationMillis = 360),
                         )
-                    )) togetherWith (scaleOut(
+                    )
+            },
+            predictivePopTransitionSpec = { _ ->
+                (
+                    slideIntoContainer(
+                        towards = AnimatedContentTransitionScope.SlideDirection.Start,
+                        animationSpec =
+                        tween(
+                            easing = FastOutSlowInEasing,
+                        ),
+                        initialOffset = { fullWidth -> -fullWidth / 4 },
+                    ) +
+                        fadeIn(
+                            animationSpec =
+                            tween(
+                                easing = LinearOutSlowInEasing,
+                            ),
+                        )
+                    ) togetherWith (
+                    scaleOut(
                         targetScale = 0.8f,
-                        animationSpec = tween(
-                            easing = FastOutSlowInEasing
+                        animationSpec =
+                        tween(
+                            easing = FastOutSlowInEasing,
+                        ),
+                    ) +
+                        fadeOut(
+                            animationSpec = tween(),
                         )
-                    ) + fadeOut(
-                        animationSpec = tween()
-                    ))
-                },
-                onBack = {
-                    leaveScreen {
-                        if (backStack.size > 1) {
-                            backStack.removeLastOrNull()
-                        } else {
-                            finish()
-                        }
-                    }
-                },
-                entryProvider = entryProvider {
-                    entry<ReplaceRuleRoute> {
-                        ReplaceRuleRouteScreen(
-                            bookUrl = bookUrl,
-                            onBackClick = { leaveScreen { finish() } },
-                            onNavigateToEdit = { route -> backStack.add(route) }
-                        )
-                    }
-
-                    entry<ReplaceEditRoute> { route ->
-                        val viewModel: ReplaceEditViewModel = koinViewModel(
-                            key = "replace_edit_${route.sessionId}"
-                        ) { parametersOf(route) }
-
-                        ReplaceEditRouteScreen(
-                            viewModel = viewModel,
-                            onBack = {
-                                leaveScreen {
-                                    if (backStack.size > 1) {
-                                        backStack.removeLastOrNull()
-                                    } else {
-                                        finish()
-                                    }
-                                }
-                            },
-                            onSaveSuccess = {
-                                leaveScreen {
-                                    if (backStack.size > 1) {
-                                        backStack.removeLastOrNull()
-                                    } else {
-                                        finish()
-                                    }
-                                }
-                            }
-                        )
-                    }
-                }
-            )
-            BackHandler(enabled = !configuration.appShell.predictiveBackEnabled) {
+                    )
+            },
+            onBack = {
                 leaveScreen {
                     if (backStack.size > 1) {
                         backStack.removeLastOrNull()
@@ -196,10 +179,57 @@ class ReplaceRuleActivity : BaseComposeActivity() {
                         finish()
                     }
                 }
+            },
+            entryProvider =
+            entryProvider {
+                entry<ReplaceRuleRoute> {
+                    ReplaceRuleRouteScreen(
+                        bookUrl = bookUrl,
+                        onBackClick = { leaveScreen { finish() } },
+                        onNavigateToEdit = { route -> backStack.add(route) },
+                    )
+                }
+
+                entry<ReplaceEditRoute> { route ->
+                    val viewModel: ReplaceEditViewModel =
+                        koinViewModel(
+                            key = "replace_edit_${route.sessionId}",
+                        ) { parametersOf(route) }
+
+                    ReplaceEditRouteScreen(
+                        viewModel = viewModel,
+                        onBack = {
+                            leaveScreen {
+                                if (backStack.size > 1) {
+                                    backStack.removeLastOrNull()
+                                } else {
+                                    finish()
+                                }
+                            }
+                        },
+                        onSaveSuccess = {
+                            leaveScreen {
+                                if (backStack.size > 1) {
+                                    backStack.removeLastOrNull()
+                                } else {
+                                    finish()
+                                }
+                            }
+                        },
+                    )
+                }
+            },
+        )
+        BackHandler(enabled = !configuration.appShell.predictiveBackEnabled) {
+            leaveScreen {
+                if (backStack.size > 1) {
+                    backStack.removeLastOrNull()
+                } else {
+                    finish()
+                }
             }
+        }
     }
 
-    private fun resolveStartRoute(route: String?): NavKey {
-        return route?.let { Json.decodeFromString<ReplaceEditRoute>(it) } ?: ReplaceRuleRoute
-    }
+    private fun resolveStartRoute(route: String?): NavKey = route?.let { Json.decodeFromString<ReplaceEditRoute>(it) } ?: ReplaceRuleRoute
 }

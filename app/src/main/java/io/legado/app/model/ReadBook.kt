@@ -7,7 +7,6 @@ import io.legado.app.data.appDb
 import io.legado.app.data.entities.Book
 import io.legado.app.data.entities.BookChapter
 import io.legado.app.data.entities.BookProgress
-import io.legado.app.data.entities.BookSource
 import io.legado.app.data.entities.readRecord.ReadRecord
 import io.legado.app.data.entities.readRecord.ReadRecordSession
 import io.legado.app.data.repository.HighlightRuleRepository
@@ -59,6 +58,7 @@ import io.legado.app.utils.dpToPx
 import io.legado.app.utils.postEvent
 import io.legado.app.utils.stackTraceStr
 import io.legado.app.utils.toastOnUi
+import kotlin.math.min
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.Dispatchers.Main
@@ -78,8 +78,6 @@ import kotlinx.coroutines.withContext
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import splitties.init.appCtx
-import kotlin.math.min
-
 
 /**
  * ReadBook 会话的权威只读快照。
@@ -124,6 +122,7 @@ object ReadBook : CoroutineScope by MainScope(), KoinComponent {
     var inBookshelf = false
     var chapterSize = 0
     var simulatedChapterSize = 0
+
     // 主线程写（翻页/换章/进度跳转），IO 线程读——layoutLoadedChapter 在
     // Dispatchers.IO 上用它们判断当前页是否已排版（见 when(chapter.index - durChapterIndex)
     // 与 page.containPos(durChapterPos)）。没有 @Volatile 时 IO 侧可能读到陈旧值，
@@ -137,14 +136,16 @@ object ReadBook : CoroutineScope by MainScope(), KoinComponent {
         private set
     var isLocalBook = true
     var chapterChanged = false
+
     @Volatile
     var readerChapterInputWindow = ReaderChapterInputWindow()
         private set
+
     @Volatile
     private var readerPaginationSnapshots = emptyMap<Int, ReaderChapterPaginationSnapshot>()
+
     @Volatile
     private var readerPaginationEnvironment: ReaderPaginationEnvironment? = null
-    var bookSource: BookSource? = null
     var msg: String? = null
     private val readRecordRepository: ReadRecordRepository by inject()
     private val readSettingsGateway: ReadSettingsGateway by inject()
@@ -152,8 +153,7 @@ object ReadBook : CoroutineScope by MainScope(), KoinComponent {
     private var lastReadLength: Long = 0
     private val loadingChapters = arrayListOf<Int>()
     private val readRecord = ReadRecord()
-    private val chapterLayoutScheduler = LatestChapterTaskScheduler<ChapterLayoutTaskKey>(this) {
-            _, error ->
+    private val chapterLayoutScheduler = LatestChapterTaskScheduler<ChapterLayoutTaskKey>(this) { _, error ->
         AppLog.put("Reader chapter load ERROR", error)
         appCtx.toastOnUi("Reader chapter load ERROR:\n${error.stackTraceStr}")
     }
@@ -161,7 +161,6 @@ object ReadBook : CoroutineScope by MainScope(), KoinComponent {
     var isUiActive = false
     val isAutoSaveSessionRunning: Boolean
         get() = autoSaveJob != null
-
 
     /* 跳转进度前进度记录 */
     var lastBookProgress: BookProgress? = null
@@ -191,7 +190,8 @@ object ReadBook : CoroutineScope by MainScope(), KoinComponent {
             AppLog.putDebug("PageEstimate $metric")
         },
     )
-    //占位
+
+    // 占位
     private var currentReadLength: Long = 10L
     private const val AUTO_SAVE_INTERVAL = 120 * 1000L
 
@@ -328,12 +328,21 @@ object ReadBook : CoroutineScope by MainScope(), KoinComponent {
         val environment = readerPaginationEnvironment ?: return
         val style = environment.style
         val columns = style.columnCount(environment.widthPx, environment.heightPx)
-        val contentWidth = environment.widthPx / columns - style.paddingLeftPx - style.paddingRightPx -
-            environment.contentPaddingLeftPx - environment.contentPaddingRightPx
-        val contentHeight = (environment.heightPx - style.paddingTopPx - style.paddingBottomPx -
-            environment.contentPaddingTopPx - environment.contentPaddingBottomPx -
-            LegacyReaderPageDecorationFactory.headerExtentPx() -
-            LegacyReaderPageDecorationFactory.footerExtentPx()).toInt()
+        val contentWidth = environment.widthPx /
+            columns -
+            style.paddingLeftPx -
+            style.paddingRightPx -
+            environment.contentPaddingLeftPx -
+            environment.contentPaddingRightPx
+        val contentHeight = (
+            environment.heightPx -
+                style.paddingTopPx -
+                style.paddingBottomPx -
+                environment.contentPaddingTopPx -
+                environment.contentPaddingBottomPx -
+                LegacyReaderPageDecorationFactory.headerExtentPx() -
+                LegacyReaderPageDecorationFactory.footerExtentPx()
+            ).toInt()
         if (contentWidth <= 0 || contentHeight <= 0) return
         val processor = contentProcessor ?: ContentProcessor.get(book)
 
@@ -356,7 +365,9 @@ object ReadBook : CoroutineScope by MainScope(), KoinComponent {
             // The estimator counts screen turns, not columns: both columns contribute capacity.
             contentHeightPx = contentHeight * columns,
             fontKey = "${style.bodyStyle.fontPath}|${style.bodyStyle.fontWeight}|${style.bodyStyle.fontFamily}|${style.bodyStyle.italic}",
-            titleFontKey = "${style.titleStyle.fontPath}|${style.titleStyle.fontWeight}|${style.titleStyle.fontFamily}|${style.titleStyle.italic}",
+            titleFontKey =
+            "${style.titleStyle.fontPath}|${style.titleStyle.fontWeight}|" +
+                "${style.titleStyle.fontFamily}|${style.titleStyle.italic}",
             letterSpacing = ReadBookConfig.letterSpacing,
             paragraphIndent = ReadBookConfig.paragraphIndent,
             titleMode = ReadBookConfig.titleMode,
@@ -429,8 +440,7 @@ object ReadBook : CoroutineScope by MainScope(), KoinComponent {
         }
     }
 
-    fun getWholeBookPageState(chapterIndex: Int, localPageIndex: Int): WholeBookPageState? =
-        wholeBookPageCoordinator.getState(chapterIndex, localPageIndex)
+    fun getWholeBookPageState(chapterIndex: Int, localPageIndex: Int): WholeBookPageState? = wholeBookPageCoordinator.getState(chapterIndex, localPageIndex)
 
     /** Silently paginates uncached local-book chapters and feeds the whole-book coordinator. */
     suspend fun paginateLocalBookPages(layoutGeneration: Long) {
@@ -472,29 +482,30 @@ object ReadBook : CoroutineScope by MainScope(), KoinComponent {
                 htmlSemanticTextResolver = AndroidReaderHtmlSemanticTextResolver,
             )
             val environment = readerPaginationEnvironment ?: return
-            when (val result = LegacyReaderChapterPaginator.paginate(
-                book = book,
-                bookSource = bookSource,
-                chapter = chapter,
-                displayTitle = displayTitle,
-                content = processed,
-                source = source,
-                revision = layoutGeneration + chapter.index,
-                viewportWidthPx = environment.widthPx,
-                viewportHeightPx = environment.heightPx,
-                contentPaddingLeftPx = environment.contentPaddingLeftPx,
-                contentPaddingTopPx = environment.contentPaddingTopPx,
-                contentPaddingRightPx = environment.contentPaddingRightPx,
-                contentPaddingBottomPx = environment.contentPaddingBottomPx,
-                paginationStyle = environment.style,
-                highlightRules = highlightRules,
-            )) {
-                is LegacyReaderChapterPaginationResult.Success -> {
-                wholeBookPageCoordinator.correctChapter(
-                    chapterIndex = chapter.index,
-                    realPageCount = result.pages.size.coerceAtLeast(1),
-                    layoutGeneration = layoutGeneration,
+            when (
+                val result = LegacyReaderChapterPaginator.paginate(
+                    book = book,
+                    chapter = chapter,
+                    displayTitle = displayTitle,
+                    content = processed,
+                    source = source,
+                    revision = layoutGeneration + chapter.index,
+                    viewportWidthPx = environment.widthPx,
+                    viewportHeightPx = environment.heightPx,
+                    contentPaddingLeftPx = environment.contentPaddingLeftPx,
+                    contentPaddingTopPx = environment.contentPaddingTopPx,
+                    contentPaddingRightPx = environment.contentPaddingRightPx,
+                    contentPaddingBottomPx = environment.contentPaddingBottomPx,
+                    paginationStyle = environment.style,
+                    highlightRules = highlightRules,
                 )
+            ) {
+                is LegacyReaderChapterPaginationResult.Success -> {
+                    wholeBookPageCoordinator.correctChapter(
+                        chapterIndex = chapter.index,
+                        realPageCount = result.pages.size.coerceAtLeast(1),
+                        layoutGeneration = layoutGeneration,
+                    )
                 }
                 is LegacyReaderChapterPaginationResult.Unsupported -> Unit
             }
@@ -585,8 +596,7 @@ object ReadBook : CoroutineScope by MainScope(), KoinComponent {
         )
     }
 
-    fun readerPagination(chapterIndex: Int = durChapterIndex): ReaderChapterPaginationSnapshot? =
-        readerPaginationSnapshots[chapterIndex]
+    fun readerPagination(chapterIndex: Int = durChapterIndex): ReaderChapterPaginationSnapshot? = readerPaginationSnapshots[chapterIndex]
 
     val readerPaginationGeneration: Long get() = wholeBookPageCoordinator.generation
 
@@ -595,7 +605,6 @@ object ReadBook : CoroutineScope by MainScope(), KoinComponent {
     }
 
     fun upWebBook(book: Book) {
-        bookSource = null
         if (book.getImageStyle().isNullOrBlank() && (book.isImage || book.isPdf)) {
             book.setImageStyle(Book.imgStyleFull)
         }
@@ -611,7 +620,7 @@ object ReadBook : CoroutineScope by MainScope(), KoinComponent {
                     ConfigUpdateAction.UpdateStyle,
                     ConfigUpdateAction.ReloadContent,
                     ConfigUpdateAction.RebuildWholeBookPageIndex,
-                )
+                ),
             )
             if (readSettingsGateway.currentSettings.readBarStyleFollowPage) {
                 postEvent(EventBus.UPDATE_READ_ACTION_BAR, true)
@@ -621,8 +630,10 @@ object ReadBook : CoroutineScope by MainScope(), KoinComponent {
 
     fun setProgress(progress: BookProgress) {
         if (progress.durChapterIndex < chapterSize &&
-            (durChapterIndex != progress.durChapterIndex
-                    || durChapterPos != progress.durChapterPos)
+            (
+                durChapterIndex != progress.durChapterIndex ||
+                    durChapterPos != progress.durChapterPos
+                )
         ) {
             durChapterIndex = progress.durChapterIndex
             durChapterPos = progress.durChapterPos
@@ -634,9 +645,9 @@ object ReadBook : CoroutineScope by MainScope(), KoinComponent {
         }
     }
 
-    //暂时保存跳转前进度
+    // 暂时保存跳转前进度
     fun saveCurrentBookProgress() {
-        if (lastBookProgress != null) return //避免进度条连续跳转不能覆盖最初的进度记录
+        if (lastBookProgress != null) return // 避免进度条连续跳转不能覆盖最初的进度记录
         lastBookProgress = book?.let { BookProgress(it) }
     }
 
@@ -647,15 +658,14 @@ object ReadBook : CoroutineScope by MainScope(), KoinComponent {
         if (lastBookProgress != null) readingAnchorJumpCount++
     }
 
-    fun hasReadingAnchor(): Boolean =
-        ReadBookConfig.readingAnchorEnabled && lastBookProgress != null && readingAnchorJumpCount >= 2
+    fun hasReadingAnchor(): Boolean = ReadBookConfig.readingAnchorEnabled && lastBookProgress != null && readingAnchorJumpCount >= 2
 
     fun discardReadingAnchor() {
         lastBookProgress = null
         readingAnchorJumpCount = 0
     }
 
-    //恢复跳转前进度
+    // 恢复跳转前进度
     fun restoreLastBookProgress() {
         lastBookProgress?.let {
             setProgress(it)
@@ -722,7 +732,7 @@ object ReadBook : CoroutineScope by MainScope(), KoinComponent {
                     bookAuthor = currentBookAuthor,
                     startTime = readStartTime,
                     endTime = readStartTime,
-                    words = durChapterIndex.toLong()
+                    words = durChapterIndex.toLong(),
                 )
             }
         }
@@ -745,7 +755,7 @@ object ReadBook : CoroutineScope by MainScope(), KoinComponent {
 
             currentActiveSession = currentActiveSession!!.copy(
                 endTime = endTime,
-                words = durChapterIndex.toLong()
+                words = durChapterIndex.toLong(),
             )
 
             readStartTime = endTime
@@ -808,7 +818,7 @@ object ReadBook : CoroutineScope by MainScope(), KoinComponent {
                 currentActiveSession = current.copy(
                     startTime = sessionToSave.endTime,
                     endTime = sessionToSave.endTime,
-                    words = durChapterIndex.toLong()
+                    words = durChapterIndex.toLong(),
                 )
             }
         }
@@ -884,7 +894,7 @@ object ReadBook : CoroutineScope by MainScope(), KoinComponent {
 
     suspend fun moveToNextChapterAwait(
         upContent: Boolean,
-        upContentInPlace: Boolean = true
+        upContentInPlace: Boolean = true,
     ): Boolean {
         if (durChapterIndex < simulatedChapterSize - 1) {
             durChapterPos = 0
@@ -915,13 +925,15 @@ object ReadBook : CoroutineScope by MainScope(), KoinComponent {
     fun moveToPrevChapter(
         upContent: Boolean,
         toLast: Boolean = true,
-        upContentInPlace: Boolean = true
+        upContentInPlace: Boolean = true,
     ): Boolean {
         if (durChapterIndex > 0) {
             durChapterPos = if (toLast) {
                 readerPagination(durChapterIndex - 1)?.lastPageStart
                     ?: Int.MAX_VALUE
-            } else 0
+            } else {
+                0
+            }
             durChapterIndex--
             clearExpiredChapterLoadingJob()
             moveReaderChapterInputPrevious()
@@ -963,7 +975,7 @@ object ReadBook : CoroutineScope by MainScope(), KoinComponent {
         index: Int,
         durChapterPos: Int = 0,
         upContent: Boolean = true,
-        success: (() -> Unit)? = null
+        success: (() -> Unit)? = null,
     ) {
         // 实时读取章节数而不是依赖缓存 chapterSize：更新目录后 chapterSize 若未同步，
         // 新增章节的 index 会超出旧值而被下方守卫静默吞掉，表现为「点击新章节无法跳转」。
@@ -1045,7 +1057,7 @@ object ReadBook : CoroutineScope by MainScope(), KoinComponent {
      */
     fun loadContent(
         resetPageOffset: Boolean,
-        success: (() -> Unit)? = null
+        success: (() -> Unit)? = null,
     ) {
         loadContent(
             durChapterIndex,
@@ -1108,7 +1120,7 @@ object ReadBook : CoroutineScope by MainScope(), KoinComponent {
         index: Int,
         upContent: Boolean = true,
         resetPageOffset: Boolean = false,
-        success: (() -> Unit)? = null
+        success: (() -> Unit)? = null,
     ) {
         Coroutine.async {
             val book = book!!
@@ -1127,7 +1139,7 @@ object ReadBook : CoroutineScope by MainScope(), KoinComponent {
                         it,
                         upContent,
                         resetPageOffset,
-                        success = success
+                        success = success,
                     )
                 } ?: download(
                     downloadScope,
@@ -1148,7 +1160,7 @@ object ReadBook : CoroutineScope by MainScope(), KoinComponent {
         index: Int,
         upContent: Boolean = true,
         resetPageOffset: Boolean = false,
-        success: (() -> Unit)? = null
+        success: (() -> Unit)? = null,
     ) = withContext(IO) {
         if (addLoading(index)) {
             try {
@@ -1199,7 +1211,7 @@ object ReadBook : CoroutineScope by MainScope(), KoinComponent {
         chapter: BookChapter,
         resetPageOffset: Boolean,
         semaphore: Semaphore? = null,
-        success: (() -> Unit)? = null
+        success: (() -> Unit)? = null,
     ) {
         val book = book ?: return removeLoading(chapter.index)
         val msg = if (book.isLocal) "无内容" else "没有书源"
@@ -1208,7 +1220,7 @@ object ReadBook : CoroutineScope by MainScope(), KoinComponent {
             chapter,
             "加载正文失败\n$msg",
             resetPageOffset = resetPageOffset,
-            success = success
+            success = success,
         )
     }
 
@@ -1241,7 +1253,7 @@ object ReadBook : CoroutineScope by MainScope(), KoinComponent {
         upContent: Boolean = true,
         resetPageOffset: Boolean,
         canceled: Boolean = false,
-        success: (() -> Unit)? = null
+        success: (() -> Unit)? = null,
     ) {
         removeLoading(chapter.index)
         if (canceled || chapter.index !in durChapterIndex - 1..durChapterIndex + 1) {
@@ -1302,7 +1314,6 @@ object ReadBook : CoroutineScope by MainScope(), KoinComponent {
         )
         val readerChapterInput = ReaderChapterInput(
             book = book,
-            bookSource = bookSource,
             chapter = chapter,
             displayTitle = displayTitle,
             content = contents,
@@ -1310,7 +1321,6 @@ object ReadBook : CoroutineScope by MainScope(), KoinComponent {
             contentHash = contents.hashCode(),
             contentProcessesHash = contents.effectiveContentProcesses.hashCode(),
             sourceHash = readerSource.hashCode(),
-            bookSourceHash = bookSource.hashCode(),
             pageEstimateGeneration = pageEstimateGeneration,
         )
         ensureActive()
@@ -1324,11 +1334,9 @@ object ReadBook : CoroutineScope by MainScope(), KoinComponent {
                 renderCallBack?.contentLoadFinish()
                 publishSnapshot()
             }
-
             -1 -> {
                 if (upContent) renderCallBack?.upContent(offset, resetPageOffset)
             }
-
             1 -> {
                 if (upContent) renderCallBack?.upContent(offset, resetPageOffset)
             }
@@ -1341,7 +1349,7 @@ object ReadBook : CoroutineScope by MainScope(), KoinComponent {
         chapter: BookChapter,
         content: String,
         upContent: Boolean = true,
-        resetPageOffset: Boolean
+        resetPageOffset: Boolean,
     ) {
         removeLoading(chapter.index)
         if (chapter.index !in durChapterIndex - 1..durChapterIndex + 1) {
@@ -1363,9 +1371,7 @@ object ReadBook : CoroutineScope by MainScope(), KoinComponent {
         // 在线目录更新已移除, 本地目录由本地解析路径负责
     }
 
-    fun pageAnim(): Int {
-        return book?.getPageAnim() ?: ReadBookConfig.pageAnim
-    }
+    fun pageAnim(): Int = book?.getPageAnim() ?: ReadBookConfig.pageAnim
 
     fun setCharset(charset: String) {
         book?.let {
@@ -1429,7 +1435,8 @@ object ReadBook : CoroutineScope by MainScope(), KoinComponent {
                     if (!pendingProgressSave) {
                         pendingProgressSave = true
                         progressSaveHandler.postDelayed(
-                            pendingProgressSaveRunnable, PROGRESS_SAVE_DEBOUNCE_MS
+                            pendingProgressSaveRunnable,
+                            PROGRESS_SAVE_DEBOUNCE_MS,
                         )
                     }
                 } else {
@@ -1458,7 +1465,7 @@ object ReadBook : CoroutineScope by MainScope(), KoinComponent {
             }
             preDownloadTask?.cancel()
             preDownloadTask = launch(IO) {
-                //预下载
+                // 预下载
                 launch {
                     val maxChapterIndex =
                         min(durChapterIndex + readSettingsGateway.currentSettings.preDownloadNum, chapterSize)
@@ -1539,9 +1546,9 @@ object ReadBook : CoroutineScope by MainScope(), KoinComponent {
         val current =
             appDb.bookChapterDao.getChapter(chapter.bookUrl, chapter.index) ?: return false
         return current.url == chapter.url &&
-                current.title == chapter.title &&
-                current.start == chapter.start &&
-                current.end == chapter.end
+            current.title == chapter.title &&
+            current.start == chapter.start &&
+            current.end == chapter.end
     }
 
     private fun clearExpiredChapterLoadingJob(clearAll: Boolean = false) {
@@ -1573,7 +1580,6 @@ object ReadBook : CoroutineScope by MainScope(), KoinComponent {
         callBack?.notifyBookChanged()
         callBack = cb
     }
-
 
     /**
      * 注册渲染回调（UI 层渲染控制器）。视图就绪后立即同步一次当前内容，
@@ -1621,13 +1627,13 @@ object ReadBook : CoroutineScope by MainScope(), KoinComponent {
         fun upContent(
             relativePosition: Int = 0,
             resetPageOffset: Boolean = true,
-            success: (() -> Unit)? = null
+            success: (() -> Unit)? = null,
         )
 
         suspend fun upContentAwait(
             relativePosition: Int = 0,
             resetPageOffset: Boolean = true,
-            success: (() -> Unit)? = null
+            success: (() -> Unit)? = null,
         )
 
         fun pageChanged()
@@ -1655,5 +1661,4 @@ object ReadBook : CoroutineScope by MainScope(), KoinComponent {
 
         fun sureNewProgress(progress: BookProgress)
     }
-
 }

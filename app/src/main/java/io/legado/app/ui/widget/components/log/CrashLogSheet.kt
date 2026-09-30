@@ -39,7 +39,7 @@ fun CrashLogSheet(
             MediumTonalButton(
                 onClick = onClear,
                 icon = Icons.Default.DeleteSweep,
-                contentDescription = stringResource(R.string.clear)
+                contentDescription = stringResource(R.string.clear),
             )
         },
         title = stringResource(R.string.crash_log),
@@ -49,16 +49,17 @@ fun CrashLogSheet(
         } else {
             LazyColumn(
                 modifier = Modifier.fillMaxWidth(),
-                contentPadding = PaddingValues(bottom = 16.dp)
+                contentPadding = PaddingValues(bottom = 16.dp),
             ) {
                 items(logFiles) { fileDoc ->
                     AppText(
                         text = fileDoc.name,
                         style = LegadoTheme.typography.bodyMedium,
-                        modifier = Modifier
+                        modifier =
+                        Modifier
                             .fillMaxWidth()
                             .clickable { onReadFile(fileDoc) }
-                            .padding(16.dp)
+                            .padding(16.dp),
                     )
                 }
             }

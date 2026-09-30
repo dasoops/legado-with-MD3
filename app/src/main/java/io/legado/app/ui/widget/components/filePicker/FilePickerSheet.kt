@@ -13,7 +13,9 @@ import io.legado.app.ui.widget.components.modalBottomSheet.OptionCard
 import io.legado.app.ui.widget.components.modalBottomSheet.OptionSheet
 
 enum class FilePickerSheetMode {
-    DIR, FILE, EXPORT
+    DIR,
+    FILE,
+    EXPORT,
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -31,13 +33,13 @@ fun FilePickerSheet(
     OptionSheet(
         show = show,
         onDismissRequest = onDismissRequest,
-        title = title
+        title = title,
     ) {
         onSelectSysDir?.let {
             OptionCard(
                 icon = Icons.Default.FolderOpen,
                 text = stringResource(R.string.sys_folder_picker),
-                onClick = it
+                onClick = it,
             )
         }
 
@@ -45,7 +47,7 @@ fun FilePickerSheet(
             OptionCard(
                 icon = Icons.AutoMirrored.Filled.InsertDriveFile,
                 text = stringResource(R.string.sys_file_picker),
-                onClick = { it(typesOfExtensions(allowExtensions)) }
+                onClick = { it(typesOfExtensions(allowExtensions)) },
             )
         }
 
@@ -53,7 +55,7 @@ fun FilePickerSheet(
             OptionCard(
                 icon = Icons.AutoMirrored.Filled.InsertDriveFile,
                 text = stringResource(R.string.multi_select_items),
-                onClick = { it(typesOfExtensions(allowExtensions)) }
+                onClick = { it(typesOfExtensions(allowExtensions)) },
             )
         }
 
@@ -61,7 +63,7 @@ fun FilePickerSheet(
             OptionCard(
                 icon = Icons.Default.EditNote,
                 text = stringResource(R.string.manual_input),
-                onClick = it
+                onClick = it,
             )
         }
     }
@@ -74,12 +76,18 @@ private fun typesOfExtensions(allowExtensions: Array<String>?): Array<String> {
     } else {
         allowExtensions.forEach {
             when (it) {
-                "*" -> types.add("*/*")
-                "txt", "xml" -> types.add("text/*")
+                "*" -> {
+                    types.add("*/*")
+                }
+                "txt", "xml" -> {
+                    types.add("text/*")
+                }
                 else -> {
-                    val mime = MimeTypeMap.getSingleton()
-                        .getMimeTypeFromExtension(it)
-                        ?: "application/octet-stream"
+                    val mime =
+                        MimeTypeMap
+                            .getSingleton()
+                            .getMimeTypeFromExtension(it)
+                            ?: "application/octet-stream"
                     types.add(mime)
                 }
             }

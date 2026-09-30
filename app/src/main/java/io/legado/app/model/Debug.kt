@@ -9,7 +9,6 @@ import java.util.Date
 import java.util.Locale
 
 object Debug {
-
     @SuppressLint("ConstantLocale")
     private val debugTimeFormat = SimpleDateFormat("[mm:ss.SSS]", Locale.getDefault())
 
@@ -20,7 +19,7 @@ object Debug {
         print: Boolean = true,
         isHtml: Boolean = false,
         showTime: Boolean = true,
-        state: Int = 1
+        state: Int = 1,
     ) {
         if (BuildConfig.DEBUG) {
             Log.d("sourceDebug", if (isHtml) HtmlFormatter.format(msg) else msg)
@@ -31,5 +30,4 @@ object Debug {
     fun log(msg: String?) {
         log(null, if (msg == null) "" else msg, true)
     }
-
 }

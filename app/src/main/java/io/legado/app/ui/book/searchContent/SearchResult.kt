@@ -30,9 +30,8 @@ data class SearchResult(
     val queryIndexInChapter: Int = 0,
     val matchLength: Int = query.length,
     val isRegex: Boolean = false,
-    val progressPercent: Float = 0f
+    val progressPercent: Float = 0f,
 ) {
-
     fun getTitleAnnotatedString(
         accentColor: Color,
         isEInkMode: Boolean,
@@ -41,7 +40,7 @@ data class SearchResult(
             SpanStyle(
                 color = if (isEInkMode) Color.Unspecified else accentColor,
                 textDecoration = if (isEInkMode) TextDecoration.Underline else null,
-            )
+            ),
         ) {
             append(chapterTitle)
         }
@@ -65,7 +64,8 @@ data class SearchResult(
                 val end = (start + length).coerceAtMost(resultText.length)
                 if (start !in 0 until end) return@forEach
                 addStyle(
-                    style = if (isEInkMode) {
+                    style =
+                    if (isEInkMode) {
                         SpanStyle(textDecoration = TextDecoration.Underline)
                     } else {
                         SpanStyle(
@@ -81,14 +81,16 @@ data class SearchResult(
         }
     }
 
-    fun getTitleSpannable(accentColor: Int, isEInkMode: Boolean): SpannableString =
-        SpannableString(chapterTitle).apply {
-            if (isEInkMode) {
-                setSpan(UnderlineSpan(), 0, length, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
-            } else {
-                setSpan(ForegroundColorSpan(accentColor), 0, length, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
-            }
+    fun getTitleSpannable(
+        accentColor: Int,
+        isEInkMode: Boolean,
+    ): SpannableString = SpannableString(chapterTitle).apply {
+        if (isEInkMode) {
+            setSpan(UnderlineSpan(), 0, length, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
+        } else {
+            setSpan(ForegroundColorSpan(accentColor), 0, length, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
         }
+    }
 
     fun getContentSpannable(
         textColor: Int,
@@ -113,18 +115,18 @@ data class SearchResult(
     }
 
     private fun getHighlightRanges(): List<Pair<Int, Int>> = if (isRegex) {
-            listOf(queryIndexInResult to matchLength)
-        } else if (query.isNotBlank()) {
-            buildList {
-                var searchStart = 0
-                while (searchStart < resultText.length) {
-                    val start = resultText.indexOf(query, searchStart, ignoreCase = true)
-                    if (start == -1) break
-                    add(start to query.length)
-                    searchStart = start + query.length.coerceAtLeast(1)
-                }
+        listOf(queryIndexInResult to matchLength)
+    } else if (query.isNotBlank()) {
+        buildList {
+            var searchStart = 0
+            while (searchStart < resultText.length) {
+                val start = resultText.indexOf(query, searchStart, ignoreCase = true)
+                if (start == -1) break
+                add(start to query.length)
+                searchStart = start + query.length.coerceAtLeast(1)
             }
-        } else {
-            emptyList()
         }
+    } else {
+        emptyList()
+    }
 }

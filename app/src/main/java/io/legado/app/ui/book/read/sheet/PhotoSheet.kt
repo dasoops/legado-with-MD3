@@ -12,11 +12,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.load.resource.bitmap.DownsampleStrategy
-import com.bumptech.glide.request.RequestOptions
 import io.legado.app.R
 import io.legado.app.help.book.BookHelp
 import io.legado.app.help.glide.ImageLoader
-import io.legado.app.help.glide.OkHttpModelLoader
 import io.legado.app.model.BookCover
 import io.legado.app.model.ImageProvider
 import io.legado.app.model.ReadBook
@@ -49,11 +47,13 @@ fun PhotoSheet(
                         setImageBitmap(bitmap)
                     } else {
                         // Try to load from local file
-                        val file = ReadBook.book?.let { book ->
-                            BookHelp.getImage(book, src)
-                        }
+                        val file =
+                            ReadBook.book?.let { book ->
+                                BookHelp.getImage(book, src)
+                            }
                         if (file?.exists() == true) {
-                            ImageLoader.load(ctx, file)
+                            ImageLoader
+                                .load(ctx, file)
                                 .error(R.drawable.image_loading_error)
                                 .dontTransform()
                                 .downsample(DownsampleStrategy.NONE)
@@ -61,17 +61,9 @@ fun PhotoSheet(
                                 .into(this)
                         } else {
                             // Load from URL
-                            val request = ImageLoader.load(ctx, src).apply {
-                                sourceOrigin?.let { origin ->
-                                    apply(
-                                        RequestOptions().set(
-                                            OkHttpModelLoader.sourceOriginOption,
-                                            origin
-                                        )
-                                    )
-                                }
-                            }
-                            request.error(BookCover.defaultDrawable)
+                            val request = ImageLoader.load(ctx, src)
+                            request
+                                .error(BookCover.defaultDrawable)
                                 .dontTransform()
                                 .downsample(DownsampleStrategy.NONE)
                                 .into(this)
@@ -83,21 +75,26 @@ fun PhotoSheet(
                         val drawable = drawable
                         val bmp = (drawable as? BitmapDrawable)?.bitmap
                         if (bmp != null) {
-                            val byteArray = ByteArrayOutputStream().use { stream ->
-                                bmp.compress(Bitmap.CompressFormat.JPEG, 100, stream)
-                                stream.toByteArray()
-                            }
+                            val byteArray =
+                                ByteArrayOutputStream().use { stream ->
+                                    bmp.compress(Bitmap.CompressFormat.JPEG, 100, stream)
+                                    stream.toByteArray()
+                                }
                             val success = saveImageToGallery(context, byteArray)
                             context.toastOnUi(
-                                if (success) context.getString(R.string.save_success)
-                                else "保存失败"
+                                if (success) {
+                                    context.getString(R.string.save_success)
+                                } else {
+                                    "保存失败"
+                                },
                             )
                         }
                         true
                     }
                 }
             },
-            modifier = Modifier
+            modifier =
+            Modifier
                 .fillMaxSize()
                 .padding(vertical = 8.dp),
         )

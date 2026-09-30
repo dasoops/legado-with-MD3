@@ -5,18 +5,18 @@ import androidx.core.os.LocaleListCompat
 import io.legado.app.constant.PreferKey
 import io.legado.app.domain.gateway.AppLocaleGateway
 import io.legado.app.help.config.AppConfigStore
+import java.util.Locale
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import java.util.Locale
 
 internal interface AppLocalePlatform {
     fun getApplicationLocales(): LocaleListCompat
+
     fun setApplicationLocales(locales: LocaleListCompat)
 }
 
 private object AppCompatLocalePlatform : AppLocalePlatform {
-    override fun getApplicationLocales(): LocaleListCompat =
-        AppCompatDelegate.getApplicationLocales()
+    override fun getApplicationLocales(): LocaleListCompat = AppCompatDelegate.getApplicationLocales()
 
     override fun setApplicationLocales(locales: LocaleListCompat) {
         AppCompatDelegate.setApplicationLocales(locales)
@@ -32,16 +32,16 @@ class AppLocaleRepository internal constructor(
         AppConfigStore.getString(PreferKey.language)
     },
 ) : AppLocaleGateway {
-
     private var mirroredLanguage = normalizeLanguage(readPersistedLanguage())
     private val initialPlatformLocales = platform.getApplicationLocales()
-    private val _language = MutableStateFlow(
-        if (initialPlatformLocales.isEmpty) {
-            mirroredLanguage
-        } else {
-            languageForLocaleList(initialPlatformLocales)
-        }
-    )
+    private val _language =
+        MutableStateFlow(
+            if (initialPlatformLocales.isEmpty) {
+                mirroredLanguage
+            } else {
+                languageForLocaleList(initialPlatformLocales)
+            },
+        )
     override val language = _language.asStateFlow()
     override val currentLanguage: String
         get() = _language.value
@@ -85,22 +85,23 @@ internal fun normalizeLanguage(language: String?): String = when (language) {
     else -> "auto"
 }
 
-internal fun localeListForLanguage(language: String?): LocaleListCompat =
-    when (normalizeLanguage(language)) {
-        "zh" -> LocaleListCompat.create(Locale.SIMPLIFIED_CHINESE)
-        "tw" -> LocaleListCompat.create(Locale.TRADITIONAL_CHINESE)
-        "en" -> LocaleListCompat.create(Locale.ENGLISH)
-        else -> LocaleListCompat.getEmptyLocaleList()
-    }
+internal fun localeListForLanguage(language: String?): LocaleListCompat = when (normalizeLanguage(language)) {
+    "zh" -> LocaleListCompat.create(Locale.SIMPLIFIED_CHINESE)
+    "tw" -> LocaleListCompat.create(Locale.TRADITIONAL_CHINESE)
+    "en" -> LocaleListCompat.create(Locale.ENGLISH)
+    else -> LocaleListCompat.getEmptyLocaleList()
+}
 
 internal fun languageForLocaleList(locales: LocaleListCompat): String {
     if (locales.isEmpty) return "auto"
     val locale = locales[0] ?: return "auto"
     return when {
         locale.language == Locale.CHINESE.language &&
-            (locale.country.equals("TW", ignoreCase = true) ||
-                locale.country.equals("HK", ignoreCase = true) ||
-                locale.script.equals("Hant", ignoreCase = true)) -> "tw"
+            (
+                locale.country.equals("TW", ignoreCase = true) ||
+                    locale.country.equals("HK", ignoreCase = true) ||
+                    locale.script.equals("Hant", ignoreCase = true)
+                ) -> "tw"
         locale.language == Locale.CHINESE.language -> "zh"
         locale.language == Locale.ENGLISH.language -> "en"
         else -> "auto"

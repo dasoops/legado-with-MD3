@@ -27,13 +27,9 @@ data class TextProcessAction(
         /** 用户划线/高亮标记：不改文本，样式由 styleJson 承载，文本仅供锚点定位。 */
         const val TYPE_MARK = "mark"
 
-        fun replace(replacement: String): TextProcessAction {
-            return TextProcessAction(TYPE_REPLACE, replacement = replacement)
-        }
+        fun replace(replacement: String): TextProcessAction = TextProcessAction(TYPE_REPLACE, replacement = replacement)
 
-        fun delete(): TextProcessAction {
-            return TextProcessAction(TYPE_DELETE)
-        }
+        fun delete(): TextProcessAction = TextProcessAction(TYPE_DELETE)
     }
 }
 
@@ -56,28 +52,53 @@ data class TextProcessStyle(
  */
 @Keep
 enum class MarkingEffect {
-    SOLID, WAVE, DASHED, STRIKE, HIGHLIGHT, BG, TEXT;
+    SOLID,
+    WAVE,
+    DASHED,
+    STRIKE,
+    HIGHLIGHT,
+    BG,
+    TEXT,
+    ;
 
     /** 是否属于下划线类效果（对应 underlineMode != 0）。 */
     val isUnderline: Boolean
-        get() = this == SOLID || this == WAVE || this == DASHED ||
-                this == STRIKE || this == HIGHLIGHT
+        get() =
+            this == SOLID ||
+                this == WAVE ||
+                this == DASHED ||
+                this == STRIKE ||
+                this == HIGHLIGHT
 
     /**
      * 由效果 + 选中颜色生成样式。背景色自动半透明（约 20% alpha），
      * 避免不透明背景盖住正文；下划线/字体色用原色。
      */
     fun toStyle(color: Int): TextProcessStyle = when (this) {
-        SOLID -> TextProcessStyle(underlineMode = 1, underlineColor = color)
-        WAVE -> TextProcessStyle(underlineMode = 3, underlineColor = color)
-        DASHED -> TextProcessStyle(underlineMode = 2, underlineColor = color)
-        STRIKE -> TextProcessStyle(underlineMode = 6, underlineColor = color)
-        HIGHLIGHT -> TextProcessStyle(
-            underlineMode = 7,
-            underlineColor = (color and 0x00FFFFFF) or 0x66000000,
-        )
-        BG -> TextProcessStyle(bgColor = (color and 0x00FFFFFF) or 0x33000000)
-        TEXT -> TextProcessStyle(textColor = color)
+        SOLID -> {
+            TextProcessStyle(underlineMode = 1, underlineColor = color)
+        }
+        WAVE -> {
+            TextProcessStyle(underlineMode = 3, underlineColor = color)
+        }
+        DASHED -> {
+            TextProcessStyle(underlineMode = 2, underlineColor = color)
+        }
+        STRIKE -> {
+            TextProcessStyle(underlineMode = 6, underlineColor = color)
+        }
+        HIGHLIGHT -> {
+            TextProcessStyle(
+                underlineMode = 7,
+                underlineColor = (color and 0x00FFFFFF) or 0x66000000,
+            )
+        }
+        BG -> {
+            TextProcessStyle(bgColor = (color and 0x00FFFFFF) or 0x33000000)
+        }
+        TEXT -> {
+            TextProcessStyle(textColor = color)
+        }
     }
 
     companion object {

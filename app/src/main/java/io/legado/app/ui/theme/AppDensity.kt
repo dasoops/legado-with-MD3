@@ -10,14 +10,15 @@ import io.legado.app.utils.sysConfiguration
 /**
  * 应用设置里的字体缩放（10 = 1.0 倍），超出 0.8~1.6 时回落到 [systemFontScale]。
  */
-fun resolveAppFontScale(fontScaleSetting: Int, systemFontScale: Float): Float =
-    (fontScaleSetting / 10f).takeIf { it in 0.8f..1.6f } ?: systemFontScale
+fun resolveAppFontScale(
+    fontScaleSetting: Int,
+    systemFontScale: Float,
+): Float = (fontScaleSetting / 10f).takeIf { it in 0.8f..1.6f } ?: systemFontScale
 
 /**
  * 同上，回落到当前系统字体缩放。
  */
-fun resolveAppFontScale(fontScaleSetting: Int): Float =
-    resolveAppFontScale(fontScaleSetting, sysConfiguration.fontScale)
+fun resolveAppFontScale(fontScaleSetting: Int): Float = resolveAppFontScale(fontScaleSetting, sysConfiguration.fontScale)
 
 /**
  * 以平台像素密度 + 应用字体缩放构造 [Density]。

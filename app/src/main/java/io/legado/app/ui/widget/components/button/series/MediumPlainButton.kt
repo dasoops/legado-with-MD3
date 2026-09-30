@@ -17,7 +17,7 @@ fun MediumPlainButton(
     icon: ImageVector? = null,
     text: String? = null,
     tint: androidx.compose.ui.graphics.Color = LegadoTheme.colorScheme.onSurface,
-    contentDescription: String? = null
+    contentDescription: String? = null,
 ) {
     SeriesButton(
         onClick = onClick,
@@ -26,7 +26,7 @@ fun MediumPlainButton(
         selected = selected,
         onLongClick = onLongClick,
         size = if (text == null) MediumSeriesIconButtonSize else null,
-        contentColor = tint
+        contentColor = tint,
     ) { contentColor ->
         SeriesButtonContent(
             icon = icon,
@@ -36,7 +36,7 @@ fun MediumPlainButton(
             textStyle = LegadoTheme.typography.labelMedium,
             contentColor = contentColor,
             padding = PaddingValues(horizontal = 16.dp, vertical = 10.dp),
-            spacing = 8.dp
+            spacing = 8.dp,
         )
     }
 }

@@ -10,8 +10,10 @@ data class ReaderPagePlacement(
     val page: ReaderPage,
     val offsetY: Float,
 ) {
-    fun containsViewportPoint(x: Float, y: Float): Boolean =
-        x in 0f..page.widthPx.toFloat() && y in offsetY..(offsetY + page.scrollExtentPx)
+    fun containsViewportPoint(
+        x: Float,
+        y: Float,
+    ): Boolean = x in 0f..page.widthPx.toFloat() && y in offsetY..(offsetY + page.scrollExtentPx)
 
     fun localY(viewportY: Float): Float = viewportY - offsetY
 }
@@ -25,26 +27,29 @@ data class ReaderSelectionVisualBounds(
 class ReaderPageViewportLayout private constructor(
     val placements: List<ReaderPagePlacement>,
 ) {
-    fun pageAt(x: Float, y: Float): ReaderPagePlacement? =
-        placements.firstOrNull { it.containsViewportPoint(x, y) }
+    fun pageAt(
+        x: Float,
+        y: Float,
+    ): ReaderPagePlacement? = placements.firstOrNull { it.containsViewportPoint(x, y) }
 
-    fun selectionBounds(selection: ReaderSelection): List<ReaderSelectionVisualBounds> =
-        placements.flatMap { placement ->
-            selection.bounds(placement.page).mergeSelectionBounds().map { bounds ->
-                ReaderSelectionVisualBounds(
-                    page = placement.page,
-                    bounds = bounds.offsetY(placement.offsetY),
-                )
-            }
+    fun selectionBounds(selection: ReaderSelection): List<ReaderSelectionVisualBounds> = placements.flatMap { placement ->
+        selection.bounds(placement.page).mergeSelectionBounds().map { bounds ->
+            ReaderSelectionVisualBounds(
+                page = placement.page,
+                bounds = bounds.offsetY(placement.offsetY),
+            )
         }
+    }
 
     companion object {
-        fun paged(window: ReaderPageWindow): ReaderPageViewportLayout =
-            ReaderPageViewportLayout(
-                listOfNotNull(window.current?.let { ReaderPagePlacement(it, 0f) }),
-            )
+        fun paged(window: ReaderPageWindow): ReaderPageViewportLayout = ReaderPageViewportLayout(
+            listOfNotNull(window.current?.let { ReaderPagePlacement(it, 0f) }),
+        )
 
-        fun scroll(window: ReaderPageWindow, scrollOffsetPx: Float): ReaderPageViewportLayout {
+        fun scroll(
+            window: ReaderPageWindow,
+            scrollOffsetPx: Float,
+        ): ReaderPageViewportLayout {
             val current = window.current ?: return ReaderPageViewportLayout(emptyList())
             return ReaderPageViewportLayout(
                 listOfNotNull(

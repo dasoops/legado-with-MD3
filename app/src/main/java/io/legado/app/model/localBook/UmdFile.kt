@@ -5,12 +5,14 @@ import io.legado.app.data.entities.BookChapter
 import io.legado.app.utils.DebugLog
 import io.legado.app.utils.FileUtils
 import io.legado.app.utils.printOnDebug
-import me.ag2s.umdlib.domain.UmdBook
-import me.ag2s.umdlib.umd.UmdReader
 import java.io.File
 import java.io.InputStream
+import me.ag2s.umdlib.domain.UmdBook
+import me.ag2s.umdlib.umd.UmdReader
 
-class UmdFile(var book: Book) {
+class UmdFile(
+    var book: Book,
+) {
     companion object : BaseLocalBookParse {
         private var uFile: UmdFile? = null
 
@@ -25,30 +27,23 @@ class UmdFile(var book: Book) {
         }
 
         @Synchronized
-        override fun getChapterList(book: Book): ArrayList<BookChapter> {
-            return getUFile(book).getChapterList()
-        }
+        override fun getChapterList(book: Book): ArrayList<BookChapter> = getUFile(book).getChapterList()
 
         @Synchronized
-        override fun getContent(book: Book, chapter: BookChapter): String? {
-            return getUFile(book).getContent(chapter)
-        }
+        override fun getContent(
+            book: Book,
+            chapter: BookChapter,
+        ): String? = getUFile(book).getContent(chapter)
 
         @Synchronized
         override fun getImage(
             book: Book,
-            href: String
-        ): InputStream? {
-            return getUFile(book).getImage(href)
-        }
-
+            href: String,
+        ): InputStream? = getUFile(book).getImage(href)
 
         @Synchronized
-        override fun upBookInfo(book: Book) {
-            return getUFile(book).upBookInfo()
-        }
+        override fun upBookInfo(book: Book) = getUFile(book).upBookInfo()
     }
-
 
     private var umdBook: UmdBook? = null
         get() {
@@ -97,9 +92,7 @@ class UmdFile(var book: Book) {
         }
     }
 
-    private fun getContent(chapter: BookChapter): String? {
-        return umdBook?.chapters?.getContentString(chapter.index)
-    }
+    private fun getContent(chapter: BookChapter): String? = umdBook?.chapters?.getContentString(chapter.index)
 
     private fun getChapterList(): ArrayList<BookChapter> {
         val chapterList = ArrayList<BookChapter>()
@@ -116,8 +109,7 @@ class UmdFile(var book: Book) {
         return chapterList
     }
 
-    private fun getImage(@Suppress("UNUSED_PARAMETER") href: String): InputStream? {
-        return null
-    }
-
+    private fun getImage(
+        @Suppress("UNUSED_PARAMETER") href: String,
+    ): InputStream? = null
 }

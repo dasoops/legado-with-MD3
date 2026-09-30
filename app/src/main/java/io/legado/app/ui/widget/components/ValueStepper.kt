@@ -32,7 +32,7 @@ fun ValueStepper(
     Row(
         modifier = modifier,
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(6.dp)
+        horizontalArrangement = Arrangement.spacedBy(6.dp),
     ) {
         SmallOutlinedButton(
             onClick = {
@@ -46,18 +46,19 @@ fun ValueStepper(
         if (content != null) {
             content()
         } else {
-            val displayText = valueFormat?.invoke(displayValue) ?: if (showDecimal) {
-                displayValue.toString()
-            } else {
-                displayValue.toInt().toString()
-            }
+            val displayText =
+                valueFormat?.invoke(displayValue) ?: if (showDecimal) {
+                    displayValue.toString()
+                } else {
+                    displayValue.toInt().toString()
+                }
             TextCard(
                 cornerRadius = 8.dp,
                 horizontalPadding = 8.dp,
                 verticalPadding = 4.dp,
                 text = displayText,
                 backgroundColor = LegadoTheme.colorScheme.surfaceContainerHigh,
-                contentColor = LegadoTheme.colorScheme.onSurface
+                contentColor = LegadoTheme.colorScheme.onSurface,
             )
         }
         SmallOutlinedButton(

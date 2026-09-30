@@ -28,22 +28,52 @@ data class OnboardingUiState(
 /** 用户动作；与 Android Intent 无关，命名见 skill 约定。 */
 sealed interface OnboardingIntent {
     data object Next : OnboardingIntent
+
     data object Prev : OnboardingIntent
-    data class UpdateWebDavUrl(val value: String) : OnboardingIntent
-    data class UpdateWebDavAccount(val value: String) : OnboardingIntent
-    data class UpdateWebDavPassword(val value: String) : OnboardingIntent
+
+    data class UpdateWebDavUrl(
+        val value: String,
+    ) : OnboardingIntent
+
+    data class UpdateWebDavAccount(
+        val value: String,
+    ) : OnboardingIntent
+
+    data class UpdateWebDavPassword(
+        val value: String,
+    ) : OnboardingIntent
 
     /** 应用访问密码，旧实现即时写入 LocalConfig.password */
-    data class UpdateAppAccessPassword(val value: String) : OnboardingIntent
+    data class UpdateAppAccessPassword(
+        val value: String,
+    ) : OnboardingIntent
+
     data object SaveAndTestWebDav : OnboardingIntent
+
     data object FetchBackups : OnboardingIntent
-    data class RestoreBackup(val name: String) : OnboardingIntent
+
+    data class RestoreBackup(
+        val name: String,
+    ) : OnboardingIntent
+
     data object DismissBackupSelector : OnboardingIntent
+
     data object StartLocalRestore : OnboardingIntent
-    data class RestoreLocalFile(val uri: String) : OnboardingIntent
-    data class SelectTheme(val value: String) : OnboardingIntent
-    data class SetThemeMode(val value: String) : OnboardingIntent
+
+    data class RestoreLocalFile(
+        val uri: String,
+    ) : OnboardingIntent
+
+    data class SelectTheme(
+        val value: String,
+    ) : OnboardingIntent
+
+    data class SetThemeMode(
+        val value: String,
+    ) : OnboardingIntent
+
     data object DismissRestoreError : OnboardingIntent
+
     data object CancelBusy : OnboardingIntent
 }
 
@@ -52,7 +82,12 @@ sealed interface OnboardingEffect {
 
     /** 首页按返回键：直接结束引导（不进入主界面），保持旧行为 */
     data object Finish : OnboardingEffect
+
     data object OpenRestoreFilePicker : OnboardingEffect
+
     data object ApplyDayNight : OnboardingEffect
-    data class ShowToast(val resId: Int) : OnboardingEffect
+
+    data class ShowToast(
+        val resId: Int,
+    ) : OnboardingEffect
 }

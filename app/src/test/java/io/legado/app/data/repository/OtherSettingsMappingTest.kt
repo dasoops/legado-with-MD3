@@ -6,7 +6,6 @@ import org.junit.Assert.assertEquals
 import org.junit.Test
 
 class OtherSettingsMappingTest {
-
     @Test
     fun `其他设置 19 键写读映射逐字段对应`() {
         otherMappingSamples().forEach { expected ->
@@ -17,24 +16,26 @@ class OtherSettingsMappingTest {
 
     @Test
     fun `默认书籍目录 nullable 删除走真实原子路径`() {
-        val values = captureAtomicUpdateValues(
-            current = OtherSettings(defaultBookTreeUri = "content://old"),
-            read = { it.toOtherSettings() },
-            toPrefMap = OtherSettings::toPrefMap,
-            transform = { it.copy(defaultBookTreeUri = null) },
-        )
+        val values =
+            captureAtomicUpdateValues(
+                current = OtherSettings(defaultBookTreeUri = "content://old"),
+                read = { it.toOtherSettings() },
+                toPrefMap = OtherSettings::toPrefMap,
+                transform = { it.copy(defaultBookTreeUri = null) },
+            )
 
         assertEquals(mapOf(PreferKey.defaultBookTreeUri to null), values)
     }
 }
 
 private fun otherMappingSamples(): List<OtherSettings> {
-    val base = OtherSettings(
-        updateToVariant = "beta",
-        defaultBookTreeUri = "content://books",
-        sourceEditMaxLine = 123,
-        fontSort = 7,
-    )
+    val base =
+        OtherSettings(
+            updateToVariant = "beta",
+            defaultBookTreeUri = "content://books",
+            sourceEditMaxLine = 123,
+            fontSort = 7,
+        )
     return listOf(
         base,
         base.copy(autoCheckUpdateOnStart = true),

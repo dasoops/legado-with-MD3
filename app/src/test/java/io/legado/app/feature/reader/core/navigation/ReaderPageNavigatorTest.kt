@@ -15,7 +15,17 @@ class ReaderPageNavigatorTest {
     private fun page(index: Int, start: Int, chapterIndex: Int = 4) = ReaderPage(
         id = ReaderPageId(chapterIndex, index), chapterTitle = "", text = "字",
         widthPx = 100, heightPx = 100, contentTopPx = 0f, contentBottomPx = 100f,
-        elements = listOf(ReaderElement.Text(ReaderRect(0f, 0f, 10f, 10f), 8f, "字", ReaderTextStyle(0, 10f), false, false, chapterPosition = start)),
+        elements = listOf(
+            ReaderElement.Text(
+                ReaderRect(0f, 0f, 10f, 10f),
+                8f,
+                "字",
+                ReaderTextStyle(0, 10f),
+                false,
+                false,
+                chapterPosition = start,
+            ),
+        ),
         revision = 1,
     )
 
@@ -101,10 +111,30 @@ class ReaderPageNavigatorTest {
     @Test
     fun bodyAnchorUsesLeftColumnBeforeHigherRightColumn() {
         val style = ReaderTextStyle(0, 10f)
-        val page = page(0, 0).copy(elements = listOf(
-            ReaderElement.Text(ReaderRect(5f, 20f, 15f, 30f), 28f, "左", style, false, false, chapterPosition = 10, paragraphIndex = 1),
-            ReaderElement.Text(ReaderRect(55f, 0f, 65f, 10f), 8f, "右", style, false, false, chapterPosition = 30, paragraphIndex = 2),
-        ))
+        val page = page(0, 0).copy(
+            elements = listOf(
+                ReaderElement.Text(
+                    ReaderRect(5f, 20f, 15f, 30f),
+                    28f,
+                    "左",
+                    style,
+                    false,
+                    false,
+                    chapterPosition = 10,
+                    paragraphIndex = 1,
+                ),
+                ReaderElement.Text(
+                    ReaderRect(55f, 0f, 65f, 10f),
+                    8f,
+                    "右",
+                    style,
+                    false,
+                    false,
+                    chapterPosition = 30,
+                    paragraphIndex = 2,
+                ),
+            ),
+        )
         val context = ReaderPageNavigator.pageContext(listOf(page), 0)
         assertEquals(10, context?.contentStartPosition)
         assertEquals("左", context?.anchorText)
@@ -116,9 +146,36 @@ class ReaderPageNavigatorTest {
         val page = page(index = 0, start = 0).copy(
             text = "标题正文",
             elements = listOf(
-                ReaderElement.Text(ReaderRect(0f, 0f, 10f, 10f), 8f, "标题", style, false, true, chapterPosition = 0, paragraphIndex = 0),
-                ReaderElement.Text(ReaderRect(0f, 20f, 10f, 30f), 28f, "正", style, false, false, chapterPosition = 100, paragraphIndex = 1),
-                ReaderElement.Text(ReaderRect(10f, 20f, 20f, 30f), 28f, "文", style, false, false, chapterPosition = 101, paragraphIndex = 1),
+                ReaderElement.Text(
+                    ReaderRect(0f, 0f, 10f, 10f),
+                    8f,
+                    "标题",
+                    style,
+                    false,
+                    true,
+                    chapterPosition = 0,
+                    paragraphIndex = 0,
+                ),
+                ReaderElement.Text(
+                    ReaderRect(0f, 20f, 10f, 30f),
+                    28f,
+                    "正",
+                    style,
+                    false,
+                    false,
+                    chapterPosition = 100,
+                    paragraphIndex = 1,
+                ),
+                ReaderElement.Text(
+                    ReaderRect(10f, 20f, 20f, 30f),
+                    28f,
+                    "文",
+                    style,
+                    false,
+                    false,
+                    chapterPosition = 101,
+                    paragraphIndex = 1,
+                ),
             ),
         )
 
@@ -163,14 +220,18 @@ class ReaderPageNavigatorTest {
         assertEquals(
             emptyList<Int>(),
             ReaderPageNavigator.missingAdjacentChapters(
-                withPrevChapter, pageIndex = 0, chapterCount = 5,
+                withPrevChapter,
+                pageIndex = 0,
+                chapterCount = 5,
             ),
         )
         val withNextChapter = pages + page(index = 0, start = 0, chapterIndex = 5)
         assertEquals(
             listOf(3),
             ReaderPageNavigator.missingAdjacentChapters(
-                withNextChapter, pageIndex = 0, chapterCount = 6,
+                withNextChapter,
+                pageIndex = 0,
+                chapterCount = 6,
             ),
         )
     }
@@ -182,7 +243,9 @@ class ReaderPageNavigatorTest {
         assertEquals(
             emptyList<Int>(),
             ReaderPageNavigator.missingAdjacentChapters(
-                listOf(placeholder), pageIndex = 0, chapterCount = 8,
+                listOf(placeholder),
+                pageIndex = 0,
+                chapterCount = 8,
             ),
         )
     }
@@ -219,7 +282,7 @@ class ReaderPageNavigatorTest {
         assertNull(ReaderPageNavigator.locateOrNull(pages, chapterIndex = 9, chapterPosition = 0))
         assertEquals(
             1,
-            ReaderPageNavigator.locateOrNull(pages, chapterIndex = 4, chapterPosition = 25)
+            ReaderPageNavigator.locateOrNull(pages, chapterIndex = 4, chapterPosition = 25),
         )
     }
 }

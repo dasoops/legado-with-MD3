@@ -29,17 +29,17 @@ fun AccentColorButton(
     enabled: Boolean = true,
 ) {
     Box(
-        modifier = modifier
+        modifier =
+        modifier
             .size(width = 36.dp, height = 36.dp)
             .clip(RoundedCornerShape(32.dp))
             .background(Color(color))
             .border(
                 width = 1.dp,
                 color = LegadoTheme.colorScheme.outlineVariant,
-                shape = RoundedCornerShape(32.dp)
-            )
-            .then(
-                if (enabled) Modifier.clickable(onClick = onClick) else Modifier
-            )
+                shape = RoundedCornerShape(32.dp),
+            ).then(
+                if (enabled) Modifier.clickable(onClick = onClick) else Modifier,
+            ),
     )
 }

@@ -31,30 +31,38 @@ class ReadBookmarkNavigateDelegate(
     private val relocateMarkingTargetUseCase: RelocateMarkingTargetUseCase,
     private val host: Host,
 ) {
-
     interface Host {
         val pendingTarget: PendingBookmarkTarget?
-        fun jumpToChapter(chapterIndex: Int, chapterPos: Int)
+
+        fun jumpToChapter(
+            chapterIndex: Int,
+            chapterPos: Int,
+        )
+
         fun setPendingTarget(pending: PendingBookmarkTarget?)
     }
 
     fun navigateToBookmark(bookmark: Bookmark) {
         val book = ReadBook.book ?: return
         scope.launch {
-            val targetTitle = bookRepository.getChapterTitle(
-                book.name, book.author, bookmark.chapterIndex,
-            )
-            val verdict = verifyUseCase.verify(
-                currentBookUrl = book.bookUrl,
-                targetChapterTitle = targetTitle,
-                storedBookUrl = bookmark.bookUrl,
-                storedChapterName = bookmark.chapterName,
-            )
+            val targetTitle =
+                bookRepository.getChapterTitle(
+                    book.name,
+                    book.author,
+                    bookmark.chapterIndex,
+                )
+            val verdict =
+                verifyUseCase.verify(
+                    currentBookUrl = book.bookUrl,
+                    targetChapterTitle = targetTitle,
+                    storedBookUrl = bookmark.bookUrl,
+                    storedChapterName = bookmark.chapterName,
+                )
             if (verdict is BookmarkTargetVerdict.Match) {
                 host.jumpToChapter(bookmark.chapterIndex, bookmark.chapterPos)
             } else {
                 host.setPendingTarget(
-                    PendingBookmarkTarget(bookmark.chapterIndex, bookmark.chapterPos, verdict)
+                    PendingBookmarkTarget(bookmark.chapterIndex, bookmark.chapterPos, verdict),
                 )
             }
         }
@@ -66,15 +74,19 @@ class ReadBookmarkNavigateDelegate(
         val chapterIndex = marking.chapterIndex ?: anchor.chapterIndex
         val chapterPos = anchor.chapterPosition ?: 0
         scope.launch {
-            val targetTitle = bookRepository.getChapterTitle(
-                book.name, book.author, chapterIndex,
-            )
-            val verdict = verifyUseCase.verify(
-                currentBookUrl = book.bookUrl,
-                targetChapterTitle = targetTitle,
-                storedBookUrl = marking.bookUrl,
-                storedChapterName = marking.chapterName,
-            )
+            val targetTitle =
+                bookRepository.getChapterTitle(
+                    book.name,
+                    book.author,
+                    chapterIndex,
+                )
+            val verdict =
+                verifyUseCase.verify(
+                    currentBookUrl = book.bookUrl,
+                    targetChapterTitle = targetTitle,
+                    storedBookUrl = marking.bookUrl,
+                    storedChapterName = marking.chapterName,
+                )
             if (verdict is BookmarkTargetVerdict.Match) {
                 host.jumpToChapter(chapterIndex, chapterPos)
             } else {
@@ -84,8 +96,8 @@ class ReadBookmarkNavigateDelegate(
                         PendingBookmarkTarget(
                             chapterIndex,
                             chapterPos,
-                            verdict
-                        )
+                            verdict,
+                        ),
                     )
             }
         }
@@ -111,25 +123,26 @@ class ReadBookmarkNavigateDelegate(
         anchor: TextProcessAnchor,
     ): RelocateMarkingTargetUseCase.Target? {
         val processor = ContentProcessor.get(book)
-        val candidates = bookRepository.getChapters(book.bookUrl)
-            .asSequence()
-            .filter {
-                it.index == anchor.chapterIndex ||
+        val candidates =
+            bookRepository
+                .getChapters(book.bookUrl)
+                .asSequence()
+                .filter {
+                    it.index == anchor.chapterIndex ||
                         (chapterName.isNotBlank() && it.title == chapterName)
-            }
-            .distinctBy { it.index }
-            .mapNotNull { chapter ->
-                val rawContent = BookHelp.getContent(book, chapter) ?: return@mapNotNull null
-                RelocateMarkingTargetUseCase.Candidate(
-                    chapterIndex = chapter.index,
-                    content = processor.getContent(book, chapter, rawContent, includeTitle = false)
-                        .toString(),
-                )
-            }
-            .toList()
+                }.distinctBy { it.index }
+                .mapNotNull { chapter ->
+                    val rawContent = BookHelp.getContent(book, chapter) ?: return@mapNotNull null
+                    RelocateMarkingTargetUseCase.Candidate(
+                        chapterIndex = chapter.index,
+                        content =
+                        processor
+                            .getContent(book, chapter, rawContent, includeTitle = false)
+                            .toString(),
+                    )
+                }.toList()
         return relocateMarkingTargetUseCase.locate(anchor, candidates)
     }
 
-    private fun BookMarking.anchor(): TextProcessAnchor? =
-        GSON.fromJsonObject<TextProcessAnchor>(anchorJson).getOrNull()
+    private fun BookMarking.anchor(): TextProcessAnchor? = GSON.fromJsonObject<TextProcessAnchor>(anchorJson).getOrNull()
 }

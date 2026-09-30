@@ -13,59 +13,56 @@ class HomeDashboardRepository(
     private val readRecordDao: ReadRecordDao,
     private val localPreferencesRepository: SettingsRepository,
 ) : HomeDashboardGateway {
+    override fun observeTotalReadBooks(): Flow<Int> = readRecordDao.observeTotalReadBookCount()
 
-    override fun observeTotalReadBooks(): Flow<Int> =
-        readRecordDao.observeTotalReadBookCount()
+    override fun observeTotalReadTime(): Flow<Long> = readRecordDao.getTotalReadTime().map { it ?: 0L }
 
-    override fun observeTotalReadTime(): Flow<Long> =
-        readRecordDao.getTotalReadTime().map { it ?: 0L }
+    override fun observeReadTime(date: String): Flow<Long> = readRecordDao.observeReadTimeByDate(date).map { it ?: 0L }
 
-    override fun observeReadTime(date: String): Flow<Long> =
-        readRecordDao.observeReadTimeByDate(date).map { it ?: 0L }
-
-    override fun observeRecentBooks(limit: Int): Flow<List<HomeReadingBook>> =
-        readRecordDao.observeRecentHomeBooks(limit).map { rows ->
-            rows.map { row ->
-                HomeReadingBook(
-                    bookUrl = row.bookUrl,
-                    name = row.recordName,
-                    author = row.recordAuthor,
-                    origin = row.origin,
-                    coverPath = if (row.customCoverUrl.isNullOrEmpty()) {
-                        row.coverUrl
-                    } else {
-                        row.customCoverUrl
-                    },
-                    chapterTitle = row.chapterTitle,
-                    chapterProgress = if (
-                        row.totalChapterNum != null &&
-                        row.totalChapterNum > 0 &&
-                        row.chapterIndex != null
-                    ) {
-                        (row.chapterIndex + 1)
-                            .coerceIn(0, row.totalChapterNum)
-                            .toFloat() / row.totalChapterNum
-                    } else {
-                        null
-                    },
-                )
-            }
+    override fun observeRecentBooks(limit: Int): Flow<List<HomeReadingBook>> = readRecordDao.observeRecentHomeBooks(limit).map { rows ->
+        rows.map { row ->
+            HomeReadingBook(
+                bookUrl = row.bookUrl,
+                name = row.recordName,
+                author = row.recordAuthor,
+                origin = row.origin,
+                coverPath =
+                if (row.customCoverUrl.isNullOrEmpty()) {
+                    row.coverUrl
+                } else {
+                    row.customCoverUrl
+                },
+                chapterTitle = row.chapterTitle,
+                chapterProgress =
+                if (
+                    row.totalChapterNum != null &&
+                    row.totalChapterNum > 0 &&
+                    row.chapterIndex != null
+                ) {
+                    (row.chapterIndex + 1)
+                        .coerceIn(0, row.totalChapterNum)
+                        .toFloat() /
+                        row.totalChapterNum
+                } else {
+                    null
+                },
+            )
         }
+    }
 
-    override fun observeDailyGoal(defaultValue: Int): Flow<Int> =
-        localPreferencesRepository.getPreference(
-            LocalPreferencesKeys.DAILY_READING_GOAL_MINUTES,
-            defaultValue,
-        )
+    override fun observeDailyGoal(defaultValue: Int): Flow<Int> = localPreferencesRepository.getPreference(
+        LocalPreferencesKeys.DAILY_READING_GOAL_MINUTES,
+        defaultValue,
+    )
 
-    override fun observeSelectedSourceSetUrl(): Flow<String?> =
-        localPreferencesRepository.getPreference(
+    override fun observeSelectedSourceSetUrl(): Flow<String?> = localPreferencesRepository
+        .getPreference(
             LocalPreferencesKeys.HOME_SOURCE_SET_URL,
             "",
         ).map { it.takeIf(String::isNotBlank) }
 
-    override fun observeVisibleSections(): Flow<Set<HomeDashboardSection>> =
-        localPreferencesRepository.getPreference(
+    override fun observeVisibleSections(): Flow<Set<HomeDashboardSection>> = localPreferencesRepository
+        .getPreference(
             LocalPreferencesKeys.HOME_DASHBOARD_SECTIONS,
             DEFAULT_HOME_DASHBOARD_SECTIONS.joinToString(",") { it.storageValue },
         ).map(HomeDashboardSection::fromStorage)

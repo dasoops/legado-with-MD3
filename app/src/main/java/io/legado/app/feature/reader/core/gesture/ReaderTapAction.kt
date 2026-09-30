@@ -1,6 +1,8 @@
 package io.legado.app.feature.reader.core.gesture
 
-enum class ReaderTapAction(val legacyValue: Int) {
+enum class ReaderTapAction(
+    val legacyValue: Int,
+) {
     NONE(-1),
     MENU(0),
     NEXT_PAGE(1),
@@ -15,11 +17,11 @@ enum class ReaderTapAction(val legacyValue: Int) {
     OPEN_CHAPTER_LIST(10),
     OPEN_SEARCH(11),
     SYNC_PROGRESS(12),
-    TOGGLE_READ_ALOUD_PAUSE(13);
+    TOGGLE_READ_ALOUD_PAUSE(13),
+    ;
 
     companion object {
-        fun fromLegacyValue(value: Int): ReaderTapAction =
-            entries.firstOrNull { it.legacyValue == value } ?: NONE
+        fun fromLegacyValue(value: Int): ReaderTapAction = entries.firstOrNull { it.legacyValue == value } ?: NONE
     }
 }
 
@@ -34,22 +36,35 @@ data class ReaderTapActionGrid(
     val bottomCenter: ReaderTapAction,
     val bottomRight: ReaderTapAction,
 ) {
-    fun actionAt(x: Float, y: Float, width: Float, height: Float): ReaderTapAction {
+    fun actionAt(
+        x: Float,
+        y: Float,
+        width: Float,
+        height: Float,
+    ): ReaderTapAction {
         if (width <= 0f || height <= 0f || x < 0f || y < 0f || x > width || y > height) return ReaderTapAction.NONE
-        val column = when {
-            x < width * .33f -> 0
-            x < width * .66f -> 1
-            else -> 2
-        }
-        val row = when {
-            y < height * .33f -> 0
-            y < height * .66f -> 1
-            else -> 2
-        }
+        val column =
+            when {
+                x < width * .33f -> 0
+                x < width * .66f -> 1
+                else -> 2
+            }
+        val row =
+            when {
+                y < height * .33f -> 0
+                y < height * .66f -> 1
+                else -> 2
+            }
         return arrayOf(
-            topLeft, topCenter, topRight,
-            middleLeft, middleCenter, middleRight,
-            bottomLeft, bottomCenter, bottomRight,
+            topLeft,
+            topCenter,
+            topRight,
+            middleLeft,
+            middleCenter,
+            middleRight,
+            bottomLeft,
+            bottomCenter,
+            bottomRight,
         )[row * 3 + column]
     }
 

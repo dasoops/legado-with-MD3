@@ -6,13 +6,16 @@ import org.junit.Test
 class ReaderNineSliceLayoutTest {
     @Test
     fun centerStaysOnTextWhileEightFrameCellsUseExpandedBounds() {
-        val image = ReaderTextBackgroundImage(
-            "frame.png", 3, 1f,
-            ninePatchLeft = 0.2f,
-            ninePatchRight = 0.3f,
-            ninePatchTop = 0.1f,
-            ninePatchBottom = 0.2f,
-        )
+        val image =
+            ReaderTextBackgroundImage(
+                "frame.png",
+                3,
+                1f,
+                ninePatchLeft = 0.2f,
+                ninePatchRight = 0.3f,
+                ninePatchTop = 0.1f,
+                ninePatchBottom = 0.2f,
+            )
         val content = ReaderRect(10f, 20f, 40f, 50f)
         val frame = ReaderRect(0f, 16f, 55f, 58f)
 
@@ -30,11 +33,14 @@ class ReaderNineSliceLayoutTest {
     fun withoutALineGapOnlyTheCenterAndTheSideCellsSurvive() {
         // 无行距时上下边厚度为 0（对照旧 View TextLine.drawNineSliceFrames 里
         // overflowScale = 0），上下两行连同四角一起消失，只剩中心 + 左右两条边。
-        val image = ReaderTextBackgroundImage(
-            "frame.png", 3, 1f,
-            contentInsetLeftPx = 7f,
-            contentInsetRightPx = 5f,
-        )
+        val image =
+            ReaderTextBackgroundImage(
+                "frame.png",
+                3,
+                1f,
+                contentInsetLeftPx = 7f,
+                contentInsetRightPx = 5f,
+            )
         val content = ReaderRect(10f, 20f, 40f, 50f)
         val frame = ReaderRect(3f, 20f, 45f, 50f)
 
@@ -50,21 +56,25 @@ class ReaderNineSliceLayoutTest {
 
     @Test
     fun rawNinePatchGuideBorderIsExcludedFromEverySourceCell() {
-        val image = ReaderTextBackgroundImage(
-            "frame.9.png", 3, 1f,
-            ninePatchLeft = 0.2f,
-            ninePatchRight = 0.3f,
-            ninePatchTop = 0.1f,
-            ninePatchBottom = 0.2f,
-        )
+        val image =
+            ReaderTextBackgroundImage(
+                "frame.9.png",
+                3,
+                1f,
+                ninePatchLeft = 0.2f,
+                ninePatchRight = 0.3f,
+                ninePatchTop = 0.1f,
+                ninePatchBottom = 0.2f,
+            )
 
-        val cells = ReaderNineSliceLayout.cells(
-            bitmapWidth = 52,
-            bitmapHeight = 42,
-            content = ReaderRect(10f, 4f, 35f, 32f),
-            frame = ReaderRect(0f, 0f, 50f, 40f),
-            image = image,
-        )
+        val cells =
+            ReaderNineSliceLayout.cells(
+                bitmapWidth = 52,
+                bitmapHeight = 42,
+                content = ReaderRect(10f, 4f, 35f, 32f),
+                frame = ReaderRect(0f, 0f, 50f, 40f),
+                image = image,
+            )
 
         assertEquals(ReaderIntRect(1, 1, 11, 5), cells.first().source)
         assertEquals(ReaderIntRect(36, 33, 51, 41), cells.last().source)
@@ -72,20 +82,24 @@ class ReaderNineSliceLayoutTest {
 
     @Test
     fun fixedCornersKeepOneUniformConfiguredScale() {
-        val image = ReaderTextBackgroundImage(
-            "frame.png", 3, 0.5f,
-            ninePatchLeft = 0.2f,
-            ninePatchRight = 0.3f,
-            ninePatchTop = 0.1f,
-            ninePatchBottom = 0.2f,
-        ).withBitmapSize(50, 40)
+        val image =
+            ReaderTextBackgroundImage(
+                "frame.png",
+                3,
+                0.5f,
+                ninePatchLeft = 0.2f,
+                ninePatchRight = 0.3f,
+                ninePatchTop = 0.1f,
+                ninePatchBottom = 0.2f,
+            ).withBitmapSize(50, 40)
         val content = ReaderRect(5f, 2f, 30f, 30f)
-        val frame = ReaderRect(
-            content.left - image.contentInsetLeftPx,
-            content.top - image.contentInsetTopPx,
-            content.right + image.contentInsetRightPx,
-            content.bottom + image.contentInsetBottomPx,
-        )
+        val frame =
+            ReaderRect(
+                content.left - image.contentInsetLeftPx,
+                content.top - image.contentInsetTopPx,
+                content.right + image.contentInsetRightPx,
+                content.bottom + image.contentInsetBottomPx,
+            )
 
         val topLeft = ReaderNineSliceLayout.cells(50, 40, content, frame, image).first()
 
@@ -97,21 +111,25 @@ class ReaderNineSliceLayoutTest {
 
     @Test
     fun fractionalMarginsRoundBackToTheirOriginalPixelBoundaries() {
-        val image = ReaderTextBackgroundImage(
-            "frame.9.png", 3, 1f,
-            ninePatchLeft = 7f / 31f,
-            ninePatchRight = 9f / 31f,
-            ninePatchTop = 5f / 29f,
-            ninePatchBottom = 8f / 29f,
-        )
+        val image =
+            ReaderTextBackgroundImage(
+                "frame.9.png",
+                3,
+                1f,
+                ninePatchLeft = 7f / 31f,
+                ninePatchRight = 9f / 31f,
+                ninePatchTop = 5f / 29f,
+                ninePatchBottom = 8f / 29f,
+            )
 
-        val cells = ReaderNineSliceLayout.cells(
-            bitmapWidth = 33,
-            bitmapHeight = 31,
-            content = ReaderRect(7f, 5f, 22f, 21f),
-            frame = ReaderRect(0f, 0f, 31f, 29f),
-            image = image,
-        )
+        val cells =
+            ReaderNineSliceLayout.cells(
+                bitmapWidth = 33,
+                bitmapHeight = 31,
+                content = ReaderRect(7f, 5f, 22f, 21f),
+                frame = ReaderRect(0f, 0f, 31f, 29f),
+                image = image,
+            )
 
         assertEquals(ReaderIntRect(1, 1, 8, 6), cells.first().source)
         assertEquals(ReaderIntRect(23, 22, 32, 30), cells.last().source)

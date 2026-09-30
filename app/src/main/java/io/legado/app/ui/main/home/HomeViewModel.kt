@@ -37,9 +37,9 @@ class HomeViewModel(
     private val backupSettingsGateway: BackupSettingsGateway,
 ) : ViewModel() {
 
-    private val _backupState = MutableStateFlow(HomeBackupState())
-    private val _activeDialog = MutableStateFlow<HomeDialog?>(null)
-    private val _activeSheet = MutableStateFlow<HomeSheet?>(null)
+    private val backupState = MutableStateFlow(HomeBackupState())
+    private val activeDialog = MutableStateFlow<HomeDialog?>(null)
+    private val activeSheet = MutableStateFlow<HomeSheet?>(null)
     private val _effects = MutableSharedFlow<HomeEffect>(extraBufferCapacity = 16)
     val effects = _effects.asSharedFlow()
     private var backupRefreshJob: Job? = null
@@ -55,9 +55,9 @@ class HomeViewModel(
 
     val uiState = combine(
         dashboardData,
-        _backupState,
-        _activeDialog,
-        _activeSheet,
+        backupState,
+        activeDialog,
+        activeSheet,
     ) { dashboardData, backup, dialog, sheet ->
         val (dashboard, selectedSourceUrl, visibleSections) = dashboardData
         HomeUiState(
@@ -96,7 +96,7 @@ class HomeViewModel(
                         refreshLatestBackup()
                     } else {
                         backupRefreshJob?.cancel()
-                        _backupState.update { it.copy(isLoading = false) }
+                        backupState.update { it.copy(isLoading = false) }
                     }
                 }
         }
@@ -108,24 +108,21 @@ class HomeViewModel(
             is HomeIntent.RecentHistoryBookClick -> openBook(intent.bookUrl)
             is HomeIntent.SelectSourceSet -> selectSourceSet(intent.sourceUrl)
             HomeIntent.DashboardSettingsClick -> {
-                _activeSheet.value = HomeSheet.DashboardSettings
+                activeSheet.value = HomeSheet.DashboardSettings
             }
-
             is HomeIntent.SetSectionVisible -> {
                 setSectionVisible(intent.section, intent.visible)
             }
             HomeIntent.ReadingGoalClick -> {
-                _activeDialog.value = HomeDialog.SetReadingGoal(
-                    uiState.value.dailyGoalMinutes
+                activeDialog.value = HomeDialog.SetReadingGoal(
+                    uiState.value.dailyGoalMinutes,
                 )
             }
-
             is HomeIntent.UpdateReadingGoal -> updateReadingGoal(intent.minutes)
-            HomeIntent.BackupClick -> _activeSheet.value = HomeSheet.BackupOptions
+            HomeIntent.BackupClick -> activeSheet.value = HomeSheet.BackupOptions
             is HomeIntent.BackupDestinationSelected -> {
                 requestBackup(intent.destination)
             }
-
             is HomeIntent.BackupDirectorySelected -> {
                 backup(
                     destination = intent.destination,
@@ -133,27 +130,23 @@ class HomeViewModel(
                     savePath = true,
                 )
             }
-
-            HomeIntent.RestoreClick -> _activeSheet.value = HomeSheet.RestoreOptions
+            HomeIntent.RestoreClick -> activeSheet.value = HomeSheet.RestoreOptions
             HomeIntent.RestoreFromLocal -> {
-                _activeSheet.value = null
+                activeSheet.value = null
                 _effects.tryEmit(HomeEffect.SelectRestoreFile)
             }
-
             HomeIntent.RestoreFromNetwork -> {
-                _activeSheet.value = null
+                activeSheet.value = null
                 requestRestore()
             }
-
             is HomeIntent.RestoreLocalFileSelected -> restoreLocal(intent.uri)
             HomeIntent.ConfirmRestore -> restore()
             HomeIntent.BackupSettingsClick -> {
                 _effects.tryEmit(HomeEffect.OpenBackupSettings)
             }
-
             HomeIntent.RetryBackupInfo -> refreshLatestBackup()
-            HomeIntent.DismissDialog -> _activeDialog.value = null
-            HomeIntent.DismissSheet -> _activeSheet.value = null
+            HomeIntent.DismissDialog -> activeDialog.value = null
+            HomeIntent.DismissSheet -> activeSheet.value = null
         }
     }
 
@@ -171,7 +164,7 @@ class HomeViewModel(
     }
 
     private fun updateReadingGoal(minutes: Int) {
-        _activeDialog.value = null
+        activeDialog.value = null
         viewModelScope.launch {
             homeDashboardUseCase.updateDailyGoal(minutes)
         }
@@ -196,24 +189,24 @@ class HomeViewModel(
     }
 
     private fun requestRestore() {
-        val backup = _backupState.value.latest
+        val backup = backupState.value.latest
         if (backup == null) {
             _effects.tryEmit(
                 HomeEffect.ShowMessage(
-                    if (_backupState.value.isLoadError) {
+                    if (backupState.value.isLoadError) {
                         R.string.home_webdav_backup_load_error
                     } else {
                         R.string.home_no_webdav_backup
-                    }
-                )
+                    },
+                ),
             )
             return
         }
-        _activeDialog.value = HomeDialog.ConfirmRestore(backup.name)
+        activeDialog.value = HomeDialog.ConfirmRestore(backup.name)
     }
 
     private fun requestBackup(destination: HomeBackupDestination) {
-        _activeSheet.value = null
+        activeSheet.value = null
         if (destination == HomeBackupDestination.WebDav) {
             backup(destination = destination, path = null)
             return
@@ -227,7 +220,7 @@ class HomeViewModel(
                     HomeEffect.RequestBackupStoragePermission(
                         destination = destination,
                         path = path,
-                    )
+                    ),
                 )
             } else {
                 backup(destination = destination, path = path)
@@ -241,7 +234,7 @@ class HomeViewModel(
         savePath: Boolean = false,
     ) {
         if (!backupActionMutex.tryLock()) return
-        _backupState.update { it.copy(isActionRunning = true) }
+        backupState.update { it.copy(isActionRunning = true) }
         viewModelScope.launch(Dispatchers.IO) {
             try {
                 runCatching {
@@ -263,11 +256,11 @@ class HomeViewModel(
                         HomeEffect.ShowMessage(
                             messageRes = R.string.backup_error,
                             detail = error.localizedMessage,
-                        )
+                        ),
                     )
                 }
             } finally {
-                _backupState.update { it.copy(isActionRunning = false) }
+                backupState.update { it.copy(isActionRunning = false) }
                 backupActionMutex.unlock()
             }
         }
@@ -275,7 +268,7 @@ class HomeViewModel(
 
     private fun restoreLocal(uri: String) {
         if (!backupActionMutex.tryLock()) return
-        _backupState.update { it.copy(isActionRunning = true) }
+        backupState.update { it.copy(isActionRunning = true) }
         viewModelScope.launch(Dispatchers.IO) {
             try {
                 runCatching {
@@ -288,21 +281,21 @@ class HomeViewModel(
                         HomeEffect.ShowMessage(
                             messageRes = R.string.restore_error,
                             detail = error.localizedMessage,
-                        )
+                        ),
                     )
                 }
             } finally {
-                _backupState.update { it.copy(isActionRunning = false) }
+                backupState.update { it.copy(isActionRunning = false) }
                 backupActionMutex.unlock()
             }
         }
     }
 
     private fun restore() {
-        val backup = _backupState.value.latest ?: return
-        _activeDialog.value = null
+        val backup = backupState.value.latest ?: return
+        activeDialog.value = null
         if (!backupActionMutex.tryLock()) return
-        _backupState.update { it.copy(isActionRunning = true) }
+        backupState.update { it.copy(isActionRunning = true) }
         viewModelScope.launch(Dispatchers.IO) {
             try {
                 runCatching {
@@ -315,11 +308,11 @@ class HomeViewModel(
                         HomeEffect.ShowMessage(
                             messageRes = R.string.restore_error,
                             detail = error.localizedMessage,
-                        )
+                        ),
                     )
                 }
             } finally {
-                _backupState.update { it.copy(isActionRunning = false) }
+                backupState.update { it.copy(isActionRunning = false) }
                 backupActionMutex.unlock()
             }
         }
@@ -333,7 +326,7 @@ class HomeViewModel(
     }
 
     private suspend fun loadLatestBackup() {
-        _backupState.update {
+        backupState.update {
             it.copy(
                 isLoading = true,
                 isLoadError = false,
@@ -341,7 +334,7 @@ class HomeViewModel(
         }
         try {
             val latest = webDavBackupUseCase.getLatestBackup()
-            _backupState.update {
+            backupState.update {
                 it.copy(
                     latest = latest,
                     isLoading = false,
@@ -351,7 +344,7 @@ class HomeViewModel(
         } catch (error: CancellationException) {
             throw error
         } catch (_: Exception) {
-            _backupState.update {
+            backupState.update {
                 it.copy(
                     isLoading = false,
                     isLoadError = true,

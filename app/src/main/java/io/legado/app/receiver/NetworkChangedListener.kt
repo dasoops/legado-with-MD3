@@ -14,8 +14,9 @@ import splitties.systemservices.connectivityManager
  * 监测网络变化
  */
 @SuppressLint("ObsoleteSdkInt")
-class NetworkChangedListener(private val context: Context) {
-
+class NetworkChangedListener(
+    private val context: Context,
+) {
     var onNetworkChanged: (() -> Unit)? = null
     private var registered = false
 
@@ -66,16 +67,17 @@ class NetworkChangedListener(private val context: Context) {
     }
 
     inner class NetworkChangedReceiver : BroadcastReceiver() {
+        val filter =
+            IntentFilter().apply {
+                @Suppress("DEPRECATION")
+                addAction(ConnectivityManager.CONNECTIVITY_ACTION)
+            }
 
-        val filter = IntentFilter().apply {
-            @Suppress("DEPRECATION")
-            addAction(ConnectivityManager.CONNECTIVITY_ACTION)
-        }
-
-        override fun onReceive(context: Context, intent: Intent) {
+        override fun onReceive(
+            context: Context,
+            intent: Intent,
+        ) {
             onNetworkChanged?.invoke()
         }
-
     }
-
 }

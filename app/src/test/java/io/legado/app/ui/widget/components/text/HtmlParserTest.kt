@@ -5,7 +5,6 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class HtmlParserTest {
-
     @Test
     fun button_withOnClickSplitsNameAndClick() {
         val doc =
@@ -30,9 +29,10 @@ class HtmlParserTest {
 
     @Test
     fun buttonInsideDivUsehtmlStyleIsParsed() {
-        val doc = HtmlParser.parse(
-            "<div>评论：<button>点赞@onclick:showCmt(\"https://a.com/x\")</button></div>"
-        )
+        val doc =
+            HtmlParser.parse(
+                "<div>评论：<button>点赞@onclick:showCmt(\"https://a.com/x\")</button></div>",
+            )
 
         val buttons = doc.paragraphs.flatMap { it.content }.filterIsInstance<HtmlInline.Button>()
         assertEquals(1, buttons.size)
@@ -44,19 +44,25 @@ class HtmlParserTest {
     fun hrBecomesHorizontalRuleParagraph() {
         val doc = HtmlParser.parse("<div>a<hr>b</div>")
 
-        assertTrue(doc.paragraphs.any { paragraph ->
-            paragraph.content.size == 1 && paragraph.content[0] is HtmlInline.HorizontalRule
-        })
+        assertTrue(
+            doc.paragraphs.any { paragraph ->
+                paragraph.content.size == 1 && paragraph.content[0] is HtmlInline.HorizontalRule
+            },
+        )
     }
 
     @Test
     fun imageWithClickParamExtractsClick() {
-        val doc = HtmlParser.parse(
-            "<img src=\"https://a.com/1.png,{&quot;click&quot;:&quot;showCmt(1)&quot;,&quot;width&quot;:&quot;80%&quot;}\">"
-        )
+        val doc =
+            HtmlParser.parse(
+                "<img src=\"https://a.com/1.png,{&quot;click&quot;:&quot;showCmt(1)&quot;,&quot;width&quot;:&quot;80%&quot;}\">",
+            )
 
         val image =
-            doc.paragraphs.flatMap { it.content }.filterIsInstance<HtmlInline.Image>().single()
+            doc.paragraphs
+                .flatMap { it.content }
+                .filterIsInstance<HtmlInline.Image>()
+                .single()
         assertEquals("showCmt(1)", image.click)
         assertEquals("https://a.com/1.png", image.loadSource)
     }
@@ -66,7 +72,10 @@ class HtmlParserTest {
         val doc = HtmlParser.parse("<img src=\"https://a.com/1.png\">")
 
         val image =
-            doc.paragraphs.flatMap { it.content }.filterIsInstance<HtmlInline.Image>().single()
+            doc.paragraphs
+                .flatMap { it.content }
+                .filterIsInstance<HtmlInline.Image>()
+                .single()
         assertEquals(null, image.click)
     }
 
@@ -74,9 +83,12 @@ class HtmlParserTest {
     fun tableWithDirectCellsIsParsedWithoutScopeSelector() {
         val doc = HtmlParser.parse("<table><tr><th>Word</th><td>释义</td></tr></table>")
 
-        val text = doc.paragraphs.single().content
-            .filterIsInstance<HtmlInline.Text>()
-            .joinToString("") { it.value }
+        val text =
+            doc.paragraphs
+                .single()
+                .content
+                .filterIsInstance<HtmlInline.Text>()
+                .joinToString("") { it.value }
         assertEquals("Word  释义", text)
     }
 }

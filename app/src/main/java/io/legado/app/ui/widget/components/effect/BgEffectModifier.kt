@@ -21,17 +21,18 @@ internal fun Modifier.bgEffectDraw(
     playing: Boolean,
     colorStage: () -> Float,
     alpha: () -> Float,
-): Modifier = this then BgEffectElement(
-    painter = painter,
-    preset = preset,
-    surface = surface,
-    drawSurface = drawSurface,
-    effectBackground = effectBackground,
-    isFullSize = isFullSize,
-    playing = playing,
-    colorStage = colorStage,
-    alpha = alpha,
-)
+): Modifier = this then
+    BgEffectElement(
+        painter = painter,
+        preset = preset,
+        surface = surface,
+        drawSurface = drawSurface,
+        effectBackground = effectBackground,
+        isFullSize = isFullSize,
+        playing = playing,
+        colorStage = colorStage,
+        alpha = alpha,
+    )
 
 private data class BgEffectElement(
     val painter: BgEffectPainter,
@@ -44,7 +45,6 @@ private data class BgEffectElement(
     val colorStage: () -> Float,
     val alpha: () -> Float,
 ) : ModifierNodeElement<BgEffectNode>() {
-
     override fun create(): BgEffectNode = BgEffectNode(
         painter = painter,
         preset = preset,
@@ -84,7 +84,6 @@ private class BgEffectNode(
     private var alpha: () -> Float,
 ) : Modifier.Node(),
     DrawModifierNode {
-
     private var animationJob: Job? = null
     private var animTime: Float = 0f
     private var startOffset: Float = 0f
@@ -133,18 +132,19 @@ private class BgEffectNode(
     private fun startAnimation() {
         animationJob?.cancel()
         startOffset = animTime
-        animationJob = coroutineScope.launch {
-            val minDeltaNanos = 1_000_000_000L / 60L
-            val origin = withFrameNanos { it }
-            var lastEmit = origin
-            while (isActive) {
-                val now = withFrameNanos { it }
-                if (now - lastEmit < minDeltaNanos) continue
-                lastEmit = now
-                animTime = startOffset + (now - origin) / 1_000_000_000f
-                invalidateDraw()
+        animationJob =
+            coroutineScope.launch {
+                val minDeltaNanos = 1_000_000_000L / 60L
+                val origin = withFrameNanos { it }
+                var lastEmit = origin
+                while (isActive) {
+                    val now = withFrameNanos { it }
+                    if (now - lastEmit < minDeltaNanos) continue
+                    lastEmit = now
+                    animTime = startOffset + (now - origin) / 1_000_000_000f
+                    invalidateDraw()
+                }
             }
-        }
     }
 
     override fun ContentDrawScope.draw() {

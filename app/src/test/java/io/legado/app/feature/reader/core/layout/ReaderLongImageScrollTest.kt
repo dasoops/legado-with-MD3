@@ -10,17 +10,35 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class ReaderLongImageScrollTest {
-    private val paged = ReaderPaginationConfig(
-        0, "", 100, 100, 0f, 0f, 0f, 0f, 10f, 8f,
-    )
-    private val fullImage = ReaderMeasuredBlock.Image(
-        "long", 50f, 200f, 0, scaleMode = ReaderImageScaleMode.FIT_WIDTH,
-    )
+    private val paged =
+        ReaderPaginationConfig(
+            0,
+            "",
+            100,
+            100,
+            0f,
+            0f,
+            0f,
+            0f,
+            10f,
+            8f,
+        )
+    private val fullImage =
+        ReaderMeasuredBlock.Image(
+            "long",
+            50f,
+            200f,
+            0,
+            scaleMode = ReaderImageScaleMode.FIT_WIDTH,
+        )
 
     @Test fun continuousFullImageKeepsItsWidthScaledHeightAndHitArea() {
-        val page = ReaderPaginator.paginateBlocks(
-            listOf(fullImage), paged.copy(continuousScroll = true),
-        ).single()
+        val page =
+            ReaderPaginator
+                .paginateBlocks(
+                    listOf(fullImage),
+                    paged.copy(continuousScroll = true),
+                ).single()
         val image = page.elements.single() as ReaderElement.Image
 
         assertEquals(100f, image.bounds.width, 0f)
@@ -40,13 +58,19 @@ class ReaderLongImageScrollTest {
     }
 
     @Test fun contentFollowingAFullLongImageStartsANewScrollPage() {
-        val paragraph = ReaderMeasuredParagraph(
-            "甲", listOf("甲"), listOf(10f), ReaderTextStyle(0, 10f), 1,
-        )
-        val pages = ReaderPaginator.paginateBlocks(
-            listOf(fullImage, ReaderMeasuredBlock.Paragraph(paragraph)),
-            paged.copy(continuousScroll = true),
-        )
+        val paragraph =
+            ReaderMeasuredParagraph(
+                "甲",
+                listOf("甲"),
+                listOf(10f),
+                ReaderTextStyle(0, 10f),
+                1,
+            )
+        val pages =
+            ReaderPaginator.paginateBlocks(
+                listOf(fullImage, ReaderMeasuredBlock.Paragraph(paragraph)),
+                paged.copy(continuousScroll = true),
+            )
 
         assertEquals(2, pages.size)
         assertEquals(400f, pages.first().scrollExtentPx, 0f)
@@ -57,17 +81,24 @@ class ReaderLongImageScrollTest {
     }
 
     @Test fun continuousPagesExcludeFixedViewportChromeFromTheirStackingExtent() {
-        val paragraph = ReaderMeasuredParagraph(
-            "甲", listOf("甲"), listOf(10f), ReaderTextStyle(0, 10f), 1,
-        )
-        val page = ReaderPaginator.paginateBlocks(
-            listOf(ReaderMeasuredBlock.Paragraph(paragraph)),
-            paged.copy(
-                paddingTopPx = 10f,
-                paddingBottomPx = 20f,
-                continuousScroll = true,
-            ),
-        ).single()
+        val paragraph =
+            ReaderMeasuredParagraph(
+                "甲",
+                listOf("甲"),
+                listOf(10f),
+                ReaderTextStyle(0, 10f),
+                1,
+            )
+        val page =
+            ReaderPaginator
+                .paginateBlocks(
+                    listOf(ReaderMeasuredBlock.Paragraph(paragraph)),
+                    paged.copy(
+                        paddingTopPx = 10f,
+                        paddingBottomPx = 20f,
+                        continuousScroll = true,
+                    ),
+                ).single()
 
         // 页高为排版游标：只含正文行高 10f，上下留白都不计入堆叠高度。
         assertEquals(10f, page.scrollExtentPx, 0f)

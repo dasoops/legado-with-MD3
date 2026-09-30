@@ -4,11 +4,11 @@ import android.content.Context
 import android.net.Uri
 import io.legado.app.data.repository.ReadSettingsRepository
 import io.legado.app.help.coroutine.Coroutine
+import java.io.File
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import java.io.File
 
 /**
  * 阅读菜单按钮配置域（R2.2 续批）。
@@ -23,7 +23,6 @@ class ReadButtonConfigDelegate(
     private val readSettingsRepository: ReadSettingsRepository,
     private val host: Host,
 ) {
-
     interface Host {
         fun updateMenuConfig(transform: (ReadMenuConfig) -> ReadMenuConfig)
 
@@ -64,7 +63,7 @@ class ReadButtonConfigDelegate(
         scope.launch {
             readSettingsRepository.update { settings ->
                 settings.copy(
-                    moreActionsConfig = normalized.joinToString(";") { "${it.id},${it.enabled}" }
+                    moreActionsConfig = normalized.joinToString(";") { "${it.id},${it.enabled}" },
                 )
             }
         }
@@ -73,38 +72,47 @@ class ReadButtonConfigDelegate(
     fun parseMoreActions(raw: String): List<ReadBookButtonConfigItem> {
         if (raw.isBlank()) return MoreActionIds.map { ReadBookButtonConfigItem(it, true) }
         val seen = mutableSetOf<String>()
-        val items = raw.split(";").mapNotNull { token ->
-            val parts = token.split(",")
-            val id = parts.getOrNull(0)?.takeIf { it in MoreActionIds && seen.add(it) }
-            val enabled = parts.getOrNull(1)?.toBooleanStrictOrNull()
-            if (id != null && enabled != null) ReadBookButtonConfigItem(id, enabled) else null
-        }.toMutableList()
+        val items =
+            raw
+                .split(";")
+                .mapNotNull { token ->
+                    val parts = token.split(",")
+                    val id = parts.getOrNull(0)?.takeIf { it in MoreActionIds && seen.add(it) }
+                    val enabled = parts.getOrNull(1)?.toBooleanStrictOrNull()
+                    if (id != null && enabled != null) ReadBookButtonConfigItem(id, enabled) else null
+                }.toMutableList()
         MoreActionIds.forEach { id ->
             if (seen.add(id)) items.add(ReadBookButtonConfigItem(id, true))
         }
         return items
     }
 
-    private fun normalizeMoreActions(
-        items: List<ReadBookButtonConfigItem>,
-    ): List<ReadBookButtonConfigItem> {
+    private fun normalizeMoreActions(items: List<ReadBookButtonConfigItem>): List<ReadBookButtonConfigItem> {
         val seen = mutableSetOf<String>()
-        val normalized = items.mapNotNull { item ->
-            item.takeIf { it.id in MoreActionIds && seen.add(it.id) }
-        }.toMutableList()
+        val normalized =
+            items
+                .mapNotNull { item ->
+                    item.takeIf { it.id in MoreActionIds && seen.add(it.id) }
+                }.toMutableList()
         MoreActionIds.forEach { id ->
             if (seen.add(id)) normalized.add(ReadBookButtonConfigItem(id, true))
         }
         return normalized
     }
 
-    fun saveMenuCustomIcon(id: String, uri: Uri) {
+    fun saveMenuCustomIcon(
+        id: String,
+        uri: Uri,
+    ) {
         copyCustomIcon(id, uri, "read_menu_icons") { path ->
             ConfigUpdate.MenuCustomIcon(id, path)
         }
     }
 
-    fun saveTitleBarCustomIcon(id: String, uri: Uri) {
+    fun saveTitleBarCustomIcon(
+        id: String,
+        uri: Uri,
+    ) {
         copyCustomIcon(id, uri, "title_bar_icons") { path ->
             ConfigUpdate.TitleBarCustomIcon(id, path)
         }
@@ -131,19 +139,21 @@ class ReadButtonConfigDelegate(
         key: String,
     ): List<ReadBookButtonConfigItem> {
         val prefs = context.getSharedPreferences(preferenceName, Context.MODE_PRIVATE)
-        val raw = prefs.getString(key, null)
-            ?.split(";")
-            ?.mapNotNull { token ->
-                val parts = token.split(",")
-                val id = parts.getOrNull(0)?.takeIf { it in ReadBookButtonIds }
-                val enabled = parts.getOrNull(1)?.toBooleanStrictOrNull()
-                if (id != null && enabled != null) {
-                    ReadBookButtonConfigItem(id, enabled)
-                } else {
-                    null
+        val raw =
+            prefs
+                .getString(key, null)
+                ?.split(";")
+                ?.mapNotNull { token ->
+                    val parts = token.split(",")
+                    val id = parts.getOrNull(0)?.takeIf { it in ReadBookButtonIds }
+                    val enabled = parts.getOrNull(1)?.toBooleanStrictOrNull()
+                    if (id != null && enabled != null) {
+                        ReadBookButtonConfigItem(id, enabled)
+                    } else {
+                        null
+                    }
                 }
-            }
-            ?: emptyList()
+                ?: emptyList()
 
         return if (raw.isEmpty()) {
             ReadBookButtonIds.map { id ->
@@ -163,24 +173,25 @@ class ReadButtonConfigDelegate(
         items: List<ReadBookButtonConfigItem>,
     ) {
         val value = items.joinToString(";") { "${it.id},${it.enabled}" }
-        context.getSharedPreferences(preferenceName, Context.MODE_PRIVATE)
+        context
+            .getSharedPreferences(preferenceName, Context.MODE_PRIVATE)
             .edit()
             .putString(key, value)
             .apply()
     }
 
-    private fun normalizeButtonConfig(
-        items: List<ReadBookButtonConfigItem>,
-    ): List<ReadBookButtonConfigItem> {
+    private fun normalizeButtonConfig(items: List<ReadBookButtonConfigItem>): List<ReadBookButtonConfigItem> {
         val seen = mutableSetOf<String>()
-        val normalized = items.mapNotNull { item ->
-            val id = item.id
-            if (id in ReadBookButtonIds && seen.add(id)) {
-                ReadBookButtonConfigItem(id, item.enabled)
-            } else {
-                null
-            }
-        }.toMutableList()
+        val normalized =
+            items
+                .mapNotNull { item ->
+                    val id = item.id
+                    if (id in ReadBookButtonIds && seen.add(id)) {
+                        ReadBookButtonConfigItem(id, item.enabled)
+                    } else {
+                        null
+                    }
+                }.toMutableList()
         ReadBookButtonIds.forEach { id ->
             if (seen.add(id)) {
                 normalized.add(ReadBookButtonConfigItem(id, false))
@@ -194,11 +205,12 @@ class ReadButtonConfigDelegate(
         const val TITLE_BAR_ICON_KEY = "icons"
         const val TOOL_BUTTON_PREFS = "tool_button_config"
         const val TOOL_BUTTON_KEY = "tool_buttons"
-        val DEFAULT_ENABLED_BUTTON_IDS = setOf(
-            "search",
-            "auto_page",
-            "catalog",
-            "setting",
-        )
+        val DEFAULT_ENABLED_BUTTON_IDS =
+            setOf(
+                "search",
+                "auto_page",
+                "catalog",
+                "setting",
+            )
     }
 }

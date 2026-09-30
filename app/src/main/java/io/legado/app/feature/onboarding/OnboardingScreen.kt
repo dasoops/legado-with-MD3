@@ -58,58 +58,65 @@ fun OnboardingScreen(
     }
 
     Column(
-        modifier = Modifier
+        modifier =
+        Modifier
             .fillMaxSize()
-            .windowInsetsPadding(WindowInsets.safeDrawing)
+            .windowInsetsPadding(WindowInsets.safeDrawing),
     ) {
         Column(
-            modifier = Modifier
+            modifier =
+            Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Image(
                 painter = painterResource(R.drawable.ic_launcher_foreground),
                 contentDescription = null,
                 contentScale = ContentScale.Crop,
-                modifier = Modifier
+                modifier =
+                Modifier
                     .padding(top = 16.dp)
                     .height(96.dp)
-                    .width(128.dp)
+                    .width(128.dp),
             )
             AppText(
                 text = pageTitle(state.page),
                 style = LegadoTheme.typography.headlineLargeEmphasized,
                 textAlign = TextAlign.Center,
-                modifier = Modifier
+                modifier =
+                Modifier
                     .fillMaxWidth()
-                    .padding(top = 8.dp)
+                    .padding(top = 8.dp),
             )
             AppText(
                 text = pageSummary(state.page),
                 style = LegadoTheme.typography.bodyLargeEmphasized,
                 textAlign = TextAlign.Center,
-                modifier = Modifier
+                modifier =
+                Modifier
                     .fillMaxWidth()
-                    .padding(top = 4.dp, bottom = 12.dp)
+                    .padding(top = 4.dp, bottom = 12.dp),
             )
             AppLinearProgressIndicator(
                 progress = state.page * 1f / state.pageCount,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
             )
         }
 
         Crossfade(
             targetState = state.page,
             label = "onboarding-page",
-            modifier = Modifier
+            modifier =
+            Modifier
                 .fillMaxWidth()
-                .weight(1f)
+                .weight(1f),
         ) { page ->
             Box(
-                modifier = Modifier
+                modifier =
+                Modifier
                     .fillMaxSize()
-                    .padding(horizontal = 16.dp, vertical = 8.dp)
+                    .padding(horizontal = 16.dp, vertical = 8.dp),
             ) {
                 GlassCard(modifier = Modifier.fillMaxWidth()) {
                     when (page) {
@@ -122,15 +129,16 @@ fun OnboardingScreen(
         }
 
         Box(
-            modifier = Modifier
+            modifier =
+            Modifier
                 .fillMaxWidth()
                 .padding(16.dp),
-            contentAlignment = Alignment.CenterEnd
+            contentAlignment = Alignment.CenterEnd,
         ) {
             MediumTonalButton(
                 onClick = { onIntent(OnboardingIntent.Next) },
                 text = nextButtonText(state.page, state.pageCount),
-                icon = Icons.AutoMirrored.Filled.ArrowForward
+                icon = Icons.AutoMirrored.Filled.ArrowForward,
             )
         }
     }
@@ -141,7 +149,10 @@ fun OnboardingScreen(
 }
 
 @Composable
-private fun BusyDialog(state: OnboardingUiState, onIntent: (OnboardingIntent) -> Unit) {
+private fun BusyDialog(
+    state: OnboardingUiState,
+    onIntent: (OnboardingIntent) -> Unit,
+) {
     val busyText = state.busyText ?: return
     AppAlertDialog(
         show = true,
@@ -150,17 +161,20 @@ private fun BusyDialog(state: OnboardingUiState, onIntent: (OnboardingIntent) ->
             Row(
                 horizontalArrangement = Arrangement.spacedBy(16.dp),
                 verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
             ) {
                 AppCircularProgressIndicator(modifier = Modifier.size(28.dp))
                 AppText(text = busyText)
             }
-        }
+        },
     )
 }
 
 @Composable
-private fun BackupSelectorDialog(state: OnboardingUiState, onIntent: (OnboardingIntent) -> Unit) {
+private fun BackupSelectorDialog(
+    state: OnboardingUiState,
+    onIntent: (OnboardingIntent) -> Unit,
+) {
     val backupNames = state.backupNames ?: return
     AppAlertDialog(
         show = true,
@@ -174,20 +188,24 @@ private fun BackupSelectorDialog(state: OnboardingUiState, onIntent: (Onboarding
                         text = name,
                         maxLines = 2,
                         overflow = TextOverflow.Ellipsis,
-                        modifier = Modifier
+                        modifier =
+                        Modifier
                             .fillMaxWidth()
                             .clip(RoundedCornerShape(8.dp))
                             .clickable { onIntent(OnboardingIntent.RestoreBackup(name)) }
-                            .padding(vertical = 10.dp, horizontal = 4.dp)
+                            .padding(vertical = 10.dp, horizontal = 4.dp),
                     )
                 }
             }
-        }
+        },
     )
 }
 
 @Composable
-private fun RestoreErrorDialog(state: OnboardingUiState, onIntent: (OnboardingIntent) -> Unit) {
+private fun RestoreErrorDialog(
+    state: OnboardingUiState,
+    onIntent: (OnboardingIntent) -> Unit,
+) {
     val message = state.restoreErrorMessage ?: return
     AppAlertDialog(
         show = true,
@@ -196,115 +214,126 @@ private fun RestoreErrorDialog(state: OnboardingUiState, onIntent: (OnboardingIn
         text = message,
         confirmText = stringResource(R.string.ok),
         onConfirm = { onIntent(OnboardingIntent.StartLocalRestore) },
-        onDismiss = { onIntent(OnboardingIntent.DismissRestoreError) }
+        onDismiss = { onIntent(OnboardingIntent.DismissRestoreError) },
     )
 }
 
 @Composable
 private fun PrivacyPage(state: OnboardingUiState) {
     Column(
-        modifier = Modifier
+        modifier =
+        Modifier
             .verticalScroll(rememberScrollState())
-            .padding(16.dp)
+            .padding(16.dp),
     ) {
         AppText(
             text = stringResource(R.string.privacy_policy),
             style = LegadoTheme.typography.titleMedium,
             color = LegadoTheme.colorScheme.secondary,
-            modifier = Modifier.padding(bottom = 8.dp)
+            modifier = Modifier.padding(bottom = 8.dp),
         )
         MarkdownBlock(
             content = state.privacyPolicy,
-            modifier = Modifier
+            modifier =
+            Modifier
                 .fillMaxWidth()
-                .padding(bottom = 16.dp)
+                .padding(bottom = 16.dp),
         )
         AppText(
             text = stringResource(R.string.disclaimer),
             style = LegadoTheme.typography.titleMedium,
             color = LegadoTheme.colorScheme.secondary,
-            modifier = Modifier.padding(bottom = 8.dp)
+            modifier = Modifier.padding(bottom = 8.dp),
         )
         MarkdownBlock(
             content = state.disclaimer,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
         )
     }
 }
 
 @Composable
-private fun WebDavPage(state: OnboardingUiState, onIntent: (OnboardingIntent) -> Unit) {
+private fun WebDavPage(
+    state: OnboardingUiState,
+    onIntent: (OnboardingIntent) -> Unit,
+) {
     Column(
-        modifier = Modifier
+        modifier =
+        Modifier
             .verticalScroll(rememberScrollState())
             .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
+        verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         AppTextField(
             value = state.webDavUrl,
             onValueChange = { onIntent(OnboardingIntent.UpdateWebDavUrl(it)) },
             label = stringResource(R.string.web_dav_url),
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
         )
         AppTextField(
             value = state.webDavAccount,
             onValueChange = { onIntent(OnboardingIntent.UpdateWebDavAccount(it)) },
             label = stringResource(R.string.web_dav_account),
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
         )
         AppTextField(
             value = state.webDavPassword,
             onValueChange = { onIntent(OnboardingIntent.UpdateWebDavPassword(it)) },
             label = stringResource(R.string.web_dav_pw),
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
         )
         Row(
             horizontalArrangement = Arrangement.spacedBy(12.dp),
-            modifier = Modifier.padding(top = 4.dp)
+            modifier = Modifier.padding(top = 4.dp),
         ) {
             MediumTonalButton(
                 onClick = { onIntent(OnboardingIntent.FetchBackups) },
                 text = stringResource(R.string.restore),
-                modifier = Modifier.weight(1f)
+                modifier = Modifier.weight(1f),
             )
             MediumTonalButton(
                 onClick = { onIntent(OnboardingIntent.SaveAndTestWebDav) },
                 text = stringResource(R.string.action_save),
-                modifier = Modifier.weight(1f)
+                modifier = Modifier.weight(1f),
             )
         }
         AppText(
             text = stringResource(R.string.set_local_password_summary),
             style = LegadoTheme.typography.labelSmall,
-            modifier = Modifier.padding(top = 8.dp)
+            modifier = Modifier.padding(top = 8.dp),
         )
         AppTextField(
             value = state.appAccessPassword,
             onValueChange = { onIntent(OnboardingIntent.UpdateAppAccessPassword(it)) },
             label = stringResource(R.string.set_local_password),
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
         )
     }
 }
 
 @Composable
-private fun ThemePage(state: OnboardingUiState, onIntent: (OnboardingIntent) -> Unit) {
+private fun ThemePage(
+    state: OnboardingUiState,
+    onIntent: (OnboardingIntent) -> Unit,
+) {
     val context = LocalContext.current
     val isDark = LegadoTheme.isDark
     val themeItems = stringArrayResource(R.array.themes_item)
     val themeValues = stringArrayResource(R.array.themes_value)
-    val themes = remember(themeItems, themeValues) {
-        themeItems.zip(themeValues).toList()
-    }
+    val themes =
+        remember(themeItems, themeValues) {
+            themeItems.zip(themeValues).toList()
+        }
     Column(
-        modifier = Modifier
+        modifier =
+        Modifier
             .verticalScroll(rememberScrollState())
-            .padding(16.dp)
+            .padding(16.dp),
     ) {
         Box {
             ThemeModeSelector(
                 selectedMode = state.themeMode,
-                onModeSelected = { onIntent(OnboardingIntent.SetThemeMode(it)) }
+                onModeSelected = { onIntent(OnboardingIntent.SetThemeMode(it)) },
             )
         }
         Box(modifier = Modifier.padding(top = 16.dp)) {
@@ -317,7 +346,7 @@ private fun ThemePage(state: OnboardingUiState, onIntent: (OnboardingIntent) -> 
                 paletteStyle = state.theme.paletteStyle,
                 customLightSeedColor = state.theme.customPrimary,
                 customNightSeedColor = state.theme.customNightPrimary,
-                onThemeSelected = { onIntent(OnboardingIntent.SelectTheme(it)) }
+                onThemeSelected = { onIntent(OnboardingIntent.SelectTheme(it)) },
             )
         }
     }
@@ -329,7 +358,7 @@ private fun pageTitle(page: Int): String = stringResource(
         0 -> R.string.onboarding_title_welcome
         1 -> R.string.onboarding_title_backup
         else -> R.string.onboarding_title_theme
-    }
+    },
 )
 
 @Composable
@@ -338,14 +367,17 @@ private fun pageSummary(page: Int): String = stringResource(
         0 -> R.string.onboarding_summary_welcome
         1 -> R.string.onboarding_summary_backup
         else -> R.string.onboarding_summary_theme
-    }
+    },
 )
 
 @Composable
-private fun nextButtonText(page: Int, pageCount: Int): String = stringResource(
+private fun nextButtonText(
+    page: Int,
+    pageCount: Int,
+): String = stringResource(
     when {
         page == 0 -> R.string.onboarding_next_agree
         page == pageCount - 1 -> R.string.onboarding_next_done
         else -> R.string.onboarding_next_step
-    }
+    },
 )

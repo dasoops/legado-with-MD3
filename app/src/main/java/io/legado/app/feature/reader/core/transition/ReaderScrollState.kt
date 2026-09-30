@@ -19,7 +19,6 @@ data class ReaderScrollResult(
  * input delta is ever dropped between pages.
  */
 object ReaderScrollPolicy {
-
     /**
      * Click paging keeps one visible text row for context, matching ScrollPageDelegate.
      * Non-inline image pages and empty pages move by one full viewport.
@@ -37,36 +36,51 @@ object ReaderScrollPolicy {
         nextPlus: ReaderPage? = null,
     ): Float {
         val viewport = (page.contentBottomPx - page.contentTopPx).coerceAtLeast(1f)
-        data class Row(val element: ReaderElement, val stackOffset: Float)
-        val visible = buildList {
-            fun collect(source: ReaderPage, shift: Float) {
-                val stackOffset = offsetPx + shift
-                for (element in source.elements) {
-                    if (element.bounds.bottom + stackOffset > page.contentTopPx &&
-                        element.bounds.top + stackOffset < page.contentBottomPx
-                    ) add(Row(element, stackOffset))
+
+        data class Row(
+            val element: ReaderElement,
+            val stackOffset: Float,
+        )
+        val visible =
+            buildList {
+                fun collect(
+                    source: ReaderPage,
+                    shift: Float,
+                ) {
+                    val stackOffset = offsetPx + shift
+                    for (element in source.elements) {
+                        if (element.bounds.bottom + stackOffset > page.contentTopPx &&
+                            element.bounds.top + stackOffset < page.contentBottomPx
+                        ) {
+                            add(Row(element, stackOffset))
+                        }
+                    }
+                }
+                previous?.let { collect(it, -it.scrollExtentPx) }
+                collect(page, 0f)
+                next?.let { nextPage ->
+                    collect(nextPage, page.scrollExtentPx)
+                    nextPlus?.let { following ->
+                        collect(following, page.scrollExtentPx + nextPage.scrollExtentPx)
+                    }
                 }
             }
-            previous?.let { collect(it, -it.scrollExtentPx) }
-            collect(page, 0f)
-            next?.let { nextPage ->
-                collect(nextPage, page.scrollExtentPx)
-                nextPlus?.let { following ->
-                    collect(following, page.scrollExtentPx + nextPage.scrollExtentPx)
-                }
-            }
-        }
         val text = visible.filter { it.element is ReaderElement.Text }
         if (text.isEmpty() ||
             (!page.inlineImagesPreserveScrollLine && visible.any { it.element is ReaderElement.Image })
-        ) return if (direction == ReaderTurnDirection.PREVIOUS) viewport else -viewport
+        ) {
+            return if (direction == ReaderTurnDirection.PREVIOUS) viewport else -viewport
+        }
 
-        val distance = when (direction) {
-            ReaderTurnDirection.NEXT ->
-                text.maxOf { it.element.bounds.top + it.stackOffset } - page.contentTopPx
-            ReaderTurnDirection.PREVIOUS ->
-                viewport - (text.minOf { it.element.bounds.bottom + it.stackOffset } - page.contentTopPx)
-        }.coerceIn(0f, viewport)
+        val distance =
+            when (direction) {
+                ReaderTurnDirection.NEXT -> {
+                    text.maxOf { it.element.bounds.top + it.stackOffset } - page.contentTopPx
+                }
+                ReaderTurnDirection.PREVIOUS -> {
+                    viewport - (text.minOf { it.element.bounds.bottom + it.stackOffset } - page.contentTopPx)
+                }
+            }.coerceIn(0f, viewport)
         val effective = distance.takeIf { it > 0f } ?: viewport
         return if (direction == ReaderTurnDirection.PREVIOUS) effective else -effective
     }
@@ -103,7 +117,9 @@ object ReaderScrollPolicy {
         if (next > 0f) {
             return if (hasPrevious && previousExtentPx > 0f) {
                 ReaderScrollResult(next - previousExtentPx, ReaderScrollCrossing.PREVIOUS)
-            } else ReaderScrollResult(0f, hitBoundary = true)
+            } else {
+                ReaderScrollResult(0f, hitBoundary = true)
+            }
         }
         if (!hasNext && next < 0f && next + currentExtentPx < viewportExtentPx) {
             return ReaderScrollResult(

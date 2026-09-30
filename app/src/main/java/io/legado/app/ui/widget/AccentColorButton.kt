@@ -7,11 +7,12 @@ import android.util.AttributeSet
 import com.google.android.material.button.MaterialButton
 import io.legado.app.utils.dpToPx
 
-class AccentColorButton @JvmOverloads constructor(
+class AccentColorButton
+@JvmOverloads
+constructor(
     context: Context,
     attrs: AttributeSet? = null,
 ) : MaterialButton(context, attrs) {
-
     var color: Int = 0
         set(value) {
             field = value
@@ -26,15 +27,9 @@ class AccentColorButton @JvmOverloads constructor(
         iconSize = 24.dpToPx()
     }
 
-    private fun createColorPreviewDrawable(color: Int): Drawable {
-        return GradientDrawable().apply {
-            shape = GradientDrawable.RECTANGLE
-            cornerRadius = 16f.dpToPx()
-            setColor(color)
-        }
+    private fun createColorPreviewDrawable(color: Int): Drawable = GradientDrawable().apply {
+        shape = GradientDrawable.RECTANGLE
+        cornerRadius = 16f.dpToPx()
+        setColor(color)
     }
-
 }
-
-
-

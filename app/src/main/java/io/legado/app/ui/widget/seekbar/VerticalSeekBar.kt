@@ -11,7 +11,6 @@ import android.widget.ProgressBar
 import androidx.appcompat.widget.AppCompatSeekBar
 import androidx.core.view.ViewCompat
 import io.legado.app.R
-//import io.legado.app.lib.theme.accentColor
 import java.lang.reflect.InvocationTargetException
 import java.lang.reflect.Method
 
@@ -56,7 +55,7 @@ class VerticalSeekBar @JvmOverloads constructor(context: Context, attrs: Attribu
 
     init {
         if (!isInEditMode) {
-            //applyTint(context.accentColor)
+            // applyTint(context.accentColor)
         }
         @Suppress("DEPRECATION")
         ViewCompat.setLayoutDirection(this, ViewCompat.LAYOUT_DIRECTION_LTR)
@@ -77,12 +76,10 @@ class VerticalSeekBar @JvmOverloads constructor(context: Context, attrs: Attribu
     }
 
     @SuppressLint("ClickableViewAccessibility")
-    override fun onTouchEvent(event: MotionEvent): Boolean {
-        return if (useViewRotation()) {
-            onTouchEventUseViewRotation(event)
-        } else {
-            onTouchEventTraditionalRotation(event)
-        }
+    override fun onTouchEvent(event: MotionEvent): Boolean = if (useViewRotation()) {
+        onTouchEventUseViewRotation(event)
+    } else {
+        onTouchEventTraditionalRotation(event)
     }
 
     private fun onTouchEventTraditionalRotation(event: MotionEvent): Boolean {
@@ -98,11 +95,9 @@ class VerticalSeekBar @JvmOverloads constructor(context: Context, attrs: Attribu
                 attemptClaimDrag(true)
                 invalidate()
             }
-
             MotionEvent.ACTION_MOVE -> if (mIsDragging) {
                 trackTouchEvent(event)
             }
-
             MotionEvent.ACTION_UP -> {
                 if (mIsDragging) {
                     trackTouchEvent(event)
@@ -122,7 +117,6 @@ class VerticalSeekBar @JvmOverloads constructor(context: Context, attrs: Attribu
                 // value has not apparently changed)
                 invalidate()
             }
-
             MotionEvent.ACTION_CANCEL -> {
                 if (mIsDragging) {
                     onStopTrackingTouch()
@@ -140,7 +134,6 @@ class VerticalSeekBar @JvmOverloads constructor(context: Context, attrs: Attribu
         if (handled) {
             when (event.action) {
                 MotionEvent.ACTION_DOWN -> attemptClaimDrag(true)
-
                 MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> attemptClaimDrag(false)
             }
         }
@@ -212,16 +205,13 @@ class VerticalSeekBar @JvmOverloads constructor(context: Context, attrs: Attribu
                     direction = if (mRotationAngle == ROTATION_ANGLE_CW_90) 1 else -1
                     handled = true
                 }
-
                 KeyEvent.KEYCODE_DPAD_UP -> {
                     direction = if (mRotationAngle == ROTATION_ANGLE_CW_270) 1 else -1
                     handled = true
                 }
-
                 KeyEvent.KEYCODE_DPAD_LEFT, KeyEvent.KEYCODE_DPAD_RIGHT ->
                     // move view focus to previous/next view
                     return false
-
                 else -> handled = false
             }
 
@@ -257,13 +247,12 @@ class VerticalSeekBar @JvmOverloads constructor(context: Context, attrs: Attribu
                 val m: Method = ProgressBar::class.java.getDeclaredMethod(
                     "setProgress",
                     Int::class.javaPrimitiveType,
-                    Boolean::class.javaPrimitiveType
+                    Boolean::class.javaPrimitiveType,
                 )
                 m.isAccessible = true
                 mMethodSetProgressFromUser = m
             } catch (_: NoSuchMethodException) {
             }
-
         }
 
         if (mMethodSetProgressFromUser != null) {
@@ -273,7 +262,6 @@ class VerticalSeekBar @JvmOverloads constructor(context: Context, attrs: Attribu
             } catch (_: IllegalAccessException) {
             } catch (_: InvocationTargetException) {
             }
-
         } else {
             super.setProgress(progress)
         }
@@ -313,7 +301,6 @@ class VerticalSeekBar @JvmOverloads constructor(context: Context, attrs: Attribu
                     canvas.rotate(90f)
                     canvas.translate(0f, (-super.getWidth()).toFloat())
                 }
-
                 ROTATION_ANGLE_CW_270 -> {
                     canvas.rotate(-90f)
                     canvas.translate((-super.getHeight()).toFloat(), 0f)
@@ -330,16 +317,12 @@ class VerticalSeekBar @JvmOverloads constructor(context: Context, attrs: Attribu
     }
 
     /*package*/
-    internal fun useViewRotation(): Boolean {
-        return !isInEditMode
-    }
+    internal fun useViewRotation(): Boolean = !isInEditMode
 
     companion object {
         const val ROTATION_ANGLE_CW_90 = 90
         const val ROTATION_ANGLE_CW_270 = 270
 
-        private fun isValidRotationAngle(angle: Int): Boolean {
-            return angle == ROTATION_ANGLE_CW_90 || angle == ROTATION_ANGLE_CW_270
-        }
+        private fun isValidRotationAngle(angle: Int): Boolean = angle == ROTATION_ANGLE_CW_90 || angle == ROTATION_ANGLE_CW_270
     }
 }

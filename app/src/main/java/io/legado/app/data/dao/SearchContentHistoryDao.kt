@@ -9,12 +9,14 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface SearchContentHistoryDao {
-
     @Query("SELECT * FROM search_content_history ORDER BY time DESC")
     fun getAll(): Flow<List<SearchContentHistory>>
 
     @Query("SELECT * FROM search_content_history WHERE bookName = :bookName AND bookAuthor = :bookAuthor ORDER BY time DESC")
-    fun getByBook(bookName: String, bookAuthor: String): Flow<List<SearchContentHistory>>
+    fun getByBook(
+        bookName: String,
+        bookAuthor: String,
+    ): Flow<List<SearchContentHistory>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(searchContentHistory: SearchContentHistory)
@@ -23,11 +25,18 @@ interface SearchContentHistoryDao {
     suspend fun delete(id: Long)
 
     @Query("DELETE FROM search_content_history WHERE bookName = :bookName AND bookAuthor = :bookAuthor")
-    suspend fun deleteByBook(bookName: String, bookAuthor: String)
+    suspend fun deleteByBook(
+        bookName: String,
+        bookAuthor: String,
+    )
 
     @Query("DELETE FROM search_content_history")
     suspend fun deleteAll()
 
     @Query("SELECT * FROM search_content_history WHERE bookName = :bookName AND bookAuthor = :bookAuthor AND `query` = :query")
-    suspend fun get(bookName: String, bookAuthor: String, query: String): SearchContentHistory?
+    suspend fun get(
+        bookName: String,
+        bookAuthor: String,
+        query: String,
+    ): SearchContentHistory?
 }

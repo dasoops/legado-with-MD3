@@ -1,8 +1,8 @@
 package io.legado.app.help.config
 
+import java.io.File
 import org.junit.Assert.assertTrue
 import org.junit.Test
-import java.io.File
 
 /**
  * R4.3 —— `ReadBookConfig` 与 `ReadStyleGateway` 之间的依赖必须单向。
@@ -23,23 +23,24 @@ import java.io.File
  * ——文件内部写的是 `config.x = value`，绕不过那条正则，只能在这里断言。
  */
 class ReadBookConfigDependencyDirectionTest {
-
     @Test
     fun `ReadBookConfig 不反向依赖 ReadStyleGateway`() {
-        val source = stripComments(
-            mainSourceFile("io/legado/app/help/config/ReadBookConfig.kt").readText()
-        )
-        val violations = buildList {
-            if (Regex("""\bReadStyleGateway\b""").containsMatchIn(source)) {
-                add("引用了 ReadStyleGateway")
+        val source =
+            stripComments(
+                mainSourceFile("io/legado/app/help/config/ReadBookConfig.kt").readText(),
+            )
+        val violations =
+            buildList {
+                if (Regex("""\bReadStyleGateway\b""").containsMatchIn(source)) {
+                    add("引用了 ReadStyleGateway")
+                }
+                if (Regex("""\bReadStyleMutation\b""").containsMatchIn(source)) {
+                    add("引用了 ReadStyleMutation（在向领域层下达样式变更）")
+                }
+                if (Regex("""\battachGateway\b""").containsMatchIn(source)) {
+                    add("又出现了 attachGateway 这类事后回填的反向引用")
+                }
             }
-            if (Regex("""\bReadStyleMutation\b""").containsMatchIn(source)) {
-                add("引用了 ReadStyleMutation（在向领域层下达样式变更）")
-            }
-            if (Regex("""\battachGateway\b""").containsMatchIn(source)) {
-                add("又出现了 attachGateway 这类事后回填的反向引用")
-            }
-        }
         assertTrue(
             "ReadBookConfig 又反向依赖排版 gateway 了：${violations.joinToString()}。\n" +
                 "排版存储不该命令拥有它的领域层——需要改样式的调用方请自己拿 " +
@@ -51,11 +52,12 @@ class ReadBookConfigDependencyDirectionTest {
     @Test
     fun `ReadBookConfig 是只读投影，没有公开可写属性`() {
         val source = stripComments(readBookConfigSource())
-        val writable = Regex("""^    var (\w+)""", RegexOption.MULTILINE)
-            .findAll(source)
-            .map { it.groupValues[1] }
-            .filterNot { it in WRITABLE_ALLOWLIST }
-            .toList()
+        val writable =
+            Regex("""^    var (\w+)""", RegexOption.MULTILINE)
+                .findAll(source)
+                .map { it.groupValues[1] }
+                .filterNot { it in WRITABLE_ALLOWLIST }
+                .toList()
 
         assertTrue(
             "ReadBookConfig 又长出了公开可写属性：${writable.joinToString()}。\n" +
@@ -71,17 +73,18 @@ class ReadBookConfigDependencyDirectionTest {
     @Test
     fun `ReadBookConfig 不再持有排版状态本体`() {
         val source = stripComments(readBookConfigSource())
-        val violations = buildList {
-            Regex("""^    (?:private )?(?:val|var) (\w+)\s*:\s*(?:Array|Mutable)?List<Config>""", MULTILINE)
-                .findAll(source)
-                .forEach { add("${it.groupValues[1]}（配置列表）") }
-            Regex("""^    (?:private )?lateinit var (\w+)\s*:\s*Config\b""", MULTILINE)
-                .findAll(source)
-                .forEach { add("${it.groupValues[1]}（共享排版那一份）") }
-            Regex("""^    (?:private )?(?:val|var) (\w+)\s*=\s*(?:arrayListOf|mutableListOf|mutableMapOf|hashMapOf)""", MULTILINE)
-                .findAll(source)
-                .forEach { add("${it.groupValues[1]}（可变集合）") }
-        }
+        val violations =
+            buildList {
+                Regex("""^    (?:private )?(?:val|var) (\w+)\s*:\s*(?:Array|Mutable)?List<Config>""", MULTILINE)
+                    .findAll(source)
+                    .forEach { add("${it.groupValues[1]}（配置列表）") }
+                Regex("""^    (?:private )?lateinit var (\w+)\s*:\s*Config\b""", MULTILINE)
+                    .findAll(source)
+                    .forEach { add("${it.groupValues[1]}（共享排版那一份）") }
+                Regex("""^    (?:private )?(?:val|var) (\w+)\s*=\s*(?:arrayListOf|mutableListOf|mutableMapOf|hashMapOf)""", MULTILINE)
+                    .findAll(source)
+                    .forEach { add("${it.groupValues[1]}（可变集合）") }
+            }
 
         assertTrue(
             "ReadBookConfig 又把排版状态本体收回去了：${violations.joinToString()}。\n" +
@@ -97,8 +100,10 @@ class ReadBookConfigDependencyDirectionTest {
     @Test
     fun `ReadBookConfig 只从 store 读，不调它的写方法`() {
         val source = stripComments(readBookConfigSource())
-        val called = STORE_WRITES.filter { Regex("""\bconfigStore\.$it\s*\(""").containsMatchIn(source) }
-            .filterNot { it in INITIALIZE_ONLY && initializeBody(source).contains("$it(") }
+        val called =
+            STORE_WRITES
+                .filter { Regex("""\bconfigStore\.$it\s*\(""").containsMatchIn(source) }
+                .filterNot { it in INITIALIZE_ONLY && initializeBody(source).contains("$it(") }
 
         assertTrue(
             "ReadBookConfig 调了 ReadStyleConfigStore 的写方法：${called.joinToString()}。\n" +
@@ -116,15 +121,16 @@ class ReadBookConfigDependencyDirectionTest {
         val MULTILINE = RegexOption.MULTILINE
 
         /** [ReadStyleConfigStore] 上会改状态的方法。 */
-        val STORE_WRITES = listOf(
-            "updateEffective",
-            "updateStyleAt",
-            "addConfig",
-            "deleteConfigAt",
-            "importOrReplaceConfig",
-            "initConfigs",
-            "initShareConfig",
-        )
+        val STORE_WRITES =
+            listOf(
+                "updateEffective",
+                "updateStyleAt",
+                "addConfig",
+                "deleteConfigAt",
+                "importOrReplaceConfig",
+                "initConfigs",
+                "initShareConfig",
+            )
 
         /** 只允许出现在 `initialize()` 里的两个——首帧之前得先把配置读进来。 */
         val INITIALIZE_ONLY = setOf("initConfigs", "initShareConfig")
@@ -139,8 +145,7 @@ class ReadBookConfigDependencyDirectionTest {
         /** `durConfig` 是整份配置的替换入口（应用预设 / 导入），只有 gateway 实现用得到。 */
         val WRITABLE_ALLOWLIST = setOf("durConfig")
 
-        fun readBookConfigSource(): String =
-            mainSourceFile("io/legado/app/help/config/ReadBookConfig.kt").readText()
+        fun readBookConfigSource(): String = mainSourceFile("io/legado/app/help/config/ReadBookConfig.kt").readText()
 
         fun stripComments(text: String): String = text
             .replace(Regex("""/\*[\s\S]*?\*/"""), "")

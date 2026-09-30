@@ -39,7 +39,7 @@ fun ReaderMenuDismissLayer(
                     indication = null,
                     interactionSource = remember { MutableInteractionSource() },
                     onClick = onDismiss,
-                )
+                ),
         )
     }
 }
@@ -83,13 +83,15 @@ fun DefaultReaderMenuTopSurface(content: @Composable () -> Unit) {
 @Composable
 fun DefaultReaderMenuBottomSurface(content: @Composable () -> Unit) {
     Surface(
-        modifier = Modifier
+        modifier =
+        Modifier
             .fillMaxWidth()
             .navigationBarsPadding()
             .padding(horizontal = 16.dp, vertical = 16.dp),
         shape = RoundedCornerShape(32.dp),
         color = LegadoTheme.colorScheme.surfaceContainerHigh,
-        border = androidx.compose.foundation.BorderStroke(
+        border =
+        androidx.compose.foundation.BorderStroke(
             1.dp,
             LegadoTheme.colorScheme.outlineVariant,
         ),

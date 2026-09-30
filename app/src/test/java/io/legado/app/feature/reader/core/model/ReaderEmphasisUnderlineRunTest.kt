@@ -4,18 +4,20 @@ import org.junit.Assert.assertEquals
 import org.junit.Test
 
 class ReaderEmphasisUnderlineRunTest {
-    private val emphasis = ReaderEmphasisUnderline(
-        colorArgb = 0xff123456.toInt(),
-        widthPx = 2f,
-        bottomOffsetPx = 1f,
-    )
+    private val emphasis =
+        ReaderEmphasisUnderline(
+            colorArgb = 0xff123456.toInt(),
+            widthPx = 2f,
+            bottomOffsetPx = 1f,
+        )
 
     @Test fun `one emphasized glyph underlines its entire visual line`() {
-        val page = page(
-            text(10f, 20f, emphasis),
-            text(20f, 30f),
-            text(30f, 45f),
-        )
+        val page =
+            page(
+                text(10f, 20f, emphasis),
+                text(20f, 30f),
+                text(30f, 45f),
+            )
 
         assertEquals(
             listOf(ReaderEmphasisUnderlineRun(10f, 45f, 39f, emphasis)),
@@ -24,22 +26,24 @@ class ReaderEmphasisUnderlineRunTest {
     }
 
     @Test fun `separate visual lines produce separate emphasis rules`() {
-        val page = page(
-            text(0f, 10f, emphasis, top = 0f, bottom = 20f),
-            text(10f, 20f, top = 0f, bottom = 20f),
-            text(5f, 15f, emphasis, top = 20f, bottom = 40f),
-        )
+        val page =
+            page(
+                text(0f, 10f, emphasis, top = 0f, bottom = 20f),
+                text(10f, 20f, top = 0f, bottom = 20f),
+                text(5f, 15f, emphasis, top = 20f, bottom = 40f),
+            )
 
         assertEquals(listOf(19f, 39f), page.emphasisUnderlineRuns().map { it.yPx })
     }
 
     @Test
     fun `hit underlines the whole line even when only one glyph matches`() {
-        val page = page(
-            text(10f, 20f),
-            text(20f, 30f),
-            text(30f, 45f),
-        )
+        val page =
+            page(
+                text(10f, 20f),
+                text(20f, 30f),
+                text(30f, 45f),
+            )
 
         assertEquals(
             listOf(ReaderEmphasisUnderlineRun(10f, 45f, 39f, emphasis)),
@@ -49,10 +53,11 @@ class ReaderEmphasisUnderlineRunTest {
 
     @Test
     fun `lines without a hit produce no rule`() {
-        val page = page(
-            text(0f, 10f, top = 0f, bottom = 20f),
-            text(5f, 15f, top = 20f, bottom = 40f),
-        )
+        val page =
+            page(
+                text(0f, 10f, top = 0f, bottom = 20f),
+                text(5f, 15f, top = 20f, bottom = 40f),
+            )
 
         assertEquals(
             emptyList<ReaderEmphasisUnderlineRun>(),
@@ -62,10 +67,11 @@ class ReaderEmphasisUnderlineRunTest {
 
     @Test
     fun `hit on the title line does not underline body lines`() {
-        val page = page(
-            text(0f, 30f, top = 0f, bottom = 20f),
-            text(0f, 40f, top = 20f, bottom = 40f),
-        )
+        val page =
+            page(
+                text(0f, 30f, top = 0f, bottom = 20f),
+                text(0f, 40f, top = 20f, bottom = 40f),
+            )
 
         assertEquals(
             listOf(ReaderEmphasisUnderlineRun(0f, 30f, 19f, emphasis)),

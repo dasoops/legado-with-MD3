@@ -18,5 +18,5 @@ data class MobiHeader(
     val trailingFlags: Int,
     val indx: Int,
     val title: String,
-    val languege: String
+    val languege: String,
 )

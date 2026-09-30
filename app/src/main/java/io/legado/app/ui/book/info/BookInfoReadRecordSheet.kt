@@ -51,30 +51,31 @@ fun BookReadRecordSheet(
     ) {
         GlassCard(
             modifier = Modifier.fillMaxWidth(),
-            containerColor = LegadoTheme.colorScheme.surfaceContainerLow
+            containerColor = LegadoTheme.colorScheme.surfaceContainerLow,
         ) {
             Row(
-                modifier = Modifier
+                modifier =
+                Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp, vertical = 14.dp),
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
             ) {
                 Icon(
                     imageVector = Icons.Default.Timeline,
                     contentDescription = null,
-                    tint = LegadoTheme.colorScheme.primary
+                    tint = LegadoTheme.colorScheme.primary,
                 )
                 Column {
                     AppText(
                         text = stringResource(R.string.all_read_time),
                         style = LegadoTheme.typography.labelMedium,
-                        color = LegadoTheme.colorScheme.primary
+                        color = LegadoTheme.colorScheme.primary,
                     )
                     AppText(
                         text = formatReadDuration(totalReadTime),
                         style = LegadoTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.Bold,
                     )
                 }
             }
@@ -82,17 +83,18 @@ fun BookReadRecordSheet(
         Spacer(modifier = Modifier.height(12.dp))
         if (timelineDays.isEmpty()) {
             Box(
-                modifier = Modifier
+                modifier =
+                Modifier
                     .fillMaxWidth()
                     .padding(vertical = 24.dp),
-                contentAlignment = Alignment.Center
+                contentAlignment = Alignment.Center,
             ) {
                 EmptyMessage(message = stringResource(R.string.empty))
             }
         } else {
             LazyColumn(
                 modifier = Modifier.fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(4.dp)
+                verticalArrangement = Arrangement.spacedBy(4.dp),
             ) {
                 timelineDays.forEach { day ->
                     item(key = "header_${day.date}") {
@@ -101,7 +103,7 @@ fun BookReadRecordSheet(
                             style = LegadoTheme.typography.titleSmall,
                             color = LegadoTheme.colorScheme.primary,
                             fontWeight = FontWeight.SemiBold,
-                            modifier = Modifier.padding(top = 8.dp, bottom = 4.dp)
+                            modifier = Modifier.padding(top = 8.dp, bottom = 4.dp),
                         )
                     }
                     items(day.sessions, key = { it.id }) { session ->
@@ -120,7 +122,8 @@ private fun TimelineSessionRow(session: ReadRecordSession) {
     val nodeColor = LegadoTheme.colorScheme.primary
     val duration = (session.endTime - session.startTime).coerceAtLeast(0L)
     Row(
-        modifier = Modifier
+        modifier =
+        Modifier
             .fillMaxWidth()
             .drawBehind {
                 val x = 12.dp.toPx()
@@ -129,30 +132,31 @@ private fun TimelineSessionRow(session: ReadRecordSession) {
                     color = lineColor,
                     start = Offset(x, 0f),
                     end = Offset(x, size.height),
-                    strokeWidth = 2.dp.toPx()
+                    strokeWidth = 2.dp.toPx(),
                 )
                 drawCircle(
                     color = nodeColor,
                     radius = 4.dp.toPx(),
-                    center = Offset(x, centerY)
+                    center = Offset(x, centerY),
                 )
-            }
-            .padding(start = 28.dp, top = 6.dp, bottom = 6.dp),
-        verticalAlignment = Alignment.CenterVertically
+            }.padding(start = 28.dp, top = 6.dp, bottom = 6.dp),
+        verticalAlignment = Alignment.CenterVertically,
     ) {
         Spacer(modifier = Modifier.width(8.dp))
         Column(modifier = Modifier.weight(1f)) {
             AppText(
-                text = Instant.ofEpochMilli(session.endTime)
+                text =
+                Instant
+                    .ofEpochMilli(session.endTime)
                     .atZone(ZoneId.systemDefault())
                     .format(DateTimeFormatter.ofPattern("HH:mm")),
                 style = LegadoTheme.typography.bodyMedium,
-                fontWeight = FontWeight.SemiBold
+                fontWeight = FontWeight.SemiBold,
             )
             AppText(
                 text = formatReadDuration(duration),
                 style = LegadoTheme.typography.bodySmall,
-                color = LegadoTheme.colorScheme.onSurfaceVariant
+                color = LegadoTheme.colorScheme.onSurfaceVariant,
             )
         }
         if (session.words > 0) {

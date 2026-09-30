@@ -8,11 +8,10 @@ import io.legado.app.data.entities.ExactChapterPageCountEntity
 
 @Dao
 interface ExactChapterPageCountDao {
-
     @Query(
         "select * from exact_chapter_page_counts " +
             "where bookId = :bookId and layoutSignature = :layoutSignature " +
-            "and engineVersion = :engineVersion"
+            "and engineVersion = :engineVersion",
     )
     suspend fun getByLayout(
         bookId: String,
@@ -24,5 +23,8 @@ interface ExactChapterPageCountDao {
     suspend fun upsert(entity: ExactChapterPageCountEntity)
 
     @Query("delete from exact_chapter_page_counts where bookId = :bookId and chapterId = :chapterId")
-    suspend fun deleteChapter(bookId: String, chapterId: String)
+    suspend fun deleteChapter(
+        bookId: String,
+        chapterId: String,
+    )
 }

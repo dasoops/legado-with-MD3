@@ -11,7 +11,10 @@ data class ReaderSelectionCoordinate(
 )
 
 object ReaderSelectionCoordinateMapper {
-    fun find(lines: List<ReaderSelectionLine>, chapterPosition: Int): ReaderSelectionCoordinate? {
+    fun find(
+        lines: List<ReaderSelectionLine>,
+        chapterPosition: Int,
+    ): ReaderSelectionCoordinate? {
         lines.forEachIndexed { lineIndex, line ->
             var position = line.chapterPosition
             line.columnCharacterLengths.forEachIndexed { columnIndex, rawLength ->

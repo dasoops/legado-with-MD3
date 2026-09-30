@@ -6,13 +6,9 @@ import io.legado.app.data.entities.ReplaceRule
 data class BookContent(
     val sameTitleRemoved: Boolean,
     val textList: List<String>,
-    //起效的替换规则
+    // 起效的替换规则
     val effectiveReplaceRules: List<ReplaceRule>?,
     val effectiveContentProcesses: List<BookContentProcess> = emptyList(),
 ) {
-
-    override fun toString(): String {
-        return textList.joinToString("\n")
-    }
-
+    override fun toString(): String = textList.joinToString("\n")
 }

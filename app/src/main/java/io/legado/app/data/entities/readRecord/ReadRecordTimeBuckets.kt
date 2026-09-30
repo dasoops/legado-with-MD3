@@ -16,7 +16,6 @@ data class ReadRecordTimeSlice(
 }
 
 object ReadRecordTimeBuckets {
-
     /**
      * 按本地时间的整点边界切分会话, 让跨小时和跨午夜的时长分别落入正确桶中。
      * 使用时间线上的 Instant 推进, 避免夏令时切换时出现重复或丢失时长。
@@ -33,18 +32,20 @@ object ReadRecordTimeBuckets {
         val slices = mutableListOf<ReadRecordTimeSlice>()
         while (cursor < finish) {
             val localCursor = cursor.atZone(zoneId)
-            val nextHour = localCursor
-                .truncatedTo(ChronoUnit.HOURS)
-                .plusHours(1)
-                .toInstant()
+            val nextHour =
+                localCursor
+                    .truncatedTo(ChronoUnit.HOURS)
+                    .plusHours(1)
+                    .toInstant()
             val sliceEnd = minOf(finish, nextHour)
             if (sliceEnd > cursor) {
-                slices += ReadRecordTimeSlice(
-                    date = localCursor.toLocalDate(),
-                    hour = localCursor.hour,
-                    startTime = cursor.toEpochMilli(),
-                    endTime = sliceEnd.toEpochMilli(),
-                )
+                slices +=
+                    ReadRecordTimeSlice(
+                        date = localCursor.toLocalDate(),
+                        hour = localCursor.hour,
+                        startTime = cursor.toEpochMilli(),
+                        endTime = sliceEnd.toEpochMilli(),
+                    )
             }
             cursor = sliceEnd
         }

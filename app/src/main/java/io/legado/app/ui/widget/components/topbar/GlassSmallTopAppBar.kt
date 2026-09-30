@@ -37,13 +37,14 @@ fun GlassSmallTopAppBar(
 
     val hazeState = LocalHazeState.current
     val containerColor = GlassTopAppBarDefaults.getMiuixAppBarColor()
-    val finalModifier = if (hazeState != null) {
-        modifier
-            .background(containerColor)
-            .responsiveHazeEffect(hazeState)
-    } else {
-        modifier.background(containerColor)
-    }
+    val finalModifier =
+        if (hazeState != null) {
+            modifier
+                .background(containerColor)
+                .responsiveHazeEffect(hazeState)
+        } else {
+            modifier.background(containerColor)
+        }
 
     Column(modifier = finalModifier) {
         MiuixSmallTopAppBar(
@@ -51,7 +52,7 @@ fun GlassSmallTopAppBar(
             navigationIcon = navigationIcon,
             actions = {
                 TopBarActionsRow(
-                    modifier = Modifier.padding(end = miuixTopBarActionsEndPadding())
+                    modifier = Modifier.padding(end = miuixTopBarActionsEndPadding()),
                 ) { actions() }
             },
             color = Color.Transparent,

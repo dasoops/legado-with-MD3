@@ -10,13 +10,12 @@ import org.robolectric.annotation.Config
 @RunWith(RobolectricTestRunner::class)
 @Config(application = Application::class, sdk = [35])
 class LocalDirectoryTagsTest {
-
     @Test
     fun `目录根文件使用所选目录名作为标签`() {
         val root = "file:///mnt/Awork/Books"
         assertEquals(
             listOf("Books"),
-            directoryTagsOf(root, "Books", "/mnt/Awork/Books/a.txt")
+            directoryTagsOf(root, "Books", "/mnt/Awork/Books/a.txt"),
         )
     }
 
@@ -25,7 +24,7 @@ class LocalDirectoryTagsTest {
         val root = "file:///mnt/Awork"
         assertEquals(
             listOf("Awork", "Books"),
-            directoryTagsOf(root, "Awork", "/mnt/Awork/Books/a.txt")
+            directoryTagsOf(root, "Awork", "/mnt/Awork/Books/a.txt"),
         )
     }
 

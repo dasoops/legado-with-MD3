@@ -36,7 +36,10 @@ object CookieManager {
         saveCookiesFromHeaders(url, headers)
     }
 
-    private fun saveCookiesFromHeaders(url: HttpUrl, headers: Headers) {
+    private fun saveCookiesFromHeaders(
+        url: HttpUrl,
+        headers: Headers,
+    ) {
         val domain = NetworkUtils.getSubDomain(url.toString())
         val cookies = Cookie.parseAll(url, headers)
 
@@ -59,28 +62,29 @@ object CookieManager {
 
         val newCookie = mergeCookies(requestCookie, cookie) ?: return request
 
-        kotlin.runCatching {
-            return request.newBuilder()
-                .header("Cookie", newCookie)
-                .build()
-        }.onFailure {
-            CookieStore.removeCookie(url)
-            val msg = "设置cookie出错，已清除cookie $domain cookie:$newCookie\n$it"
-            AppLog.put(msg, it)
-        }
+        kotlin
+            .runCatching {
+                return request
+                    .newBuilder()
+                    .header("Cookie", newCookie)
+                    .build()
+            }.onFailure {
+                CookieStore.removeCookie(url)
+                val msg = "设置cookie出错，已清除cookie $domain cookie:$newCookie\n$it"
+                AppLog.put(msg, it)
+            }
 
         return request
     }
 
-    private fun getSessionCookieMap(domain: String): MutableMap<String, String>? {
-        return getSessionCookie(domain)?.let { CookieStore.cookieToMap(it) }
-    }
+    private fun getSessionCookieMap(domain: String): MutableMap<String, String>? = getSessionCookie(domain)?.let { CookieStore.cookieToMap(it) }
 
-    fun getSessionCookie(domain: String): String? {
-        return CacheManager.getFromMemory("${domain}_session_cookie") as? String
-    }
+    fun getSessionCookie(domain: String): String? = CacheManager.getFromMemory("${domain}_session_cookie") as? String
 
-    private fun updateSessionCookie(domain: String, cookies: String) {
+    private fun updateSessionCookie(
+        domain: String,
+        cookies: String,
+    ) {
         val sessionCookie = getSessionCookie(domain)
         if (sessionCookie.isNullOrEmpty()) {
             CacheManager.putMemory("${domain}_session_cookie", cookies)
@@ -96,18 +100,21 @@ object CookieManager {
         return CookieStore.mapToCookie(cookieMap)
     }
 
-    fun mergeCookiesToMap(vararg cookies: String?): MutableMap<String, String> {
-        return cookies.filterNotNull().map {
+    fun mergeCookiesToMap(vararg cookies: String?): MutableMap<String, String> = cookies
+        .filterNotNull()
+        .map {
             CookieStore.cookieToMap(it)
         }.reduce { acc, cookieMap ->
             acc.apply { putAll(cookieMap) }
         }
-    }
 
     /**
      * 删除单个Cookie
      */
-    fun removeCookie(url: String, key: String) {
+    fun removeCookie(
+        url: String,
+        key: String,
+    ) {
         val domain = NetworkUtils.getSubDomain(url)
 
         getSessionCookieMap(domain)?.let {
@@ -145,14 +152,13 @@ object CookieManager {
         }
     }
 
-    private fun Map<String, List<String>>.toHeaders(): Headers {
-        return Headers.Builder().apply {
+    private fun Map<String, List<String>>.toHeaders(): Headers = Headers
+        .Builder()
+        .apply {
             this@toHeaders.forEach { (k, v) ->
                 v.forEach {
                     add(k, it)
                 }
             }
         }.build()
-    }
-
 }

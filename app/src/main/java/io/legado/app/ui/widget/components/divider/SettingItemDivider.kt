@@ -16,31 +16,32 @@ import androidx.compose.ui.unit.dp
 import io.legado.app.ui.theme.LocalAppUiConfiguration
 
 @Composable
-fun SettingItemDivider(
-    modifier: Modifier = Modifier
-) {
+fun SettingItemDivider(modifier: Modifier = Modifier) {
     val themeSettings = LocalAppUiConfiguration.current.theme
     if (!themeSettings.enableItemDivider) return
 
     val thickness = themeSettings.itemDividerWidth.dp
     val lengthPercent = themeSettings.itemDividerLength / 100f
-    val dividerColor = if (themeSettings.itemDividerColor != 0) {
-        Color(themeSettings.itemDividerColor)
-    } else {
-        Color.Gray.copy(alpha = 0.3f)
-    }
+    val dividerColor =
+        if (themeSettings.itemDividerColor != 0) {
+            Color(themeSettings.itemDividerColor)
+        } else {
+            Color.Gray.copy(alpha = 0.3f)
+        }
 
     Box(
-        modifier = modifier
+        modifier =
+        modifier
             .fillMaxWidth(),
-        contentAlignment = Alignment.Center
+        contentAlignment = Alignment.Center,
     ) {
         Box(
-            modifier = Modifier
+            modifier =
+            Modifier
                 .fillMaxWidth(lengthPercent)
                 .height(thickness)
                 .clip(CircleShape)
-                .background(dividerColor)
+                .background(dividerColor),
         )
     }
 }

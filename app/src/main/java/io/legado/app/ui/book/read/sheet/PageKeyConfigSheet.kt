@@ -34,12 +34,10 @@ import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 
 @Composable
-fun PageKeyConfigSheet(
-    onDismissRequest: () -> Unit,
-) {
+fun PageKeyConfigSheet(onDismissRequest: () -> Unit) {
     val readSettingsRepository: ReadSettingsRepository = koinInject()
     val preferences by readSettingsRepository.preferences.collectAsStateWithLifecycle(
-        initialValue = ReadPreferences()
+        initialValue = ReadPreferences(),
     )
     val scope = rememberCoroutineScope()
     var prevKeys by remember { mutableStateOf(preferences.prevKeys) }
@@ -65,18 +63,20 @@ fun PageKeyConfigSheet(
                         label = { Text(stringResource(R.string.prev_page_key)) },
                         singleLine = true,
                         keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
-                        modifier = Modifier
+                        modifier =
+                        Modifier
                             .fillMaxWidth()
                             .onKeyEvent { event ->
                                 val keyCode = event.nativeKeyEvent.keyCode
                                 if (keyCode != android.view.KeyEvent.KEYCODE_BACK &&
                                     keyCode != android.view.KeyEvent.KEYCODE_DEL
                                 ) {
-                                    prevKeys = if (prevKeys.isEmpty() || prevKeys.endsWith(",")) {
-                                        "$prevKeys$keyCode"
-                                    } else {
-                                        "$prevKeys,$keyCode"
-                                    }
+                                    prevKeys =
+                                        if (prevKeys.isEmpty() || prevKeys.endsWith(",")) {
+                                            "$prevKeys$keyCode"
+                                        } else {
+                                            "$prevKeys,$keyCode"
+                                        }
                                     true
                                 } else {
                                     false
@@ -90,18 +90,20 @@ fun PageKeyConfigSheet(
                         label = { Text(stringResource(R.string.next_page_key)) },
                         singleLine = true,
                         keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
-                        modifier = Modifier
+                        modifier =
+                        Modifier
                             .fillMaxWidth()
                             .onKeyEvent { event ->
                                 val keyCode = event.nativeKeyEvent.keyCode
                                 if (keyCode != android.view.KeyEvent.KEYCODE_BACK &&
                                     keyCode != android.view.KeyEvent.KEYCODE_DEL
                                 ) {
-                                    nextKeys = if (nextKeys.isEmpty() || nextKeys.endsWith(",")) {
-                                        "$nextKeys$keyCode"
-                                    } else {
-                                        "$nextKeys,$keyCode"
-                                    }
+                                    nextKeys =
+                                        if (nextKeys.isEmpty() || nextKeys.endsWith(",")) {
+                                            "$nextKeys$keyCode"
+                                        } else {
+                                            "$nextKeys,$keyCode"
+                                        }
                                     true
                                 } else {
                                     false

@@ -68,7 +68,6 @@ fun ContentProcessesSheet(
                     AppCircularProgressIndicator()
                 }
             }
-
             state.errorMessage != null -> {
                 AppText(
                     text = state.errorMessage,
@@ -78,7 +77,6 @@ fun ContentProcessesSheet(
                         .padding(bottom = 24.dp),
                 )
             }
-
             state.items.isEmpty() -> {
                 EmptyMessage(
                     message = stringResource(R.string.content_process_empty),
@@ -86,7 +84,6 @@ fun ContentProcessesSheet(
                         .fillMaxWidth(),
                 )
             }
-
             else -> {
                 var viewingItem by remember { mutableStateOf<ContentProcessItemUi?>(null) }
 
@@ -102,7 +99,7 @@ fun ContentProcessesSheet(
                             onClick = { viewingItem = item },
                             onToggle = {
                                 onIntent(
-                                    ReadBookIntent.ToggleContentProcess(item.id, !item.enabled)
+                                    ReadBookIntent.ToggleContentProcess(item.id, !item.enabled),
                                 )
                             },
                             onDelete = {
@@ -121,7 +118,7 @@ fun ContentProcessesSheet(
                         content = {
                             Column {
                                 AppText(
-                                    text = stringResource(R.string.ai_text_clean_before),
+                                    text = stringResource(R.string.content_process_before),
                                     style = LegadoTheme.typography.labelSmall,
                                     color = LegadoTheme.colorScheme.onSurfaceVariant,
                                 )
@@ -130,13 +127,13 @@ fun ContentProcessesSheet(
                                     modifier = Modifier.padding(top = 2.dp, bottom = 8.dp),
                                 )
                                 AppText(
-                                    text = stringResource(R.string.ai_text_clean_after),
+                                    text = stringResource(R.string.content_process_after),
                                     style = LegadoTheme.typography.labelSmall,
                                     color = LegadoTheme.colorScheme.onSurfaceVariant,
                                 )
                                 AppText(
                                     text = item.replacementText.ifEmpty {
-                                        stringResource(R.string.ai_text_clean_delete)
+                                        stringResource(R.string.content_process_delete_selected)
                                     },
                                     modifier = Modifier.padding(top = 2.dp),
                                     color = if (item.replacementText.isEmpty()) {
@@ -219,7 +216,7 @@ private fun ContentProcessItem(
 
             Spacer(Modifier.height(10.dp))
             AppText(
-                text = stringResource(R.string.ai_text_clean_before),
+                text = stringResource(R.string.content_process_before),
                 style = LegadoTheme.typography.labelSmall,
                 color = LegadoTheme.colorScheme.onSurfaceVariant,
             )
@@ -232,13 +229,13 @@ private fun ContentProcessItem(
 
             Spacer(Modifier.height(8.dp))
             AppText(
-                text = stringResource(R.string.ai_text_clean_after),
+                text = stringResource(R.string.content_process_after),
                 style = LegadoTheme.typography.labelSmall,
                 color = LegadoTheme.colorScheme.onSurfaceVariant,
             )
             AppText(
                 text = item.replacementText.ifEmpty {
-                    stringResource(R.string.ai_text_clean_delete)
+                    stringResource(R.string.content_process_delete_selected)
                 },
                 modifier = Modifier.padding(top = 2.dp),
                 color = if (item.replacementText.isEmpty()) {
@@ -256,14 +253,14 @@ private fun ContentProcessItem(
 @Composable
 private fun contentProcessTitle(item: ContentProcessItemUi): String {
     val kind = when (item.kind) {
-        BookContentProcess.KIND_AI_CLEAN -> stringResource(R.string.content_process_ai_clean)
-        BookContentProcess.KIND_AI_REWRITE -> stringResource(R.string.content_process_ai_rewrite)
+        BookContentProcess.KIND_MANUAL_REPLACEMENT -> stringResource(R.string.content_process_manual_replacement)
         else -> item.kind
     }
     val action = when (item.actionType) {
         TextProcessAction.TYPE_DELETE -> stringResource(R.string.content_process_delete_action)
         TextProcessAction.TYPE_INSERT_BEFORE,
-        TextProcessAction.TYPE_INSERT_AFTER -> stringResource(R.string.content_process_insert_action)
+        TextProcessAction.TYPE_INSERT_AFTER,
+        -> stringResource(R.string.content_process_insert_action)
         else -> stringResource(R.string.content_process_replace_action)
     }
     return "$kind · $action"

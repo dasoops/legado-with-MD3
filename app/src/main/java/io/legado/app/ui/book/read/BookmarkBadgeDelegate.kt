@@ -6,12 +6,12 @@ import android.provider.OpenableColumns
 import io.legado.app.R
 import io.legado.app.constant.AppLog
 import io.legado.app.data.repository.ReadSettingsRepository
+import java.io.File
+import java.io.FileNotFoundException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import java.io.File
-import java.io.FileNotFoundException
 
 /**
  * 自定义书签角标的落盘与清除。
@@ -26,7 +26,6 @@ class BookmarkBadgeDelegate(
     private val readSettingsRepository: ReadSettingsRepository,
     private val emitEffect: (ReadBookEffect) -> Unit,
 ) {
-
     fun applyBadgeImage(uri: Uri) {
         scope.launch(Dispatchers.IO) {
             runCatching {
@@ -41,8 +40,8 @@ class BookmarkBadgeDelegate(
                 AppLog.put("选择书签角标失败", throwable)
                 emitEffect(
                     ReadBookEffect.LongToast(
-                        throwable.localizedMessage ?: context.getString(R.string.error)
-                    )
+                        throwable.localizedMessage ?: context.getString(R.string.error),
+                    ),
                 )
             }
         }
@@ -50,9 +49,10 @@ class BookmarkBadgeDelegate(
 
     fun clearBadgeImage() {
         scope.launch(Dispatchers.IO) {
-            val oldPath = runCatching {
-                readSettingsRepository.preferences.first().bookmarkBadgeImage
-            }.getOrDefault("")
+            val oldPath =
+                runCatching {
+                    readSettingsRepository.preferences.first().bookmarkBadgeImage
+                }.getOrDefault("")
             oldPath.takeIf { it.isNotBlank() }?.let { runCatching { File(it).delete() } }
             readSettingsRepository.update { it.copy(bookmarkBadgeImage = "") }
             readSettingsRepository.preferences.first { it.bookmarkBadgeImage.isEmpty() }
@@ -62,9 +62,11 @@ class BookmarkBadgeDelegate(
 
     private fun copyToAppStorage(uri: Uri): String {
         val name = queryDisplayName(uri)
-        val ext = name?.substringAfterLast('.', "")
-            ?.lowercase()
-            ?.takeIf { it.isNotBlank() && it.length <= 6 } ?: "img"
+        val ext =
+            name
+                ?.substringAfterLast('.', "")
+                ?.lowercase()
+                ?.takeIf { it.isNotBlank() && it.length <= 6 } ?: "img"
         val target = File(context.filesDir, "bookmark_badge.$ext")
         context.contentResolver.openInputStream(uri)?.use { input ->
             target.outputStream().use { output -> input.copyTo(output) }
@@ -72,13 +74,13 @@ class BookmarkBadgeDelegate(
         return target.absolutePath
     }
 
-    private fun queryDisplayName(uri: Uri): String? {
-        return context.contentResolver.query(
+    private fun queryDisplayName(uri: Uri): String? = context.contentResolver
+        .query(
             uri,
             arrayOf(OpenableColumns.DISPLAY_NAME),
             null,
             null,
-            null
+            null,
         )?.use { cursor ->
             if (cursor.moveToFirst()) {
                 val index = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
@@ -87,5 +89,4 @@ class BookmarkBadgeDelegate(
                 null
             }
         }
-    }
 }

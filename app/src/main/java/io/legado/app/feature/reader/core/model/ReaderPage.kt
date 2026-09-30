@@ -1,11 +1,24 @@
 package io.legado.app.feature.reader.core.model
 
-data class ReaderPageId(val chapterIndex: Int, val pageIndex: Int)
+data class ReaderPageId(
+    val chapterIndex: Int,
+    val pageIndex: Int,
+)
 
-data class ReaderRect(val left: Float, val top: Float, val right: Float, val bottom: Float) {
+data class ReaderRect(
+    val left: Float,
+    val top: Float,
+    val right: Float,
+    val bottom: Float,
+) {
     val width get() = right - left
     val height get() = bottom - top
-    fun contains(x: Float, y: Float): Boolean = x in left..right && y in top..bottom
+
+    fun contains(
+        x: Float,
+        y: Float,
+    ): Boolean = x in left..right && y in top..bottom
+
     fun offsetY(deltaY: Float) = copy(top = top + deltaY, bottom = bottom + deltaY)
 }
 
@@ -40,15 +53,19 @@ data class ReaderTextBackgroundImage(
     val contentInsetBottomPx: Float = 0f,
 ) {
     val hasNinePatchBorder: Boolean
-        get() = source.substringBefore('?').substringBefore('#')
-            .endsWith(".9.png", ignoreCase = true)
+        get() =
+            source
+                .substringBefore('?')
+                .substringBefore('#')
+                .endsWith(".9.png", ignoreCase = true)
 }
 
-fun ReaderTextBackgroundImage.withBitmapWidth(widthPx: Int): ReaderTextBackgroundImage {
-    return withBitmapSize(widthPx, 0)
-}
+fun ReaderTextBackgroundImage.withBitmapWidth(widthPx: Int): ReaderTextBackgroundImage = withBitmapSize(widthPx, 0)
 
-fun ReaderTextBackgroundImage.withBitmapSize(widthPx: Int, heightPx: Int): ReaderTextBackgroundImage {
+fun ReaderTextBackgroundImage.withBitmapSize(
+    widthPx: Int,
+    heightPx: Int,
+): ReaderTextBackgroundImage {
     if (fit != 3 || widthPx <= 0) return this
     val borderPx = if (hasNinePatchBorder) 1 else 0
     val contentWidthPx = (widthPx - borderPx * 2).coerceAtLeast(0)
@@ -104,8 +121,7 @@ sealed interface ReaderElement {
         val continuesBackgroundRun: Boolean = false,
     ) : ReaderElement {
         /** HTML links and search hits keep the legacy reader's accent priority. */
-        fun resolvedColorArgb(accentColorArgb: Int): Int =
-            if (link != null || searchResult) accentColorArgb else style.colorArgb
+        fun resolvedColorArgb(accentColorArgb: Int): Int = if (link != null || searchResult) accentColorArgb else style.colorArgb
 
         val drawsLinkUnderline: Boolean
             get() = link != null
@@ -179,19 +195,22 @@ data class ReaderPage(
     /** 邻章未装载时预置的"加载中"占位页，分页批次落地后被同 id 真实页替换。 */
     val isPlaceholder: Boolean = false,
 ) {
-    fun elementAt(x: Float, y: Float): ReaderElement? =
-        elements.firstOrNull { it.bounds.contains(x, y) }
+    fun elementAt(
+        x: Float,
+        y: Float,
+    ): ReaderElement? = elements.firstOrNull { it.bounds.contains(x, y) }
 
-    fun hasSameGeometryAs(other: ReaderPage): Boolean =
-        id == other.id &&
-            widthPx == other.widthPx && heightPx == other.heightPx &&
-            contentTopPx == other.contentTopPx && contentBottomPx == other.contentBottomPx &&
-            scrollExtentPx == other.scrollExtentPx &&
-            elements.size == other.elements.size &&
-            elements.indices.all { index ->
-                elements[index]::class == other.elements[index]::class &&
-                    elements[index].bounds == other.elements[index].bounds
-            }
+    fun hasSameGeometryAs(other: ReaderPage): Boolean = id == other.id &&
+        widthPx == other.widthPx &&
+        heightPx == other.heightPx &&
+        contentTopPx == other.contentTopPx &&
+        contentBottomPx == other.contentBottomPx &&
+        scrollExtentPx == other.scrollExtentPx &&
+        elements.size == other.elements.size &&
+        elements.indices.all { index ->
+            elements[index]::class == other.elements[index]::class &&
+                elements[index].bounds == other.elements[index].bounds
+        }
 }
 
 data class ReaderPageWindow(

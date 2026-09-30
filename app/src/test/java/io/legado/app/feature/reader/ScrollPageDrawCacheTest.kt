@@ -18,7 +18,6 @@ import org.robolectric.annotation.GraphicsMode
 @Config(application = Application::class, sdk = [35])
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
 class ScrollPageDrawCacheTest {
-
     @Test
     fun `visual page refresh sharing elements reuses draw data`() {
         val elements = listOf(text())
@@ -34,10 +33,11 @@ class ScrollPageDrawCacheTest {
     @Test
     fun `search refresh reuses immutable layout draw data`() {
         val original = page(listOf(text()))
-        val highlighted = original.copy(
-            searchStart = 0,
-            searchEndInclusive = 3,
-        )
+        val highlighted =
+            original.copy(
+                searchStart = 0,
+                searchEndInclusive = 3,
+            )
         val cache = ScrollPageDrawCache()
 
         val originalData = cache.ensure(original)

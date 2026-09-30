@@ -71,14 +71,15 @@ fun BackgroundImageManageSheet(
         title = title,
     ) {
         Column(
-            modifier = Modifier
+            modifier =
+            Modifier
                 .fillMaxWidth()
                 .padding(bottom = 24.dp),
-            verticalArrangement = Arrangement.spacedBy(2.dp)
+            verticalArrangement = Arrangement.spacedBy(2.dp),
         ) {
             Row(
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
             ) {
                 BackgroundImageTile(
                     label = stringResource(R.string.day),
@@ -117,7 +118,6 @@ fun BackgroundImageManageSheet(
                         )
                     }
                 }
-
                 is BackgroundImageExtraOption.Opacity -> {
                     SliderSettingItem(
                         title = option.title,
@@ -128,8 +128,9 @@ fun BackgroundImageManageSheet(
                         onValueChange = { option.onValueChange(it.toInt()) },
                     )
                 }
-
-                null -> Unit
+                null -> {
+                    Unit
+                }
             }
         }
     }
@@ -149,19 +150,20 @@ private fun BackgroundImageTile(
                 onClick = onSelect,
                 cornerRadius = 12.dp,
                 containerColor = LegadoTheme.colorScheme.surfaceContainerHigh,
-                modifier = Modifier
+                modifier =
+                Modifier
                     .fillMaxWidth()
-                    .aspectRatio(1f)
+                    .aspectRatio(1f),
             ) {
                 Box(
                     modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
+                    contentAlignment = Alignment.Center,
                 ) {
                     AppIcon(
                         imageVector = Icons.Default.Add,
                         contentDescription = stringResource(R.string.add),
                         modifier = Modifier.size(48.dp),
-                        tint = LegadoTheme.colorScheme.primary
+                        tint = LegadoTheme.colorScheme.primary,
                     )
                 }
             }
@@ -173,27 +175,29 @@ private fun BackgroundImageTile(
                     AsyncImage(
                         model = path,
                         contentDescription = null,
-                        modifier = Modifier
+                        modifier =
+                        Modifier
                             .fillMaxWidth()
                             .aspectRatio(1f),
-                        contentScale = ContentScale.Crop
+                        contentScale = ContentScale.Crop,
                     )
                 }
                 SmallTonalButton(
                     onClick = onRemove,
-                    modifier = Modifier
+                    modifier =
+                    Modifier
                         .align(Alignment.TopEnd)
                         .padding(8.dp)
                         .size(32.dp),
                     icon = Icons.Default.Close,
-                    contentDescription = stringResource(R.string.close)
+                    contentDescription = stringResource(R.string.close),
                 )
             }
         }
         AppText(
             text = label,
             style = LegadoTheme.typography.labelSmall,
-            modifier = Modifier.padding(start = 4.dp, top = 8.dp)
+            modifier = Modifier.padding(start = 4.dp, top = 8.dp),
         )
     }
 }

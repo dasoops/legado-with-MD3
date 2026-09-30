@@ -1,11 +1,13 @@
 package io.legado.app.help
 
 object IntentData {
-
     private val bigData: MutableMap<String, Any> = mutableMapOf()
 
     @Synchronized
-    fun put(key: String, data: Any?): String {
+    fun put(
+        key: String,
+        data: Any?,
+    ): String {
         data?.let {
             bigData[key] = data
         }

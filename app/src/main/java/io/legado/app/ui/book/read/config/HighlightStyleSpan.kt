@@ -16,8 +16,7 @@ class HighlightStyleSpan(
     val bgImage: String = "",
     val bgImageFit: Int = 0,
     val bgImageScale: Float = 1f,
-) : CharacterStyle(), UpdateAppearance {
-
+) : CharacterStyle(),
+    UpdateAppearance {
     override fun updateDrawState(tp: TextPaint) = Unit
-
 }

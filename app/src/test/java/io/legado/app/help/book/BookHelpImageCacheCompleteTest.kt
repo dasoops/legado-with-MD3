@@ -5,7 +5,6 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class BookHelpImageCacheCompleteTest {
-
     @Test
     fun completeOnlyWhenNoFailuresAndFilesCached() {
         assertTrue(isChapterImageCacheComplete(failures = 0, filesCached = true))

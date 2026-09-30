@@ -5,7 +5,6 @@ import kotlin.math.min
 
 @Suppress("SameParameterValue", "RegExpRedundantEscape")
 object ContentHelp {
-
     /**
      * 段落重排算法入口。把整篇内容输入，连接错误的分段，再把每个段落调用其他方法重新切分
      *
@@ -13,16 +12,21 @@ object ContentHelp {
      * @param chapterName 标题
      * @return
      */
-    fun reSegment(content: String, chapterName: String): String {
+    fun reSegment(
+        content: String,
+        chapterName: String,
+    ): String {
         var content1 = content
         val dict = makeDict(content1)
-        var p = content1
-            .replace("&quot;".toRegex(), "“")
-            .replace("[:：]['\"‘”“]+".toRegex(), "：“")
-            .replace("[\"”“]+\\s*[\"”“][\\s\"”“]*".toRegex(), "”\n“")
-            .split("\n(\\s*)".toRegex()).toTypedArray()
+        var p =
+            content1
+                .replace("&quot;".toRegex(), "“")
+                .replace("[:：]['\"‘”“]+".toRegex(), "：“")
+                .replace("[\"”“]+\\s*[\"”“][\\s\"”“]*".toRegex(), "”\n“")
+                .split("\n(\\s*)".toRegex())
+                .toTypedArray()
 
-        //初始化StringBuilder的长度,在原content的长度基础上做冗余
+        // 初始化StringBuilder的长度,在原content的长度基础上做冗余
         var buffer = StringBuilder((content1.length * 1.15).toInt())
         //          章节的文本格式为章节标题-空行-首段，所以处理段落时需要略过第一行文本。
         buffer.append("  ")
@@ -31,11 +35,13 @@ object ContentHelp {
             buffer.append(p[0].replace("[\u3000\\s]+".toRegex(), ""))
         }
 
-        //如果原文存在分段错误，需要把段落重新黏合
+        // 如果原文存在分段错误，需要把段落重新黏合
         for (i in 1 until p.size) {
-            if (match(MARK_SENTENCES_END, buffer.last())
-                || (match(MARK_QUOTATION_RIGHT, buffer.last())
-                        && match(MARK_SENTENCES_END, buffer[buffer.lastIndex - 1]))
+            if (match(MARK_SENTENCES_END, buffer.last()) ||
+                (
+                    match(MARK_QUOTATION_RIGHT, buffer.last()) &&
+                        match(MARK_SENTENCES_END, buffer[buffer.lastIndex - 1])
+                    )
             ) {
                 buffer.append("\n")
             }
@@ -47,27 +53,32 @@ object ContentHelp {
         //         ”“处理为”\n“。
         //         ”。“处理为”。\n“。不考虑“？”  “！”的情况。
         // ”。xxx处理为 ”。\n xxx
-        p = buffer.toString()
-            .replace("[\"”“]+\\s*[\"”“]+".toRegex(), "”\n“")
-            .replace("[\"”“]+(？。！?!~)[\"”“]+".toRegex(), "”$1\n“")
-            .replace("[\"”“]+(？。！?!~)([^\"”“])".toRegex(), "”$1\n$2")
-            .replace(
-                "([问说喊唱叫骂道着答])[\\.。]".toRegex(),
-                "$1。\n"
-            )
-            .split("\n".toRegex()).toTypedArray()
+        p =
+            buffer
+                .toString()
+                .replace("[\"”“]+\\s*[\"”“]+".toRegex(), "”\n“")
+                .replace("[\"”“]+(？。！?!~)[\"”“]+".toRegex(), "”$1\n“")
+                .replace("[\"”“]+(？。！?!~)([^\"”“])".toRegex(), "”$1\n$2")
+                .replace(
+                    "([问说喊唱叫骂道着答])[\\.。]".toRegex(),
+                    "$1。\n",
+                ).split("\n".toRegex())
+                .toTypedArray()
         buffer = StringBuilder((content1.length * 1.15).toInt())
         for (s in p) {
             buffer.append("\n")
             buffer.append(findNewLines(s, dict))
         }
         buffer = reduceLength(buffer)
-        content1 = (buffer.toString() //         处理章节头部空格和换行
-            .replaceFirst("^\\s+".toRegex(), "")
-            .replace("\\s*[\"”“]+\\s*[\"”“][\\s\"”“]*".toRegex(), "”\n“")
-            .replace("[:：][”“\"\\s]+".toRegex(), "：“")
-            .replace("\n[\"“”]([^\n\"“”]+)([,:，：][\"”“])([^\n\"“”]+)".toRegex(), "\n$1：“$3")
-            .replace("\n(\\s*)".toRegex(), "\n"))
+        content1 = (
+            buffer
+                .toString() //         处理章节头部空格和换行
+                .replaceFirst("^\\s+".toRegex(), "")
+                .replace("\\s*[\"”“]+\\s*[\"”“][\\s\"”“]*".toRegex(), "”\n“")
+                .replace("[:：][”“\"\\s]+".toRegex(), "：“")
+                .replace("\n[\"“”]([^\n\"“”]+)([,:，：][\"”“])([^\n\"“”]+)".toRegex(), "\n$1：“$3")
+                .replace("\n(\\s*)".toRegex(), "\n")
+            )
         return content1
     }
 
@@ -90,7 +101,11 @@ object ContentHelp {
         var dialogue = 0
         for (i in 0 until l) {
             if (b[i]) {
-                if (dialogue < 0) dialogue = 1 else if (dialogue < 2) dialogue++
+                if (dialogue < 0) {
+                    dialogue = 1
+                } else if (dialogue < 2) {
+                    dialogue++
+                }
             } else {
                 if (dialogue > 1) {
                     p[i] = splitQuote(p[i])
@@ -104,9 +119,9 @@ object ContentHelp {
         for (i in 0 until l) {
             string.append('\n')
             string.append(p[i])
-            //System.out.print(" "+b[i]);
+            // System.out.print(" "+b[i]);
         }
-        //System.out.println(" " + str);
+        // System.out.println(" " + str);
         return string
     }
 
@@ -116,8 +131,10 @@ object ContentHelp {
         if (length < 3) return str
         if (match(MARK_QUOTATION, str[0])) {
             val i = seekIndex(str, MARK_QUOTATION, 1, length - 2, true) + 1
-            if (i > 1) if (!match(MARK_QUOTATION_BEFORE, str[i - 1])) {
-                return "${str.take(i)}\n${str.substring(i)}"
+            if (i > 1) {
+                if (!match(MARK_QUOTATION_BEFORE, str[i - 1])) {
+                    return "${str.take(i)}\n${str.substring(i)}"
+                }
             }
         } else if (match(MARK_QUOTATION, str[length - 1])) {
             val i = length - 1 - seekIndex(str, MARK_QUOTATION, 1, length - 2, false)
@@ -143,7 +160,7 @@ object ContentHelp {
         offset: Int,
         min: Int,
         gain: Int,
-        tigger: Int
+        tigger: Int,
     ): ArrayList<Int> {
         val result = ArrayList<Int>()
         val arrayEnd = seekIndexes(str, MARK_SENTENCES_END_P, 0, str.length - 2, true)
@@ -167,18 +184,21 @@ object ContentHelp {
     }
 
     // 对内容重新划分段落.输入参数str已经使用换行符预分割
-    private fun findNewLines(str: String, dict: List<String>): String {
+    private fun findNewLines(
+        str: String,
+        dict: List<String>,
+    ): String {
         val string = StringBuilder(str)
         // 标记string中每个引号的位置.特别的，用引号进行列举时视为只有一对引号。 如：“锅”、“碗”视为“锅、碗”，从而避免误断句。
         val arrayQuote: MutableList<Int> = ArrayList()
         //  标记插入换行符的位置，int为插入位置（str的char下标）
         var insN = ArrayList<Int>()
 
-        //mod[i]标记str的每一段处于引号内还是引号外。范围： str.substring( array_quote.get(i), array_quote.get(i+1) )的状态。
-        //长度：array_quote.size(),但是初始化时未预估占用的长度，用空间换时间
-        //0未知，正数引号内，负数引号外。
-        //如果相邻的两个标记都为+1，那么需要增加1个引号。
-        //引号内不进行断句
+        // mod[i]标记str的每一段处于引号内还是引号外。范围： str.substring( array_quote.get(i), array_quote.get(i+1) )的状态。
+        // 长度：array_quote.size(),但是初始化时未预估占用的长度，用空间换时间
+        // 0未知，正数引号内，负数引号外。
+        // 如果相邻的两个标记都为+1，那么需要增加1个引号。
+        // 引号内不进行断句
         val mod = IntArray(str.length)
         var waitClose = false
         for (i in str.indices) {
@@ -230,7 +250,7 @@ object ContentHelp {
                                     }
                                 }
                             }
-                            //if(char_b2=='.' || char_b2=='。')
+                            // if(char_b2=='.' || char_b2=='。')
                             if (match(MARK_SENTENCES_END_P, charB2)) {
                                 insN.add(p - 1)
                             } else if (!match("的", charB2)) {
@@ -257,16 +277,15 @@ object ContentHelp {
         }
         val size = arrayQuote.size
 
-
-        //标记循环状态，此位置前的引号是否已经配对
+        // 标记循环状态，此位置前的引号是否已经配对
         var opend = false
         if (size > 0) {
-            //第1次遍历array_quote，令其元素的值不为0
+            // 第1次遍历array_quote，令其元素的值不为0
             for (i in 0 until size) {
                 if (mod[i] > 0) {
                     opend = true
                 } else if (mod[i] < 0) {
-                    //连续2个反引号表明存在冲突，强制把前一个设为正引号
+                    // 连续2个反引号表明存在冲突，强制把前一个设为正引号
                     if (!opend) {
                         if (i > 0) mod[i] = 3
                     }
@@ -279,21 +298,22 @@ object ContentHelp {
             //        修正，断尾必须封闭引号
             if (opend) {
                 if (arrayQuote[size - 1] - string.length > -3) {
-                    //if((match(MARK_QUOTATION,string.charAt(string.length()-1)) || match(MARK_QUOTATION,string.charAt(string.length()-2)))){
+                    // if((match(MARK_QUOTATION,string.charAt(string.length()-1)) || match(MARK_QUOTATION,string.charAt(string.length()-2)))){
                     if (size > 1) mod[size - 2] = 4
                     // 0<=i<size,故无需判断size>=1
                     mod[size - 1] = -4
-                } else if (!match(MARK_SENTENCES_SAY, string[string.length - 2])) string.append(
-                    "”"
-                )
+                } else if (!match(MARK_SENTENCES_SAY, string[string.length - 2])) {
+                    string.append(
+                        "”",
+                    )
+                }
             }
 
-
-            //第2次循环，mod[i]由负变正时，前1字符如果是句末，需要插入换行
-            var loop2Mod1 = -1 //上一个引号跟随内容的状态
-            var loop2Mod2: Int //当前引号跟随内容的状态
+            // 第2次循环，mod[i]由负变正时，前1字符如果是句末，需要插入换行
+            var loop2Mod1 = -1 // 上一个引号跟随内容的状态
+            var loop2Mod2: Int // 当前引号跟随内容的状态
             var i = 0
-            var j = arrayQuote[0] - 1 //当前引号前一字符的序号
+            var j = arrayQuote[0] - 1 // 当前引号前一字符的序号
             if (j < 0) {
                 i = 1
                 loop2Mod1 = 0
@@ -309,31 +329,32 @@ object ContentHelp {
             }
         }
 
-        //第3次循环，匹配并插入换行。
-        //"xxxx" xxxx。\n xxx“xxxx”
-        //未实现
+        // 第3次循环，匹配并插入换行。
+        // "xxxx" xxxx。\n xxx“xxxx”
+        // 未实现
 
         // 使用字典验证ins_n , 避免插入不必要的换行。
         // 由于目前没有插入、的列表，无法解决 “xx”、“xx”“xx” 被插入换行的问题
         val insN1 = ArrayList<Int>()
         for (i in insN) {
             if (match("\"'”“", string[i])) {
-                val start: Int = seekLast(
-                    str,
-                    "\"'”“",
-                    i - 1,
-                    i - WORD_MAX_LENGTH
-                )
+                val start: Int =
+                    seekLast(
+                        str,
+                        "\"'”“",
+                        i - 1,
+                        i - WORD_MAX_LENGTH,
+                    )
                 if (start > 0) {
                     val word = str.substring(start + 1, i)
                     if (dict.contains(word)) {
-                        //System.out.println("使用字典验证 跳过\tins_n=" + i + "  word=" + word);
-                        //引号内如果是字典词条，后方不插入换行符（前方不需要优化）
+                        // System.out.println("使用字典验证 跳过\tins_n=" + i + "  word=" + word);
+                        // 引号内如果是字典词条，后方不插入换行符（前方不需要优化）
                         continue
                     } else {
-                        //System.out.println("使用字典验证 插入\tins_n=" + i + "  word=" + word);
+                        // System.out.println("使用字典验证 插入\tins_n=" + i + "  word=" + word);
                         if (match("的地得", str[start])) {
-                            //xx的“xx”，后方不插入换行符（前方不需要优化）
+                            // xx的“xx”，后方不插入换行符（前方不需要优化）
                             continue
                         }
                     }
@@ -369,7 +390,6 @@ object ContentHelp {
 
 //            把引号前的换行符与内容相间插入
                 while (j < insN.size) {
-
 //                如果下一个换行符在当前引号前，那么需要此次处理.如果紧挨当前引号，需要考虑插入引号的情况
                     if (nextLine >= qutoe) break
                     nextLine = insN[j]
@@ -435,7 +455,6 @@ object ContentHelp {
 
 //            把引号前的换行符与内容相间插入
             while (j < insN.size) {
-
 //                如果下一个换行符在当前引号前，那么需要此次处理.如果紧挨当前引号，需要考虑插入引号的情况
                 if (nextLine >= quote) break
                 nextLine = insN[j]
@@ -449,10 +468,14 @@ object ContentHelp {
                 progress = quote + 1
             }
             if (insQuote[i] && buffer.length > 2) {
-                if (buffer[buffer.length - 1] == '\n') buffer.append('“') else buffer.insert(
-                    buffer.length - 1,
-                    "”\n"
-                )
+                if (buffer[buffer.length - 1] == '\n') {
+                    buffer.append('“')
+                } else {
+                    buffer.insert(
+                        buffer.length - 1,
+                        "”\n",
+                    )
+                }
             }
         }
         while (j < insN.size) {
@@ -477,22 +500,24 @@ object ContentHelp {
      * @return 词条列表
      */
     private fun makeDict(str: String): List<String> {
-
         // 引号中间不包含任何标点
-        val patten = Regex(
-            """
-          (?<=["'”“])([^
-          \p{P}]{1,$WORD_MAX_LENGTH})(?=["'”“])
-          """.trimIndent()
-        )
-        //Pattern patten = Pattern.compile("(?<=[\"'”“])([^\n\"'”“]{1,16})(?=[\"'”“])");
+        val patten =
+            Regex(
+                """
+                (?<=["'”“])([^
+                \p{P}]{1,$WORD_MAX_LENGTH})(?=["'”“])
+                """.trimIndent(),
+            )
+        // Pattern patten = Pattern.compile("(?<=[\"'”“])([^\n\"'”“]{1,16})(?=[\"'”“])");
         val cache: MutableList<String> = ArrayList()
         val dict: MutableList<String> = ArrayList()
         for (m in patten.findAll(str)) {
             val word = m.value
             if (cache.contains(word)) {
                 if (!dict.contains(word)) dict.add(word)
-            } else cache.add(word)
+            } else {
+                cache.add(word)
+            }
         }
         return dict
     }
@@ -512,7 +537,7 @@ object ContentHelp {
         key: String,
         from: Int,
         to: Int,
-        inOrder: Boolean
+        inOrder: Boolean,
     ): ArrayList<Int> {
         val list = ArrayList<Int>()
         if (str.length - from < 1) return list
@@ -544,7 +569,12 @@ object ContentHelp {
      * @param to   匹配到哪个字符（不包含此字符）默认0
      * @return 位置（正向计算)
      */
-    private fun seekLast(str: String, key: String, from: Int, to: Int): Int {
+    private fun seekLast(
+        str: String,
+        key: String,
+        from: Int,
+        to: Int,
+    ): Int {
         if (str.length - from < 1) return -1
         var i = str.lastIndex
         if (from < i && i > 0) i = from
@@ -571,7 +601,13 @@ object ContentHelp {
      * @param inOrder 是否从正向开始匹配
      * @return 返回最短距离, 注意不是str的char的下标
      */
-    private fun seekIndex(str: String, key: String, from: Int, to: Int, inOrder: Boolean): Int {
+    private fun seekIndex(
+        str: String,
+        key: String,
+        from: Int,
+        to: Int,
+        inOrder: Boolean,
+    ): Int {
         if (str.length - from < 1) return -1
         var i = 0
         if (from > 0) i = from
@@ -601,7 +637,7 @@ object ContentHelp {
     三、一段接着一段地直接引用时，中间段落只在段首用起引号，该段段尾却不用引回号。但是正统文学不在考虑范围内。
     四、引号里面又要用引号时，外面一层用双引号，里面一层用单引号。暂时不需要考虑
     五、反语和强调，周围没有断句符号。
-    */
+     */
 
     //  句子结尾的标点。因为引号可能存在误判，不包含引号。
     private const val MARK_SENTENCES_END = "？。！?!~"
@@ -622,7 +658,8 @@ object ContentHelp {
     //  限制字典的长度
     private const val WORD_MAX_LENGTH = 16
 
-    private fun match(rule: String, chr: Char): Boolean {
-        return rule.indexOf(chr) != -1
-    }
+    private fun match(
+        rule: String,
+        chr: Char,
+    ): Boolean = rule.indexOf(chr) != -1
 }

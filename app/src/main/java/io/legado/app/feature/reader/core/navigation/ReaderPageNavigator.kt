@@ -28,7 +28,11 @@ data class ReaderPageContext(
 )
 
 object ReaderPageNavigator {
-    fun bodyParagraphAt(pages: List<ReaderPage>, chapterIndex: Int, chapterPosition: Int): Int? = pages
+    fun bodyParagraphAt(
+        pages: List<ReaderPage>,
+        chapterIndex: Int,
+        chapterPosition: Int,
+    ): Int? = pages
         .asSequence()
         .filter { it.id.chapterIndex == chapterIndex }
         .flatMap { it.elements.asSequence() }
@@ -37,7 +41,10 @@ object ReaderPageNavigator {
         .maxByOrNull { it.chapterPosition }
         ?.paragraphIndex
 
-    fun window(pages: List<ReaderPage>, pageIndex: Int): ReaderPageWindow {
+    fun window(
+        pages: List<ReaderPage>,
+        pageIndex: Int,
+    ): ReaderPageWindow {
         if (pages.isEmpty()) return ReaderPageWindow()
         val index = pageIndex.coerceIn(pages.indices)
         return ReaderPageWindow(
@@ -65,7 +72,11 @@ object ReaderPageNavigator {
         }
     }
 
-    fun move(pages: List<ReaderPage>, pageIndex: Int, delta: Int): ReaderNavigationResult {
+    fun move(
+        pages: List<ReaderPage>,
+        pageIndex: Int,
+        delta: Int,
+    ): ReaderNavigationResult {
         if (pages.isEmpty()) return ReaderNavigationResult(0, ReaderPageWindow(), true)
         val target = (pageIndex + delta).coerceIn(pages.indices)
         return ReaderNavigationResult(target, window(pages, target), target != pageIndex + delta)
@@ -82,12 +93,16 @@ object ReaderPageNavigator {
      * 承接是 `ReadBookController.crossComposeChapterBoundary`（预置"加载中"占位页或直接启动
      * 该章排版）。因此放行必须回到业务语义，把翻页交给宿主处理。
      */
-    fun canTurnNext(window: ReaderPageWindow, hasNextChapter: Boolean): Boolean =
-        window.next != null || hasNextChapter
+    fun canTurnNext(
+        window: ReaderPageWindow,
+        hasNextChapter: Boolean,
+    ): Boolean = window.next != null || hasNextChapter
 
     /** 上一页放行条件，对照旧 View `TextPageFactory.hasPrev()`。 */
-    fun canTurnPrevious(window: ReaderPageWindow, hasPreviousChapter: Boolean): Boolean =
-        window.previous != null || hasPreviousChapter
+    fun canTurnPrevious(
+        window: ReaderPageWindow,
+        hasPreviousChapter: Boolean,
+    ): Boolean = window.previous != null || hasPreviousChapter
 
     /**
      * 按章内位置定位页下标；该章不在 [pages] 中时返回 null。
@@ -95,23 +110,35 @@ object ReaderPageNavigator {
      * 注意与 [locate] 的区别：本函数不把"未定位"折叠成 0。0 是全书首页的合法下标，
      * 调用方拿它发布窗口会把阅读位置跳到书首（见 `publishDirectReaderPageWindow`）。
      */
-    fun locateOrNull(pages: List<ReaderPage>, chapterIndex: Int, chapterPosition: Int): Int? {
+    fun locateOrNull(
+        pages: List<ReaderPage>,
+        chapterIndex: Int,
+        chapterPosition: Int,
+    ): Int? {
         val chapterPages = pages.withIndex().filter { it.value.id.chapterIndex == chapterIndex }
         if (chapterPages.isEmpty()) return null
         return chapterPages.lastOrNull { pageStart(it.value) <= chapterPosition }?.index
             ?: chapterPages.first().index
     }
 
-    fun locate(pages: List<ReaderPage>, chapterIndex: Int, chapterPosition: Int): Int =
-        locateOrNull(pages, chapterIndex, chapterPosition) ?: 0
+    fun locate(
+        pages: List<ReaderPage>,
+        chapterIndex: Int,
+        chapterPosition: Int,
+    ): Int = locateOrNull(pages, chapterIndex, chapterPosition) ?: 0
 
-    fun chapterPosition(pages: List<ReaderPage>, pageIndex: Int): ReaderChapterPagePosition? {
+    fun chapterPosition(
+        pages: List<ReaderPage>,
+        pageIndex: Int,
+    ): ReaderChapterPagePosition? {
         val page = pages.getOrNull(pageIndex) ?: return null
         val chapterIndex = page.id.chapterIndex
         val chapterPages = pages.filter { it.id.chapterIndex == chapterIndex }
-        val localIndex = chapterPages.indexOfFirst { it === page }
-            .takeIf { it >= 0 }
-            ?: chapterPages.indexOfFirst { it.id == page.id }
+        val localIndex =
+            chapterPages
+                .indexOfFirst { it === page }
+                .takeIf { it >= 0 }
+                ?: chapterPages.indexOfFirst { it.id == page.id }
         if (localIndex < 0) return null
         return ReaderChapterPagePosition(chapterIndex, localIndex, chapterPages.size)
     }
@@ -126,26 +153,33 @@ object ReaderPageNavigator {
         return chapterPages[chapterPageIndex.coerceIn(chapterPages.indices)].index
     }
 
-    fun pageContext(pages: List<ReaderPage>, pageIndex: Int): ReaderPageContext? {
+    fun pageContext(
+        pages: List<ReaderPage>,
+        pageIndex: Int,
+    ): ReaderPageContext? {
         val page = pages.getOrNull(pageIndex) ?: return null
         val positions = page.elements.mapNotNull(::elementRange)
         if (positions.isEmpty() && page.elements.none { it is ReaderElement.Text && it.emphasized }) return null
         val start = positions.minOfOrNull { it.first } ?: 0
         val contentEnd = positions.maxOfOrNull { it.last + 1 } ?: 0
-        val nextPageStart = pages.getOrNull(pageIndex + 1)
-            ?.takeIf { it.id.chapterIndex == page.id.chapterIndex }
-            ?.elements
-            ?.mapNotNull(::elementRange)
-            ?.minOfOrNull { it.first }
-            ?.takeIf { it > start }
-        val firstBodyParagraph = page.elements.asSequence()
-            .filterIsInstance<ReaderElement.Text>()
-            .filterNot { it.emphasized }
-            .groupBy { it.paragraphIndex }
-            .values
-            .minByOrNull { paragraph ->
-                paragraph.minOf { it.chapterPosition }
-            }
+        val nextPageStart =
+            pages
+                .getOrNull(pageIndex + 1)
+                ?.takeIf { it.id.chapterIndex == page.id.chapterIndex }
+                ?.elements
+                ?.mapNotNull(::elementRange)
+                ?.minOfOrNull { it.first }
+                ?.takeIf { it > start }
+        val firstBodyParagraph =
+            page.elements
+                .asSequence()
+                .filterIsInstance<ReaderElement.Text>()
+                .filterNot { it.emphasized }
+                .groupBy { it.paragraphIndex }
+                .values
+                .minByOrNull { paragraph ->
+                    paragraph.minOf { it.chapterPosition }
+                }
         return ReaderPageContext(
             chapterIndex = page.id.chapterIndex,
             chapterTitle = page.chapterTitle,
@@ -153,21 +187,35 @@ object ReaderPageNavigator {
             endPosition = nextPageStart ?: contentEnd.coerceAtLeast(start + 1),
             text = page.text,
             contentStartPosition = firstBodyParagraph?.minOf { it.chapterPosition },
-            anchorText = firstBodyParagraph
+            anchorText =
+            firstBodyParagraph
                 ?.joinToString(separator = "") { it.value }
                 ?.trim()
                 ?.takeIf(String::isNotEmpty),
         )
     }
 
-    fun pageStart(page: ReaderPage): Int = page.elements.mapNotNull(::elementRange)
+    fun pageStart(page: ReaderPage): Int = page.elements
+        .mapNotNull(::elementRange)
         .minOfOrNull { it.first } ?: 0
 
     private fun elementRange(element: ReaderElement): IntRange? = when (element) {
-        is ReaderElement.Text -> if (element.emphasized) null else element.chapterPosition until
-            (element.chapterPosition + element.value.length.coerceAtLeast(1))
-        is ReaderElement.Image -> element.chapterPosition..element.chapterPosition
-        is ReaderElement.Spacer -> element.chapterPosition..element.chapterPosition
-        else -> null
+        is ReaderElement.Text -> {
+            if (element.emphasized) {
+                null
+            } else {
+                element.chapterPosition until
+                    (element.chapterPosition + element.value.length.coerceAtLeast(1))
+            }
+        }
+        is ReaderElement.Image -> {
+            element.chapterPosition..element.chapterPosition
+        }
+        is ReaderElement.Spacer -> {
+            element.chapterPosition..element.chapterPosition
+        }
+        else -> {
+            null
+        }
     }
 }

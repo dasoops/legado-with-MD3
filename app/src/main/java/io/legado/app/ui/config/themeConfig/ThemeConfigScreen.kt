@@ -99,11 +99,12 @@ fun ThemeConfigScreen(
     val theme = state.theme
     val scrollBehavior = GlassTopAppBarDefaults.defaultScrollBehavior()
     val context = LocalContext.current
-    fun updateTheme(transform: (ThemeSettings) -> ThemeSettings) =
-        onIntent(ThemeConfigIntent.UpdateTheme(transform))
-    val fontFolderState = remember(state.fontFolder) {
-        FontFolderState.Loaded(state.fontFolder.takeIf { it.isNotEmpty() }?.let(android.net.Uri::parse))
-    }
+
+    fun updateTheme(transform: (ThemeSettings) -> ThemeSettings) = onIntent(ThemeConfigIntent.UpdateTheme(transform))
+    val fontFolderState =
+        remember(state.fontFolder) {
+            FontFolderState.Loaded(state.fontFolder.takeIf { it.isNotEmpty() }?.let(android.net.Uri::parse))
+        }
 
     AppScaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
@@ -113,28 +114,30 @@ fun ThemeConfigScreen(
                 scrollBehavior = scrollBehavior,
                 navigationIcon = {
                     TopBarNavigationButton(onClick = onBackClick)
-                }
+                },
             )
-        }
+        },
     ) { paddingValues ->
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
-            contentPadding = adaptiveContentPadding(
+            contentPadding =
+            adaptiveContentPadding(
                 top = paddingValues.calculateTopPadding(),
-                bottom = 120.dp
-            )
+                bottom = 120.dp,
+            ),
         ) {
             item {
                 val composeEngine = appShell.composeEngine
-                val isMiuixEngine = remember(composeEngine) {
-                    ThemeResolver.isMiuixEngine(composeEngine)
-                }
+                val isMiuixEngine =
+                    remember(composeEngine) {
+                        ThemeResolver.isMiuixEngine(composeEngine)
+                    }
                 val isDarkTheme = LegadoTheme.isDark
 
                 if (!isMiuixEngine) {
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.fillMaxWidth(),
                     ) {
                         ThemeCard(
                             context = context,
@@ -143,7 +146,7 @@ fun ThemeConfigScreen(
                             isAmoled = theme.isPureBlack,
                             paletteStyle = theme.paletteStyle,
                             customLightSeedColor = theme.customPrimary,
-                            customNightSeedColor = theme.customNightPrimary
+                            customNightSeedColor = theme.customNightPrimary,
                         )
                     }
                 }
@@ -152,35 +155,35 @@ fun ThemeConfigScreen(
 
                 val themeItems = stringArrayResource(R.array.themes_item)
                 val themeValues = stringArrayResource(R.array.themes_value)
-                val themes = remember(themeItems, themeValues) {
-                    themeItems.zip(themeValues).toList()
-                }
+                val themes =
+                    remember(themeItems, themeValues) {
+                        themeItems.zip(themeValues).toList()
+                    }
 
                 AnimatedVisibility(visible = theme.showRefactorTip) {
                     GlassCard(
                         cornerRadius = 16.dp,
-                        modifier = Modifier.padding(bottom = 16.dp)
+                        modifier = Modifier.padding(bottom = 16.dp),
                     ) {
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier.padding(16.dp)
+                            modifier = Modifier.padding(16.dp),
                         ) {
                             AppText(
                                 text = "仍有部分界面未用Compose重构，这些界面会与大部分界面有较大差异。",
                                 style = LegadoTheme.typography.labelLargeEmphasized,
-                                modifier = Modifier.weight(1f)
+                                modifier = Modifier.weight(1f),
                             )
                             SmallPlainButton(
                                 icon = AppIcons.Close,
                                 contentDescription = stringResource(R.string.close),
                                 onClick = {
                                     onIntent(ThemeConfigIntent.DismissRefactorTip)
-                                }
+                                },
                             )
                         }
                     }
                 }
-
 
                 SplicedColumnGroup(title = stringResource(R.string.theme)) {
                     if (isMiuixEngine) {
@@ -191,9 +194,9 @@ fun ThemeConfigScreen(
                             entryValues = stringArrayResource(R.array.theme_mode_v),
                             onValueChange = { mode ->
                                 onIntent(
-                                    ThemeConfigIntent.SetThemeMode(mode)
+                                    ThemeConfigIntent.SetThemeMode(mode),
                                 )
-                            }
+                            },
                         )
 
                         SwitchSettingItem(
@@ -202,13 +205,14 @@ fun ThemeConfigScreen(
                             checked = theme.useMiuixMonet,
                             onCheckedChange = {
                                 onIntent(ThemeConfigIntent.SetMiuixMonet(it))
-                            }
+                            },
                         )
 
                         if (theme.useMiuixMonet) {
-                            val visibleThemes = themes.filter { (_, value) ->
-                                value != "4" || state.showEInkTheme
-                            }
+                            val visibleThemes =
+                                themes.filter { (_, value) ->
+                                    value != "4" || state.showEInkTheme
+                                }
                             DropdownListSettingItem(
                                 title = stringResource(R.string.theme),
                                 selectedValue = theme.appTheme,
@@ -216,7 +220,7 @@ fun ThemeConfigScreen(
                                 entryValues = visibleThemes.map { it.second }.toTypedArray(),
                                 onValueChange = { value ->
                                     onIntent(ThemeConfigIntent.SelectTheme(value))
-                                }
+                                },
                             )
                         }
                     } else {
@@ -224,16 +228,17 @@ fun ThemeConfigScreen(
                             selectedMode = appShell.themeMode,
                             onModeSelected = { mode ->
                                 onIntent(ThemeConfigIntent.SetThemeMode(mode))
-                            }
+                            },
                         )
                     }
 
                     if (!isMiuixEngine) {
                         Spacer(modifier = Modifier.height(16.dp))
 
-                        val visibleThemes = themes.filter { (_, value) ->
-                            value != "4" || state.showEInkTheme
-                        }
+                        val visibleThemes =
+                            themes.filter { (_, value) ->
+                                value != "4" || state.showEInkTheme
+                            }
                         ThemeColorSelector(
                             context = context,
                             themes = visibleThemes,
@@ -245,7 +250,7 @@ fun ThemeConfigScreen(
                             customNightSeedColor = theme.customNightPrimary,
                             onThemeSelected = {
                                 onIntent(ThemeConfigIntent.SelectTheme(it))
-                            }
+                            },
                         )
                     }
                 }
@@ -257,17 +262,17 @@ fun ThemeConfigScreen(
                             checked = theme.isPureBlack,
                             onCheckedChange = { value ->
                                 updateTheme { it.copy(isPureBlack = value) }
-                            }
+                            },
                         )
                     }
                     ClickableSettingItem(
                         title = stringResource(R.string.font_setting),
-                        onClick = { onIntent(ThemeConfigIntent.ShowSheet(ThemeConfigSheet.Font)) }
+                        onClick = { onIntent(ThemeConfigIntent.ShowSheet(ThemeConfigSheet.Font)) },
                     )
                     if (theme.appTheme == "12" && (!isMiuixEngine || theme.useMiuixMonet)) {
                         ClickableSettingItem(
                             title = stringResource(R.string.custom_theme_colors),
-                            onClick = onNavigateToCustomTheme
+                            onClick = onNavigateToCustomTheme,
                         )
                     }
                     DropdownListSettingItem(
@@ -277,16 +282,16 @@ fun ThemeConfigScreen(
                         entryValues = stringArrayResource(R.array.composeEngine_value),
                         onValueChange = {
                             onIntent(
-                                ThemeConfigIntent.SetComposeEngine(it)
+                                ThemeConfigIntent.SetComposeEngine(it),
                             )
-                        }
+                        },
                     )
                     ClickableSettingItem(
                         title = stringResource(R.string.change_icon),
                         description = stringResource(R.string.change_icon_summary),
                         onClick = {
                             onIntent(ThemeConfigIntent.ShowSheet(ThemeConfigSheet.LauncherIcon))
-                        }
+                        },
                     )
                     SwitchSettingItem(
                         title = stringResource(R.string.predictive_back),
@@ -294,9 +299,9 @@ fun ThemeConfigScreen(
                         checked = appShell.predictiveBackEnabled,
                         onCheckedChange = {
                             onIntent(
-                                ThemeConfigIntent.SetPredictiveBackEnabled(it)
+                                ThemeConfigIntent.SetPredictiveBackEnabled(it),
                             )
-                        }
+                        },
                     )
                     SliderSettingItem(
                         title = stringResource(R.string.font_scale),
@@ -309,14 +314,14 @@ fun ThemeConfigScreen(
                         steps = 7,
                         onValueChange = { value ->
                             onIntent(
-                                ThemeConfigIntent.SetFontScale(value.toInt())
+                                ThemeConfigIntent.SetFontScale(value.toInt()),
                             )
-                        }
+                        },
                     )
                     ClickableSettingItem(
                         title = stringResource(R.string.theme_pack),
                         description = stringResource(R.string.theme_pack_s),
-                        onClick = onNavigateToThemeManage
+                        onClick = onNavigateToThemeManage,
                     )
                     ClickableSettingItem(
                         title = stringResource(R.string.background_image),
@@ -325,11 +330,11 @@ fun ThemeConfigScreen(
                             onIntent(
                                 ThemeConfigIntent.ShowSheet(
                                     ThemeConfigSheet.BackgroundImage(
-                                        BackgroundImageTarget.App
-                                    )
-                                )
+                                        BackgroundImageTarget.App,
+                                    ),
+                                ),
                             )
-                        }
+                        },
                     )
                 }
 
@@ -346,19 +351,19 @@ fun ThemeConfigScreen(
                         checked = appShell.showStatusBar,
                         onCheckedChange = {
                             onIntent(
-                                ThemeConfigIntent.SetShowStatusBar(it)
+                                ThemeConfigIntent.SetShowStatusBar(it),
                             )
-                        }
+                        },
                     )
-                    //TODO:这个可以不要了，在删掉原来的设置页以后删
+                    // TODO:这个可以不要了，在删掉原来的设置页以后删
                     SwitchSettingItem(
                         title = stringResource(R.string.show_swipe_animation),
                         checked = appShell.swipeAnimation,
                         onCheckedChange = {
                             onIntent(
-                                ThemeConfigIntent.SetSwipeAnimation(it)
+                                ThemeConfigIntent.SetSwipeAnimation(it),
                             )
-                        }
+                        },
                     )
                     ClickableSettingItem(
                         title = stringResource(R.string.top_bottom_bar_settings),
@@ -374,9 +379,9 @@ fun ThemeConfigScreen(
                         entryValues = stringArrayResource(R.array.tabletInterface_value),
                         onValueChange = {
                             onIntent(
-                                ThemeConfigIntent.SetTabletInterface(it)
+                                ThemeConfigIntent.SetTabletInterface(it),
                             )
-                        }
+                        },
                     )
                 }
 
@@ -387,7 +392,7 @@ fun ThemeConfigScreen(
                         checked = theme.bookInfoFollowCoverColor,
                         onCheckedChange = { value ->
                             updateTheme { it.copy(bookInfoFollowCoverColor = value) }
-                        }
+                        },
                     )
                     DropdownListSettingItem(
                         title = stringResource(R.string.book_info_network_cover_background),
@@ -396,7 +401,7 @@ fun ThemeConfigScreen(
                         entryValues = stringArrayResource(R.array.book_info_background_blur_values),
                         onValueChange = { value ->
                             updateTheme { it.copy(bookInfoNetworkCoverBackground = value) }
-                        }
+                        },
                     )
                     DropdownListSettingItem(
                         title = stringResource(R.string.book_info_default_cover_background),
@@ -405,7 +410,7 @@ fun ThemeConfigScreen(
                         entryValues = stringArrayResource(R.array.book_info_background_blur_values),
                         onValueChange = { value ->
                             updateTheme { it.copy(bookInfoDefaultCoverBackground = value) }
-                        }
+                        },
                     )
                 }
 
@@ -416,7 +421,7 @@ fun ThemeConfigScreen(
                         checked = theme.eyeProtectionEnabled,
                         onCheckedChange = { value ->
                             updateTheme { it.copy(eyeProtectionEnabled = value) }
-                        }
+                        },
                     )
 
                     SwitchSettingItem(
@@ -425,23 +430,24 @@ fun ThemeConfigScreen(
                         checked = theme.eyeProtectionAutoNight,
                         onCheckedChange = { value ->
                             updateTheme { it.copy(eyeProtectionAutoNight = value) }
-                        }
+                        },
                     )
 
                     AnimatedVisibility(visible = theme.isEyeProtectionConfigured) {
                         Column {
                             SliderSettingItem(
                                 title = stringResource(R.string.color_temperature),
-                                description = stringResource(
+                                description =
+                                stringResource(
                                     R.string.color_temperature_summary,
-                                    theme.colorTemperature
+                                    theme.colorTemperature,
                                 ),
                                 value = theme.colorTemperature.toFloat(),
                                 defaultValue = 50f,
                                 valueRange = 0f..100f,
                                 onValueChange = { value ->
                                     updateTheme { it.copy(colorTemperature = value.toInt()) }
-                                }
+                                },
                             )
 
                             SwitchSettingItem(
@@ -450,7 +456,7 @@ fun ThemeConfigScreen(
                                 checked = theme.eyeProtectionSchedule,
                                 onCheckedChange = { value ->
                                     updateTheme { it.copy(eyeProtectionSchedule = value) }
-                                }
+                                },
                             )
 
                             AnimatedVisibility(visible = theme.eyeProtectionSchedule) {
@@ -463,9 +469,9 @@ fun ThemeConfigScreen(
                                                 ThemeConfigIntent.RequestTimePicker(
                                                     ThemeTimeField.EyeProtectionStart,
                                                     theme.eyeProtectionStartTime,
-                                                )
+                                                ),
                                             )
-                                        }
+                                        },
                                     )
                                     ClickableSettingItem(
                                         title = stringResource(R.string.eye_protection_end_time),
@@ -475,9 +481,9 @@ fun ThemeConfigScreen(
                                                 ThemeConfigIntent.RequestTimePicker(
                                                     ThemeTimeField.EyeProtectionEnd,
                                                     theme.eyeProtectionEndTime,
-                                                )
+                                                ),
                                             )
-                                        }
+                                        },
                                     )
                                 }
                             }
@@ -489,7 +495,7 @@ fun ThemeConfigScreen(
                     SwitchSettingItem(
                         title = stringResource(R.string.is_blur_enable),
                         checked = theme.enableBlur,
-                        onCheckedChange = { onIntent(ThemeConfigIntent.SetBlurEnabled(it)) }
+                        onCheckedChange = { onIntent(ThemeConfigIntent.SetBlurEnabled(it)) },
                     )
                     AnimatedVisibility(visible = theme.enableBlur) {
                         SwitchSettingItem(
@@ -497,11 +503,10 @@ fun ThemeConfigScreen(
                             checked = theme.enableProgressiveBlur,
                             onCheckedChange = { value ->
                                 updateTheme { it.copy(enableProgressiveBlur = value) }
-                            }
+                            },
                         )
                     }
                 }
-
             }
 
             // Container settings
@@ -513,15 +518,16 @@ fun ThemeConfigScreen(
                         checked = theme.enableContainerBackgroundImage,
                         onCheckedChange = { value ->
                             updateTheme { it.copy(enableContainerBackgroundImage = value) }
-                        }
+                        },
                     )
                     AnimatedVisibility(visible = theme.enableContainerBackgroundImage) {
                         Column(
-                            verticalArrangement = Arrangement.spacedBy(2.dp)
+                            verticalArrangement = Arrangement.spacedBy(2.dp),
                         ) {
                             ClickableSettingItem(
                                 title = "大容器背景图片",
-                                description = if (theme.largeContainerBackgroundImageLight.isNullOrBlank() &&
+                                description =
+                                if (theme.largeContainerBackgroundImageLight.isNullOrBlank() &&
                                     theme.largeContainerBackgroundImageDark.isNullOrBlank()
                                 ) {
                                     stringResource(R.string.select_image)
@@ -532,15 +538,16 @@ fun ThemeConfigScreen(
                                     onIntent(
                                         ThemeConfigIntent.ShowSheet(
                                             ThemeConfigSheet.BackgroundImage(
-                                                BackgroundImageTarget.LargeContainer
-                                            )
-                                        )
+                                                BackgroundImageTarget.LargeContainer,
+                                            ),
+                                        ),
                                     )
-                                }
+                                },
                             )
                             ClickableSettingItem(
                                 title = "项目背景图片",
-                                description = if (theme.itemBackgroundImageLight.isNullOrBlank() &&
+                                description =
+                                if (theme.itemBackgroundImageLight.isNullOrBlank() &&
                                     theme.itemBackgroundImageDark.isNullOrBlank()
                                 ) {
                                     stringResource(R.string.select_image)
@@ -551,26 +558,27 @@ fun ThemeConfigScreen(
                                     onIntent(
                                         ThemeConfigIntent.ShowSheet(
                                             ThemeConfigSheet.BackgroundImage(
-                                                BackgroundImageTarget.Item
-                                            )
-                                        )
+                                                BackgroundImageTarget.Item,
+                                            ),
+                                        ),
                                     )
-                                }
+                                },
                             )
                         }
                     }
                     SliderSettingItem(
-                            title = stringResource(R.string.container_opacity),
-                            description = stringResource(
-                                R.string.container_opacity_summary,
-                                theme.containerOpacity
-                            ),
-                            value = theme.containerOpacity.toFloat(),
-                            defaultValue = 100f,
-                            valueRange = 0f..100f,
-                            onValueChange = { value ->
-                                updateTheme { it.copy(containerOpacity = value.toInt()) }
-                            }
+                        title = stringResource(R.string.container_opacity),
+                        description =
+                        stringResource(
+                            R.string.container_opacity_summary,
+                            theme.containerOpacity,
+                        ),
+                        value = theme.containerOpacity.toFloat(),
+                        defaultValue = 100f,
+                        valueRange = 0f..100f,
+                        onValueChange = { value ->
+                            updateTheme { it.copy(containerOpacity = value.toInt()) }
+                        },
                     )
                     SwitchSettingItem(
                         title = stringResource(R.string.disable_spliced_group_corner_radius),
@@ -580,7 +588,7 @@ fun ThemeConfigScreen(
                             updateTheme {
                                 it.copy(disableSplicedColumnGroupCornerRadius = value)
                             }
-                        }
+                        },
                     )
                     SwitchSettingItem(
                         title = stringResource(R.string.base_card_corner_radius_override),
@@ -588,7 +596,7 @@ fun ThemeConfigScreen(
                         checked = theme.overrideBaseCardCornerRadius,
                         onCheckedChange = { value ->
                             updateTheme { it.copy(overrideBaseCardCornerRadius = value) }
-                        }
+                        },
                     )
                     AnimatedVisibility(visible = theme.overrideBaseCardCornerRadius) {
                         SliderSettingItem(
@@ -601,7 +609,7 @@ fun ThemeConfigScreen(
                             decimal = true,
                             onValueChange = { value ->
                                 updateTheme { it.copy(baseCardCornerRadius = value) }
-                            }
+                            },
                         )
                     }
                     SwitchSettingItem(
@@ -610,7 +618,7 @@ fun ThemeConfigScreen(
                         checked = theme.overrideBaseCardBorder,
                         onCheckedChange = { value ->
                             updateTheme { it.copy(overrideBaseCardBorder = value) }
-                        }
+                        },
                     )
                     AnimatedVisibility(visible = theme.overrideBaseCardBorder) {
                         Column {
@@ -624,7 +632,7 @@ fun ThemeConfigScreen(
                                 decimal = true,
                                 onValueChange = { value ->
                                     updateTheme { it.copy(baseCardBorderWidth = value) }
-                                }
+                                },
                             )
                             BaseCardBorderColorSettingItem(
                                 title = stringResource(R.string.base_card_border_color_day),
@@ -632,10 +640,10 @@ fun ThemeConfigScreen(
                                 onClick = {
                                     onIntent(
                                         ThemeConfigIntent.ShowSheet(
-                                            ThemeConfigSheet.BaseCardBorderColor(false)
-                                        )
+                                            ThemeConfigSheet.BaseCardBorderColor(false),
+                                        ),
                                     )
-                                }
+                                },
                             )
                             BaseCardBorderColorSettingItem(
                                 title = stringResource(R.string.base_card_border_color_night),
@@ -643,10 +651,10 @@ fun ThemeConfigScreen(
                                 onClick = {
                                     onIntent(
                                         ThemeConfigIntent.ShowSheet(
-                                            ThemeConfigSheet.BaseCardBorderColor(true)
-                                        )
+                                            ThemeConfigSheet.BaseCardBorderColor(true),
+                                        ),
                                     )
-                                }
+                                },
                             )
                         }
                     }
@@ -655,7 +663,7 @@ fun ThemeConfigScreen(
                         checked = theme.enableItemDivider,
                         onCheckedChange = { value ->
                             updateTheme { it.copy(enableItemDivider = value) }
-                        }
+                        },
                     )
                     if (theme.enableItemDivider) {
                         SliderSettingItem(
@@ -668,7 +676,7 @@ fun ThemeConfigScreen(
                             decimal = true,
                             onValueChange = { value ->
                                 updateTheme { it.copy(itemDividerWidth = value) }
-                            }
+                            },
                         )
                         SliderSettingItem(
                             title = stringResource(R.string.theme_config_divider_length),
@@ -679,31 +687,39 @@ fun ThemeConfigScreen(
                             steps = 14,
                             onValueChange = { value ->
                                 updateTheme { it.copy(itemDividerLength = value) }
-                            }
+                            },
                         )
                         ClickableSettingItem(
                             title = stringResource(R.string.tip_divider_color),
-                            option = if (theme.itemDividerColor != 0) "#${Integer.toHexString(theme.itemDividerColor).uppercase()}" else stringResource(R.string.click_to_select),
+                            option =
+                            if (theme.itemDividerColor !=
+                                0
+                            ) {
+                                "#${Integer.toHexString(theme.itemDividerColor).uppercase()}"
+                            } else {
+                                stringResource(R.string.click_to_select)
+                            },
                             onClick = {
                                 onIntent(
-                                    ThemeConfigIntent.ShowSheet(ThemeConfigSheet.DividerColor)
+                                    ThemeConfigIntent.ShowSheet(ThemeConfigSheet.DividerColor),
                                 )
                             },
                             trailingContent = {
                                 if (theme.itemDividerColor != 0) {
                                     Box(
-                                        modifier = Modifier
+                                        modifier =
+                                        Modifier
                                             .size(28.dp)
                                             .clip(CircleShape)
                                             .background(Color(theme.itemDividerColor))
                                             .border(
                                                 1.dp,
                                                 MaterialTheme.colorScheme.outlineVariant,
-                                                CircleShape
-                                            )
+                                                CircleShape,
+                                            ),
                                     )
                                 }
-                            }
+                            },
                         )
                     }
                 }
@@ -716,13 +732,12 @@ fun ThemeConfigScreen(
                         description = stringResource(R.string.theme_config_reset_defaults_summary),
                         onClick = {
                             onIntent(
-                                ThemeConfigIntent.ShowDialog(ThemeConfigDialog.ResetDefaults)
+                                ThemeConfigIntent.ShowDialog(ThemeConfigDialog.ResetDefaults),
                             )
-                        }
+                        },
                     )
                 }
             }
-
         }
     }
 
@@ -740,11 +755,12 @@ fun ThemeConfigScreen(
     val timePickerDialog = state.activeDialog as? ThemeConfigDialog.TimePicker
     if (timePickerDialog != null) {
         TimePickerDialog(
-            title = stringResource(
+            title =
+            stringResource(
                 when (timePickerDialog.field) {
                     ThemeTimeField.EyeProtectionStart -> R.string.eye_protection_start_time
                     ThemeTimeField.EyeProtectionEnd -> R.string.eye_protection_end_time
-                }
+                },
             ),
             currentValue = timePickerDialog.currentValue,
             onDismissRequest = { onIntent(ThemeConfigIntent.DismissDialog) },
@@ -755,102 +771,115 @@ fun ThemeConfigScreen(
         )
     }
 
-
     val backgroundImageSheet = state.activeSheet as? ThemeConfigSheet.BackgroundImage
     val backgroundImageTarget = backgroundImageSheet?.target
+
     fun requestImage(dark: Boolean) {
         when (backgroundImageTarget) {
-            BackgroundImageTarget.App ->
+            BackgroundImageTarget.App -> {
                 onIntent(ThemeConfigIntent.RequestBackgroundImage(dark))
-
-            BackgroundImageTarget.LargeContainer ->
+            }
+            BackgroundImageTarget.LargeContainer -> {
                 onIntent(
                     ThemeConfigIntent.RequestContainerBackgroundImage(
                         ContainerBackgroundTarget.LargeContainer,
-                        dark
-                    )
+                        dark,
+                    ),
                 )
-
-            BackgroundImageTarget.Item ->
+            }
+            BackgroundImageTarget.Item -> {
                 onIntent(
                     ThemeConfigIntent.RequestContainerBackgroundImage(
                         ContainerBackgroundTarget.Item,
-                        dark
-                    )
+                        dark,
+                    ),
                 )
-
-            null -> Unit
+            }
+            null -> {
+                Unit
+            }
         }
     }
 
     fun removeImage(dark: Boolean) {
         when (backgroundImageTarget) {
-            BackgroundImageTarget.App ->
+            BackgroundImageTarget.App -> {
                 onIntent(ThemeConfigIntent.RemoveBackground(dark))
-
-            BackgroundImageTarget.LargeContainer ->
+            }
+            BackgroundImageTarget.LargeContainer -> {
                 onIntent(
                     ThemeConfigIntent.RemoveContainerBackground(
                         ContainerBackgroundTarget.LargeContainer,
-                        dark
-                    )
+                        dark,
+                    ),
                 )
-
-            BackgroundImageTarget.Item ->
+            }
+            BackgroundImageTarget.Item -> {
                 onIntent(
                     ThemeConfigIntent.RemoveContainerBackground(
                         ContainerBackgroundTarget.Item,
-                        dark
-                    )
+                        dark,
+                    ),
                 )
-
-            null -> Unit
+            }
+            null -> {
+                Unit
+            }
         }
     }
     BackgroundImageManageSheet(
         show = backgroundImageSheet != null,
         onDismissRequest = { onIntent(ThemeConfigIntent.DismissSheet) },
-        title = when (backgroundImageTarget) {
+        title =
+        when (backgroundImageTarget) {
             BackgroundImageTarget.App -> stringResource(R.string.background_image)
             BackgroundImageTarget.LargeContainer -> "大容器背景图片"
             BackgroundImageTarget.Item -> "项目背景图片"
             null -> ""
         },
-        lightPath = when (backgroundImageTarget) {
+        lightPath =
+        when (backgroundImageTarget) {
             BackgroundImageTarget.App -> theme.backgroundImageLight
             BackgroundImageTarget.LargeContainer -> theme.largeContainerBackgroundImageLight
             BackgroundImageTarget.Item -> theme.itemBackgroundImageLight
             null -> null
         },
-        darkPath = when (backgroundImageTarget) {
+        darkPath =
+        when (backgroundImageTarget) {
             BackgroundImageTarget.App -> theme.backgroundImageDark
             BackgroundImageTarget.LargeContainer -> theme.largeContainerBackgroundImageDark
             BackgroundImageTarget.Item -> theme.itemBackgroundImageDark
             null -> null
         },
-        extraOption = when (backgroundImageTarget) {
-            BackgroundImageTarget.App -> BackgroundImageExtraOption.Blur(
-                lightTitle = "日间背景图片虚化",
-                darkTitle = "夜间背景图片虚化",
-                lightValue = theme.backgroundImageBlurring,
-                darkValue = theme.backgroundImageDarkBlurring,
-                onLightChange = { value -> updateTheme { it.copy(backgroundImageBlurring = value) } },
-                onDarkChange = { value -> updateTheme { it.copy(backgroundImageDarkBlurring = value) } },
-            )
-
-            BackgroundImageTarget.LargeContainer -> BackgroundImageExtraOption.Opacity(
-                title = "大容器背景图透明度",
-                value = theme.appColumnBackgroundOpacity,
-                onValueChange = { value -> updateTheme { it.copy(appColumnBackgroundOpacity = value) } },
-            )
-
-            BackgroundImageTarget.Item -> BackgroundImageExtraOption.Opacity(
-                title = "项目背景图透明度",
-                value = theme.glassCardBackgroundOpacity,
-                onValueChange = { value -> updateTheme { it.copy(glassCardBackgroundOpacity = value) } },
-            )
-
-            null -> null
+        extraOption =
+        when (backgroundImageTarget) {
+            BackgroundImageTarget.App -> {
+                BackgroundImageExtraOption.Blur(
+                    lightTitle = "日间背景图片虚化",
+                    darkTitle = "夜间背景图片虚化",
+                    lightValue = theme.backgroundImageBlurring,
+                    darkValue = theme.backgroundImageDarkBlurring,
+                    onLightChange = { value -> updateTheme { it.copy(backgroundImageBlurring = value) } },
+                    onDarkChange = { value -> updateTheme { it.copy(backgroundImageDarkBlurring = value) } },
+                )
+            }
+            BackgroundImageTarget.LargeContainer -> {
+                BackgroundImageExtraOption.Opacity(
+                    title = "大容器背景图透明度",
+                    value = theme.appColumnBackgroundOpacity,
+                    onValueChange = { value -> updateTheme { it.copy(appColumnBackgroundOpacity = value) } },
+                )
+            }
+            BackgroundImageTarget.Item -> {
+                BackgroundImageExtraOption.Opacity(
+                    title = "项目背景图透明度",
+                    value = theme.glassCardBackgroundOpacity,
+                    onValueChange = { value -> updateTheme { it.copy(glassCardBackgroundOpacity = value) } },
+                )
+            }
+            null -> {
+                null
+            }
         },
         onSelectLight = { requestImage(false) },
         onSelectDark = { requestImage(true) },
@@ -883,12 +912,11 @@ fun ThemeConfigScreen(
         onIntent = onIntent,
     )
 
-
     LauncherIconPickerSheet(
         show = state.activeSheet == ThemeConfigSheet.LauncherIcon,
         selectedValue = appShell.launcherIcon,
         onDismissRequest = { onIntent(ThemeConfigIntent.DismissSheet) },
-        onValueChange = { onIntent(ThemeConfigIntent.SelectLauncherIcon(it)) }
+        onValueChange = { onIntent(ThemeConfigIntent.SelectLauncherIcon(it)) },
     )
 
     ColorPickerSheet(
@@ -898,13 +926,14 @@ fun ThemeConfigScreen(
         onColorSelected = { value ->
             updateTheme { it.copy(itemDividerColor = value) }
             onIntent(ThemeConfigIntent.DismissSheet)
-        }
+        },
     )
 
     val baseCardBorderColorSheet = state.activeSheet as? ThemeConfigSheet.BaseCardBorderColor
     ColorPickerSheet(
         show = baseCardBorderColorSheet != null,
-        initialColor = if (baseCardBorderColorSheet?.dark == true) {
+        initialColor =
+        if (baseCardBorderColorSheet?.dark == true) {
             theme.baseCardBorderColorNight
         } else {
             theme.baseCardBorderColor
@@ -919,7 +948,7 @@ fun ThemeConfigScreen(
                 }
             }
             onIntent(ThemeConfigIntent.DismissSheet)
-        }
+        },
     )
 
     FontSelectSheet(
@@ -937,14 +966,13 @@ fun ThemeConfigScreen(
                 onClick = {
                     onIntent(ThemeConfigIntent.ClearAppFont)
                     onIntent(ThemeConfigIntent.DismissSheet)
-                }
+                },
             )
         },
         folderIcon = Icons.Default.Add,
         folderContentDescription = stringResource(R.string.select_folder),
         emptyText = stringResource(R.string.theme_config_no_font_files),
     )
-
 }
 
 @Composable
@@ -955,7 +983,8 @@ private fun BaseCardBorderColorSettingItem(
 ) {
     ClickableSettingItem(
         title = title,
-        option = if (color != 0) {
+        option =
+        if (color != 0) {
             "#${Integer.toHexString(color).uppercase()}"
         } else {
             stringResource(R.string.base_card_border_color_default)
@@ -963,16 +992,16 @@ private fun BaseCardBorderColorSettingItem(
         onClick = onClick,
         trailingContent = {
             Box(
-                modifier = Modifier
+                modifier =
+                Modifier
                     .size(28.dp)
                     .clip(CircleShape)
                     .background(
                         color.takeIf { it != 0 }?.let(::Color)
-                            ?: LegadoTheme.colorScheme.outlineVariant
-                    )
-                    .border(1.dp, MaterialTheme.colorScheme.outlineVariant, CircleShape)
+                            ?: LegadoTheme.colorScheme.outlineVariant,
+                    ).border(1.dp, MaterialTheme.colorScheme.outlineVariant, CircleShape),
             )
-        }
+        },
     )
 }
 
@@ -980,20 +1009,23 @@ private fun BaseCardBorderColorSettingItem(
 @Composable
 fun ThemeModeSelector(
     selectedMode: String,
-    onModeSelected: (String) -> Unit
+    onModeSelected: (String) -> Unit,
 ) {
-    val modes = listOf(
-        Triple("0", stringResource(R.string.flow_sys), Icons.Filled.BrightnessMedium),
-        Triple("1", stringResource(R.string.light_mode), Icons.Filled.LightMode),
-        Triple("2", stringResource(R.string.dark_mode), Icons.Filled.DarkMode)
-    )
+    val modes =
+        listOf(
+            Triple("0", stringResource(R.string.flow_sys), Icons.Filled.BrightnessMedium),
+            Triple("1", stringResource(R.string.light_mode), Icons.Filled.LightMode),
+            Triple("2", stringResource(R.string.dark_mode), Icons.Filled.DarkMode),
+        )
 
-    val selectedIndex = modes.indexOfFirst { it.first == selectedMode }
-        .coerceAtLeast(0)
+    val selectedIndex =
+        modes
+            .indexOfFirst { it.first == selectedMode }
+            .coerceAtLeast(0)
 
     Row(
         modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(ButtonGroupDefaults.ConnectedSpaceBetween)
+        horizontalArrangement = Arrangement.spacedBy(ButtonGroupDefaults.ConnectedSpaceBetween),
     ) {
         val modifiers = listOf(Modifier.weight(1.2f), Modifier.weight(1f), Modifier.weight(1f))
 
@@ -1002,11 +1034,12 @@ fun ThemeModeSelector(
                 checked = selectedIndex == index,
                 onCheckedChange = { onModeSelected(value) },
                 modifier = modifiers[index].semantics { role = Role.RadioButton },
-                shapes = when (index) {
+                shapes =
+                when (index) {
                     0 -> ButtonGroupDefaults.connectedLeadingButtonShapes()
                     modes.lastIndex -> ButtonGroupDefaults.connectedTrailingButtonShapes()
                     else -> ButtonGroupDefaults.connectedMiddleButtonShapes()
-                }
+                },
             ) {
                 Icon(imageVector = icon, contentDescription = null)
                 Spacer(Modifier.size(ToggleButtonDefaults.IconSpacing))
@@ -1026,11 +1059,11 @@ fun ThemeColorSelector(
     paletteStyle: String?,
     customLightSeedColor: Int,
     customNightSeedColor: Int,
-    onThemeSelected: (String) -> Unit
+    onThemeSelected: (String) -> Unit,
 ) {
     LazyRow(
         horizontalArrangement = Arrangement.spacedBy(16.dp),
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier.fillMaxWidth(),
     ) {
         items(themes) { (label, value) ->
             ThemeColorButton(
@@ -1043,7 +1076,7 @@ fun ThemeColorSelector(
                 paletteStyle = paletteStyle,
                 customLightSeedColor = customLightSeedColor,
                 customNightSeedColor = customNightSeedColor,
-                onClick = { onThemeSelected(value) }
+                onClick = { onThemeSelected(value) },
             )
         }
     }
@@ -1061,25 +1094,31 @@ fun ThemeColorButton(
     paletteStyle: String?,
     customLightSeedColor: Int,
     customNightSeedColor: Int,
-    onClick: () -> Unit
+    onClick: () -> Unit,
 ) {
     // 配色方案由种子色实时生成，开销不小，缓存避免无关重组时重复计算
-    val colors = remember(
-        value, isDark, isAmoled, paletteStyle, customLightSeedColor, customNightSeedColor
-    ) {
-        getThemeColorPalette(
-            context = context,
-            value = value,
-            isDark = isDark,
-            isAmoled = isAmoled,
-            paletteStyle = paletteStyle,
-            customLightSeedColor = customLightSeedColor,
-            customNightSeedColor = customNightSeedColor
-        )
-    }
+    val colors =
+        remember(
+            value,
+            isDark,
+            isAmoled,
+            paletteStyle,
+            customLightSeedColor,
+            customNightSeedColor,
+        ) {
+            getThemeColorPalette(
+                context = context,
+                value = value,
+                isDark = isDark,
+                isAmoled = isAmoled,
+                paletteStyle = paletteStyle,
+                customLightSeedColor = customLightSeedColor,
+                customNightSeedColor = customNightSeedColor,
+            )
+        }
     val borderWidth by animateDpAsState(
         targetValue = if (isSelected) 2.dp else 0.dp,
-        label = "borderWidth"
+        label = "borderWidth",
     )
 
     Column(
@@ -1089,28 +1128,33 @@ fun ThemeColorButton(
             onClick = onClick,
             modifier = Modifier.size(64.dp),
             shape = RoundedCornerShape(16.dp),
-            border = if (isSelected) BorderStroke(
-                borderWidth,
-                LegadoTheme.colorScheme.primary
-            ) else null,
-            colors = CardDefaults.cardColors(containerColor = colors.surfaceContainer)
+            border =
+            if (isSelected) {
+                BorderStroke(
+                    borderWidth,
+                    LegadoTheme.colorScheme.primary,
+                )
+            } else {
+                null
+            },
+            colors = CardDefaults.cardColors(containerColor = colors.surfaceContainer),
         ) {
             Box(
                 modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
+                contentAlignment = Alignment.Center,
             ) {
                 Box(
-                    modifier = Modifier.size(48.dp)
+                    modifier = Modifier.size(48.dp),
                 ) {
                     Canvas(
-                        modifier = Modifier.fillMaxSize()
+                        modifier = Modifier.fillMaxSize(),
                     ) {
                         drawArc(
                             color = colors.secondary,
                             startAngle = -90f,
                             sweepAngle = 180f,
                             useCenter = true,
-                            size = size
+                            size = size,
                         )
 
                         drawArc(
@@ -1118,31 +1162,33 @@ fun ThemeColorButton(
                             startAngle = 90f,
                             sweepAngle = 180f,
                             useCenter = true,
-                            size = size
+                            size = size,
                         )
                     }
 
                     Box(
-                        modifier = Modifier
+                        modifier =
+                        Modifier
                             .size(24.dp)
                             .clip(CircleShape)
                             .background(colors.primary)
-                            .align(Alignment.Center)
+                            .align(Alignment.Center),
                     )
                 }
 
                 if (isSelected) {
                     Box(
-                        modifier = Modifier
+                        modifier =
+                        Modifier
                             .size(40.dp)
                             .clip(RoundedCornerShape(12.dp)),
-                        contentAlignment = Alignment.Center
+                        contentAlignment = Alignment.Center,
                     ) {
                         Icon(
                             imageVector = Icons.Default.Check,
                             contentDescription = null,
                             tint = MaterialTheme.colorScheme.onPrimary,
-                            modifier = Modifier.size(24.dp)
+                            modifier = Modifier.size(24.dp),
                         )
                     }
                 }
@@ -1154,7 +1200,7 @@ fun ThemeColorButton(
         AppText(
             text = label,
             style = LegadoTheme.typography.labelSmall,
-            color = if (isSelected) LegadoTheme.colorScheme.primary else LegadoTheme.colorScheme.onSurface
+            color = if (isSelected) LegadoTheme.colorScheme.primary else LegadoTheme.colorScheme.onSurface,
         )
     }
 }
@@ -1167,86 +1213,95 @@ fun ThemeCard(
     isAmoled: Boolean,
     paletteStyle: String?,
     customLightSeedColor: Int,
-    customNightSeedColor: Int
+    customNightSeedColor: Int,
 ) {
-    val colors = remember(
-        value, isDark, isAmoled, paletteStyle, customLightSeedColor, customNightSeedColor
-    ) {
-        getThemeColors(
-            context = context,
-            value = value,
-            isDark = isDark,
-            isAmoled = isAmoled,
-            paletteStyle = paletteStyle,
-            customLightSeedColor = customLightSeedColor,
-            customNightSeedColor = customNightSeedColor
-        )
-    }
+    val colors =
+        remember(
+            value,
+            isDark,
+            isAmoled,
+            paletteStyle,
+            customLightSeedColor,
+            customNightSeedColor,
+        ) {
+            getThemeColors(
+                context = context,
+                value = value,
+                isDark = isDark,
+                isAmoled = isAmoled,
+                paletteStyle = paletteStyle,
+                customLightSeedColor = customLightSeedColor,
+                customNightSeedColor = customNightSeedColor,
+            )
+        }
 
     Column(
-        horizontalAlignment = Alignment.CenterHorizontally
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Card(
-            modifier = Modifier
+            modifier =
+            Modifier
                 .width(128.dp)
                 .height(256.dp),
             shape = MaterialTheme.shapes.large,
             border = BorderStroke(1.dp, colors.primary),
-            colors = CardDefaults.cardColors(containerColor = colors.surface)
+            colors = CardDefaults.cardColors(containerColor = colors.surface),
         ) {
             ConstraintLayout(
-                modifier = Modifier.fillMaxSize()
+                modifier = Modifier.fillMaxSize(),
             ) {
                 val (colorTop, colorBook, colorBottom) = createRefs()
 
                 Box(
-                    modifier = Modifier
+                    modifier =
+                    Modifier
                         .size(width = 48.dp, height = 16.dp)
                         .constrainAs(colorTop) {
                             top.linkTo(parent.top, margin = 12.dp)
                             start.linkTo(parent.start, margin = 12.dp)
-                        }
-                        .clip(RoundedCornerShape(8.dp))
-                        .background(colors.onSurfaceVariant)
+                        }.clip(RoundedCornerShape(8.dp))
+                        .background(colors.onSurfaceVariant),
                 )
 
                 Box(
-                    modifier = Modifier
+                    modifier =
+                    Modifier
                         .size(width = 56.dp, height = 80.dp)
                         .constrainAs(colorBook) {
                             top.linkTo(colorTop.bottom, margin = 8.dp)
                             start.linkTo(colorTop.start)
-                        }
-                        .clip(RoundedCornerShape(8.dp))
-                        .background(colors.secondaryContainer)
+                        }.clip(RoundedCornerShape(8.dp))
+                        .background(colors.secondaryContainer),
                 ) {
                     Box(
-                        modifier = Modifier
+                        modifier =
+                        Modifier
                             .align(Alignment.TopEnd)
                             .padding(4.dp)
                             .size(width = 16.dp, height = 12.dp)
                             .clip(RoundedCornerShape(4.dp))
-                            .background(colors.secondary)
+                            .background(colors.secondary),
                     )
                 }
 
                 Box(
-                    modifier = Modifier
+                    modifier =
+                    Modifier
                         .fillMaxWidth()
                         .height(40.dp)
                         .constrainAs(colorBottom) {
                             bottom.linkTo(parent.bottom)
                             start.linkTo(parent.start, margin = 4.dp)
                             end.linkTo(parent.end, margin = 4.dp)
-                        }
-                        .background(colors.surfaceContainer)
+                        }.background(colors.surfaceContainer),
                 ) {
                     Box(
-                        modifier = Modifier
+                        modifier =
+                        Modifier
                             .align(Alignment.Center)
                             .size(20.dp)
                             .clip(CircleShape)
-                            .background(colors.primary)
+                            .background(colors.primary),
                     )
                 }
             }
@@ -1258,7 +1313,7 @@ data class ThemeColorPalette(
     val primary: Color,
     val secondary: Color,
     val tertiary: Color,
-    val surfaceContainer: Color
+    val surfaceContainer: Color,
 )
 
 data class ThemeColors(
@@ -1269,7 +1324,7 @@ data class ThemeColors(
     val surfaceContainer: Color,
     val secondaryContainer: Color,
     val onSurface: Color,
-    val onSurfaceVariant: Color
+    val onSurfaceVariant: Color,
 )
 
 @SuppressLint("ResourceType")
@@ -1281,25 +1336,26 @@ private fun getThemeColorPalette(
     paletteStyle: String?,
     materialVersion: String? = null,
     customLightSeedColor: Int = 0,
-    customNightSeedColor: Int = 0
+    customNightSeedColor: Int = 0,
 ): ThemeColorPalette {
     val appThemeMode = ThemeResolver.resolveThemeMode(value)
     val customSeedColor = if (isDark) customNightSeedColor else customLightSeedColor
-    val colorScheme = ThemeEngine.getColorScheme(
-        context = context,
-        mode = appThemeMode,
-        darkTheme = isDark,
-        isAmoled = isAmoled,
-        paletteStyle = paletteStyle,
-        materialVersion = materialVersion,
-        customSeedColor = customSeedColor
-    )
+    val colorScheme =
+        ThemeEngine.getColorScheme(
+            context = context,
+            mode = appThemeMode,
+            darkTheme = isDark,
+            isAmoled = isAmoled,
+            paletteStyle = paletteStyle,
+            materialVersion = materialVersion,
+            customSeedColor = customSeedColor,
+        )
 
     return ThemeColorPalette(
         primary = colorScheme.primary,
         secondary = colorScheme.secondaryContainer,
         tertiary = colorScheme.tertiaryContainer,
-        surfaceContainer = colorScheme.surfaceContainer
+        surfaceContainer = colorScheme.surfaceContainer,
     )
 }
 
@@ -1312,19 +1368,20 @@ private fun getThemeColors(
     paletteStyle: String?,
     materialVersion: String? = null,
     customLightSeedColor: Int = 0,
-    customNightSeedColor: Int = 0
+    customNightSeedColor: Int = 0,
 ): ThemeColors {
     val appThemeMode = ThemeResolver.resolveThemeMode(value)
     val customSeedColor = if (isDark) customNightSeedColor else customLightSeedColor
-    val colorScheme = ThemeEngine.getColorScheme(
-        context = context,
-        mode = appThemeMode,
-        darkTheme = isDark,
-        isAmoled = isAmoled,
-        paletteStyle = paletteStyle,
-        materialVersion = materialVersion,
-        customSeedColor = customSeedColor
-    )
+    val colorScheme =
+        ThemeEngine.getColorScheme(
+            context = context,
+            mode = appThemeMode,
+            darkTheme = isDark,
+            isAmoled = isAmoled,
+            paletteStyle = paletteStyle,
+            materialVersion = materialVersion,
+            customSeedColor = customSeedColor,
+        )
 
     return ThemeColors(
         primary = colorScheme.primary,
@@ -1334,6 +1391,6 @@ private fun getThemeColors(
         surfaceContainer = colorScheme.surfaceContainer,
         secondaryContainer = colorScheme.secondaryContainer,
         onSurface = colorScheme.onSurface,
-        onSurfaceVariant = colorScheme.onSurfaceVariant
+        onSurfaceVariant = colorScheme.onSurfaceVariant,
     )
 }

@@ -53,13 +53,14 @@ fun EffectiveReplacesSheet(
     val chineseConvertItem = remember { ReplaceRule(CHINESE_CONVERT_ID, "繁简转换") }
     val reSegmentItem = remember { ReplaceRule(RE_SEGMENT_ID, "") }
 
-    val items = remember(show, effectiveRules, chineseConvertActive, reSegmentActive) {
-        buildList {
-            addAll(effectiveRules)
-            if (chineseConvertActive) add(chineseConvertItem)
-            if (reSegmentActive) add(reSegmentItem)
+    val items =
+        remember(show, effectiveRules, chineseConvertActive, reSegmentActive) {
+            buildList {
+                addAll(effectiveRules)
+                if (chineseConvertActive) add(chineseConvertItem)
+                if (reSegmentActive) add(reSegmentItem)
+            }
         }
-    }
 
     var isEdited by remember(show) { mutableStateOf(false) }
     var disabledIds by remember(show) { mutableStateOf(emptySet<Long>()) }
@@ -76,7 +77,8 @@ fun EffectiveReplacesSheet(
             onClick = onOpenContentProcesses,
             icon = Icons.Default.Edit,
             text = stringResource(R.string.content_processes),
-            modifier = Modifier
+            modifier =
+            Modifier
                 .fillMaxWidth()
                 .padding(bottom = 8.dp),
         )
@@ -93,20 +95,23 @@ fun EffectiveReplacesSheet(
                                 onOpenReplaceEditor(rule.id, rule.pattern)
                             }
                         },
-                        modifier = Modifier
+                        modifier =
+                        Modifier
                             .fillMaxWidth()
                             .padding(vertical = 4.dp),
-                        containerColor = LegadoTheme.colorScheme.onSheetContent
+                        containerColor = LegadoTheme.colorScheme.onSheetContent,
                     ) {
                         Row(
-                            modifier = Modifier
+                            modifier =
+                            Modifier
                                 .fillMaxWidth()
                                 .padding(horizontal = 12.dp, vertical = 8.dp),
                             verticalAlignment = Alignment.CenterVertically,
                         ) {
                             Column(modifier = Modifier.weight(1f)) {
                                 AppText(
-                                    text = if (rule.id == RE_SEGMENT_ID) {
+                                    text =
+                                    if (rule.id == RE_SEGMENT_ID) {
                                         stringResource(R.string.re_segment)
                                     } else {
                                         rule.name
@@ -151,13 +156,16 @@ fun EffectiveReplacesSheet(
                                         RE_SEGMENT_ID -> {
                                             onDisableReSegment()
                                         }
-
-                                        CHINESE_CONVERT_ID -> onDisableChineseConverter()
-                                        else -> onDisableRule(rule)
+                                        CHINESE_CONVERT_ID -> {
+                                            onDisableChineseConverter()
+                                        }
+                                        else -> {
+                                            onDisableRule(rule)
+                                        }
                                     }
                                 },
-                icon = Icons.Default.Close,
-                contentDescription = stringResource(R.string.close)
+                                icon = Icons.Default.Close,
+                                contentDescription = stringResource(R.string.close),
                             )
                         }
                     }

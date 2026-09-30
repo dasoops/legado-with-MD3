@@ -1,7 +1,11 @@
 package io.legado.app.feature.reader.core.layout
 
 /** Actual font bounds at the shaped size, without leaking Android Paint into pagination. */
-data class ReaderFontBounds(val topPx: Float, val bottomPx: Float, val descentPx: Float) {
+data class ReaderFontBounds(
+    val topPx: Float,
+    val bottomPx: Float,
+    val descentPx: Float,
+) {
     val heightPx: Float get() = bottomPx - topPx
     val baselineOffsetPx: Float get() = heightPx - descentPx
 }
@@ -17,11 +21,14 @@ data class ReaderFontLineMetrics(
 
 fun interface ReaderTextShaper {
     fun shape(text: String): GlyphClusters
+
     val fontBounds: ReaderFontBounds? get() = null
     val fontLineMetrics: ReaderFontLineMetrics? get() = null
 }
 
-class ReaderParagraphFactory(private val shaper: ReaderTextShaper) {
+class ReaderParagraphFactory(
+    private val shaper: ReaderTextShaper,
+) {
     fun create(
         text: String,
         style: io.legado.app.feature.reader.core.model.ReaderTextStyle,

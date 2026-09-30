@@ -21,7 +21,6 @@ import io.legado.app.ui.theme.LegadoTheme
 import io.legado.app.ui.widget.components.icon.AppIcon
 import io.legado.app.ui.widget.components.text.AnimatedTextLine
 
-
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun TextCard(
@@ -52,28 +51,29 @@ fun TextCard(
         containerColor = finalBackgroundColor,
         contentColor = finalContentColor,
         onClick = onClick,
-        border = border
+        border = border,
     ) {
         Row(
-            modifier = Modifier.padding(
+            modifier =
+            Modifier.padding(
                 horizontal = horizontalPadding,
-                vertical = verticalPadding
+                vertical = verticalPadding,
             ),
             horizontalArrangement = horizontalArrangement,
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
         ) {
-
             if (icon != null) {
                 AppIcon(
                     imageVector = icon,
                     contentDescription = null,
                     tint = finalContentColor,
-                    modifier = Modifier.size(iconSize)
+                    modifier = Modifier.size(iconSize),
                 )
             }
 
-            if (icon != null && text != null)
+            if (icon != null && text != null) {
                 Spacer(modifier = Modifier.width(spacing))
+            }
 
             text?.let {
                 AnimatedTextLine(
@@ -81,10 +81,9 @@ fun TextCard(
                     style = textStyle,
                     color = finalContentColor,
                     maxLines = 2,
-                    overflow = TextOverflow.Ellipsis
+                    overflow = TextOverflow.Ellipsis,
                 )
             }
         }
     }
 }
-

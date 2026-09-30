@@ -15,7 +15,6 @@ class DashUnderlineSpan(
     private val underlineWidth: Float = 1f,
     private val underlineOffset: Float = 6f,
 ) : ReplacementSpan() {
-
     private val offsetPx = underlineOffset.toInt().dpToPx()
 
     override fun getSize(
@@ -23,7 +22,7 @@ class DashUnderlineSpan(
         text: CharSequence,
         start: Int,
         end: Int,
-        fm: Paint.FontMetricsInt?
+        fm: Paint.FontMetricsInt?,
     ): Int {
         if (fm != null) {
             val metrics = paint.fontMetricsInt
@@ -44,7 +43,7 @@ class DashUnderlineSpan(
         top: Int,
         y: Int,
         bottom: Int,
-        paint: Paint
+        paint: Paint,
     ) {
         val textStr = text.subSequence(start, end).toString()
         paint.color = textColor
@@ -52,13 +51,14 @@ class DashUnderlineSpan(
 
         val width = paint.measureText(text, start, end)
         val lineY = y + offsetPx
-        val dashPaint = Paint(paint).apply {
-            color = underlineColor
-            style = Paint.Style.STROKE
-            strokeWidth = underlineWidth.dpToPx()
-            pathEffect = DashPathEffect(floatArrayOf(10f, 10f), 0f)
-            isAntiAlias = true
-        }
+        val dashPaint =
+            Paint(paint).apply {
+                color = underlineColor
+                style = Paint.Style.STROKE
+                strokeWidth = underlineWidth.dpToPx()
+                pathEffect = DashPathEffect(floatArrayOf(10f, 10f), 0f)
+                isAntiAlias = true
+            }
         canvas.drawLine(x, lineY.toFloat(), x + width, lineY.toFloat(), dashPaint)
     }
 }

@@ -3,9 +3,9 @@ package io.legado.app.utils.canvasrecorder
 import android.graphics.Canvas
 import java.util.concurrent.locks.ReentrantLock
 
-class CanvasRecorderLocked(private val delegate: CanvasRecorder) :
-    CanvasRecorder by delegate {
-
+class CanvasRecorderLocked(
+    private val delegate: CanvasRecorder,
+) : CanvasRecorder by delegate {
     var lock: ReentrantLock? = ReentrantLock()
 
     private fun initLock() {
@@ -18,7 +18,10 @@ class CanvasRecorderLocked(private val delegate: CanvasRecorder) :
         }
     }
 
-    override fun beginRecording(width: Int, height: Int): Canvas {
+    override fun beginRecording(
+        width: Int,
+        height: Int,
+    ): Canvas {
         initLock()
         lock!!.lock()
         return delegate.beginRecording(width, height)
@@ -60,5 +63,4 @@ class CanvasRecorderLocked(private val delegate: CanvasRecorder) :
         }
         lock = null
     }
-
 }

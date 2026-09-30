@@ -4,7 +4,6 @@ import org.junit.Assert.assertEquals
 import org.junit.Test
 
 class VerifyBookmarkTargetUseCaseTest {
-
     private val useCase = VerifyBookmarkTargetUseCase()
 
     @Test
@@ -15,7 +14,7 @@ class VerifyBookmarkTargetUseCaseTest {
                 currentBookUrl = "srcA",
                 targetChapterTitle = "第三章",
                 storedBookUrl = "srcA",
-                storedChapterName = "第三章"
+                storedChapterName = "第三章",
             ),
         )
     }
@@ -29,7 +28,7 @@ class VerifyBookmarkTargetUseCaseTest {
                 currentBookUrl = "srcB",
                 targetChapterTitle = "第三章",
                 storedBookUrl = "srcA",
-                storedChapterName = "第三章"
+                storedChapterName = "第三章",
             ),
         )
     }
@@ -43,7 +42,7 @@ class VerifyBookmarkTargetUseCaseTest {
                 currentBookUrl = "srcB",
                 targetChapterTitle = "第二章",
                 storedBookUrl = "",
-                storedChapterName = "第三章"
+                storedChapterName = "第三章",
             ),
         )
     }
@@ -57,7 +56,7 @@ class VerifyBookmarkTargetUseCaseTest {
                 currentBookUrl = "srcA",
                 targetChapterTitle = null,
                 storedBookUrl = "srcA",
-                storedChapterName = "第三章"
+                storedChapterName = "第三章",
             ),
         )
         assertEquals(
@@ -66,7 +65,7 @@ class VerifyBookmarkTargetUseCaseTest {
                 currentBookUrl = "srcB",
                 targetChapterTitle = null,
                 storedBookUrl = "srcA",
-                storedChapterName = "第三章"
+                storedChapterName = "第三章",
             ),
         )
     }

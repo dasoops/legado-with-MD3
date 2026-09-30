@@ -4,12 +4,10 @@ import android.app.Dialog
 import android.view.WindowManager
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.DialogFragment
-//import io.legado.app.lib.theme.accentColor
-//import io.legado.app.lib.theme.filletBackground
 import splitties.systemservices.windowManager
 
 fun AlertDialog.applyTint(): AlertDialog {
-    //window?.setBackgroundDrawable(context.filletBackground)
+    // window?.setBackgroundDrawable(context.filletBackground)
 //    val colorStateList = Selector.colorBuild()
 //        .setDefaultColor(ThemeStore.accentColor(context))
 //        .setPressedColor(ColorUtils.darkenColor(ThemeStore.accentColor(context)))
@@ -43,7 +41,7 @@ fun Dialog.setLayout(widthMix: Float, heightMix: Float) {
     val dm = context.windowManager.windowSize
     window?.setLayout(
         (dm.widthPixels * widthMix).toInt(),
-        (dm.heightPixels * heightMix).toInt()
+        (dm.heightPixels * heightMix).toInt(),
     )
 }
 
@@ -55,7 +53,7 @@ fun Dialog.setLayout(width: Int, heightMix: Float) {
     val dm = context.windowManager.windowSize
     window?.setLayout(
         width,
-        (dm.heightPixels * heightMix).toInt()
+        (dm.heightPixels * heightMix).toInt(),
     )
 }
 
@@ -67,7 +65,7 @@ fun Dialog.setLayout(widthMix: Float, height: Int) {
     val dm = context.windowManager.windowSize
     window?.setLayout(
         (dm.widthPixels * widthMix).toInt(),
-        height
+        height,
     )
 }
 

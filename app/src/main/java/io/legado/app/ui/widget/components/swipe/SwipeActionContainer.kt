@@ -38,14 +38,15 @@ fun SwipeActionContainer(
     modifier: Modifier = Modifier,
     startAction: SwipeAction? = null,
     endAction: SwipeAction? = null,
-    content: @Composable () -> Unit
+    content: @Composable () -> Unit,
 ) {
     val haptic = LocalHapticFeedback.current
-    val dismissState = rememberSwipeToDismissBoxState(
-        positionalThreshold = { totalDistance ->
-            totalDistance * 0.6f
-        }
-    )
+    val dismissState =
+        rememberSwipeToDismissBoxState(
+            positionalThreshold = { totalDistance ->
+                totalDistance * 0.6f
+            },
+        )
 
     LaunchedEffect(dismissState.targetValue) {
         if (dismissState.targetValue == SwipeToDismissBoxValue.StartToEnd) {
@@ -61,20 +62,19 @@ fun SwipeActionContainer(
                 startAction?.onSwipe?.invoke()
                 dismissState.reset()
             }
-
             SwipeToDismissBoxValue.EndToStart -> {
                 endAction?.onSwipe?.invoke()
                 dismissState.reset()
             }
-
             else -> {}
         }
     }
 
     SwipeToDismissBox(
         state = dismissState,
-        modifier = modifier.then(
-            swipeActionsSemantics(startAction, endAction)
+        modifier =
+        modifier.then(
+            swipeActionsSemantics(startAction, endAction),
         ),
         enableDismissFromStartToEnd = startAction != null,
         enableDismissFromEndToStart = endAction != null,
@@ -83,27 +83,24 @@ fun SwipeActionContainer(
             val progress = dismissState.progress
 
             when (direction) {
-
                 SwipeToDismissBoxValue.StartToEnd -> {
                     startAction?.let { action ->
                         SwipeBackground(
                             dismissState = dismissState,
                             action = action,
-                            alignStart = true
+                            alignStart = true,
                         )
                     }
                 }
-
                 SwipeToDismissBoxValue.EndToStart -> {
                     endAction?.let { action ->
                         SwipeBackground(
                             dismissState = dismissState,
                             action = action,
-                            alignStart = false
+                            alignStart = false,
                         )
                     }
                 }
-
                 else -> {}
             }
         },
@@ -111,36 +108,37 @@ fun SwipeActionContainer(
             Surface(
                 modifier = Modifier.fillMaxSize(),
                 color = Color.Transparent,
-                shape = RectangleShape
+                shape = RectangleShape,
             ) {
                 content()
             }
-        }
+        },
     )
 }
 
 private fun swipeActionsSemantics(
     startAction: SwipeAction?,
-    endAction: SwipeAction?
+    endAction: SwipeAction?,
 ): Modifier {
-    val accessibilityActions = buildList {
-        startAction?.contentDescription?.let { label ->
-            add(
-                CustomAccessibilityAction(label = label) {
-                    startAction.onSwipe()
-                    true
-                }
-            )
+    val accessibilityActions =
+        buildList {
+            startAction?.contentDescription?.let { label ->
+                add(
+                    CustomAccessibilityAction(label = label) {
+                        startAction.onSwipe()
+                        true
+                    },
+                )
+            }
+            endAction?.contentDescription?.let { label ->
+                add(
+                    CustomAccessibilityAction(label = label) {
+                        endAction.onSwipe()
+                        true
+                    },
+                )
+            }
         }
-        endAction?.contentDescription?.let { label ->
-            add(
-                CustomAccessibilityAction(label = label) {
-                    endAction.onSwipe()
-                    true
-                }
-            )
-        }
-    }
     if (accessibilityActions.isEmpty()) return Modifier
     return Modifier.semantics {
         customActions = accessibilityActions
@@ -151,50 +149,65 @@ private fun swipeActionsSemantics(
 private fun SwipeBackground(
     action: SwipeAction,
     dismissState: SwipeToDismissBoxState,
-    alignStart: Boolean
+    alignStart: Boolean,
 ) {
-    val isThresholdReached = dismissState.targetValue == if (alignStart)
-        SwipeToDismissBoxValue.StartToEnd
-    else
-        SwipeToDismissBoxValue.EndToStart
+    val isThresholdReached =
+        dismissState.targetValue ==
+            if (alignStart) {
+                SwipeToDismissBoxValue.StartToEnd
+            } else {
+                SwipeToDismissBoxValue.EndToStart
+            }
 
     val backgroundColor by animateColorAsState(
-        targetValue = if (isThresholdReached)
+        targetValue =
+        if (isThresholdReached) {
             action.background
-        else
-            LegadoTheme.colorScheme.surfaceVariant,
-        label = "bgColor"
+        } else {
+            LegadoTheme.colorScheme.surfaceVariant
+        },
+        label = "bgColor",
     )
 
     val iconScale by animateFloatAsState(
-        targetValue = if (isThresholdReached) 1.2f
-        else 1f,
-        label = "iconScale"
+        targetValue =
+        if (isThresholdReached) {
+            1.2f
+        } else {
+            1f
+        },
+        label = "iconScale",
     )
 
     Box(
-        modifier = Modifier
+        modifier =
+        Modifier
             .fillMaxSize()
             .background(backgroundColor)
             .padding(horizontal = 24.dp),
-        contentAlignment = if (alignStart)
+        contentAlignment =
+        if (alignStart) {
             Alignment.CenterStart
-        else
+        } else {
             Alignment.CenterEnd
+        },
     ) {
         Icon(
             imageVector = action.icon,
             contentDescription = null,
-            modifier = Modifier
+            modifier =
+            Modifier
                 .size(24.dp)
                 .graphicsLayer {
                     scaleX = iconScale
                     scaleY = iconScale
                 },
-            tint = if (isThresholdReached)
+            tint =
+            if (isThresholdReached) {
                 contentColorFor(action.background)
-            else
+            } else {
                 LegadoTheme.colorScheme.onSurfaceVariant
+            },
         )
     }
 }

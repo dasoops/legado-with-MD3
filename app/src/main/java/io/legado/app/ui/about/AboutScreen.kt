@@ -100,82 +100,87 @@ private fun MaterialAboutScreen(
                 navigationIcon = {
                     TopBarNavigationButton(onClick = onBack)
                 },
-                scrollBehavior = scrollBehavior
+                scrollBehavior = scrollBehavior,
             )
-        }
+        },
     ) { padding ->
         Column(
-            modifier = Modifier
+            modifier =
+            Modifier
                 .padding(padding)
-                .verticalScroll(rememberScrollState())
+                .verticalScroll(rememberScrollState()),
         ) {
             Image(
                 painter = painterResource(R.drawable.ic_launcher_foreground),
                 contentDescription = null,
                 contentScale = ContentScale.Crop,
-                modifier = Modifier
+                modifier =
+                Modifier
                     .height(120.dp)
                     .width(160.dp)
-                    .align(Alignment.CenterHorizontally)
+                    .align(Alignment.CenterHorizontally),
             )
             AppText(
                 text = stringResource(R.string.app_name),
                 style = LegadoTheme.typography.bodyLarge,
                 fontSize = 18.sp,
                 fontWeight = FontWeight.Bold,
-                modifier = Modifier
+                modifier =
+                Modifier
                     .fillMaxWidth()
-                    .wrapContentWidth(Alignment.CenterHorizontally)
+                    .wrapContentWidth(Alignment.CenterHorizontally),
             )
             TextCard(
                 text = versionName,
                 cornerRadius = 8.dp,
-                modifier = Modifier
+                modifier =
+                Modifier
                     .fillMaxWidth()
                     .wrapContentWidth(Alignment.CenterHorizontally)
-                    .padding(vertical = 4.dp)
+                    .padding(vertical = 4.dp),
             )
             AppText(
                 text = stringResource(R.string.about_description),
                 style = LegadoTheme.typography.bodyLarge,
                 fontSize = 12.sp,
-                modifier = Modifier
+                modifier =
+                Modifier
                     .fillMaxWidth()
                     .wrapContentWidth(Alignment.CenterHorizontally)
-                    .padding(bottom = 4.dp)
+                    .padding(bottom = 4.dp),
             )
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.Center
+                horizontalArrangement = Arrangement.Center,
             ) {
                 FilledTonalIconButton(onClick = { onIntent(AboutIntent.OpenUrl("https://github.com/dasoops/legado-with-MD3")) }) {
                     Icon(
                         painter = painterResource(R.drawable.ic_web_outline),
-                        contentDescription = stringResource(R.string.about_open_project_homepage)
+                        contentDescription = stringResource(R.string.about_open_project_homepage),
                     )
                 }
                 FilledTonalIconButton(onClick = { onIntent(AboutIntent.OpenUrl("https://github.com/dasoops/legado-with-MD3")) }) {
                     Icon(
                         painter = painterResource(R.drawable.ic_github),
-                        contentDescription = stringResource(R.string.about_open_github)
+                        contentDescription = stringResource(R.string.about_open_github),
                     )
                 }
                 FilledTonalIconButton(onClick = { onIntent(AboutIntent.CheckUpdate) }) {
                     Icon(
                         painter = painterResource(R.drawable.ic_import),
-                        contentDescription = stringResource(R.string.check_update)
+                        contentDescription = stringResource(R.string.check_update),
                     )
                 }
             }
 
             SplicedColumnGroup(
                 modifier = Modifier.padding(horizontal = 16.dp),
-                title = ""
+                title = "",
             ) {
                 SettingItemWithDivider {
                     SettingItem(
                         title = stringResource(R.string.contributors),
-                        onClick = { onIntent(AboutIntent.OpenUrl("https://github.com/dasoops/legado-with-MD3")) }
+                        onClick = { onIntent(AboutIntent.OpenUrl("https://github.com/dasoops/legado-with-MD3")) },
                     )
                 }
                 SettingItemWithDivider {
@@ -185,40 +190,40 @@ private fun MaterialAboutScreen(
                             onIntent(
                                 AboutIntent.ShowMdFile(
                                     privacyPolicyTitle,
-                                    "privacyPolicy.md"
-                                )
+                                    "privacyPolicy.md",
+                                ),
                             )
-                        }
+                        },
                     )
                 }
                 SettingItemWithDivider {
                     SettingItem(
                         title = stringResource(R.string.license),
-                        onClick = { onIntent(AboutIntent.ShowMdFile(licenseTitle, "LICENSE.md")) }
+                        onClick = { onIntent(AboutIntent.ShowMdFile(licenseTitle, "LICENSE.md")) },
                     )
                 }
                 SettingItemWithDivider {
                     SettingItem(
                         title = stringResource(R.string.disclaimer),
-                        onClick = { onIntent(AboutIntent.ShowMdFile(disclaimerTitle, "disclaimer.md")) }
+                        onClick = { onIntent(AboutIntent.ShowMdFile(disclaimerTitle, "disclaimer.md")) },
                     )
                 }
                 SettingItemWithDivider {
                     SettingItem(
                         title = stringResource(R.string.crash_log),
-                        onClick = { onIntent(AboutIntent.ShowCrashLogs) }
+                        onClick = { onIntent(AboutIntent.ShowCrashLogs) },
                     )
                 }
                 SettingItemWithDivider {
                     SettingItem(
                         title = stringResource(R.string.save_log),
-                        onClick = { onIntent(AboutIntent.SaveLog) }
+                        onClick = { onIntent(AboutIntent.SaveLog) },
                     )
                 }
                 SettingItemWithDivider {
                     SettingItem(
                         title = stringResource(R.string.create_heap_dump),
-                        onClick = { onIntent(AboutIntent.CreateHeapDump) }
+                        onClick = { onIntent(AboutIntent.CreateHeapDump) },
                     )
                 }
             }
@@ -243,30 +248,36 @@ private fun AboutOverlays(
     }
 
     when (val sheet = renderedSheet) {
-        is AboutSheet.None -> Unit
-        is AboutSheet.Markdown -> MarkdownSheet(
-            show = currentSheet is AboutSheet.Markdown,
-            title = sheet.title,
-            content = sheet.content,
-            onDismissRequest = { onIntent(AboutIntent.DismissSheet) },
-        )
-
-        is AboutSheet.CrashLogs -> CrashLogSheet(
-            show = currentSheet is AboutSheet.CrashLogs,
-            logFiles = state.crashLogFiles,
-            onDismissRequest = { onIntent(AboutIntent.DismissSheet) },
-            onReadFile = { onIntent(AboutIntent.ReadCrashFile(it)) },
-            onClear = { onIntent(AboutIntent.ClearCrashLogs) },
-        )
-
-        is AboutSheet.Update -> UpdateSheet(
-            show = currentSheet is AboutSheet.Update,
-            updateInfo = sheet.updateInfo,
-            updateToVariant = state.updateToVariant,
-            mode = sheet.mode,
-            onDismissRequest = { onIntent(AboutIntent.DismissSheet) },
-            onStartDownload = { onIntent(AboutIntent.StartDownload) },
-        )
+        is AboutSheet.None -> {
+            Unit
+        }
+        is AboutSheet.Markdown -> {
+            MarkdownSheet(
+                show = currentSheet is AboutSheet.Markdown,
+                title = sheet.title,
+                content = sheet.content,
+                onDismissRequest = { onIntent(AboutIntent.DismissSheet) },
+            )
+        }
+        is AboutSheet.CrashLogs -> {
+            CrashLogSheet(
+                show = currentSheet is AboutSheet.CrashLogs,
+                logFiles = state.crashLogFiles,
+                onDismissRequest = { onIntent(AboutIntent.DismissSheet) },
+                onReadFile = { onIntent(AboutIntent.ReadCrashFile(it)) },
+                onClear = { onIntent(AboutIntent.ClearCrashLogs) },
+            )
+        }
+        is AboutSheet.Update -> {
+            UpdateSheet(
+                show = currentSheet is AboutSheet.Update,
+                updateInfo = sheet.updateInfo,
+                updateToVariant = state.updateToVariant,
+                mode = sheet.mode,
+                onDismissRequest = { onIntent(AboutIntent.DismissSheet) },
+                onStartDownload = { onIntent(AboutIntent.StartDownload) },
+            )
+        }
     }
 
     AppAlertDialog(
@@ -275,10 +286,10 @@ private fun AboutOverlays(
         content = {
             Box(
                 modifier = Modifier.fillMaxWidth(),
-                contentAlignment = Alignment.Center
+                contentAlignment = Alignment.Center,
             ) {
                 AppCircularProgressIndicator()
             }
-        }
+        },
     )
 }

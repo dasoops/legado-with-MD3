@@ -50,23 +50,25 @@ internal fun SearchBottomMenuContent(
 ) {
     val totalResults = state.searchResultList.size
     val currentIndex = state.searchResultIndex.coerceIn(0, (totalResults - 1).coerceAtLeast(0))
-    val percent = if (totalResults > 0) {
-        ((currentIndex + 1) * 100 / totalResults)
-    } else {
-        0
-    }
+    val percent =
+        if (totalResults > 0) {
+            ((currentIndex + 1) * 100 / totalResults)
+        } else {
+            0
+        }
 
     Column(
-        modifier = Modifier
+        modifier =
+        Modifier
             .fillMaxWidth()
             .windowInsetsPadding(
-                WindowInsets.safeDrawing.only(WindowInsetsSides.Horizontal)
-            )
-            .padding(top = 12.dp, bottom = bottomPadding)
+                WindowInsets.safeDrawing.only(WindowInsetsSides.Horizontal),
+            ).padding(top = 12.dp, bottom = bottomPadding)
             .animateContentSize(),
     ) {
         Column(
-            modifier = Modifier
+            modifier =
+            Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -82,14 +84,15 @@ internal fun SearchBottomMenuContent(
                 )
                 Spacer(Modifier.width(8.dp))
                 TextCard(
-                    text = "$percent%"
+                    text = "$percent%",
                 )
                 Spacer(Modifier.width(16.dp))
                 VerticalDivider(
                     color = LegadoTheme.colorScheme.outlineVariant,
-                    modifier = Modifier
+                    modifier =
+                    Modifier
                         .height(8.dp)
-                        .width(1.dp)
+                        .width(1.dp),
                 )
                 Spacer(Modifier.width(16.dp))
                 AnimatedText(
@@ -105,7 +108,8 @@ internal fun SearchBottomMenuContent(
         Spacer(Modifier.height(8.dp))
 
         Row(
-            modifier = Modifier
+            modifier =
+            Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -145,19 +149,24 @@ private fun SearchPillSurface(
     onClick: (() -> Unit)? = null,
     content: @Composable RowScope.() -> Unit,
 ) {
-    val baseModifier = Modifier
-        .height(40.dp)
-        .clip(RoundedCornerShape(16.dp))
-        .background(LegadoTheme.colorScheme.surfaceContainerLow)
+    val baseModifier =
+        Modifier
+            .height(40.dp)
+            .clip(RoundedCornerShape(16.dp))
+            .background(LegadoTheme.colorScheme.surfaceContainerLow)
     Row(
-        modifier = modifier
+        modifier =
+        modifier
             .then(
-                if (onClick != null) baseModifier.clickable(
-                    role = Role.Button,
-                    onClick = onClick
-                ) else baseModifier
-            )
-            .padding(horizontal = 12.dp),
+                if (onClick != null) {
+                    baseModifier.clickable(
+                        role = Role.Button,
+                        onClick = onClick,
+                    )
+                } else {
+                    baseModifier
+                },
+            ).padding(horizontal = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Center,
         content = content,

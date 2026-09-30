@@ -77,14 +77,14 @@ class ReplaceRuleViewModel(
         val showContentProcesses: Boolean = false,
     )
 
-    private val _bookState = MutableStateFlow(BookSpecificState())
+    private val bookState = MutableStateFlow(BookSpecificState())
 
     // Must use `by lazy` — super.uiState depends on rawDataFlow (declared below),
     // and eager initialization would access it before construction completes.
     override val uiState: StateFlow<ReplaceRuleUiState> by lazy {
         combine(
             super.uiState,
-            _bookState
+            bookState,
         ) { baseState, bookState ->
             baseState.copy(
                 bookUrl = bookState.bookUrl,
@@ -99,7 +99,7 @@ class ReplaceRuleViewModel(
         }.stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
-            initialValue = initialState
+            initialValue = initialState,
         )
     }
 
@@ -107,7 +107,7 @@ class ReplaceRuleViewModel(
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
-            initialValue = emptyList()
+            initialValue = emptyList(),
         )
 
     fun onIntent(intent: ReplaceRuleIntent) {
@@ -159,42 +159,42 @@ class ReplaceRuleViewModel(
             // Book-specific
             is ReplaceRuleIntent.InitBookData -> initBookData(intent.bookUrl)
             ReplaceRuleIntent.ToggleReplaceEnable -> toggleReplaceEnable()
-            ReplaceRuleIntent.ShowEffectiveReplaces -> _bookState.update { it.copy(showEffectiveReplaces = true) }
+            ReplaceRuleIntent.ShowEffectiveReplaces -> bookState.update { it.copy(showEffectiveReplaces = true) }
             ReplaceRuleIntent.ShowContentProcesses -> {
-                _bookState.update { it.copy(showContentProcesses = true) }
+                bookState.update { it.copy(showContentProcesses = true) }
                 loadContentProcesses()
             }
-            ReplaceRuleIntent.DismissEffectiveReplaces -> _bookState.update { it.copy(showEffectiveReplaces = false) }
-            ReplaceRuleIntent.DismissContentProcesses -> _bookState.update { it.copy(showContentProcesses = false) }
+            ReplaceRuleIntent.DismissEffectiveReplaces -> bookState.update { it.copy(showEffectiveReplaces = false) }
+            ReplaceRuleIntent.DismissContentProcesses -> bookState.update { it.copy(showContentProcesses = false) }
             is ReplaceRuleIntent.DisableEffectiveRule -> viewModelScope.launch {
                 repository.insert(intent.rule.copy(isEnabled = false))
             }
             ReplaceRuleIntent.DisableChineseConverter -> {
                 viewModelScope.launch { readSettingsRepository.setChineseConverterType(0) }
-                _bookState.update { it.copy(chineseConvertActive = false) }
+                bookState.update { it.copy(chineseConvertActive = false) }
             }
             ReplaceRuleIntent.DisableReSegment -> {
                 ReadBook.book?.setReSegment(false)
                 ReadBook.loadContent(false)
-                _bookState.update { it.copy(reSegmentActive = false) }
+                bookState.update { it.copy(reSegmentActive = false) }
             }
             is ReplaceRuleIntent.ToggleContentProcess -> viewModelScope.launch {
                 bookContentProcessGateway.setEnabled(intent.id, intent.enabled)
                 loadContentProcesses()
             }
-            is ReplaceRuleIntent.RequestDeleteContentProcess -> _bookState.update {
+            is ReplaceRuleIntent.RequestDeleteContentProcess -> bookState.update {
                 it.copy(contentProcessState = it.contentProcessState.copy(deleteItem = intent.item))
             }
             ReplaceRuleIntent.ConfirmDeleteContentProcess -> {
-                val deleteItem = _bookState.value.contentProcessState.deleteItem
+                val deleteItem = bookState.value.contentProcessState.deleteItem
                 if (deleteItem != null) {
                     viewModelScope.launch { bookContentProcessGateway.delete(deleteItem.id) }
-                    _bookState.update {
+                    bookState.update {
                         it.copy(contentProcessState = it.contentProcessState.copy(deleteItem = null))
                     }
                 }
             }
-            ReplaceRuleIntent.DismissDeleteContentProcess -> _bookState.update {
+            ReplaceRuleIntent.DismissDeleteContentProcess -> bookState.update {
                 it.copy(contentProcessState = it.contentProcessState.copy(deleteItem = null))
             }
         }
@@ -227,38 +227,36 @@ class ReplaceRuleViewModel(
     override fun filterData(
         data: List<ReplaceRule>,
         searchKey: String,
-        groupFilter: String
-    ): List<ReplaceRule> {
-        return if (searchKey.isEmpty() && groupFilter.isEmpty()) data
-        else data.filter {
+        groupFilter: String,
+    ): List<ReplaceRule> = if (searchKey.isEmpty() && groupFilter.isEmpty()) {
+        data
+    } else {
+        data.filter {
             val key = searchKey.ifEmpty { groupFilter }
-            it.name.contains(key, ignoreCase = true)
-                    || it.pattern.contains(key, ignoreCase = true)
-                    || it.replacement.contains(key, ignoreCase = true)
-                    || it.scope?.contains(key, ignoreCase = true) == true
+            it.name.contains(key, ignoreCase = true) ||
+                it.pattern.contains(key, ignoreCase = true) ||
+                it.replacement.contains(key, ignoreCase = true) ||
+                it.scope?.contains(key, ignoreCase = true) == true
         }
     }
-
 
     override fun composeUiState(
         items: List<ReplaceRuleItemUi>,
         selectedIds: Set<Long>,
         isSearch: Boolean,
-        importState: BaseImportUiState<ReplaceRule>
-    ): ReplaceRuleUiState {
-        return ReplaceRuleUiState(
-            items = items.toImmutableList(),
-            selectedIds = selectedIds.toImmutableSet(),
-            searchKey = _searchKey.value,
-            sortMode = _sortMode.value,
-            selectedGroup = _group.value,
-            interaction = InteractionState(
-                isSearchMode = isSearch,
-                isUploading = importState is BaseImportUiState.Loading,
-                isLoading = false
-            )
-        )
-    }
+        importState: BaseImportUiState<ReplaceRule>,
+    ): ReplaceRuleUiState = ReplaceRuleUiState(
+        items = items.toImmutableList(),
+        selectedIds = selectedIds.toImmutableSet(),
+        searchKey = searchKeyState.value,
+        sortMode = _sortMode.value,
+        selectedGroup = _group.value,
+        interaction = InteractionState(
+            isSearchMode = isSearch,
+            isUploading = importState is BaseImportUiState.Loading,
+            isLoading = false,
+        ),
+    )
 
     override fun ReplaceRule.toUiItem() = ReplaceRuleItemUi(
         id = id,
@@ -273,34 +271,28 @@ class ReplaceRuleViewModel(
         excludeScope = excludeScope,
         isRegex = isRegex,
         timeoutMillisecond = timeoutMillisecond,
-        order = order
+        order = order,
     )
 
     override fun ruleItemToEntity(item: ReplaceRuleItemUi): ReplaceRule = item.toEntity()
 
     override suspend fun generateJson(entities: List<ReplaceRule>): String = GSON.toJson(entities)
 
-    override fun parseImportRules(text: String): List<ReplaceRule> {
-        return when {
-            text.isJsonArray() -> ReplaceAnalyzer.jsonToReplaceRules(text).getOrThrow()
-            text.isJsonObject() -> listOf(ReplaceAnalyzer.jsonToReplaceRule(text).getOrThrow())
-            else -> throw Exception("格式不正确")
-        }
+    override fun parseImportRules(text: String): List<ReplaceRule> = when {
+        text.isJsonArray() -> ReplaceAnalyzer.jsonToReplaceRules(text).getOrThrow()
+        text.isJsonObject() -> listOf(ReplaceAnalyzer.jsonToReplaceRule(text).getOrThrow())
+        else -> throw Exception("格式不正确")
     }
 
-    override fun hasChanged(newRule: ReplaceRule, oldRule: ReplaceRule): Boolean {
-        return newRule.pattern != oldRule.pattern
-                || newRule.replacement != oldRule.replacement
-                || newRule.isRegex != oldRule.isRegex
-                || newRule.scope != oldRule.scope
-    }
+    override fun hasChanged(newRule: ReplaceRule, oldRule: ReplaceRule): Boolean = newRule.pattern != oldRule.pattern ||
+        newRule.replacement != oldRule.replacement ||
+        newRule.isRegex != oldRule.isRegex ||
+        newRule.scope != oldRule.scope
 
-    override suspend fun findOldRule(newRule: ReplaceRule): ReplaceRule? {
-        return repository.findById(newRule.id)
-    }
+    override suspend fun findOldRule(newRule: ReplaceRule): ReplaceRule? = repository.findById(newRule.id)
 
     override fun saveImportedRules() {
-        val state = _importState.value as? BaseImportUiState.Success<ReplaceRule> ?: return
+        val state = importStateMutable.value as? BaseImportUiState.Success<ReplaceRule> ?: return
         viewModelScope.launch(Dispatchers.IO) {
             val rulesToSave = state.items
                 .filter { it.isSelected }
@@ -329,8 +321,8 @@ class ReplaceRuleViewModel(
                     repository.insert(rule)
                 }
                 withContext(Dispatchers.Main) {
-                    _importState.value = BaseImportUiState.Idle
-                    _eventChannel.send(BaseRuleEvent.ShowSnackbar("成功导入 ${rulesToSave.size} 条规则"))
+                    importStateMutable.value = BaseImportUiState.Idle
+                    eventChannel.send(BaseRuleEvent.ShowSnackbar("成功导入 ${rulesToSave.size} 条规则"))
                 }
             }
         }
@@ -353,25 +345,22 @@ class ReplaceRuleViewModel(
     }
 
     private fun saveSortOrder() {
-        val currentLocal = _localItems.value ?: return
+        val currentLocal = localItemsState.value ?: return
         viewModelScope.launch {
             repository.moveOrder(currentLocal.map { it.toEntity() }, _sortMode.value == "desc")
-            _localItems.value = null
+            localItemsState.value = null
         }
     }
 
-
-    private fun setEnabled(id: Long, enabled: Boolean) =
-        viewModelScope.launch { repository.setEnabled(id, enabled) }
+    private fun setEnabled(id: Long, enabled: Boolean) = viewModelScope.launch { repository.setEnabled(id, enabled) }
 
     private fun delete(rule: ReplaceRule) = viewModelScope.launch { repository.delete(rule) }
     fun enableSelectionByIds(ids: Set<Long>) = viewModelScope.launch { repository.enableByIds(ids) }
-    fun disableSelectionByIds(ids: Set<Long>) =
-        viewModelScope.launch { repository.disableByIds(ids) }
+    fun disableSelectionByIds(ids: Set<Long>) = viewModelScope.launch { repository.disableByIds(ids) }
 
     fun delSelectionByIds(ids: Set<Long>) = viewModelScope.launch {
         repository.deleteByIds(ids)
-        _selectedIds.update { it - ids }
+        selectedIdsState.update { it - ids }
     }
 
     private fun selectAll() {
@@ -386,20 +375,15 @@ class ReplaceRuleViewModel(
     private fun addGroup(group: String) = viewModelScope.launch { repository.addGroup(group) }
     private fun delGroup(group: String) = viewModelScope.launch { repository.delGroup(group) }
 
-    private fun toTop(rule: ReplaceRule) =
-        viewModelScope.launch { repository.toTop(rule, _sortMode.value == "desc") }
+    private fun toTop(rule: ReplaceRule) = viewModelScope.launch { repository.toTop(rule, _sortMode.value == "desc") }
 
-    private fun toBottom(rule: ReplaceRule) =
-        viewModelScope.launch { repository.toBottom(rule, _sortMode.value == "desc") }
+    private fun toBottom(rule: ReplaceRule) = viewModelScope.launch { repository.toBottom(rule, _sortMode.value == "desc") }
 
-    private fun topSelectByIds(ids: Set<Long>) =
-        viewModelScope.launch { repository.topByIds(ids, _sortMode.value == "desc") }
+    private fun topSelectByIds(ids: Set<Long>) = viewModelScope.launch { repository.topByIds(ids, _sortMode.value == "desc") }
 
-    private fun bottomSelectByIds(ids: Set<Long>) =
-        viewModelScope.launch { repository.bottomByIds(ids, _sortMode.value == "desc") }
+    private fun bottomSelectByIds(ids: Set<Long>) = viewModelScope.launch { repository.bottomByIds(ids, _sortMode.value == "desc") }
 
-    private fun upGroup(oldGroup: String, newGroup: String?) =
-        viewModelScope.launch { repository.upGroup(oldGroup, newGroup) }
+    private fun upGroup(oldGroup: String, newGroup: String?) = viewModelScope.launch { repository.upGroup(oldGroup, newGroup) }
 
     //region Book-specific methods
 
@@ -416,7 +400,7 @@ class ReplaceRuleViewModel(
                 book.getUseReplaceRule(otherSettingsGateway.currentSettings.replaceEnableDefault)
             val chineseConvertActive = readSettingsRepository.currentSettings.chineseConverterType > 0
             val reSegmentActive = book.getReSegment()
-            _bookState.update {
+            bookState.update {
                 it.copy(
                     bookUrl = bookUrl,
                     replaceEnabled = replaceEnabled,
@@ -431,18 +415,18 @@ class ReplaceRuleViewModel(
     private fun toggleReplaceEnable() {
         ReadBook.book?.let { book ->
             val enabled = !book.getUseReplaceRule(
-                otherSettingsGateway.currentSettings.replaceEnableDefault
+                otherSettingsGateway.currentSettings.replaceEnableDefault,
             )
             book.setUseReplaceRule(enabled)
             ReadBook.saveRead()
-            _bookState.update { it.copy(replaceEnabled = enabled) }
+            bookState.update { it.copy(replaceEnabled = enabled) }
         }
     }
 
     private fun loadContentProcesses() {
         val book = ReadBook.book ?: return
         val chapterIndex = ReadBook.durChapterIndex
-        _bookState.update {
+        bookState.update {
             it.copy(contentProcessState = it.contentProcessState.copy(isLoading = true, errorMessage = null))
         }
         viewModelScope.launch(Dispatchers.IO) {
@@ -451,15 +435,17 @@ class ReplaceRuleViewModel(
                     .mapNotNull { it.toContentProcessItemUi() }
                     .toImmutableList()
             }.onSuccess { items ->
-                _bookState.update {
+                bookState.update {
                     it.copy(contentProcessState = it.contentProcessState.copy(isLoading = false, items = items))
                 }
             }.onFailure { error ->
-                _bookState.update {
-                    it.copy(contentProcessState = it.contentProcessState.copy(
-                        isLoading = false,
-                        errorMessage = error.localizedMessage
-                    ))
+                bookState.update {
+                    it.copy(
+                        contentProcessState = it.contentProcessState.copy(
+                            isLoading = false,
+                            errorMessage = error.localizedMessage,
+                        ),
+                    )
                 }
             }
         }

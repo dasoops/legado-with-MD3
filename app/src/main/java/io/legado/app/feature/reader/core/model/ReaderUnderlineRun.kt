@@ -19,7 +19,9 @@ fun ReaderPage.underlineRuns(): List<ReaderUnderlineRun> {
         }
         val previous = runs.lastOrNull()
         if (
-            previous != null && previousUnderlinedText != null && previous.underline == underline &&
+            previous != null &&
+            previousUnderlinedText != null &&
+            previous.underline == underline &&
             abs(previous.bounds.top - text.bounds.top) < 0.5f &&
             abs(previous.bounds.bottom - text.bounds.bottom) < 0.5f &&
             // Glyph bounds intentionally exclude letter- and justification-spacing.  A
@@ -27,9 +29,10 @@ fun ReaderPage.underlineRuns(): List<ReaderUnderlineRun> {
             // TextLine renderer did, otherwise waves restart for every character.
             text.bounds.left >= previous.bounds.right
         ) {
-            runs[runs.lastIndex] = previous.copy(
-                bounds = previous.bounds.copy(right = text.bounds.right),
-            )
+            runs[runs.lastIndex] =
+                previous.copy(
+                    bounds = previous.bounds.copy(right = text.bounds.right),
+                )
         } else {
             runs += ReaderUnderlineRun(text.bounds, underline)
         }

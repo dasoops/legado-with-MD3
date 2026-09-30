@@ -16,23 +16,22 @@ import io.legado.app.ui.widget.components.reader.ReaderMenuTintStyle
 import io.legado.app.ui.widget.components.reader.readerMenuLiquidGlass
 import io.legado.app.ui.widget.components.reader.readerMenuSurfaceBrush
 
-internal val menuTextShadow = androidx.compose.ui.graphics.Shadow(
-    color = Color.Black.copy(alpha = 0.12f),
-    offset = Offset.Zero,
-    blurRadius = 12f,
-)
+internal val menuTextShadow =
+    androidx.compose.ui.graphics.Shadow(
+        color = Color.Black.copy(alpha = 0.12f),
+        offset = Offset.Zero,
+        blurRadius = 12f,
+    )
 
 internal data class ReadMenuColors(
     val background: Color,
     val content: Color,
 )
 
-internal fun Int.toReaderMenuTintStyle(): ReaderMenuTintStyle {
-    return if (this == ReadMenuBlurStyle.Progressive) {
-        ReaderMenuTintStyle.Gradient
-    } else {
-        ReaderMenuTintStyle.Fill
-    }
+internal fun Int.toReaderMenuTintStyle(): ReaderMenuTintStyle = if (this == ReadMenuBlurStyle.PROGRESSIVE) {
+    ReaderMenuTintStyle.Gradient
+} else {
+    ReaderMenuTintStyle.Fill
 }
 
 @Composable
@@ -50,26 +49,29 @@ internal fun Modifier.readMenuLiquidGlass(
     val resolvedBlurRadius = blurRadius ?: menuConfig.readMenuBlurRadius.dp
     val blurAlpha = surfaceAlphaOverride ?: menuConfig.readMenuBlurAlpha
     val surfaceColor = readMenuTintColor(menuConfig) ?: colors.background
-    val containerColor = surfaceColor.copy(
-        alpha = (blurAlpha.coerceIn(0, 100) / 100f).coerceAtMost(0.6f)
-    )
-    val topBarSurfaceBrush = readerMenuSurfaceBrush(
-        style = ReaderMenuTintStyle.Gradient,
-        placement = ReaderMenuPlacement.Top,
-        color = surfaceColor,
-        alpha = containerColor.alpha,
-    )
-
-    val surfaceBrush = if (useTopBarStyle) {
-        topBarSurfaceBrush
-    } else {
+    val containerColor =
+        surfaceColor.copy(
+            alpha = (blurAlpha.coerceIn(0, 100) / 100f).coerceAtMost(0.6f),
+        )
+    val topBarSurfaceBrush =
         readerMenuSurfaceBrush(
-            style = ReaderMenuTintStyle.Fill,
-            placement = ReaderMenuPlacement.Bottom,
+            style = ReaderMenuTintStyle.Gradient,
+            placement = ReaderMenuPlacement.Top,
             color = surfaceColor,
             alpha = containerColor.alpha,
         )
-    }
+
+    val surfaceBrush =
+        if (useTopBarStyle) {
+            topBarSurfaceBrush
+        } else {
+            readerMenuSurfaceBrush(
+                style = ReaderMenuTintStyle.Fill,
+                placement = ReaderMenuPlacement.Bottom,
+                color = surfaceColor,
+                alpha = containerColor.alpha,
+            )
+        }
     return readerMenuLiquidGlass(
         backdrop = backdrop,
         shape = shape,
@@ -82,36 +84,32 @@ internal fun Modifier.readMenuLiquidGlass(
 }
 
 @Composable
-internal fun readMenuTintColor(menuConfig: ReadMenuConfig): Color? {
-    return menuConfig.readMenuBlurColorNight
-        .takeIf { it != 0 && ReadStyleResolver.isNightTheme() }
+internal fun readMenuTintColor(menuConfig: ReadMenuConfig): Color? = menuConfig.readMenuBlurColorNight
+    .takeIf { it != 0 && ReadStyleResolver.isNightTheme() }
+    ?.let(::Color)
+    ?: menuConfig.readMenuBlurColor
+        .takeIf { it != 0 && !ReadStyleResolver.isNightTheme() }
         ?.let(::Color)
-        ?: menuConfig.readMenuBlurColor
-            .takeIf { it != 0 && !ReadStyleResolver.isNightTheme() }
-            ?.let(::Color)
-        ?: menuConfig.readMenuBlurColor
-            .takeIf { it != 0 }
-            ?.let(::Color)
-}
+    ?: menuConfig.readMenuBlurColor
+        .takeIf { it != 0 }
+        ?.let(::Color)
 
 @Composable
-internal fun readMenuBorderColor(menuConfig: ReadMenuConfig): Int {
-    return (if (ReadStyleResolver.isNightTheme()) {
+internal fun readMenuBorderColor(menuConfig: ReadMenuConfig): Int = (
+    if (ReadStyleResolver.isNightTheme()) {
         menuConfig.readMenuBorderColorNight
     } else {
         menuConfig.readMenuBorderColor
-    }).takeIf { it != 0 }
-        ?: LegadoTheme.colorScheme.outlineVariant.hashCode()
-}
+    }
+    ).takeIf { it != 0 }
+    ?: LegadoTheme.colorScheme.outlineVariant.hashCode()
 
 @Composable
-internal fun readMenuTextColor(menuConfig: ReadMenuConfig): Color {
-    return Color(
-        if (ReadStyleResolver.isNightTheme()) {
-            menuConfig.readMenuTextColorNight
-        } else {
-            menuConfig.readMenuTextColor
-        }
-    ).takeUnless { it == Color.Unspecified || it.alpha == 0f }
-        ?: LegadoTheme.colorScheme.onSurface
-}
+internal fun readMenuTextColor(menuConfig: ReadMenuConfig): Color = Color(
+    if (ReadStyleResolver.isNightTheme()) {
+        menuConfig.readMenuTextColorNight
+    } else {
+        menuConfig.readMenuTextColor
+    },
+).takeUnless { it == Color.Unspecified || it.alpha == 0f }
+    ?: LegadoTheme.colorScheme.onSurface

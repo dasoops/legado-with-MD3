@@ -12,17 +12,18 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AlignHorizontalCenter
 import androidx.compose.material.icons.automirrored.filled.AlignHorizontalLeft
 import androidx.compose.material.icons.automirrored.filled.AlignHorizontalRight
-import androidx.compose.material.icons.filled.AspectRatio
 import androidx.compose.material.icons.automirrored.filled.CallSplit
+import androidx.compose.material.icons.automirrored.filled.FormatIndentIncrease
+import androidx.compose.material.icons.automirrored.filled.Segment
+import androidx.compose.material.icons.filled.AlignHorizontalCenter
+import androidx.compose.material.icons.filled.AspectRatio
 import androidx.compose.material.icons.filled.CleanHands
 import androidx.compose.material.icons.filled.Code
 import androidx.compose.material.icons.filled.CopyAll
 import androidx.compose.material.icons.filled.FormatAlignJustify
 import androidx.compose.material.icons.filled.FormatColorText
-import androidx.compose.material.icons.automirrored.filled.FormatIndentIncrease
 import androidx.compose.material.icons.filled.FormatItalic
 import androidx.compose.material.icons.filled.FormatLineSpacing
 import androidx.compose.material.icons.filled.FormatSize
@@ -32,7 +33,6 @@ import androidx.compose.material.icons.filled.Layers
 import androidx.compose.material.icons.filled.LineWeight
 import androidx.compose.material.icons.filled.Minimize
 import androidx.compose.material.icons.filled.Palette
-import androidx.compose.material.icons.automirrored.filled.Segment
 import androidx.compose.material.icons.filled.SpaceBar
 import androidx.compose.material.icons.filled.TextFields
 import androidx.compose.material.icons.filled.Title
@@ -82,21 +82,29 @@ import io.legado.app.ui.widget.components.settingItem.TinySliderSettingItem
 import io.legado.app.ui.widget.components.settingItem.TinySwitchSettingItem
 import io.legado.app.ui.widget.components.text.AppText
 import io.legado.app.utils.getCompatColor
-import org.koin.compose.koinInject
 import kotlin.math.roundToInt
+import org.koin.compose.koinInject
 
 // region Modal target sealed interface
 
 /** Identifies which color picker to show in the typography page. */
 internal sealed interface TypographyColorTarget {
     data object Text : TypographyColorTarget
+
     data object TextAccent : TypographyColorTarget
+
     data object Title : TypographyColorTarget
+
     data object TitleNight : TypographyColorTarget
+
     data object Header : TypographyColorTarget
+
     data object HeaderNight : TypographyColorTarget
+
     data object Footer : TypographyColorTarget
+
     data object FooterNight : TypographyColorTarget
+
     data object Divider : TypographyColorTarget
 }
 
@@ -118,7 +126,7 @@ private fun FontWeightSetting(
                 0 -> 400f
                 1 -> 900f
                 else -> value.coerceIn(100, 900).toFloat()
-            }
+            },
         )
     }
     val weightEntries = stringArrayResource(R.array.text_font_weight)
@@ -129,7 +137,8 @@ private fun FontWeightSetting(
             selectedValue = if (isCustom) "-1" else value.toString(),
             // 自定义时直接显示当前字重数值，而不是笼统的“自定义”
             selectedDisplay = if (isCustom) sliderValue.toInt().toString() else null,
-            displayEntries = arrayOf(
+            displayEntries =
+            arrayOf(
                 weightEntries[2],
                 weightEntries[0],
                 weightEntries[1],
@@ -145,7 +154,8 @@ private fun FontWeightSetting(
 
         AnimatedVisibility(visible = isCustom) {
             Column(
-                modifier = Modifier
+                modifier =
+                Modifier
                     .fillMaxWidth()
                     .padding(bottom = 4.dp),
                 verticalArrangement = Arrangement.spacedBy(4.dp),
@@ -156,7 +166,8 @@ private fun FontWeightSetting(
                     color = LegadoTheme.colorScheme.onSurfaceVariant,
                 )
                 NormalCard(
-                    modifier = Modifier
+                    modifier =
+                    Modifier
                         .fillMaxWidth()
                         .height(56.dp),
                     containerColor = LegadoTheme.colorScheme.surfaceContainerLow,
@@ -170,7 +181,8 @@ private fun FontWeightSetting(
                             sliderValue = it
                             onValueChange(it.toInt())
                         },
-                        modifier = Modifier
+                        modifier =
+                        Modifier
                             .fillMaxSize()
                             .padding(horizontal = 12.dp),
                         content = {
@@ -273,7 +285,8 @@ internal fun TypographyBodyTab(
     var indentCount by remember(config.paragraphIndentCount) { mutableIntStateOf(config.paragraphIndentCount) }
 
     Column(
-        modifier = modifier
+        modifier =
+        modifier
             .fillMaxWidth()
             .verticalScroll(rememberScrollState()),
     ) {
@@ -417,7 +430,6 @@ internal fun TypographyBodyTab(
                 onIntent(ReadBookIntent.UpdateConfig(ConfigUpdate.TextBottomJustify(it)))
             },
         )
-
     }
 }
 
@@ -449,7 +461,8 @@ internal fun TypographyTitleTab(
     var flagText by remember { mutableStateOf(titleSegFlag) }
 
     Column(
-        modifier = modifier
+        modifier =
+        modifier
             .fillMaxWidth()
             .verticalScroll(rememberScrollState()),
     ) {
@@ -498,7 +511,8 @@ internal fun TypographyTitleTab(
         TinyDropdownSettingItem(
             title = stringResource(R.string.title_position),
             selectedValue = titleMode.toString(),
-            displayEntries = arrayOf(
+            displayEntries =
+            arrayOf(
                 stringResource(R.string.title_left),
                 stringResource(R.string.title_center),
                 stringResource(R.string.title_hide),
@@ -513,7 +527,8 @@ internal fun TypographyTitleTab(
         TinyDropdownSettingItem(
             title = stringResource(R.string.split_title_mode),
             selectedValue = titleSegType.toString(),
-            displayEntries = arrayOf(
+            displayEntries =
+            arrayOf(
                 stringResource(R.string.close),
                 stringResource(R.string.split_title_by_position),
                 stringResource(R.string.split_title_by_flag),
@@ -603,8 +618,8 @@ internal fun TypographyTitleTab(
                 titleTopSpacing = value.toInt()
                 onIntent(
                     ReadBookIntent.UpdateConfig(
-                        ConfigUpdate.TitleTopSpacing(titleTopSpacing)
-                    )
+                        ConfigUpdate.TitleTopSpacing(titleTopSpacing),
+                    ),
                 )
             },
         )
@@ -617,8 +632,8 @@ internal fun TypographyTitleTab(
                 titleBottomSpacing = value.toInt()
                 onIntent(
                     ReadBookIntent.UpdateConfig(
-                        ConfigUpdate.TitleBottomSpacing(titleBottomSpacing)
-                    )
+                        ConfigUpdate.TitleBottomSpacing(titleBottomSpacing),
+                    ),
                 )
             },
         )
@@ -672,7 +687,8 @@ internal fun TypographyHeaderTab(
     val tipValues = tipTypeValues
 
     Column(
-        modifier = modifier
+        modifier =
+        modifier
             .fillMaxWidth()
             .verticalScroll(rememberScrollState()),
     ) {
@@ -723,7 +739,8 @@ internal fun TypographyHeaderTab(
         TinyColorSettingItem(
             title = stringResource(R.string.tip_divider_color),
             description = stringResource(R.string.tip_divider_color_shared_desc),
-            colorValue = when (config.tipDividerColor) {
+            colorValue =
+            when (config.tipDividerColor) {
                 -1 -> context.getCompatColor(R.color.divider)
                 0 -> config.textColorDay
                 else -> config.tipDividerColor
@@ -788,7 +805,8 @@ internal fun TypographyFooterTab(
     val tipValues = tipTypeValues
 
     Column(
-        modifier = modifier
+        modifier =
+        modifier
             .fillMaxWidth()
             .verticalScroll(rememberScrollState()),
     ) {
@@ -839,7 +857,8 @@ internal fun TypographyFooterTab(
         TinyColorSettingItem(
             title = stringResource(R.string.tip_divider_color),
             description = stringResource(R.string.tip_divider_color_shared_desc),
-            colorValue = when (config.tipDividerColor) {
+            colorValue =
+            when (config.tipDividerColor) {
                 -1 -> context.getCompatColor(R.color.divider)
                 0 -> config.textColorDay
                 else -> config.tipDividerColor
@@ -919,78 +938,88 @@ internal fun TypographyMarginTab(
     var footerPaddingRight by remember(config.footerPaddingRight) { mutableFloatStateOf(config.footerPaddingRight.toFloat()) }
 
     Column(
-        modifier = modifier
+        modifier =
+        modifier
             .fillMaxWidth()
             .verticalScroll(rememberScrollState())
             .padding(top = 8.dp),
     ) {
         when (page) {
-            0 -> PaddingSliders(
-                top = paddingTop, bottom = paddingBottom,
-                left = paddingLeft, right = paddingRight,
-                onTopChange = {
-                    paddingTop = it
-                    onIntent(ReadBookIntent.UpdateConfig(ConfigUpdate.PaddingTop(it.toInt())))
-                },
-                onBottomChange = {
-                    paddingBottom = it
-                    onIntent(ReadBookIntent.UpdateConfig(ConfigUpdate.PaddingBottom(it.toInt())))
-                },
-                onLeftChange = {
-                    paddingLeft = it
-                    onIntent(ReadBookIntent.UpdateConfig(ConfigUpdate.PaddingLeft(it.toInt())))
-                },
-                onRightChange = {
-                    paddingRight = it
-                    onIntent(ReadBookIntent.UpdateConfig(ConfigUpdate.PaddingRight(it.toInt())))
-                },
-            )
-
-            1 -> PaddingSliders(
-                top = headerPaddingTop, bottom = headerPaddingBottom,
-                left = headerPaddingLeft, right = headerPaddingRight,
-                maxValue = 300f,
-                onTopChange = {
-                    headerPaddingTop = it
-                    onIntent(ReadBookIntent.UpdateConfig(ConfigUpdate.HeaderPaddingTop(it.toInt())))
-                },
-                onBottomChange = {
-                    headerPaddingBottom = it
-                    onIntent(ReadBookIntent.UpdateConfig(ConfigUpdate.HeaderPaddingBottom(it.toInt())))
-                },
-                onLeftChange = {
-                    headerPaddingLeft = it
-                    onIntent(ReadBookIntent.UpdateConfig(ConfigUpdate.HeaderPaddingLeft(it.toInt())))
-                },
-                onRightChange = {
-                    headerPaddingRight = it
-                    onIntent(ReadBookIntent.UpdateConfig(ConfigUpdate.HeaderPaddingRight(it.toInt())))
-                },
-            )
-
-            else -> PaddingSliders(
-                top = footerPaddingTop, bottom = footerPaddingBottom,
-                left = footerPaddingLeft, right = footerPaddingRight,
-                maxValue = 300f,
-                onTopChange = {
-                    footerPaddingTop = it
-                    onIntent(ReadBookIntent.UpdateConfig(ConfigUpdate.FooterPaddingTop(it.toInt())))
-                },
-                onBottomChange = {
-                    footerPaddingBottom = it
-                    onIntent(ReadBookIntent.UpdateConfig(ConfigUpdate.FooterPaddingBottom(it.toInt())))
-                },
-                onLeftChange = {
-                    footerPaddingLeft = it
-                    onIntent(ReadBookIntent.UpdateConfig(ConfigUpdate.FooterPaddingLeft(it.toInt())))
-                },
-                onRightChange = {
-                    footerPaddingRight = it
-                    onIntent(ReadBookIntent.UpdateConfig(ConfigUpdate.FooterPaddingRight(it.toInt())))
-                },
-            )
+            0 -> {
+                PaddingSliders(
+                    top = paddingTop,
+                    bottom = paddingBottom,
+                    left = paddingLeft,
+                    right = paddingRight,
+                    onTopChange = {
+                        paddingTop = it
+                        onIntent(ReadBookIntent.UpdateConfig(ConfigUpdate.PaddingTop(it.toInt())))
+                    },
+                    onBottomChange = {
+                        paddingBottom = it
+                        onIntent(ReadBookIntent.UpdateConfig(ConfigUpdate.PaddingBottom(it.toInt())))
+                    },
+                    onLeftChange = {
+                        paddingLeft = it
+                        onIntent(ReadBookIntent.UpdateConfig(ConfigUpdate.PaddingLeft(it.toInt())))
+                    },
+                    onRightChange = {
+                        paddingRight = it
+                        onIntent(ReadBookIntent.UpdateConfig(ConfigUpdate.PaddingRight(it.toInt())))
+                    },
+                )
+            }
+            1 -> {
+                PaddingSliders(
+                    top = headerPaddingTop,
+                    bottom = headerPaddingBottom,
+                    left = headerPaddingLeft,
+                    right = headerPaddingRight,
+                    maxValue = 300f,
+                    onTopChange = {
+                        headerPaddingTop = it
+                        onIntent(ReadBookIntent.UpdateConfig(ConfigUpdate.HeaderPaddingTop(it.toInt())))
+                    },
+                    onBottomChange = {
+                        headerPaddingBottom = it
+                        onIntent(ReadBookIntent.UpdateConfig(ConfigUpdate.HeaderPaddingBottom(it.toInt())))
+                    },
+                    onLeftChange = {
+                        headerPaddingLeft = it
+                        onIntent(ReadBookIntent.UpdateConfig(ConfigUpdate.HeaderPaddingLeft(it.toInt())))
+                    },
+                    onRightChange = {
+                        headerPaddingRight = it
+                        onIntent(ReadBookIntent.UpdateConfig(ConfigUpdate.HeaderPaddingRight(it.toInt())))
+                    },
+                )
+            }
+            else -> {
+                PaddingSliders(
+                    top = footerPaddingTop,
+                    bottom = footerPaddingBottom,
+                    left = footerPaddingLeft,
+                    right = footerPaddingRight,
+                    maxValue = 300f,
+                    onTopChange = {
+                        footerPaddingTop = it
+                        onIntent(ReadBookIntent.UpdateConfig(ConfigUpdate.FooterPaddingTop(it.toInt())))
+                    },
+                    onBottomChange = {
+                        footerPaddingBottom = it
+                        onIntent(ReadBookIntent.UpdateConfig(ConfigUpdate.FooterPaddingBottom(it.toInt())))
+                    },
+                    onLeftChange = {
+                        footerPaddingLeft = it
+                        onIntent(ReadBookIntent.UpdateConfig(ConfigUpdate.FooterPaddingLeft(it.toInt())))
+                    },
+                    onRightChange = {
+                        footerPaddingRight = it
+                        onIntent(ReadBookIntent.UpdateConfig(ConfigUpdate.FooterPaddingRight(it.toInt())))
+                    },
+                )
+            }
         }
-
     }
 }
 
@@ -1006,33 +1035,58 @@ internal fun TypographyColorPickerSheet(
     onIntent: (ReadBookIntent) -> Unit,
 ) {
     val context = LocalContext.current
-    val initialColor = remember(target, config) {
-        when (target) {
-            TypographyColorTarget.Text -> config.textColor
-            TypographyColorTarget.TextAccent -> config.textAccentColor
-            TypographyColorTarget.Title ->
-                if (config.titleColor != 0) config.titleColor else config.textColorDay
-            TypographyColorTarget.TitleNight ->
-                if (config.titleColorNight != 0) config.titleColorNight else config.textColorNight
-            TypographyColorTarget.Header ->
-                if (config.tipHeaderColor != 0) config.tipHeaderColor
-                else config.textColorDay
-            TypographyColorTarget.HeaderNight ->
-                if (config.tipHeaderColorNight != 0) config.tipHeaderColorNight
-                else config.textColorNight
-            TypographyColorTarget.Footer ->
-                if (config.tipFooterColor != 0) config.tipFooterColor
-                else config.textColorDay
-            TypographyColorTarget.FooterNight ->
-                if (config.tipFooterColorNight != 0) config.tipFooterColorNight
-                else config.textColorNight
-            TypographyColorTarget.Divider -> when (config.tipDividerColor) {
-                -1 -> context.getCompatColor(R.color.divider)
-                0 -> config.textColor
-                else -> config.tipDividerColor
+    val initialColor =
+        remember(target, config) {
+            when (target) {
+                TypographyColorTarget.Text -> {
+                    config.textColor
+                }
+                TypographyColorTarget.TextAccent -> {
+                    config.textAccentColor
+                }
+                TypographyColorTarget.Title -> {
+                    if (config.titleColor != 0) config.titleColor else config.textColorDay
+                }
+                TypographyColorTarget.TitleNight -> {
+                    if (config.titleColorNight != 0) config.titleColorNight else config.textColorNight
+                }
+                TypographyColorTarget.Header -> {
+                    if (config.tipHeaderColor != 0) {
+                        config.tipHeaderColor
+                    } else {
+                        config.textColorDay
+                    }
+                }
+                TypographyColorTarget.HeaderNight -> {
+                    if (config.tipHeaderColorNight != 0) {
+                        config.tipHeaderColorNight
+                    } else {
+                        config.textColorNight
+                    }
+                }
+                TypographyColorTarget.Footer -> {
+                    if (config.tipFooterColor != 0) {
+                        config.tipFooterColor
+                    } else {
+                        config.textColorDay
+                    }
+                }
+                TypographyColorTarget.FooterNight -> {
+                    if (config.tipFooterColorNight != 0) {
+                        config.tipFooterColorNight
+                    } else {
+                        config.textColorNight
+                    }
+                }
+                TypographyColorTarget.Divider -> {
+                    when (config.tipDividerColor) {
+                        -1 -> context.getCompatColor(R.color.divider)
+                        0 -> config.textColor
+                        else -> config.tipDividerColor
+                    }
+                }
             }
         }
-    }
 
     ColorPickerSheet(
         show = true,
@@ -1040,24 +1094,33 @@ internal fun TypographyColorPickerSheet(
         onDismissRequest = onDismiss,
         onColorSelected = { color ->
             when (target) {
-                TypographyColorTarget.Text ->
+                TypographyColorTarget.Text -> {
                     onIntent(ReadBookIntent.UpdateConfig(ConfigUpdate.TextColor(color)))
-                TypographyColorTarget.TextAccent ->
+                }
+                TypographyColorTarget.TextAccent -> {
                     onIntent(ReadBookIntent.UpdateConfig(ConfigUpdate.TextAccentColor(color)))
-                TypographyColorTarget.Title ->
+                }
+                TypographyColorTarget.Title -> {
                     onIntent(ReadBookIntent.UpdateConfig(ConfigUpdate.TitleColor(color)))
-                TypographyColorTarget.TitleNight ->
+                }
+                TypographyColorTarget.TitleNight -> {
                     onIntent(ReadBookIntent.UpdateConfig(ConfigUpdate.TitleColorNight(color)))
-                TypographyColorTarget.Header ->
+                }
+                TypographyColorTarget.Header -> {
                     onIntent(ReadBookIntent.UpdateConfig(ConfigUpdate.TipHeaderColor(color)))
-                TypographyColorTarget.HeaderNight ->
+                }
+                TypographyColorTarget.HeaderNight -> {
                     onIntent(ReadBookIntent.UpdateConfig(ConfigUpdate.TipHeaderColorNight(color)))
-                TypographyColorTarget.Footer ->
+                }
+                TypographyColorTarget.Footer -> {
                     onIntent(ReadBookIntent.UpdateConfig(ConfigUpdate.TipFooterColor(color)))
-                TypographyColorTarget.FooterNight ->
+                }
+                TypographyColorTarget.FooterNight -> {
                     onIntent(ReadBookIntent.UpdateConfig(ConfigUpdate.TipFooterColorNight(color)))
-                TypographyColorTarget.Divider ->
+                }
+                TypographyColorTarget.Divider -> {
                     onIntent(ReadBookIntent.UpdateConfig(ConfigUpdate.TipDividerColor(color)))
+                }
             }
             onDismiss()
         },
@@ -1142,16 +1205,17 @@ private fun TypographyFontSelectSheet(
 ) {
     val readSettingsRepository: ReadSettingsRepository = koinInject()
     val preferences by readSettingsRepository.preferences.collectAsStateWithLifecycle(
-        initialValue = null
+        initialValue = null,
     )
-    val fontFolderState = remember(preferences) {
-        val pref = preferences
-        if (pref == null) {
-            FontFolderState.Loading
-        } else {
-            FontFolderState.Loaded(pref.fontFolder.takeIf { it.isNotEmpty() }?.toUri())
+    val fontFolderState =
+        remember(preferences) {
+            val pref = preferences
+            if (pref == null) {
+                FontFolderState.Loading
+            } else {
+                FontFolderState.Loaded(pref.fontFolder.takeIf { it.isNotEmpty() }?.toUri())
+            }
         }
-    }
     val systemTypefaces = stringArrayResource(R.array.system_typefaces)
 
     FontSelectSheet(
@@ -1172,14 +1236,15 @@ private fun applyTipValue(
     value: Int,
     onIntent: (ReadBookIntent) -> Unit,
 ) {
-    val configUpdate = when (target) {
-        CustomTipTarget.HEADER_LEFT -> ConfigUpdate.TipHeaderLeft(value)
-        CustomTipTarget.HEADER_MIDDLE -> ConfigUpdate.TipHeaderMiddle(value)
-        CustomTipTarget.HEADER_RIGHT -> ConfigUpdate.TipHeaderRight(value)
-        CustomTipTarget.FOOTER_LEFT -> ConfigUpdate.TipFooterLeft(value)
-        CustomTipTarget.FOOTER_MIDDLE -> ConfigUpdate.TipFooterMiddle(value)
-        CustomTipTarget.FOOTER_RIGHT -> ConfigUpdate.TipFooterRight(value)
-    }
+    val configUpdate =
+        when (target) {
+            CustomTipTarget.HEADER_LEFT -> ConfigUpdate.TipHeaderLeft(value)
+            CustomTipTarget.HEADER_MIDDLE -> ConfigUpdate.TipHeaderMiddle(value)
+            CustomTipTarget.HEADER_RIGHT -> ConfigUpdate.TipHeaderRight(value)
+            CustomTipTarget.FOOTER_LEFT -> ConfigUpdate.TipFooterLeft(value)
+            CustomTipTarget.FOOTER_MIDDLE -> ConfigUpdate.TipFooterMiddle(value)
+            CustomTipTarget.FOOTER_RIGHT -> ConfigUpdate.TipFooterRight(value)
+        }
     onIntent(ReadBookIntent.UpdateConfig(configUpdate))
 }
 
@@ -1192,23 +1257,40 @@ private fun applyTipValue(
  * 放在唯一消费方旁边而不是 `ReadBookConfig` 里：它是静态选项表，不是配置状态，
  * 留在那个全局 object 上会让「弹层不得直读 ReadBookConfig」的护栏被迫开白名单。
  */
-private val tipTypeValues = with(ReadTipType) {
-    arrayOf(
-        tipNone, tipBookName, tipChapterTitle, tipChapterTitleArrow, tipChapterTitleArrowClassic,
-        tipTime, tipBattery, tipBatteryClassic, tipBatteryInside, tipBatteryIcon,
-        tipBatteryPercentage, tipPage, tipTotalProgress, tipTotalProgress1, tipPageAndTotal,
-        tipTimeBattery, tipTimeBatteryClassic, tipTimeBatteryPercentage, tipWholeBookPage,
-        tipWholeBookPageAndProgress, tipCustom
-    )
-}
+private val tipTypeValues =
+    with(ReadTipType) {
+        arrayOf(
+            tipNone,
+            tipBookName,
+            tipChapterTitle,
+            tipChapterTitleArrow,
+            tipChapterTitleArrowClassic,
+            tipTime,
+            tipBattery,
+            tipBatteryClassic,
+            tipBatteryInside,
+            tipBatteryIcon,
+            tipBatteryPercentage,
+            tipPage,
+            tipTotalProgress,
+            tipTotalProgress1,
+            tipPageAndTotal,
+            tipTimeBattery,
+            tipTimeBatteryClassic,
+            tipTimeBatteryPercentage,
+            tipWholeBookPage,
+            tipWholeBookPageAndProgress,
+            tipCustom,
+        )
+    }
 
 private fun headerModes(context: Context): LinkedHashMap<Int, String> = linkedMapOf(
     Pair(0, context.getString(R.string.hide_when_status_bar_show)),
     Pair(1, context.getString(R.string.show)),
-    Pair(2, context.getString(R.string.hide))
+    Pair(2, context.getString(R.string.hide)),
 )
 
 private fun footerModes(context: Context): LinkedHashMap<Int, String> = linkedMapOf(
     Pair(0, context.getString(R.string.show)),
-    Pair(1, context.getString(R.string.hide))
+    Pair(1, context.getString(R.string.hide)),
 )

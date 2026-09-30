@@ -20,6 +20,7 @@ import io.legado.app.data.repository.ReadPreferences
 import io.legado.app.domain.gateway.CoverSettingsGateway
 import io.legado.app.domain.usecase.BookmarkTargetVerdict
 import io.legado.app.help.coil.CoverExtras
+import io.legado.app.model.BookCover as BookCoverModel
 import io.legado.app.ui.book.read.sheet.BgTextConfigSheet
 import io.legado.app.ui.book.read.sheet.CharsetConfigSheet
 import io.legado.app.ui.book.read.sheet.ClickActionConfigSheet
@@ -48,7 +49,6 @@ import io.legado.app.ui.widget.components.image.cover.usesDefaultBookCover
 import io.legado.app.ui.widget.components.log.AppLogSheet
 import io.legado.app.ui.widget.components.text.AppText
 import org.koin.compose.koinInject
-import io.legado.app.model.BookCover as BookCoverModel
 
 /**
  * Stateless reader overlays: back handling, dialogs and sheets.
@@ -63,26 +63,40 @@ fun ReadBookOverlayRoute(
     onPickBookmarkBadgeImage: () -> Unit,
     onResetBookmarkBadge: () -> Unit,
 ) {
-    val highlightActive = rememberFeatureActivated(
-        state.activeSheet is ReadBookSheet.HighlightRuleConfig
-    )
+    val highlightActive =
+        rememberFeatureActivated(
+            state.activeSheet is ReadBookSheet.HighlightRuleConfig,
+        )
     val markingActive = rememberFeatureActivated(state.activeSheet is ReadBookSheet.Marking)
     val contentEditActive = rememberFeatureActivated(state.activeSheet is ReadBookSheet.ContentEdit)
-    val contentProcessActive = rememberFeatureActivated(
-        state.activeSheet is ReadBookSheet.TextProcessing
-    )
-    val highlightRuleState = if (highlightActive) {
-        viewModel.highlightRuleState.collectAsStateWithLifecycle().value
-    } else HighlightRuleConfigUiState()
-    val markingState = if (markingActive) {
-        viewModel.markingState.collectAsStateWithLifecycle().value
-    } else MarkingUiState()
-    val contentEditState = if (contentEditActive) {
-        viewModel.contentEditState.collectAsStateWithLifecycle().value
-    } else ContentEditUiState()
-    val contentProcessState = if (contentProcessActive) {
-        viewModel.contentProcessState.collectAsStateWithLifecycle().value
-    } else ContentProcessConfigUiState()
+    val contentProcessActive =
+        rememberFeatureActivated(
+            state.activeSheet is ReadBookSheet.TextProcessing,
+        )
+    val highlightRuleState =
+        if (highlightActive) {
+            viewModel.highlightRuleState.collectAsStateWithLifecycle().value
+        } else {
+            HighlightRuleConfigUiState()
+        }
+    val markingState =
+        if (markingActive) {
+            viewModel.markingState.collectAsStateWithLifecycle().value
+        } else {
+            MarkingUiState()
+        }
+    val contentEditState =
+        if (contentEditActive) {
+            viewModel.contentEditState.collectAsStateWithLifecycle().value
+        } else {
+            ContentEditUiState()
+        }
+    val contentProcessState =
+        if (contentProcessActive) {
+            viewModel.contentProcessState.collectAsStateWithLifecycle().value
+        } else {
+            ContentProcessConfigUiState()
+        }
     ReadBookScreen(
         state = state,
         highlightRuleState = highlightRuleState,
@@ -132,16 +146,20 @@ fun ReadBookScreen(
         show = readRecordAliasDialog != null,
         onDismissRequest = { onIntent(ReadBookIntent.ResolveReadRecordAlias(false, rememberAliasChoice)) },
         title = stringResource(R.string.read_record_alias_title),
-        text = readRecordAliasDialog?.let {
-            stringResource(R.string.read_record_alias_message, it.bookName, it.readTime / 60000, it.author)
-        }.orEmpty(),
+        text =
+        readRecordAliasDialog
+            ?.let {
+                stringResource(R.string.read_record_alias_message, it.bookName, it.readTime / 60000, it.author)
+            }.orEmpty(),
         confirmText = stringResource(R.string.read_record_alias_merge),
         onConfirm = { onIntent(ReadBookIntent.ResolveReadRecordAlias(true, rememberAliasChoice)) },
         dismissText = stringResource(R.string.read_record_alias_keep_separate),
         onDismiss = { onIntent(ReadBookIntent.ResolveReadRecordAlias(false, rememberAliasChoice)) },
         content = {
             Row(
-                modifier = androidx.compose.ui.Modifier.fillMaxWidth(),
+                modifier =
+                androidx.compose.ui.Modifier
+                    .fillMaxWidth(),
                 verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
             ) {
                 Checkbox(
@@ -222,17 +240,22 @@ fun ReadBookScreen(
         show = pendingTarget != null,
         onDismissRequest = { onIntent(ReadBookIntent.CancelBookmarkTargetJump) },
         title = stringResource(R.string.bookmark_target_may_shift),
-        text = stringResource(
+        text =
+        stringResource(
             when (pendingTarget?.verdict) {
-                is BookmarkTargetVerdict.SourceChanged ->
+                is BookmarkTargetVerdict.SourceChanged -> {
                     R.string.bookmark_target_source_changed
-
-                BookmarkTargetVerdict.TitleMismatch ->
+                }
+                BookmarkTargetVerdict.TitleMismatch -> {
                     R.string.bookmark_target_title_mismatch
-
-                null -> R.string.bookmark_target_title_mismatch
-                BookmarkTargetVerdict.Match -> R.string.bookmark_target_title_mismatch
-            }
+                }
+                null -> {
+                    R.string.bookmark_target_title_mismatch
+                }
+                BookmarkTargetVerdict.Match -> {
+                    R.string.bookmark_target_title_mismatch
+                }
+            },
         ),
         confirmText = stringResource(R.string.bookmark_target_jump_anyway),
         onConfirm = { onIntent(ReadBookIntent.ConfirmBookmarkTargetJump) },
@@ -272,9 +295,10 @@ fun ReadBookScreen(
         onDismissRequest = dismissSheet,
         onIntent = onIntent,
     )
-    val fontSelectFolderState = remember(preferences.fontFolder) {
-        FontFolderState.Loaded(preferences.fontFolder.takeIf { it.isNotEmpty() }?.toUri())
-    }
+    val fontSelectFolderState =
+        remember(preferences.fontFolder) {
+            FontFolderState.Loaded(preferences.fontFolder.takeIf { it.isNotEmpty() }?.toUri())
+        }
     val fontSelectSystemTypefaces = stringArrayResource(R.array.system_typefaces)
     FontSelectSheet(
         show = state.activeSheet is ReadBookSheet.FontSelect,
@@ -410,42 +434,36 @@ fun ReadBookScreen(
                 onDismissRequest = dismissSheet,
             )
         }
-
         is ReadBookSheet.PageKeyConfig -> {
             PageKeyConfigSheet(
                 onDismissRequest = dismissSheet,
             )
         }
-
-
-
         is ReadBookSheet.PageAnim -> {
             PageAnimConfigSheet(
                 onDismissRequest = dismissSheet,
                 onAnimChanged = { onIntent(ReadBookIntent.PageAnimChanged) },
             )
         }
-
         is ReadBookSheet.Charset -> {
             CharsetConfigSheet(
                 show = showCharsetSheet,
                 onDismissRequest = dismissSheet,
             )
         }
-
-        is ReadBookSheet.Bookmark -> Unit
-
-        is ReadBookSheet.BookNavigation -> Unit
-
+        is ReadBookSheet.Bookmark -> {
+            Unit
+        }
+        is ReadBookSheet.BookNavigation -> {
+            Unit
+        }
         is ReadBookSheet.InfoConfig -> {
             // Integrated into TypographyPage
             LaunchedEffect(state.activeSheet) {
                 onIntent(ReadBookIntent.DismissSheet)
             }
         }
-
         null -> {}
-
         // Sheets using AppModalBottomSheet are composed unconditionally above
         else -> {}
     }

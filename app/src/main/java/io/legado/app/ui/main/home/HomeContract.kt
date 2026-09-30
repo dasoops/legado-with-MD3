@@ -49,36 +49,67 @@ data class HomeBackupUi(
 
 sealed interface HomeIntent {
     data object RecentBookClick : HomeIntent
-    data class RecentHistoryBookClick(val bookUrl: String) : HomeIntent
-    data class SelectSourceSet(val sourceUrl: String) : HomeIntent
+
+    data class RecentHistoryBookClick(
+        val bookUrl: String,
+    ) : HomeIntent
+
+    data class SelectSourceSet(
+        val sourceUrl: String,
+    ) : HomeIntent
+
     data object DashboardSettingsClick : HomeIntent
+
     data class SetSectionVisible(
         val section: HomeDashboardSection,
         val visible: Boolean,
     ) : HomeIntent
+
     data object ReadingGoalClick : HomeIntent
-    data class UpdateReadingGoal(val minutes: Int) : HomeIntent
+
+    data class UpdateReadingGoal(
+        val minutes: Int,
+    ) : HomeIntent
+
     data object BackupClick : HomeIntent
-    data class BackupDestinationSelected(val destination: HomeBackupDestination) : HomeIntent
+
+    data class BackupDestinationSelected(
+        val destination: HomeBackupDestination,
+    ) : HomeIntent
+
     data class BackupDirectorySelected(
         val destination: HomeBackupDestination,
         val path: String,
     ) : HomeIntent
 
     data object RestoreClick : HomeIntent
+
     data object RestoreFromLocal : HomeIntent
+
     data object RestoreFromNetwork : HomeIntent
-    data class RestoreLocalFileSelected(val uri: String) : HomeIntent
+
+    data class RestoreLocalFileSelected(
+        val uri: String,
+    ) : HomeIntent
+
     data object ConfirmRestore : HomeIntent
+
     data object BackupSettingsClick : HomeIntent
+
     data object RetryBackupInfo : HomeIntent
+
     data object DismissDialog : HomeIntent
+
     data object DismissSheet : HomeIntent
 }
 
 sealed interface HomeEffect {
-    data class OpenBook(val book: Book) : HomeEffect
+    data class OpenBook(
+        val book: Book,
+    ) : HomeEffect
+
     data object OpenBackupSettings : HomeEffect
+
     data class SelectBackupDirectory(
         val destination: HomeBackupDestination,
     ) : HomeEffect
@@ -89,6 +120,7 @@ sealed interface HomeEffect {
     ) : HomeEffect
 
     data object SelectRestoreFile : HomeEffect
+
     data class ShowMessage(
         @param:StringRes val messageRes: Int,
         val detail: String? = null,
@@ -97,18 +129,27 @@ sealed interface HomeEffect {
 
 @Stable
 sealed interface HomeDialog {
-    data class SetReadingGoal(val currentMinutes: Int) : HomeDialog
-    data class ConfirmRestore(val backupName: String) : HomeDialog
+    data class SetReadingGoal(
+        val currentMinutes: Int,
+    ) : HomeDialog
+
+    data class ConfirmRestore(
+        val backupName: String,
+    ) : HomeDialog
 }
 
 @Stable
 sealed interface HomeSheet {
     data object DashboardSettings : HomeSheet
+
     data object BackupOptions : HomeSheet
+
     data object RestoreOptions : HomeSheet
 }
 
-enum class HomeBackupDestination(val mode: String) {
+enum class HomeBackupDestination(
+    val mode: String,
+) {
     Local("local"),
     WebDav("webdav"),
     LocalAndWebDav("both"),

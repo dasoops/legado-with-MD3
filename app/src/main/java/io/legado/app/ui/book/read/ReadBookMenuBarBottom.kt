@@ -64,28 +64,30 @@ internal fun MenuBottomBar(
     val sliderMax = seekMax.toFloat().coerceAtLeast(1f)
     var sliderValue by remember {
         mutableFloatStateOf(
-            state.seekProgress.coerceIn(0, seekMax).toFloat()
+            state.seekProgress.coerceIn(0, seekMax).toFloat(),
         )
     }
     var sliderDragging by remember { mutableStateOf(false) }
     var previewPageIndex by remember { mutableIntStateOf(state.seekProgress.coerceIn(0, seekMax)) }
     val toolButtonsBottomPadding = if (buttonGlassEnabled) 6.dp else 0.dp
-    val contentBottomPadding = if (bottomPadding > toolButtonsBottomPadding) {
-        bottomPadding - toolButtonsBottomPadding
-    } else {
-        0.dp
-    }
+    val contentBottomPadding =
+        if (bottomPadding > toolButtonsBottomPadding) {
+            bottomPadding - toolButtonsBottomPadding
+        } else {
+            0.dp
+        }
     val progressCurrent = sliderValue.roundToInt().coerceIn(0, seekMax) + 1
     val progressTotal = seekMax + 1
-    val progressValueDescription = stringResource(
-        if (progressBarBehavior == "page") {
-            R.string.a11y_read_progress_page
-        } else {
-            R.string.a11y_read_progress_chapter
-        },
-        progressCurrent,
-        progressTotal,
-    )
+    val progressValueDescription =
+        stringResource(
+            if (progressBarBehavior == "page") {
+                R.string.a11y_read_progress_page
+            } else {
+                R.string.a11y_read_progress_chapter
+            },
+            progressCurrent,
+            progressTotal,
+        )
 
     fun commitSliderValue(value: Float) {
         val target = value.roundToInt().coerceIn(0, seekMax)
@@ -121,12 +123,12 @@ internal fun MenuBottomBar(
     }
 
     Column(
-        modifier = Modifier
+        modifier =
+        Modifier
             .fillMaxWidth()
             .windowInsetsPadding(
-                WindowInsets.safeDrawing.only(WindowInsetsSides.Horizontal)
-            )
-            .padding(top = 8.dp, bottom = contentBottomPadding)
+                WindowInsets.safeDrawing.only(WindowInsetsSides.Horizontal),
+            ).padding(top = 8.dp, bottom = contentBottomPadding)
             .animateContentSize(),
     ) {
         if (state.menuConfig.showBrightnessView == "1") {
@@ -154,12 +156,13 @@ internal fun MenuBottomBar(
         // Seek bar row: prev + slider + next
         AnimatedVisibility(visible = state.menuConfig.readSliderMode != "1") {
             Row(
-                modifier = Modifier
+                modifier =
+                Modifier
                     .fillMaxWidth()
                     .padding(vertical = 4.dp)
                     .padding(horizontal = 16.dp),
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 BottomBarGlassIconButton(
                     onClick = { onIntent(ReadBookIntent.PrevChapter) },
@@ -185,9 +188,10 @@ internal fun MenuBottomBar(
                     glassThumbEnabled = buttonGlassEnabled,
                     accessibilityLabel = stringResource(R.string.progress),
                     accessibilityValue = progressValueDescription,
-                    modifier = Modifier
+                    modifier =
+                    Modifier
                         .weight(1f)
-                        .padding(horizontal = 8.dp)
+                        .padding(horizontal = 8.dp),
                 )
 
                 BottomBarGlassIconButton(
@@ -205,21 +209,22 @@ internal fun MenuBottomBar(
         Spacer(Modifier.height(12.dp))
 
         // Tool buttons
-        val toolButtons = remember(
-            context,
-            state.menuConfig.bottomBarButtons,
-            state.menuConfig.readMenuCustomIcons,
-            state.isAutoPage,
-            state.useReplaceRule,
-            eyeProtectionEnabled,
-        ) {
-            loadToolButtons(
-                context = context,
-                state = state,
-                eyeProtectionEnabled = eyeProtectionEnabled,
-                onIntent = onIntent,
-            )
-        }
+        val toolButtons =
+            remember(
+                context,
+                state.menuConfig.bottomBarButtons,
+                state.menuConfig.readMenuCustomIcons,
+                state.isAutoPage,
+                state.useReplaceRule,
+                eyeProtectionEnabled,
+            ) {
+                loadToolButtons(
+                    context = context,
+                    state = state,
+                    eyeProtectionEnabled = eyeProtectionEnabled,
+                    onIntent = onIntent,
+                )
+            }
         val itemsPerRow = state.menuConfig.readMenuIconItemsPerRow
         val rowCount = state.menuConfig.readMenuIconRowCount
         val pageSize = (itemsPerRow * rowCount).coerceAtLeast(1)
@@ -228,13 +233,15 @@ internal fun MenuBottomBar(
 
         HorizontalPager(
             state = pagerState,
-            modifier = Modifier
+            modifier =
+            Modifier
                 .fillMaxWidth(),
         ) { page ->
             val pageButtons = toolButtons.drop(page * pageSize).take(pageSize)
             Column(
                 verticalArrangement = Arrangement.spacedBy(12.dp),
-                modifier = Modifier
+                modifier =
+                Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp)
                     .padding(bottom = toolButtonsBottomPadding),
@@ -323,7 +330,7 @@ internal fun BrightnessBar(
         sliderValue = value.coerceIn(0f, 100f)
         val target = value.roundToInt().coerceIn(0, 100)
 
-        //直接先改亮度，如果在这里onBrightnessChange，会ANR
+        // 直接先改亮度，如果在这里onBrightnessChange，会ANR
         onBrightnessPreview(target)
     }
 
@@ -341,14 +348,16 @@ internal fun BrightnessBar(
         onToggleAuto()
     }
 
-    val brightnessValueDescription = stringResource(
-        R.string.a11y_percent_value,
-        sliderValue.roundToInt().coerceIn(0, 100),
-    )
+    val brightnessValueDescription =
+        stringResource(
+            R.string.a11y_percent_value,
+            sliderValue.roundToInt().coerceIn(0, 100),
+        )
 
     if (vertical) {
         Column(
-            modifier = modifier
+            modifier =
+            modifier
                 .width(if (buttonGlassEnabled) 64.dp else 56.dp)
                 .padding(vertical = 12.dp, horizontal = 4.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -392,7 +401,8 @@ internal fun BrightnessBar(
     } else {
         val buttonSize = if (buttonGlassEnabled) 48.dp else 40.dp
         Row(
-            modifier = modifier
+            modifier =
+            modifier
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp, vertical = 4.dp),
             verticalAlignment = Alignment.CenterVertically,
@@ -424,7 +434,8 @@ internal fun BrightnessBar(
                 glassThumbEnabled = glassThumbEnabled,
                 accessibilityLabel = stringResource(R.string.brightness),
                 accessibilityValue = brightnessValueDescription,
-                modifier = Modifier
+                modifier =
+                Modifier
                     .weight(1f)
                     .padding(horizontal = 8.dp),
             )

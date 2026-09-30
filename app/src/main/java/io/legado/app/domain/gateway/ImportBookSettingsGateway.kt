@@ -6,5 +6,6 @@ import kotlinx.coroutines.flow.Flow
 interface ImportBookSettingsGateway {
     val currentSettings: ImportBookSettings
     val settings: Flow<ImportBookSettings>
+
     suspend fun update(transform: (ImportBookSettings) -> ImportBookSettings)
 }

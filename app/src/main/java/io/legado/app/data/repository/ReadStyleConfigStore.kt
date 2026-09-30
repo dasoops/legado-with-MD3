@@ -15,8 +15,9 @@ import io.legado.app.help.coroutine.Coroutine
  * 本类**不知道当前选中哪一份**：`styleSelect` / `shareLayout` 是设置项，
  * 由 `ReadBookConfig` 解析成下标后再来取用。
  */
-class ReadStyleConfigStore(private val readStyleRepository: ReadStyleRepository) {
-
+class ReadStyleConfigStore(
+    private val readStyleRepository: ReadStyleRepository,
+) {
     private val lock = Any()
     private val configList = arrayListOf<ReadBookConfig.Config>()
     private lateinit var shareConfigRef: ReadBookConfig.Config
@@ -50,7 +51,11 @@ class ReadStyleConfigStore(private val readStyleRepository: ReadStyleRepository)
     }
 
     /** 整份替换（应用预设 / 导入）。共享排版开着时，共享那份跟着换。 */
-    fun replaceConfigAt(index: Int, config: ReadBookConfig.Config, alsoShare: Boolean) {
+    fun replaceConfigAt(
+        index: Int,
+        config: ReadBookConfig.Config,
+        alsoShare: Boolean,
+    ) {
         synchronized(lock) {
             configList[index] = config
             if (alsoShare) {
@@ -66,7 +71,10 @@ class ReadStyleConfigStore(private val readStyleRepository: ReadStyleRepository)
      * 下标解析与 [configAt] 保持一致（含配置文件缺斤少两时先恢复默认、越界回落到 0），
      * 否则「读得到、写不进」会成为一类静默失效。
      */
-    fun updateStyleAt(index: Int, transform: (ReadBookConfig.Config) -> ReadBookConfig.Config) {
+    fun updateStyleAt(
+        index: Int,
+        transform: (ReadBookConfig.Config) -> ReadBookConfig.Config,
+    ) {
         synchronized(lock) {
             if (configList.size < 5) {
                 resetAllLocked()

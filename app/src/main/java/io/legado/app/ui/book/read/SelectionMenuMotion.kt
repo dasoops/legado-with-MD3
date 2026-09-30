@@ -18,7 +18,6 @@ import androidx.compose.ui.graphics.TransformOrigin
  * 用朝向选区的那条边。
  */
 internal object SelectionMenuMotion {
-
     /** 淡入时长。 */
     private const val FADE_IN_DURATION_MILLIS = 360
 
@@ -37,19 +36,17 @@ internal object SelectionMenuMotion {
     private const val ENTER_SCALE = 0.94f
     private const val EXIT_SCALE = 0.96f
 
-    fun enter(transformOrigin: TransformOrigin = TransformOrigin.Center): EnterTransition =
-        fadeIn(animationSpec = tween(FADE_IN_DURATION_MILLIS)) +
-                scaleIn(
-                    animationSpec = tween(SCALE_IN_DURATION_MILLIS),
-                    initialScale = ENTER_SCALE,
-                    transformOrigin = transformOrigin,
-                )
+    fun enter(transformOrigin: TransformOrigin = TransformOrigin.Center): EnterTransition = fadeIn(animationSpec = tween(FADE_IN_DURATION_MILLIS)) +
+        scaleIn(
+            animationSpec = tween(SCALE_IN_DURATION_MILLIS),
+            initialScale = ENTER_SCALE,
+            transformOrigin = transformOrigin,
+        )
 
-    fun exit(transformOrigin: TransformOrigin = TransformOrigin.Center): ExitTransition =
-        fadeOut(animationSpec = tween(EXIT_DURATION_MILLIS)) +
-                scaleOut(
-                    animationSpec = tween(SCALE_OUT_DURATION_MILLIS),
-                    targetScale = EXIT_SCALE,
-                    transformOrigin = transformOrigin,
-                )
+    fun exit(transformOrigin: TransformOrigin = TransformOrigin.Center): ExitTransition = fadeOut(animationSpec = tween(EXIT_DURATION_MILLIS)) +
+        scaleOut(
+            animationSpec = tween(SCALE_OUT_DURATION_MILLIS),
+            targetScale = EXIT_SCALE,
+            transformOrigin = transformOrigin,
+        )
 }

@@ -6,5 +6,5 @@ data class KF6Section(
     val end: Int,
     val length: Int,
     val href: String,
-    var next: KF6Section? = null
+    var next: KF6Section? = null,
 )

@@ -77,7 +77,7 @@ data class TocItemUi(
     val isPay: Boolean,
     val isDur: Boolean,
     val isSelected: Boolean,
-    val wordCount: String?
+    val wordCount: String?,
 ) : SelectableItem<Int>
 
 @Immutable
@@ -88,7 +88,7 @@ data class TocBookmarkItemUi(
     val content: String,
     val chapterName: String,
     val isDur: Boolean,
-    val raw: Bookmark
+    val raw: Bookmark,
 )
 
 /** 划线/高亮笔记（book_marks 表）在目录 Sheet 里的展示项。 */
@@ -103,7 +103,7 @@ data class TocMarkingItemUi(
     /** 创建时的源（源指纹），用于在笔记页标出跨源笔记。 */
     val bookUrl: String,
     val isDur: Boolean,
-    val raw: BookMarking
+    val raw: BookMarking,
 )
 
 @Stable
@@ -157,7 +157,7 @@ sealed interface TocEffect {
 
 data class TocDomainItem(
     val chapter: BookChapter,
-    val displayTitle: String
+    val displayTitle: String,
 )
 
 private data class TocUiConfig(
@@ -171,7 +171,7 @@ private data class TocUiConfig(
 
 private data class TocPreferences(
     val useReplace: Boolean,
-    val showWordCount: Boolean
+    val showWordCount: Boolean,
 )
 
 internal data class TitleCacheKey(
@@ -180,7 +180,7 @@ internal data class TitleCacheKey(
     val rulesFingerprint: Int,
     val chineseConverterType: Int,
     val chapterCount: Int,
-    val chaptersFingerprint: Long
+    val chaptersFingerprint: Long,
 )
 
 internal object TocTitleCache {
@@ -188,10 +188,10 @@ internal object TocTitleCache {
     private val entries = object : LinkedHashMap<TitleCacheKey, Map<Int, String>>(
         MAX_ENTRIES,
         0.75f,
-        true
+        true,
     ) {
         override fun removeEldestEntry(
-            eldest: MutableMap.MutableEntry<TitleCacheKey, Map<Int, String>>?
+            eldest: MutableMap.MutableEntry<TitleCacheKey, Map<Int, String>>?,
         ): Boolean = size > MAX_ENTRIES
     }
 
@@ -212,7 +212,7 @@ private data class TitleReplaceState(
     val titles: Map<Int, String> = emptyMap(),
     val completed: Int = 0,
     val total: Int = 0,
-    val isRunning: Boolean = false
+    val isRunning: Boolean = false,
 )
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -226,7 +226,7 @@ class TocViewModel(
     private val otherSettingsGateway: OtherSettingsGateway,
 ) : BaseRuleViewModel<TocItemUi, TocDomainItem, Int, TocActionState>(
     application,
-    initialState = TocActionState()
+    initialState = TocActionState(),
 ) {
 
     private val bookUrlFlow = MutableStateFlow(savedStateHandle.get<String>("bookUrl"))
@@ -237,12 +237,11 @@ class TocViewModel(
         }
         .stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
-
     // 目录更新（重新解析章节）期间的忙碌态，独立于导入状态。
-    private val _isTocUpdating = MutableStateFlow(false)
+    private val isTocUpdating = MutableStateFlow(false)
 
     override val uiState: StateFlow<TocActionState> by lazy {
-        combine(super.uiState, _isTocUpdating) { state, updating ->
+        combine(super.uiState, isTocUpdating) { state, updating ->
             state.copy(isLoading = updating)
         }.stateIn(
             scope = viewModelScope,
@@ -259,7 +258,7 @@ class TocViewModel(
     val bookmarkUiList: StateFlow<List<TocBookmarkItemUi>> =
         combine(
             bookState.filterNotNull(),
-            _searchKey
+            searchKeyState,
         ) { book, query ->
             book to query
         }
@@ -271,7 +270,7 @@ class TocViewModel(
                             .asSequence()
                             .filter {
                                 query.isBlank() ||
-                                        it.content.contains(query, ignoreCase = true)
+                                    it.content.contains(query, ignoreCase = true)
                             }
                             .map { bookmark ->
                                 TocBookmarkItemUi(
@@ -281,7 +280,7 @@ class TocViewModel(
                                     content = bookmark.content,
                                     chapterName = bookmark.chapterName,
                                     isDur = bookmark.chapterIndex == book.durChapterIndex,
-                                    raw = bookmark
+                                    raw = bookmark,
                                 )
                             }
                             .toList()
@@ -290,13 +289,13 @@ class TocViewModel(
             .stateIn(
                 scope = viewModelScope,
                 started = SharingStarted.WhileSubscribed(5000),
-                initialValue = emptyList()
+                initialValue = emptyList(),
             )
 
     val markingUiList: StateFlow<List<TocMarkingItemUi>> =
         combine(
             bookState.filterNotNull(),
-            _searchKey
+            searchKeyState,
         ) { book, query ->
             book to query
         }
@@ -326,8 +325,8 @@ class TocViewModel(
                             }
                             .filter {
                                 query.isBlank() ||
-                                        it.text.contains(query, ignoreCase = true) ||
-                                        it.note.contains(query, ignoreCase = true)
+                                    it.text.contains(query, ignoreCase = true) ||
+                                    it.note.contains(query, ignoreCase = true)
                             }
                             .toList()
                     }
@@ -335,7 +334,7 @@ class TocViewModel(
             .stateIn(
                 scope = viewModelScope,
                 started = SharingStarted.WhileSubscribed(5000),
-                initialValue = emptyList()
+                initialValue = emptyList(),
             )
 
     val screenState: StateFlow<TocUiState> by lazy {
@@ -369,13 +368,13 @@ class TocViewModel(
         .map {
             TocPreferences(
                 useReplace = it.tocUiUseReplace,
-                showWordCount = it.tocCountWords
+                showWordCount = it.tocCountWords,
             )
         }
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5_000),
-            initialValue = TocPreferences(useReplace = false, showWordCount = true)
+            initialValue = TocPreferences(useReplace = false, showWordCount = true),
         )
 
     private val uiConfigFlow = combine(
@@ -403,7 +402,7 @@ class TocViewModel(
         bookState.filterNotNull().map { it.bookUrl }.distinctUntilChanged()
             .flatMapLatest { bookRepository.flowChapters(it) },
         uiConfigFlow,
-        titleReplaceState
+        titleReplaceState,
     ) { originalChapters, config, titleState ->
         val book = bookState.value ?: return@combine emptyList()
 
@@ -417,7 +416,9 @@ class TocViewModel(
             config.useReplace && book.getUseReplaceRule(config.defaultReplaceEnabled)
         ) {
             ContentProcessor.get(book.name, book.origin).getTitleReplaceRules()
-        } else emptyList()
+        } else {
+            emptyList()
+        }
 
         updateTitleReplaceCacheIfNeeded(
             book = book,
@@ -438,7 +439,6 @@ class TocViewModel(
                 displayTitle = titleState.titles[chapter.index] ?: baseTitle,
             )
         }
-
     }.flowOn(Dispatchers.Default)
 
     val useReplace get() = tocPreferences.value.useReplace
@@ -459,22 +459,21 @@ class TocViewModel(
         items: List<TocItemUi>,
         selectedIds: Set<Int>,
         isSearch: Boolean,
-        importState: BaseImportUiState<TocDomainItem>
+        importState: BaseImportUiState<TocDomainItem>,
     ): TocActionState {
-
         val durIndex = bookState.value?.durChapterIndex ?: -1
 
         val updatedItems = items.map { uiItem ->
             uiItem.copy(
                 isSelected = uiItem.id in selectedIds,
-                isDur = uiItem.id == durIndex
+                isDur = uiItem.id == durIndex,
             )
         }
 
         return TocActionState(
             items = updatedItems.toImmutableList(),
             selectedIds = selectedIds.toImmutableSet(),
-            searchKey = _searchKey.value,
+            searchKey = searchKeyState.value,
             isSearch = isSearch,
             isLoading = false,
             useReplace = tocPreferences.value.useReplace,
@@ -502,13 +501,11 @@ class TocViewModel(
             isPay = chapter.isPay,
             isDur = false,
             isSelected = false,
-            wordCount = wordCountText
+            wordCount = wordCountText,
         )
     }
 
-    override fun ruleItemToEntity(item: TocItemUi): TocDomainItem {
-        throw NotImplementedError("TOC 不需要向后反转实体")
-    }
+    override fun ruleItemToEntity(item: TocItemUi): TocDomainItem = throw NotImplementedError("TOC 不需要向后反转实体")
 
     override suspend fun generateJson(entities: List<TocDomainItem>) = ""
     override fun parseImportRules(text: String): List<TocDomainItem> = emptyList()
@@ -553,7 +550,7 @@ class TocViewModel(
         val newConfig = currentConfig.copy(reverseToc = !currentConfig.reverseToc)
         val newBook = currentBook.copy(readConfig = newConfig)
         bookRepository.update(newBook)
-        //bookState.value = newBook
+        // bookState.value = newBook
     }
 
     fun updateToc() = execute {
@@ -614,7 +611,7 @@ class TocViewModel(
 
     fun invertSelection() {
         val allIds = uiState.value.items.map { it.id }.toSet()
-        setSelection(allIds - _selectedIds.value)
+        setSelection(allIds - selectedIdsState.value)
     }
 
     fun clearSelection() {
@@ -623,10 +620,10 @@ class TocViewModel(
 
     fun selectFromLast() {
         val currentItems = uiState.value.items
-        val maxSelectedId = _selectedIds.value.maxOrNull() ?: return
+        val maxSelectedId = selectedIdsState.value.maxOrNull() ?: return
         val maxIndex = currentItems.indexOfFirst { it.id == maxSelectedId }
         if (maxIndex == -1) return
-        setSelection(_selectedIds.value + currentItems.drop(maxIndex + 1).map { it.id })
+        setSelection(selectedIdsState.value + currentItems.drop(maxIndex + 1).map { it.id })
     }
 
     fun saveTocRegex(newRegex: String) {
@@ -635,8 +632,7 @@ class TocViewModel(
         upBookTocRule(book) { error ->
             if (error != null) {
                 showMessage(context.getString(R.string.toc_rule_update_failed, error.localizedMessage))
-            }
-            else {
+            } else {
                 showMessage(R.string.toc_rule_updated)
                 if (ReadBook.book?.bookUrl == book.bookUrl) ReadBook.upMsg(null)
             }
@@ -644,19 +640,19 @@ class TocViewModel(
     }
 
     private fun upBookTocRule(book: Book, complete: (Throwable?) -> Unit) {
-        _isTocUpdating.value = true
+        isTocUpdating.value = true
         execute {
             bookRepository.update(book)
             LocalBook.getChapterList(book).let { chapters ->
                 bookRepository.replaceChaptersAndUpdateBook(book, chapters)
                 ReadBook.onChapterListUpdated(book)
-                //bookState.value = book
+                // bookState.value = book
             }
         }.onSuccess {
-            _isTocUpdating.value = false
+            isTocUpdating.value = false
             complete.invoke(null)
         }.onError {
-            _isTocUpdating.value = false
+            isTocUpdating.value = false
             complete.invoke(it)
         }
     }
@@ -670,8 +666,12 @@ class TocViewModel(
                 return@launch
             }
             BookmarkExporter.exportToUri(
-                context = getApplication(), fileUri = fileUri, bookmarks = bookmarks,
-                isMd = isMd, bookName = book.name, author = book.author
+                context = getApplication(),
+                fileUri = fileUri,
+                bookmarks = bookmarks,
+                isMd = isMd,
+                bookName = book.name,
+                author = book.author,
             )
             showMessage(R.string.save_success)
         } catch (e: Exception) {
@@ -679,11 +679,9 @@ class TocViewModel(
         }
     }
 
-    fun updateBookmark(bookmark: Bookmark) =
-        viewModelScope.launch(Dispatchers.IO) { bookmarkRepository.save(bookmark) }
+    fun updateBookmark(bookmark: Bookmark) = viewModelScope.launch(Dispatchers.IO) { bookmarkRepository.save(bookmark) }
 
-    fun deleteBookmark(bookmark: Bookmark) =
-        viewModelScope.launch(Dispatchers.IO) { bookmarkRepository.delete(bookmark) }
+    fun deleteBookmark(bookmark: Bookmark) = viewModelScope.launch(Dispatchers.IO) { bookmarkRepository.delete(bookmark) }
 
     fun addBookmarksForSelected() = viewModelScope.launch(Dispatchers.IO) {
         val book = bookState.value ?: return@launch
@@ -708,7 +706,7 @@ class TocViewModel(
                 chapterPos = 0,
                 chapterName = item.title,
                 bookText = "",
-                content = ""
+                content = "",
             )
         }
 
@@ -734,8 +732,8 @@ class TocViewModel(
         chineseConverterType: Int,
     ) {
         val shouldUseReplace = useReplace &&
-                book.getUseReplaceRule(defaultReplaceEnabled) &&
-                replaceRules.isNotEmpty()
+            book.getUseReplaceRule(defaultReplaceEnabled) &&
+            replaceRules.isNotEmpty()
         if (!shouldUseReplace) {
             titleCacheJob?.cancel()
             titleCacheJob = null
@@ -764,14 +762,14 @@ class TocViewModel(
             chapterCount = chapters.size,
             chaptersFingerprint = chapters.fold(0L) { fingerprint, chapter ->
                 fingerprint + 31L * chapter.index + chapter.title.hashCode()
-            }
+            },
         )
 
         val currentTitleState = titleReplaceState.value
         val isJobActive = titleCacheJob?.isActive == true
         val isCurrentCacheReady =
             currentTitleState.cacheKey == key &&
-                    currentTitleState.completed == chapters.size
+                currentTitleState.completed == chapters.size
         if (key == lastTitleCacheKey &&
             (isJobActive || currentTitleState.isRunning || isCurrentCacheReady)
         ) {
@@ -787,7 +785,7 @@ class TocViewModel(
                 titles = cachedTitles,
                 completed = chapters.size,
                 total = chapters.size,
-                isRunning = false
+                isRunning = false,
             )
             return
         }
@@ -797,7 +795,7 @@ class TocViewModel(
         titleReplaceState.value = TitleReplaceState(
             cacheKey = key,
             total = chapters.size,
-            isRunning = chapters.isNotEmpty()
+            isRunning = chapters.isNotEmpty(),
         )
         if (chapters.isEmpty()) {
             titleCacheJob = null
@@ -821,7 +819,7 @@ class TocViewModel(
                                 replaceRules,
                                 true,
                                 chineseConverterType = chineseConverterType,
-                            )
+                            ),
                         )
                     }
                 }
@@ -830,8 +828,10 @@ class TocViewModel(
                     completed++
                     val now = System.nanoTime()
                     val shouldPublish = completed < chapters.size &&
-                            (completed - lastPublishedCompleted >= publishBatchSize ||
-                                    now - lastPublishedAt >= TITLE_REPLACE_UPDATE_INTERVAL_NANOS)
+                        (
+                            completed - lastPublishedCompleted >= publishBatchSize ||
+                                now - lastPublishedAt >= TITLE_REPLACE_UPDATE_INTERVAL_NANOS
+                            )
                     if (shouldPublish) {
                         titleReplaceState.update { current ->
                             if (current.cacheKey != key) {
@@ -842,7 +842,7 @@ class TocViewModel(
                                     titles = HashMap(newCache),
                                     completed = completed,
                                     total = chapters.size,
-                                    isRunning = true
+                                    isRunning = true,
                                 )
                             }
                         }
@@ -860,7 +860,7 @@ class TocViewModel(
                         titles = newCache,
                         completed = chapters.size,
                         total = chapters.size,
-                        isRunning = false
+                        isRunning = false,
                     )
                 }
             }

@@ -16,17 +16,16 @@ import java.lang.Character.offsetByCodePoints
 import java.net.InetAddress
 import java.util.Locale
 
-
 fun String?.safeTrim() = if (this.isNullOrBlank()) null else this.trim()
 
 fun String?.isContentScheme(): Boolean = this?.startsWith("content://") == true
 
 fun String.toEditable(): Editable = Editable.Factory.getInstance().newEditable(this)
 
-fun String.parseToUri(): Uri {
-    return if (isUri()) this.toUri() else {
-        Uri.fromFile(File(this))
-    }
+fun String.parseToUri(): Uri = if (isUri()) {
+    this.toUri()
+} else {
+    Uri.fromFile(File(this))
 }
 
 fun String?.isUri(): Boolean {
@@ -34,43 +33,37 @@ fun String?.isUri(): Boolean {
     return this.startsWith("file://", true) || isContentScheme()
 }
 
-fun String?.isAbsUrl() =
-    this?.let {
-        it.startsWith("http://", true) || it.startsWith("https://", true)
-    } ?: false
+fun String?.isAbsUrl() = this?.let {
+    it.startsWith("http://", true) || it.startsWith("https://", true)
+} ?: false
 
-fun String?.isDataUrl() =
-    this?.let {
-        dataUriRegex.matches(it)
-    } ?: false
+fun String?.isDataUrl() = this?.let {
+    dataUriRegex.matches(it)
+} ?: false
 
-fun String?.isJson(): Boolean =
-    this?.run {
-        val str = this.trim()
-        when {
-            str.startsWith("{") && str.endsWith("}") -> true
-            str.startsWith("[") && str.endsWith("]") -> true
-            else -> false
-        }
-    } ?: false
+fun String?.isJson(): Boolean = this?.run {
+    val str = this.trim()
+    when {
+        str.startsWith("{") && str.endsWith("}") -> true
+        str.startsWith("[") && str.endsWith("]") -> true
+        else -> false
+    }
+} ?: false
 
-fun String?.isJsonObject(): Boolean =
-    this?.run {
-        val str = this.trim()
-        str.startsWith("{") && str.endsWith("}")
-    } ?: false
+fun String?.isJsonObject(): Boolean = this?.run {
+    val str = this.trim()
+    str.startsWith("{") && str.endsWith("}")
+} ?: false
 
-fun String?.isJsonArray(): Boolean =
-    this?.run {
-        val str = this.trim()
-        str.startsWith("[") && str.endsWith("]")
-    } ?: false
+fun String?.isJsonArray(): Boolean = this?.run {
+    val str = this.trim()
+    str.startsWith("[") && str.endsWith("]")
+} ?: false
 
-fun String?.isXml(): Boolean =
-    this?.run {
-        val str = this.trim()
-        str.startsWith("<") && str.endsWith(">")
-    } ?: false
+fun String?.isXml(): Boolean = this?.run {
+    val str = this.trim()
+    str.startsWith("<") && str.endsWith(">")
+} ?: false
 
 fun String?.isTrue(nullIsTrue: Boolean = false): Boolean {
     if (this.isNullOrBlank() || this == "null") {
@@ -79,28 +72,39 @@ fun String?.isTrue(nullIsTrue: Boolean = false): Boolean {
     return !this.trim().matches("(?i)^(?:false|no|not|0|0.0)$".toRegex())
 }
 
-fun String.isHex(): Boolean {
-    return all {c ->
-        c in '0'..'9' || c in 'A'..'F' || c in 'a'..'f'
-    }
+fun String.isHex(): Boolean = all { c ->
+    c in '0'..'9' || c in 'A'..'F' || c in 'a'..'f'
 }
 
-fun String.splitNotBlank(vararg delimiter: String, limit: Int = 0): Array<String> = run {
-    this.split(*delimiter, limit = limit).map { it.trim() }.filterNot { it.isBlank() }
+fun String.splitNotBlank(
+    vararg delimiter: String,
+    limit: Int = 0,
+): Array<String> = run {
+    this
+        .split(*delimiter, limit = limit)
+        .map { it.trim() }
+        .filterNot { it.isBlank() }
         .toTypedArray()
 }
 
-fun String.splitNotBlank(regex: Regex, limit: Int = 0): Array<String> = run {
-    this.split(regex, limit).map { it.trim() }.filterNot { it.isBlank() }.toTypedArray()
+fun String.splitNotBlank(
+    regex: Regex,
+    limit: Int = 0,
+): Array<String> = run {
+    this
+        .split(regex, limit)
+        .map { it.trim() }
+        .filterNot { it.isBlank() }
+        .toTypedArray()
 }
 
 @SuppressLint("ObsoleteSdkInt")
-fun String.cnCompare(other: String): Int {
-    return if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
-        Collator.getInstance(ULocale.SIMPLIFIED_CHINESE).compare(this, other)
-    } else {
-        java.text.Collator.getInstance(Locale.CHINA).compare(this, other)
-    }
+fun String.cnCompare(other: String): Int = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
+    Collator.getInstance(ULocale.SIMPLIFIED_CHINESE).compare(this, other)
+} else {
+    java.text.Collator
+        .getInstance(Locale.CHINA)
+        .compare(this, other)
 }
 
 /**
@@ -114,9 +118,7 @@ fun String?.memorySize(): Int {
 /**
  * 是否中文
  */
-fun String.isChinese(): Boolean {
-    return chineseCharRegex.containsMatchIn(this)
-}
+fun String.isChinese(): Boolean = chineseCharRegex.containsMatchIn(this)
 
 private val chineseCharRegex = Regex("[\u4e00-\u9fa5]")
 
@@ -136,9 +138,7 @@ fun CharSequence.toStringArray(): Array<String> {
     }
 }
 
-fun String.escapeRegex(): String {
-    return replace(AppPattern.regexCharRegex, "\\\\$0")
-}
+fun String.escapeRegex(): String = replace(AppPattern.regexCharRegex, "\\\\$0")
 
 fun String.encodeURI(): String {
     val builder = StringBuilder(length)
@@ -160,34 +160,33 @@ fun String.encodeURI(): String {
 
 private const val ENCODE_HEX_UPPER = "0123456789ABCDEF"
 
-private val encodeQuerySafeChars: BooleanArray = BooleanArray(128).apply {
-    for (c in "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_.-~!$&'()*+,;=:@/?") {
-        this[c.code] = true
+private val encodeQuerySafeChars: BooleanArray =
+    BooleanArray(128).apply {
+        for (c in "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_.-~!$&'()*+,;=:@/?") {
+            this[c.code] = true
+        }
     }
-}
 
-fun String.normalizeFileName(): String {
-    return replace(AppPattern.fileNameRegex2, "_")
-}
+fun String.normalizeFileName(): String = replace(AppPattern.fileNameRegex2, "_")
 
 /**
  * 将字符串加上转义,方便传递字符串到浏览器
  */
-fun String.escapeForJs(): String {
-    return this.replace("\\", "\\\\")
-        .replace("\"", "\\\"").replace("'", "\\'")
-        .replace("\n", "\\n").replace("\r", "\\r")
-        .replace("\t", "\\t")
-        .replace("\u2028", "\\u2028")
-        .replace("\u2029", "\\u2029")
-}
+fun String.escapeForJs(): String = this
+    .replace("\\", "\\\\")
+    .replace("\"", "\\\"")
+    .replace("'", "\\'")
+    .replace("\n", "\\n")
+    .replace("\r", "\\r")
+    .replace("\t", "\\t")
+    .replace("\u2028", "\\u2028")
+    .replace("\u2029", "\\u2029")
 
 /**
  * 将ip字符串转为InetAddress
  */
-fun String.parseIpsFromString(): List<InetAddress>? =
-    split(",")
-        .map { it.trim() }
-        .filter { it.isNotEmpty() }
-        .mapNotNull { it.runCatching { InetAddress.getByName(this) }.getOrNull() }
-        .takeIf { it.isNotEmpty() }
+fun String.parseIpsFromString(): List<InetAddress>? = split(",")
+    .map { it.trim() }
+    .filter { it.isNotEmpty() }
+    .mapNotNull { it.runCatching { InetAddress.getByName(this) }.getOrNull() }
+    .takeIf { it.isNotEmpty() }

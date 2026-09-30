@@ -10,7 +10,10 @@ import org.koin.core.context.GlobalContext
 private val themeSettingsGateway
     get() = GlobalContext.get().get<ThemeSettingsGateway>()
 
-fun loadAnimation(context: Context, @AnimRes id: Int): Animation {
+fun loadAnimation(
+    context: Context,
+    @AnimRes id: Int,
+): Animation {
     val animation = AnimationUtils.loadAnimation(context, id)
     if (themeSettingsGateway.currentSettings.appTheme == "4") {
         animation.duration = 0

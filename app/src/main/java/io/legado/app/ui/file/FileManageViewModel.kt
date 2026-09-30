@@ -6,8 +6,9 @@ import io.legado.app.base.BaseViewModel
 import io.legado.app.utils.toastOnUi
 import java.io.File
 
-class FileManageViewModel(application: Application) : BaseViewModel(application) {
-
+class FileManageViewModel(
+    application: Application,
+) : BaseViewModel(application) {
     val rootDoc = context.getExternalFilesDir(null)?.parentFile
     var subDocs = mutableListOf<File>()
     val filesLiveData = MutableLiveData<List<File>>()
@@ -19,15 +20,17 @@ class FileManageViewModel(application: Application) : BaseViewModel(application)
             parentFile ?: return@execute emptyList()
             if (parentFile == rootDoc) {
                 parentFile.listFiles()?.sortedWith(
-                    compareBy({ it.isFile }, { it.name })
+                    compareBy({ it.isFile }, { it.name }),
                 )
             } else {
                 val list = arrayListOf(parentFile)
-                parentFile.listFiles()?.sortedWith(
-                    compareBy({ it.isFile }, { it.name })
-                )?.let {
-                    list.addAll(it)
-                }
+                parentFile
+                    .listFiles()
+                    ?.sortedWith(
+                        compareBy({ it.isFile }, { it.name }),
+                    )?.let {
+                        list.addAll(it)
+                    }
                 list
             }
         }.onStart {
@@ -48,5 +51,4 @@ class FileManageViewModel(application: Application) : BaseViewModel(application)
             context.toastOnUi(it.localizedMessage)
         }
     }
-
 }

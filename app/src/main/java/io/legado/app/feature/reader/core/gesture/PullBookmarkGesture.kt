@@ -39,8 +39,10 @@ data class PullBookmarkClaim(
 /** Pure gesture policy shared by the temporary View host and the new Compose pointer input. */
 object PullBookmarkGesture {
     /** Release must use the pointer's final displacement, not the last MOVE sample. */
-    fun shouldToggleOnRelease(wasDragging: Boolean, finalDrag: PullBookmarkDrag): Boolean =
-        wasDragging && finalDrag.isCandidate && finalDrag.isArmed
+    fun shouldToggleOnRelease(
+        wasDragging: Boolean,
+        finalDrag: PullBookmarkDrag,
+    ): Boolean = wasDragging && finalDrag.isCandidate && finalDrag.isArmed
 
     /**
      * Locks gesture ownership after a pull candidate has been rejected.
@@ -48,12 +50,14 @@ object PullBookmarkGesture {
      * The page-turn delegate may start animating as soon as ownership is released, so a later
      * diagonal movement cannot safely reclaim the same pointer stream for bookmarking.
      */
-    fun claim(previouslyReleased: Boolean, drag: PullBookmarkDrag): PullBookmarkClaim =
-        if (previouslyReleased || !drag.isCandidate) {
-            PullBookmarkClaim(isDragging = false, isReleased = true)
-        } else {
-            PullBookmarkClaim(isDragging = true, isReleased = false)
-        }
+    fun claim(
+        previouslyReleased: Boolean,
+        drag: PullBookmarkDrag,
+    ): PullBookmarkClaim = if (previouslyReleased || !drag.isCandidate) {
+        PullBookmarkClaim(isDragging = false, isReleased = true)
+    } else {
+        PullBookmarkClaim(isDragging = true, isReleased = false)
+    }
 
     fun drag(
         deltaX: Float,
@@ -64,11 +68,16 @@ object PullBookmarkGesture {
         selectionActive: Boolean,
         config: PullBookmarkConfig,
     ): PullBookmarkDrag {
-        val candidate = enabled && pagedMode && !selectionActive && deltaY > 0f &&
-            abs(deltaY) > abs(deltaX) * config.verticalDominanceRatio
+        val candidate =
+            enabled &&
+                pagedMode &&
+                !selectionActive &&
+                deltaY > 0f &&
+                abs(deltaY) > abs(deltaX) * config.verticalDominanceRatio
         return PullBookmarkDrag(
             isCandidate = candidate,
-            pageOffsetPx = if (candidate) {
+            pageOffsetPx =
+            if (candidate) {
                 deltaY.coerceIn(0f, pageHeightPx * config.maxPageOffsetRatio)
             } else {
                 0f

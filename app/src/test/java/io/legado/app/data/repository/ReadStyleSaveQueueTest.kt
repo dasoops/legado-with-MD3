@@ -13,23 +13,23 @@ import org.junit.Assert.assertEquals
 import org.junit.Test
 
 class ReadStyleSaveQueueTest {
-
     @Test
     fun `第一次保存失败后第二次仍可成功`() = runBlocking {
         val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
         val attempts = Channel<String>(Channel.UNLIMITED)
         val failures = Channel<Throwable>(Channel.UNLIMITED)
         val saved = Channel<String>(Channel.UNLIMITED)
-        val queue = ReadStyleSaveQueue(
-            scope = scope,
-            persist = { snapshot ->
-                val name = snapshot.configs.single().name
-                attempts.trySend(name)
-                if (name == "first") throw IOException("disk full")
-                saved.trySend(name)
-            },
-            onFailure = { failures.trySend(it) },
-        )
+        val queue =
+            ReadStyleSaveQueue(
+                scope = scope,
+                persist = { snapshot ->
+                    val name = snapshot.configs.single().name
+                    attempts.trySend(name)
+                    if (name == "first") throw IOException("disk full")
+                    saved.trySend(name)
+                },
+                onFailure = { failures.trySend(it) },
+            )
 
         try {
             queue.submit(snapshot("first"))

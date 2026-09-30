@@ -6,7 +6,7 @@ import kotlin.math.atan
 
 class RotateGestureDetector(private val mListener: OnRotateListener) {
 
-    private val MAX_DEGREES_STEP = 120
+    private val maxDegreesStep = 120
 
     private var mPrevSlope = 0f
     private var mCurrSlope = 0f
@@ -17,10 +17,10 @@ class RotateGestureDetector(private val mListener: OnRotateListener) {
     private val y2 = 0f
 
     fun onTouchEvent(event: MotionEvent) {
-
         when (event.actionMasked) {
             MotionEvent.ACTION_POINTER_DOWN,
-            MotionEvent.ACTION_POINTER_UP -> {
+            MotionEvent.ACTION_POINTER_UP,
+            -> {
                 if (event.pointerCount == 2) mPrevSlope = calculateSlope(event)
             }
             MotionEvent.ACTION_MOVE -> if (event.pointerCount > 1) {
@@ -31,13 +31,12 @@ class RotateGestureDetector(private val mListener: OnRotateListener) {
 
                 val deltaSlope = currDegrees - prevDegrees
 
-                if (abs(deltaSlope) <= MAX_DEGREES_STEP) {
+                if (abs(deltaSlope) <= maxDegreesStep) {
                     mListener.onRotate(deltaSlope.toFloat(), (x2 + x1) / 2, (y2 + y1) / 2)
                 }
                 mPrevSlope = mCurrSlope
             }
         }
-
     }
 
     private fun calculateSlope(event: MotionEvent): Float {

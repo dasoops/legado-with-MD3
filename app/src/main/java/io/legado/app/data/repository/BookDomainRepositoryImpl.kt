@@ -10,41 +10,37 @@ import io.legado.app.help.book.isLocal
 
 class BookDomainRepositoryImpl(
     private val bookDao: BookDao,
-    private val bookChapterDao: BookChapterDao
+    private val bookChapterDao: BookChapterDao,
 ) : BookDomainRepository {
-
     private suspend fun getBooks(bookUrls: Set<String>): List<Book> {
         if (bookUrls.isEmpty()) return emptyList()
         return bookUrls.mapNotNull { bookDao.getBook(it) }
     }
 
-    override suspend fun getDeletableBooks(bookUrls: Set<String>): List<DeletableBook> {
-        return getBooks(bookUrls).map { book ->
-            DeletableBook(
-                bookUrl = book.bookUrl,
-                origin = book.origin,
-                isLocal = book.isLocal
-            )
-        }
+    override suspend fun getDeletableBooks(bookUrls: Set<String>): List<DeletableBook> = getBooks(bookUrls).map { book ->
+        DeletableBook(
+            bookUrl = book.bookUrl,
+            origin = book.origin,
+            isLocal = book.isLocal,
+        )
     }
 
-    override suspend fun getBookGroupAssignments(bookUrls: Set<String>): List<BookGroupAssignment> {
-        return getBooks(bookUrls).map { book ->
-            BookGroupAssignment(
-                bookUrl = book.bookUrl,
-                group = book.group
-            )
-        }
+    override suspend fun getBookGroupAssignments(bookUrls: Set<String>): List<BookGroupAssignment> = getBooks(bookUrls).map { book ->
+        BookGroupAssignment(
+            bookUrl = book.bookUrl,
+            group = book.group,
+        )
     }
 
     override suspend fun updateBookGroups(assignments: List<BookGroupAssignment>) {
         if (assignments.isEmpty()) return
         val groups = assignments.associateBy { it.bookUrl }
-        val books = getBooks(groups.keys).mapNotNull { book ->
-            groups[book.bookUrl]?.let { assignment ->
-                if (book.group == assignment.group) null else book.copy(group = assignment.group)
+        val books =
+            getBooks(groups.keys).mapNotNull { book ->
+                groups[book.bookUrl]?.let { assignment ->
+                    if (book.group == assignment.group) null else book.copy(group = assignment.group)
+                }
             }
-        }
         if (books.isNotEmpty()) {
             bookDao.update(*books.toTypedArray())
         }

@@ -55,14 +55,16 @@ object ReaderTipValueFormatter {
         }
     }
 
-    private fun ReaderTipValueContext.wholeBookPage(): String =
-        if (wholeBookPageIndex != null && wholeBookPageCount != null) {
-            "$wholeBookPageIndex/$wholeBookPageCount"
-        } else {
-            "${pageIndex + 1}/$pageCount"
-        }
+    private fun ReaderTipValueContext.wholeBookPage(): String = if (wholeBookPageIndex != null && wholeBookPageCount != null) {
+        "$wholeBookPageIndex/$wholeBookPageCount"
+    } else {
+        "${pageIndex + 1}/$pageCount"
+    }
 
-    private fun resolveCustom(template: String, context: ReaderTipValueContext): String {
+    private fun resolveCustom(
+        template: String,
+        context: ReaderTipValueContext,
+    ): String {
         val wholeIndex = context.wholeBookPageIndex ?: context.pageIndex + 1
         val wholeCount = context.wholeBookPageCount ?: context.pageCount
         return template

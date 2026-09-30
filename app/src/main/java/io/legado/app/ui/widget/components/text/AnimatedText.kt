@@ -41,7 +41,7 @@ fun AnimatedText(
     maxLines: Int = Int.MAX_VALUE,
     minLines: Int = 1,
     onTextLayout: ((TextLayoutResult) -> Unit)? = null,
-    style: TextStyle = LocalTextStyle.current
+    style: TextStyle = LocalTextStyle.current,
 ) {
     Row(
         modifier = modifier,
@@ -54,10 +54,10 @@ fun AnimatedText(
                     targetState = char,
                     transitionSpec = {
                         (slideInVertically(initialOffsetY = { it })).togetherWith(
-                            slideOutVertically(targetOffsetY = { -it })
+                            slideOutVertically(targetOffsetY = { -it }),
                         )
                     },
-                    label = ""
+                    label = "",
                 ) {
                     AppText(
                         style = style,
@@ -75,7 +75,7 @@ fun AnimatedText(
                         overflow = overflow,
                         maxLines = maxLines,
                         minLines = minLines,
-                        onTextLayout = onTextLayout
+                        onTextLayout = onTextLayout,
                     )
                 }
             }
@@ -106,7 +106,7 @@ fun AnimatedTextLine(
     maxLines: Int = Int.MAX_VALUE,
     minLines: Int = 1,
     onTextLayout: ((TextLayoutResult) -> Unit)? = null,
-    style: TextStyle = LocalTextStyle.current
+    style: TextStyle = LocalTextStyle.current,
 ) {
     AnimatedContent(
         targetState = text,
@@ -114,7 +114,7 @@ fun AnimatedTextLine(
             (slideInVertically { it }).togetherWith(slideOutVertically { -it })
         },
         label = "LineAnimation",
-        modifier = modifier
+        modifier = modifier,
     ) { targetText ->
         AppText(
             text = targetText,
@@ -133,11 +133,10 @@ fun AnimatedTextLine(
             overflow = overflow,
             maxLines = maxLines,
             minLines = minLines,
-            onTextLayout = onTextLayout
+            onTextLayout = onTextLayout,
         )
     }
 }
-
 
 @Composable
 fun AdaptiveAnimatedText(
@@ -158,17 +157,17 @@ fun AdaptiveAnimatedText(
     maxLines: Int = Int.MAX_VALUE,
     minLines: Int = 1,
     onTextLayout: ((TextLayoutResult) -> Unit)? = null,
-    style: TextStyle = LocalTextStyle.current
+    style: TextStyle = LocalTextStyle.current,
 ) {
     AnimatedContent(
         targetState = useCharMode,
         transitionSpec = {
             (slideInVertically { it } + fadeIn()).togetherWith(
-                slideOutVertically { -it } + fadeOut()
+                slideOutVertically { -it } + fadeOut(),
             )
         },
         label = "ModeSwitchAnimation",
-        modifier = modifier
+        modifier = modifier,
     ) { currentMode ->
         if (currentMode) {
             AnimatedText(
@@ -187,7 +186,7 @@ fun AdaptiveAnimatedText(
                 maxLines = maxLines,
                 minLines = minLines,
                 onTextLayout = onTextLayout,
-                style = style
+                style = style,
             )
         } else {
             AnimatedTextLine(
@@ -206,7 +205,7 @@ fun AdaptiveAnimatedText(
                 maxLines = maxLines,
                 minLines = minLines,
                 onTextLayout = onTextLayout,
-                style = style
+                style = style,
             )
         }
     }

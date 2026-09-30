@@ -20,15 +20,22 @@ import io.legado.app.databinding.DialogCustomGroupBinding
 import io.legado.app.databinding.DialogRecyclerViewBinding
 import io.legado.app.databinding.ItemSourceImportBinding
 import io.legado.app.lib.dialogs.alert
-//import io.legado.app.lib.theme.primaryColor
 import io.legado.app.ui.widget.dialog.CodeDialog
 import io.legado.app.ui.widget.dialog.WaitDialog
-import io.legado.app.utils.*
+import io.legado.app.utils.GSON
+import io.legado.app.utils.dpToPx
+import io.legado.app.utils.fromJsonObject
+import io.legado.app.utils.gone
+import io.legado.app.utils.putPrefBoolean
+import io.legado.app.utils.setLayout
+import io.legado.app.utils.showDialogFragment
 import io.legado.app.utils.viewbindingdelegate.viewBinding
+import io.legado.app.utils.visible
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import splitties.views.onClick
 
-class ImportReplaceRuleDialog() : BaseDialogFragment(R.layout.dialog_recycler_view),
+class ImportReplaceRuleDialog() :
+    BaseDialogFragment(R.layout.dialog_recycler_view),
     Toolbar.OnMenuItemClickListener,
     CodeDialog.Callback {
 
@@ -57,9 +64,9 @@ class ImportReplaceRuleDialog() : BaseDialogFragment(R.layout.dialog_recycler_vi
 
     @SuppressLint("NotifyDataSetChanged")
     override fun onFragmentCreated(view: View, savedInstanceState: Bundle?) {
-        //binding.toolBar.setBackgroundColor(primaryColor)
+        // binding.toolBar.setBackgroundColor(primaryColor)
         binding.toolBar.setTitle(R.string.import_replace_rule)
-        //binding.rotateLoading.visible()
+        // binding.rotateLoading.visible()
         initMenu()
         binding.recyclerView.layoutManager = LinearLayoutManager(requireContext())
         binding.recyclerView.adapter = adapter
@@ -164,13 +171,13 @@ class ImportReplaceRuleDialog() : BaseDialogFragment(R.layout.dialog_recycler_vi
             binding.tvFooterLeft.text = getString(
                 R.string.select_cancel_count,
                 viewModel.selectCount,
-                viewModel.allRules.size
+                viewModel.allRules.size,
             )
         } else {
             binding.tvFooterLeft.text = getString(
                 R.string.select_all_count,
                 viewModel.selectCount,
-                viewModel.allRules.size
+                viewModel.allRules.size,
             )
         }
     }
@@ -187,16 +194,14 @@ class ImportReplaceRuleDialog() : BaseDialogFragment(R.layout.dialog_recycler_vi
     inner class SourcesAdapter(context: Context) :
         RecyclerAdapter<ReplaceRule, ItemSourceImportBinding>(context) {
 
-        override fun getViewBinding(parent: ViewGroup): ItemSourceImportBinding {
-            return ItemSourceImportBinding.inflate(inflater, parent, false)
-        }
+        override fun getViewBinding(parent: ViewGroup): ItemSourceImportBinding = ItemSourceImportBinding.inflate(inflater, parent, false)
 
         @SuppressLint("SetTextI18n")
         override fun convert(
             holder: ItemViewHolder,
             binding: ItemSourceImportBinding,
             item: ReplaceRule,
-            payloads: MutableList<Any>
+            payloads: MutableList<Any>,
         ) {
             binding.run {
                 cbSourceName.isChecked = viewModel.selectStatus[holder.layoutPosition]
@@ -208,10 +213,10 @@ class ImportReplaceRuleDialog() : BaseDialogFragment(R.layout.dialog_recycler_vi
                 val localRule = viewModel.checkRules[holder.layoutPosition]
                 tvSourceState.text = when {
                     localRule == null -> "新增"
-                    item.pattern != localRule.pattern
-                            || item.replacement != localRule.replacement
-                            || item.isRegex != localRule.isRegex
-                            || item.scope != localRule.scope -> "更新"
+                    item.pattern != localRule.pattern ||
+                        item.replacement != localRule.replacement ||
+                        item.isRegex != localRule.isRegex ||
+                        item.scope != localRule.scope -> "更新"
                     else -> "已有"
                 }
             }
@@ -236,13 +241,11 @@ class ImportReplaceRuleDialog() : BaseDialogFragment(R.layout.dialog_recycler_vi
                         CodeDialog(
                             GSON.toJson(source),
                             disableEdit = false,
-                            requestId = holder.layoutPosition.toString()
-                        )
+                            requestId = holder.layoutPosition.toString(),
+                        ),
                     )
                 }
             }
         }
-
     }
-
 }

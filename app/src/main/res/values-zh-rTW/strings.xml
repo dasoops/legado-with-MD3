@@ -277,7 +277,6 @@
     <string name="bookmark_mark_delete_note">刪除筆記</string>
     <string name="bookmark_mark_note_hint">輸入備註…</string>
     <string name="bookmark_mark_editing">已有標記，儲存將更新</string>
-    <string name="content_process_ai_section">AI 改寫</string>
     <string name="marks">筆記</string>
     <string name="marks_empty">暫無劃線筆記</string>
     <string name="marks_other_source">其他書源</string>

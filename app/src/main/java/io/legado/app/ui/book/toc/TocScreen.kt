@@ -116,13 +116,13 @@ import io.legado.app.ui.widget.components.tabRow.AppTabRow
 import io.legado.app.ui.widget.components.text.AppText
 import io.legado.app.ui.widget.components.topbar.DynamicTopAppBar
 import io.legado.app.ui.widget.components.topbar.GlassTopAppBarDefaults
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -138,28 +138,31 @@ fun TocRouteScreen(
     val state by viewModel.screenState.collectAsStateWithLifecycle()
     val context = LocalContext.current
     var pendingExportMarkdown by remember { mutableStateOf(false) }
-    val exportLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.CreateDocument("*/*")
-    ) { uri: Uri? ->
-        uri?.let { viewModel.onIntent(TocIntent.ExportBookmarks(it, pendingExportMarkdown)) }
-    }
-    val tocRegexLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.StartActivityForResult()
-    ) { result ->
-        if (result.resultCode == android.app.Activity.RESULT_OK) {
-            viewModel.onIntent(
-                TocIntent.SaveTocRegex(result.data?.getStringExtra("tocRegex").orEmpty())
-            )
+    val exportLauncher =
+        rememberLauncherForActivityResult(
+            contract = ActivityResultContracts.CreateDocument("*/*"),
+        ) { uri: Uri? ->
+            uri?.let { viewModel.onIntent(TocIntent.ExportBookmarks(it, pendingExportMarkdown)) }
         }
-    }
+    val tocRegexLauncher =
+        rememberLauncherForActivityResult(
+            contract = ActivityResultContracts.StartActivityForResult(),
+        ) { result ->
+            if (result.resultCode == android.app.Activity.RESULT_OK) {
+                viewModel.onIntent(
+                    TocIntent.SaveTocRegex(result.data?.getStringExtra("tocRegex").orEmpty()),
+                )
+            }
+        }
     LaunchedEffect(bookUrl) {
         bookUrl?.let { viewModel.onIntent(TocIntent.LoadBook(it)) }
     }
     LaunchedEffect(viewModel) {
         viewModel.effects.collectLatest { effect ->
             when (effect) {
-                is TocEffect.ShowMessage ->
+                is TocEffect.ShowMessage -> {
                     Toast.makeText(context, effect.message, Toast.LENGTH_SHORT).show()
+                }
             }
         }
     }
@@ -172,7 +175,7 @@ fun TocRouteScreen(
         onBookmarkClick = onBookmarkClick,
         onEditLocalTocRule = { regex ->
             tocRegexLauncher.launch(
-                Intent(context, TxtTocRuleActivity::class.java).putExtra("tocRegex", regex)
+                Intent(context, TxtTocRuleActivity::class.java).putExtra("tocRegex", regex),
             )
         },
         onExportBookmarks = { isMarkdown, fileName ->
@@ -231,40 +234,46 @@ fun TocScreen(
     val addBookmarkText = stringResource(R.string.bookmark_add)
     val bookmarkDefaultFileName = stringResource(R.string.bookmark)
 
-    val topBarTitle = remember(
-        pagerState.currentPage,
-        book?.name,
-        book?.durChapterTitle,
-    ) {
-        when (pagerState.currentPage) {
-            0 -> {
-                book?.durChapterTitle?.takeIf { it.isNotBlank() } ?: (book?.name ?: "")
+    val topBarTitle =
+        remember(
+            pagerState.currentPage,
+            book?.name,
+            book?.durChapterTitle,
+        ) {
+            when (pagerState.currentPage) {
+                0 -> {
+                    book?.durChapterTitle?.takeIf { it.isNotBlank() } ?: (book?.name ?: "")
+                }
+                1 -> {
+                    bookmarkManagementTitle
+                }
+                else -> {
+                    book?.name ?: ""
+                }
             }
-
-            1 -> bookmarkManagementTitle
-            else -> book?.name ?: ""
         }
-    }
 
-    val topBarSubtitle = remember(
-        pagerState.currentPage,
-        book?.durChapterIndex,
-        book?.totalChapterNum
-    ) {
-        when (pagerState.currentPage) {
-            0 -> {
-                val durIndex = (book?.durChapterIndex ?: -1) + 1
-                val totalNum = book?.totalChapterNum ?: 0
-                if (durIndex > 0 && totalNum > 0) {
-                    "$durIndex / $totalNum"
-                } else {
+    val topBarSubtitle =
+        remember(
+            pagerState.currentPage,
+            book?.durChapterIndex,
+            book?.totalChapterNum,
+        ) {
+            when (pagerState.currentPage) {
+                0 -> {
+                    val durIndex = (book?.durChapterIndex ?: -1) + 1
+                    val totalNum = book?.totalChapterNum ?: 0
+                    if (durIndex > 0 && totalNum > 0) {
+                        "$durIndex / $totalNum"
+                    } else {
+                        null
+                    }
+                }
+                else -> {
                     null
                 }
             }
-
-            else -> null
         }
-    }
 
     val isOnTocPage = pagerState.currentPage == 0
     val collapsedVolumes = uiState.collapsedVolumes
@@ -275,14 +284,15 @@ fun TocScreen(
             if (firstVisibleIndex !in state.items.indices) return@derivedStateOf null
 
             val firstVisibleItem = state.items[firstVisibleIndex]
-            val volumeIndex = if (firstVisibleItem.isVolume) {
-                firstVisibleIndex
-            } else {
-                (firstVisibleIndex - 1 downTo 0).firstOrNull {
-                    val candidate = state.items[it]
-                    candidate.isVolume && candidate.tocLevel < firstVisibleItem.tocLevel
-                }
-            } ?: return@derivedStateOf null
+            val volumeIndex =
+                if (firstVisibleItem.isVolume) {
+                    firstVisibleIndex
+                } else {
+                    (firstVisibleIndex - 1 downTo 0).firstOrNull {
+                        val candidate = state.items[it]
+                        candidate.isVolume && candidate.tocLevel < firstVisibleItem.tocLevel
+                    }
+                } ?: return@derivedStateOf null
             val volumeItem = state.items[volumeIndex]
             val isCollapsed = collapsedVolumes.contains(volumeItem.id)
             val shouldStick =
@@ -292,51 +302,53 @@ fun TocScreen(
         }
     }
 
-    val fabItems = remember(
-        state.items,
-        locateCurrentReadingText,
-        moveToTopText,
-        moveToBottomText
-    ) {
-        listOf(
-            FabMenuItem(Icons.Default.LocationOn, locateCurrentReadingText) {
-                scope.launch {
-                    val target = state.items.indexOfFirst { it.isDur }
-                    if (target != -1) {
-                        listState.animateScrollToItem(
-                            index = target,
-                            scrollOffset = -offset
-                        )
+    val fabItems =
+        remember(
+            state.items,
+            locateCurrentReadingText,
+            moveToTopText,
+            moveToBottomText,
+        ) {
+            listOf(
+                FabMenuItem(Icons.Default.LocationOn, locateCurrentReadingText) {
+                    scope.launch {
+                        val target = state.items.indexOfFirst { it.isDur }
+                        if (target != -1) {
+                            listState.animateScrollToItem(
+                                index = target,
+                                scrollOffset = -offset,
+                            )
+                        }
                     }
-                }
-            },
-            FabMenuItem(Icons.Default.VerticalAlignTop, moveToTopText) {
-                scope.launch { listState.animateScrollToItem(0) }
-            },
-            FabMenuItem(Icons.Default.VerticalAlignBottom, moveToBottomText) {
-                scope.launch { listState.animateScrollToItem(state.items.size) }
-            }
-        )
-    }
-
-    val selectionSecondaryActions = remember(
-        state.selectedIds,
-        invertSelectionText,
-        selectFollowingText
-    ) {
-        listOf(
-            ActionItem(
-                text = invertSelectionText,
-                icon = Icons.Default.Refresh,
-                onClick = { onIntent(TocIntent.InvertSelection) }
-            ),
-            ActionItem(
-                text = selectFollowingText,
-                icon = Icons.Default.ExpandMore,
-                onClick = { onIntent(TocIntent.SelectFromLast) }
+                },
+                FabMenuItem(Icons.Default.VerticalAlignTop, moveToTopText) {
+                    scope.launch { listState.animateScrollToItem(0) }
+                },
+                FabMenuItem(Icons.Default.VerticalAlignBottom, moveToBottomText) {
+                    scope.launch { listState.animateScrollToItem(state.items.size) }
+                },
             )
-        )
-    }
+        }
+
+    val selectionSecondaryActions =
+        remember(
+            state.selectedIds,
+            invertSelectionText,
+            selectFollowingText,
+        ) {
+            listOf(
+                ActionItem(
+                    text = invertSelectionText,
+                    icon = Icons.Default.Refresh,
+                    onClick = { onIntent(TocIntent.InvertSelection) },
+                ),
+                ActionItem(
+                    text = selectFollowingText,
+                    icon = Icons.Default.ExpandMore,
+                    onClick = { onIntent(TocIntent.SelectFromLast) },
+                ),
+            )
+        }
 
     var hasAutoScrolled by rememberSaveable { mutableStateOf(false) }
 
@@ -345,10 +357,10 @@ fun TocScreen(
             val durIndex = book.durChapterIndex
             val targetIndex = state.items.indexOfFirst { it.id == durIndex || it.isDur }
             if (targetIndex != -1) {
-                delay(100) 
+                delay(100)
                 listState.scrollToItem(
                     index = targetIndex,
-                    scrollOffset = -offset
+                    scrollOffset = -offset,
                 )
                 hasAutoScrolled = true
             }
@@ -412,7 +424,7 @@ fun TocScreen(
                                 onClick = {
                                     dismiss()
                                     onIntent(TocIntent.ToggleUseReplace)
-                                }
+                                },
                             )
                             RoundDropdownMenuItem(
                                 text = stringResource(R.string.show_word_count),
@@ -420,21 +432,21 @@ fun TocScreen(
                                 onClick = {
                                     dismiss()
                                     onIntent(TocIntent.ToggleShowWordCount)
-                                }
+                                },
                             )
                             RoundDropdownMenuItem(
                                 text = stringResource(R.string.reverse_toc),
                                 onClick = {
                                     dismiss()
                                     onIntent(TocIntent.ReverseToc)
-                                }
+                                },
                             )
                             RoundDropdownMenuItem(
                                 text = stringResource(R.string.update_toc),
                                 onClick = {
                                     dismiss()
                                     onIntent(TocIntent.UpdateToc)
-                                }
+                                },
                             )
                             PillDivider()
                             RoundDropdownMenuItem(
@@ -442,7 +454,7 @@ fun TocScreen(
                                 onClick = {
                                     onOpenReplaceRule(null)
                                     dismiss()
-                                }
+                                },
                             )
                             RoundDropdownMenuItem(
                                 text = stringResource(R.string.add_replace_rule),
@@ -451,16 +463,17 @@ fun TocScreen(
                                     book?.name?.let { scopes.add(it) }
                                     book?.origin?.let { scopes.add(it) }
 
-                                    val editRoute = ReplaceEditRoute(
-                                        id = -1,
-                                        pattern = "",
-                                        scope = scopes.joinToString(";"),
-                                        isScopeTitle = true,
-                                        isScopeContent = false
-                                    )
+                                    val editRoute =
+                                        ReplaceEditRoute(
+                                            id = -1,
+                                            pattern = "",
+                                            scope = scopes.joinToString(";"),
+                                            isScopeTitle = true,
+                                            isScopeContent = false,
+                                        )
                                     onOpenReplaceRule(editRoute)
                                     dismiss()
-                                }
+                                },
                             )
                             if (book?.isLocal == true) {
                                 PillHeaderDivider(title = stringResource(R.string.local_book_options))
@@ -469,50 +482,53 @@ fun TocScreen(
                                     onClick = {
                                         onEditLocalTocRule(book.tocUrl)
                                         dismiss()
-                                    }
+                                    },
                                 )
                             }
                         }
-
                         else -> {
                             RoundDropdownMenuItem(
                                 text = stringResource(R.string.export_bookmarks_json),
                                 onClick = {
-                                    val dateFormat = SimpleDateFormat(
-                                        "yyyyMMdd_HHmm",
-                                        Locale.getDefault()
-                                    ).format(Date())
+                                    val dateFormat =
+                                        SimpleDateFormat(
+                                            "yyyyMMdd_HHmm",
+                                            Locale.getDefault(),
+                                        ).format(Date())
                                     val initialName =
                                         "${book?.name ?: bookmarkDefaultFileName}_$dateFormat.json"
                                     onExportBookmarks(false, initialName)
                                     dismiss()
-                                }
+                                },
                             )
                             RoundDropdownMenuItem(
                                 text = stringResource(R.string.export_bookmarks_markdown),
                                 onClick = {
-                                    val dateFormat = SimpleDateFormat(
-                                        "yyyyMMdd_HHmm",
-                                        Locale.getDefault()
-                                    ).format(Date())
+                                    val dateFormat =
+                                        SimpleDateFormat(
+                                            "yyyyMMdd_HHmm",
+                                            Locale.getDefault(),
+                                        ).format(Date())
                                     val initialName =
                                         "${book?.name ?: bookmarkDefaultFileName}_$dateFormat.md"
                                     onExportBookmarks(true, initialName)
                                     dismiss()
-                                }
+                                },
                             )
                         }
                     }
                 },
                 bottomContent = {
                     Row(
-                        modifier = Modifier
+                        modifier =
+                        Modifier
                             .fillMaxWidth()
                             .adaptiveHorizontalPadding(),
-                        verticalAlignment = Alignment.CenterVertically
+                        verticalAlignment = Alignment.CenterVertically,
                     ) {
                         AppTabRow(
-                            tabTitles = listOf(
+                            tabTitles =
+                            listOf(
                                 stringResource(R.string.chapter_list),
                                 stringResource(R.string.bookmark),
                                 stringResource(R.string.marks),
@@ -523,7 +539,7 @@ fun TocScreen(
                                     pagerState.animateScrollToPage(index)
                                 }
                             },
-                            modifier = Modifier.weight(1f)
+                            modifier = Modifier.weight(1f),
                         )
 
                         if (pagerState.currentPage == 0 && hasVolumes) {
@@ -533,28 +549,31 @@ fun TocScreen(
                                     onCheckedChange = { showVolumeMenu = it },
                                     style = ToggleStyle.Outlined,
                                     icon = Icons.AutoMirrored.Filled.FormatListBulleted,
-                                    contentDescription = stringResource(R.string.volume_management)
+                                    contentDescription = stringResource(R.string.volume_management),
                                 )
                                 RoundDropdownMenu(
                                     expanded = showVolumeMenu,
-                                    onDismissRequest = { showVolumeMenu = false }
+                                    onDismissRequest = { showVolumeMenu = false },
                                 ) {
                                     RoundDropdownMenuItem(
                                         text = stringResource(R.string.expand_volume),
                                         onClick = {
-                                            onIntent(TocIntent.ExpandAllVolumes); showVolumeMenu = false
-                                        }
+                                            onIntent(TocIntent.ExpandAllVolumes)
+                                            showVolumeMenu = false
+                                        },
                                     )
                                     RoundDropdownMenuItem(
                                         text = stringResource(R.string.coll_volume),
                                         onClick = {
-                                            onIntent(TocIntent.CollapseAllVolumes); showVolumeMenu = false
-                                        }
+                                            onIntent(TocIntent.CollapseAllVolumes)
+                                            showVolumeMenu = false
+                                        },
                                     )
 
-                                    val volumeItems = remember(state.items) {
-                                        state.items.filter { it.isVolume && it.tocLevel == 0 }
-                                    }
+                                    val volumeItems =
+                                        remember(state.items) {
+                                            state.items.filter { it.isVolume && it.tocLevel == 0 }
+                                        }
                                     if (volumeItems.isNotEmpty()) {
                                         PillHeaderDivider(title = stringResource(R.string.quick_jump))
                                         volumeItems.forEach { uiItem ->
@@ -566,12 +585,12 @@ fun TocScreen(
                                                             state.items.indexOf(uiItem)
                                                         if (targetIndex != -1) {
                                                             listState.animateScrollToItem(
-                                                                index = targetIndex
+                                                                index = targetIndex,
                                                             )
                                                         }
                                                     }
                                                     showVolumeMenu = false
-                                                }
+                                                },
                                             )
                                         }
                                     }
@@ -579,104 +598,117 @@ fun TocScreen(
                             }
                         }
                     }
-                }
+                },
             )
         },
         floatingActionButton = {
             AppFloatingActionButtonMenu(
-                modifier = Modifier
+                modifier =
+                Modifier
                     .offset(x = 16.dp, y = 16.dp),
                 expanded = fabMenuExpanded,
                 onExpandedChange = { fabMenuExpanded = it },
                 items = fabItems,
                 visible = shouldShowFab,
-                focusRequester = focusRequester
+                focusRequester = focusRequester,
             )
-        }
+        },
     ) { padding ->
         Box(modifier = Modifier.fillMaxSize()) {
             AnimatedVisibility(
                 visible = isSelectionMode,
-                modifier = Modifier
+                modifier =
+                Modifier
                     .align(Alignment.BottomCenter)
                     .offset(y = -ScreenOffset)
                     .padding(bottom = 16.dp)
                     .zIndex(1f),
                 enter = slideInVertically { it } + fadeIn(),
-                exit = slideOutVertically { it } + fadeOut()
+                exit = slideOutVertically { it } + fadeOut(),
             ) {
                 SelectionBottomBar(
                     onSelectAll = { onIntent(TocIntent.SelectAll) },
                     onSelectInvert = { onIntent(TocIntent.InvertSelection) },
-                    primaryAction = ActionItem(
+                    primaryAction =
+                    ActionItem(
                         text = addBookmarkText,
                         icon = Icons.Default.BookmarkAdd,
-                        onClick = { onIntent(TocIntent.AddBookmarksForSelected) }
+                        onClick = { onIntent(TocIntent.AddBookmarksForSelected) },
                     ),
-                    secondaryActions = selectionSecondaryActions
+                    secondaryActions = selectionSecondaryActions,
                 )
             }
 
             HorizontalPager(state = pagerState) { page ->
                 when (page) {
-                    0 -> ChapterListContent(
-                        state = state,
-                        collapsedVolumes = collapsedVolumes,
-                        onIntent = onIntent,
-                        listState = listState,
-                        onChapterClick = onChapterClick,
-                        contentPadding = adaptiveContentPaddingOnlyVertical(
-                            top = padding.calculateTopPadding(),
-                            bottom = 120.dp
+                    0 -> {
+                        ChapterListContent(
+                            state = state,
+                            collapsedVolumes = collapsedVolumes,
+                            onIntent = onIntent,
+                            listState = listState,
+                            onChapterClick = onChapterClick,
+                            contentPadding =
+                            adaptiveContentPaddingOnlyVertical(
+                                top = padding.calculateTopPadding(),
+                                bottom = 120.dp,
+                            ),
                         )
-                    )
-
-                    1 -> BookmarkListContent(
-                        bookmarks = uiState.bookmarks,
-                        book = book,
-                        onBookmarkLongClick = onBookmarkClick,
-                        onBookmarkClick = { bookmark ->
-                            editingBookmark = bookmark
-                        },
-                        contentPadding = adaptiveContentPaddingOnlyVertical(
-                            top = padding.calculateTopPadding(),
-                            bottom = 120.dp
+                    }
+                    1 -> {
+                        BookmarkListContent(
+                            bookmarks = uiState.bookmarks,
+                            book = book,
+                            onBookmarkLongClick = onBookmarkClick,
+                            onBookmarkClick = { bookmark ->
+                                editingBookmark = bookmark
+                            },
+                            contentPadding =
+                            adaptiveContentPaddingOnlyVertical(
+                                top = padding.calculateTopPadding(),
+                                bottom = 120.dp,
+                            ),
                         )
-                    )
-
-                    2 -> MarkingListContent(
-                        markings = uiState.markings,
-                        book = book,
-                        onMarkingClick = onBookmarkClick,
-                        contentPadding = adaptiveContentPaddingOnlyVertical(
-                            top = padding.calculateTopPadding(),
-                            bottom = 120.dp
+                    }
+                    2 -> {
+                        MarkingListContent(
+                            markings = uiState.markings,
+                            book = book,
+                            onMarkingClick = onBookmarkClick,
+                            contentPadding =
+                            adaptiveContentPaddingOnlyVertical(
+                                top = padding.calculateTopPadding(),
+                                bottom = 120.dp,
+                            ),
                         )
-                    )
+                    }
                 }
             }
 
             AnimatedVisibility(
                 visible = isOnTocPage && state.titleReplaceProgress != null,
-                modifier = Modifier
+                modifier =
+                Modifier
                     .align(Alignment.TopCenter)
                     .padding(top = padding.calculateTopPadding())
                     .fillMaxWidth()
-                    .zIndex(2f)
+                    .zIndex(2f),
             ) {
                 AppLinearProgressIndicator(
                     progress = state.titleReplaceProgress ?: 0f,
-                    modifier = Modifier
+                    modifier =
+                    Modifier
                         .fillMaxWidth()
-                        .clearAndSetSemantics { }
+                        .clearAndSetSemantics { },
                 )
             }
 
             TopFloatingStickyItem(
                 item = stickyVolume,
-                modifier = Modifier
+                modifier =
+                Modifier
                     .align(Alignment.TopStart)
-                    .padding(top = padding.calculateTopPadding() + 4.dp, start = 8.dp)
+                    .padding(top = padding.calculateTopPadding() + 4.dp, start = 8.dp),
             ) { volume ->
                 TextCard(
                     text = volume.title,
@@ -693,14 +725,15 @@ fun TocScreen(
                                 listState.animateScrollToItem(index)
                             }
                         }
-                    }
+                    },
                 )
             }
         }
 
-        val bookmarkForSheet = editingBookmark ?: remember(editingBookmark == null) {
-            Bookmark()
-        }
+        val bookmarkForSheet =
+            editingBookmark ?: remember(editingBookmark == null) {
+                Bookmark()
+            }
         BookmarkEditSheet(
             show = editingBookmark != null,
             bookmark = bookmarkForSheet,
@@ -712,7 +745,7 @@ fun TocScreen(
             onDelete = { bookmarkToDelete ->
                 onIntent(TocIntent.DeleteBookmark(bookmarkToDelete))
                 editingBookmark = null
-            }
+            },
         )
     }
 }
@@ -725,22 +758,20 @@ fun ChapterListContent(
     onIntent: (TocIntent) -> Unit,
     listState: LazyListState,
     onChapterClick: (Int) -> Unit,
-    contentPadding: PaddingValues
+    contentPadding: PaddingValues,
 ) {
-
     FastScrollLazyColumn(
         state = listState,
         modifier = Modifier.fillMaxSize(),
-        contentPadding = contentPadding
+        contentPadding = contentPadding,
     ) {
-
         state.items.forEach { uiItem ->
 
             if (uiItem.isVolume) {
-
                 item(key = "volume-${uiItem.id}") {
                     CollapsibleHeader(
-                        modifier = Modifier
+                        modifier =
+                        Modifier
                             .animateItem()
                             .adaptiveHorizontalPadding(),
                         title = uiItem.title,
@@ -749,7 +780,8 @@ fun ChapterListContent(
                         leadingContent = {
                             repeat(uiItem.tocLevel.coerceIn(0, 6) + 1) {
                                 Box(
-                                    modifier = Modifier
+                                    modifier =
+                                    Modifier
                                         .padding(horizontal = 2.dp)
                                         .size(6.dp)
                                         .clip(CircleShape)
@@ -759,26 +791,26 @@ fun ChapterListContent(
                         },
                     )
                 }
-
             } else {
-
                 item(key = uiItem.id) {
                     ChapterItem(
-                        modifier = Modifier
+                        modifier =
+                        Modifier
                             .animateItem()
                             .fillMaxWidth()
                             .tocIndent(uiItem.tocLevel),
                         item = uiItem,
                         showWordCount = state.showWordCount,
                         onClick = {
-                            if (state.selectedIds.isNotEmpty())
+                            if (state.selectedIds.isNotEmpty()) {
                                 onIntent(TocIntent.ToggleSelection(uiItem.id))
-                            else
+                            } else {
                                 onChapterClick(uiItem.id)
+                            }
                         },
                         onLongClick = {
                             onIntent(TocIntent.ToggleSelection(uiItem.id))
-                        }
+                        },
                     )
                 }
             }
@@ -797,60 +829,69 @@ fun ChapterItem(
     item: TocItemUi,
     showWordCount: Boolean,
     onClick: () -> Unit,
-    onLongClick: () -> Unit
+    onLongClick: () -> Unit,
 ) {
     val backgroundColor by animateColorAsState(
-        targetValue = when {
+        targetValue =
+        when {
             item.isSelected -> LegadoTheme.colorScheme.primaryContainer.copy(alpha = 0.5f)
             item.isDur -> LegadoTheme.colorScheme.secondaryContainer.copy(alpha = 0.3f)
             else -> Color.Transparent
-        }, label = "BgColor"
+        },
+        label = "BgColor",
     )
 
     val textColor by animateColorAsState(
-        targetValue = when {
+        targetValue =
+        when {
             item.isSelected -> LegadoTheme.colorScheme.onSurface
             item.isDur -> LegadoTheme.colorScheme.primary
             else -> LegadoTheme.colorScheme.onSurface
-        }, label = "BgColor"
+        },
+        label = "BgColor",
     )
 
     val detailColor by animateColorAsState(
-        targetValue = when {
+        targetValue =
+        when {
             item.isSelected -> LegadoTheme.colorScheme.onSurfaceVariant
             item.isDur -> LegadoTheme.colorScheme.primary
             else -> LegadoTheme.colorScheme.onSurfaceVariant
-        }, label = "BgColor"
+        },
+        label = "BgColor",
     )
     val currentReadingDescription = stringResource(R.string.a11y_current_reading)
     val lockedDescription = stringResource(R.string.a11y_vip_locked)
-    val wordCountDescription = item.wordCount?.let {
-        stringResource(R.string.a11y_word_count, it)
-    }
-    val chapterContentDescription = buildList {
-        add(item.title)
-        item.tag?.takeIf { it.isNotBlank() }?.let(::add)
-        if (item.isDur) add(currentReadingDescription)
-        if (item.isVip && !item.isPay) add(lockedDescription)
-        if (showWordCount) wordCountDescription?.let(::add)
-    }.joinToString(", ")
+    val wordCountDescription =
+        item.wordCount?.let {
+            stringResource(R.string.a11y_word_count, it)
+        }
+    val chapterContentDescription =
+        buildList {
+            add(item.title)
+            item.tag?.takeIf { it.isNotBlank() }?.let(::add)
+            if (item.isDur) add(currentReadingDescription)
+            if (item.isVip && !item.isPay) add(lockedDescription)
+            if (showWordCount) wordCountDescription?.let(::add)
+        }.joinToString(", ")
 
     Surface(
-        modifier = modifier
+        modifier =
+        modifier
             .fillMaxWidth()
             .semantics {
                 role = Role.Button
                 contentDescription = chapterContentDescription
                 selected = item.isSelected
-            }
-            .combinedClickable(
+            }.combinedClickable(
                 onClick = onClick,
-                onLongClick = onLongClick
+                onLongClick = onLongClick,
             ),
-        color = backgroundColor
+        color = backgroundColor,
     ) {
         Row(
-            modifier = Modifier
+            modifier =
+            Modifier
                 .adaptiveHorizontalPadding(vertical = 16.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
@@ -861,9 +902,10 @@ fun ChapterItem(
                             imageVector = Icons.Default.Lock,
                             contentDescription = null,
                             tint = LegadoTheme.colorScheme.error,
-                            modifier = Modifier
+                            modifier =
+                            Modifier
                                 .size(14.dp)
-                                .padding(end = 4.dp)
+                                .padding(end = 4.dp),
                         )
                     }
 
@@ -872,7 +914,7 @@ fun ChapterItem(
                         style = LegadoTheme.typography.bodyMediumEmphasized.copy(fontWeight = FontWeight.Medium),
                         color = textColor,
                         maxLines = 2,
-                        overflow = TextOverflow.Ellipsis
+                        overflow = TextOverflow.Ellipsis,
                     )
                 }
 
@@ -882,7 +924,7 @@ fun ChapterItem(
                         style = LegadoTheme.typography.labelSmallEmphasized,
                         color = detailColor.copy(alpha = 0.8f),
                         maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
+                        overflow = TextOverflow.Ellipsis,
                     )
                 }
             }
@@ -892,16 +934,17 @@ fun ChapterItem(
 
             if (showStatusIcon) {
                 Box(
-                    modifier = Modifier
+                    modifier =
+                    Modifier
                         .padding(start = 8.dp)
                         .wrapContentSize()
                         .clip(MaterialTheme.shapes.medium),
-                    contentAlignment = Alignment.Center
+                    contentAlignment = Alignment.Center,
                 ) {
                     StatusIcon(
                         isDur = item.isDur,
                         wordCount = item.wordCount,
-                        showWordCount = showWordCount
+                        showWordCount = showWordCount,
                     )
                 }
             }
@@ -916,7 +959,7 @@ fun BookmarkListContent(
     book: Book?,
     onBookmarkLongClick: (chapterIndex: Int, chapterPos: Int) -> Unit,
     onBookmarkClick: (Bookmark) -> Unit,
-    contentPadding: PaddingValues
+    contentPadding: PaddingValues,
 ) {
     val listState = rememberLazyListState()
 
@@ -934,31 +977,33 @@ fun BookmarkListContent(
 
     if (bookmarks.isEmpty()) {
         Box(
-            modifier = Modifier
+            modifier =
+            Modifier
                 .fillMaxSize()
                 .padding(
                     top = contentPadding.calculateTopPadding(),
-                    bottom = contentPadding.calculateBottomPadding()
+                    bottom = contentPadding.calculateBottomPadding(),
                 ),
-            contentAlignment = Alignment.Center
+            contentAlignment = Alignment.Center,
         ) {
             EmptyMessage(
-                message = stringResource(R.string.no_bookmark)
+                message = stringResource(R.string.no_bookmark),
             )
         }
     } else {
         FastScrollLazyColumn(
             state = listState,
             modifier = Modifier.fillMaxSize(),
-            contentPadding = contentPadding
+            contentPadding = contentPadding,
         ) {
             items(
                 items = bookmarks,
-                key = { it.id }
+                key = { it.id },
             ) { bookmark ->
                 BookmarkItem(
                     bookmark = bookmark.raw,
-                    modifier = Modifier
+                    modifier =
+                    Modifier
                         .animateItem()
                         .fillMaxWidth(),
                     isDur = book?.durChapterIndex == bookmark.chapterIndex,
@@ -967,7 +1012,7 @@ fun BookmarkListContent(
                     },
                     onLongClick = {
                         onBookmarkLongClick(bookmark.chapterIndex, bookmark.chapterPos)
-                    }
+                    },
                 )
             }
         }
@@ -984,7 +1029,8 @@ private fun MarkingListContent(
 ) {
     if (markings.isEmpty()) {
         Box(
-            modifier = Modifier
+            modifier =
+            Modifier
                 .fillMaxSize()
                 .padding(
                     top = contentPadding.calculateTopPadding(),
@@ -1003,35 +1049,40 @@ private fun MarkingListContent(
         contentPadding = contentPadding,
     ) {
         items(items = markings, key = { it.id }) { marking ->
-            val contentColor = if (marking.isDur) {
-                LegadoTheme.colorScheme.onSecondaryContainer
-            } else {
-                LegadoTheme.colorScheme.onSurface
-            }
+            val contentColor =
+                if (marking.isDur) {
+                    LegadoTheme.colorScheme.onSecondaryContainer
+                } else {
+                    LegadoTheme.colorScheme.onSurface
+                }
             NormalCard(
                 onClick = { onMarkingClick(marking.chapterIndex, marking.chapterPos) },
-                containerColor = if (marking.isDur) {
+                containerColor =
+                if (marking.isDur) {
                     LegadoTheme.colorScheme.secondaryContainer.copy(alpha = 0.3f)
                 } else {
                     LegadoTheme.colorScheme.surface
                 },
                 contentColor = contentColor,
                 cornerRadius = 0.dp,
-                modifier = Modifier
+                modifier =
+                Modifier
                     .animateItem()
                     .fillMaxWidth(),
             ) {
                 Column(
-                    modifier = Modifier
+                    modifier =
+                    Modifier
                         .padding(vertical = 12.dp)
                         .adaptiveHorizontalPadding(),
                 ) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         AppText(
-                            text = marking.chapterName.ifBlank {
+                            text =
+                            marking.chapterName.ifBlank {
                                 stringResource(
                                     R.string.chapter_index_format,
-                                    marking.chapterIndex + 1
+                                    marking.chapterIndex + 1,
                                 )
                             },
                             style = LegadoTheme.typography.labelMediumEmphasized,
@@ -1076,56 +1127,53 @@ private fun MarkingListContent(
 private fun StatusIcon(
     isDur: Boolean,
     wordCount: String?,
-    showWordCount: Boolean
+    showWordCount: Boolean,
 ) {
-
-    val targetState = when {
-        showWordCount && !wordCount.isNullOrEmpty() -> "SUCCESS_WORD_COUNT"
-        isDur -> "DUR"
-        else -> "EMPTY"
-    }
+    val targetState =
+        when {
+            showWordCount && !wordCount.isNullOrEmpty() -> "SUCCESS_WORD_COUNT"
+            isDur -> "DUR"
+            else -> "EMPTY"
+        }
 
     AnimatedContent(
         targetState = targetState,
         transitionSpec = {
             (fadeIn(tween(200)) + scaleIn(initialScale = 0.8f)) togetherWith
-                    (fadeOut(tween(150)) + scaleOut(targetScale = 0.8f))
+                (fadeOut(tween(150)) + scaleOut(targetScale = 0.8f))
         },
-        label = "StatusIconAnim"
+        label = "StatusIconAnim",
     ) { state ->
 
         when (state) {
-
             "EMPTY" -> {
                 Box(modifier = Modifier.size(24.dp))
             }
-
             "DUR" -> {
                 Icon(
                     imageVector = Icons.Rounded.LocationOn,
                     contentDescription = null,
                     modifier = Modifier.size(24.dp),
-                    tint = LegadoTheme.colorScheme.secondary
+                    tint = LegadoTheme.colorScheme.secondary,
                 )
             }
-
             "SUCCESS_WORD_COUNT" -> {
                 NormalCard(
                     cornerRadius = 12.dp,
-                    containerColor = if (isDur) LegadoTheme.colorScheme.primaryContainer else LegadoTheme.colorScheme.surfaceContainer
+                    containerColor = if (isDur) LegadoTheme.colorScheme.primaryContainer else LegadoTheme.colorScheme.surfaceContainer,
                 ) {
                     if (wordCount != null) {
                         AppText(
-                            modifier = Modifier
+                            modifier =
+                            Modifier
                                 .padding(horizontal = 8.dp, vertical = 4.dp),
                             text = wordCount,
                             style = LegadoTheme.typography.labelSmall.copy(fontSize = 9.sp),
-                            color = if (isDur) LegadoTheme.colorScheme.onPrimaryContainer else LegadoTheme.colorScheme.onSurfaceVariant
+                            color = if (isDur) LegadoTheme.colorScheme.onPrimaryContainer else LegadoTheme.colorScheme.onSurfaceVariant,
                         )
                     }
                 }
             }
-
             else -> {
                 Box(modifier = Modifier.size(24.dp))
             }

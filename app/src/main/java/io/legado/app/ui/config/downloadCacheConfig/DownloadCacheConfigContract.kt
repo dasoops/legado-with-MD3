@@ -17,13 +17,32 @@ enum class DownloadCacheConfigDialog {
 }
 
 sealed interface DownloadCacheConfigIntent {
-    data class SetThreadCount(val value: Int) : DownloadCacheConfigIntent
-    data class SetPreDownloadNum(val value: Int) : DownloadCacheConfigIntent
-    data class SetBitmapCacheSize(val value: Int) : DownloadCacheConfigIntent
-    data class SetImageRetainNum(val value: Int) : DownloadCacheConfigIntent
-    data class SetUserAgent(val value: String) : DownloadCacheConfigIntent
-    data class ShowDialog(val dialog: DownloadCacheConfigDialog) : DownloadCacheConfigIntent
+    data class SetThreadCount(
+        val value: Int,
+    ) : DownloadCacheConfigIntent
+
+    data class SetPreDownloadNum(
+        val value: Int,
+    ) : DownloadCacheConfigIntent
+
+    data class SetBitmapCacheSize(
+        val value: Int,
+    ) : DownloadCacheConfigIntent
+
+    data class SetImageRetainNum(
+        val value: Int,
+    ) : DownloadCacheConfigIntent
+
+    data class SetUserAgent(
+        val value: String,
+    ) : DownloadCacheConfigIntent
+
+    data class ShowDialog(
+        val dialog: DownloadCacheConfigDialog,
+    ) : DownloadCacheConfigIntent
+
     data object DismissDialog : DownloadCacheConfigIntent
+
     data object ConfirmDialog : DownloadCacheConfigIntent
 }
 

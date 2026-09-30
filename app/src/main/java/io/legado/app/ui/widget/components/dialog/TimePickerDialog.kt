@@ -13,18 +13,21 @@ import io.legado.app.R
 import io.legado.app.ui.widget.components.alert.AppAlertDialog
 import java.util.Locale
 
-internal fun formatTimeValue(hour: Int, minute: Int): String =
-    String.format(Locale.ROOT, "%02d:%02d", hour, minute)
+internal fun formatTimeValue(
+    hour: Int,
+    minute: Int,
+): String = String.format(Locale.ROOT, "%02d:%02d", hour, minute)
 
 internal fun parseTimeNumber(value: String): Int? {
     if (value.isEmpty()) return null
-    val normalized = buildString(value.length) {
-        value.forEach { char ->
-            val digit = Character.digit(char, 10)
-            if (digit < 0) return null
-            append(('0'.code + digit).toChar())
+    val normalized =
+        buildString(value.length) {
+            value.forEach { char ->
+                val digit = Character.digit(char, 10)
+                if (digit < 0) return null
+                append(('0'.code + digit).toChar())
+            }
         }
-    }
     return normalized.toIntOrNull()
 }
 
@@ -40,13 +43,16 @@ fun TimePickerDialog(
     onDismissRequest: () -> Unit,
     onConfirm: (String) -> Unit,
 ) {
-    val timePickerState = rememberTimePickerState(
-        initialHour = parseTimeNumber(currentValue.substringBefore(':'))
-            ?.coerceIn(0, 23) ?: 0,
-        initialMinute = parseTimeNumber(currentValue.substringAfter(':', ""))
-            ?.coerceIn(0, 59) ?: 0,
-        is24Hour = true,
-    )
+    val timePickerState =
+        rememberTimePickerState(
+            initialHour =
+            parseTimeNumber(currentValue.substringBefore(':'))
+                ?.coerceIn(0, 23) ?: 0,
+            initialMinute =
+            parseTimeNumber(currentValue.substringAfter(':', ""))
+                ?.coerceIn(0, 59) ?: 0,
+            is24Hour = true,
+        )
     AppAlertDialog(
         show = true,
         onDismissRequest = onDismissRequest,
@@ -54,7 +60,7 @@ fun TimePickerDialog(
         content = {
             Box(
                 modifier = Modifier.fillMaxWidth(),
-                contentAlignment = Alignment.Center
+                contentAlignment = Alignment.Center,
             ) {
                 TimePicker(state = timePickerState)
             }

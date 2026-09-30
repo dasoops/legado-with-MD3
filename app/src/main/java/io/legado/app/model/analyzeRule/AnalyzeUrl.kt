@@ -7,12 +7,9 @@ import com.bumptech.glide.load.model.GlideUrl
 import io.legado.app.constant.AppConst.UA_NAME
 import io.legado.app.constant.AppLog
 import io.legado.app.constant.AppPattern
-import io.legado.app.data.entities.BaseSource
 import io.legado.app.data.entities.BookChapter
 import io.legado.app.domain.gateway.DownloadCacheSettingsGateway
 import io.legado.app.exception.NoStackTraceException
-import io.legado.app.help.CacheManager
-import io.legado.app.help.ConcurrentRateLimiter
 import io.legado.app.help.crypto.toHexString
 import io.legado.app.help.glide.GlideHeaders
 import io.legado.app.help.http.CookieManager
@@ -41,15 +38,6 @@ import io.legado.app.utils.isJsonObject
 import io.legado.app.utils.isXml
 import io.legado.app.utils.parseIpsFromString
 import io.legado.app.utils.stackTraceStr
-import kotlinx.coroutines.runBlocking
-import okhttp3.Dns
-import okhttp3.MediaType.Companion.toMediaType
-import okhttp3.OkHttpClient
-import okhttp3.Request
-import okhttp3.RequestBody.Companion.toRequestBody
-import okhttp3.Response
-import okhttp3.ResponseBody.Companion.toResponseBody
-import org.koin.core.context.GlobalContext
 import java.io.ByteArrayInputStream
 import java.io.InputStream
 import java.net.URLEncoder
@@ -59,10 +47,19 @@ import kotlin.coroutines.ContinuationInterceptor
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
 import kotlin.math.max
+import kotlinx.coroutines.runBlocking
+import okhttp3.Dns
+import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.RequestBody.Companion.toRequestBody
+import okhttp3.Response
+import okhttp3.ResponseBody.Companion.toResponseBody
+import org.koin.core.context.GlobalContext
 
 /**
  * Created by GKF on 2018/1/24.
- * 搜索URL规则解析
+ * 解析带有 Legado URL 参数的地址, 同时保留 data URI 和本地 WebDAV serverID 能力.
  */
 @Suppress("unused", "MemberVisibilityCanBePrivate")
 @Keep
@@ -74,15 +71,13 @@ class AnalyzeUrl(
     private val speakText: String? = null,
     private val speakSpeed: Int? = null,
     private var baseUrl: String = "",
-    private val source: BaseSource? = null,
     private val ruleData: RuleDataInterface? = null,
     private val chapter: BookChapter? = null,
     private val readTimeout: Long? = null,
     private val callTimeout: Long? = null,
     private var coroutineContext: CoroutineContext = EmptyCoroutineContext,
     headerMapF: Map<String, String>? = null,
-    hasLoginHeader: Boolean = true,
-    private val infoMap: MutableMap<String, String>? = null
+    private val infoMap: MutableMap<String, String>? = null,
 ) {
     constructor(mUrl: String) : this(mUrl, null)
 
@@ -103,9 +98,7 @@ class AnalyzeUrl(
     private var proxy: String? = null
     private var retry: Int = 0
     private var dnsIp: String? = null
-    private val enabledCookieJar = source?.enabledCookieJar == true
     private val domain: String
-    private val concurrentRateLimiter = ConcurrentRateLimiter(source)
     private val cacheSettingsGateway get() = GlobalContext.get().get<DownloadCacheSettingsGateway>()
 
     // 服务器ID
@@ -116,10 +109,7 @@ class AnalyzeUrl(
         coroutineContext = coroutineContext.minusKey(ContinuationInterceptor)
         val urlMatch = paramPattern.find(baseUrl)
         if (urlMatch != null) baseUrl = baseUrl.substring(0, urlMatch.range.first)
-        (headerMapF ?: source?.getHeaderMap(
-            cacheSettingsGateway.currentSettings.userAgent,
-            hasLoginHeader
-        ))?.let {
+        headerMapF?.let {
             headerMap.putAll(it)
             if (it.containsKey("proxy")) {
                 proxy = it["proxy"]
@@ -127,7 +117,7 @@ class AnalyzeUrl(
             }
         }
         initUrl()
-        domain = NetworkUtils.getSubDomain(source?.getKey() ?: url)
+        domain = NetworkUtils.getSubDomain(url)
     }
 
     /**
@@ -135,9 +125,9 @@ class AnalyzeUrl(
      */
     fun initUrl() {
         ruleUrl = mUrl
-        //替换参数
+        // 替换参数
         replaceKeyPageJs()
-        //处理URL
+        // 处理URL
         analyzeUrl()
     }
 
@@ -145,11 +135,11 @@ class AnalyzeUrl(
      * 替换关键字,页数
      */
     private fun replaceKeyPageJs() {
-        //page
+        // page
         page?.let {
             for (m in pagePattern.findAll(ruleUrl)) {
                 val pages = m.groupValues[1].split(",")
-                ruleUrl = if (page < pages.size) { //pages[pages.size - 1]等同于pages.last()
+                ruleUrl = if (page < pages.size) { // pages[pages.size - 1]等同于pages.last()
                     ruleUrl.replace(m.value, pages[page - 1].trim { it <= ' ' })
                 } else {
                     ruleUrl.replace(m.value, pages.last().trim { it <= ' ' })
@@ -162,7 +152,7 @@ class AnalyzeUrl(
      * 解析Url
      */
     private fun analyzeUrl() {
-        //replaceKeyPageJs已经替换掉额外内容，此处url是基础形式，可以直接切首个‘,’之前字符串。
+        // replaceKeyPageJs已经替换掉额外内容，此处url是基础形式，可以直接切首个‘,’之前字符串。
         val urlMatch = paramPattern.find(ruleUrl)
         val urlNoOption =
             if (urlMatch != null) ruleUrl.substring(0, urlMatch.range.first) else ruleUrl
@@ -209,13 +199,11 @@ class AnalyzeUrl(
                     urlNoQuery = url.substring(0, pos)
                 }
             }
-
             RequestMethod.POST -> body?.let {
                 if (!it.isJson() && !it.isXml() && headerMap["Content-Type"].isNullOrEmpty()) {
                     analyzeFields(it)
                 }
             }
-
             RequestMethod.HEAD -> Unit
         }
     }
@@ -281,7 +269,7 @@ class AnalyzeUrl(
     private fun StringBuilder.appendEncoded(
         value: String,
         checkEncoded: Boolean,
-        charset: Charset?
+        charset: Charset?,
     ) {
         if (checkEncoded && NetworkUtils.encodedForm(value)) {
             append(value)
@@ -292,27 +280,20 @@ class AnalyzeUrl(
         }
     }
 
-
     /**
      * 访问网站,返回StrResponse
      */
     suspend fun getStrResponseAwait(
         isTest: Boolean = false,
-        skipRateLimit: Boolean = false
     ): StrResponse {
         if (type != null) {
             return StrResponse(url, getByteArrayAwait().toHexString())
         }
-        if (skipRateLimit) {
-            return executeStrRequest(isTest)
-        }
-        concurrentRateLimiter.withLimit {
-            return executeStrRequest(isTest)
-        }
+        return executeStrRequest(isTest)
     }
 
     private suspend fun executeStrRequest(
-        isTest: Boolean = false
+        isTest: Boolean = false,
     ): StrResponse {
         setCookie()
         val startTime = System.currentTimeMillis()
@@ -334,12 +315,10 @@ class AnalyzeUrl(
                             postJson(body)
                         }
                     }
-
                     RequestMethod.HEAD -> {
                         get(urlNoQuery, encodedQuery)
                         head()
                     }
-
                     else -> get(urlNoQuery, encodedQuery)
                 }
             }.let {
@@ -347,7 +326,9 @@ class AnalyzeUrl(
                     ?.matches(AppPattern.xmlContentTypeRegex) == true
                 if (isXml && it.body?.trim()?.startsWith("<?xml", true) == false) {
                     StrResponse(it.raw, "<?xml version=\"1.0\"?>" + it.body)
-                } else it
+                } else {
+                    it
+                }
             }
             val connectionTime = System.currentTimeMillis() - startTime
             strResponse.putCallTime(connectionTime.toInt())
@@ -357,18 +338,19 @@ class AnalyzeUrl(
                 throw e
             }
             val errorCode = when (e) {
-                is java.net.SocketTimeoutException -> -2  // 超时错误
-                is java.net.UnknownHostException -> -3   // 未找到域名
-                is java.net.ConnectException -> -4       // 连接被拒绝
-                is java.net.SocketException -> -5        // Socket错误（包括连接重置）
-                is javax.net.ssl.SSLException -> -6      // SSL证书或握手错误
+                is java.net.SocketTimeoutException -> -2 // 超时错误
+                is java.net.UnknownHostException -> -3 // 未找到域名
+                is java.net.ConnectException -> -4 // 连接被拒绝
+                is java.net.SocketException -> -5 // Socket错误（包括连接重置）
+                is javax.net.ssl.SSLException -> -6 // SSL证书或握手错误
                 is java.io.InterruptedIOException -> {
                     if (e.message?.contains("timeout") == true) {
-                        -1  // 超过设定时间
-                    } else -7
+                        -1 // 超过设定时间
+                    } else {
+                        -7
+                    }
                 }
-
-                else -> -7  // 其它错误
+                else -> -7 // 其它错误
             }
             return StrResponse(url, e.message).apply {
                 putCallTime(errorCode)
@@ -376,45 +358,39 @@ class AnalyzeUrl(
         }
     }
 
-    fun getStrResponse(): StrResponse {
-        return runBlocking(coroutineContext) {
-            getStrResponseAwait()
-        }
+    fun getStrResponse(): StrResponse = runBlocking(coroutineContext) {
+        getStrResponseAwait()
     }
 
     /**
      * 访问网站,返回Response
      */
     suspend fun getResponseAwait(): Response {
-        concurrentRateLimiter.withLimit {
-            setCookie()
-            val response = getClient().newCallResponse(retry) {
-                addHeaders(headerMap)
-                when (method) {
-                    RequestMethod.POST -> {
-                        url(urlNoQuery)
-                        val contentType = headerMap["Content-Type"]
-                        val body = body
-                        if (!encodedForm.isNullOrEmpty() || body.isNullOrBlank()) {
-                            postForm(encodedForm ?: "")
-                        } else if (!contentType.isNullOrBlank()) {
-                            val requestBody = body.toRequestBody(contentType.toMediaType())
-                            post(requestBody)
-                        } else {
-                            postJson(body)
-                        }
+        setCookie()
+        val response = getClient().newCallResponse(retry) {
+            addHeaders(headerMap)
+            when (method) {
+                RequestMethod.POST -> {
+                    url(urlNoQuery)
+                    val contentType = headerMap["Content-Type"]
+                    val body = body
+                    if (!encodedForm.isNullOrEmpty() || body.isNullOrBlank()) {
+                        postForm(encodedForm ?: "")
+                    } else if (!contentType.isNullOrBlank()) {
+                        val requestBody = body.toRequestBody(contentType.toMediaType())
+                        post(requestBody)
+                    } else {
+                        postJson(body)
                     }
-
-                    RequestMethod.HEAD -> {
-                        get(urlNoQuery, encodedQuery)
-                        head()
-                    }
-
-                    else -> get(urlNoQuery, encodedQuery)
                 }
+                RequestMethod.HEAD -> {
+                    get(urlNoQuery, encodedQuery)
+                    head()
+                }
+                else -> get(urlNoQuery, encodedQuery)
             }
-            return response
         }
+        return response
     }
 
     /**
@@ -431,8 +407,7 @@ class AnalyzeUrl(
     /**
      * 返回一个errStrResponse
      */
-    fun getErrStrResponse(e: Throwable): StrResponse =
-        StrResponse(getErrResponse(e), e.stackTraceStr)
+    fun getErrStrResponse(e: Throwable): StrResponse = StrResponse(getErrResponse(e), e.stackTraceStr)
 
     private fun getClient(): OkHttpClient {
         val client = getProxyClient(proxy)
@@ -457,15 +432,10 @@ class AnalyzeUrl(
         }
     }
 
-    private fun extractHostFromUrl(url: String): String? {
-        return AppPattern.domainRegex.find(url)?.groupValues?.getOrNull(1)
-    }
+    private fun extractHostFromUrl(url: String): String? = AppPattern.domainRegex.find(url)?.groupValues?.getOrNull(1)
 
-
-    fun getResponse(): Response {
-        return runBlocking(coroutineContext) {
-            getResponseAwait()
-        }
+    fun getResponse(): Response = runBlocking(coroutineContext) {
+        getResponseAwait()
     }
 
     private fun getByteArrayIfDataUri(): ByteArray? {
@@ -491,10 +461,8 @@ class AnalyzeUrl(
         return getResponseAwait().body.bytes()
     }
 
-    fun getByteArray(): ByteArray {
-        return runBlocking(coroutineContext) {
-            getByteArrayAwait()
-        }
+    fun getByteArray(): ByteArray = runBlocking(coroutineContext) {
+        getByteArrayAwait()
     }
 
     /**
@@ -507,10 +475,8 @@ class AnalyzeUrl(
         return getResponseAwait().body.byteStream()
     }
 
-    fun getInputStream(): InputStream {
-        return runBlocking(coroutineContext) {
-            getInputStreamAwait()
-        }
+    fun getInputStream(): InputStream = runBlocking(coroutineContext) {
+        getInputStreamAwait()
     }
 
     /**
@@ -526,7 +492,7 @@ class AnalyzeUrl(
                     bodyMap[entry.key] = mapOf(
                         Pair("fileName", fileName),
                         Pair("file", file),
-                        Pair("contentType", contentType)
+                        Pair("contentType", contentType),
                     )
                 }
             }
@@ -541,13 +507,7 @@ class AnalyzeUrl(
     private fun setCookie() {
         val cookie = kotlin.run {
             /* 每次调用getXX cookieJar已经保存过了
-            if (enabledCookieJar) {
-                val key = "${domain}_cookieJar"
-                CacheManager.getFromMemory(key)?.let {
-                    return@run it
-                }
-            }
-            */
+             */
             CookieStore.getCookie(domain)
         }
         if (cookie.isNotEmpty()) {
@@ -555,27 +515,7 @@ class AnalyzeUrl(
                 headerMap.put("Cookie", it)
             }
         }
-        if (enabledCookieJar) {
-            headerMap[CookieManager.cookieJarHeader] = "1"
-        } else {
-            headerMap.remove(CookieManager.cookieJarHeader)
-        }
-    }
-
-    /**
-     * 保存cookieJar中的cookie在访问结束时就保存,不等到下次访问
-     */
-    private fun saveCookie() {
-        //书源启用保存cookie时 添加内存中的cookie到数据库
-        if (enabledCookieJar) {
-            val key = "${domain}_cookieJar"
-            CacheManager.getFromMemory(key)?.let {
-                if (it is String) {
-                    CookieStore.replaceCookie(domain, it)
-                    CacheManager.deleteMemory(key)
-                }
-            }
-        }
+        headerMap.remove(CookieManager.cookieJarHeader)
     }
 
     /**
@@ -591,13 +531,9 @@ class AnalyzeUrl(
         return Pair(url, headerMap)
     }
 
-    fun getUserAgent(): String {
-        return headerMap.get(UA_NAME, true) ?: cacheSettingsGateway.currentSettings.userAgent
-    }
+    fun getUserAgent(): String = headerMap.get(UA_NAME, true) ?: cacheSettingsGateway.currentSettings.userAgent
 
-    fun isPost(): Boolean {
-        return method == RequestMethod.POST
-    }
+    fun isPost(): Boolean = method == RequestMethod.POST
 
     companion object {
         val paramPattern: Regex = Regex("\\s*,\\s*(?=\\{)")
@@ -626,7 +562,6 @@ class AnalyzeUrl(
             }
             return builder.toString()
         }
-
     }
 
     @Keep
@@ -660,41 +595,31 @@ class AnalyzeUrl(
             method = if (value.isNullOrBlank()) null else value
         }
 
-        fun getMethod(): String? {
-            return method
-        }
+        fun getMethod(): String? = method
 
         fun setCharset(value: String?) {
             charset = if (value.isNullOrBlank()) null else value
         }
 
-        fun getCharset(): String? {
-            return charset
-        }
+        fun getCharset(): String? = charset
 
         fun setOrigin(value: String?) {
             origin = if (value.isNullOrBlank()) null else value
         }
 
-        fun getOrigin(): String? {
-            return origin
-        }
+        fun getOrigin(): String? = origin
 
         fun setRetry(value: String?) {
             retry = if (value.isNullOrEmpty()) null else value.toIntOrNull()
         }
 
-        fun getRetry(): Int {
-            return retry ?: 0
-        }
+        fun getRetry(): Int = retry ?: 0
 
         fun setType(value: String?) {
             type = if (value.isNullOrBlank()) null else value
         }
 
-        fun getType(): String? {
-            return type
-        }
+        fun getType(): String? = type
 
         fun setHeaders(value: String?) {
             headers = if (value.isNullOrBlank()) {
@@ -704,12 +629,10 @@ class AnalyzeUrl(
             }
         }
 
-        fun getHeaderMap(): Map<*, *>? {
-            return when (val value = headers) {
-                is Map<*, *> -> value
-                is String -> GSON.fromJsonObject<Map<String, Any>>(value).getOrNull()
-                else -> null
-            }
+        fun getHeaderMap(): Map<*, *>? = when (val value = headers) {
+            is Map<*, *> -> value
+            is String -> GSON.fromJsonObject<Map<String, Any>>(value).getOrNull()
+            else -> null
         }
 
         fun setBody(value: String?) {
@@ -721,27 +644,21 @@ class AnalyzeUrl(
             }
         }
 
-        fun getBody(): String? {
-            return body?.let {
-                it as? String ?: GSON.toJson(it)
-            }
+        fun getBody(): String? = body?.let {
+            it as? String ?: GSON.toJson(it)
         }
 
         fun setDnsIp(value: String?) {
             dnsIp = if (value.isNullOrBlank()) null else value
         }
 
-        fun getDnsIp(): String? {
-            return dnsIp
-        }
+        fun getDnsIp(): String? = dnsIp
 
         fun setServerID(value: String?) {
             serverID = if (value.isNullOrBlank()) null else value.toLong()
         }
 
-        fun getServerID(): Long? {
-            return serverID
-        }
+        fun getServerID(): Long? = serverID
     }
 
     data class ConcurrentRecord(
@@ -760,7 +677,6 @@ class AnalyzeUrl(
         /**
          * 正在访问的个数
          */
-        var frequency: Int
+        var frequency: Int,
     )
-
 }

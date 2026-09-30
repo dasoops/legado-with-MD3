@@ -4,7 +4,6 @@ import androidx.annotation.StringRes
 
 @Suppress("unused")
 class PermissionsCompat private constructor() {
-
     private var request: Request? = null
 
     fun request() {
@@ -20,29 +19,35 @@ class PermissionsCompat private constructor() {
         }
 
         fun onGranted(callback: () -> Unit): Builder {
-            request.setOnGrantedCallback(object : OnPermissionsGrantedCallback {
-                override fun onPermissionsGranted() {
-                    callback()
-                }
-            })
+            request.setOnGrantedCallback(
+                object : OnPermissionsGrantedCallback {
+                    override fun onPermissionsGranted() {
+                        callback()
+                    }
+                },
+            )
             return this
         }
 
         fun onDenied(callback: (deniedPermissions: Array<String>) -> Unit): Builder {
-            request.setOnDeniedCallback(object : OnPermissionsDeniedCallback {
-                override fun onPermissionsDenied(deniedPermissions: Array<String>) {
-                    callback(deniedPermissions)
-                }
-            })
+            request.setOnDeniedCallback(
+                object : OnPermissionsDeniedCallback {
+                    override fun onPermissionsDenied(deniedPermissions: Array<String>) {
+                        callback(deniedPermissions)
+                    }
+                },
+            )
             return this
         }
 
         fun onError(callback: (e: Exception) -> Unit): Builder {
-            request.setOnErrorCallBack(object : OnErrorCallback{
-                override fun onError(e: Exception) {
-                    callback(e)
-                }
-            })
+            request.setOnErrorCallBack(
+                object : OnErrorCallback {
+                    override fun onError(e: Exception) {
+                        callback(e)
+                    }
+                },
+            )
             return this
         }
 
@@ -51,7 +56,9 @@ class PermissionsCompat private constructor() {
             return this
         }
 
-        fun rationale(@StringRes resId: Int): Builder {
+        fun rationale(
+            @StringRes resId: Int,
+        ): Builder {
             request.setRationale(resId)
             return this
         }
@@ -68,5 +75,4 @@ class PermissionsCompat private constructor() {
             return compat
         }
     }
-
 }

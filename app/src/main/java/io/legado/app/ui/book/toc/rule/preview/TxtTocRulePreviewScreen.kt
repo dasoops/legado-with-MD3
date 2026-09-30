@@ -134,7 +134,6 @@ fun TxtTocRulePreviewScreen(
                 ChapterListSheetContent(item = item)
             }
         }
-
         null -> { /* no sheet */ }
     }
 
@@ -158,7 +157,7 @@ fun TxtTocRulePreviewScreen(
                     name = r?.name ?: "",
                     rule1 = r?.chapterRule ?: "",
                     rule2 = r?.example ?: "",
-                    rule3 = r?.volumeRule ?: ""
+                    rule3 = r?.volumeRule ?: "",
                 )
             },
             fromFields = { fields, old ->
@@ -166,14 +165,14 @@ fun TxtTocRulePreviewScreen(
                     name = fields.name,
                     chapterRule = fields.rule1,
                     volumeRule = fields.rule3,
-                    example = fields.rule2
+                    example = fields.rule2,
                 ) ?: TxtTocRule(
                     name = fields.name,
                     chapterRule = fields.rule1,
                     volumeRule = fields.rule3,
-                    example = fields.rule2
+                    example = fields.rule2,
                 )
-            }
+            },
         )
     }
 
@@ -197,13 +196,15 @@ fun TxtTocRulePreviewScreen(
                     // Layout toggle button
                     TopBarActionButton(
                         onClick = { onIntent(TxtTocRulePreviewIntent.ToggleLayout) },
-                        imageVector = if (state.isGridLayout) {
+                        imageVector =
+                        if (state.isGridLayout) {
                             Icons.AutoMirrored.Outlined.FormatListBulleted
                         } else {
                             Icons.Default.GridView
                         },
-                        contentDescription = stringResource(
-                            if (state.isGridLayout) R.string.layout_mode_list else R.string.layout_mode_grid
+                        contentDescription =
+                        stringResource(
+                            if (state.isGridLayout) R.string.layout_mode_list else R.string.layout_mode_grid,
                         ),
                     )
                     // Manage page button
@@ -218,7 +219,7 @@ fun TxtTocRulePreviewScreen(
                         modifier = Modifier.adaptiveHorizontalPadding(),
                         visible = state.showSearch,
                         enter = expandVertically() + fadeIn(),
-                        exit = shrinkVertically() + fadeOut()
+                        exit = shrinkVertically() + fadeOut(),
                     ) {
                         SearchBar(
                             query = state.searchQuery,
@@ -233,7 +234,8 @@ fun TxtTocRulePreviewScreen(
     ) { contentPadding ->
         if (state.loading) {
             Box(
-                modifier = Modifier
+                modifier =
+                Modifier
                     .fillMaxSize()
                     .padding(contentPadding),
                 contentAlignment = Alignment.Center,
@@ -241,48 +243,50 @@ fun TxtTocRulePreviewScreen(
                 CircularProgressIndicator()
             }
         } else if (state.isGridLayout) {
-                val displayRules = state.filteredRules
-                LazyVerticalGrid(
-                    columns = GridCells.Fixed(2),
-                    modifier = Modifier.fillMaxSize(),
-                    contentPadding = adaptiveContentPadding(
-                        top = contentPadding.calculateTopPadding(),
-                        bottom = contentPadding.calculateBottomPadding(),
-                    ),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
-                ) {
-                    itemsIndexed(displayRules, key = { _, item -> item.rule.id }) { _, item ->
-                        RulePreviewCard(
-                            item = item,
-                            isSelected = item.rule.chapterRule == state.selectedRule,
-                            onClick = {
-                                onIntent(TxtTocRulePreviewIntent.SelectRule(item.rule.chapterRule))
-                                onIntent(TxtTocRulePreviewIntent.ShowChapterList(item))
-                            },
-                        )
-                    }
+            val displayRules = state.filteredRules
+            LazyVerticalGrid(
+                columns = GridCells.Fixed(2),
+                modifier = Modifier.fillMaxSize(),
+                contentPadding =
+                adaptiveContentPadding(
+                    top = contentPadding.calculateTopPadding(),
+                    bottom = contentPadding.calculateBottomPadding(),
+                ),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                itemsIndexed(displayRules, key = { _, item -> item.rule.id }) { _, item ->
+                    RulePreviewCard(
+                        item = item,
+                        isSelected = item.rule.chapterRule == state.selectedRule,
+                        onClick = {
+                            onIntent(TxtTocRulePreviewIntent.SelectRule(item.rule.chapterRule))
+                            onIntent(TxtTocRulePreviewIntent.ShowChapterList(item))
+                        },
+                    )
                 }
-            } else {
-                val displayRules = state.filteredRules
-                LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
-                    contentPadding = adaptiveContentPadding(
-                        top = contentPadding.calculateTopPadding(),
-                        bottom = contentPadding.calculateBottomPadding(),
-                    ),
-                    verticalArrangement = Arrangement.spacedBy(4.dp),
-                ) {
-                    itemsIndexed(displayRules, key = { _, item -> item.rule.id }) { _, item ->
-                        RulePreviewListItem(
-                            item = item,
-                            isSelected = item.rule.chapterRule == state.selectedRule,
-                            onClick = {
-                                onIntent(TxtTocRulePreviewIntent.SelectRule(item.rule.chapterRule))
-                                onIntent(TxtTocRulePreviewIntent.ShowChapterList(item))
-                            },
-                        )
-                    }
+            }
+        } else {
+            val displayRules = state.filteredRules
+            LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                contentPadding =
+                adaptiveContentPadding(
+                    top = contentPadding.calculateTopPadding(),
+                    bottom = contentPadding.calculateBottomPadding(),
+                ),
+                verticalArrangement = Arrangement.spacedBy(4.dp),
+            ) {
+                itemsIndexed(displayRules, key = { _, item -> item.rule.id }) { _, item ->
+                    RulePreviewListItem(
+                        item = item,
+                        isSelected = item.rule.chapterRule == state.selectedRule,
+                        onClick = {
+                            onIntent(TxtTocRulePreviewIntent.SelectRule(item.rule.chapterRule))
+                            onIntent(TxtTocRulePreviewIntent.ShowChapterList(item))
+                        },
+                    )
+                }
             }
         }
     }
@@ -296,12 +300,13 @@ private fun RulePreviewCard(
 ) {
     val borderColor by animateColorAsState(
         targetValue = if (isSelected) LegadoTheme.colorScheme.primary else Color.Transparent,
-        label = "borderColor"
+        label = "borderColor",
     )
 
     GlassCard(
         onClick = onClick,
-        border = if (isSelected) {
+        border =
+        if (isSelected) {
             BorderStroke(1.5.dp, LegadoTheme.colorScheme.primary)
         } else {
             BorderStroke(0.5.dp, borderColor)
@@ -310,7 +315,8 @@ private fun RulePreviewCard(
     ) {
         Box(modifier = Modifier.fillMaxWidth()) {
             Column(
-                modifier = Modifier
+                modifier =
+                Modifier
                     .padding(12.dp)
                     .padding(bottom = 28.dp),
             ) {
@@ -334,15 +340,17 @@ private fun RulePreviewCard(
             Surface(
                 shape = RoundedCornerShape(12.dp),
                 color = LegadoTheme.colorScheme.primaryContainer.copy(alpha = 0.85f),
-                modifier = Modifier
+                modifier =
+                Modifier
                     .align(Alignment.BottomEnd)
                     .padding(8.dp),
             ) {
                 if (item.totalCount < 0) {
                     AppCircularProgressIndicator(
-                        modifier = Modifier
+                        modifier =
+                        Modifier
                             .size(16.dp)
-                            .padding(4.dp)
+                            .padding(4.dp),
                     )
                 } else {
                     AppText(
@@ -365,12 +373,13 @@ private fun RulePreviewListItem(
 ) {
     val borderColor by animateColorAsState(
         targetValue = if (isSelected) LegadoTheme.colorScheme.primary else Color.Transparent,
-        label = "borderColor"
+        label = "borderColor",
     )
 
     GlassCard(
         onClick = onClick,
-        border = if (isSelected) {
+        border =
+        if (isSelected) {
             BorderStroke(1.5.dp, LegadoTheme.colorScheme.primary)
         } else {
             BorderStroke(0.5.dp, borderColor)
@@ -378,7 +387,8 @@ private fun RulePreviewListItem(
         modifier = Modifier.fillMaxWidth(),
     ) {
         Row(
-            modifier = Modifier
+            modifier =
+            Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp, vertical = 12.dp),
             verticalAlignment = Alignment.CenterVertically,
@@ -413,16 +423,18 @@ private fun RulePreviewListItem(
             ) {
                 if (item.totalCount < 0) {
                     CircularProgressIndicator(
-                        modifier = Modifier
+                        modifier =
+                        Modifier
                             .size(16.dp)
                             .padding(4.dp),
                         strokeWidth = 2.dp,
                     )
                 } else {
                     Text(
-                        text = stringResource(
+                        text =
+                        stringResource(
                             R.string.chapter_count_format,
-                            item.totalCount
+                            item.totalCount,
                         ),
                         style = LegadoTheme.typography.labelSmall,
                         color = LegadoTheme.colorScheme.onPrimaryContainer,
@@ -435,11 +447,10 @@ private fun RulePreviewListItem(
 }
 
 @Composable
-private fun ChapterListSheetContent(
-    item: TocRulePreviewItem,
-) {
+private fun ChapterListSheetContent(item: TocRulePreviewItem) {
     Column(
-        modifier = Modifier
+        modifier =
+        Modifier
             .fillMaxWidth()
             .padding(16.dp),
     ) {
@@ -453,7 +464,8 @@ private fun ChapterListSheetContent(
 
         // Chapter list
         FastScrollLazyColumn(
-            modifier = Modifier
+            modifier =
+            Modifier
                 .fillMaxWidth()
                 .heightIn(max = 400.dp),
         ) {
@@ -461,7 +473,8 @@ private fun ChapterListSheetContent(
                 Text(
                     text = chapter,
                     style = LegadoTheme.typography.bodyMedium,
-                    modifier = Modifier
+                    modifier =
+                    Modifier
                         .fillMaxWidth()
                         .padding(vertical = 8.dp, horizontal = 4.dp),
                     maxLines = 2,

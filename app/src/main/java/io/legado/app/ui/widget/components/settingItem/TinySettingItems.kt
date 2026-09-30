@@ -116,16 +116,20 @@ fun TinySettingItem(
     val alpha = if (enabled) 1f else 0.5f
 
     NormalCard(
-        onClick = if (enabled) {
+        onClick =
+        if (enabled) {
             {
                 when {
                     isExpandable -> onExpandChange.invoke(!expanded)
                     else -> onClick?.invoke()
                 }
             }
-        } else null,
+        } else {
+            null
+        },
         onLongClick = if (enabled) onLongClick else null,
-        modifier = modifier
+        modifier =
+        modifier
             .padding(bottom = 4.dp)
             .heightIn(min = 56.dp)
             .fillMaxWidth()
@@ -143,7 +147,8 @@ fun TinySettingItem(
     ) {
         Column(modifier = Modifier.fillMaxWidth()) {
             Row(
-                modifier = Modifier
+                modifier =
+                Modifier
                     .fillMaxWidth()
                     .height(56.dp)
                     .padding(horizontal = 12.dp),
@@ -160,7 +165,7 @@ fun TinySettingItem(
                 }
 
                 Column(
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.weight(1f),
                 ) {
                     AppText(
                         text = title,
@@ -173,14 +178,16 @@ fun TinySettingItem(
                             style = LegadoTheme.typography.labelSmall,
                             color = LegadoTheme.colorScheme.onSurfaceVariant.copy(alpha = alpha),
                             maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
+                            overflow = TextOverflow.Ellipsis,
                         )
                     }
                 }
 
                 Box(contentAlignment = Alignment.Center) {
                     when {
-                        trailingContent != null -> trailingContent()
+                        trailingContent != null -> {
+                            trailingContent()
+                        }
                         isExpandable -> {
                             val rotation by animateFloatAsState(
                                 targetValue = if (expanded) 180f else 0f,
@@ -190,7 +197,8 @@ fun TinySettingItem(
                                 imageVector = Icons.Default.KeyboardArrowDown,
                                 contentDescription = null,
                                 tint = LegadoTheme.colorScheme.onSurfaceVariant.copy(alpha = alpha),
-                                modifier = Modifier
+                                modifier =
+                                Modifier
                                     .size(20.dp)
                                     .rotate(rotation),
                             )
@@ -202,7 +210,8 @@ fun TinySettingItem(
             if (isExpandable) {
                 AnimatedVisibility(visible = expanded) {
                     Column(
-                        modifier = Modifier
+                        modifier =
+                        Modifier
                             .fillMaxWidth()
                             .padding(start = 12.dp, end = 12.dp, bottom = 12.dp),
                     ) {
@@ -230,7 +239,7 @@ fun TinyDropdownSettingItem(
     var showMenu by remember { mutableStateOf(false) }
     val currentEntry =
         selectedDisplay ?: displayEntries.getOrNull(entryValues.indexOf(selectedValue))
-        ?: selectedValue
+            ?: selectedValue
 
     Box(modifier = Modifier.fillMaxWidth()) {
         TinySettingItem(
@@ -263,7 +272,8 @@ fun TinyDropdownSettingItem(
                         onValueChange(entryValues[index])
                         dismiss()
                     },
-                    trailingIcon = if (selectedValue == entryValues[index]) {
+                    trailingIcon =
+                    if (selectedValue == entryValues[index]) {
                         {
                             Icon(
                                 Icons.Default.Check,
@@ -271,7 +281,9 @@ fun TinyDropdownSettingItem(
                                 modifier = Modifier.size(18.dp),
                             )
                         }
-                    } else null,
+                    } else {
+                        null
+                    },
                 )
             }
         }
@@ -400,7 +412,8 @@ fun TinyClickableSettingItem(
         imageVector = imageVector,
         modifier = modifier,
         color = color,
-        trailingContent = trailingContent ?: {
+        trailingContent =
+        trailingContent ?: {
             Icon(
                 imageVector = Icons.Default.ChevronRight,
                 contentDescription = null,
@@ -508,7 +521,8 @@ private fun ColorModePill(
     val currentColor = if (isNightMode) nightColor else dayColor
 
     Box(
-        modifier = Modifier
+        modifier =
+        Modifier
             .width(pillWidth)
             .height(pillHeight)
             .clip(RoundedCornerShape(pillHeight))
@@ -529,7 +543,8 @@ private fun ColorModePill(
                 imageVector = Icons.Default.DarkMode,
                 contentDescription = null,
                 modifier = Modifier.size(16.dp),
-                tint = if (!isNightMode) {
+                tint =
+                if (!isNightMode) {
                     LegadoTheme.colorScheme.onSurface
                 } else {
                     LegadoTheme.colorScheme.onSurfaceVariant
@@ -539,7 +554,8 @@ private fun ColorModePill(
                 imageVector = Icons.Default.LightMode,
                 contentDescription = null,
                 modifier = Modifier.size(16.dp),
-                tint = if (isNightMode) {
+                tint =
+                if (isNightMode) {
                     LegadoTheme.colorScheme.onSurface
                 } else {
                     LegadoTheme.colorScheme.onSurfaceVariant
@@ -549,16 +565,19 @@ private fun ColorModePill(
 
         // Knob — color or + icon
         Box(
-            modifier = Modifier
+            modifier =
+            Modifier
                 .offset { IntOffset(x = knobOffset.roundToPx(), y = 0) }
                 .size(knobSize)
                 .clip(CircleShape)
                 .background(LegadoTheme.colorScheme.surfaceContainerLow)
                 .then(
-                    if (currentColor != 0) Modifier.background(Color(currentColor))
-                    else Modifier
-                )
-                .clickable(
+                    if (currentColor != 0) {
+                        Modifier.background(Color(currentColor))
+                    } else {
+                        Modifier
+                    },
+                ).clickable(
                     enabled = enabled,
                     onClick = onClickColor,
                 ),
@@ -633,18 +652,19 @@ private fun ClearColorModePill(
 
     Row(
         horizontalArrangement = Arrangement.spacedBy(8.dp),
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = Alignment.CenterVertically,
     ) {
         if (hasCustomColor) {
             Box(
-                modifier = Modifier
+                modifier =
+                Modifier
                     .size(knobSize)
                     .clip(CircleShape)
                     .clickable(enabled = enabled, onClick = onReset)
                     .border(
                         width = 1.dp,
                         color = LegadoTheme.colorScheme.surfaceContainerHigh,
-                        shape = CircleShape
+                        shape = CircleShape,
                     ),
                 contentAlignment = Alignment.Center,
             ) {
@@ -699,7 +719,8 @@ fun TinyBgImageModeSettingItem(
         expandContent = {
             Row(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
-                modifier = Modifier
+                modifier =
+                Modifier
                     .fillMaxWidth()
                     .padding(top = 8.dp),
             ) {
@@ -736,7 +757,8 @@ private fun BgImageCard(
     val hasImage = !bgImage.isNullOrBlank()
 
     Box(
-        modifier = modifier
+        modifier =
+        modifier
             .height(56.dp)
             .clip(RoundedCornerShape(8.dp))
             .background(LegadoTheme.colorScheme.surfaceContainerHigh)
@@ -753,23 +775,28 @@ private fun BgImageCard(
         }
 
         Row(
-            modifier = Modifier
+            modifier =
+            Modifier
                 .fillMaxSize()
                 .padding(horizontal = 8.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
-            val labelStyle = if (hasImage) {
-                LegadoTheme.typography.labelSmall.copy(
-                    shadow = androidx.compose.ui.graphics.Shadow(
-                        color = Color.Black.copy(alpha = 0.6f),
-                        offset = androidx.compose.ui.geometry.Offset(1f, 1f),
-                        blurRadius = 3f,
+            val labelStyle =
+                if (hasImage) {
+                    LegadoTheme.typography.labelSmall.copy(
+                        shadow =
+                        androidx.compose.ui.graphics.Shadow(
+                            color = Color.Black.copy(alpha = 0.6f),
+                            offset =
+                            androidx.compose.ui.geometry
+                                .Offset(1f, 1f),
+                            blurRadius = 3f,
+                        ),
                     )
-                )
-            } else {
-                LegadoTheme.typography.labelSmall
-            }
+                } else {
+                    LegadoTheme.typography.labelSmall
+                }
             AppText(
                 text = label,
                 style = labelStyle,
@@ -778,7 +805,8 @@ private fun BgImageCard(
 
             if (hasImage) {
                 Box(
-                    modifier = Modifier
+                    modifier =
+                    Modifier
                         .size(24.dp)
                         .clip(CircleShape)
                         .background(LegadoTheme.colorScheme.surface.copy(alpha = 0.7f))

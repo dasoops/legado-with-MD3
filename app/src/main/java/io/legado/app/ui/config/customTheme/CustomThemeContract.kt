@@ -26,8 +26,12 @@ data class CustomThemeUiState(
 )
 
 sealed interface CustomThemePicker {
-    data class DeepColor(val slot: CustomThemeColorSlot) : CustomThemePicker
+    data class DeepColor(
+        val slot: CustomThemeColorSlot,
+    ) : CustomThemePicker
+
     data object DaySeed : CustomThemePicker
+
     data object NightSeed : CustomThemePicker
 }
 
@@ -47,16 +51,39 @@ enum class CustomThemeColorSlot {
 }
 
 sealed interface CustomThemeIntent {
-    data class DeepPersonalizationChanged(val value: Boolean) : CustomThemeIntent
-    data class PaletteStyleChanged(val value: String) : CustomThemeIntent
-    data class CustomContrastChanged(val value: String) : CustomThemeIntent
-    data class MaterialVersionChanged(val value: String) : CustomThemeIntent
-    data class OpenPicker(val picker: CustomThemePicker) : CustomThemeIntent
+    data class DeepPersonalizationChanged(
+        val value: Boolean,
+    ) : CustomThemeIntent
+
+    data class PaletteStyleChanged(
+        val value: String,
+    ) : CustomThemeIntent
+
+    data class CustomContrastChanged(
+        val value: String,
+    ) : CustomThemeIntent
+
+    data class MaterialVersionChanged(
+        val value: String,
+    ) : CustomThemeIntent
+
+    data class OpenPicker(
+        val picker: CustomThemePicker,
+    ) : CustomThemeIntent
+
     data object DismissPicker : CustomThemeIntent
-    data class ColorSelected(val value: Int) : CustomThemeIntent
+
+    data class ColorSelected(
+        val value: Int,
+    ) : CustomThemeIntent
 }
 
 sealed interface CustomThemeEffect {
-    data class ApplyLegacyPrimarySeed(val color: Int) : CustomThemeEffect
-    data class SettingsUpdateFailed(val message: String) : CustomThemeEffect
+    data class ApplyLegacyPrimarySeed(
+        val color: Int,
+    ) : CustomThemeEffect
+
+    data class SettingsUpdateFailed(
+        val message: String,
+    ) : CustomThemeEffect
 }

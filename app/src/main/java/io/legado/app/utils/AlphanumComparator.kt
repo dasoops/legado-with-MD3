@@ -1,13 +1,13 @@
 package io.legado.app.utils
 
-
 /**
  * 排序比较
  */
 object AlphanumComparator : Comparator<String> {
-
-
-    override fun compare(s1: String, s2: String): Int {
+    override fun compare(
+        s1: String,
+        s2: String,
+    ): Int {
         var thisMarker = 0
         var thatMarker = 0
         val s1Length = s1.length
@@ -47,7 +47,11 @@ object AlphanumComparator : Comparator<String> {
         return s1Length - s2Length
     }
 
-    private fun getChunk(string: String, length: Int, marker: Int): String {
+    private fun getChunk(
+        string: String,
+        length: Int,
+        marker: Int,
+    ): String {
         var current = marker
         val chunk = StringBuilder()
         var c = string[current]
@@ -75,7 +79,5 @@ object AlphanumComparator : Comparator<String> {
         return chunk.toString()
     }
 
-    private fun isDigit(ch: Char): Boolean {
-        return ch in '0'..'9'
-    }
+    private fun isDigit(ch: Char): Boolean = ch in '0'..'9'
 }

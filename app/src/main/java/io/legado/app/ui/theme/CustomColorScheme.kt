@@ -12,24 +12,25 @@ class CustomColorScheme(
     colorSpec: ThemeColorSpec = ThemeColorSpec.SPEC_2021,
     contrastLevel: Double = ThemeResolver.resolveContrastLevel(),
 ) : BaseColorScheme() {
-
     private val specVersion = resolveColorSpecVersion(colorSpec)
 
-    override val lightScheme: ColorScheme = dynamicColorScheme(
-        seedColor = Color(seed),
-        isDark = false,
-        isAmoled = false,
-        style = style,
-        contrastLevel = contrastLevel,
-        specVersion = specVersion
-    )
+    override val lightScheme: ColorScheme =
+        dynamicColorScheme(
+            seedColor = Color(seed),
+            isDark = false,
+            isAmoled = false,
+            style = style,
+            contrastLevel = contrastLevel,
+            specVersion = specVersion,
+        )
 
-    override val darkScheme: ColorScheme = dynamicColorScheme(
-        seedColor = Color(seed),
-        isDark = true,
-        isAmoled = false,
-        style = style,
-        contrastLevel = contrastLevel,
-        specVersion = specVersion
-    )
+    override val darkScheme: ColorScheme =
+        dynamicColorScheme(
+            seedColor = Color(seed),
+            isDark = true,
+            isAmoled = false,
+            style = style,
+            contrastLevel = contrastLevel,
+            specVersion = specVersion,
+        )
 }

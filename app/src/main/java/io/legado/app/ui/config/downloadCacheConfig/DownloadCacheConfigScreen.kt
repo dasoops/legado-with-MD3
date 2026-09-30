@@ -8,6 +8,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.legado.app.R
 import io.legado.app.ui.theme.adaptiveContentPadding
 import io.legado.app.ui.widget.components.AppScaffold
@@ -20,7 +21,6 @@ import io.legado.app.ui.widget.components.topbar.GlassMediumFlexibleTopAppBar
 import io.legado.app.ui.widget.components.topbar.GlassTopAppBarDefaults
 import io.legado.app.ui.widget.components.topbar.TopBarNavigationButton
 import org.koin.androidx.compose.koinViewModel
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
 @Composable
 fun DownloadCacheConfigRouteScreen(
@@ -52,32 +52,34 @@ fun DownloadCacheConfigScreen(
                 scrollBehavior = scrollBehavior,
                 navigationIcon = {
                     TopBarNavigationButton(onClick = onBackClick)
-                }
+                },
             )
-        }
+        },
     ) { paddingValues ->
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
-            contentPadding = adaptiveContentPadding(
+            contentPadding =
+            adaptiveContentPadding(
                 top = paddingValues.calculateTopPadding(),
-                bottom = 120.dp
-            )
+                bottom = 120.dp,
+            ),
         ) {
             item {
                 SplicedColumnGroup(title = stringResource(R.string.http_cache)) {
                     ClickableSettingItem(
                         title = stringResource(R.string.cover_cache),
-                        description = stringResource(
+                        description =
+                        stringResource(
                             R.string.cache_size_mb,
-                            state.coverCacheSizeMb
+                            state.coverCacheSizeMb,
                         ),
                         onClick = {
                             onIntent(
                                 DownloadCacheConfigIntent.ShowDialog(
-                                    DownloadCacheConfigDialog.ClearCoverCache
-                                )
+                                    DownloadCacheConfigDialog.ClearCoverCache,
+                                ),
                             )
-                        }
+                        },
                     )
                 }
 
@@ -90,51 +92,54 @@ fun DownloadCacheConfigScreen(
                         valueRange = 1f..256f,
                         onValueChange = {
                             onIntent(DownloadCacheConfigIntent.SetThreadCount(it.toInt()))
-                        }
+                        },
                     )
 
                     SliderSettingItem(
                         title = stringResource(R.string.pre_download),
-                        description = stringResource(
+                        description =
+                        stringResource(
                             R.string.pre_download_s,
-                            settings.preDownloadNum
+                            settings.preDownloadNum,
                         ),
                         value = settings.preDownloadNum.toFloat(),
                         defaultValue = 10f,
                         valueRange = 0f..100f,
                         onValueChange = {
                             onIntent(DownloadCacheConfigIntent.SetPreDownloadNum(it.toInt()))
-                        }
+                        },
                     )
                 }
 
                 SplicedColumnGroup(title = stringResource(R.string.image_cache)) {
                     SliderSettingItem(
                         title = stringResource(R.string.bitmap_cache_size),
-                        description = stringResource(
+                        description =
+                        stringResource(
                             R.string.bitmap_cache_size_summary,
-                            settings.bitmapCacheSize
+                            settings.bitmapCacheSize,
                         ),
                         value = settings.bitmapCacheSize.toFloat(),
                         defaultValue = 32f,
                         valueRange = 1f..2047f,
                         onValueChange = {
                             onIntent(DownloadCacheConfigIntent.SetBitmapCacheSize(it.toInt()))
-                        }
+                        },
                     )
 
                     SliderSettingItem(
                         title = stringResource(R.string.image_retain_number),
-                        description = stringResource(
+                        description =
+                        stringResource(
                             R.string.image_retain_number_summary,
-                            settings.imageRetainNum
+                            settings.imageRetainNum,
                         ),
                         value = settings.imageRetainNum.toFloat(),
                         defaultValue = 10f,
                         valueRange = 0f..100f,
                         onValueChange = {
                             onIntent(DownloadCacheConfigIntent.SetImageRetainNum(it.toInt()))
-                        }
+                        },
                     )
                 }
 
@@ -142,7 +147,7 @@ fun DownloadCacheConfigScreen(
                     InputSettingItem(
                         title = stringResource(R.string.user_agent),
                         value = settings.userAgent,
-                        onConfirm = { onIntent(DownloadCacheConfigIntent.SetUserAgent(it)) }
+                        onConfirm = { onIntent(DownloadCacheConfigIntent.SetUserAgent(it)) },
                     )
                 }
 
@@ -153,10 +158,10 @@ fun DownloadCacheConfigScreen(
                         onClick = {
                             onIntent(
                                 DownloadCacheConfigIntent.ShowDialog(
-                                    DownloadCacheConfigDialog.ClearBookCache
-                                )
+                                    DownloadCacheConfigDialog.ClearBookCache,
+                                ),
                             )
-                        }
+                        },
                     )
 
                     ClickableSettingItem(
@@ -165,10 +170,10 @@ fun DownloadCacheConfigScreen(
                         onClick = {
                             onIntent(
                                 DownloadCacheConfigIntent.ShowDialog(
-                                    DownloadCacheConfigDialog.ShrinkDatabase
-                                )
+                                    DownloadCacheConfigDialog.ShrinkDatabase,
+                                ),
                             )
-                        }
+                        },
                     )
                 }
             }
@@ -182,7 +187,7 @@ fun DownloadCacheConfigScreen(
             onConfirm = {
                 onIntent(DownloadCacheConfigIntent.ConfirmDialog)
             },
-            onDismiss = { onIntent(DownloadCacheConfigIntent.DismissDialog) }
+            onDismiss = { onIntent(DownloadCacheConfigIntent.DismissDialog) },
         )
 
         AppAlertDialog(
@@ -193,7 +198,7 @@ fun DownloadCacheConfigScreen(
             onConfirm = {
                 onIntent(DownloadCacheConfigIntent.ConfirmDialog)
             },
-            onDismiss = { onIntent(DownloadCacheConfigIntent.DismissDialog) }
+            onDismiss = { onIntent(DownloadCacheConfigIntent.DismissDialog) },
         )
 
         AppAlertDialog(
@@ -204,7 +209,7 @@ fun DownloadCacheConfigScreen(
             onConfirm = {
                 onIntent(DownloadCacheConfigIntent.ConfirmDialog)
             },
-            onDismiss = { onIntent(DownloadCacheConfigIntent.DismissDialog) }
+            onDismiss = { onIntent(DownloadCacheConfigIntent.DismissDialog) },
         )
     }
 }

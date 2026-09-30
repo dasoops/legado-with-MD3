@@ -33,48 +33,54 @@ fun BookmarkItem(
     bookmark: Bookmark,
     isDur: Boolean,
     onClick: () -> Unit,
-    onLongClick: () -> Unit
+    onLongClick: () -> Unit,
 ) {
     val backgroundColor by animateColorAsState(
-        targetValue = if (isDur) LegadoTheme.colorScheme.secondaryContainer.copy(alpha = 0.3f)
-        else Color.Transparent,
-        label = "BgColor"
-    )
-    val itemDescription = listOfNotNull(
-        bookmark.chapterName,
-        bookmark.bookText.takeIf { it.isNotBlank() }?.let {
-            stringResource(R.string.bookmark_original_text_description, it)
+        targetValue =
+        if (isDur) {
+            LegadoTheme.colorScheme.secondaryContainer.copy(alpha = 0.3f)
+        } else {
+            Color.Transparent
         },
-        bookmark.content.takeIf { it.isNotBlank() }?.let {
-            stringResource(R.string.bookmark_note_description, it)
-        }
-    ).joinToString()
+        label = "BgColor",
+    )
+    val itemDescription =
+        listOfNotNull(
+            bookmark.chapterName,
+            bookmark.bookText.takeIf { it.isNotBlank() }?.let {
+                stringResource(R.string.bookmark_original_text_description, it)
+            },
+            bookmark.content.takeIf { it.isNotBlank() }?.let {
+                stringResource(R.string.bookmark_note_description, it)
+            },
+        ).joinToString()
     val editLabel = stringResource(R.string.edit)
 
     Surface(
-        modifier = modifier
+        modifier =
+        modifier
             .fillMaxWidth()
             .combinedClickable(
                 onClickLabel = editLabel,
                 onLongClickLabel = editLabel,
                 onClick = onClick,
-                onLongClick = onLongClick
-            )
-            .semantics(mergeDescendants = true) {
+                onLongClick = onLongClick,
+            ).semantics(mergeDescendants = true) {
                 contentDescription = itemDescription
                 role = Role.Button
             },
-        color = backgroundColor
+        color = backgroundColor,
     ) {
         Column(
-            modifier = Modifier
+            modifier =
+            Modifier
                 .fillMaxWidth()
-                .adaptiveHorizontalPadding(vertical = 12.dp)
+                .adaptiveHorizontalPadding(vertical = 12.dp),
         ) {
             AppText(
                 text = bookmark.chapterName,
                 style = LegadoTheme.typography.titleSmallEmphasized,
-                color = if (isDur) LegadoTheme.colorScheme.primary else LegadoTheme.colorScheme.onSurface
+                color = if (isDur) LegadoTheme.colorScheme.primary else LegadoTheme.colorScheme.onSurface,
             )
 
             if (bookmark.bookText.isNotEmpty()) {
@@ -84,7 +90,7 @@ fun BookmarkItem(
                     style = LegadoTheme.typography.bodyMedium,
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis,
-                    color = LegadoTheme.colorScheme.onSurfaceVariant
+                    color = LegadoTheme.colorScheme.onSurfaceVariant,
                 )
             }
 
@@ -93,7 +99,7 @@ fun BookmarkItem(
                 AppText(
                     text = bookmark.content,
                     style = LegadoTheme.typography.bodyMedium,
-                    color = LegadoTheme.colorScheme.primary
+                    color = LegadoTheme.colorScheme.primary,
                 )
             }
         }

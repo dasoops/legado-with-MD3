@@ -22,7 +22,6 @@ class ReadReplaceRuleDelegate(
     private val replaceRuleRepository: ReplaceRuleRepository,
     private val host: Host,
 ) {
-
     interface Host {
         fun updateAllReplaceRules(rules: List<ReplaceRuleItemUi>)
 
@@ -44,20 +43,27 @@ class ReadReplaceRuleDelegate(
                             replacement = rule.replacement,
                             enabled = rule.isEnabled,
                         )
-                    }
+                    },
                 )
             }
         }
     }
 
-    fun setEnabled(id: Long, enabled: Boolean) {
+    fun setEnabled(
+        id: Long,
+        enabled: Boolean,
+    ) {
         scope.launch {
             replaceRuleRepository.setEnabled(id, enabled)
             rulesChanged()
         }
     }
 
-    fun move(draggedId: Long, anchorId: Long, afterAnchor: Boolean) {
+    fun move(
+        draggedId: Long,
+        anchorId: Long,
+        afterAnchor: Boolean,
+    ) {
         scope.launch {
             replaceRuleRepository.moveReplaceRule(draggedId, anchorId, afterAnchor)
             rulesChanged()

@@ -28,13 +28,17 @@ object ReadSessionState {
     var backgroundMeanColor: Int = 0
         private set
 
-    fun loadBackground(width: Int, height: Int): BackgroundSnapshot {
+    fun loadBackground(
+        width: Int,
+        height: Int,
+    ): BackgroundSnapshot {
         val drawable = ReadBookConfig.durConfig.curBgDrawable(width, height)
-        val meanColor = when (drawable) {
-            is BitmapDrawable -> drawable.bitmap?.getMeanColor() ?: 0
-            is ColorDrawable -> drawable.color
-            else -> 0
-        }
+        val meanColor =
+            when (drawable) {
+                is BitmapDrawable -> drawable.bitmap?.getMeanColor() ?: 0
+                is ColorDrawable -> drawable.color
+                else -> 0
+            }
         return BackgroundSnapshot(drawable, meanColor)
     }
 

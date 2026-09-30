@@ -10,12 +10,12 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.input.pointer.util.VelocityTracker
 import androidx.compose.ui.unit.IntSize
 import io.legado.app.ui.util.inspectDragGestures
+import kotlin.math.abs
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.android.awaitFrame
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import kotlin.math.abs
 
 class DampedDragAnimation(
     private val animationScope: CoroutineScope,
@@ -29,7 +29,6 @@ class DampedDragAnimation(
     val onDragStopped: DampedDragAnimation.() -> Unit,
     val onDrag: DampedDragAnimation.(size: IntSize, dragAmount: Offset) -> Unit,
 ) {
-
     private val valueAnimationSpec = spring(1f, 1000f, visibilityThreshold)
     private val velocityAnimationSpec = spring(0.5f, 300f, visibilityThreshold * 10f)
     private val pressProgressAnimationSpec = spring(1f, 1000f, 0.001f)
@@ -52,32 +51,33 @@ class DampedDragAnimation(
     val scaleY: Float get() = scaleYAnimation.value
     val velocity: Float get() = velocityAnimation.value
 
-    val modifier: Modifier = Modifier.pointerInput(Unit) {
-        inspectDragGestures(
-            onDragStart = { down ->
-                onDragStarted(down.position)
-                press()
-            },
-            onDragEnd = {
-                onDragStopped()
-                release()
-            },
-            onDragCancel = {
-                onDragStopped()
-                release()
-            }
-        ) { change, dragAmount ->
-            val position = change.position
-            val previousPosition = change.previousPosition
+    val modifier: Modifier =
+        Modifier.pointerInput(Unit) {
+            inspectDragGestures(
+                onDragStart = { down ->
+                    onDragStarted(down.position)
+                    press()
+                },
+                onDragEnd = {
+                    onDragStopped()
+                    release()
+                },
+                onDragCancel = {
+                    onDragStopped()
+                    release()
+                },
+            ) { change, dragAmount ->
+                val position = change.position
+                val previousPosition = change.previousPosition
 
-            val isInside = canDrag(position)
-            val wasInside = canDrag(previousPosition)
+                val isInside = canDrag(position)
+                val wasInside = canDrag(previousPosition)
 
-            if (isInside && wasInside) {
-                onDrag(size, dragAmount)
+                if (isInside && wasInside) {
+                    onDrag(size, dragAmount)
+                }
             }
         }
-    }
 
     fun press() {
         velocityTracker.resetTracking()
@@ -131,7 +131,7 @@ class DampedDragAnimation(
     private fun updateVelocity() {
         velocityTracker.addPosition(
             System.currentTimeMillis(),
-            Offset(value, 0f)
+            Offset(value, 0f),
         )
         val targetVelocity =
             velocityTracker.calculateVelocity().x / (valueRange.endInclusive - valueRange.start)

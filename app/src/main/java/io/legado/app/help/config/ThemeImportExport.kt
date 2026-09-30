@@ -7,10 +7,10 @@ import com.google.gson.reflect.TypeToken
 import io.legado.app.domain.model.settings.ThemeExportData
 import io.legado.app.utils.EncoderUtils
 import io.legado.app.utils.GSON
-import splitties.init.appCtx
 import java.io.File
 import java.io.FileOutputStream
 import kotlin.uuid.Uuid
+import splitties.init.appCtx
 
 /**
  * 轻量级主题导入导出系统
@@ -18,43 +18,43 @@ import kotlin.uuid.Uuid
  * 支持保存多个命名主题并在之间切换
  */
 object ThemeImportExport {
-
-    internal fun withEmbeddedAssets(data: ThemeExportData): ThemeExportData =
-        data.copy(assets = exportAssets(data))
+    internal fun withEmbeddedAssets(data: ThemeExportData): ThemeExportData = data.copy(assets = exportAssets(data))
 
     /**
      * 将相关的图片、字体资源转换为Base64
      */
     private fun exportAssets(data: ThemeExportData): Map<String, String> {
         val assets = mutableMapOf<String, String>()
-        val assetPaths = mapOf(
-            "bgImageLight" to data.bgImageLight,
-            "bgImageDark" to data.bgImageDark,
-            "largeContainerBackgroundImageLight" to data.largeContainerBackgroundImageLight,
-            "largeContainerBackgroundImageDark" to data.largeContainerBackgroundImageDark,
-            "itemBackgroundImageLight" to data.itemBackgroundImageLight,
-            "itemBackgroundImageDark" to data.itemBackgroundImageDark,
-            "navIconHome" to data.navIconHome,
-            "navIconBookshelf" to data.navIconBookshelf,
-            "navIconExplore" to data.navIconExplore,
-            "navIconRss" to data.navIconRss,
-            "navIconMy" to data.navIconMy,
-            "navIconHomeSelected" to data.navIconHomeSelected,
-            "navIconBookshelfSelected" to data.navIconBookshelfSelected,
-            "navIconExploreSelected" to data.navIconExploreSelected,
-            "navIconRssSelected" to data.navIconRssSelected,
-            "navIconMySelected" to data.navIconMySelected,
-            "appFontPath" to data.appFontPath,
-        )
+        val assetPaths =
+            mapOf(
+                "bgImageLight" to data.bgImageLight,
+                "bgImageDark" to data.bgImageDark,
+                "largeContainerBackgroundImageLight" to data.largeContainerBackgroundImageLight,
+                "largeContainerBackgroundImageDark" to data.largeContainerBackgroundImageDark,
+                "itemBackgroundImageLight" to data.itemBackgroundImageLight,
+                "itemBackgroundImageDark" to data.itemBackgroundImageDark,
+                "navIconHome" to data.navIconHome,
+                "navIconBookshelf" to data.navIconBookshelf,
+                "navIconExplore" to data.navIconExplore,
+                "navIconRss" to data.navIconRss,
+                "navIconMy" to data.navIconMy,
+                "navIconHomeSelected" to data.navIconHomeSelected,
+                "navIconBookshelfSelected" to data.navIconBookshelfSelected,
+                "navIconExploreSelected" to data.navIconExploreSelected,
+                "navIconRssSelected" to data.navIconRssSelected,
+                "navIconMySelected" to data.navIconMySelected,
+                "appFontPath" to data.appFontPath,
+            )
 
         assetPaths.forEach { (key, path) ->
             if (!path.isNullOrBlank()) {
                 try {
-                    val file = if (path.startsWith("content://")) {
-                        null // TODO: 处理 content uri
-                    } else {
-                        File(path)
-                    }
+                    val file =
+                        if (path.startsWith("content://")) {
+                            null // TODO: 处理 content uri
+                        } else {
+                            File(path)
+                        }
                     if (file?.exists() == true) {
                         assets[key] = EncoderUtils.base64Encode(file.readBytes())
                     }
@@ -74,16 +74,21 @@ object ThemeImportExport {
     /**
      * 导出封面图集资源（支持多个逗号分隔的路径）
      */
-    private fun exportCoverAssets(assets: MutableMap<String, String>, keyPrefix: String, paths: String?) {
+    private fun exportCoverAssets(
+        assets: MutableMap<String, String>,
+        keyPrefix: String,
+        paths: String?,
+    ) {
         if (paths.isNullOrBlank()) return
         val pathList = paths.split(",").filter { it.isNotBlank() }
         pathList.forEachIndexed { index, path ->
             try {
-                val file = if (path.startsWith("content://")) {
-                    null
-                } else {
-                    File(path)
-                }
+                val file =
+                    if (path.startsWith("content://")) {
+                        null
+                    } else {
+                        File(path)
+                    }
                 if (file?.exists() == true) {
                     val key = if (pathList.size == 1) keyPrefix else "${keyPrefix}_$index"
                     assets[key] = EncoderUtils.base64Encode(file.readBytes())
@@ -98,51 +103,64 @@ object ThemeImportExport {
         data: ThemeExportData,
         applyEmbeddedCoverAssets: Boolean = true,
     ): PreparedTheme {
-        val embeddedAssets = data.assets?.let { assets ->
-            applyAssets(
-                assets = assets,
-                applyCoverAssets = applyEmbeddedCoverAssets,
+        val embeddedAssets =
+            data.assets?.let { assets ->
+                applyAssets(
+                    assets = assets,
+                    applyCoverAssets = applyEmbeddedCoverAssets,
+                )
+            } ?: AppliedThemeAssets()
+        val appliedAssets =
+            AppliedThemeAssets(
+                lightCoverPaths =
+                embeddedAssets.lightCoverPaths.ifEmpty {
+                    data.coverDefaultImage.toCoverPaths()
+                },
+                darkCoverPaths =
+                embeddedAssets.darkCoverPaths.ifEmpty {
+                    data.coverDefaultImageDark.toCoverPaths()
+                },
+                paths = embeddedAssets.paths,
+                createdFiles = embeddedAssets.createdFiles,
             )
-        } ?: AppliedThemeAssets()
-        val appliedAssets = AppliedThemeAssets(
-            lightCoverPaths = embeddedAssets.lightCoverPaths.ifEmpty {
-                data.coverDefaultImage.toCoverPaths()
-            },
-            darkCoverPaths = embeddedAssets.darkCoverPaths.ifEmpty {
-                data.coverDefaultImageDark.toCoverPaths()
-            },
-            paths = embeddedAssets.paths,
-            createdFiles = embeddedAssets.createdFiles,
-        )
         return PreparedTheme(
-            data = data.copy(
+            data =
+            data.copy(
                 bgImageLight = embeddedAssets.paths["bgImageLight"] ?: data.bgImageLight,
                 bgImageDark = embeddedAssets.paths["bgImageDark"] ?: data.bgImageDark,
                 largeContainerBackgroundImageLight =
-                    embeddedAssets.paths["largeContainerBackgroundImageLight"]
-                        ?: data.largeContainerBackgroundImageLight,
+                embeddedAssets.paths["largeContainerBackgroundImageLight"]
+                    ?: data.largeContainerBackgroundImageLight,
                 largeContainerBackgroundImageDark =
-                    embeddedAssets.paths["largeContainerBackgroundImageDark"]
-                        ?: data.largeContainerBackgroundImageDark,
-                itemBackgroundImageLight = embeddedAssets.paths["itemBackgroundImageLight"]
+                embeddedAssets.paths["largeContainerBackgroundImageDark"]
+                    ?: data.largeContainerBackgroundImageDark,
+                itemBackgroundImageLight =
+                embeddedAssets.paths["itemBackgroundImageLight"]
                     ?: data.itemBackgroundImageLight,
-                itemBackgroundImageDark = embeddedAssets.paths["itemBackgroundImageDark"]
+                itemBackgroundImageDark =
+                embeddedAssets.paths["itemBackgroundImageDark"]
                     ?: data.itemBackgroundImageDark,
                 navIconHome = embeddedAssets.paths["navIconHome"] ?: data.navIconHome,
-                navIconBookshelf = embeddedAssets.paths["navIconBookshelf"]
+                navIconBookshelf =
+                embeddedAssets.paths["navIconBookshelf"]
                     ?: data.navIconBookshelf,
                 navIconExplore = embeddedAssets.paths["navIconExplore"] ?: data.navIconExplore,
                 navIconRss = embeddedAssets.paths["navIconRss"] ?: data.navIconRss,
                 navIconMy = embeddedAssets.paths["navIconMy"] ?: data.navIconMy,
-                navIconHomeSelected = embeddedAssets.paths["navIconHomeSelected"]
+                navIconHomeSelected =
+                embeddedAssets.paths["navIconHomeSelected"]
                     ?: data.navIconHomeSelected,
-                navIconBookshelfSelected = embeddedAssets.paths["navIconBookshelfSelected"]
+                navIconBookshelfSelected =
+                embeddedAssets.paths["navIconBookshelfSelected"]
                     ?: data.navIconBookshelfSelected,
-                navIconExploreSelected = embeddedAssets.paths["navIconExploreSelected"]
+                navIconExploreSelected =
+                embeddedAssets.paths["navIconExploreSelected"]
                     ?: data.navIconExploreSelected,
-                navIconRssSelected = embeddedAssets.paths["navIconRssSelected"]
+                navIconRssSelected =
+                embeddedAssets.paths["navIconRssSelected"]
                     ?: data.navIconRssSelected,
-                navIconMySelected = embeddedAssets.paths["navIconMySelected"]
+                navIconMySelected =
+                embeddedAssets.paths["navIconMySelected"]
                     ?: data.navIconMySelected,
                 appFontPath = embeddedAssets.paths["appFontPath"] ?: data.appFontPath,
                 coverDefaultImage = appliedAssets.lightCoverPaths.joinToString(","),
@@ -166,58 +184,57 @@ object ThemeImportExport {
             if (!applyCoverAssets && key.startsWith("coverDefaultImage")) return@forEach
             try {
                 val bytes = EncoderUtils.base64DecodeToByteArray(base64)
-                val destFile = when {
-                    key.startsWith("bgImage") -> {
-                        val baseDir = appCtx.getExternalFilesDir(null) ?: appCtx.filesDir
-                        val folder = File(baseDir, key)
-                        folder.mkdirs()
-                        File(folder, "theme_asset_${Uuid.random()}.jpg")
+                val destFile =
+                    when {
+                        key.startsWith("bgImage") -> {
+                            val baseDir = appCtx.getExternalFilesDir(null) ?: appCtx.filesDir
+                            val folder = File(baseDir, key)
+                            folder.mkdirs()
+                            File(folder, "theme_asset_${Uuid.random()}.jpg")
+                        }
+                        key.contains("ContainerBackgroundImage") -> {
+                            val baseDir = appCtx.getExternalFilesDir(null) ?: appCtx.filesDir
+                            val folder = File(baseDir, "container_background/$key")
+                            folder.mkdirs()
+                            File(folder, "theme_asset_${Uuid.random()}.png")
+                        }
+                        key.startsWith("navIcon") -> {
+                            val folder = File(appCtx.filesDir, "nav_icons")
+                            folder.mkdirs()
+                            File(
+                                folder,
+                                "theme_${key.removePrefix("navIcon").lowercase()}_${Uuid.random()}.png",
+                            )
+                        }
+                        key == "appFontPath" -> {
+                            val folder = File(appCtx.filesDir, "fonts")
+                            folder.mkdirs()
+                            File(folder, "theme_font_${Uuid.random()}.ttf")
+                        }
+                        key.startsWith("coverDefaultImage") -> {
+                            val baseDir = appCtx.getExternalFilesDir(null) ?: appCtx.filesDir
+                            val folder = File(baseDir, "covers")
+                            folder.mkdirs()
+                            File(folder, "${key}_${Uuid.random()}.jpg")
+                        }
+                        else -> {
+                            null
+                        }
                     }
-
-                    key.contains("ContainerBackgroundImage") -> {
-                        val baseDir = appCtx.getExternalFilesDir(null) ?: appCtx.filesDir
-                        val folder = File(baseDir, "container_background/$key")
-                        folder.mkdirs()
-                        File(folder, "theme_asset_${Uuid.random()}.png")
-                    }
-
-                    key.startsWith("navIcon") -> {
-                        val folder = File(appCtx.filesDir, "nav_icons")
-                        folder.mkdirs()
-                        File(
-                            folder,
-                            "theme_${key.removePrefix("navIcon").lowercase()}_${Uuid.random()}.png",
-                        )
-                    }
-
-                    key == "appFontPath" -> {
-                        val folder = File(appCtx.filesDir, "fonts")
-                        folder.mkdirs()
-                        File(folder, "theme_font_${Uuid.random()}.ttf")
-                    }
-
-                    key.startsWith("coverDefaultImage") -> {
-                        val baseDir = appCtx.getExternalFilesDir(null) ?: appCtx.filesDir
-                        val folder = File(baseDir, "covers")
-                        folder.mkdirs()
-                        File(folder, "${key}_${Uuid.random()}.jpg")
-                    }
-
-                    else -> null
-                }
 
                 destFile?.let { file ->
                     createdFiles += file
                     FileOutputStream(file).use { it.write(bytes) }
                     val path = file.absolutePath
                     if (key.startsWith("coverDefaultImage")) {
-                            // 判断是日间还是夜间封面
-                            val baseKey = if (key.removePrefix("coverDefaultImage").startsWith("Dark")) {
+                        // 判断是日间还是夜间封面
+                        val baseKey =
+                            if (key.removePrefix("coverDefaultImage").startsWith("Dark")) {
                                 "coverDefaultImageDark"
                             } else {
                                 "coverDefaultImage"
                             }
-                            coverPaths.getOrPut(baseKey) { mutableListOf() }.add(path)
+                        coverPaths.getOrPut(baseKey) { mutableListOf() }.add(path)
                     } else {
                         paths[key] = path
                     }
@@ -245,19 +262,20 @@ object ThemeImportExport {
         }
     }
 
-    private fun String.toCoverPaths(): List<String> =
-        split(",").map(String::trim).filter(String::isNotEmpty)
+    private fun String.toCoverPaths(): List<String> = split(",").map(String::trim).filter(String::isNotEmpty)
 
     private fun parseThemeData(json: String): ThemeExportData? {
         val root = JsonParser.parseString(json).asJsonObject
         return when {
-            root.has("appTheme") && root.has("themeMode") ->
+            root.has("appTheme") && root.has("themeMode") -> {
                 GSON.fromJson(root, ThemeExportData::class.java)
-
-            root.has("a") && root.has("A") && root.has("y0") ->
+            }
+            root.has("a") && root.has("A") && root.has("y0") -> {
                 parseObfuscatedThemeV1(root)
-
-            else -> null
+            }
+            else -> {
+                null
+            }
         }
     }
 
@@ -340,27 +358,34 @@ object ThemeImportExport {
             coverTextColorN = root.int("t0", -1),
             coverShadowColorN = root.int("u0", -1),
             coverInfoOrientation = root.string("x0", "0"),
-            assets = root.get("y0")?.takeUnless { it.isJsonNull }?.let {
+            assets =
+            root.get("y0")?.takeUnless { it.isJsonNull }?.let {
                 GSON.fromJson(it, assetsType)
             },
         )
     }
 
-    private fun JsonObject.string(key: String, default: String = ""): String =
-        get(key)?.takeUnless { it.isJsonNull }?.asString ?: default
+    private fun JsonObject.string(
+        key: String,
+        default: String = "",
+    ): String = get(key)?.takeUnless { it.isJsonNull }?.asString ?: default
 
-    private fun JsonObject.nullableString(key: String): String? =
-        get(key)?.takeUnless { it.isJsonNull }?.asString
+    private fun JsonObject.nullableString(key: String): String? = get(key)?.takeUnless { it.isJsonNull }?.asString
 
-    private fun JsonObject.boolean(key: String, default: Boolean = false): Boolean =
-        get(key)?.takeUnless { it.isJsonNull }?.asBoolean ?: default
+    private fun JsonObject.boolean(
+        key: String,
+        default: Boolean = false,
+    ): Boolean = get(key)?.takeUnless { it.isJsonNull }?.asBoolean ?: default
 
-    private fun JsonObject.int(key: String, default: Int = 0): Int =
-        get(key)?.takeUnless { it.isJsonNull }?.asInt ?: default
+    private fun JsonObject.int(
+        key: String,
+        default: Int = 0,
+    ): Int = get(key)?.takeUnless { it.isJsonNull }?.asInt ?: default
 
-    private fun JsonObject.float(key: String, default: Float = 0f): Float =
-        get(key)?.takeUnless { it.isJsonNull }?.asFloat ?: default
-
+    private fun JsonObject.float(
+        key: String,
+        default: Float = 0f,
+    ): Float = get(key)?.takeUnless { it.isJsonNull }?.asFloat ?: default
 }
 
 /**

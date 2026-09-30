@@ -71,7 +71,6 @@ internal class ReaderLayoutCoordinator(
     private val updateLayoutSize: (width: Int, height: Int) -> Unit,
     private val relayoutContent: () -> Unit,
 ) : ReaderLayoutController {
-
     private val _viewport = MutableStateFlow<ReaderViewport?>(null)
     override val viewport: StateFlow<ReaderViewport?> = _viewport.asStateFlow()
 
@@ -88,7 +87,9 @@ internal class ReaderLayoutCoordinator(
         if (
             viewport.contentWidthPx == appliedContentWidth &&
             viewport.contentHeightPx == appliedContentHeight
-        ) return
+        ) {
+            return
+        }
         appliedContentWidth = viewport.contentWidthPx
         appliedContentHeight = viewport.contentHeightPx
         updateLayoutSize(appliedContentWidth, appliedContentHeight)
@@ -98,10 +99,8 @@ internal class ReaderLayoutCoordinator(
         relayoutContent()
     }
 
-    override suspend fun awaitViewport(timeoutMillis: Long): ReaderViewport? {
-        return withTimeoutOrNull(timeoutMillis) {
-            viewport.filter { it?.isReady == true }.first()
-        }
+    override suspend fun awaitViewport(timeoutMillis: Long): ReaderViewport? = withTimeoutOrNull(timeoutMillis) {
+        viewport.filter { it?.isReady == true }.first()
     }
 
     fun publishPageLayout(pageIndex: Int) {
@@ -111,7 +110,7 @@ internal class ReaderLayoutCoordinator(
                 revision = ++layoutRevision,
                 pageIndex = pageIndex,
                 viewport = currentViewport,
-            )
+            ),
         )
     }
 }

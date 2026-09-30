@@ -5,12 +5,13 @@ import org.junit.Assert.assertNull
 import org.junit.Test
 
 class ReaderChapterPaginationSnapshotTest {
-    private val snapshot = ReaderChapterPaginationSnapshot(
-        chapterIndex = 4,
-        pageStarts = listOf(0, 120, 260),
-        contentEnd = 340,
-        generation = 7,
-    )
+    private val snapshot =
+        ReaderChapterPaginationSnapshot(
+            chapterIndex = 4,
+            pageStarts = listOf(0, 120, 260),
+            contentEnd = 340,
+            generation = 7,
+        )
 
     @Test
     fun resolvesPageIndexAndAdjacentStarts() {

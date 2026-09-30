@@ -5,13 +5,13 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class ReaderMenuVisualStateTest {
-
     @Test
     fun `gradient without blur keeps tint but not contrast content`() {
-        val state = visualState(
-            effect = ReaderMenuEffect.None,
-            tintStyle = ReaderMenuTintStyle.Gradient,
-        )
+        val state =
+            visualState(
+                effect = ReaderMenuEffect.None,
+                tintStyle = ReaderMenuTintStyle.Gradient,
+            )
 
         assertTrue(state.isGradient)
         assertTrue(state.useTint)
@@ -21,10 +21,11 @@ class ReaderMenuVisualStateTest {
 
     @Test
     fun `progressive haze enables contrast content`() {
-        val state = visualState(
-            effect = ReaderMenuEffect.Haze,
-            tintStyle = ReaderMenuTintStyle.Gradient,
-        )
+        val state =
+            visualState(
+                effect = ReaderMenuEffect.Haze,
+                tintStyle = ReaderMenuTintStyle.Gradient,
+            )
 
         assertTrue(state.isProgressiveBlur)
         assertTrue(state.useContrastContent)
@@ -33,11 +34,12 @@ class ReaderMenuVisualStateTest {
 
     @Test
     fun `fill without blur can opt out of tint`() {
-        val state = visualState(
-            effect = ReaderMenuEffect.None,
-            tintStyle = ReaderMenuTintStyle.Fill,
-            tintFill = false,
-        )
+        val state =
+            visualState(
+                effect = ReaderMenuEffect.None,
+                tintStyle = ReaderMenuTintStyle.Fill,
+                tintFill = false,
+            )
 
         assertFalse(state.isGradient)
         assertFalse(state.useTint)
@@ -45,11 +47,12 @@ class ReaderMenuVisualStateTest {
 
     @Test
     fun `fill with haze uses tint`() {
-        val state = visualState(
-            effect = ReaderMenuEffect.Haze,
-            tintStyle = ReaderMenuTintStyle.Fill,
-            tintFill = false,
-        )
+        val state =
+            visualState(
+                effect = ReaderMenuEffect.Haze,
+                tintStyle = ReaderMenuTintStyle.Fill,
+                tintFill = false,
+            )
 
         assertFalse(state.isProgressiveBlur)
         assertTrue(state.useTint)
@@ -57,10 +60,11 @@ class ReaderMenuVisualStateTest {
 
     @Test
     fun `liquid glass does not enable progressive contrast content`() {
-        val state = visualState(
-            effect = ReaderMenuEffect.LiquidGlass,
-            tintStyle = ReaderMenuTintStyle.Gradient,
-        )
+        val state =
+            visualState(
+                effect = ReaderMenuEffect.LiquidGlass,
+                tintStyle = ReaderMenuTintStyle.Gradient,
+            )
 
         assertTrue(state.isGradient)
         assertFalse(state.isProgressiveBlur)
@@ -70,12 +74,13 @@ class ReaderMenuVisualStateTest {
 
     @Test
     fun `secondary surface disables style and tint`() {
-        val state = visualState(
-            effect = ReaderMenuEffect.Haze,
-            tintStyle = ReaderMenuTintStyle.Gradient,
-            styleEnabled = false,
-            tintAllowed = false,
-        )
+        val state =
+            visualState(
+                effect = ReaderMenuEffect.Haze,
+                tintStyle = ReaderMenuTintStyle.Gradient,
+                styleEnabled = false,
+                tintAllowed = false,
+            )
 
         assertFalse(state.isGradient)
         assertFalse(state.isProgressiveBlur)

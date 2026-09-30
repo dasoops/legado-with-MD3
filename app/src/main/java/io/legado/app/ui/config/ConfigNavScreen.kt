@@ -27,7 +27,7 @@ fun ConfigNavScreen(
     onNavigateToTheme: () -> Unit,
     onNavigateToBackup: () -> Unit,
     onNavigateToDownloadCache: () -> Unit,
-    onNavigateToLab: () -> Unit
+    onNavigateToLab: () -> Unit,
 ) {
     val scrollBehavior = GlassTopAppBarDefaults.defaultScrollBehavior()
 
@@ -39,46 +39,47 @@ fun ConfigNavScreen(
                 scrollBehavior = scrollBehavior,
                 navigationIcon = {
                     TopBarNavigationButton(onClick = onBackClick)
-                }
+                },
             )
-        }
+        },
     ) { paddingValues ->
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
-            contentPadding = adaptiveContentPadding(
+            contentPadding =
+            adaptiveContentPadding(
                 top = paddingValues.calculateTopPadding(),
-                bottom = 120.dp
-            )
+                bottom = 120.dp,
+            ),
         ) {
             item {
                 SplicedColumnGroup {
                     ClickableSettingItem(
                         title = stringResource(R.string.theme_setting),
-                        onClick = onNavigateToTheme
+                        onClick = onNavigateToTheme,
                     )
                     ClickableSettingItem(
                         title = stringResource(R.string.other_setting),
-                        onClick = onNavigateToOther
+                        onClick = onNavigateToOther,
                     )
                     ClickableSettingItem(
                         title = stringResource(R.string.read_config),
-                        onClick = onNavigateToRead
+                        onClick = onNavigateToRead,
                     )
                     ClickableSettingItem(
                         title = stringResource(R.string.cover_config),
-                        onClick = onNavigateToCover
+                        onClick = onNavigateToCover,
                     )
                     ClickableSettingItem(
                         title = stringResource(R.string.download_cache_config),
-                        onClick = onNavigateToDownloadCache
+                        onClick = onNavigateToDownloadCache,
                     )
                     ClickableSettingItem(
                         title = stringResource(R.string.backup_restore),
-                        onClick = onNavigateToBackup
+                        onClick = onNavigateToBackup,
                     )
                     ClickableSettingItem(
                         title = stringResource(R.string.lab_setting),
-                        onClick = onNavigateToLab
+                        onClick = onNavigateToLab,
                     )
                 }
             }

@@ -6,7 +6,5 @@ abstract class BaseColorScheme {
     abstract val lightScheme: ColorScheme
     abstract val darkScheme: ColorScheme
 
-    fun getColorScheme(darkTheme: Boolean): ColorScheme {
-        return if (darkTheme) darkScheme else lightScheme
-    }
+    fun getColorScheme(darkTheme: Boolean): ColorScheme = if (darkTheme) darkScheme else lightScheme
 }

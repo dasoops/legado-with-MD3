@@ -10,10 +10,12 @@ import java.io.File
 import java.io.FileNotFoundException
 
 class DebugThemeAssetProvider : ContentProvider() {
-
     override fun onCreate(): Boolean = true
 
-    override fun openFile(uri: Uri, mode: String): ParcelFileDescriptor {
+    override fun openFile(
+        uri: Uri,
+        mode: String,
+    ): ParcelFileDescriptor {
         if (failureArmed) {
             val error = FileNotFoundException("Injected theme asset failure: $uri")
             Log.e(LOG_TAG, "INJECTED_THEME_ASSET_OPEN uri=$uri mode=$mode", error)
@@ -29,7 +31,11 @@ class DebugThemeAssetProvider : ContentProvider() {
         return ParcelFileDescriptor.open(fixture, ParcelFileDescriptor.MODE_READ_ONLY)
     }
 
-    override fun call(method: String, arg: String?, extras: android.os.Bundle?): android.os.Bundle? {
+    override fun call(
+        method: String,
+        arg: String?,
+        extras: android.os.Bundle?,
+    ): android.os.Bundle? {
         if (method == "armFailure") {
             failureArmed = true
             Log.i(LOG_TAG, "INJECTED_THEME_ASSET_FAILURE_ARMED")
@@ -47,9 +53,16 @@ class DebugThemeAssetProvider : ContentProvider() {
         sortOrder: String?,
     ): Cursor? = null
 
-    override fun insert(uri: Uri, values: ContentValues?): Uri? = null
+    override fun insert(
+        uri: Uri,
+        values: ContentValues?,
+    ): Uri? = null
 
-    override fun delete(uri: Uri, selection: String?, selectionArgs: Array<out String>?): Int = 0
+    override fun delete(
+        uri: Uri,
+        selection: String?,
+        selectionArgs: Array<out String>?,
+    ): Int = 0
 
     override fun update(
         uri: Uri,
@@ -60,6 +73,7 @@ class DebugThemeAssetProvider : ContentProvider() {
 
     private companion object {
         const val LOG_TAG = "LegadoDebug"
+
         @Volatile
         var failureArmed = false
     }

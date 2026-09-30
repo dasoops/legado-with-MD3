@@ -9,8 +9,8 @@ import io.legado.app.utils.GSON
 import io.legado.app.utils.fromJsonArray
 import io.legado.app.utils.getPrefBoolean
 import io.legado.app.utils.putPrefBoolean
-import splitties.init.appCtx
 import java.io.File
+import splitties.init.appCtx
 
 class HighlightRuleRepository(
     private val dao: HighlightRuleDao = appDb.highlightRuleDao,
@@ -18,7 +18,7 @@ class HighlightRuleRepository(
 ) {
 
     companion object {
-        const val backupFileName = "highlightRule.json"
+        const val BACKUP_FILE_NAME = "highlightRule.json"
     }
 
     data class BackupData(
@@ -28,22 +28,14 @@ class HighlightRuleRepository(
         val bracketNoteEnabled: Boolean = true,
     )
 
-    fun load(configName: String): List<HighlightRule> {
-        return clearUnreadableReferences(
-            dao.getAll().filter { it.matchesConfig(configName) }
-        )
-    }
+    fun load(configName: String): List<HighlightRule> = clearUnreadableReferences(
+        dao.getAll().filter { it.matchesConfig(configName) },
+    )
 
-    fun loadEnabled(configName: String): List<HighlightRule> {
-        return clearUnreadableReferences(
-            dao.getEnabled().filter { it.matchesConfig(configName) }
-        )
-    }
+    fun loadEnabled(configName: String): List<HighlightRule> = clearUnreadableReferences(
+        dao.getEnabled().filter { it.matchesConfig(configName) },
+    )
 
-    /**
-     * 保存指定排版的规则。
-     * 仅替换当前排版绑定的规则，不影响其他排版的规则。
-     */
     fun save(configName: String, rules: List<HighlightRule>) {
         saveForConfig(rules, configName.ifBlank { null })
     }
@@ -116,14 +108,12 @@ class HighlightRuleRepository(
         return rules
     }
 
-    fun createBackupData(configName: String): BackupData {
-        return BackupData(
-            rules = load(configName),
-            dialogEnabled = context.getPrefBoolean(PreferKey.highlightRuleDialog, true),
-            bookTitleEnabled = context.getPrefBoolean(PreferKey.highlightRuleBookTitle, true),
-            bracketNoteEnabled = context.getPrefBoolean(PreferKey.highlightRuleBracketNote, true),
-        )
-    }
+    fun createBackupData(configName: String): BackupData = BackupData(
+        rules = load(configName),
+        dialogEnabled = context.getPrefBoolean(PreferKey.highlightRuleDialog, true),
+        bookTitleEnabled = context.getPrefBoolean(PreferKey.highlightRuleBookTitle, true),
+        bracketNoteEnabled = context.getPrefBoolean(PreferKey.highlightRuleBracketNote, true),
+    )
 
     fun restoreBackupData(backupData: BackupData, backupRootPath: String? = null) {
         val rules = backupData.rules.map { rule ->
@@ -155,8 +145,8 @@ class HighlightRuleRepository(
             sampleText = sampleText,
             targetScope = normalizeTargetScope(
                 runCatching { rule.targetScope }.getOrDefault(
-                    HighlightRule.TARGET_ALL
-                )
+                    HighlightRule.TARGET_ALL,
+                ),
             ),
             enabled = runCatching { rule.enabled }.getOrDefault(true),
             position = runCatching { rule.position }.getOrDefault(0),
@@ -197,14 +187,12 @@ class HighlightRuleRepository(
         return cleaned
     }
 
-    private fun normalizeTargetScope(value: Int, fallback: Int = HighlightRule.TARGET_ALL): Int {
-        return when (value) {
-            HighlightRule.TARGET_ALL,
-            HighlightRule.TARGET_TITLE,
-            HighlightRule.TARGET_BODY -> value
-
-            else -> fallback
-        }
+    private fun normalizeTargetScope(value: Int, fallback: Int = HighlightRule.TARGET_ALL): Int = when (value) {
+        HighlightRule.TARGET_ALL,
+        HighlightRule.TARGET_TITLE,
+        HighlightRule.TARGET_BODY,
+        -> value
+        else -> fallback
     }
 
     fun createDefaultRules(): List<HighlightRule> {
@@ -217,7 +205,7 @@ class HighlightRuleRepository(
                 sampleText = "她轻声说：“今晚就出发。”",
                 position = 0,
                 enabled = ctx.getPrefBoolean(PreferKey.highlightRuleDialog, true),
-                textColor = 0xFFFF8C00.toInt()
+                textColor = 0xFFFF8C00.toInt(),
             ),
             HighlightRule(
                 id = "book_title_default",
@@ -228,7 +216,7 @@ class HighlightRuleRepository(
                 enabled = ctx.getPrefBoolean(PreferKey.highlightRuleBookTitle, true),
                 underlineMode = 3,
                 underlineWidth = 0.5f,
-                underlineColor = 0xFF63C37D.toInt()
+                underlineColor = 0xFF63C37D.toInt(),
             ),
             HighlightRule(
                 id = "bracket_note_default",
@@ -240,7 +228,7 @@ class HighlightRuleRepository(
                 textColor = 0xFF8F959E.toInt(),
                 underlineMode = 2,
                 underlineWidth = 0.5f,
-                underlineColor = 0xFF5A8DEE.toInt()
+                underlineColor = 0xFF5A8DEE.toInt(),
             ),
             HighlightRule(
                 id = "title_emphasis_default",
@@ -252,7 +240,7 @@ class HighlightRuleRepository(
                 enabled = true,
                 textColor = 0xFF333333.toInt(),
                 underlineMode = 4,
-                underlineColor = 0xFF7C5634.toInt()
+                underlineColor = 0xFF7C5634.toInt(),
             ),
             HighlightRule(
                 id = "thought_default",
@@ -264,7 +252,7 @@ class HighlightRuleRepository(
                 textColor = 0xFF9370DB.toInt(),
                 underlineMode = 1,
                 underlineWidth = 0.5f,
-                underlineColor = 0xFF9370DB.toInt()
+                underlineColor = 0xFF9370DB.toInt(),
             ),
             HighlightRule(
                 id = "narrator_default",
@@ -273,7 +261,7 @@ class HighlightRuleRepository(
                 sampleText = "（注：此处时间线与前文同步）",
                 position = 5,
                 enabled = false,
-                textColor = 0xFF708090.toInt()
+                textColor = 0xFF708090.toInt(),
             ),
             HighlightRule(
                 id = "emphasis_default",
@@ -284,7 +272,7 @@ class HighlightRuleRepository(
                 enabled = false,
                 textColor = 0xFFDC143C.toInt(),
                 underlineMode = 1,
-                underlineColor = 0xFFDC143C.toInt()
+                underlineColor = 0xFFDC143C.toInt(),
             ),
             HighlightRule(
                 id = "poetry_default",
@@ -296,7 +284,7 @@ class HighlightRuleRepository(
                 textColor = 0xFF2F4F4F.toInt(),
                 underlineMode = 3,
                 underlineWidth = 0.5f,
-                underlineColor = 0xFF2F4F4F.toInt()
+                underlineColor = 0xFF2F4F4F.toInt(),
             ),
             HighlightRule(
                 id = "ellipsis_default",
@@ -305,7 +293,7 @@ class HighlightRuleRepository(
                 sampleText = "他沉默了很久……最后还是点了头。",
                 position = 8,
                 enabled = false,
-                textColor = 0xFF8B8B8B.toInt()
+                textColor = 0xFF8B8B8B.toInt(),
             ),
             HighlightRule(
                 id = "number_default",
@@ -314,7 +302,7 @@ class HighlightRuleRepository(
                 sampleText = "原价100元，现在只要50元。",
                 position = 9,
                 enabled = false,
-                textColor = 0xFF4169E1.toInt()
+                textColor = 0xFF4169E1.toInt(),
             ),
             HighlightRule(
                 id = "english_default",
@@ -323,7 +311,7 @@ class HighlightRuleRepository(
                 sampleText = "Hello World，你好世界。",
                 position = 10,
                 enabled = false,
-                textColor = 0xFF4169E1.toInt()
+                textColor = 0xFF4169E1.toInt(),
             ),
             HighlightRule(
                 id = "date_time_default",
@@ -332,8 +320,8 @@ class HighlightRuleRepository(
                 sampleText = "2024年8月12日，上午10:30出发。",
                 position = 11,
                 enabled = false,
-                textColor = 0xFF20B2AA.toInt()
-            )
+                textColor = 0xFF20B2AA.toInt(),
+            ),
         )
     }
 
@@ -369,29 +357,17 @@ class HighlightRuleRepository(
 
     // region configName helpers
 
-    /**
-     * 判断规则是否适用于指定排版。
-     * configName 为 null 表示全局规则（适用于所有排版）。
-     * configName 为 JSON 数组字符串，如 '["日间","夜间"]'。
-     */
     private fun HighlightRule.matchesConfig(configName: String): Boolean {
         val cn = this.configName
         if (cn.isNullOrBlank()) return true // 全局规则
         return cn.configNames().contains(configName)
     }
 
-    /**
-     * 解析 configName JSON 数组为列表。
-     */
     // endregion
 }
 
-fun String.configNames(): List<String> {
-    return runCatching {
-        GSON.fromJsonArray<String>(this).getOrNull() ?: emptyList()
-    }.getOrElse { emptyList() }
-}
+fun String.configNames(): List<String> = runCatching {
+    GSON.fromJsonArray<String>(this).getOrNull() ?: emptyList()
+}.getOrElse { emptyList() }
 
-fun List<String>.toJsonArray(): String {
-    return GSON.toJson(this)
-}
+fun List<String>.toJsonArray(): String = GSON.toJson(this)

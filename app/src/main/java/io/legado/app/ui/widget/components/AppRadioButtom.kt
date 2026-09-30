@@ -15,21 +15,21 @@ fun AppRadioButton(
     selected: Boolean,
     onClick: (() -> Unit)?,
     modifier: Modifier = Modifier,
-    enabled: Boolean = true
+    enabled: Boolean = true,
 ) {
     if (ThemeResolver.isMiuixEngine(composeEngine)) {
         MiuixRadioButton(
             selected = selected,
             onClick = onClick,
             modifier = modifier,
-            enabled = enabled
+            enabled = enabled,
         )
     } else {
         RadioButton(
             selected = selected,
             onClick = onClick,
             modifier = modifier,
-            enabled = enabled
+            enabled = enabled,
         )
     }
 }

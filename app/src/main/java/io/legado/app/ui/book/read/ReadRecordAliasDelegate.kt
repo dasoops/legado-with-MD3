@@ -31,12 +31,13 @@ class ReadRecordAliasDelegate(
         val sources = readRecordRepository.getUnknownAuthorRecords(book.name)
         if (sources.isEmpty()) return
         val key = ReadRecordIdentity.key(book.name, book.author)
-        val decision = localPreferencesRepository
-            .getString(LocalPreferencesKeys.READ_RECORD_ALIAS_DECISIONS.name)
-            .first()
-            .split('\n')
-            .mapNotNull { ReadRecordAliasDecision.decode(it, key) }
-            .firstOrNull()
+        val decision =
+            localPreferencesRepository
+                .getString(LocalPreferencesKeys.READ_RECORD_ALIAS_DECISIONS.name)
+                .first()
+                .split('\n')
+                .mapNotNull { ReadRecordAliasDecision.decode(it, key) }
+                .firstOrNull()
         if (decision != null) {
             if (decision == ReadRecordAliasAction.MERGE) merge(book, sources)
             return
@@ -48,7 +49,10 @@ class ReadRecordAliasDelegate(
     }
 
     /** 处理用户的合并/保留选择，并按需记住决定。 */
-    fun resolve(merge: Boolean, rememberChoice: Boolean) {
+    fun resolve(
+        merge: Boolean,
+        rememberChoice: Boolean,
+    ) {
         val book = pendingBook
         val sources = pendingSources
         val key = pendingKey
@@ -59,9 +63,10 @@ class ReadRecordAliasDelegate(
         if (book == null) return
         scope.launch {
             if (rememberChoice && key != null) {
-                val old = localPreferencesRepository
-                    .getString(LocalPreferencesKeys.READ_RECORD_ALIAS_DECISIONS.name)
-                    .first()
+                val old =
+                    localPreferencesRepository
+                        .getString(LocalPreferencesKeys.READ_RECORD_ALIAS_DECISIONS.name)
+                        .first()
                 val cleaned = ReadRecordAliasDecision.removeForKey(old, key)
                 localPreferencesRepository.putString(
                     LocalPreferencesKeys.READ_RECORD_ALIAS_DECISIONS.name,
@@ -88,7 +93,10 @@ class ReadRecordAliasDelegate(
         }
     }
 
-    private suspend fun merge(book: Book, sources: List<ReadRecord>) {
+    private suspend fun merge(
+        book: Book,
+        sources: List<ReadRecord>,
+    ) {
         sources.groupBy { it.deviceId }.forEach { (deviceId, records) ->
             readRecordRepository.mergeIndependentReadRecordsInto(
                 ReadRecord(deviceId, book.name, book.author),

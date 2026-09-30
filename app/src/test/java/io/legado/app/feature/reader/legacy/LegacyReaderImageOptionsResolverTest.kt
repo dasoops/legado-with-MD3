@@ -9,9 +9,10 @@ import org.junit.Test
 class LegacyReaderImageOptionsResolverTest {
     @Test
     fun parsesTypedImageUrlOptions() {
-        val options = LegacyReaderImageOptionsResolver.resolve(
-            "https://example/image, {\"style\":\"right\",\"width\":\"37.5%\",\"click\":\"open(\\\"x\\\")\"}",
-        )!!
+        val options =
+            LegacyReaderImageOptionsResolver.resolve(
+                "https://example/image, {\"style\":\"right\",\"width\":\"37.5%\",\"click\":\"open(\\\"x\\\")\"}",
+            )!!
         assertEquals(ReaderImageLayoutMode.STANDALONE, options.layoutMode)
         assertEquals(ReaderTextAlignment.END, options.horizontalAlignment)
         assertEquals(.375f, options.requestedWidthFraction!!, 0f)

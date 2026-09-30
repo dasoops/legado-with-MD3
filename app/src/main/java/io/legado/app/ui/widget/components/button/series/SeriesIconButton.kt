@@ -57,7 +57,7 @@ internal val SmallButtonShape = RoundedCornerShape(50)
 internal enum class SeriesIconButtonStyle {
     Plain,
     Tonal,
-    Outlined
+    Outlined,
 }
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -78,7 +78,7 @@ internal fun SeriesButton(
     containerColor: Color? = null,
     selectedContainerColor: Color = LegadoTheme.colorScheme.primaryContainer,
     selectedContentColor: Color = LegadoTheme.colorScheme.onPrimaryContainer,
-    content: @Composable (Color) -> Unit
+    content: @Composable (Color) -> Unit,
 ) {
     var lastEnabled by remember { mutableStateOf(enabled) }
     var lastSelected by remember { mutableStateOf(selected) }
@@ -92,28 +92,31 @@ internal fun SeriesButton(
     val animSpec = if (isStateChanged) tween<Color>(150) else snap()
 
     val containerColor by animateColorAsState(
-        targetValue = when {
+        targetValue =
+        when {
             !enabled -> disabledContainerColor(style)
             selected -> selectedContainerColor
             else -> containerColor ?: containerColor(style)
         },
         animationSpec = animSpec,
-        label = "SeriesIconContainerColor"
+        label = "SeriesIconContainerColor",
     )
     val resolvedContentColor by animateColorAsState(
-        targetValue = when {
+        targetValue =
+        when {
             !enabled -> disabledContentColor(contentColor)
             selected -> selectedContentColor
             else -> contentColor
         },
         animationSpec = animSpec,
-        label = "SeriesIconContentColor"
+        label = "SeriesIconContentColor",
     )
     val border = borderStroke(style, enabled)
     val interactionSource = remember { MutableInteractionSource() }
 
     Box(
-        modifier = Modifier
+        modifier =
+        Modifier
             .then(if (enforceMinimumInteractiveSize) Modifier.minimumInteractiveComponentSize() else Modifier)
             .then(modifier)
             .then(if (size != null) Modifier.size(size) else Modifier)
@@ -126,14 +129,13 @@ internal fun SeriesButton(
                 enabled = enabled,
                 role = Role.Button,
                 onLongClick = onLongClick,
-                onClick = onClick
-            )
-            .semantics {
+                onClick = onClick,
+            ).semantics {
                 if (selected) {
                     this.selected = true
                 }
             },
-        contentAlignment = Alignment.Center
+        contentAlignment = Alignment.Center,
     ) {
         content(resolvedContentColor)
     }
@@ -170,13 +172,13 @@ internal fun SeriesIconButton(
         contentColor = contentColor,
         containerColor = containerColor,
         selectedContainerColor = selectedContainerColor,
-        selectedContentColor = selectedContentColor
+        selectedContentColor = selectedContentColor,
     ) { resolvedContentColor ->
         AppIcon(
             imageVector = icon,
             contentDescription = contentDescription,
             tint = resolvedContentColor,
-            modifier = Modifier.size(iconSize)
+            modifier = Modifier.size(iconSize),
         )
     }
 }
@@ -190,7 +192,7 @@ internal fun SeriesButtonContent(
     textStyle: TextStyle,
     contentColor: Color,
     padding: PaddingValues,
-    spacing: Dp
+    spacing: Dp,
 ) {
     val hasText = text != null
     require(hasText || !contentDescription.isNullOrBlank()) {
@@ -198,25 +200,26 @@ internal fun SeriesButtonContent(
     }
     Row(
         modifier = Modifier.padding(if (hasText) padding else PaddingValues(0.dp)),
-        horizontalArrangement = Arrangement.spacedBy(
+        horizontalArrangement =
+        Arrangement.spacedBy(
             if (hasText) spacing else 0.dp,
-            Alignment.CenterHorizontally
+            Alignment.CenterHorizontally,
         ),
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = Alignment.CenterVertically,
     ) {
         if (icon != null) {
             AppIcon(
                 imageVector = icon,
                 contentDescription = contentDescription,
                 tint = contentColor,
-                modifier = Modifier.size(iconSize)
+                modifier = Modifier.size(iconSize),
             )
         }
         if (text != null) {
             AppText(
                 text = text,
                 style = textStyle,
-                color = contentColor
+                color = contentColor,
             )
         }
     }
@@ -232,7 +235,7 @@ internal fun SeriesAnimatedButtonContent(
     textStyle: TextStyle,
     contentColor: Color,
     padding: PaddingValues,
-    spacing: Dp
+    spacing: Dp,
 ) {
     val hasText = text != null
     Row(
@@ -243,7 +246,7 @@ internal fun SeriesAnimatedButtonContent(
             imageVector = icon,
             contentDescription = contentDescription,
             tint = contentColor,
-            modifier = Modifier.size(iconSize)
+            modifier = Modifier.size(iconSize),
         )
         AnimatedVisibility(visible = showText && text != null) {
             if (text != null) {
@@ -255,7 +258,7 @@ internal fun SeriesAnimatedButtonContent(
                     softWrap = false,
                     // 间距并入动画内容，随文字一起伸缩；Row 级 spacedBy 间距不参与
                     // 动画，会在文字移除瞬间突变造成顿挫
-                    modifier = Modifier.padding(start = spacing)
+                    modifier = Modifier.padding(start = spacing),
                 )
             }
         }
@@ -265,37 +268,37 @@ internal fun SeriesAnimatedButtonContent(
 internal fun squareSize(size: Dp) = DpSize(size, size)
 
 @Composable
-private fun containerColor(style: SeriesIconButtonStyle): Color {
-    return when (style) {
-        SeriesIconButtonStyle.Plain -> Color.Transparent
-        SeriesIconButtonStyle.Tonal -> LegadoTheme.colorScheme.surfaceContainerLow
-        SeriesIconButtonStyle.Outlined -> LegadoTheme.colorScheme.surface.copy(alpha = 0f)
-    }
+private fun containerColor(style: SeriesIconButtonStyle): Color = when (style) {
+    SeriesIconButtonStyle.Plain -> Color.Transparent
+    SeriesIconButtonStyle.Tonal -> LegadoTheme.colorScheme.surfaceContainerLow
+    SeriesIconButtonStyle.Outlined -> LegadoTheme.colorScheme.surface.copy(alpha = 0f)
 }
 
 @Composable
-private fun disabledContainerColor(style: SeriesIconButtonStyle): Color {
-    return when (style) {
-        SeriesIconButtonStyle.Plain -> Color.Transparent
-        SeriesIconButtonStyle.Tonal,
-        SeriesIconButtonStyle.Outlined -> LegadoTheme.colorScheme.outlineVariant
-    }
+private fun disabledContainerColor(style: SeriesIconButtonStyle): Color = when (style) {
+    SeriesIconButtonStyle.Plain -> Color.Transparent
+    SeriesIconButtonStyle.Tonal,
+    SeriesIconButtonStyle.Outlined,
+    -> LegadoTheme.colorScheme.outlineVariant
 }
 
-private fun disabledContentColor(contentColor: Color): Color {
-    return contentColor.copy(alpha = 0.38f)
-}
+private fun disabledContentColor(contentColor: Color): Color = contentColor.copy(alpha = 0.38f)
 
 @Composable
-private fun borderStroke(style: SeriesIconButtonStyle, enabled: Boolean): BorderStroke? {
-    return when (style) {
-        SeriesIconButtonStyle.Outlined -> if (enabled) {
+private fun borderStroke(
+    style: SeriesIconButtonStyle,
+    enabled: Boolean,
+): BorderStroke? = when (style) {
+    SeriesIconButtonStyle.Outlined -> {
+        if (enabled) {
             BorderStroke(1.dp, LegadoTheme.colorScheme.outlineVariant)
         } else {
             BorderStroke(1.dp, LegadoTheme.colorScheme.outlineVariant.copy(alpha = 0.2f))
         }
-
-        SeriesIconButtonStyle.Plain,
-        SeriesIconButtonStyle.Tonal -> null
+    }
+    SeriesIconButtonStyle.Plain,
+    SeriesIconButtonStyle.Tonal,
+    -> {
+        null
     }
 }

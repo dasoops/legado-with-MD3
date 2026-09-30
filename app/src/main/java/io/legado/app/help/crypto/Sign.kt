@@ -11,13 +11,15 @@ import java.security.spec.X509EncodedKeySpec
 
 @Keep
 @Suppress("unused")
-class Sign(private val algorithm: String) {
-
-    private val keyAlgorithm = algorithm.substringBefore('/').let { name ->
-        val separator = name.lowercase().lastIndexOf("with")
-        val keyName = if (separator >= 0) name.substring(separator + 4) else name
-        if (keyName.equals("ECDSA", true)) "EC" else keyName
-    }
+class Sign(
+    private val algorithm: String,
+) {
+    private val keyAlgorithm =
+        algorithm.substringBefore('/').let { name ->
+            val separator = name.lowercase().lastIndexOf("with")
+            val keyName = if (separator >= 0) name.substring(separator + 4) else name
+            if (keyName.equals("ECDSA", true)) "EC" else keyName
+        }
     private var privateKey: PrivateKey? = null
     private var publicKey: PublicKey? = null
 
@@ -61,10 +63,12 @@ class Sign(private val algorithm: String) {
 
     fun signHex(data: InputStream): String = sign(data).toHexString()
 
-    fun verify(data: ByteArray, signature: ByteArray): Boolean = Signature.getInstance(algorithm).run {
+    fun verify(
+        data: ByteArray,
+        signature: ByteArray,
+    ): Boolean = Signature.getInstance(algorithm).run {
         initVerify(requireNotNull(publicKey) { "Public key is required for verification" })
         update(data)
         verify(signature)
     }
-
 }

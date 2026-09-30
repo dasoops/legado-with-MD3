@@ -7,7 +7,7 @@ import androidx.room.PrimaryKey
 
 @Entity(
     tableName = "search_content_history",
-    indices = [(Index(value = ["bookName", "bookAuthor", "query"], unique = true))]
+    indices = [(Index(value = ["bookName", "bookAuthor", "query"], unique = true))],
 )
 data class SearchContentHistory(
     @PrimaryKey(autoGenerate = true)
@@ -17,5 +17,5 @@ data class SearchContentHistory(
     @ColumnInfo(defaultValue = "")
     var bookAuthor: String? = null,
     var query: String = "",
-    var time: Long = System.currentTimeMillis()
+    var time: Long = System.currentTimeMillis(),
 )

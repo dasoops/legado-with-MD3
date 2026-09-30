@@ -17,14 +17,14 @@ fun PrimaryButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
-    text: String
+    text: String,
 ) {
     if (ThemeResolver.isMiuixEngine(composeEngine)) {
         MiuixButton(
             onClick = onClick,
             modifier = modifier,
             enabled = enabled,
-            colors = MiuixButtonDefaults.buttonColorsPrimary()
+            colors = MiuixButtonDefaults.buttonColorsPrimary(),
         ) {
             MiuixText(text = text, style = LegadoTheme.typography.labelLarge)
         }
@@ -44,16 +44,16 @@ fun SecondaryButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
-    text: String
+    text: String,
 ) {
     if (ThemeResolver.isMiuixEngine(composeEngine)) {
         MiuixButton(
             onClick = onClick,
             modifier = modifier,
             enabled = enabled,
-            colors = MiuixButtonDefaults.buttonColors()
+            colors = MiuixButtonDefaults.buttonColors(),
         ) {
-            MiuixText(text = text,style = LegadoTheme.typography.labelLarge)
+            MiuixText(text = text, style = LegadoTheme.typography.labelLarge)
         }
     } else {
         OutlinedButton(

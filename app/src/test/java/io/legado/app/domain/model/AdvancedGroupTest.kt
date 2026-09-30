@@ -4,16 +4,20 @@ import org.junit.Assert.assertEquals
 import org.junit.Test
 
 class AdvancedGroupTest {
-
-    private data class SampleBook(val name: String, val author: String, val tags: List<String>)
-
-    private val shelf = listOf(
-        SampleBook("三体", "刘慈欣", listOf("科幻", "宇宙", "已读")),
-        SampleBook("诡秘之主", "爱潜水的乌贼", listOf("奇幻", "冒险", "未读")),
-        SampleBook("庆余年", "猫腻", listOf("历史", "权谋", "已读")),
-        SampleBook("凡人修仙传", "忘语", listOf("仙侠", "修真", "未读")),
-        SampleBook("明朝那些事儿", "当年明月", listOf("历史", "纪实", "已读")),
+    private data class SampleBook(
+        val name: String,
+        val author: String,
+        val tags: List<String>,
     )
+
+    private val shelf =
+        listOf(
+            SampleBook("三体", "刘慈欣", listOf("科幻", "宇宙", "已读")),
+            SampleBook("诡秘之主", "爱潜水的乌贼", listOf("奇幻", "冒险", "未读")),
+            SampleBook("庆余年", "猫腻", listOf("历史", "权谋", "已读")),
+            SampleBook("凡人修仙传", "忘语", listOf("仙侠", "修真", "未读")),
+            SampleBook("明朝那些事儿", "当年明月", listOf("历史", "纪实", "已读")),
+        )
 
     private fun matchedNames(pattern: String): List<String> {
         val regex = Regex(pattern)

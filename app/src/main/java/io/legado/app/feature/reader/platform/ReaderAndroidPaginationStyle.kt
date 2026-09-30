@@ -1,10 +1,10 @@
 package io.legado.app.feature.reader.platform
 
 import android.text.TextPaint
-import io.legado.app.feature.reader.core.model.ReaderTextStyle
-import io.legado.app.feature.reader.core.model.ReaderEmphasisUnderline
 import io.legado.app.feature.reader.core.layout.ReaderColumnMode
 import io.legado.app.feature.reader.core.layout.ReaderPageUnderline
+import io.legado.app.feature.reader.core.model.ReaderEmphasisUnderline
+import io.legado.app.feature.reader.core.model.ReaderTextStyle
 import io.legado.app.feature.reader.core.source.ReaderTitleSegmentation
 
 /** Immutable-per-pagination Android shaping input, independent of the legacy page model. */
@@ -35,6 +35,8 @@ data class ReaderAndroidPaginationStyle(
     val pageUnderline: ReaderPageUnderline? = null,
     val emphasisUnderlineStyle: ReaderEmphasisUnderline? = null,
 ) {
-    fun columnCount(widthPx: Int, heightPx: Int): Int =
-        columnMode.columnCount(widthPx, heightPx, isTablet, isScroll)
+    fun columnCount(
+        widthPx: Int,
+        heightPx: Int,
+    ): Int = columnMode.columnCount(widthPx, heightPx, isTablet, isScroll)
 }

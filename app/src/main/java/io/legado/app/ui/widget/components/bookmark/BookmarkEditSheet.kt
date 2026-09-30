@@ -32,7 +32,7 @@ fun BookmarkEditSheet(
     bookmark: Bookmark,
     onDismiss: () -> Unit,
     onSave: (Bookmark) -> Unit,
-    onDelete: (Bookmark) -> Unit
+    onDelete: (Bookmark) -> Unit,
 ) {
     var showDeleteConfirmDialog by remember { mutableStateOf(false) }
     var bookText by remember(bookmark) { mutableStateOf(bookmark.bookText) }
@@ -46,22 +46,23 @@ fun BookmarkEditSheet(
             MediumTonalButton(
                 onClick = { showDeleteConfirmDialog = true },
                 icon = AppIcons.Delete,
-                contentDescription = stringResource(R.string.delete)
+                contentDescription = stringResource(R.string.delete),
             )
         },
         endAction = {
             MediumTonalButton(
                 onClick = {
-                    val newBookmark = bookmark.apply {
-                        this.bookText = bookText
-                        this.content = content
-                    }
+                    val newBookmark =
+                        bookmark.apply {
+                            this.bookText = bookText
+                            this.content = content
+                        }
                     onSave(newBookmark)
                 },
                 icon = AppIcons.Check,
-                contentDescription = stringResource(R.string.action_save)
+                contentDescription = stringResource(R.string.action_save),
             )
-        }
+        },
     ) {
         BookmarkEditContent(
             bookmark = bookmark,
@@ -83,7 +84,7 @@ fun BookmarkEditSheet(
             onDelete(bookmark)
         },
         dismissText = stringResource(R.string.cancel),
-        onDismiss = { showDeleteConfirmDialog = false }
+        onDismiss = { showDeleteConfirmDialog = false },
     )
 }
 
@@ -96,18 +97,19 @@ fun BookmarkEditContent(
     onContentChange: (String) -> Unit,
 ) {
     Column(
-        modifier = Modifier
+        modifier =
+        Modifier
             .fillMaxWidth()
             .navigationBarsPadding()
             .imePadding()
-            .verticalScroll(rememberScrollState())
+            .verticalScroll(rememberScrollState()),
     ) {
         AppTextFieldSurface(
             value = bookText,
             onValueChange = onBookTextChange,
             label = stringResource(R.string.bookmark_original_text),
             modifier = Modifier.fillMaxWidth(),
-            maxLines = 10
+            maxLines = 10,
         )
 
         Spacer(modifier = Modifier.height(12.dp))
@@ -117,7 +119,7 @@ fun BookmarkEditContent(
             onValueChange = onContentChange,
             label = stringResource(R.string.bookmark_note),
             modifier = Modifier.fillMaxWidth(),
-            maxLines = 5
+            maxLines = 5,
         )
 
         Spacer(modifier = Modifier.height(16.dp))

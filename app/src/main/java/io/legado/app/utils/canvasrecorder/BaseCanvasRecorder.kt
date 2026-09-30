@@ -3,7 +3,6 @@ package io.legado.app.utils.canvasrecorder
 import androidx.annotation.CallSuper
 
 abstract class BaseCanvasRecorder : CanvasRecorder {
-
     @JvmField
     protected var isDirty = true
 
@@ -21,16 +20,9 @@ abstract class BaseCanvasRecorder : CanvasRecorder {
         isDirty = false
     }
 
-    override fun isDirty(): Boolean {
-        return isDirty
-    }
+    override fun isDirty(): Boolean = isDirty
 
-    override fun isLocked(): Boolean {
-        return false
-    }
+    override fun isLocked(): Boolean = false
 
-    override fun needRecord(): Boolean {
-        return isDirty() && !isLocked()
-    }
-
+    override fun needRecord(): Boolean = isDirty() && !isLocked()
 }

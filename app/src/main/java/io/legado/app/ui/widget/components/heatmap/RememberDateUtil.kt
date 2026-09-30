@@ -15,52 +15,54 @@ import java.time.LocalDate
 @Composable
 fun rememberDateRange(
     dailyReadCounts: Map<LocalDate, Int>,
-    dailyReadTimes: Map<LocalDate, Long>
-): Pair<LocalDate, LocalDate> {
-    return remember(dailyReadCounts, dailyReadTimes) {
-        val firstReadDate = listOfNotNull(
+    dailyReadTimes: Map<LocalDate, Long>,
+): Pair<LocalDate, LocalDate> = remember(dailyReadCounts, dailyReadTimes) {
+    val firstReadDate =
+        listOfNotNull(
             dailyReadCounts.filterValues { it > 0 }.keys.minOrNull(),
-            dailyReadTimes.filterValues { it > 0L }.keys.minOrNull()
+            dailyReadTimes.filterValues { it > 0L }.keys.minOrNull(),
         ).minOrNull()
 
-        val lastReadDate = listOfNotNull(
+    val lastReadDate =
+        listOfNotNull(
             dailyReadCounts.filterValues { it > 0 }.keys.maxOrNull(),
-            dailyReadTimes.filterValues { it > 0L }.keys.maxOrNull()
+            dailyReadTimes.filterValues { it > 0L }.keys.maxOrNull(),
         ).maxOrNull()
 
-        val startDate = firstReadDate?.minusMonths(1) ?: LocalDate.now()
-        val endDate = lastReadDate ?: startDate
+    val startDate = firstReadDate?.minusMonths(1) ?: LocalDate.now()
+    val endDate = lastReadDate ?: startDate
 
-        startDate to endDate
-    }
+    startDate to endDate
 }
 
 /**
  * 生成日期范围内的所有日期列表
  */
 @Composable
-fun rememberDaysInRange(startDate: LocalDate, endDate: LocalDate): List<LocalDate> {
-    return remember(startDate, endDate) {
-        val list = mutableListOf<LocalDate>()
-        var current = startDate
-        while (!current.isAfter(endDate)) {
-            list.add(current)
-            current = current.plusDays(1)
-        }
-        list
+fun rememberDaysInRange(
+    startDate: LocalDate,
+    endDate: LocalDate,
+): List<LocalDate> = remember(startDate, endDate) {
+    val list = mutableListOf<LocalDate>()
+    var current = startDate
+    while (!current.isAfter(endDate)) {
+        list.add(current)
+        current = current.plusDays(1)
     }
+    list
 }
 
 /**
  * 将日期列表按周分组（补全第一周的空白天数）
  */
 @Composable
-fun rememberWeeks(days: List<LocalDate>, startDate: LocalDate): List<List<LocalDate?>> {
-    return remember(days, startDate) {
-        val firstDayOfWeekOffset = startDate.dayOfWeek.value - 1 // 周一为1
-        val padded = List(firstDayOfWeekOffset) { null } + days
-        padded.chunked(7)
-    }
+fun rememberWeeks(
+    days: List<LocalDate>,
+    startDate: LocalDate,
+): List<List<LocalDate?>> = remember(days, startDate) {
+    val firstDayOfWeekOffset = startDate.dayOfWeek.value - 1 // 周一为1
+    val padded = List(firstDayOfWeekOffset) { null } + days
+    padded.chunked(7)
 }
 
 /**
@@ -71,7 +73,7 @@ fun rememberHeatmapLevel(
     day: LocalDate,
     mode: HeatmapMode,
     dailyReadCounts: Map<LocalDate, Int>,
-    dailyReadTimes: Map<LocalDate, Long>
+    dailyReadTimes: Map<LocalDate, Long>,
 ): Int {
     val maxCount by remember(dailyReadCounts) {
         derivedStateOf { dailyReadCounts.values.maxOrNull()?.coerceAtLeast(1) ?: 1 }
@@ -81,13 +83,14 @@ fun rememberHeatmapLevel(
     }
 
     return remember(day, mode, maxCount, maxTime) {
-        val fraction = if (mode == HeatmapMode.COUNT) {
-            val value = dailyReadCounts[day] ?: 0
-            value.toFloat() / maxCount
-        } else {
-            val value = dailyReadTimes[day] ?: 0L
-            value.toFloat() / maxTime
-        }
+        val fraction =
+            if (mode == HeatmapMode.COUNT) {
+                val value = dailyReadCounts[day] ?: 0
+                value.toFloat() / maxCount
+            } else {
+                val value = dailyReadTimes[day] ?: 0L
+                value.toFloat() / maxTime
+            }
 
         when {
             fraction == 0f -> 0
@@ -106,13 +109,11 @@ fun rememberHeatmapLevel(
 fun heatmapColorForLevel(
     level: Int,
     primary: Color = LegadoTheme.colorScheme.primary,
-    emptyColor: Color = LegadoTheme.colorScheme.surface
-): Color {
-    return when (level) {
-        0 -> emptyColor
-        1 -> primary.copy(alpha = 0.35f)
-        2 -> primary.copy(alpha = 0.55f)
-        3 -> primary.copy(alpha = 0.75f)
-        else -> primary
-    }
+    emptyColor: Color = LegadoTheme.colorScheme.surface,
+): Color = when (level) {
+    0 -> emptyColor
+    1 -> primary.copy(alpha = 0.35f)
+    2 -> primary.copy(alpha = 0.55f)
+    3 -> primary.copy(alpha = 0.75f)
+    else -> primary
 }

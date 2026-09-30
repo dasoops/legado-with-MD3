@@ -4,15 +4,14 @@ import androidx.datastore.preferences.core.mutablePreferencesOf
 import io.legado.app.constant.PreferKey
 import io.legado.app.constant.ReadMenuBlurStyle
 import io.legado.app.domain.model.settings.ReadSettings
+import kotlin.reflect.full.primaryConstructor
 import kotlinx.coroutines.flow.MutableStateFlow
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
-import kotlin.reflect.full.primaryConstructor
 
 class ReadSettingsMappingTest {
-
     @Test
     fun `gateway 持久化映射覆盖 ReadSettings 全部 108 个字段`() {
         val actualKeys = ReadSettings().toGatewayPrefMap().keys
@@ -42,32 +41,36 @@ class ReadSettingsMappingTest {
 
     @Test
     fun `阅读设置 gateway 全部键写读映射逐字段对应`() {
-        val repository = ReadSettingsRepository(
-            settingsRepository = SettingsRepository(),
-            preferencesFlow = MutableStateFlow(mutablePreferencesOf()),
-        )
+        val repository =
+            ReadSettingsRepository(
+                settingsRepository = SettingsRepository(),
+                preferencesFlow = MutableStateFlow(mutablePreferencesOf()),
+            )
 
         readSettingsMappingSamples().forEach { expected ->
             assertEquals(expected.expectedGatewayPrefMap(), expected.toGatewayPrefMap())
-            val actual = with(repository) {
-                expected.expectedGatewayPrefMap().toTestPreferences().toReadSettings()
-            }
+            val actual =
+                with(repository) {
+                    expected.expectedGatewayPrefMap().toTestPreferences().toReadSettings()
+                }
             assertEquals(expected, actual)
         }
     }
 
     @Test
     fun `PageKeys previous next 通过真实原子路径对称单批写入`() {
-        val repository = ReadSettingsRepository(
-            settingsRepository = SettingsRepository(),
-            preferencesFlow = MutableStateFlow(mutablePreferencesOf()),
-        )
-        val values = captureAtomicUpdateValues(
-            current = ReadSettings(prevKeys = "old-prev", nextKeys = "old-next"),
-            read = { with(repository) { it.toReadSettings() } },
-            toPrefMap = ReadSettings::toGatewayPrefMap,
-            transform = { it.copy(prevKeys = "new-prev", nextKeys = "new-next") },
-        )
+        val repository =
+            ReadSettingsRepository(
+                settingsRepository = SettingsRepository(),
+                preferencesFlow = MutableStateFlow(mutablePreferencesOf()),
+            )
+        val values =
+            captureAtomicUpdateValues(
+                current = ReadSettings(prevKeys = "old-prev", nextKeys = "old-next"),
+                read = { with(repository) { it.toReadSettings() } },
+                toPrefMap = ReadSettings::toGatewayPrefMap,
+                transform = { it.copy(prevKeys = "new-prev", nextKeys = "new-next") },
+            )
 
         assertEquals(
             mapOf(
@@ -81,20 +84,22 @@ class ReadSettingsMappingTest {
     @Test
     fun `空快照使用精简阅读菜单默认值`() {
         val preferences = mutablePreferencesOf()
-        val repository = ReadSettingsRepository(
-            settingsRepository = SettingsRepository(),
-            preferencesFlow = MutableStateFlow(preferences),
-        )
+        val repository =
+            ReadSettingsRepository(
+                settingsRepository = SettingsRepository(),
+                preferencesFlow = MutableStateFlow(preferences),
+            )
 
-        val settings = with(repository) {
-            preferences.toReadSettings()
-        }
+        val settings =
+            with(repository) {
+                preferences.toReadSettings()
+            }
 
         assertEquals("0", settings.showBrightnessView)
         assertEquals(1, settings.readBarStyle)
         assertFalse(settings.readMenuIconShowText)
         assertTrue(settings.readMenuFloatingBottomBar)
-        assertEquals(ReadMenuBlurStyle.Solid, settings.readMenuTopBarBlurStyle)
+        assertEquals(ReadMenuBlurStyle.SOLID, settings.readMenuTopBarBlurStyle)
         assertEquals(85, settings.readMenuBlurAlpha)
         assertEquals(1, settings.readMenuBorderWidth)
         assertEquals(3, settings.titleBarIconPosition)
@@ -106,87 +111,88 @@ class ReadSettingsMappingTest {
 }
 
 private fun readSettingsMappingSamples(): List<ReadSettings> {
-    val base = ReadSettings(
-        screenOrientation = "orientation",
-        keepLight = "keep-light",
-        titleBarMode = "title-mode",
-        readMenuBlurAlpha = 37,
-        readMenuFloatingIconLiquidGlass = true,
-        showBrightnessView = "brightness-view",
-        brightnessVwPos = "brightness-pos",
-        readBrightness = 73,
-        readSliderMode = "slider-mode",
-        doubleHorizontalPage = "double-page",
-        progressBarBehavior = "chapter",
-        pageTouchSlop = 19,
-        clickImgWay = "click-way",
-        textSelectMenuConfig = "select-menu",
-        lastMarkingStyle = "marking-style",
-        prevKeys = "previous-keys",
-        nextKeys = "next-keys",
-        fontFolder = "font-folder",
-        systemTypefaces = 23,
-        preDownloadNum = 29,
-        menuAlpha = 1001,
-        expandTextMenu = true,
-        showSelectMenuIcon = false,
-        autoReadSpeed = 1004,
-        tocUiUseReplace = true,
-        tocCountWords = false,
-        useNewTocSheet = false,
-        maxLengthWithNoToc = 3000,
-        readStyleSelect = 1007,
-        comicStyleSelect = 1008,
-        shareLayout = true,
-        readBarStyleFollowPage = true,
-        readBarStyle = 1011,
-        clickActionTL = 1012,
-        clickActionTC = 1013,
-        clickActionTR = 1014,
-        clickActionML = 1015,
-        clickActionMC = 1016,
-        clickActionMR = 1017,
-        clickActionBL = 1018,
-        clickActionBC = 1019,
-        clickActionBR = 1020,
-        readMenuBgColor = 1021,
-        readMenuAccentColor = 1022,
-        readMenuContainerColor = 1023,
-        readMenuBgColorNight = 1024,
-        readMenuAccentColorNight = 1025,
-        readMenuContainerColorNight = 1026,
-        readMenuTextColor = 1027,
-        readMenuTextColorNight = 1028,
-        readMenuColorMode = 1029,
-        readMenuIconShowText = true,
-        readMenuIconStyle = 1031,
-        titleBarIconStyle = 1032,
-        readMenuIconItemsPerRow = 1033,
-        readMenuIconRowCount = 1034,
-        readMenuBottomCornerRadius = 1035,
-        readMenuFloatingBottomBar = false,
-        readMenuTopBarBlurMode = 1037,
-        readMenuBottomBarBlurMode = 1038,
-        readMenuTopBarLiquidGlassButtons = true,
-        readMenuTopBarMergeButtons = true,
-        readMenuTopBarTitleCapsule = true,
-        readMenuBottomBarLiquidGlassButtons = true,
-        readMenuTopBarBlurStyle = 1042,
-        readMenuBottomBarBlurStyle = 1043,
-        readMenuBlurRadius = 1044,
-        readMenuBlurColor = 1045,
-        readMenuBlurColorNight = 1046,
-        readMenuPaletteStyle = "readMenuPalett-47",
-        readMenuLensRadius = 1048f,
-        readMenuBorderWidth = 1049,
-        readMenuBorderColor = 1050,
-        readMenuBorderColorNight = 1051,
-        readMenuCustomIcons = "readMenuCustom-52",
-        titleBarCustomIcons = "titleBarCustom-53",
-        titleBarIconPosition = 1054,
-        showTitleBarIcons = true,
-        chineseConverterType = 1056,
-    )
+    val base =
+        ReadSettings(
+            screenOrientation = "orientation",
+            keepLight = "keep-light",
+            titleBarMode = "title-mode",
+            readMenuBlurAlpha = 37,
+            readMenuFloatingIconLiquidGlass = true,
+            showBrightnessView = "brightness-view",
+            brightnessVwPos = "brightness-pos",
+            readBrightness = 73,
+            readSliderMode = "slider-mode",
+            doubleHorizontalPage = "double-page",
+            progressBarBehavior = "chapter",
+            pageTouchSlop = 19,
+            clickImgWay = "click-way",
+            textSelectMenuConfig = "select-menu",
+            lastMarkingStyle = "marking-style",
+            prevKeys = "previous-keys",
+            nextKeys = "next-keys",
+            fontFolder = "font-folder",
+            systemTypefaces = 23,
+            preDownloadNum = 29,
+            menuAlpha = 1001,
+            expandTextMenu = true,
+            showSelectMenuIcon = false,
+            autoReadSpeed = 1004,
+            tocUiUseReplace = true,
+            tocCountWords = false,
+            useNewTocSheet = false,
+            maxLengthWithNoToc = 3000,
+            readStyleSelect = 1007,
+            comicStyleSelect = 1008,
+            shareLayout = true,
+            readBarStyleFollowPage = true,
+            readBarStyle = 1011,
+            clickActionTL = 1012,
+            clickActionTC = 1013,
+            clickActionTR = 1014,
+            clickActionML = 1015,
+            clickActionMC = 1016,
+            clickActionMR = 1017,
+            clickActionBL = 1018,
+            clickActionBC = 1019,
+            clickActionBR = 1020,
+            readMenuBgColor = 1021,
+            readMenuAccentColor = 1022,
+            readMenuContainerColor = 1023,
+            readMenuBgColorNight = 1024,
+            readMenuAccentColorNight = 1025,
+            readMenuContainerColorNight = 1026,
+            readMenuTextColor = 1027,
+            readMenuTextColorNight = 1028,
+            readMenuColorMode = 1029,
+            readMenuIconShowText = true,
+            readMenuIconStyle = 1031,
+            titleBarIconStyle = 1032,
+            readMenuIconItemsPerRow = 1033,
+            readMenuIconRowCount = 1034,
+            readMenuBottomCornerRadius = 1035,
+            readMenuFloatingBottomBar = false,
+            readMenuTopBarBlurMode = 1037,
+            readMenuBottomBarBlurMode = 1038,
+            readMenuTopBarLiquidGlassButtons = true,
+            readMenuTopBarMergeButtons = true,
+            readMenuTopBarTitleCapsule = true,
+            readMenuBottomBarLiquidGlassButtons = true,
+            readMenuTopBarBlurStyle = 1042,
+            readMenuBottomBarBlurStyle = 1043,
+            readMenuBlurRadius = 1044,
+            readMenuBlurColor = 1045,
+            readMenuBlurColorNight = 1046,
+            readMenuPaletteStyle = "readMenuPalett-47",
+            readMenuLensRadius = 1048f,
+            readMenuBorderWidth = 1049,
+            readMenuBorderColor = 1050,
+            readMenuBorderColorNight = 1051,
+            readMenuCustomIcons = "readMenuCustom-52",
+            titleBarCustomIcons = "titleBarCustom-53",
+            titleBarIconPosition = 1054,
+            showTitleBarIcons = true,
+            chineseConverterType = 1056,
+        )
     return listOf(
         ReadSettings(),
         base,

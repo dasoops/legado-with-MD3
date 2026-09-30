@@ -49,11 +49,12 @@ object ThemeConfig {
     val autoCheckNewBackup get() = backup.autoCheckNewBackup
 
     fun initNightMode() {
-        val mode = when (themeMode) {
-            "1" -> AppCompatDelegate.MODE_NIGHT_NO
-            "2" -> AppCompatDelegate.MODE_NIGHT_YES
-            else -> AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
-        }
+        val mode =
+            when (themeMode) {
+                "1" -> AppCompatDelegate.MODE_NIGHT_NO
+                "2" -> AppCompatDelegate.MODE_NIGHT_YES
+                else -> AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
+            }
         AppCompatDelegate.setDefaultNightMode(mode)
     }
 }

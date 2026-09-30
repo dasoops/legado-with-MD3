@@ -15,9 +15,9 @@ import splitties.views.onLongClick
  * Created by Invincible on 2017/12/15.
  */
 @Suppress("unused", "MemberVisibilityCanBePrivate")
-abstract class DiffRecyclerAdapter<ITEM, VB : ViewBinding>(protected val context: Context) :
-    RecyclerView.Adapter<ItemViewHolder>() {
-
+abstract class DiffRecyclerAdapter<ITEM, VB : ViewBinding>(
+    protected val context: Context,
+) : RecyclerView.Adapter<ItemViewHolder>() {
     val inflater: LayoutInflater = LayoutInflater.from(context)
 
     private val asyncListDiffer: AsyncListDiffer<ITEM> by lazy {
@@ -65,7 +65,10 @@ abstract class DiffRecyclerAdapter<ITEM, VB : ViewBinding>(protected val context
         }
     }
 
-    fun setItem(position: Int, item: ITEM) {
+    fun setItem(
+        position: Int,
+        item: ITEM,
+    ) {
         kotlin.runCatching {
             asyncListDiffer.currentList[position] = item
             notifyItemChanged(position)
@@ -82,7 +85,10 @@ abstract class DiffRecyclerAdapter<ITEM, VB : ViewBinding>(protected val context
         }
     }
 
-    fun updateItem(position: Int, payload: Any) {
+    fun updateItem(
+        position: Int,
+        payload: Any,
+    ) {
         kotlin.runCatching {
             val size = itemCount
             if (position in 0 until size) {
@@ -91,14 +97,18 @@ abstract class DiffRecyclerAdapter<ITEM, VB : ViewBinding>(protected val context
         }
     }
 
-    fun updateItems(fromPosition: Int, toPosition: Int, payloads: Any) {
+    fun updateItems(
+        fromPosition: Int,
+        toPosition: Int,
+        payloads: Any,
+    ) {
         kotlin.runCatching {
             val size = itemCount
             if (fromPosition in 0 until size && toPosition in 0 until size) {
                 notifyItemRangeChanged(
                     fromPosition,
                     toPosition - fromPosition + 1,
-                    payloads
+                    payloads,
                 )
             }
         }
@@ -115,31 +125,36 @@ abstract class DiffRecyclerAdapter<ITEM, VB : ViewBinding>(protected val context
     /**
      * grid 模式下使用
      */
-    protected open fun getSpanSize(viewType: Int, position: Int) = 1
+    protected open fun getSpanSize(
+        viewType: Int,
+        position: Int,
+    ) = 1
 
     override fun getItemCount() = getItems().size
 
-    final override fun getItemViewType(position: Int): Int {
-        return 0
-    }
+    final override fun getItemViewType(position: Int): Int = 0
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ItemViewHolder {
-        return ItemViewHolder(getViewBinding(parent))
-    }
+    override fun onCreateViewHolder(
+        parent: ViewGroup,
+        viewType: Int,
+    ): ItemViewHolder = ItemViewHolder(getViewBinding(parent))
 
     protected abstract fun getViewBinding(parent: ViewGroup): VB
 
-    final override fun onBindViewHolder(holder: ItemViewHolder, position: Int) {}
+    final override fun onBindViewHolder(
+        holder: ItemViewHolder,
+        position: Int,
+    ) {}
 
     open fun onCurrentListChanged() {
-        //可继承
+        // 可继承
     }
 
     @Suppress("UNCHECKED_CAST")
     final override fun onBindViewHolder(
         holder: ItemViewHolder,
         position: Int,
-        payloads: MutableList<Any>
+        payloads: MutableList<Any>,
     ) {
         registerListener(holder, (holder.binding as VB))
         registerItemListener(holder)
@@ -176,11 +191,10 @@ abstract class DiffRecyclerAdapter<ITEM, VB : ViewBinding>(protected val context
         val manager = recyclerView.layoutManager
         layoutManager = manager
         if (manager is GridLayoutManager) {
-            manager.spanSizeLookup = object : GridLayoutManager.SpanSizeLookup() {
-                override fun getSpanSize(position: Int): Int {
-                    return getSpanSize(getItemViewType(position), position)
+            manager.spanSizeLookup =
+                object : GridLayoutManager.SpanSizeLookup() {
+                    override fun getSpanSize(position: Int): Int = getSpanSize(getItemViewType(position), position)
                 }
-            }
         }
     }
 
@@ -195,7 +209,10 @@ abstract class DiffRecyclerAdapter<ITEM, VB : ViewBinding>(protected val context
         }
     }
 
-    protected open fun startAnimation(holder: ItemViewHolder, item: ItemAnimation) {
+    protected open fun startAnimation(
+        holder: ItemViewHolder,
+        item: ItemAnimation,
+    ) {
         item.itemAnimation?.let {
             for (anim in it.getAnimators(holder.itemView)) {
                 anim.setDuration(item.itemAnimDuration).start()
@@ -212,12 +229,14 @@ abstract class DiffRecyclerAdapter<ITEM, VB : ViewBinding>(protected val context
         holder: ItemViewHolder,
         binding: VB,
         item: ITEM,
-        payloads: MutableList<Any>
+        payloads: MutableList<Any>,
     )
 
     /**
      * 注册事件
      */
-    abstract fun registerListener(holder: ItemViewHolder, binding: VB)
-
+    abstract fun registerListener(
+        holder: ItemViewHolder,
+        binding: VB,
+    )
 }

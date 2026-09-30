@@ -29,13 +29,15 @@ class ReadContentEditDelegate(
     private val host: Host,
     private val readSettingsRepository: ReadSettingsRepository,
 ) {
-
     interface Host {
         val currentCanvasPage: ReaderPageContext?
 
         fun setActiveSheet(sheet: ReadBookSheet?)
 
-        suspend fun findChapter(bookUrl: String, chapterIndex: Int): BookChapter?
+        suspend fun findChapter(
+            bookUrl: String,
+            chapterIndex: Int,
+        ): BookChapter?
     }
 
     private val _uiState = MutableStateFlow(ContentEditUiState())
@@ -73,36 +75,45 @@ class ReadContentEditDelegate(
 
     fun load() {
         _uiState.update { it.copy(loading = true, text = "") }
-        Coroutine.async(scope, Dispatchers.IO) {
-            val book = ReadBook.book ?: return@async
-            val chapter = host.findChapter(book.bookUrl, ReadBook.durChapterIndex)
-                ?: return@async
-            val title = chapter.getDisplayTitle(
-                chineseConverterType = readSettingsRepository.currentSettings.chineseConverterType
-            )
-            val contentProcessor = ContentProcessor.get(book.name, book.origin)
-            val rawContent = BookHelp.getContent(book, chapter) ?: return@async
-            val text = contentProcessor.getContent(book, chapter, rawContent, includeTitle = false)
-                .toString()
-            val cursorOffset = resolveCursorOffset(text)
-            _uiState.update {
-                it.copy(
-                    text = text,
-                    title = title,
-                    cursorOffset = cursorOffset,
-                    isLocalTxt = book.isLocalTxt,
-                )
+        Coroutine
+            .async(scope, Dispatchers.IO) {
+                val book = ReadBook.book ?: return@async
+                val chapter =
+                    host.findChapter(book.bookUrl, ReadBook.durChapterIndex)
+                        ?: return@async
+                val title =
+                    chapter.getDisplayTitle(
+                        chineseConverterType = readSettingsRepository.currentSettings.chineseConverterType,
+                    )
+                val contentProcessor = ContentProcessor.get(book.name, book.origin)
+                val rawContent = BookHelp.getContent(book, chapter) ?: return@async
+                val text =
+                    contentProcessor
+                        .getContent(book, chapter, rawContent, includeTitle = false)
+                        .toString()
+                val cursorOffset = resolveCursorOffset(text)
+                _uiState.update {
+                    it.copy(
+                        text = text,
+                        title = title,
+                        cursorOffset = cursorOffset,
+                        isLocalTxt = book.isLocalTxt,
+                    )
+                }
+            }.onFinally {
+                _uiState.update { it.copy(loading = false) }
             }
-        }.onFinally {
-            _uiState.update { it.copy(loading = false) }
-        }
     }
 
-    fun save(content: String, saveToSource: Boolean) {
+    fun save(
+        content: String,
+        saveToSource: Boolean,
+    ) {
         Coroutine.async(scope, Dispatchers.IO) {
             val book = ReadBook.book ?: return@async
-            val chapter = host.findChapter(book.bookUrl, ReadBook.durChapterIndex)
-                ?: return@async
+            val chapter =
+                host.findChapter(book.bookUrl, ReadBook.durChapterIndex)
+                    ?: return@async
             BookHelp.saveText(book, chapter, content, saveToSource)
             ReadBook.loadContent(ReadBook.durChapterIndex, resetPageOffset = false)
         }
@@ -110,31 +121,35 @@ class ReadContentEditDelegate(
 
     fun reset() {
         _uiState.update { it.copy(loading = true) }
-        Coroutine.async(scope, Dispatchers.IO) {
-            val book = ReadBook.book ?: return@async
-            val chapter = host.findChapter(book.bookUrl, ReadBook.durChapterIndex)
-                ?: return@async
-            BookHelp.delContent(book, chapter)
-            val contentProcessor = ContentProcessor.get(book.name, book.origin)
-            val rawContent = BookHelp.getContent(book, chapter)
-            val text = if (rawContent != null) {
-                contentProcessor.getContent(book, chapter, rawContent, includeTitle = false)
-                    .toString()
-            } else {
-                ""
+        Coroutine
+            .async(scope, Dispatchers.IO) {
+                val book = ReadBook.book ?: return@async
+                val chapter =
+                    host.findChapter(book.bookUrl, ReadBook.durChapterIndex)
+                        ?: return@async
+                BookHelp.delContent(book, chapter)
+                val contentProcessor = ContentProcessor.get(book.name, book.origin)
+                val rawContent = BookHelp.getContent(book, chapter)
+                val text =
+                    if (rawContent != null) {
+                        contentProcessor
+                            .getContent(book, chapter, rawContent, includeTitle = false)
+                            .toString()
+                    } else {
+                        ""
+                    }
+                val cursorOffset = resolveCursorOffset(text)
+                _uiState.update {
+                    it.copy(
+                        text = text,
+                        cursorOffset = cursorOffset,
+                        loading = false,
+                    )
+                }
+                ReadBook.loadContent(ReadBook.durChapterIndex, resetPageOffset = false)
+            }.onError {
+                _uiState.update { it.copy(loading = false) }
             }
-            val cursorOffset = resolveCursorOffset(text)
-            _uiState.update {
-                it.copy(
-                    text = text,
-                    cursorOffset = cursorOffset,
-                    loading = false,
-                )
-            }
-            ReadBook.loadContent(ReadBook.durChapterIndex, resetPageOffset = false)
-        }.onError {
-            _uiState.update { it.copy(loading = false) }
-        }
     }
 
     // --- 光标定位：优先用打开弹层那一刻的可见首行，其次用锚点文本 ---
@@ -151,8 +166,9 @@ class ReadContentEditDelegate(
             clearPendingLocation()
             return 0
         }
-        val preferred = (pendingCursorOffset ?: currentOffset())
-            .coerceIn(0, text.length)
+        val preferred =
+            (pendingCursorOffset ?: currentOffset())
+                .coerceIn(0, text.length)
         val anchor = pendingAnchor ?: currentAnchor()
         clearPendingLocation()
         if (anchor.isNullOrBlank()) {

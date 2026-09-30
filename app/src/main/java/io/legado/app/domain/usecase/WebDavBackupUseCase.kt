@@ -6,9 +6,8 @@ import io.legado.app.domain.gateway.WebDavBackupGateway
 import io.legado.app.domain.model.WebDavBackup
 
 class WebDavBackupUseCase(
-    private val webDavBackupGateway: WebDavBackupGateway
+    private val webDavBackupGateway: WebDavBackupGateway,
 ) {
-
     val isConfigured: Boolean
         get() = webDavBackupGateway.isConfigured
 

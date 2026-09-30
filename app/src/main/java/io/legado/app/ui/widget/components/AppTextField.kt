@@ -27,10 +27,10 @@ import androidx.compose.ui.unit.dp
 import io.legado.app.ui.theme.LegadoTheme
 import io.legado.app.ui.theme.ThemeResolver
 import io.legado.app.ui.widget.components.text.AppText
-import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.basic.InputField as MiuixSearchBarInputField
 import top.yukonga.miuix.kmp.basic.TextField as MiuixTextField
 import top.yukonga.miuix.kmp.basic.TextFieldDefaults as MiuixTextFieldDefaults
+import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -68,8 +68,10 @@ fun AppTextField(
             modifier = modifier,
             enabled = enabled,
             readOnly = readOnly,
-            colors = MiuixTextFieldDefaults.textFieldColors(
-                backgroundColor = if (backgroundColor != Color.Unspecified) {
+            colors =
+            MiuixTextFieldDefaults.textFieldColors(
+                backgroundColor =
+                if (backgroundColor != Color.Unspecified) {
                     backgroundColor
                 } else {
                     MiuixTheme.colorScheme.surfaceContainerHigh
@@ -85,7 +87,7 @@ fun AppTextField(
             lineLimits = lineLimits,
             onTextLayout = onTextLayout,
             scrollState = scrollState,
-            interactionSource = interactionSource
+            interactionSource = interactionSource,
         )
     } else {
         val resolvedContentPadding =
@@ -95,19 +97,41 @@ fun AppTextField(
                 TextFieldDefaults.contentPaddingWithLabel()
             }
 
-        val resolvedColors = if (backgroundColor != Color.Unspecified) {
-            TextFieldDefaults.colors(
-                focusedContainerColor = backgroundColor,
-                unfocusedContainerColor = backgroundColor,
-                disabledContainerColor = backgroundColor,
-                errorContainerColor = backgroundColor,
-                focusedIndicatorColor = if (backgroundColor == Color.Transparent) Color.Transparent else TextFieldDefaults.colors().focusedIndicatorColor,
-                unfocusedIndicatorColor = if (backgroundColor == Color.Transparent) Color.Transparent else TextFieldDefaults.colors().unfocusedIndicatorColor,
-                disabledIndicatorColor = if (backgroundColor == Color.Transparent) Color.Transparent else TextFieldDefaults.colors().disabledIndicatorColor,
-            )
-        } else {
-            TextFieldDefaults.colors()
-        }
+        val resolvedColors =
+            if (backgroundColor != Color.Unspecified) {
+                TextFieldDefaults.colors(
+                    focusedContainerColor = backgroundColor,
+                    unfocusedContainerColor = backgroundColor,
+                    disabledContainerColor = backgroundColor,
+                    errorContainerColor = backgroundColor,
+                    focusedIndicatorColor =
+                    if (backgroundColor ==
+                        Color.Transparent
+                    ) {
+                        Color.Transparent
+                    } else {
+                        TextFieldDefaults.colors().focusedIndicatorColor
+                    },
+                    unfocusedIndicatorColor =
+                    if (backgroundColor ==
+                        Color.Transparent
+                    ) {
+                        Color.Transparent
+                    } else {
+                        TextFieldDefaults.colors().unfocusedIndicatorColor
+                    },
+                    disabledIndicatorColor =
+                    if (backgroundColor ==
+                        Color.Transparent
+                    ) {
+                        Color.Transparent
+                    } else {
+                        TextFieldDefaults.colors().disabledIndicatorColor
+                    },
+                )
+            } else {
+                TextFieldDefaults.colors()
+            }
 
         TextField(
             state = state,
@@ -133,7 +157,7 @@ fun AppTextField(
             shape = shape,
             colors = resolvedColors,
             contentPadding = resolvedContentPadding,
-            interactionSource = interactionSource
+            interactionSource = interactionSource,
         )
     }
 }
@@ -173,8 +197,10 @@ fun AppTextField(
             modifier = modifier,
             enabled = enabled,
             readOnly = readOnly,
-            colors = MiuixTextFieldDefaults.textFieldColors(
-                backgroundColor = if (backgroundColor != Color.Unspecified) {
+            colors =
+            MiuixTextFieldDefaults.textFieldColors(
+                backgroundColor =
+                if (backgroundColor != Color.Unspecified) {
                     backgroundColor
                 } else {
                     MiuixTheme.colorScheme.surfaceContainerHigh
@@ -189,22 +215,44 @@ fun AppTextField(
             singleLine = singleLine,
             maxLines = maxLines,
             minLines = minLines,
-            interactionSource = interactionSource
+            interactionSource = interactionSource,
         )
     } else {
-        val resolvedColors = if (backgroundColor != Color.Unspecified) {
-            TextFieldDefaults.colors(
-                focusedContainerColor = backgroundColor,
-                unfocusedContainerColor = backgroundColor,
-                disabledContainerColor = backgroundColor,
-                errorContainerColor = backgroundColor,
-                focusedIndicatorColor = if (backgroundColor == Color.Transparent) Color.Transparent else TextFieldDefaults.colors().focusedIndicatorColor,
-                unfocusedIndicatorColor = if (backgroundColor == Color.Transparent) Color.Transparent else TextFieldDefaults.colors().unfocusedIndicatorColor,
-                disabledIndicatorColor = if (backgroundColor == Color.Transparent) Color.Transparent else TextFieldDefaults.colors().disabledIndicatorColor,
-            )
-        } else {
-            TextFieldDefaults.colors()
-        }
+        val resolvedColors =
+            if (backgroundColor != Color.Unspecified) {
+                TextFieldDefaults.colors(
+                    focusedContainerColor = backgroundColor,
+                    unfocusedContainerColor = backgroundColor,
+                    disabledContainerColor = backgroundColor,
+                    errorContainerColor = backgroundColor,
+                    focusedIndicatorColor =
+                    if (backgroundColor ==
+                        Color.Transparent
+                    ) {
+                        Color.Transparent
+                    } else {
+                        TextFieldDefaults.colors().focusedIndicatorColor
+                    },
+                    unfocusedIndicatorColor =
+                    if (backgroundColor ==
+                        Color.Transparent
+                    ) {
+                        Color.Transparent
+                    } else {
+                        TextFieldDefaults.colors().unfocusedIndicatorColor
+                    },
+                    disabledIndicatorColor =
+                    if (backgroundColor ==
+                        Color.Transparent
+                    ) {
+                        Color.Transparent
+                    } else {
+                        TextFieldDefaults.colors().disabledIndicatorColor
+                    },
+                )
+            } else {
+                TextFieldDefaults.colors()
+            }
 
         TextField(
             value = value,
@@ -228,7 +276,7 @@ fun AppTextField(
             minLines = minLines,
             shape = shape,
             colors = resolvedColors,
-            interactionSource = interactionSource
+            interactionSource = interactionSource,
         )
     }
 }
@@ -284,7 +332,7 @@ fun AppTextFieldSurface(
         scrollState = scrollState,
         shape = shape,
         contentPadding = contentPadding,
-        interactionSource = interactionSource
+        interactionSource = interactionSource,
     )
 }
 
@@ -338,17 +386,18 @@ fun AppDenseTextField(
             enabled = enabled,
             leadingIcon = leadingIcon,
             trailingIcon = trailingIcon,
-            interactionSource = interactionSource
+            interactionSource = interactionSource,
         )
         return
     }
 
     val denseMinHeight = if (isMiuix) 45.dp else 48.dp
-    val denseBackgroundColor = if (isMiuix && backgroundColor == Color.Unspecified) {
-        MiuixTheme.colorScheme.surfaceContainerHigh
-    } else {
-        backgroundColor
-    }
+    val denseBackgroundColor =
+        if (isMiuix && backgroundColor == Color.Unspecified) {
+            MiuixTheme.colorScheme.surfaceContainerHigh
+        } else {
+            backgroundColor
+        }
 
     AppTextField(
         state = state,
@@ -374,7 +423,7 @@ fun AppDenseTextField(
         scrollState = scrollState,
         shape = shape,
         contentPadding = PaddingValues(top = 4.dp, bottom = 4.dp, start = 12.dp, end = 12.dp),
-        interactionSource = interactionSource
+        interactionSource = interactionSource,
     )
 }
 
@@ -425,6 +474,6 @@ fun AppTextFieldSurface(
         maxLines = maxLines,
         minLines = minLines,
         shape = shape,
-        interactionSource = interactionSource
+        interactionSource = interactionSource,
     )
 }

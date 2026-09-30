@@ -8,22 +8,23 @@ import org.junit.Assert.assertEquals
 import org.junit.Test
 
 class ReaderTipResourceTest {
-
     @Test
     fun `dynamic tip missing from remembered map is created instead of throwing`() {
         val oldRow = tipRow("02:49")
         val updatedRow = tipRow("02:50")
 
-        val resolved = resolveReaderTipResource(updatedRow, mapOf(oldRow to "old paint")) {
-            "paint for ${it.tips.single().text}"
-        }
+        val resolved =
+            resolveReaderTipResource(updatedRow, mapOf(oldRow to "old paint")) {
+                "paint for ${it.tips.single().text}"
+            }
 
         assertEquals("paint for 02:50", resolved)
     }
 
     private fun tipRow(text: String) = ReaderTipRow(
         visible = true,
-        tips = listOf(
+        tips =
+        listOf(
             ReaderPageTip(
                 text = text,
                 alignment = ReaderTipAlignment.END,

@@ -41,18 +41,20 @@ abstract class MobiBook(
     private val exth = headers.exth
     private val trailingFlags = mobi.trailingFlags
 
-    val charset: Charset = when (val charset = mobi.encoding) {
-        65001 -> Charsets.UTF_8
-        1252 -> Charset.forName("windows-1252")
-        else -> error("unknown charset $charset")
-    }
+    val charset: Charset =
+        when (val charset = mobi.encoding) {
+            65001 -> Charsets.UTF_8
+            1252 -> Charset.forName("windows-1252")
+            else -> error("unknown charset $charset")
+        }
 
-    private val decompressor: Decompressor = when (val compression = palmdoc.compression) {
-        1 -> PlainDecompressor()
-        2 -> Lz77Decompressor(max(4096, palmdoc.recordSize))
-        17480 -> HuffcdicDecompressor(this, mobi)
-        else -> error("unknown compression $charset")
-    }
+    private val decompressor: Decompressor =
+        when (val compression = palmdoc.compression) {
+            1 -> PlainDecompressor()
+            2 -> Lz77Decompressor(max(4096, palmdoc.recordSize))
+            17480 -> HuffcdicDecompressor(this, mobi)
+            else -> error("unknown compression $charset")
+        }
 
     @Suppress("UNCHECKED_CAST")
     val metadata: MobiMetadata by lazy {
@@ -65,7 +67,7 @@ abstract class MobiBook(
             exth["date"] as? String ?: "",
             exth["description"] as? String ?: "",
             exth["subject"] as? List<String> ?: emptyList(),
-            exth["rights"] as? String ?: ""
+            exth["rights"] as? String ?: "",
         )
     }
 
@@ -85,9 +87,7 @@ abstract class MobiBook(
         }
     }
 
-    fun getRecord(index: Int): ByteBuffer {
-        return pdbFile.getRecordData(kf8BoundaryOffset + index)
-    }
+    fun getRecord(index: Int): ByteBuffer = pdbFile.getRecordData(kf8BoundaryOffset + index)
 
     fun getTextRecord(index: Int): ByteArray {
         if (index < 0 && index >= palmdoc.numTextRecords) {
@@ -100,7 +100,6 @@ abstract class MobiBook(
 
     fun getTextRecordInputStream(): InputStream {
         return object : InputStream() {
-
             private var index = -1
             private var bis: ByteArrayInputStream = emptyByteArrayInputStream
             private var available = textRecordOffsets.last()
@@ -154,10 +153,7 @@ abstract class MobiBook(
                 return n1.toLong()
             }
 
-            override fun available(): Int {
-                return available
-            }
-
+            override fun available(): Int = available
         }
     }
 
@@ -185,9 +181,7 @@ abstract class MobiBook(
         return byteArray.copyOfRange(0, byteArray.size - extraSize)
     }
 
-    fun getResource(index: Int): ByteBuffer {
-        return pdbFile.getRecordData(resourceStart + index)
-    }
+    fun getResource(index: Int): ByteBuffer = pdbFile.getRecordData(resourceStart + index)
 
     fun getNCX(): List<NCX>? {
         val indxIndex = mobi.indx
@@ -195,20 +189,21 @@ abstract class MobiBook(
             return null
         }
         val indexData = getIndexData(indxIndex)
-        val items = indexData.table.mapIndexed { index, indexEntry ->
-            val tagMap = indexEntry.tagMap
-            NCX(
-                index,
-                tagMap[1]?.tagValues?.getOrNull(0),
-                tagMap[2]?.tagValues?.getOrNull(0),
-                indexData.cncx[tagMap[3].tagValues[0]],
-                tagMap[4]?.tagValues?.getOrNull(0),
-                tagMap[6]?.tagValues,
-                tagMap[21]?.tagValues?.getOrNull(0),
-                tagMap[22]?.tagValues?.getOrNull(0),
-                tagMap[23]?.tagValues?.getOrNull(0),
-            )
-        }
+        val items =
+            indexData.table.mapIndexed { index, indexEntry ->
+                val tagMap = indexEntry.tagMap
+                NCX(
+                    index,
+                    tagMap[1]?.tagValues?.getOrNull(0),
+                    tagMap[2]?.tagValues?.getOrNull(0),
+                    indexData.cncx[tagMap[3].tagValues[0]],
+                    tagMap[4]?.tagValues?.getOrNull(0),
+                    tagMap[6]?.tagValues,
+                    tagMap[21]?.tagValues?.getOrNull(0),
+                    tagMap[22]?.tagValues?.getOrNull(0),
+                    tagMap[23]?.tagValues?.getOrNull(0),
+                )
+            }
 
         val parentItemMap = hashMapOf<Int, ArrayList<NCX>>()
 
@@ -271,7 +266,7 @@ abstract class MobiBook(
         indxBuffer: ByteBuffer,
         tagx: TagxHeader,
         tagTable: List<TagxTag>,
-        idxtOffset: Int
+        idxtOffset: Int,
     ): IndexEntry {
         val array = indxBuffer.array()
 
@@ -351,11 +346,15 @@ abstract class MobiBook(
         return IndexEntry(label, tags, tagMap)
     }
 
-    private fun readIdxt(buffer: ByteBuffer, indxHeader: IndxHeader): IntArray {
-        return buffer.readUInt16Array(indxHeader.idxt + 4, indxHeader.numRecords)
-    }
+    private fun readIdxt(
+        buffer: ByteBuffer,
+        indxHeader: IndxHeader,
+    ): IntArray = buffer.readUInt16Array(indxHeader.idxt + 4, indxHeader.numRecords)
 
-    private fun readTagxTags(tagx: TagxHeader, tagxBuffer: ByteBuffer): List<TagxTag> {
+    private fun readTagxTags(
+        tagx: TagxHeader,
+        tagxBuffer: ByteBuffer,
+    ): List<TagxTag> {
         val numTags = (tagx.length - 12) / 4
         val tags = arrayListOf<TagxTag>()
         tagxBuffer.position(12)
@@ -369,7 +368,10 @@ abstract class MobiBook(
         return tags
     }
 
-    private fun readCncx(indxIndex: Int, indx: IndxHeader): SparseArray<String> {
+    private fun readCncx(
+        indxIndex: Int,
+        indx: IndxHeader,
+    ): SparseArray<String> {
         val cncx = SparseArray<String>()
         var cncxRecordOffset = 0
         for (i in 0..<indx.numCncx) {
@@ -415,8 +417,18 @@ abstract class MobiBook(
         val numCncx = indx.readUInt32(52)
 
         return IndxHeader(
-            magic, length, type, idxt, numRecords, encoding, language, total, ordt,
-            ligt, numLigt, numCncx
+            magic,
+            length,
+            type,
+            idxt,
+            numRecords,
+            encoding,
+            language,
+            total,
+            ordt,
+            ligt,
+            numLigt,
+            numCncx,
         )
     }
 
@@ -442,5 +454,4 @@ abstract class MobiBook(
     companion object {
         private val emptyByteArrayInputStream = ByteArrayInputStream(ByteArray(0))
     }
-
 }

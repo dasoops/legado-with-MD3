@@ -15,18 +15,21 @@ import kotlinx.coroutines.flow.asSharedFlow
  * 接住并转成事件流，ViewModel 只是订阅者。
  */
 sealed interface ReaderSessionEvent {
-
     /** 会话派生状态（菜单/进度等）需要重新同步。对应 `upMenuView`。 */
     data object StateInvalidated : ReaderSessionEvent
 
     /** [ReadBook] 请求所有者去加载目录。对应 `loadChapterList`。 */
-    data class ChapterListRequested(val book: Book) : ReaderSessionEvent
+    data class ChapterListRequested(
+        val book: Book,
+    ) : ReaderSessionEvent
 
     /** 当前会话的书被换掉。对应 `notifyBookChanged`。 */
     data object BookChanged : ReaderSessionEvent
 
     /** 云端进度比本地新，需所有者确认。对应 `sureNewProgress`。 */
-    data class NewProgressAvailable(val progress: BookProgress) : ReaderSessionEvent
+    data class NewProgressAvailable(
+        val progress: BookProgress,
+    ) : ReaderSessionEvent
 }
 
 /**
@@ -40,7 +43,6 @@ sealed interface ReaderSessionEvent {
  * 这是迁移期的桥接层：待 Track A 后续把所有权彻底从 ReadBook 收回后，可替换为真正的会话实现。
  */
 interface ReaderSession {
-
     /** 权威会话快照流。 */
     val state: StateFlow<LegacyReaderSnapshot>
 
@@ -62,7 +64,10 @@ interface ReaderSession {
     fun isCurrentBook(bookUrl: String): Boolean
 
     /** 跳转到指定章节与章内位置。 */
-    fun moveToChapter(index: Int, position: Int = 0)
+    fun moveToChapter(
+        index: Int,
+        position: Int = 0,
+    )
 
     /** 下一章。 */
     fun nextChapter()
@@ -83,8 +88,9 @@ interface ReaderSession {
  * **上一个**持有者发 `notifyBookChanged`。因此本类必须**每个所有者一份**，
  * attach/detach 与 register/unregister 一一对应，身份语义与迁移前完全一致。
  */
-class LegacyReaderSession : ReaderSession, ReadBook.CallBack {
-
+class LegacyReaderSession :
+    ReaderSession,
+    ReadBook.CallBack {
     private val _events = MutableSharedFlow<ReaderSessionEvent>(extraBufferCapacity = 16)
 
     override val events: SharedFlow<ReaderSessionEvent> = _events.asSharedFlow()
@@ -102,7 +108,10 @@ class LegacyReaderSession : ReaderSession, ReadBook.CallBack {
 
     override fun isCurrentBook(bookUrl: String): Boolean = ReadBook.isCurrentBook(bookUrl)
 
-    override fun moveToChapter(index: Int, position: Int) {
+    override fun moveToChapter(
+        index: Int,
+        position: Int,
+    ) {
         ReadBook.openChapter(index, position)
     }
 

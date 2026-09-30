@@ -56,7 +56,7 @@ fun AppModalBottomSheet(
     contentWindowInsets: @Composable () -> WindowInsets = { BottomSheetDefaults.modalWindowInsets },
     contentPaddingEnabled: Boolean = true,
     sheetGesturesEnabled: Boolean = true,
-    content: @Composable ColumnScope.() -> Unit
+    content: @Composable ColumnScope.() -> Unit,
 ) {
     val colorScheme = LocalLegadoThemeColors.current.colorScheme
     val sheetContainerColor = LegadoTheme.colorScheme.surfaceContainer
@@ -68,28 +68,38 @@ fun AppModalBottomSheet(
             show = show,
             modifier = modifier,
             title = title,
-            startAction = startAction?.let { action ->
+            startAction =
+            startAction?.let { action ->
                 {
                     ProvideAppDensity {
                         ProvideAppContentColor(sheetContentColor) {
                             CompositionLocalProvider(LocalUseMiuixWindowPopup provides true) {
                                 Box(
-                                    modifier = if (contentPaddingEnabled) Modifier
-                                    else Modifier.padding(start = 16.dp),
+                                    modifier =
+                                    if (contentPaddingEnabled) {
+                                        Modifier
+                                    } else {
+                                        Modifier.padding(start = 16.dp)
+                                    },
                                 ) { action() }
                             }
                         }
                     }
                 }
             },
-            endAction = endAction?.let { action ->
+            endAction =
+            endAction?.let { action ->
                 {
                     ProvideAppDensity {
                         ProvideAppContentColor(sheetContentColor) {
                             CompositionLocalProvider(LocalUseMiuixWindowPopup provides true) {
                                 Box(
-                                    modifier = if (contentPaddingEnabled) Modifier
-                                    else Modifier.padding(end = 16.dp),
+                                    modifier =
+                                    if (contentPaddingEnabled) {
+                                        Modifier
+                                    } else {
+                                        Modifier.padding(end = 16.dp)
+                                    },
                                 ) { action() }
                             }
                         }
@@ -106,7 +116,8 @@ fun AppModalBottomSheet(
                 ProvideAppContentColor(sheetContentColor) {
                     CompositionLocalProvider(LocalUseMiuixWindowPopup provides true) {
                         Column(
-                            modifier = Modifier
+                            modifier =
+                            Modifier
                                 .fillMaxWidth()
                                 .let {
                                     if (contentPaddingEnabled) {
@@ -114,11 +125,10 @@ fun AppModalBottomSheet(
                                     } else {
                                         it.navigationBarsPadding()
                                     }
-                                }
-                                .let { contentModifier ->
+                                }.let { contentModifier ->
                                     if (animateContentSize) contentModifier.animateContentSize() else contentModifier
                                 },
-                            content = content
+                            content = content,
                         )
                     }
                 }
@@ -126,20 +136,24 @@ fun AppModalBottomSheet(
         }
     } else {
         if (show) {
-            val sheetState = rememberBottomSheetState(
-                initialValue = Hidden,
-                enabledValues = setOf(Hidden, Expanded)
-            )
+            val sheetState =
+                rememberBottomSheetState(
+                    initialValue = Hidden,
+                    enabledValues = setOf(Hidden, Expanded),
+                )
             val density = LocalDensity.current
-            val maxHeight = with(density) {
-                LocalWindowInfo.current.containerSize.height.toDp() * 0.8f
-            }
+            val maxHeight =
+                with(density) {
+                    LocalWindowInfo.current.containerSize.height
+                        .toDp() *
+                        0.8f
+                }
 
             MaterialExpressiveTheme(
                 colorScheme = colorScheme,
                 typography = Typography(),
                 motionScheme = MotionScheme.expressive(),
-                shapes = Shapes()
+                shapes = Shapes(),
             ) {
                 ModalBottomSheet(
                     onDismissRequest = onDismissRequest,
@@ -152,7 +166,8 @@ fun AppModalBottomSheet(
                 ) {
                     ProvideAppDensity {
                         Column(
-                            modifier = Modifier
+                            modifier =
+                            Modifier
                                 .fillMaxWidth()
                                 .let {
                                     if (contentPaddingEnabled) {
@@ -160,32 +175,36 @@ fun AppModalBottomSheet(
                                     } else {
                                         it
                                     }
-                                }
-                                .heightIn(max = maxHeight)
+                                }.heightIn(max = maxHeight)
                                 .let { contentModifier ->
                                     if (animateContentSize) contentModifier.animateContentSize() else contentModifier
-                                }
-                                .then(modifier)
+                                }.then(modifier),
                         ) {
                             val hasHeader =
                                 !title.isNullOrEmpty() || startAction != null || endAction != null
 
                             if (hasHeader) {
                                 Box(
-                                    modifier = Modifier
+                                    modifier =
+                                    Modifier
                                         .fillMaxWidth()
                                         .padding(bottom = 16.dp),
-                                    contentAlignment = Alignment.Center
+                                    contentAlignment = Alignment.Center,
                                 ) {
                                     if (startAction != null) {
                                         Box(
-                                            modifier = Modifier
+                                            modifier =
+                                            Modifier
                                                 .align(Alignment.CenterStart)
                                                 .let {
-                                                    if (contentPaddingEnabled) it else it.padding(
-                                                        start = 16.dp
-                                                    )
-                                                }
+                                                    if (contentPaddingEnabled) {
+                                                        it
+                                                    } else {
+                                                        it.padding(
+                                                            start = 16.dp,
+                                                        )
+                                                    }
+                                                },
                                         ) {
                                             startAction()
                                         }
@@ -199,19 +218,24 @@ fun AppModalBottomSheet(
                                             textAlign = TextAlign.Center,
                                             maxLines = 1,
                                             overflow = TextOverflow.Ellipsis,
-                                            modifier = Modifier.padding(horizontal = 56.dp)
+                                            modifier = Modifier.padding(horizontal = 56.dp),
                                         )
                                     }
 
                                     if (endAction != null) {
                                         Box(
-                                            modifier = Modifier
+                                            modifier =
+                                            Modifier
                                                 .align(Alignment.CenterEnd)
                                                 .let {
-                                                    if (contentPaddingEnabled) it else it.padding(
-                                                        end = 16.dp
-                                                    )
-                                                }
+                                                    if (contentPaddingEnabled) {
+                                                        it
+                                                    } else {
+                                                        it.padding(
+                                                            end = 16.dp,
+                                                        )
+                                                    }
+                                                },
                                         ) {
                                             endAction()
                                         }
@@ -244,7 +268,7 @@ fun <T> AppModalBottomSheet(
     animateContentSize: Boolean = true,
     contentWindowInsets: @Composable () -> WindowInsets = { BottomSheetDefaults.modalWindowInsets },
     sheetGesturesEnabled: Boolean = true,
-    content: @Composable ColumnScope.(T) -> Unit
+    content: @Composable ColumnScope.(T) -> Unit,
 ) {
     var cachedData by remember { mutableStateOf(data) }
 
@@ -267,6 +291,6 @@ fun <T> AppModalBottomSheet(
             if (currentData != null) {
                 content(currentData)
             }
-        }
+        },
     )
 }

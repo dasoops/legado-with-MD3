@@ -7,15 +7,17 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import io.legado.app.R
 import io.legado.app.databinding.DialogWaitBinding
 
-class WaitDialog(context: Context) {
-
+class WaitDialog(
+    context: Context,
+) {
     private val binding: DialogWaitBinding =
         DialogWaitBinding.inflate(LayoutInflater.from(context))
 
-    private val dialog: Dialog = MaterialAlertDialogBuilder(context)
-        .setView(binding.root)
-        .setCancelable(true)
-        .create()
+    private val dialog: Dialog =
+        MaterialAlertDialogBuilder(context)
+            .setView(binding.root)
+            .setCancelable(true)
+            .create()
 
     init {
         binding.tvMsg.setText(R.string.loading)
@@ -40,9 +42,7 @@ class WaitDialog(context: Context) {
         dialog.dismiss()
     }
 
-    fun isShowing(): Boolean {
-        return dialog.isShowing
-    }
+    fun isShowing(): Boolean = dialog.isShowing
 
     fun setOnCancelListener(listener: () -> Unit): WaitDialog {
         dialog.setOnCancelListener { listener() }

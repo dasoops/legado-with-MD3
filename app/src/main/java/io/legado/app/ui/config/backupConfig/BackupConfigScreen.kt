@@ -75,49 +75,57 @@ fun BackupConfigRouteScreen(
     val context = LocalContext.current
     val state = viewModel.uiState.collectAsStateWithLifecycle().value
     val snackbarHostState = remember { SnackbarHostState() }
-    val selectBackupPathLauncher = rememberLauncherForActivityResult(
-        ActivityResultContracts.OpenDocumentTree()
-    ) { uri ->
-        uri ?: return@rememberLauncherForActivityResult
-        uri.takePersistablePermissionSafely(context)
-        val path = if (uri.isContentScheme()) uri.toString() else uri.path.orEmpty()
-        viewModel.onIntent(BackupConfigIntent.BackupDirectorySelected(path, runBackup = false))
-    }
-    val backupAndSelectLauncher = rememberLauncherForActivityResult(
-        ActivityResultContracts.OpenDocumentTree()
-    ) { uri ->
-        uri ?: return@rememberLauncherForActivityResult
-        uri.takePersistablePermissionSafely(context)
-        val path = if (uri.isContentScheme()) uri.toString() else uri.path.orEmpty()
-        viewModel.onIntent(BackupConfigIntent.BackupDirectorySelected(path, runBackup = true))
-    }
-    val restoreFileLauncher = rememberLauncherForActivityResult(
-        ActivityResultContracts.OpenDocument()
-    ) { uri -> uri?.let { viewModel.onIntent(BackupConfigIntent.RestoreLocal(it.toString())) } }
+    val selectBackupPathLauncher =
+        rememberLauncherForActivityResult(
+            ActivityResultContracts.OpenDocumentTree(),
+        ) { uri ->
+            uri ?: return@rememberLauncherForActivityResult
+            uri.takePersistablePermissionSafely(context)
+            val path = if (uri.isContentScheme()) uri.toString() else uri.path.orEmpty()
+            viewModel.onIntent(BackupConfigIntent.BackupDirectorySelected(path, runBackup = false))
+        }
+    val backupAndSelectLauncher =
+        rememberLauncherForActivityResult(
+            ActivityResultContracts.OpenDocumentTree(),
+        ) { uri ->
+            uri ?: return@rememberLauncherForActivityResult
+            uri.takePersistablePermissionSafely(context)
+            val path = if (uri.isContentScheme()) uri.toString() else uri.path.orEmpty()
+            viewModel.onIntent(BackupConfigIntent.BackupDirectorySelected(path, runBackup = true))
+        }
+    val restoreFileLauncher =
+        rememberLauncherForActivityResult(
+            ActivityResultContracts.OpenDocument(),
+        ) { uri -> uri?.let { viewModel.onIntent(BackupConfigIntent.RestoreLocal(it.toString())) } }
 
     LaunchedEffect(Unit) {
         viewModel.effects.collectLatest { effect ->
             when (effect) {
-                BackupConfigEffect.LaunchBackupDirectoryPicker -> selectBackupPathLauncher.launch(null)
-                BackupConfigEffect.LaunchBackupAndRunDirectoryPicker ->
+                BackupConfigEffect.LaunchBackupDirectoryPicker -> {
+                    selectBackupPathLauncher.launch(null)
+                }
+                BackupConfigEffect.LaunchBackupAndRunDirectoryPicker -> {
                     backupAndSelectLauncher.launch(null)
-                BackupConfigEffect.LaunchRestoreFilePicker ->
+                }
+                BackupConfigEffect.LaunchRestoreFilePicker -> {
                     restoreFileLauncher.launch(arrayOf("application/zip"))
+                }
                 is BackupConfigEffect.RequestStoragePermission -> {
-                    PermissionsCompat.Builder()
+                    PermissionsCompat
+                        .Builder()
                         .addPermissions(*Permissions.Group.STORAGE)
                         .rationale(R.string.tip_perm_request_storage)
                         .onGranted {
                             viewModel.onIntent(
-                                BackupConfigIntent.PerformBackup(effect.path, effect.mode)
+                                BackupConfigIntent.PerformBackup(effect.path, effect.mode),
                             )
-                        }
-                        .request()
+                        }.request()
                 }
                 is BackupConfigEffect.ShowMessage -> {
-                    val message = effect.argument?.let {
-                        context.getString(effect.messageRes, it)
-                    } ?: context.getString(effect.messageRes)
+                    val message =
+                        effect.argument?.let {
+                            context.getString(effect.messageRes, it)
+                        } ?: context.getString(effect.messageRes)
                     snackbarHostState.showSnackbar(message)
                 }
             }
@@ -155,7 +163,8 @@ fun BackupConfigScreen(
     ) { paddingValues ->
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
-            contentPadding = adaptiveContentPadding(
+            contentPadding =
+            adaptiveContentPadding(
                 top = paddingValues.calculateTopPadding(),
                 bottom = 120.dp,
             ),
@@ -305,7 +314,8 @@ private fun BackupConfigSheets(
         title = stringResource(R.string.select_restore_file),
     ) {
         LazyColumn(
-            modifier = Modifier
+            modifier =
+            Modifier
                 .fillMaxWidth()
                 .padding(bottom = 16.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -328,16 +338,16 @@ private fun BackupConfigSheets(
             onIntent(
                 BackupConfigIntent.ToggleIgnoreItem(
                     key,
-                    value
-                )
+                    value,
+                ),
             )
         },
         onToggleDbIgnoreItem = { key, value ->
             onIntent(
                 BackupConfigIntent.ToggleDbIgnoreItem(
                     key,
-                    value
-                )
+                    value,
+                ),
             )
         },
         onConfirm = { onIntent(BackupConfigIntent.SaveIgnoreItems) },
@@ -352,16 +362,16 @@ private fun BackupConfigSheets(
             onIntent(
                 BackupConfigIntent.ToggleBackupIgnoreItem(
                     key,
-                    value
-                )
+                    value,
+                ),
             )
         },
         onToggleDbIgnoreItem = { key, value ->
             onIntent(
                 BackupConfigIntent.ToggleBackupDbIgnoreItem(
                     key,
-                    value
-                )
+                    value,
+                ),
             )
         },
         onConfirm = { onIntent(BackupConfigIntent.SaveBackupIgnoreItems) },
@@ -395,13 +405,15 @@ private fun IgnoreItemsSheet(
         },
     ) {
         Column(
-            modifier = Modifier
+            modifier =
+            Modifier
                 .fillMaxWidth()
                 .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(4.dp),
         ) {
             CardTabRow(
-                tabTitles = listOf(
+                tabTitles =
+                listOf(
                     stringResource(R.string.config_ignore),
                     stringResource(R.string.database_ignore),
                 ),
@@ -418,7 +430,6 @@ private fun IgnoreItemsSheet(
                         )
                     }
                 }
-
                 1 -> {
                     dbIgnoreItems.forEach { item: BackupIgnoreItem ->
                         CheckboxItem(
@@ -463,7 +474,8 @@ private fun BackupConfigDialogs(
                         },
                         backgroundColor = LegadoTheme.colorScheme.surface,
                         label = stringResource(R.string.web_dav_pw),
-                        visualTransformation = if (it.passwordVisible) {
+                        visualTransformation =
+                        if (it.passwordVisible) {
                             VisualTransformation.None
                         } else {
                             PasswordVisualTransformation()
@@ -474,14 +486,19 @@ private fun BackupConfigDialogs(
                                 onIntent(BackupConfigIntent.TogglePasswordVisibility)
                             }) {
                                 Icon(
-                                    imageVector = if (it.passwordVisible) {
+                                    imageVector =
+                                    if (it.passwordVisible) {
                                         Icons.Filled.Visibility
                                     } else {
                                         Icons.Filled.VisibilityOff
                                     },
-                                    contentDescription = stringResource(
-                                        if (it.passwordVisible) R.string.hide_password
-                                        else R.string.show_password
+                                    contentDescription =
+                                    stringResource(
+                                        if (it.passwordVisible) {
+                                            R.string.hide_password
+                                        } else {
+                                            R.string.show_password
+                                        },
                                     ),
                                 )
                             }

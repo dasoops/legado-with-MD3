@@ -1,12 +1,35 @@
 package io.legado.app.domain.gateway
 
 sealed interface ReadStyleMutation {
-    data class IntValue(val key: ReadStyleIntKey, val value: Int) : ReadStyleMutation
-    data class FloatValue(val key: ReadStyleFloatKey, val value: Float) : ReadStyleMutation
-    data class BooleanValue(val key: ReadStyleBooleanKey, val value: Boolean) : ReadStyleMutation
-    data class StringValue(val key: ReadStyleStringKey, val value: String) : ReadStyleMutation
-    data class ColorValue(val key: ReadStyleColorKey, val value: Int) : ReadStyleMutation
-    data class Background(val type: Int, val value: String) : ReadStyleMutation
+    data class IntValue(
+        val key: ReadStyleIntKey,
+        val value: Int,
+    ) : ReadStyleMutation
+
+    data class FloatValue(
+        val key: ReadStyleFloatKey,
+        val value: Float,
+    ) : ReadStyleMutation
+
+    data class BooleanValue(
+        val key: ReadStyleBooleanKey,
+        val value: Boolean,
+    ) : ReadStyleMutation
+
+    data class StringValue(
+        val key: ReadStyleStringKey,
+        val value: String,
+    ) : ReadStyleMutation
+
+    data class ColorValue(
+        val key: ReadStyleColorKey,
+        val value: Int,
+    ) : ReadStyleMutation
+
+    data class Background(
+        val type: Int,
+        val value: String,
+    ) : ReadStyleMutation
 }
 
 enum class ReadStyleIntKey {

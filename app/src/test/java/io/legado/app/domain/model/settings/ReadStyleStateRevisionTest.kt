@@ -17,7 +17,6 @@ import org.junit.Test
  * 主构造函数里挪走（或标成不参与相等性），这里会红。
  */
 class ReadStyleStateRevisionTest {
-
     @Test
     fun `三项投影字段不变时 StateFlow 会丢掉这次发射`() {
         val flow = MutableStateFlow(ReadStyleState(revision = 7L))

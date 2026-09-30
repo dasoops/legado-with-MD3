@@ -31,7 +31,7 @@ import kotlin.math.roundToInt
 @Suppress("UNUSED_PARAMETER", "unused", "MemberVisibilityCanBePrivate", "PropertyName")
 class PhotoView @JvmOverloads constructor(
     context: Context,
-    attrs: AttributeSet? = null
+    attrs: AttributeSet? = null,
 ) : AppCompatImageView(context, attrs) {
     val MIN_ROTATE = 35
     val ANIMA_DURING = 340
@@ -63,10 +63,10 @@ class PhotoView @JvmOverloads constructor(
     private var isKnowSize = false
     private var hasOverTranslate = false
 
-    //缩放
+    // 缩放
     var isEnable = true
 
-    //旋转
+    // 旋转
     var isRotateEnable = false
     private var isInit = false
     private var mAdjustViewBounds = false
@@ -128,9 +128,7 @@ class PhotoView @JvmOverloads constructor(
     /**
      * 获取默认的动画持续时间
      */
-    fun getDefaultAnimDuring(): Int {
-        return ANIMA_DURING
-    }
+    fun getDefaultAnimDuring(): Int = ANIMA_DURING
 
     override fun setOnClickListener(l: OnClickListener?) {
         super.setOnClickListener(l)
@@ -161,9 +159,7 @@ class PhotoView @JvmOverloads constructor(
     /**
      * 获取动画持续时间
      */
-    fun getAnimDuring(): Int {
-        return mAnimaDuring
-    }
+    fun getAnimDuring(): Int = mAnimaDuring
 
     /**
      * 设置动画的持续时间
@@ -182,9 +178,7 @@ class PhotoView @JvmOverloads constructor(
     /**
      * 获取最大可以缩放的倍数
      */
-    fun getMaxScale(): Float {
-        return mMaxScale
-    }
+    fun getMaxScale(): Float = mMaxScale
 
     /**
      */
@@ -213,11 +207,11 @@ class PhotoView @JvmOverloads constructor(
         initBase()
     }
 
-    private fun hasSize(d: Drawable): Boolean {
-        return !((d.intrinsicHeight <= 0 || d.intrinsicWidth <= 0)
-                && (d.minimumWidth <= 0 || d.minimumHeight <= 0)
-                && (d.bounds.width() <= 0 || d.bounds.height() <= 0))
-    }
+    private fun hasSize(d: Drawable): Boolean = !(
+        (d.intrinsicHeight <= 0 || d.intrinsicWidth <= 0) &&
+            (d.minimumWidth <= 0 || d.minimumHeight <= 0) &&
+            (d.bounds.width() <= 0 || d.bounds.height() <= 0)
+        )
 
     private fun getDrawableWidth(d: Drawable): Int {
         var width = d.intrinsicWidth
@@ -404,7 +398,7 @@ class PhotoView @JvmOverloads constructor(
         if (p == null) {
             p = ViewGroup.LayoutParams(
                 ViewGroup.LayoutParams.WRAP_CONTENT,
-                ViewGroup.LayoutParams.WRAP_CONTENT
+                ViewGroup.LayoutParams.WRAP_CONTENT,
             )
         }
         width = if (p.width == ViewGroup.LayoutParams.MATCH_PARENT) {
@@ -472,20 +466,18 @@ class PhotoView @JvmOverloads constructor(
         super.draw(canvas)
     }
 
-    override fun dispatchTouchEvent(event: MotionEvent): Boolean {
-        return if (isEnable) {
-            val action = event.actionMasked
-            if (event.pointerCount >= 2) hasMultiTouch = true
-            mDetector.onTouchEvent(event)
-            if (isRotateEnable) {
-                mRotateDetector.onTouchEvent(event)
-            }
-            mScaleDetector.onTouchEvent(event)
-            if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL) onUp()
-            true
-        } else {
-            super.dispatchTouchEvent(event)
+    override fun dispatchTouchEvent(event: MotionEvent): Boolean = if (isEnable) {
+        val action = event.actionMasked
+        if (event.pointerCount >= 2) hasMultiTouch = true
+        mDetector.onTouchEvent(event)
+        if (isRotateEnable) {
+            mRotateDetector.onTouchEvent(event)
         }
+        mScaleDetector.onTouchEvent(event)
+        if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL) onUp()
+        true
+    } else {
+        super.dispatchTouchEvent(event)
     }
 
     private fun onUp() {
@@ -493,7 +485,11 @@ class PhotoView @JvmOverloads constructor(
         if (canRotate || mDegrees % 90 != 0f) {
             var toDegrees = (mDegrees / 90).toInt() * 90.toFloat()
             val remainder = mDegrees % 90
-            if (remainder > 45) toDegrees += 90f else if (remainder < -45) toDegrees -= 90f
+            if (remainder > 45) {
+                toDegrees += 90f
+            } else if (remainder < -45) {
+                toDegrees -= 90f
+            }
             mTranslate.withRotate(mDegrees.toInt(), toDegrees.toInt())
             mDegrees = toDegrees
         }
@@ -525,8 +521,10 @@ class PhotoView @JvmOverloads constructor(
         var tx = 0
         var ty = 0
         if (imgRect.width() <= mWidgetRect.width()) {
-            if (!isImageCenterWidth(imgRect)) tx =
-                (-((mWidgetRect.width() - imgRect.width()) / 2 - imgRect.left)).toInt()
+            if (!isImageCenterWidth(imgRect)) {
+                tx =
+                    (-((mWidgetRect.width() - imgRect.width()) / 2 - imgRect.left)).toInt()
+            }
         } else {
             if (imgRect.left > mWidgetRect.left) {
                 tx = (imgRect.left - mWidgetRect.left).toInt()
@@ -535,8 +533,10 @@ class PhotoView @JvmOverloads constructor(
             }
         }
         if (imgRect.height() <= mWidgetRect.height()) {
-            if (!isImageCenterHeight(imgRect)) ty =
-                (-((mWidgetRect.height() - imgRect.height()) / 2 - imgRect.top)).toInt()
+            if (!isImageCenterHeight(imgRect)) {
+                ty =
+                    (-((mWidgetRect.height() - imgRect.height()) / 2 - imgRect.top)).toInt()
+            }
         } else {
             if (imgRect.top > mWidgetRect.top) {
                 ty = (imgRect.top - mWidgetRect.top).toInt()
@@ -550,27 +550,19 @@ class PhotoView @JvmOverloads constructor(
         }
     }
 
-    private fun isImageCenterHeight(rect: RectF): Boolean {
-        return abs(rect.top.roundToInt() - (mWidgetRect.height() - rect.height()) / 2) < 1
-    }
+    private fun isImageCenterHeight(rect: RectF): Boolean = abs(rect.top.roundToInt() - (mWidgetRect.height() - rect.height()) / 2) < 1
 
-    private fun isImageCenterWidth(rect: RectF): Boolean {
-        return abs(rect.left.roundToInt() - (mWidgetRect.width() - rect.width()) / 2) < 1
-    }
+    private fun isImageCenterWidth(rect: RectF): Boolean = abs(rect.left.roundToInt() - (mWidgetRect.width() - rect.width()) / 2) < 1
 
     private fun resistanceScrollByX(
         overScroll: Float,
-        detalX: Float
-    ): Float {
-        return detalX * (abs(abs(overScroll) - MAX_OVER_RESISTANCE) / MAX_OVER_RESISTANCE.toFloat())
-    }
+        detalX: Float,
+    ): Float = detalX * (abs(abs(overScroll) - MAX_OVER_RESISTANCE) / MAX_OVER_RESISTANCE.toFloat())
 
     private fun resistanceScrollByY(
         overScroll: Float,
-        detalY: Float
-    ): Float {
-        return detalY * (abs(abs(overScroll) - MAX_OVER_RESISTANCE) / MAX_OVER_RESISTANCE.toFloat())
-    }
+        detalY: Float,
+    ): Float = detalY * (abs(abs(overScroll) - MAX_OVER_RESISTANCE) / MAX_OVER_RESISTANCE.toFloat())
 
     /**
      * 匹配两个Rect的共同部分输出到out，若无共同部分则输出0，0，0，0
@@ -602,28 +594,28 @@ class PhotoView @JvmOverloads constructor(
     }
 
     fun canScrollHorizontallySelf(direction: Float): Boolean {
-        if (mImgRect.width() <= mWidgetRect.width())
+        if (mImgRect.width() <= mWidgetRect.width()) {
             return false
-        if (direction < 0 && mImgRect.left.roundToInt() - direction >= mWidgetRect.left)
+        }
+        if (direction < 0 && mImgRect.left.roundToInt() - direction >= mWidgetRect.left) {
             return false
+        }
         return !(direction > 0 && mImgRect.right.roundToInt() - direction <= mWidgetRect.right)
     }
 
     fun canScrollVerticallySelf(direction: Float): Boolean {
-        if (mImgRect.height() <= mWidgetRect.height())
+        if (mImgRect.height() <= mWidgetRect.height()) {
             return false
-        if (direction < 0 && mImgRect.top.roundToInt() - direction >= mWidgetRect.top)
+        }
+        if (direction < 0 && mImgRect.top.roundToInt() - direction >= mWidgetRect.top) {
             return false
+        }
         return !(direction > 0 && mImgRect.bottom.roundToInt() - direction <= mWidgetRect.bottom)
     }
 
-    override fun canScrollHorizontally(direction: Int): Boolean {
-        return if (hasMultiTouch) true else canScrollHorizontallySelf(direction.toFloat())
-    }
+    override fun canScrollHorizontally(direction: Int): Boolean = if (hasMultiTouch) true else canScrollHorizontallySelf(direction.toFloat())
 
-    override fun canScrollVertically(direction: Int): Boolean {
-        return if (hasMultiTouch) true else canScrollVerticallySelf(direction.toFloat())
-    }
+    override fun canScrollVertically(direction: Int): Boolean = if (hasMultiTouch) true else canScrollVerticallySelf(direction.toFloat())
 
     private inner class InterpolatorProxy : Interpolator {
         private var mTarget: Interpolator?
@@ -636,10 +628,7 @@ class PhotoView @JvmOverloads constructor(
             mTarget = interpolator
         }
 
-        override fun getInterpolation(input: Float): Float {
-            return mTarget?.getInterpolation(input) ?: input
-        }
-
+        override fun getInterpolation(input: Float): Float = mTarget?.getInterpolation(input) ?: input
     }
 
     private inner class Transform : Runnable {
@@ -682,7 +671,7 @@ class PhotoView @JvmOverloads constructor(
                 0,
                 ((to - form) * 10000).toInt(),
                 0,
-                mAnimaDuring
+                mAnimaDuring,
             )
         }
 
@@ -692,14 +681,14 @@ class PhotoView @JvmOverloads constructor(
             deltaX: Float,
             deltaY: Float,
             d: Int,
-            c: ClipCalculate?
+            c: ClipCalculate?,
         ) {
             mClipScroller.startScroll(
                 (fromX * 10000).toInt(),
                 (fromY * 10000).toInt(),
                 (deltaX * 10000).toInt(),
                 (deltaY * 10000).toInt(),
-                d
+                d,
             )
             this.c = c
         }
@@ -745,7 +734,7 @@ class PhotoView @JvmOverloads constructor(
                 minY,
                 maxY,
                 if (abs(overX) < MAX_FLING_OVER_SCROLL * 2) 0 else MAX_FLING_OVER_SCROLL,
-                if (abs(overY) < MAX_FLING_OVER_SCROLL * 2) 0 else MAX_FLING_OVER_SCROLL
+                if (abs(overY) < MAX_FLING_OVER_SCROLL * 2) 0 else MAX_FLING_OVER_SCROLL,
             )
         }
 
@@ -764,7 +753,6 @@ class PhotoView @JvmOverloads constructor(
         }
 
         override fun run() {
-
             // if (!isRuning) return;
             var endAnima = true
             if (mScaleScroller.computeScrollOffset()) {
@@ -800,7 +788,7 @@ class PhotoView @JvmOverloads constructor(
                     sx,
                     sy,
                     (mImgRect.left + mImgRect.right) / 2,
-                    c!!.calculateTop()
+                    c!!.calculateTop(),
                 )
                 mTmpMatrix.mapRect(mClipRect, mImgRect)
                 if (sx == 1f) {
@@ -862,7 +850,6 @@ class PhotoView @JvmOverloads constructor(
         private fun postExecute() {
             if (isRunning) post(this)
         }
-
     }
 
     fun getInfo(): Info {
@@ -879,7 +866,7 @@ class PhotoView @JvmOverloads constructor(
             mScreenCenter,
             mScale,
             mDegrees,
-            mScaleType
+            mScaleType,
         )
     }
 
@@ -896,7 +883,7 @@ class PhotoView @JvmOverloads constructor(
             p[0] + imgRect.left,
             p[1] + imgRect.top,
             p[0] + imgRect.right,
-            p[1] + imgRect.bottom
+            p[1] + imgRect.bottom,
         )
         val widgetRect = RectF(0F, 0F, imgView.width.toFloat(), imgView.height.toFloat())
         val baseRect = RectF(widgetRect)
@@ -909,7 +896,7 @@ class PhotoView @JvmOverloads constructor(
             screenCenter,
             1F,
             0F,
-            imgView.scaleType
+            imgView.scaleType,
         )
     }
 
@@ -943,21 +930,15 @@ class PhotoView @JvmOverloads constructor(
     }
 
     inner class START : ClipCalculate {
-        override fun calculateTop(): Float {
-            return mImgRect.top
-        }
+        override fun calculateTop(): Float = mImgRect.top
     }
 
     inner class END : ClipCalculate {
-        override fun calculateTop(): Float {
-            return mImgRect.bottom
-        }
+        override fun calculateTop(): Float = mImgRect.bottom
     }
 
     inner class OTHER : ClipCalculate {
-        override fun calculateTop(): Float {
-            return (mImgRect.top + mImgRect.bottom) / 2
-        }
+        override fun calculateTop(): Float = (mImgRect.top + mImgRect.bottom) / 2
     }
 
     /**
@@ -998,13 +979,19 @@ class PhotoView @JvmOverloads constructor(
                 clipX = if (clipX > 1) 1F else clipX
                 clipY = if (clipY > 1) 1F else clipY
                 val c =
-                    if (info.mScaleType == ScaleType.FIT_START) START() else if (info.mScaleType == ScaleType.FIT_END) END() else OTHER()
+                    if (info.mScaleType == ScaleType.FIT_START) {
+                        START()
+                    } else if (info.mScaleType == ScaleType.FIT_END) {
+                        END()
+                    } else {
+                        OTHER()
+                    }
                 mTranslate.withClip(clipX, clipY, 1 - clipX, 1 - clipY, mAnimaDuring / 3, c)
                 mTmpMatrix.setScale(
                     clipX,
                     clipY,
                     (mImgRect.left + mImgRect.right) / 2,
-                    c.calculateTop()
+                    c.calculateTop(),
                 )
                 mTmpMatrix.mapRect(mTranslate.mClipRect, mImgRect)
                 mClip = mTranslate.mClipRect
@@ -1018,7 +1005,7 @@ class PhotoView @JvmOverloads constructor(
 
     fun animaTo(
         info: Info,
-        completeCallBack: Runnable
+        completeCallBack: Runnable,
     ) {
         if (isInit) {
             mTranslate.stop()
@@ -1045,7 +1032,7 @@ class PhotoView @JvmOverloads constructor(
                 0,
                 0,
                 (tcx - mScaleCenter.x).toInt(),
-                (tcy - mScaleCenter.y).toInt()
+                (tcy - mScaleCenter.y).toInt(),
             )
             mTranslate.withScale(mScale, scale)
             mTranslate.withRotate(mDegrees.toInt(), info.mDegrees.toInt(), mAnimaDuring * 2 / 3)
@@ -1057,10 +1044,16 @@ class PhotoView @JvmOverloads constructor(
                 val cx = clipX
                 val cy = clipY
                 val c =
-                    if (info.mScaleType == ScaleType.FIT_START) START() else if (info.mScaleType == ScaleType.FIT_END) END() else OTHER()
+                    if (info.mScaleType == ScaleType.FIT_START) {
+                        START()
+                    } else if (info.mScaleType == ScaleType.FIT_END) {
+                        END()
+                    } else {
+                        OTHER()
+                    }
                 postDelayed(
                     { mTranslate.withClip(1F, 1F, -1 + cx, -1 + cy, mAnimaDuring / 2, c) },
-                    mAnimaDuring / 2.toLong()
+                    mAnimaDuring / 2.toLong(),
                 )
             }
             mCompleteCallBack = completeCallBack
@@ -1080,7 +1073,7 @@ class PhotoView @JvmOverloads constructor(
         override fun onRotate(
             degrees: Float,
             focusX: Float,
-            focusY: Float
+            focusY: Float,
         ) {
             mRotateFlag += degrees
             if (canRotate) {
@@ -1112,27 +1105,31 @@ class PhotoView @JvmOverloads constructor(
             e1: MotionEvent?,
             e2: MotionEvent,
             velocityX: Float,
-            velocityY: Float
+            velocityY: Float,
         ): Boolean {
             if (hasMultiTouch) return false
             if (!imgLargeWidth && !imgLargeHeight) return false
             if (mTranslate.isRunning) return false
             var vx = velocityX
             var vy = velocityY
-            if (mImgRect.left.roundToInt() >= mWidgetRect.left
-                || mImgRect.right.roundToInt() <= mWidgetRect.right
+            if (mImgRect.left.roundToInt() >= mWidgetRect.left ||
+                mImgRect.right.roundToInt() <= mWidgetRect.right
             ) {
                 vx = 0f
             }
-            if (mImgRect.top.roundToInt() >= mWidgetRect.top
-                || mImgRect.bottom.roundToInt() <= mWidgetRect.bottom
+            if (mImgRect.top.roundToInt() >= mWidgetRect.top ||
+                mImgRect.bottom.roundToInt() <= mWidgetRect.bottom
             ) {
                 vy = 0f
             }
             if (canRotate || mDegrees % 90 != 0f) {
                 var toDegrees = (mDegrees / 90).toInt() * 90.toFloat()
                 val remainder = mDegrees % 90
-                if (remainder > 45) toDegrees += 90f else if (remainder < -45) toDegrees -= 90f
+                if (remainder > 45) {
+                    toDegrees += 90f
+                } else if (remainder < -45) {
+                    toDegrees -= 90f
+                }
                 mTranslate.withRotate(mDegrees.toInt(), toDegrees.toInt())
                 mDegrees = toDegrees
             }
@@ -1147,7 +1144,7 @@ class PhotoView @JvmOverloads constructor(
             e1: MotionEvent?,
             e2: MotionEvent,
             distanceX: Float,
-            distanceY: Float
+            distanceY: Float,
         ): Boolean {
             var x = distanceX
             var y = distanceY
@@ -1155,38 +1152,52 @@ class PhotoView @JvmOverloads constructor(
                 mTranslate.stop()
             }
             if (canScrollHorizontallySelf(x)) {
-                if (x < 0 && mImgRect.left - x > mWidgetRect.left)
+                if (x < 0 && mImgRect.left - x > mWidgetRect.left) {
                     x = mImgRect.left
-                if (x > 0 && mImgRect.right - x < mWidgetRect.right)
+                }
+                if (x > 0 && mImgRect.right - x < mWidgetRect.right) {
                     x = mImgRect.right - mWidgetRect.right
+                }
                 mAnimMatrix.postTranslate(-x, 0f)
                 mTranslateX -= x.toInt()
             } else if (imgLargeWidth || hasMultiTouch || hasOverTranslate) {
                 checkRect()
                 if (!hasMultiTouch) {
-                    if (x < 0 && mImgRect.left - x > mCommonRect.left) x =
-                        resistanceScrollByX(mImgRect.left - mCommonRect.left, x)
-                    if (x > 0 && mImgRect.right - x < mCommonRect.right) x =
-                        resistanceScrollByX(mImgRect.right - mCommonRect.right, x)
+                    if (x < 0 && mImgRect.left - x > mCommonRect.left) {
+                        x =
+                            resistanceScrollByX(mImgRect.left - mCommonRect.left, x)
+                    }
+                    if (x > 0 && mImgRect.right - x < mCommonRect.right) {
+                        x =
+                            resistanceScrollByX(mImgRect.right - mCommonRect.right, x)
+                    }
                 }
                 mTranslateX -= x.toInt()
                 mAnimMatrix.postTranslate(-x, 0f)
                 hasOverTranslate = true
             }
             if (canScrollVerticallySelf(y)) {
-                if (y < 0 && mImgRect.top - y > mWidgetRect.top) y =
-                    mImgRect.top
-                if (y > 0 && mImgRect.bottom - y < mWidgetRect.bottom) y =
-                    mImgRect.bottom - mWidgetRect.bottom
+                if (y < 0 && mImgRect.top - y > mWidgetRect.top) {
+                    y =
+                        mImgRect.top
+                }
+                if (y > 0 && mImgRect.bottom - y < mWidgetRect.bottom) {
+                    y =
+                        mImgRect.bottom - mWidgetRect.bottom
+                }
                 mAnimMatrix.postTranslate(0f, -y)
                 mTranslateY -= y.toInt()
             } else if (imgLargeHeight || hasOverTranslate || hasMultiTouch) {
                 checkRect()
                 if (!hasMultiTouch) {
-                    if (y < 0 && mImgRect.top - y > mCommonRect.top) y =
-                        resistanceScrollByY(mImgRect.top - mCommonRect.top, y)
-                    if (y > 0 && mImgRect.bottom - y < mCommonRect.bottom) y =
-                        resistanceScrollByY(mImgRect.bottom - mCommonRect.bottom, y)
+                    if (y < 0 && mImgRect.top - y > mCommonRect.top) {
+                        y =
+                            resistanceScrollByY(mImgRect.top - mCommonRect.top, y)
+                    }
+                    if (y > 0 && mImgRect.bottom - y < mCommonRect.bottom) {
+                        y =
+                            resistanceScrollByY(mImgRect.bottom - mCommonRect.bottom, y)
+                    }
                 }
                 mAnimMatrix.postTranslate(0f, -y)
                 mTranslateY -= y.toInt()
@@ -1240,20 +1251,18 @@ class PhotoView @JvmOverloads constructor(
             val scaleFactor = detector.scaleFactor
             if (java.lang.Float.isNaN(scaleFactor) || java.lang.Float.isInfinite(scaleFactor)) return false
             mScale *= scaleFactor
-            //mScaleCenter.set(detector.getFocusX(), detector.getFocusY());
+            // mScaleCenter.set(detector.getFocusX(), detector.getFocusY());
             mAnimMatrix.postScale(
                 scaleFactor,
                 scaleFactor,
                 detector.focusX,
-                detector.focusY
+                detector.focusY,
             )
             executeTranslate()
             return true
         }
 
-        override fun onScaleBegin(detector: ScaleGestureDetector): Boolean {
-            return true
-        }
+        override fun onScaleBegin(detector: ScaleGestureDetector): Boolean = true
 
         override fun onScaleEnd(detector: ScaleGestureDetector) {}
     }

@@ -9,9 +9,7 @@ abstract class VMBaseActivity<VB : ViewBinding, VM : ViewModel>(
     theme: Theme = Theme.Auto,
     toolBarTheme: Theme = Theme.Auto,
     transparent: Boolean = false,
-    imageBg: Boolean = true
+    imageBg: Boolean = true,
 ) : BaseActivity<VB>(fullScreen, toolBarTheme, transparent, imageBg) {
-
     protected abstract val viewModel: VM
-
 }

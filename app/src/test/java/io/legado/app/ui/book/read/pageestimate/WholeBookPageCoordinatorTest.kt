@@ -12,34 +12,36 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class WholeBookPageCoordinatorTest {
-
-    private val config = PageEstimateConfig(
-        readerType = 0,
-        textSizePx = 32f,
-        textHeightPx = 38.4f,
-        lineSpacingPx = 8f,
-        paragraphSpacingPx = 4f,
-        titleTextSizePx = 40f,
-        titleTextHeightPx = 48f,
-        titleLineSpacingPx = 0f,
-        titleTopSpacingPx = 20f,
-        titleBottomSpacingPx = 20f,
-        endPaddingPx = 20f,
-        contentWidthPx = 1080,
-        contentHeightPx = 1920,
-    )
+    private val config =
+        PageEstimateConfig(
+            readerType = 0,
+            textSizePx = 32f,
+            textHeightPx = 38.4f,
+            lineSpacingPx = 8f,
+            paragraphSpacingPx = 4f,
+            titleTextSizePx = 40f,
+            titleTextHeightPx = 48f,
+            titleLineSpacingPx = 0f,
+            titleTopSpacingPx = 20f,
+            titleBottomSpacingPx = 20f,
+            endPaddingPx = 20f,
+            contentWidthPx = 1080,
+            contentHeightPx = 1920,
+        )
 
     @Test
     fun `pending exact correction is replayed after estimate`() = runBlocking {
         val changed = CompletableDeferred<Unit>()
-        val coordinator = WholeBookPageCoordinator(this, ChapterPageEstimator { 3f }) {
-            changed.complete(Unit)
-        }
+        val coordinator =
+            WholeBookPageCoordinator(this, ChapterPageEstimator { 3f }) {
+                changed.complete(Unit)
+            }
         val loaderGate = CompletableDeferred<Unit>()
-        val generation = coordinator.requestEstimate(config, BOOK_ID) {
-            loaderGate.await()
-            chapters(2)
-        }
+        val generation =
+            coordinator.requestEstimate(config, BOOK_ID) {
+                loaderGate.await()
+                chapters(2)
+            }
 
         coordinator.correctChapter(0, realPageCount = 7, layoutGeneration = generation)
         loaderGate.complete(Unit)
@@ -54,13 +56,15 @@ class WholeBookPageCoordinatorTest {
     fun `older generation cannot publish or correct newer result`() = runBlocking {
         val oldLoader = CompletableDeferred<Unit>()
         val coordinator = WholeBookPageCoordinator(this, ChapterPageEstimator { it.contentLength.toFloat() })
-        val oldGeneration = coordinator.requestEstimate(config, BOOK_ID) {
-            oldLoader.await()
-            chapters(1, contentLength = 9)
-        }
-        val newGeneration = coordinator.requestEstimate(config, BOOK_ID) {
-            chapters(1, contentLength = 4)
-        }
+        val oldGeneration =
+            coordinator.requestEstimate(config, BOOK_ID) {
+                oldLoader.await()
+                chapters(1, contentLength = 9)
+            }
+        val newGeneration =
+            coordinator.requestEstimate(config, BOOK_ID) {
+                chapters(1, contentLength = 4)
+            }
 
         awaitState(coordinator)
         coordinator.correctChapter(0, 20, oldGeneration)
@@ -77,10 +81,11 @@ class WholeBookPageCoordinatorTest {
     fun `waiting paginator is released when estimate generation is replaced`() = runBlocking {
         val loaderGate = CompletableDeferred<Unit>()
         val coordinator = WholeBookPageCoordinator(this, ChapterPageEstimator { 3f })
-        val oldGeneration = coordinator.requestEstimate(config, BOOK_ID) {
-            loaderGate.await()
-            chapters(1)
-        }
+        val oldGeneration =
+            coordinator.requestEstimate(config, BOOK_ID) {
+                loaderGate.await()
+                chapters(1)
+            }
         val oldReady = async { coordinator.awaitInitialized(oldGeneration) }
 
         coordinator.requestEstimate(config, BOOK_ID) { chapters(1) }
@@ -133,10 +138,11 @@ class WholeBookPageCoordinatorTest {
     fun `length update arriving before estimate is replayed`() = runBlocking {
         val loaderGate = CompletableDeferred<Unit>()
         val coordinator = WholeBookPageCoordinator(this, ChapterPageEstimator { it.contentLength.toFloat() })
-        val generation = coordinator.requestEstimate(config, BOOK_ID) {
-            loaderGate.await()
-            chapters(2, contentLength = null)
-        }
+        val generation =
+            coordinator.requestEstimate(config, BOOK_ID) {
+                loaderGate.await()
+                chapters(2, contentLength = null)
+            }
 
         coordinator.updateChapterLength(0, actualLength = 400, layoutGeneration = generation)
         loaderGate.complete(Unit)
@@ -176,19 +182,22 @@ class WholeBookPageCoordinatorTest {
     fun `exact result records metrics and both calibration buckets`() = runBlocking {
         val calibrationStore = FakeCalibrationStore()
         val recordedMetrics = mutableListOf<PageEstimateMetric>()
-        val coordinator = WholeBookPageCoordinator(
-            scope = this,
-            estimator = ChapterPageEstimator { 10f },
-            calibrationStore = calibrationStore,
-            metrics = PageEstimateMetrics { recordedMetrics += it },
-        )
+        val coordinator =
+            WholeBookPageCoordinator(
+                scope = this,
+                estimator = ChapterPageEstimator { 10f },
+                calibrationStore = calibrationStore,
+                metrics = PageEstimateMetrics { recordedMetrics += it },
+            )
         val generation = coordinator.requestEstimate(config, BOOK_ID) { chapters(1) }
         awaitState(coordinator)
 
         coordinator.correctChapter(0, realPageCount = 20, layoutGeneration = generation)
 
-        val correction = recordedMetrics.filterIsInstance<PageEstimateMetric.ChapterCorrected>()
-            .single()
+        val correction =
+            recordedMetrics
+                .filterIsInstance<PageEstimateMetric.ChapterCorrected>()
+                .single()
         assertEquals(10f, correction.rawEstimate, 0.0001f)
         assertEquals(10, correction.estimatedPages)
         assertEquals(20, correction.realPages)
@@ -202,11 +211,12 @@ class WholeBookPageCoordinatorTest {
     @Test
     fun `book scoped fit wins over the layout wide prior`() = runBlocking {
         val calibrationStore = FakeCalibrationStore()
-        val coordinator = WholeBookPageCoordinator(
-            scope = this,
-            estimator = ChapterPageEstimator { 4f },
-            calibrationStore = calibrationStore,
-        )
+        val coordinator =
+            WholeBookPageCoordinator(
+                scope = this,
+                estimator = ChapterPageEstimator { 4f },
+                calibrationStore = calibrationStore,
+            )
         calibrationStore.fitEverything(slope = 3f, intercept = 0f)
 
         coordinator.requestEstimate(config, BOOK_ID) { chapters(2) }
@@ -228,25 +238,29 @@ class WholeBookPageCoordinatorTest {
 
     @Test
     fun `matching cached exact count overrides calibrated estimate without recording OLS`() = runBlocking {
-        val calibrationStore = FakeCalibrationStore().apply {
-            fitEverything(slope = 2f, intercept = 0f)
-        }
-        val exactStore = FakeExactPageCountStore().apply {
-            values += exactCount(chapterIndex = 0, contentHash = 11L, pageCount = 7)
-        }
-        val coordinator = WholeBookPageCoordinator(
-            scope = this,
-            estimator = ChapterPageEstimator { 10f },
-            calibrationStore = calibrationStore,
-            exactPageCountStore = exactStore,
-        )
-
-        val generation = coordinator.requestEstimate(config, BOOK_ID) {
-            listOf(
-                ChapterLengthInfo(0, "chapter-0", 10, contentLength = 100, contentHash = 11L),
-                ChapterLengthInfo(1, "chapter-1", 10, contentLength = 100, contentHash = 12L),
+        val calibrationStore =
+            FakeCalibrationStore().apply {
+                fitEverything(slope = 2f, intercept = 0f)
+            }
+        val exactStore =
+            FakeExactPageCountStore().apply {
+                values += exactCount(chapterIndex = 0, contentHash = 11L, pageCount = 7)
+            }
+        val coordinator =
+            WholeBookPageCoordinator(
+                scope = this,
+                estimator = ChapterPageEstimator { 10f },
+                calibrationStore = calibrationStore,
+                exactPageCountStore = exactStore,
             )
-        }
+
+        val generation =
+            coordinator.requestEstimate(config, BOOK_ID) {
+                listOf(
+                    ChapterLengthInfo(0, "chapter-0", 10, contentLength = 100, contentHash = 11L),
+                    ChapterLengthInfo(1, "chapter-1", 10, contentLength = 100, contentHash = 12L),
+                )
+            }
         assertTrue(coordinator.awaitInitialized(generation))
 
         assertEquals(27, coordinator.getState(0, 0)?.totalPages)
@@ -260,14 +274,16 @@ class WholeBookPageCoordinatorTest {
 
     @Test
     fun `content hash mismatch drops stale exact count`() = runBlocking {
-        val exactStore = FakeExactPageCountStore().apply {
-            values += exactCount(chapterIndex = 0, contentHash = 11L, pageCount = 7)
-        }
-        val coordinator = WholeBookPageCoordinator(
-            scope = this,
-            estimator = ChapterPageEstimator { 10f },
-            exactPageCountStore = exactStore,
-        )
+        val exactStore =
+            FakeExactPageCountStore().apply {
+                values += exactCount(chapterIndex = 0, contentHash = 11L, pageCount = 7)
+            }
+        val coordinator =
+            WholeBookPageCoordinator(
+                scope = this,
+                estimator = ChapterPageEstimator { 10f },
+                exactPageCountStore = exactStore,
+            )
 
         coordinator.requestEstimate(config, BOOK_ID) {
             listOf(ChapterLengthInfo(0, "chapter-0", 10, contentLength = 100, contentHash = 99L))
@@ -282,14 +298,16 @@ class WholeBookPageCoordinatorTest {
     @Test
     fun `new exact result is persisted with strict layout identity`() = runBlocking {
         val exactStore = FakeExactPageCountStore()
-        val coordinator = WholeBookPageCoordinator(
-            scope = this,
-            estimator = ChapterPageEstimator { 10f },
-            exactPageCountStore = exactStore,
-        )
-        val generation = coordinator.requestEstimate(config, BOOK_ID) {
-            listOf(ChapterLengthInfo(0, "chapter-0", 10, contentLength = 100, contentHash = 11L))
-        }
+        val coordinator =
+            WholeBookPageCoordinator(
+                scope = this,
+                estimator = ChapterPageEstimator { 10f },
+                exactPageCountStore = exactStore,
+            )
+        val generation =
+            coordinator.requestEstimate(config, BOOK_ID) {
+                listOf(ChapterLengthInfo(0, "chapter-0", 10, contentLength = 100, contentHash = 11L))
+            }
         awaitState(coordinator)
 
         coordinator.correctChapter(0, realPageCount = 7, layoutGeneration = generation)
@@ -323,10 +341,12 @@ class WholeBookPageCoordinatorTest {
         const val BOOK_ID = "book://test"
     }
 
-    private fun chapters(count: Int, contentLength: Int? = 1_000) =
-        List(count) { index ->
-            ChapterLengthInfo(index, "chapter-$index", 10, contentLength = contentLength)
-        }
+    private fun chapters(
+        count: Int,
+        contentLength: Int? = 1_000,
+    ) = List(count) { index ->
+        ChapterLengthInfo(index, "chapter-$index", 10, contentLength = contentLength)
+    }
 
     private fun exactCount(
         chapterIndex: Int,
@@ -348,8 +368,7 @@ class WholeBookPageCoordinatorTest {
         private var fit: PageEstimateCalibration? = null
         val recorded = mutableMapOf<Long, Pair<Float, Int>>()
 
-        override fun get(bucket: Long): PageEstimateCalibration =
-            fit ?: PageEstimateCalibration()
+        override fun get(bucket: Long): PageEstimateCalibration = fit ?: PageEstimateCalibration()
 
         override fun record(
             bucket: Long,
@@ -360,13 +379,17 @@ class WholeBookPageCoordinatorTest {
             return get(bucket)
         }
 
-        fun fitEverything(slope: Float, intercept: Float) {
-            fit = PageEstimateCalibration(
-                slope = slope,
-                intercept = intercept,
-                sampleCount = PageEstimateCalibration.MIN_SAMPLES,
-                fitted = true,
-            )
+        fun fitEverything(
+            slope: Float,
+            intercept: Float,
+        ) {
+            fit =
+                PageEstimateCalibration(
+                    slope = slope,
+                    intercept = intercept,
+                    sampleCount = PageEstimateCalibration.MIN_SAMPLES,
+                    fitted = true,
+                )
         }
     }
 
@@ -378,19 +401,24 @@ class WholeBookPageCoordinatorTest {
             layoutSignature: Long,
             engineVersion: Int,
         ) = values.filter {
-            it.bookId == bookId && it.layoutSignature == layoutSignature &&
+            it.bookId == bookId &&
+                it.layoutSignature == layoutSignature &&
                 it.engineVersion == engineVersion
         }
 
         override suspend fun save(value: ExactChapterPageCount) {
             values.removeAll {
-                it.bookId == value.bookId && it.chapterId == value.chapterId &&
+                it.bookId == value.bookId &&
+                    it.chapterId == value.chapterId &&
                     it.layoutSignature == value.layoutSignature
             }
             values += value
         }
 
-        override suspend fun deleteChapter(bookId: String, chapterId: String) {
+        override suspend fun deleteChapter(
+            bookId: String,
+            chapterId: String,
+        ) {
             values.removeAll { it.bookId == bookId && it.chapterId == chapterId }
         }
     }

@@ -1,10 +1,10 @@
 package io.legado.app.ui.book.read
 
-import org.junit.Assert.assertTrue
-import org.junit.Test
 import java.io.File
 import kotlin.reflect.KClass
 import kotlin.reflect.full.primaryConstructor
+import org.junit.Assert.assertTrue
+import org.junit.Test
 
 /**
  * Track E · E0 —— 排版快照的完备性不变式。
@@ -18,7 +18,6 @@ import kotlin.reflect.full.primaryConstructor
  * 之后，本测试应改写为真正的实例断言（构造快照 → 派生 → 逐字段比对）。
  */
 class ReaderConfigSnapshotInvariantTest {
-
     @Test
     fun `buildSheetConfig 覆盖 ReadSheetConfigUiState 的每个字段`() {
         assertAllFieldsAssigned(
@@ -35,14 +34,18 @@ class ReaderConfigSnapshotInvariantTest {
         )
     }
 
-    private fun assertAllFieldsAssigned(stateType: KClass<*>, functionSignature: String) {
+    private fun assertAllFieldsAssigned(
+        stateType: KClass<*>,
+        functionSignature: String,
+    ) {
         val body = viewModelSource().functionBodyAfter(functionSignature)
         val assigned = NAMED_ARGUMENT.findAll(body).map { it.groupValues[1] }.toSet()
-        val missing = stateType.primaryConstructor
-            ?.parameters
-            ?.mapNotNull { it.name }
-            ?.filterNot { it in assigned }
-            .orEmpty()
+        val missing =
+            stateType.primaryConstructor
+                ?.parameters
+                ?.mapNotNull { it.name }
+                ?.filterNot { it in assigned }
+                .orEmpty()
 
         assertTrue(
             "${stateType.simpleName} 的以下字段没有在 $functionSignature 里被赋值，" +
@@ -63,7 +66,9 @@ class ReaderConfigSnapshotInvariantTest {
         var depth = 0
         for (index in open until length) {
             when (this[index]) {
-                '(' -> depth++
+                '(' -> {
+                    depth++
+                }
                 ')' -> {
                     depth--
                     if (depth == 0) return substring(open + 1, index)
@@ -73,8 +78,7 @@ class ReaderConfigSnapshotInvariantTest {
         error("`$signature` 的括号未配平")
     }
 
-    private fun viewModelSource(): String =
-        mainSourceFile("io/legado/app/ui/book/read/ReadBookViewModel.kt").readText()
+    private fun viewModelSource(): String = mainSourceFile("io/legado/app/ui/book/read/ReadBookViewModel.kt").readText()
 
     private companion object {
         /** 只认行首缩进后的具名实参，避免把嵌套调用里的 `a = b` 也算进来。 */

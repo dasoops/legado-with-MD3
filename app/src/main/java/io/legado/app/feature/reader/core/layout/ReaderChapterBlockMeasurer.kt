@@ -15,7 +15,10 @@ fun interface ReaderTextShaperFactory {
 }
 
 fun interface ReaderHtmlSourceResolver {
-    fun resolve(html: String, chapterPosition: Int): List<ReaderHtmlParagraph>?
+    fun resolve(
+        html: String,
+        chapterPosition: Int,
+    ): List<ReaderHtmlParagraph>?
 }
 
 data class ReaderHtmlParagraph(
@@ -35,7 +38,10 @@ data class ReaderParagraphDecoration(
     val leadingOffsetPx: Float = 0f,
 )
 
-data class ReaderImageDimensions(val widthPx: Float, val heightPx: Float)
+data class ReaderImageDimensions(
+    val widthPx: Float,
+    val heightPx: Float,
+)
 
 enum class ReaderImageLayoutMode { AUTO, INLINE, STANDALONE, FULL_WIDTH, SINGLE_PAGE }
 
@@ -80,8 +86,13 @@ data class ReaderChapterMeasureStyle(
 )
 
 sealed interface ReaderChapterMeasureResult {
-    data class Success(val blocks: List<ReaderMeasuredBlock>) : ReaderChapterMeasureResult
-    data class Unsupported(val reason: String) : ReaderChapterMeasureResult
+    data class Success(
+        val blocks: List<ReaderMeasuredBlock>,
+    ) : ReaderChapterMeasureResult
+
+    data class Unsupported(
+        val reason: String,
+    ) : ReaderChapterMeasureResult
 }
 
 class ReaderChapterBlockMeasurer(
@@ -98,6 +109,7 @@ class ReaderChapterBlockMeasurer(
     ): ReaderChapterMeasureResult {
         val blocks = ArrayList<ReaderMeasuredBlock>(source.blocks.size)
         val shapers = mutableMapOf<ReaderTextStyle, ReaderTextShaper>()
+
         fun shaper(textStyle: ReaderTextStyle) = shapers.getOrPut(textStyle) {
             textShaperFactory.create(textStyle)
         }
@@ -106,6 +118,7 @@ class ReaderChapterBlockMeasurer(
             val shaped = shaper(style.bodyStyle).shape(bodyIndentText)
             shaped.widthsPx.sum() + (style.letterSpacingEm ?: 0f) * style.bodyStyle.fontSizePx * shaped.text.size
         }
+
         suspend fun addStyledParagraph(
             items: List<ReaderChapterInlineSource>,
             isTitle: Boolean,
@@ -118,36 +131,55 @@ class ReaderChapterBlockMeasurer(
             decorations: List<ReaderParagraphDecoration> = emptyList(),
             justifyAtWordBoundaries: Boolean = false,
         ): ReaderChapterMeasureResult.Unsupported? {
-            val baseStyle = if (isTitle) style.titleStyle.copy(
-                fontSizePx = style.titleStyle.fontSizePx * titleScale,
-            ) else style.bodyStyle
+            val baseStyle =
+                if (isTitle) {
+                    style.titleStyle.copy(
+                        fontSizePx = style.titleStyle.fontSizePx * titleScale,
+                    )
+                } else {
+                    style.bodyStyle
+                }
             val subtitleBounds = if (isTitle && isSubtitle) shaper(baseStyle).fontBounds else null
-            val lineHeight = subtitleBounds?.heightPx
-                ?: if (isTitle) style.titleLineHeightPx?.times(titleScale) else style.bodyLineHeightPx
-            val baselineOffset = subtitleBounds?.baselineOffsetPx
-                ?: if (isTitle) style.titleBaselineOffsetPx?.times(titleScale) else style.bodyBaselineOffsetPx
-            val titleSpacingScale = if (subtitleBounds != null) {
-                subtitleBounds.heightPx / (style.titleLineHeightPx ?: style.titleStyle.fontSizePx).coerceAtLeast(1f)
-            } else titleScale
+            val lineHeight =
+                subtitleBounds?.heightPx
+                    ?: if (isTitle) style.titleLineHeightPx?.times(titleScale) else style.bodyLineHeightPx
+            val baselineOffset =
+                subtitleBounds?.baselineOffsetPx
+                    ?: if (isTitle) style.titleBaselineOffsetPx?.times(titleScale) else style.bodyBaselineOffsetPx
+            val titleSpacingScale =
+                if (subtitleBounds != null) {
+                    subtitleBounds.heightPx / (style.titleLineHeightPx ?: style.titleStyle.fontSizePx).coerceAtLeast(1f)
+                } else {
+                    titleScale
+                }
             val blankLine = items.singleOrNull() as? ReaderChapterInlineSource.BlankLine
             if (blankLine != null) {
-                blocks += ReaderMeasuredBlock.BlankLine(
-                    chapterPosition = blankLine.chapterPosition,
-                    lineHeightPx = lineHeight ?: baseStyle.fontSizePx,
-                    lineSpacingMultiplier = if (isTitle) {
-                        style.titleLineSpacingMultiplier
-                    } else style.bodyLineSpacingMultiplier,
-                )
+                blocks +=
+                    ReaderMeasuredBlock.BlankLine(
+                        chapterPosition = blankLine.chapterPosition,
+                        lineHeightPx = lineHeight ?: baseStyle.fontSizePx,
+                        lineSpacingMultiplier =
+                        if (isTitle) {
+                            style.titleLineSpacingMultiplier
+                        } else {
+                            style.bodyLineSpacingMultiplier
+                        },
+                    )
                 return null
             }
             val firstText = items.firstOrNull() as? ReaderChapterInlineSource.Text
-            val prefixEnd = firstText?.takeIf {
-                applyBodyIndent && !isTitle && bodyIndentText.isNotEmpty() &&
-                    it.value.startsWith(bodyIndentText)
-            }?.let { it.chapterPosition + bodyIndentText.length }
+            val prefixEnd =
+                firstText
+                    ?.takeIf {
+                        applyBodyIndent &&
+                            !isTitle &&
+                            bodyIndentText.isNotEmpty() &&
+                            it.value.startsWith(bodyIndentText)
+                    }?.let { it.chapterPosition + bodyIndentText.length }
             var emittedContent = false
             var hasStandaloneImage = false
             val inline = mutableListOf<ReaderMeasuredInlineItem>()
+
             fun flushInline(skipBlank: Boolean = false) {
                 if (inline.isEmpty()) return
                 // Processed paragraphs include indentation even when they contain only an image.
@@ -156,29 +188,39 @@ class ReaderChapterBlockMeasurer(
                     inline.clear()
                     return
                 }
-                val leadingIndentItems = if (prefixEnd == null) 0 else inline.takeWhile {
-                    it is ReaderMeasuredInlineItem.Text && it.chapterPosition < prefixEnd
-                }.size
-                val needsIndent = applyBodyIndent && !isTitle &&
-                    leadingIndentItems == 0 && !emittedContent
+                val leadingIndentItems =
+                    if (prefixEnd == null) {
+                        0
+                    } else {
+                        inline
+                            .takeWhile {
+                                it is ReaderMeasuredInlineItem.Text && it.chapterPosition < prefixEnd
+                            }.size
+                    }
+                val needsIndent =
+                    applyBodyIndent &&
+                        !isTitle &&
+                        leadingIndentItems == 0 &&
+                        !emittedContent
                 val htmlFirstLineMargin = if (emittedContent) restLineMarginPx else firstLineMarginPx
-                blocks += ReaderMeasuredBlock.InlineParagraph(
-                    items = inline.toList(),
-                    indentCharacters = if (needsIndent) style.bodyIndentCharacters else 0,
-                    indentWidthPx = if (needsIndent) bodyIndentWidth else htmlFirstLineMargin,
-                    restLineIndentWidthPx = restLineMarginPx,
-                    leadingIndentItems = leadingIndentItems,
-                    decorations = decorations,
-                    justifyAtWordBoundaries = justifyAtWordBoundaries,
-                    alignment = alignmentOverride ?: if (isTitle) style.titleAlignment else style.bodyAlignment,
-                    lineHeightPx = lineHeight ?: baseStyle.fontSizePx,
-                    baselineOffsetPx = baselineOffset ?: baseStyle.fontSizePx,
-                    baseTextSizePx = baseStyle.fontSizePx,
-                    emphasized = isTitle,
-                    titleSpacingScale = if (isTitle) titleSpacingScale else 1f,
-                    lineSpacingMultiplier = if (isTitle) style.titleLineSpacingMultiplier else style.bodyLineSpacingMultiplier,
-                    letterSpacingPx = style.letterSpacingEm?.times(baseStyle.fontSizePx),
-                )
+                blocks +=
+                    ReaderMeasuredBlock.InlineParagraph(
+                        items = inline.toList(),
+                        indentCharacters = if (needsIndent) style.bodyIndentCharacters else 0,
+                        indentWidthPx = if (needsIndent) bodyIndentWidth else htmlFirstLineMargin,
+                        restLineIndentWidthPx = restLineMarginPx,
+                        leadingIndentItems = leadingIndentItems,
+                        decorations = decorations,
+                        justifyAtWordBoundaries = justifyAtWordBoundaries,
+                        alignment = alignmentOverride ?: if (isTitle) style.titleAlignment else style.bodyAlignment,
+                        lineHeightPx = lineHeight ?: baseStyle.fontSizePx,
+                        baselineOffsetPx = baselineOffset ?: baseStyle.fontSizePx,
+                        baseTextSizePx = baseStyle.fontSizePx,
+                        emphasized = isTitle,
+                        titleSpacingScale = if (isTitle) titleSpacingScale else 1f,
+                        lineSpacingMultiplier = if (isTitle) style.titleLineSpacingMultiplier else style.bodyLineSpacingMultiplier,
+                        letterSpacingPx = style.letterSpacingEm?.times(baseStyle.fontSizePx),
+                    )
                 inline.clear()
                 emittedContent = true
             }
@@ -190,25 +232,27 @@ class ReaderChapterBlockMeasurer(
                         var offset = 0
                         initiallyShaped.text.forEachIndexed { clusterIndex, cluster ->
                             val position = item.chapterPosition + offset
-                            val rangeStyle = style.styleRanges
-                                .takeIf(List<ReaderStyleRange>::isNotEmpty)
-                                ?.let {
-                                    ReaderCharacterStyleResolver.resolve(
-                                        it,
-                                        position,
-                                        isTitle
-                                    )
-                                }
+                            val rangeStyle =
+                                style.styleRanges
+                                    .takeIf(List<ReaderStyleRange>::isNotEmpty)
+                                    ?.let {
+                                        ReaderCharacterStyleResolver.resolve(
+                                            it,
+                                            position,
+                                            isTitle,
+                                        )
+                                    }
                             val textStyle = htmlStyle.merge(rangeStyle)
                             val textShaper = shaper(textStyle)
                             // The paragraph was already shaped with htmlStyle to obtain its
                             // grapheme clusters. For the overwhelmingly common unstyled glyph,
                             // reuse that width instead of shaping the same glyph a second time.
-                            val width = if (textStyle == htmlStyle) {
-                                initiallyShaped.widthsPx.getOrElse(clusterIndex) { 0f }
-                            } else {
-                                textShaper.shape(cluster).widthsPx.firstOrNull() ?: 0f
-                            }
+                            val width =
+                                if (textStyle == htmlStyle) {
+                                    initiallyShaped.widthsPx.getOrElse(clusterIndex) { 0f }
+                                } else {
+                                    textShaper.shape(cluster).widthsPx.firstOrNull() ?: 0f
+                                }
                             // The paragraph already owns the base line box (including the special
                             // subtitle bounds). Style overrides and baseline-shift spans need
                             // per-glyph metrics so their visual extents can expand the shared line.
@@ -218,24 +262,27 @@ class ReaderChapterBlockMeasurer(
                             // the shared row metrics made line and paragraph spacing vary with
                             // the text a rule happened to match.  HTML baseline shifts and a
                             // requested size offset still need their own visual extents.
-                            val lineMetrics = textShaper.fontLineMetrics.takeIf {
-                                hasBaselineShift || rangeStyle?.fontSizeOffsetPx != 0f
-                            }
-                            val baselineShift = lineMetrics?.let { metrics ->
-                                (if (item.style.superscript) -metrics.ascentPx / 2f else 0f) +
-                                    (if (item.style.subscript) metrics.descentPx / 2f else 0f)
-                            } ?: 0f
-                            inline += ReaderMeasuredInlineItem.Text(
-                                value = cluster,
-                                widthPx = width,
-                                style = textStyle,
-                                chapterPosition = position,
-                                link = item.style.link,
-                                markingId = rangeStyle?.markingId,
-                                lineHeightPx = lineMetrics?.heightPx,
-                                baselineOffsetPx = lineMetrics?.baselineOffsetPx,
-                                baselineShiftPx = baselineShift,
-                            )
+                            val lineMetrics =
+                                textShaper.fontLineMetrics.takeIf {
+                                    hasBaselineShift || rangeStyle?.fontSizeOffsetPx != 0f
+                                }
+                            val baselineShift =
+                                lineMetrics?.let { metrics ->
+                                    (if (item.style.superscript) -metrics.ascentPx / 2f else 0f) +
+                                        (if (item.style.subscript) metrics.descentPx / 2f else 0f)
+                                } ?: 0f
+                            inline +=
+                                ReaderMeasuredInlineItem.Text(
+                                    value = cluster,
+                                    widthPx = width,
+                                    style = textStyle,
+                                    chapterPosition = position,
+                                    link = item.style.link,
+                                    markingId = rangeStyle?.markingId,
+                                    lineHeightPx = lineMetrics?.heightPx,
+                                    baselineOffsetPx = lineMetrics?.baselineOffsetPx,
+                                    baselineShiftPx = baselineShift,
+                                )
                             offset += cluster.length
                         }
                     }
@@ -244,52 +291,66 @@ class ReaderChapterBlockMeasurer(
                         // loader already supplies an error image; reserve stable line geometry
                         // until real dimensions are available.
                         val placeholderExtent = (lineHeight ?: baseStyle.fontSizePx).coerceAtLeast(1f)
-                        val originalSize = imageDimensionsResolver.resolve(item.source)
-                            ?: ReaderImageDimensions(placeholderExtent, placeholderExtent)
+                        val originalSize =
+                            imageDimensionsResolver.resolve(item.source)
+                                ?: ReaderImageDimensions(placeholderExtent, placeholderExtent)
                         val options = imageOptionsResolver.resolve(item.source)
-                        val requestedWidth = options?.requestedWidthFraction?.let { fraction ->
-                            style.imageAvailableWidthPx?.times(fraction)
-                        } ?: options?.requestedWidthPx
+                        val requestedWidth =
+                            options?.requestedWidthFraction?.let { fraction ->
+                                style.imageAvailableWidthPx?.times(fraction)
+                            } ?: options?.requestedWidthPx
                         val size = originalSize.withWidth(requestedWidth)
-                        val mode = options?.layoutMode ?: if (
-                            style.imagePageBreakBefore && style.imagePageBreakAfter
-                        ) ReaderImageLayoutMode.SINGLE_PAGE else style.imageLayoutMode
-                        val standalone = mode != ReaderImageLayoutMode.INLINE && (
-                            mode == ReaderImageLayoutMode.STANDALONE ||
-                            mode == ReaderImageLayoutMode.FULL_WIDTH ||
-                            mode == ReaderImageLayoutMode.SINGLE_PAGE ||
-                            size.widthPx >= style.standaloneImageThresholdPx ||
-                            size.heightPx >= style.standaloneImageThresholdPx)
+                        val mode =
+                            options?.layoutMode ?: if (
+                                style.imagePageBreakBefore && style.imagePageBreakAfter
+                            ) {
+                                ReaderImageLayoutMode.SINGLE_PAGE
+                            } else {
+                                style.imageLayoutMode
+                            }
+                        val standalone =
+                            mode != ReaderImageLayoutMode.INLINE &&
+                                (
+                                    mode == ReaderImageLayoutMode.STANDALONE ||
+                                        mode == ReaderImageLayoutMode.FULL_WIDTH ||
+                                        mode == ReaderImageLayoutMode.SINGLE_PAGE ||
+                                        size.widthPx >= style.standaloneImageThresholdPx ||
+                                        size.heightPx >= style.standaloneImageThresholdPx
+                                    )
                         if (standalone) {
                             flushInline(skipBlank = true)
                             hasStandaloneImage = true
-                            blocks += ReaderMeasuredBlock.Image(
-                                source = item.source,
-                                intrinsicWidthPx = size.widthPx,
-                                intrinsicHeightPx = size.heightPx,
-                                chapterPosition = item.chapterPosition,
-                                action = options?.action,
-                                horizontalAlignment = options?.horizontalAlignment ?: ReaderTextAlignment.CENTER,
-                                scaleMode = mode.toScaleMode(),
-                                pageBreakBefore = mode == ReaderImageLayoutMode.SINGLE_PAGE,
-                                pageBreakAfter = mode == ReaderImageLayoutMode.SINGLE_PAGE,
-                            )
+                            blocks +=
+                                ReaderMeasuredBlock.Image(
+                                    source = item.source,
+                                    intrinsicWidthPx = size.widthPx,
+                                    intrinsicHeightPx = size.heightPx,
+                                    chapterPosition = item.chapterPosition,
+                                    action = options?.action,
+                                    horizontalAlignment = options?.horizontalAlignment ?: ReaderTextAlignment.CENTER,
+                                    scaleMode = mode.toScaleMode(),
+                                    pageBreakBefore = mode == ReaderImageLayoutMode.SINGLE_PAGE,
+                                    pageBreakAfter = mode == ReaderImageLayoutMode.SINGLE_PAGE,
+                                )
                         } else {
                             // 文字嵌入（行内图）：与 View 实现一致，图片作为段内占位参与行排版，
                             // 只允许缩小到不超过当前行高（禁止放大到铺满整页文字区）。行高上限
                             // 让紧随其后的内容保持与行内占位一致且稳定的几何。
                             val maxHeight = lineHeight ?: baseStyle.fontSizePx
                             val scale = minOf(1f, maxHeight / size.heightPx.coerceAtLeast(1f))
-                            inline += ReaderMeasuredInlineItem.Image(
-                                source = item.source,
-                                widthPx = size.widthPx * scale,
-                                heightPx = size.heightPx * scale,
-                                chapterPosition = item.chapterPosition,
-                                action = options?.action,
-                            )
+                            inline +=
+                                ReaderMeasuredInlineItem.Image(
+                                    source = item.source,
+                                    widthPx = size.widthPx * scale,
+                                    heightPx = size.heightPx * scale,
+                                    chapterPosition = item.chapterPosition,
+                                    action = options?.action,
+                                )
                         }
                     }
-                    is ReaderChapterInlineSource.BlankLine -> Unit
+                    is ReaderChapterInlineSource.BlankLine -> {
+                        Unit
+                    }
                 }
             }
             flushInline(skipBlank = hasStandaloneImage)
@@ -307,49 +368,60 @@ class ReaderChapterBlockMeasurer(
                     // 旧 TextChapterLayout 在单图样式的标题段排版完（`durY += titleBottomSpacing`
                     // 之后）直接 `prepareNextPageIfNeed()`——无参调用无条件结束当前页，于是标题
                     // 独占一页、正文从下一页开始。标题分成多段时只在最后一段之后断页。
-                    if (block.isTitle && style.titlePageBreakAfter &&
+                    if (block.isTitle &&
+                        style.titlePageBreakAfter &&
                         (source.blocks.getOrNull(index + 1) as? ReaderChapterSourceBlock.Text)?.isTitle != true
                     ) {
                         blocks += ReaderMeasuredBlock.PageBreak
                     }
                 }
                 is ReaderChapterSourceBlock.Image -> {
-                    val placeholderExtent = (style.bodyLineHeightPx ?: style.bodyStyle.fontSizePx)
-                        .coerceAtLeast(1f)
-                    val originalSize = imageDimensionsResolver.resolve(block.source)
-                        ?: ReaderImageDimensions(placeholderExtent, placeholderExtent)
+                    val placeholderExtent =
+                        (style.bodyLineHeightPx ?: style.bodyStyle.fontSizePx)
+                            .coerceAtLeast(1f)
+                    val originalSize =
+                        imageDimensionsResolver.resolve(block.source)
+                            ?: ReaderImageDimensions(placeholderExtent, placeholderExtent)
                     val options = imageOptionsResolver.resolve(block.source)
-                    val requestedWidth = options?.requestedWidthFraction?.let { fraction ->
-                        style.imageAvailableWidthPx?.times(fraction)
-                    } ?: options?.requestedWidthPx
+                    val requestedWidth =
+                        options?.requestedWidthFraction?.let { fraction ->
+                            style.imageAvailableWidthPx?.times(fraction)
+                        } ?: options?.requestedWidthPx
                     val size = originalSize.withWidth(requestedWidth)
-                    val mode = options?.layoutMode ?: if (
-                        style.imagePageBreakBefore && style.imagePageBreakAfter
-                    ) ReaderImageLayoutMode.SINGLE_PAGE else style.imageLayoutMode
-                    blocks += ReaderMeasuredBlock.Image(
-                        source = block.source,
-                        intrinsicWidthPx = size.widthPx,
-                        intrinsicHeightPx = size.heightPx,
-                        chapterPosition = block.chapterPosition,
-                        action = options?.action,
-                        horizontalAlignment = options?.horizontalAlignment ?: ReaderTextAlignment.CENTER,
-                        scaleMode = mode.toScaleMode(),
-                        pageBreakBefore = mode == ReaderImageLayoutMode.SINGLE_PAGE,
-                        pageBreakAfter = mode == ReaderImageLayoutMode.SINGLE_PAGE,
-                    )
+                    val mode =
+                        options?.layoutMode ?: if (
+                            style.imagePageBreakBefore && style.imagePageBreakAfter
+                        ) {
+                            ReaderImageLayoutMode.SINGLE_PAGE
+                        } else {
+                            style.imageLayoutMode
+                        }
+                    blocks +=
+                        ReaderMeasuredBlock.Image(
+                            source = block.source,
+                            intrinsicWidthPx = size.widthPx,
+                            intrinsicHeightPx = size.heightPx,
+                            chapterPosition = block.chapterPosition,
+                            action = options?.action,
+                            horizontalAlignment = options?.horizontalAlignment ?: ReaderTextAlignment.CENTER,
+                            scaleMode = mode.toScaleMode(),
+                            pageBreakBefore = mode == ReaderImageLayoutMode.SINGLE_PAGE,
+                            pageBreakAfter = mode == ReaderImageLayoutMode.SINGLE_PAGE,
+                        )
                 }
                 is ReaderChapterSourceBlock.Paragraph -> {
                     addStyledParagraph(block.items, false)?.let { return it }
                 }
                 is ReaderChapterSourceBlock.Html -> {
-                    val paragraphs = try {
-                        htmlSourceResolver.resolve(block.value, block.chapterPosition)
-                    } catch (error: CancellationException) {
-                        throw error
-                    } catch (_: Exception) {
-                        null
-                    }
-                        ?: fallbackHtmlParagraphs(source, block)
+                    val paragraphs =
+                        try {
+                            htmlSourceResolver.resolve(block.value, block.chapterPosition)
+                        } catch (error: CancellationException) {
+                            throw error
+                        } catch (_: Exception) {
+                            null
+                        }
+                            ?: fallbackHtmlParagraphs(source, block)
                     paragraphs.forEach { paragraph ->
                         addStyledParagraph(
                             items = paragraph.items,
@@ -363,7 +435,9 @@ class ReaderChapterBlockMeasurer(
                         )?.let { return it }
                     }
                 }
-                is ReaderChapterSourceBlock.PageBreak -> blocks += ReaderMeasuredBlock.PageBreak
+                is ReaderChapterSourceBlock.PageBreak -> {
+                    blocks += ReaderMeasuredBlock.PageBreak
+                }
             }
         }
         return ReaderChapterMeasureResult.Success(blocks)
@@ -389,22 +463,26 @@ private fun fallbackHtmlParagraphs(
         if (character != '\n') return@forEachIndexed
         val value = semanticText.substring(paragraphStart, index)
         val position = start + paragraphStart
-        paragraphs += ReaderHtmlParagraph(
-            if (value.isEmpty()) {
-                listOf(ReaderChapterInlineSource.BlankLine(position))
-            } else {
-                listOf(ReaderChapterInlineSource.Text(value, position))
-            },
-        )
+        paragraphs +=
+            ReaderHtmlParagraph(
+                if (value.isEmpty()) {
+                    listOf(ReaderChapterInlineSource.BlankLine(position))
+                } else {
+                    listOf(ReaderChapterInlineSource.Text(value, position))
+                },
+            )
         paragraphStart = index + 1
     }
     if (paragraphStart < semanticText.length) {
-        paragraphs += ReaderHtmlParagraph(
-            listOf(ReaderChapterInlineSource.Text(
-                semanticText.substring(paragraphStart),
-                start + paragraphStart,
-            )),
-        )
+        paragraphs +=
+            ReaderHtmlParagraph(
+                listOf(
+                    ReaderChapterInlineSource.Text(
+                        semanticText.substring(paragraphStart),
+                        start + paragraphStart,
+                    ),
+                ),
+            )
     }
     return paragraphs
 }

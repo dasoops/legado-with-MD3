@@ -6,7 +6,6 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class WholeBookPageIndexTest {
-
     @Test
     fun `query uses cumulative page counts`() {
         val index = WholeBookPageIndex(3)

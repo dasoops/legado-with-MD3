@@ -1,7 +1,11 @@
 package io.legado.app.ui.widget.image
 
 import android.content.Context
-import android.graphics.*
+import android.graphics.Canvas
+import android.graphics.Color
+import android.graphics.Paint
+import android.graphics.Path
+import android.graphics.Rect
 import android.util.AttributeSet
 import android.view.View
 import io.legado.app.R
@@ -11,15 +15,15 @@ import io.legado.app.R
  */
 class ArcView @JvmOverloads constructor(
     context: Context,
-    attrs: AttributeSet? = null
+    attrs: AttributeSet? = null,
 ) : View(context, attrs) {
     private var mWidth = 0
     private var mHeight = 0
 
-    //弧形高度
+    // 弧形高度
     private val mArcHeight: Int
 
-    //背景颜色
+    // 背景颜色
     private var mBgColor: Int
     private val mPaint: Paint = Paint().apply {
         isAntiAlias = true
@@ -33,7 +37,7 @@ class ArcView @JvmOverloads constructor(
         mArcHeight = typedArray.getDimensionPixelSize(R.styleable.ArcView_arcHeight, 0)
         mBgColor = typedArray.getColor(
             R.styleable.ArcView_bgColor,
-            Color.parseColor("#303F9F")
+            Color.parseColor("#303F9F"),
         )
         mDirectionTop = typedArray.getBoolean(R.styleable.ArcView_arcDirectionTop, false)
         typedArray.recycle()
@@ -59,7 +63,7 @@ class ArcView @JvmOverloads constructor(
                 mWidth / 2.toFloat(),
                 mHeight.toFloat(),
                 mWidth.toFloat(),
-                mHeight - mArcHeight.toFloat()
+                mHeight - mArcHeight.toFloat(),
             )
             canvas.drawPath(path, mPaint)
         }

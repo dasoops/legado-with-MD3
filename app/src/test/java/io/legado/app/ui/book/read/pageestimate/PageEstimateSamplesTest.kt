@@ -1,23 +1,26 @@
 package io.legado.app.ui.book.read.pageestimate
 
+import kotlin.math.ceil
+import kotlin.math.roundToInt
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
-import kotlin.math.ceil
-import kotlin.math.roundToInt
 
 class PageEstimateSamplesTest {
-
-    private fun samplesOf(vararg points: Pair<Double, Double>) =
-        points.fold(PageEstimateSamples()) { acc, (x, y) -> acc.plus(x, y) }
+    private fun samplesOf(vararg points: Pair<Double, Double>) = points.fold(PageEstimateSamples()) { acc, (x, y) -> acc.plus(x, y) }
 
     @Test
     fun `recovers a known affine relation`() {
         // y = 1.4x + 0.5
-        val samples = samplesOf(
-            1.0 to 1.9, 2.0 to 3.3, 4.0 to 6.1, 8.0 to 11.7, 12.0 to 17.3,
-        )
+        val samples =
+            samplesOf(
+                1.0 to 1.9,
+                2.0 to 3.3,
+                4.0 to 6.1,
+                8.0 to 11.7,
+                12.0 to 17.3,
+            )
 
         val calibration = samples.fit()
 
@@ -71,12 +74,13 @@ class PageEstimateSamplesTest {
 
     @Test
     fun `fitted calibration rounds instead of ceiling`() {
-        val fitted = PageEstimateCalibration(
-            slope = 1.5f,
-            intercept = 0.4f,
-            sampleCount = 8,
-            fitted = true,
-        )
+        val fitted =
+            PageEstimateCalibration(
+                slope = 1.5f,
+                intercept = 0.4f,
+                sampleCount = 8,
+                fitted = true,
+            )
 
         listOf(2f, 3.3f, 7.8f).forEach { estimate ->
             assertEquals((1.5f * estimate + 0.4f).roundToInt(), fitted.apply(estimate))

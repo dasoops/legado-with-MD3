@@ -1,6 +1,8 @@
 package io.legado.app.domain.model
 
-import org.junit.Assert.*
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotEquals
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class BookTagsTest {
@@ -28,6 +30,7 @@ class BookTagsTest {
         assertNotEquals(BookTags.groupId("Aa"), BookTags.groupId("BB"))
         assertTrue(BookTags.groupId("分类") < -1024)
     }
+
     @Test
     fun `元数据与其他展示标签一同参与分组`() {
         assertEquals(listOf("TXT", "分类", "未读"), BookTags.grouping(null, "TXT,33 b,13字,分类", 0, 0, 10))

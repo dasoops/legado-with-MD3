@@ -49,9 +49,10 @@ fun MainNavigationSettingsSheet(
     val navigationListState = rememberLazyListState()
     val reorderableState =
         rememberReorderableLazyListState(navigationListState) { from, to ->
-            navigationItems = navigationItems.toMutableList().apply {
-                move(from.index, to.index)
-            }
+            navigationItems =
+                navigationItems.toMutableList().apply {
+                    move(from.index, to.index)
+                }
         }
 
     LaunchedEffect(reorderableState.isAnyItemDragging) {
@@ -67,7 +68,10 @@ fun MainNavigationSettingsSheet(
 
     fun getVisibilityForRoute(route: String): Boolean = isRouteVisible(route)
 
-    fun setVisibilityForRoute(route: String, visible: Boolean) {
+    fun setVisibilityForRoute(
+        route: String,
+        visible: Boolean,
+    ) {
         onSetVisible(route, visible)
         if (!visible) {
             val item = navigationItems.find { it.route == route } ?: return
@@ -78,9 +82,10 @@ fun MainNavigationSettingsSheet(
 
     val visibleItems = navigationItems.filter { isRouteVisible(it.route) }
     val hiddenItems = navigationItems.filter { !isRouteVisible(it.route) }
-    val selectedDefault = settings.defaultHomePage.takeIf { route ->
-        visibleItems.any { it.route == route }
-    } ?: MainDestination.Bookshelf.route
+    val selectedDefault =
+        settings.defaultHomePage.takeIf { route ->
+            visibleItems.any { it.route == route }
+        } ?: MainDestination.Bookshelf.route
 
     AppModalBottomSheet(
         show = show,
@@ -88,7 +93,8 @@ fun MainNavigationSettingsSheet(
         title = stringResource(R.string.main_navigation_settings),
     ) {
         Column(
-            modifier = Modifier
+            modifier =
+            Modifier
                 .fillMaxWidth()
                 .padding(bottom = 24.dp),
         ) {
@@ -107,17 +113,19 @@ fun MainNavigationSettingsSheet(
                 onValueChange = onSetLabelVisibilityMode,
             )
             Spacer(modifier = Modifier.padding(bottom = 4.dp))
-            val customIconCount = listOf(
-                settings.navIconHome,
-                settings.navIconBookshelf,
-                settings.navIconMy,
-                settings.navIconHomeSelected,
-                settings.navIconBookshelfSelected,
-                settings.navIconMySelected,
-            ).count { it.isNotEmpty() }
+            val customIconCount =
+                listOf(
+                    settings.navIconHome,
+                    settings.navIconBookshelf,
+                    settings.navIconMy,
+                    settings.navIconHomeSelected,
+                    settings.navIconBookshelfSelected,
+                    settings.navIconMySelected,
+                ).count { it.isNotEmpty() }
             CompactClickableSettingItem(
                 title = stringResource(R.string.theme_config_nav_icons),
-                description = if (customIconCount > 0) {
+                description =
+                if (customIconCount > 0) {
                     stringResource(R.string.theme_config_nav_icons_custom_count, customIconCount)
                 } else {
                     stringResource(R.string.theme_config_nav_icons_default)
@@ -127,7 +135,8 @@ fun MainNavigationSettingsSheet(
             Spacer(modifier = Modifier.padding(bottom = 4.dp))
             LazyColumn(
                 state = navigationListState,
-                modifier = Modifier
+                modifier =
+                Modifier
                     .fillMaxWidth()
                     .heightIn(max = 400.dp),
                 verticalArrangement = Arrangement.spacedBy(4.dp),
@@ -144,9 +153,10 @@ fun MainNavigationSettingsSheet(
                         onMoveItem = { from, to ->
                             val fromItem = visibleItems[from]
                             val toItem = visibleItems[to]
-                            navigationItems = navigationItems.toMutableList().apply {
-                                move(indexOf(fromItem), indexOf(toItem))
-                            }
+                            navigationItems =
+                                navigationItems.toMutableList().apply {
+                                    move(indexOf(fromItem), indexOf(toItem))
+                                }
                             onSetOrder(navigationItems.joinToString(",") { it.route })
                         },
                         title = stringResource(destination.labelId),

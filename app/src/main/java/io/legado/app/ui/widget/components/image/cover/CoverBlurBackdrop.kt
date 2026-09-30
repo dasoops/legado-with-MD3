@@ -30,18 +30,23 @@ fun CoverBlurBackdrop(
             path = path,
             sourceOrigin = sourceOrigin,
             memoryCacheKey = path?.let { "$it#cover-blur-backdrop" },
-            modifier = Modifier
+            modifier =
+            Modifier
                 .fillMaxSize()
                 .blur(blurRadius),
             contentScale = ContentScale.Crop,
             showLoadingPlaceholder = false,
             requestBuilder = { size(Size(512, 512)) },
         )
-        Box(Modifier
-            .fillMaxSize()
-            .background(tint.copy(alpha = 0.38f)))
-        Box(Modifier
-            .fillMaxSize()
-            .background(LegadoTheme.colorScheme.surface.copy(alpha = 0.52f)))
+        Box(
+            Modifier
+                .fillMaxSize()
+                .background(tint.copy(alpha = 0.38f)),
+        )
+        Box(
+            Modifier
+                .fillMaxSize()
+                .background(LegadoTheme.colorScheme.surface.copy(alpha = 0.52f)),
+        )
     }
 }

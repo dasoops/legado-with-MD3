@@ -86,30 +86,33 @@ data class ThemeCustomColors(
     val labelContainer: Int,
 ) {
     val hasCustomColor: Boolean
-        get() = primary != 0 || secondary != 0 || primaryText != 0 ||
-            secondaryText != 0 || background != 0 || labelContainer != 0
+        get() =
+            primary != 0 ||
+                secondary != 0 ||
+                primaryText != 0 ||
+                secondaryText != 0 ||
+                background != 0 ||
+                labelContainer != 0
 }
 
-fun ThemeSettings.customColors(isDark: Boolean): ThemeCustomColors =
-    if (isDark) {
-        ThemeCustomColors(
-            primary = themeColorNight.takeIf { it != 0 } ?: themeColor,
-            secondary = secondaryThemeColorNight.takeIf { it != 0 } ?: secondaryThemeColor,
-            primaryText = primaryTextColorNight.takeIf { it != 0 } ?: primaryTextColor,
-            secondaryText = secondaryTextColorNight.takeIf { it != 0 } ?: secondaryTextColor,
-            background = themeBackgroundColorNight.takeIf { it != 0 } ?: themeBackgroundColor,
-            labelContainer = labelContainerColorNight.takeIf { it != 0 } ?: labelContainerColor,
-        )
-    } else {
-        ThemeCustomColors(
-            primary = themeColor,
-            secondary = secondaryThemeColor,
-            primaryText = primaryTextColor,
-            secondaryText = secondaryTextColor,
-            background = themeBackgroundColor,
-            labelContainer = labelContainerColor,
-        )
-    }
+fun ThemeSettings.customColors(isDark: Boolean): ThemeCustomColors = if (isDark) {
+    ThemeCustomColors(
+        primary = themeColorNight.takeIf { it != 0 } ?: themeColor,
+        secondary = secondaryThemeColorNight.takeIf { it != 0 } ?: secondaryThemeColor,
+        primaryText = primaryTextColorNight.takeIf { it != 0 } ?: primaryTextColor,
+        secondaryText = secondaryTextColorNight.takeIf { it != 0 } ?: secondaryTextColor,
+        background = themeBackgroundColorNight.takeIf { it != 0 } ?: themeBackgroundColor,
+        labelContainer = labelContainerColorNight.takeIf { it != 0 } ?: labelContainerColor,
+    )
+} else {
+    ThemeCustomColors(
+        primary = themeColor,
+        secondary = secondaryThemeColor,
+        primaryText = primaryTextColor,
+        secondaryText = secondaryTextColor,
+        background = themeBackgroundColor,
+        labelContainer = labelContainerColor,
+    )
+}
 
-fun ThemeSettings.hasBackgroundImage(isDark: Boolean): Boolean =
-    if (isDark) !backgroundImageDark.isNullOrBlank() else !backgroundImageLight.isNullOrBlank()
+fun ThemeSettings.hasBackgroundImage(isDark: Boolean): Boolean = if (isDark) !backgroundImageDark.isNullOrBlank() else !backgroundImageLight.isNullOrBlank()

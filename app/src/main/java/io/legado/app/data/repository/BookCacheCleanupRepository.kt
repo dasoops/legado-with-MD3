@@ -5,9 +5,8 @@ import io.legado.app.domain.gateway.BookCacheCleanupGateway
 import io.legado.app.help.book.BookHelp
 
 class BookCacheCleanupRepository(
-    private val bookDao: BookDao
+    private val bookDao: BookDao,
 ) : BookCacheCleanupGateway {
-
     override fun clearAll() {
         BookHelp.clearCache()
     }

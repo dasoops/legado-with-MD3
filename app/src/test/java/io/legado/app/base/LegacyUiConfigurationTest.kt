@@ -6,7 +6,6 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class LegacyUiConfigurationTest {
-
     @Test
     fun followSystem_detectsPlatformNightModeChange() {
         assertTrue(
@@ -14,7 +13,7 @@ class LegacyUiConfigurationTest {
                 themeMode = "0",
                 previousUiMode = Configuration.UI_MODE_NIGHT_YES,
                 newUiMode = Configuration.UI_MODE_NIGHT_NO,
-            )
+            ),
         )
     }
 
@@ -25,7 +24,7 @@ class LegacyUiConfigurationTest {
                 themeMode = "2",
                 previousUiMode = Configuration.UI_MODE_NIGHT_YES,
                 newUiMode = Configuration.UI_MODE_NIGHT_NO,
-            )
+            ),
         )
     }
 
@@ -36,7 +35,7 @@ class LegacyUiConfigurationTest {
                 themeMode = "0",
                 previousUiMode = null,
                 newUiMode = Configuration.UI_MODE_NIGHT_NO,
-            )
+            ),
         )
     }
 }

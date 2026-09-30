@@ -28,7 +28,6 @@ class ImportTxtTocRuleViewModel(
     app: Application,
     private val repository: TxtTocRuleRepository,
 ) : BaseViewModel(app) {
-
     val errorLiveData = MutableLiveData<String>()
     val successLiveData = MutableLiveData<Int>()
 
@@ -89,31 +88,40 @@ class ImportTxtTocRuleViewModel(
                     allSources.add(it)
                 }
             }
-            text.isJsonArray() -> GSON.fromJsonArray<TxtTocRule>(text).getOrThrow()
-                .let { items ->
-                    allSources.addAll(items)
-                }
+            text.isJsonArray() -> {
+                GSON
+                    .fromJsonArray<TxtTocRule>(text)
+                    .getOrThrow()
+                    .let { items ->
+                        allSources.addAll(items)
+                    }
+            }
             text.isAbsUrl() -> {
                 importSourceUrl(text)
             }
             text.isUri() -> {
                 importSourceAwait(text.toUri().readText(appCtx))
             }
-            else -> throw NoStackTraceException(context.getString(R.string.wrong_format))
+            else -> {
+                throw NoStackTraceException(context.getString(R.string.wrong_format))
+            }
         }
     }
 
     private suspend fun importSourceUrl(url: String) {
-        okHttpClient.newCallResponseBody {
-            if (url.endsWith("#requestWithoutUA")) {
-                url(url.substringBeforeLast("#requestWithoutUA"))
-                header(AppConst.UA_NAME, "null")
-            } else {
-                url(url)
+        okHttpClient
+            .newCallResponseBody {
+                if (url.endsWith("#requestWithoutUA")) {
+                    url(url.substringBeforeLast("#requestWithoutUA"))
+                    header(AppConst.UA_NAME, "null")
+                } else {
+                    url(url)
+                }
+            }.decompressed()
+            .text()
+            .let {
+                importSourceAwait(it)
             }
-        }.decompressed().text().let {
-            importSourceAwait(it)
-        }
     }
 
     private fun comparisonSource() {
@@ -126,5 +134,4 @@ class ImportTxtTocRuleViewModel(
             successLiveData.postValue(allSources.size)
         }
     }
-
 }

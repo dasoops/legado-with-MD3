@@ -37,14 +37,26 @@ data class MainUiState(
 }
 
 sealed interface MainUiIntent {
-    data class SetNavigationRailExpanded(val expanded: Boolean) : MainUiIntent
-    data class HandlePreferenceClick(val event: PrefClickEvent) : MainUiIntent
+    data class SetNavigationRailExpanded(
+        val expanded: Boolean,
+    ) : MainUiIntent
+
+    data class HandlePreferenceClick(
+        val event: PrefClickEvent,
+    ) : MainUiIntent
 }
 
 sealed interface MainEffect {
-    data class StartActivity(val destination: Class<*>, val configTag: String? = null) : MainEffect
+    data class StartActivity(
+        val destination: Class<*>,
+        val configTag: String? = null,
+    ) : MainEffect
+
     data object ExitApp : MainEffect
+
     data object NavigateToReadRecord : MainEffect
+
     data object NavigateToHighlightTagRule : MainEffect
+
     data object NavigateToAbout : MainEffect
 }

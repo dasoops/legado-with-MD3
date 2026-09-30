@@ -73,10 +73,11 @@ fun LocalDirectoryRouteScreen(
     onToggleSelection: (String) -> Unit,
     onEnterSelection: (String) -> Unit,
     modifier: Modifier = Modifier,
-    viewModel: LocalDirectoryViewModel = koinViewModel(
-        key = "localDir:$groupId",
-        parameters = { parametersOf(groupId, rootUri) },
-    ),
+    viewModel: LocalDirectoryViewModel =
+        koinViewModel(
+            key = "localDir:$groupId",
+            parameters = { parametersOf(groupId, rootUri) },
+        ),
 ) {
     val context = LocalContext.current
     val state by viewModel.uiState.collectAsStateWithLifecycle()
@@ -98,9 +99,10 @@ fun LocalDirectoryRouteScreen(
     }
 
     Column(
-        modifier = modifier
+        modifier =
+        modifier
             .fillMaxSize()
-            .padding(top = contentPadding.calculateTopPadding())
+            .padding(top = contentPadding.calculateTopPadding()),
     ) {
         DirectoryBreadcrumb(
             pathNames = state.pathNames,
@@ -109,7 +111,8 @@ fun LocalDirectoryRouteScreen(
         AppPullToRefresh(
             isRefreshing = state.isLoading,
             onRefresh = { viewModel.onIntent(LocalDirectoryIntent.Refresh) },
-            modifier = Modifier
+            modifier =
+            Modifier
                 .weight(1f)
                 .fillMaxWidth(),
             topPadding = 8.dp,
@@ -137,11 +140,12 @@ private fun DirectoryBreadcrumb(
     onNavigateToLevel: (Int) -> Unit,
 ) {
     LazyRow(
-        modifier = Modifier
+        modifier =
+        Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 6.dp),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(4.dp)
+        horizontalArrangement = Arrangement.spacedBy(4.dp),
     ) {
         itemsIndexed(pathNames) { index, name ->
             val isLast = index == pathNames.lastIndex
@@ -149,28 +153,29 @@ private fun DirectoryBreadcrumb(
                 text = name,
                 style = LegadoTheme.typography.labelSmall,
                 fontWeight = if (isLast) FontWeight.SemiBold else FontWeight.Medium,
-                color = if (isLast) {
+                color =
+                if (isLast) {
                     LegadoTheme.colorScheme.primary
                 } else {
                     LegadoTheme.colorScheme.onSurfaceVariant
                 },
-                modifier = Modifier
+                modifier =
+                Modifier
                     .clip(MaterialTheme.shapes.small)
                     .then(
                         if (!isLast) {
                             Modifier.clickable { onNavigateToLevel(index) }
                         } else {
                             Modifier
-                        }
-                    )
-                    .padding(horizontal = 4.dp, vertical = 4.dp)
+                        },
+                    ).padding(horizontal = 4.dp, vertical = 4.dp),
             )
             if (!isLast) {
                 Icon(
                     imageVector = Icons.Default.ChevronRight,
                     contentDescription = null,
                     modifier = Modifier.size(12.dp),
-                    tint = LegadoTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
+                    tint = LegadoTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
                 )
             }
         }
@@ -197,9 +202,10 @@ private fun DirectoryContent(
     }
     if (state.isLoading && state.nodes.isEmpty()) {
         AppCircularProgressIndicator(
-            modifier = Modifier
+            modifier =
+            Modifier
                 .fillMaxSize()
-                .wrapContentSize(Alignment.Center)
+                .wrapContentSize(Alignment.Center),
         )
         return
     }
@@ -209,23 +215,27 @@ private fun DirectoryContent(
     }
 
     val configuration = LocalConfiguration.current
-    val isLandscape = configuration.orientation ==
+    val isLandscape =
+        configuration.orientation ==
             android.content.res.Configuration.ORIENTATION_LANDSCAPE
-    val layoutMode = if (isLandscape) {
-        settings.bookshelfLayoutModeLandscape
-    } else {
-        settings.bookshelfLayoutModePortrait
-    }
-    val layoutGrid = if (isLandscape) {
-        settings.bookshelfLayoutGridLandscape
-    } else {
-        settings.bookshelfLayoutGridPortrait
-    }
-    val layoutList = if (isLandscape) {
-        settings.bookshelfLayoutListLandscape
-    } else {
-        settings.bookshelfLayoutListPortrait
-    }
+    val layoutMode =
+        if (isLandscape) {
+            settings.bookshelfLayoutModeLandscape
+        } else {
+            settings.bookshelfLayoutModePortrait
+        }
+    val layoutGrid =
+        if (isLandscape) {
+            settings.bookshelfLayoutGridLandscape
+        } else {
+            settings.bookshelfLayoutGridPortrait
+        }
+    val layoutList =
+        if (isLandscape) {
+            settings.bookshelfLayoutListLandscape
+        } else {
+            settings.bookshelfLayoutListPortrait
+        }
     val columns = if (layoutMode == 0) layoutList else layoutGrid
     val isGridMode = layoutMode != 0
     val gridState = rememberLazyGridState()
@@ -245,28 +255,35 @@ private fun DirectoryContent(
                     is LocalDirectoryNode.Folder -> "f:${node.name}"
                     is LocalDirectoryNode.Book -> "b:${node.item.book.bookUrl}"
                 }
-            }
+            },
         ) { node ->
             when (node) {
-                is LocalDirectoryNode.Folder -> DirectoryFolderItem(
-                    name = node.name,
-                    settings = settings,
-                    isGridMode = isGridMode,
-                    onClick = { onIntent(LocalDirectoryIntent.EnterFolder(node.name)) },
-                )
-
+                is LocalDirectoryNode.Folder -> {
+                    DirectoryFolderItem(
+                        name = node.name,
+                        settings = settings,
+                        isGridMode = isGridMode,
+                        onClick = { onIntent(LocalDirectoryIntent.EnterFolder(node.name)) },
+                    )
+                }
                 is LocalDirectoryNode.Book -> {
                     val bookUi = node.item.ui
                     val bookUrl = bookUi.book.bookUrl
                     val sharedCoverKey = bookCoverSharedElementKey(bookUrl, "localdir:$groupId")
                     val isSelected = bookUrl in selectedBookUrls
                     val onRowClick = {
-                        if (isEditMode) onToggleSelection(bookUrl)
-                        else onOpenBook(bookUi.book, sharedCoverKey)
+                        if (isEditMode) {
+                            onToggleSelection(bookUrl)
+                        } else {
+                            onOpenBook(bookUi.book, sharedCoverKey)
+                        }
                     }
                     val onCoverClick = {
-                        if (isEditMode) onToggleSelection(bookUrl)
-                        else onOpenDetail(bookUi.book, sharedCoverKey)
+                        if (isEditMode) {
+                            onToggleSelection(bookUrl)
+                        } else {
+                            onOpenDetail(bookUi.book, sharedCoverKey)
+                        }
                     }
                     val onLongClick = {
                         if (isEditMode) {
@@ -303,12 +320,14 @@ private fun DirectoryContent(
 @Composable
 private fun ScrollableMessage(message: String) {
     Column(
-        modifier = Modifier
+        modifier =
+        Modifier
             .fillMaxSize()
-            .verticalScroll(rememberScrollState())
+            .verticalScroll(rememberScrollState()),
     ) {
         EmptyMessage(
-            modifier = Modifier
+            modifier =
+            Modifier
                 .fillMaxWidth()
                 .padding(vertical = 48.dp),
             message = message,

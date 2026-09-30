@@ -27,10 +27,11 @@ class ReaderPageLayoutRevisionTest {
     @Test
     fun `theme-only page snapshot has the same geometry`() {
         val oldPage = page(revision = 10L)
-        val themed = oldPage.copy(
-            revision = 20L,
-            elements = listOf(text(color = 0xFFFFFFFF.toInt())),
-        )
+        val themed =
+            oldPage.copy(
+                revision = 20L,
+                elements = listOf(text(color = 0xFFFFFFFF.toInt())),
+            )
         val originalWithText = oldPage.copy(elements = listOf(text(color = 0xFF111111.toInt())))
 
         assertEquals(true, themed.hasSameGeometryAs(originalWithText))
@@ -39,9 +40,10 @@ class ReaderPageLayoutRevisionTest {
     @Test
     fun `changed element bounds are a geometry change`() {
         val oldPage = page(revision = 10L).copy(elements = listOf(text(0xFF111111.toInt())))
-        val reflowed = page(revision = 20L).copy(
-            elements = listOf(text(0xFF111111.toInt()).copy(bounds = ReaderRect(0f, 20f, 80f, 40f))),
-        )
+        val reflowed =
+            page(revision = 20L).copy(
+                elements = listOf(text(0xFF111111.toInt()).copy(bounds = ReaderRect(0f, 20f, 80f, 40f))),
+            )
 
         assertEquals(false, reflowed.hasSameGeometryAs(oldPage))
     }

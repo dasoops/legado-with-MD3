@@ -54,22 +54,24 @@ import io.legado.app.ui.widget.components.button.series.TopBarSeriesIconButtonSi
 import io.legado.app.ui.widget.components.button.series.TopBarSeriesIconSize
 import io.legado.app.ui.widget.components.icon.AppIcon
 import io.legado.app.ui.widget.components.icon.AppIcons
-import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.basic.Icon as MiuixIcon
 import top.yukonga.miuix.kmp.basic.IconButton as MiuixIconButton
 import top.yukonga.miuix.kmp.basic.Text as MiuixText
+import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 /** 顶栏按钮样式配置。 */
-enum class TopBarButtonStyle(val storageValue: String) {
+enum class TopBarButtonStyle(
+    val storageValue: String,
+) {
     Plain("plain"),
     Tonal("tonal"),
     Outlined("outlined"),
     SemiTransparent("glass"),
-    LiquidGlass("liquid");
+    LiquidGlass("liquid"),
+    ;
 
     companion object {
-        fun fromStorage(value: String?): TopBarButtonStyle =
-            entries.firstOrNull { it.storageValue == value } ?: Tonal
+        fun fromStorage(value: String?): TopBarButtonStyle = entries.firstOrNull { it.storageValue == value } ?: Tonal
     }
 }
 
@@ -77,33 +79,44 @@ enum class TopBarButtonStyle(val storageValue: String) {
 internal val LocalTopBarMergeState = staticCompositionLocalOf { false }
 
 @Composable
-private fun currentTopBarButtonStyle(): TopBarButtonStyle =
-    TopBarButtonStyle.fromStorage(LocalAppUiConfiguration.current.theme.topBarButtonStyle)
+private fun currentTopBarButtonStyle(): TopBarButtonStyle = TopBarButtonStyle.fromStorage(LocalAppUiConfiguration.current.theme.topBarButtonStyle)
 
 private val TopBarButtonStyle.seriesStyle: SeriesIconButtonStyle
-    get() = when (this) {
-        TopBarButtonStyle.Plain -> SeriesIconButtonStyle.Plain
-        TopBarButtonStyle.Tonal, TopBarButtonStyle.SemiTransparent,
-        TopBarButtonStyle.LiquidGlass -> SeriesIconButtonStyle.Tonal
-        TopBarButtonStyle.Outlined -> SeriesIconButtonStyle.Outlined
-    }
+    get() =
+        when (this) {
+            TopBarButtonStyle.Plain -> SeriesIconButtonStyle.Plain
+            TopBarButtonStyle.Tonal, TopBarButtonStyle.SemiTransparent,
+            TopBarButtonStyle.LiquidGlass,
+            -> SeriesIconButtonStyle.Tonal
+            TopBarButtonStyle.Outlined -> SeriesIconButtonStyle.Outlined
+        }
 
 /** Plain 无容器背景，图标可以更大（40dp/24dp）；带容器/边框的样式用紧凑的 36dp/20dp。 */
 private val TopBarButtonStyle.buttonSize: DpSize
-    get() = when (this) {
-        TopBarButtonStyle.Plain -> MediumSeriesIconButtonSize
-        TopBarButtonStyle.Tonal, TopBarButtonStyle.Outlined, TopBarButtonStyle.SemiTransparent,
-        TopBarButtonStyle.LiquidGlass ->
-            TopBarSeriesIconButtonSize
-    }
+    get() =
+        when (this) {
+            TopBarButtonStyle.Plain -> {
+                MediumSeriesIconButtonSize
+            }
+            TopBarButtonStyle.Tonal, TopBarButtonStyle.Outlined, TopBarButtonStyle.SemiTransparent,
+            TopBarButtonStyle.LiquidGlass,
+            -> {
+                TopBarSeriesIconButtonSize
+            }
+        }
 
 private val TopBarButtonStyle.iconSize: Dp
-    get() = when (this) {
-        TopBarButtonStyle.Plain -> MediumSeriesIconSize
-        TopBarButtonStyle.Tonal, TopBarButtonStyle.Outlined, TopBarButtonStyle.SemiTransparent,
-        TopBarButtonStyle.LiquidGlass ->
-            TopBarSeriesIconSize
-    }
+    get() =
+        when (this) {
+            TopBarButtonStyle.Plain -> {
+                MediumSeriesIconSize
+            }
+            TopBarButtonStyle.Tonal, TopBarButtonStyle.Outlined, TopBarButtonStyle.SemiTransparent,
+            TopBarButtonStyle.LiquidGlass,
+            -> {
+                TopBarSeriesIconSize
+            }
+        }
 
 /**
  * 顶栏 actions 槽按钮间距：Plain 无边框/容器，比带容器/边框的样式更紧凑，
@@ -116,12 +129,10 @@ internal fun topBarActionSpacing(): Dp {
 }
 
 @Composable
-internal fun miuixTopBarSlotPadding(): Dp =
-    if (currentTopBarButtonStyle() == TopBarButtonStyle.Plain) 16.dp else 0.dp
+internal fun miuixTopBarSlotPadding(): Dp = if (currentTopBarButtonStyle() == TopBarButtonStyle.Plain) 16.dp else 0.dp
 
 @Composable
-internal fun miuixTopBarActionsEndPadding(): Dp =
-    if (currentTopBarButtonStyle() == TopBarButtonStyle.Plain) 0.dp else 12.dp
+internal fun miuixTopBarActionsEndPadding(): Dp = if (currentTopBarButtonStyle() == TopBarButtonStyle.Plain) 0.dp else 12.dp
 
 /** 合并模式下按钮左侧的竖向分隔线（首个按钮不画）。 */
 @Composable
@@ -137,12 +148,12 @@ private fun Modifier.mergedDivider(): Modifier {
                     color = dividerColor,
                     start = Offset(0f, size.height * 0.3f),
                     end = Offset(0f, size.height * 0.7f),
-                    strokeWidth = 1.dp.toPx()
+                    strokeWidth = 1.dp.toPx(),
                 )
             }
         } else {
             Modifier
-        }
+        },
     )
 }
 
@@ -156,31 +167,39 @@ private fun Modifier.mergedDivider(): Modifier {
 @Composable
 internal fun TopBarActionsRow(
     modifier: Modifier = Modifier,
-    content: @Composable RowScope.() -> Unit
+    content: @Composable RowScope.() -> Unit,
 ) {
     val style = currentTopBarButtonStyle()
     val mergeEnabled = LocalAppUiConfiguration.current.theme.mergeTopBarActions
-    val liquidGlassEnabled = style == TopBarButtonStyle.LiquidGlass &&
+    val liquidGlassEnabled =
+        style == TopBarButtonStyle.LiquidGlass &&
             topBarLiquidGlassEnabled()
     if (!mergeEnabled || style == TopBarButtonStyle.Plain) {
         Row(
             modifier = modifier,
             horizontalArrangement = Arrangement.spacedBy(topBarActionSpacing()),
             verticalAlignment = Alignment.CenterVertically,
-            content = content
+            content = content,
         )
         return
     }
 
     val capsuleShape = RoundedCornerShape(50)
-    val capsuleBg = when (style) {
-        TopBarButtonStyle.Tonal -> LegadoTheme.colorScheme.surfaceContainerLow
-        TopBarButtonStyle.SemiTransparent, TopBarButtonStyle.LiquidGlass ->
-            GlassTopAppBarDefaults.controlContainerColor()
-        else -> Color.Transparent // Outlined
-    }
+    val capsuleBg =
+        when (style) {
+            TopBarButtonStyle.Tonal -> {
+                LegadoTheme.colorScheme.surfaceContainerLow
+            }
+            TopBarButtonStyle.SemiTransparent, TopBarButtonStyle.LiquidGlass -> {
+                GlassTopAppBarDefaults.controlContainerColor()
+            }
+            else -> {
+                Color.Transparent
+            } // Outlined
+        }
     Box(
-        modifier = modifier
+        modifier =
+        modifier
             .height(TopBarSeriesIconButtonSize.height)
             .then(if (!liquidGlassEnabled) Modifier.clip(capsuleShape) else Modifier)
             .then(
@@ -188,20 +207,19 @@ internal fun TopBarActionsRow(
                     Modifier.topBarLiquidGlass(capsuleShape)
                 } else {
                     Modifier.background(capsuleBg, capsuleShape)
-                }
-            )
-            .then(
+                },
+            ).then(
                 if (style == TopBarButtonStyle.Outlined) {
                     Modifier.border(1.dp, LegadoTheme.colorScheme.outlineVariant, capsuleShape)
                 } else {
                     Modifier
-                }
-            )
+                },
+            ),
     ) {
         CompositionLocalProvider(LocalTopBarMergeState provides true) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                content = content
+                content = content,
             )
         }
     }
@@ -213,43 +231,51 @@ private fun TopBarButton(
     modifier: Modifier = Modifier,
     imageVector: ImageVector = Icons.AutoMirrored.Filled.ArrowBack,
     contentDescription: String? = null,
-    style: TopBarButtonStyle = currentTopBarButtonStyle()
+    style: TopBarButtonStyle = currentTopBarButtonStyle(),
 ) {
     val isMerged = LocalTopBarMergeState.current
-    val liquidGlassEnabled = style == TopBarButtonStyle.LiquidGlass &&
+    val liquidGlassEnabled =
+        style == TopBarButtonStyle.LiquidGlass &&
             topBarLiquidGlassEnabled()
     if (isMerged) {
         Box(
             contentAlignment = Alignment.Center,
-            modifier = modifier
+            modifier =
+            modifier
                 .size(style.buttonSize)
                 .mergedDivider()
                 .clickable(
                     interactionSource = remember { MutableInteractionSource() },
                     indication = if (liquidGlassEnabled) null else ripple(bounded = true),
                     role = Role.Button,
-                    onClick = onClick
-                )
+                    onClick = onClick,
+                ),
         ) {
             AppIcon(
                 imageVector = imageVector,
                 contentDescription = contentDescription,
                 tint = LegadoTheme.colorScheme.onSurface,
-                modifier = Modifier.size(style.iconSize)
+                modifier = Modifier.size(style.iconSize),
             )
         }
     } else {
-        val containerColor = when {
-            liquidGlassEnabled -> Color.Transparent
-            style == TopBarButtonStyle.SemiTransparent ||
-                    style == TopBarButtonStyle.LiquidGlass ->
-                GlassTopAppBarDefaults.controlContainerColor()
-
-            else -> null
-        }
+        val containerColor =
+            when {
+                liquidGlassEnabled -> {
+                    Color.Transparent
+                }
+                style == TopBarButtonStyle.SemiTransparent ||
+                    style == TopBarButtonStyle.LiquidGlass -> {
+                    GlassTopAppBarDefaults.controlContainerColor()
+                }
+                else -> {
+                    null
+                }
+            }
         SeriesButton(
             onClick = onClick,
-            modifier = if (liquidGlassEnabled) {
+            modifier =
+            if (liquidGlassEnabled) {
                 modifier.topBarLiquidGlass(RoundedCornerShape(50))
             } else {
                 modifier
@@ -260,13 +286,13 @@ private fun TopBarButton(
             style = style.seriesStyle,
             contentColor = LegadoTheme.colorScheme.onSurface,
             containerColor = containerColor,
-            indication = if (liquidGlassEnabled) null else ripple(bounded = true)
+            indication = if (liquidGlassEnabled) null else ripple(bounded = true),
         ) { resolvedContentColor ->
             AppIcon(
                 imageVector = imageVector,
                 contentDescription = contentDescription,
                 tint = resolvedContentColor,
-                modifier = Modifier.size(style.iconSize)
+                modifier = Modifier.size(style.iconSize),
             )
         }
     }
@@ -277,36 +303,7 @@ fun TopBarNavigationButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     imageVector: ImageVector = AppIcons.Back,
-    contentDescription: String? = stringResource(id = R.string.back)
-) {
-    if (ThemeResolver.isMiuixEngine(LegadoTheme.composeEngine) &&
-        currentTopBarButtonStyle() == TopBarButtonStyle.Plain
-    ) {
-        MiuixIconButton(
-            onClick = onClick,
-            modifier = modifier
-        ) {
-            MiuixIcon(
-                imageVector = imageVector,
-                contentDescription = contentDescription
-            )
-        }
-    } else {
-        TopBarButton(
-            onClick = onClick,
-            imageVector = imageVector,
-            contentDescription = contentDescription,
-            modifier = modifier.padding(horizontal = 12.dp)
-        )
-    }
-}
-
-@Composable
-fun TopBarActionButton(
-    onClick: () -> Unit,
-    imageVector: ImageVector,
-    contentDescription: String?,
-    modifier: Modifier = Modifier
+    contentDescription: String? = stringResource(id = R.string.back),
 ) {
     if (ThemeResolver.isMiuixEngine(LegadoTheme.composeEngine) &&
         currentTopBarButtonStyle() == TopBarButtonStyle.Plain
@@ -317,7 +314,7 @@ fun TopBarActionButton(
         ) {
             MiuixIcon(
                 imageVector = imageVector,
-                contentDescription = contentDescription
+                contentDescription = contentDescription,
             )
         }
     } else {
@@ -325,7 +322,36 @@ fun TopBarActionButton(
             onClick = onClick,
             imageVector = imageVector,
             contentDescription = contentDescription,
-            modifier = modifier
+            modifier = modifier.padding(horizontal = 12.dp),
+        )
+    }
+}
+
+@Composable
+fun TopBarActionButton(
+    onClick: () -> Unit,
+    imageVector: ImageVector,
+    contentDescription: String?,
+    modifier: Modifier = Modifier,
+) {
+    if (ThemeResolver.isMiuixEngine(LegadoTheme.composeEngine) &&
+        currentTopBarButtonStyle() == TopBarButtonStyle.Plain
+    ) {
+        MiuixIconButton(
+            onClick = onClick,
+            modifier = modifier,
+        ) {
+            MiuixIcon(
+                imageVector = imageVector,
+                contentDescription = contentDescription,
+            )
+        }
+    } else {
+        TopBarButton(
+            onClick = onClick,
+            imageVector = imageVector,
+            contentDescription = contentDescription,
+            modifier = modifier,
         )
     }
 }
@@ -338,7 +364,7 @@ fun TopBarAnimatedActionButton(
     iconUnchecked: ImageVector,
     activeText: String,
     inactiveText: String,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     if (ThemeResolver.isMiuixEngine(LegadoTheme.composeEngine) &&
         currentTopBarButtonStyle() == TopBarButtonStyle.Plain
@@ -346,7 +372,7 @@ fun TopBarAnimatedActionButton(
         val contentColor by animateColorAsState(
             targetValue = if (checked) MiuixTheme.colorScheme.primary else MiuixTheme.colorScheme.onSurface,
             animationSpec = tween(150),
-            label = "MiuixActionButtonContent"
+            label = "MiuixActionButtonContent",
         )
 
         AnimatedActionButtonCore(
@@ -364,13 +390,13 @@ fun TopBarAnimatedActionButton(
             button = { buttonModifier, onToggle, content ->
                 MiuixIconButton(
                     onClick = { onToggle(!checked) },
-                    modifier = buttonModifier
+                    modifier = buttonModifier,
                 ) {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.Center,
                         modifier = Modifier.padding(horizontal = 8.dp),
-                        content = content
+                        content = content,
                     )
                 }
             },
@@ -379,7 +405,7 @@ fun TopBarAnimatedActionButton(
                     tint = tint ?: Color.Unspecified,
                     imageVector = imageVector,
                     contentDescription = null,
-                    modifier = iconModifier
+                    modifier = iconModifier,
                 )
             },
             text = { label, textModifier, style, color ->
@@ -389,24 +415,29 @@ fun TopBarAnimatedActionButton(
                     style = style,
                     modifier = textModifier,
                     maxLines = 1,
-                    softWrap = false
+                    softWrap = false,
                 )
-            }
+            },
         )
     } else {
         val topBarStyle = currentTopBarButtonStyle()
         val isMerged = LocalTopBarMergeState.current
-        val containerColor = if (
-            !isMerged &&
-            (topBarStyle == TopBarButtonStyle.SemiTransparent ||
-                    topBarStyle == TopBarButtonStyle.LiquidGlass)
-        ) {
-            if (topBarStyle == TopBarButtonStyle.LiquidGlass && topBarLiquidGlassEnabled()) {
-                Color.Transparent
-            } else GlassTopAppBarDefaults.controlContainerColor()
-        } else {
-            null
-        }
+        val containerColor =
+            if (
+                !isMerged &&
+                (
+                    topBarStyle == TopBarButtonStyle.SemiTransparent ||
+                        topBarStyle == TopBarButtonStyle.LiquidGlass
+                    )
+            ) {
+                if (topBarStyle == TopBarButtonStyle.LiquidGlass && topBarLiquidGlassEnabled()) {
+                    Color.Transparent
+                } else {
+                    GlassTopAppBarDefaults.controlContainerColor()
+                }
+            } else {
+                null
+            }
         AnimatedActionButtonCore(
             checked = checked,
             onCheckedChange = onCheckedChange,
@@ -419,51 +450,69 @@ fun TopBarAnimatedActionButton(
             textStyle = LegadoTheme.typography.labelMedium,
             textStartPadding = 8.dp,
             button = { buttonModifier, onToggle, content ->
-                val dividerModifier = buttonModifier
-                    .then(if (isMerged) Modifier.mergedDivider() else Modifier)
+                val dividerModifier =
+                    buttonModifier
+                        .then(if (isMerged) Modifier.mergedDivider() else Modifier)
                 if (isMerged) {
                     Box(
                         contentAlignment = Alignment.Center,
-                        modifier = dividerModifier.clickable(
+                        modifier =
+                        dividerModifier.clickable(
                             interactionSource = remember { MutableInteractionSource() },
-                            indication = if (topBarStyle == TopBarButtonStyle.LiquidGlass &&
+                            indication =
+                            if (topBarStyle == TopBarButtonStyle.LiquidGlass &&
                                 topBarLiquidGlassEnabled()
-                            ) null else ripple(bounded = true),
+                            ) {
+                                null
+                            } else {
+                                ripple(bounded = true)
+                            },
                             role = Role.Button,
-                            onClick = { onToggle(!checked) }
-                        )
+                            onClick = { onToggle(!checked) },
+                        ),
                     ) {
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.Center,
                             modifier = Modifier.padding(horizontal = 8.dp),
-                            content = content
+                            content = content,
                         )
                     }
                 } else {
                     SeriesButton(
                         onClick = { onToggle(!checked) },
-                        modifier = if (topBarStyle == TopBarButtonStyle.LiquidGlass &&
+                        modifier =
+                        if (topBarStyle == TopBarButtonStyle.LiquidGlass &&
                             topBarLiquidGlassEnabled()
                         ) {
                             dividerModifier.topBarLiquidGlass(RoundedCornerShape(50))
-                        } else dividerModifier,
+                        } else {
+                            dividerModifier
+                        },
                         enforceMinimumInteractiveSize = false,
-                        clipToShape = !(topBarStyle == TopBarButtonStyle.LiquidGlass &&
-                                topBarLiquidGlassEnabled()),
+                        clipToShape =
+                        !(
+                            topBarStyle == TopBarButtonStyle.LiquidGlass &&
+                                topBarLiquidGlassEnabled()
+                            ),
                         selected = checked,
                         style = topBarStyle.seriesStyle,
                         contentColor = LegadoTheme.colorScheme.onSurface,
                         containerColor = containerColor,
-                        indication = if (topBarStyle == TopBarButtonStyle.LiquidGlass &&
+                        indication =
+                        if (topBarStyle == TopBarButtonStyle.LiquidGlass &&
                             topBarLiquidGlassEnabled()
-                        ) null else ripple(bounded = true)
+                        ) {
+                            null
+                        } else {
+                            ripple(bounded = true)
+                        },
                     ) {
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.Center,
                             modifier = Modifier.padding(horizontal = 8.dp),
-                            content = content
+                            content = content,
                         )
                     }
                 }
@@ -471,12 +520,12 @@ fun TopBarAnimatedActionButton(
             icon = { imageVector, iconModifier, _ ->
                 AnimatedContent(
                     targetState = imageVector,
-                    label = "IconAnimation"
+                    label = "IconAnimation",
                 ) { targetIcon ->
                     AnimatedIcon(
                         modifier = iconModifier,
                         imageVector = targetIcon,
-                        contentDescription = null
+                        contentDescription = null,
                     )
                 }
             },
@@ -487,9 +536,9 @@ fun TopBarAnimatedActionButton(
                     color = color ?: Color.Unspecified,
                     modifier = textModifier,
                     maxLines = 1,
-                    softWrap = false
+                    softWrap = false,
                 )
-            }
+            },
         )
     }
 }

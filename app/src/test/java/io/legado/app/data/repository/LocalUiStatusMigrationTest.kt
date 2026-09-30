@@ -11,14 +11,14 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class LocalUiStatusMigrationTest {
-
     @Test
     fun `copies legacy values missing from settings`() {
         val current = mutablePreferencesOf(stringPreferencesKey("existing") to "current")
-        val local = mutablePreferencesOf(
-            intPreferencesKey("search_layout_mode") to 2,
-            booleanPreferencesKey("privacy_policy_ok") to true,
-        )
+        val local =
+            mutablePreferencesOf(
+                intPreferencesKey("search_layout_mode") to 2,
+                booleanPreferencesKey("privacy_policy_ok") to true,
+            )
 
         val migrated = mergeMissingLocalPreferences(current, local)
 
@@ -40,10 +40,11 @@ class LocalUiStatusMigrationTest {
 
     @Test
     fun `marks migration complete when legacy store is empty`() {
-        val migrated = mergeMissingLocalPreferences(
-            currentData = mutablePreferencesOf(),
-            localPreferences = mutablePreferencesOf(),
-        )
+        val migrated =
+            mergeMissingLocalPreferences(
+                currentData = mutablePreferencesOf(),
+                localPreferences = mutablePreferencesOf(),
+            )
 
         assertTrue(migrated[LocalPreferencesKeys.MIGRATED_TO_SETTINGS] == true)
     }

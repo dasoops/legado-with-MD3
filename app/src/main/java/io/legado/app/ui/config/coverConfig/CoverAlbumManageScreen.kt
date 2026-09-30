@@ -77,21 +77,22 @@ fun CoverAlbumManageRouteScreen(
     val context = LocalContext.current
     var imageTargetAlbumId by remember { mutableStateOf<String?>(null) }
     var imageTargetIsDark by remember { mutableStateOf(false) }
-    val imagePicker = rememberLauncherForActivityResult(
-        ActivityResultContracts.GetMultipleContents()
-    ) { uris ->
-        val albumId = imageTargetAlbumId
-        imageTargetAlbumId = null
-        if (albumId != null && uris.isNotEmpty()) {
-            viewModel.onIntent(
-                CoverAlbumIntent.ImagesSelected(
-                    albumId = albumId,
-                    isDark = imageTargetIsDark,
-                    uriStrings = uris.map { it.toString() },
+    val imagePicker =
+        rememberLauncherForActivityResult(
+            ActivityResultContracts.GetMultipleContents(),
+        ) { uris ->
+            val albumId = imageTargetAlbumId
+            imageTargetAlbumId = null
+            if (albumId != null && uris.isNotEmpty()) {
+                viewModel.onIntent(
+                    CoverAlbumIntent.ImagesSelected(
+                        albumId = albumId,
+                        isDark = imageTargetIsDark,
+                        uriStrings = uris.map { it.toString() },
+                    ),
                 )
-            )
+            }
         }
-    }
 
     LaunchedEffect(Unit) {
         viewModel.effects.collectLatest { effect ->
@@ -101,8 +102,9 @@ fun CoverAlbumManageRouteScreen(
                     imageTargetIsDark = effect.isDark
                     imagePicker.launch("image/*")
                 }
-
-                is CoverAlbumEffect.ShowMessage -> context.toastOnUi(effect.message)
+                is CoverAlbumEffect.ShowMessage -> {
+                    context.toastOnUi(effect.message)
+                }
             }
         }
     }
@@ -143,7 +145,8 @@ fun CoverAlbumManageScreen(
     ) { paddingValues ->
         if (state.albums.isEmpty()) {
             Box(
-                modifier = Modifier
+                modifier =
+                Modifier
                     .fillMaxSize()
                     .padding(paddingValues),
                 contentAlignment = Alignment.Center,
@@ -167,7 +170,8 @@ fun CoverAlbumManageScreen(
         } else {
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
-                contentPadding = adaptiveContentPadding(
+                contentPadding =
+                adaptiveContentPadding(
                     top = paddingValues.calculateTopPadding() + 8.dp,
                     bottom = 120.dp,
                 ),
@@ -225,20 +229,23 @@ private fun CoverAlbumCard(
         modifier = Modifier.fillMaxWidth(),
     ) {
         Row(
-            modifier = Modifier
+            modifier =
+            Modifier
                 .fillMaxWidth()
                 .padding(12.dp),
             horizontalArrangement = Arrangement.spacedBy(12.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Box(
-                modifier = Modifier
+                modifier =
+                Modifier
                     .size(width = 64.dp, height = 88.dp)
                     .clip(RoundedCornerShape(10.dp)),
                 contentAlignment = Alignment.Center,
             ) {
-                val preview = album.lightImages.firstOrNull()?.path
-                    ?: album.darkImages.firstOrNull()?.path
+                val preview =
+                    album.lightImages.firstOrNull()?.path
+                        ?: album.darkImages.firstOrNull()?.path
                 if (preview != null) {
                     AsyncImage(
                         model = preview,
@@ -264,7 +271,8 @@ private fun CoverAlbumCard(
                     maxLines = 1,
                 )
                 AppText(
-                    text = stringResource(
+                    text =
+                    stringResource(
                         R.string.cover_album_day_night_count,
                         album.lightImages.size,
                         album.darkImages.size,
@@ -318,7 +326,8 @@ private fun CoverAlbumEditorSheet(
         },
     ) {
         CardTabRow(
-            tabTitles = listOf(
+            tabTitles =
+            listOf(
                 stringResource(R.string.day),
                 stringResource(R.string.night),
             ),
@@ -328,7 +337,8 @@ private fun CoverAlbumEditorSheet(
         val images = if (isDark) album?.darkImages.orEmpty() else album?.lightImages.orEmpty()
         LazyVerticalGrid(
             columns = GridCells.Fixed(3),
-            modifier = Modifier
+            modifier =
+            Modifier
                 .fillMaxWidth()
                 .heightIn(max = 560.dp)
                 .padding(vertical = 8.dp),
@@ -342,7 +352,8 @@ private fun CoverAlbumEditorSheet(
             ) { image ->
                 Box {
                     NormalCard(
-                        modifier = Modifier
+                        modifier =
+                        Modifier
                             .fillMaxWidth()
                             .aspectRatio(5f / 7f),
                         cornerRadius = 12.dp,
@@ -357,14 +368,17 @@ private fun CoverAlbumEditorSheet(
                     }
                     AppIconButton(
                         onClick = { onRemoveImage(isDark, image.id) },
-                        modifier = Modifier
+                        modifier =
+                        Modifier
                             .align(Alignment.TopEnd)
                             .padding(4.dp)
                             .size(28.dp),
-                        colors = IconButtonDefaults.filledIconButtonColors(
-                            containerColor = LegadoTheme.colorScheme.surfaceContainer.copy(
-                                alpha = 0.82f
-                            )
+                        colors =
+                        IconButtonDefaults.filledIconButtonColors(
+                            containerColor =
+                            LegadoTheme.colorScheme.surfaceContainer.copy(
+                                alpha = 0.82f,
+                            ),
                         ),
                         shape = CircleShape,
                     ) {
@@ -386,34 +400,39 @@ private fun CoverAlbumDialogs(
     onIntent: (CoverAlbumIntent) -> Unit,
 ) {
     when (dialog) {
-        CoverAlbumDialog.Create -> CoverAlbumNameDialog(
-            show = true,
-            title = stringResource(R.string.cover_album_create),
-            initialName = "",
-            onSave = { onIntent(CoverAlbumIntent.SaveName(it)) },
-            onDismiss = { onIntent(CoverAlbumIntent.DismissDialog) },
-        )
-
-        is CoverAlbumDialog.Rename -> CoverAlbumNameDialog(
-            show = true,
-            title = stringResource(R.string.cover_album_rename),
-            initialName = dialog.currentName,
-            onSave = { onIntent(CoverAlbumIntent.SaveName(it)) },
-            onDismiss = { onIntent(CoverAlbumIntent.DismissDialog) },
-        )
-
-        is CoverAlbumDialog.Delete -> AppAlertDialog(
-            data = dialog,
-            onDismissRequest = { onIntent(CoverAlbumIntent.DismissDialog) },
-            title = stringResource(R.string.cover_album_delete),
-            text = stringResource(R.string.cover_album_delete_confirmation, dialog.name),
-            confirmText = stringResource(R.string.delete),
-            onConfirm = { onIntent(CoverAlbumIntent.ConfirmDelete) },
-            dismissText = stringResource(R.string.cancel),
-            onDismiss = { onIntent(CoverAlbumIntent.DismissDialog) },
-        )
-
-        null -> Unit
+        CoverAlbumDialog.Create -> {
+            CoverAlbumNameDialog(
+                show = true,
+                title = stringResource(R.string.cover_album_create),
+                initialName = "",
+                onSave = { onIntent(CoverAlbumIntent.SaveName(it)) },
+                onDismiss = { onIntent(CoverAlbumIntent.DismissDialog) },
+            )
+        }
+        is CoverAlbumDialog.Rename -> {
+            CoverAlbumNameDialog(
+                show = true,
+                title = stringResource(R.string.cover_album_rename),
+                initialName = dialog.currentName,
+                onSave = { onIntent(CoverAlbumIntent.SaveName(it)) },
+                onDismiss = { onIntent(CoverAlbumIntent.DismissDialog) },
+            )
+        }
+        is CoverAlbumDialog.Delete -> {
+            AppAlertDialog(
+                data = dialog,
+                onDismissRequest = { onIntent(CoverAlbumIntent.DismissDialog) },
+                title = stringResource(R.string.cover_album_delete),
+                text = stringResource(R.string.cover_album_delete_confirmation, dialog.name),
+                confirmText = stringResource(R.string.delete),
+                onConfirm = { onIntent(CoverAlbumIntent.ConfirmDelete) },
+                dismissText = stringResource(R.string.cancel),
+                onDismiss = { onIntent(CoverAlbumIntent.DismissDialog) },
+            )
+        }
+        null -> {
+            Unit
+        }
     }
 }
 

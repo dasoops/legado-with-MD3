@@ -14,27 +14,35 @@ import io.legado.app.BuildConfig
 import java.io.File
 import java.io.InputStream
 
-
 @Suppress("unused")
 @GlideModule
 class LegadoGlideModule : AppGlideModule() {
+    private val otherSettingsGateway get() =
+        org.koin.core.context.GlobalContext
+            .get()
+            .get<io.legado.app.domain.gateway.OtherSettingsGateway>()
 
-    private val otherSettingsGateway get() = org.koin.core.context.GlobalContext.get().get<io.legado.app.domain.gateway.OtherSettingsGateway>()
-
-    override fun registerComponents(context: Context, glide: Glide, registry: Registry) {
+    override fun registerComponents(
+        context: Context,
+        glide: Glide,
+        registry: Registry,
+    ) {
         registry.replace(
             GlideUrl::class.java,
             InputStream::class.java,
-            OkHttpModeLoaderFactory
+            OkHttpModeLoaderFactory,
         )
         registry.prepend(
             String::class.java,
             File::class.java,
-            FilePathLoader.Factory()
+            FilePathLoader.Factory(),
         )
     }
 
-    override fun applyOptions(context: Context, builder: GlideBuilder) {
+    override fun applyOptions(
+        context: Context,
+        builder: GlideBuilder,
+    ) {
         super.applyOptions(context, builder)
         val calculator = MemorySizeCalculator.Builder(context).build()
         val bitmapPool = AsyncRecycleBitmapPool(calculator.bitmapPoolSize)

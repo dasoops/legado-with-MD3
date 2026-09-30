@@ -38,7 +38,7 @@ fun TagSelectSheet(
                 value = newTags,
                 onValueChange = { newTags = it },
                 label = stringResource(R.string.new_book_tags),
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
             )
             LazyColumn(modifier = Modifier.heightIn(max = 320.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 items(tags, key = { it }) { tag ->
@@ -46,14 +46,14 @@ fun TagSelectSheet(
                         title = tag,
                         isSelected = tag in selected,
                         inSelectionMode = true,
-                        onToggleSelection = { selected = if (tag in selected) selected - tag else selected + tag }
+                        onToggleSelection = { selected = if (tag in selected) selected - tag else selected + tag },
                     )
                 }
             }
             MediumTonalButton(
                 text = stringResource(R.string.add_book_tags),
                 enabled = selected.isNotEmpty() || BookTags.editable(listOf(newTags)).isNotEmpty(),
-                onClick = { onConfirm(selected + BookTags.editable(listOf(newTags))) }
+                onClick = { onConfirm(selected + BookTags.editable(listOf(newTags))) },
             )
         }
     }

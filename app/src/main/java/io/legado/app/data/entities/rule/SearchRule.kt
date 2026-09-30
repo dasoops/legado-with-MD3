@@ -21,19 +21,17 @@ data class SearchRule(
     override var updateTime: String? = null,
     override var bookUrl: String? = null,
     override var coverUrl: String? = null,
-    override var wordCount: String? = null
-) : BookListRule, Parcelable {
-
+    override var wordCount: String? = null,
+) : BookListRule,
+    Parcelable {
     companion object {
-
-        val jsonDeserializer = JsonDeserializer<SearchRule?> { json, _, _ ->
-            when {
-                json.isJsonObject -> INITIAL_GSON.fromJson(json, SearchRule::class.java)
-                json.isJsonPrimitive -> INITIAL_GSON.fromJson(json.asString, SearchRule::class.java)
-                else -> null
+        val jsonDeserializer =
+            JsonDeserializer<SearchRule?> { json, _, _ ->
+                when {
+                    json.isJsonObject -> INITIAL_GSON.fromJson(json, SearchRule::class.java)
+                    json.isJsonPrimitive -> INITIAL_GSON.fromJson(json.asString, SearchRule::class.java)
+                    else -> null
+                }
             }
-        }
-
     }
-
 }

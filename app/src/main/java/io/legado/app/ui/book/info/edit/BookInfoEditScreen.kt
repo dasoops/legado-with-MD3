@@ -96,23 +96,24 @@ fun BookInfoEditScreen(
                 title = stringResource(id = R.string.book_info_edit),
                 navigationIcon = {
                     TopBarNavigationButton(
-                        onClick = onBack
+                        onClick = onBack,
                     )
                 },
                 actions = {
                     TopBarActionButton(
                         onClick = { viewModel.save(onSave) },
                         imageVector = Icons.Default.Save,
-                        contentDescription = stringResource(R.string.save)
+                        contentDescription = stringResource(R.string.save),
                     )
                 },
-                scrollBehavior = scrollBehavior
+                scrollBehavior = scrollBehavior,
             )
         },
         content = { paddingValues ->
             uiState.book?.let {
                 BookInfoEditContent(
-                    modifier = Modifier
+                    modifier =
+                    Modifier
                         .fillMaxSize()
                         .padding(paddingValues)
                         .consumeWindowInsets(paddingValues)
@@ -122,7 +123,7 @@ fun BookInfoEditScreen(
                     viewModel = viewModel,
                 )
             }
-        }
+        },
     )
 }
 
@@ -146,19 +147,20 @@ fun BookInfoEditContent(
         },
     )
 
-    val selectCover = rememberLauncherForActivityResult(SelectImageContract()) {
-        it.uri?.let { uri ->
-            viewModel.coverChangeTo(context, uri)
+    val selectCover =
+        rememberLauncherForActivityResult(SelectImageContract()) {
+            it.uri?.let { uri ->
+                viewModel.coverChangeTo(context, uri)
+            }
         }
-    }
 
     Column(
-        modifier = modifier.padding(16.dp)
+        modifier = modifier.padding(16.dp),
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(16.dp),
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             CoilBookCover(
                 name = uiState.name,
@@ -170,40 +172,42 @@ fun BookInfoEditContent(
                 // 传 bookUrl 后，书架/详情页缓存过的封面（含别名命中）直接本地返回，不碰书源。
                 bookUrl = uiState.book?.bookUrl,
                 preferCache = true,
-                modifier = Modifier
-                    .width(110.dp)
+                modifier =
+                Modifier
+                    .width(110.dp),
             )
             Column(
                 modifier = Modifier.weight(1f),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
+                horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                     MediumOutlinedButton(
                         onClick = { showChangeCoverSheet = true },
                         icon = Icons.Default.ImageSearch,
-                        contentDescription = stringResource(R.string.refresh_cover)
+                        contentDescription = stringResource(R.string.refresh_cover),
                     )
                     MediumOutlinedButton(
                         onClick = { selectCover.launch() },
                         icon = Icons.Default.FolderOpen,
-                        contentDescription = stringResource(R.string.select_folder)
+                        contentDescription = stringResource(R.string.select_folder),
                     )
                     MediumOutlinedButton(
                         onClick = { viewModel.resetCover() },
                         icon = Icons.Default.Replay,
-                        contentDescription = stringResource(R.string.cover_reset)
+                        contentDescription = stringResource(R.string.cover_reset),
                     )
                 }
                 Spacer(modifier = Modifier.height(4.dp))
                 BookTypeDropdown(
-                    bookTypes = listOf(
+                    bookTypes =
+                    listOf(
                         BookInfoEditType.TEXT to stringResource(R.string.book_type_text),
                         BookInfoEditType.AUDIO to stringResource(R.string.book_type_audio),
-                        BookInfoEditType.IMAGE to stringResource(R.string.book_type_image)
+                        BookInfoEditType.IMAGE to stringResource(R.string.book_type_image),
                     ),
                     selectedType = uiState.selectedType,
-                    onTypeSelected = { viewModel.onBookTypeChange(it) }
+                    onTypeSelected = { viewModel.onBookTypeChange(it) },
                 )
             }
         }
@@ -212,7 +216,7 @@ fun BookInfoEditContent(
             title = stringResource(R.string.fixed_book_type),
             description = stringResource(R.string.fixed_book_type_summary),
             checked = uiState.fixedType,
-            onCheckedChange = { viewModel.onFixedTypeChange(it) }
+            onCheckedChange = { viewModel.onFixedTypeChange(it) },
         )
         Spacer(modifier = Modifier.height(16.dp))
         AppTextField(
@@ -220,7 +224,7 @@ fun BookInfoEditContent(
             onValueChange = { viewModel.onNameChange(it) },
             label = stringResource(R.string.book_name),
             backgroundColor = LegadoTheme.colorScheme.surfaceInput,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
         )
         Spacer(modifier = Modifier.height(8.dp))
         AppTextField(
@@ -228,7 +232,7 @@ fun BookInfoEditContent(
             onValueChange = { viewModel.onAuthorChange(it) },
             label = stringResource(R.string.author),
             backgroundColor = LegadoTheme.colorScheme.surfaceInput,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
         )
         Spacer(modifier = Modifier.height(8.dp))
         AppTextField(
@@ -236,7 +240,7 @@ fun BookInfoEditContent(
             onValueChange = { viewModel.onCoverUrlChange(it) },
             label = stringResource(R.string.cover_url),
             backgroundColor = LegadoTheme.colorScheme.surfaceInput,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
         )
         Spacer(modifier = Modifier.height(8.dp))
         AppTextField(
@@ -245,7 +249,7 @@ fun BookInfoEditContent(
             readOnly = true,
             label = stringResource(R.string.source_categories),
             backgroundColor = LegadoTheme.colorScheme.surfaceInput,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
         )
         Spacer(modifier = Modifier.height(8.dp))
         KindEditor(
@@ -260,7 +264,7 @@ fun BookInfoEditContent(
             onValueChange = { viewModel.onIntroChange(it) },
             label = stringResource(R.string.book_intro),
             backgroundColor = LegadoTheme.colorScheme.surfaceInput,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
         )
         Spacer(modifier = Modifier.height(8.dp))
         AppTextField(
@@ -268,7 +272,7 @@ fun BookInfoEditContent(
             onValueChange = { viewModel.onRemarkChange(it) },
             label = stringResource(R.string.book_remark),
             backgroundColor = LegadoTheme.colorScheme.surfaceInput,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
         )
     }
 }
@@ -278,14 +282,15 @@ fun BookInfoEditContent(
 fun BookTypeDropdown(
     bookTypes: List<Pair<BookInfoEditType, String>>,
     selectedType: BookInfoEditType,
-    onTypeSelected: (BookInfoEditType) -> Unit
+    onTypeSelected: (BookInfoEditType) -> Unit,
 ) {
     var expanded by remember { mutableStateOf(false) }
     val selectedTypeLabel = bookTypes.firstOrNull { it.first == selectedType }?.second.orEmpty()
 
-    val textFieldState = rememberTextFieldState(
-        initialText = selectedTypeLabel
-    )
+    val textFieldState =
+        rememberTextFieldState(
+            initialText = selectedTypeLabel,
+        )
 
     LaunchedEffect(selectedTypeLabel) {
         textFieldState.setTextAndPlaceCursorAtEnd(selectedTypeLabel)
@@ -294,7 +299,7 @@ fun BookTypeDropdown(
     ExposedDropdownMenuBox(
         modifier = Modifier.padding(horizontal = 8.dp),
         expanded = expanded,
-        onExpandedChange = { expanded = !expanded }
+        onExpandedChange = { expanded = !expanded },
     ) {
         AppTextField(
             state = textFieldState,
@@ -305,17 +310,18 @@ fun BookTypeDropdown(
             trailingIcon = {
                 ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
             },
-            modifier = Modifier
+            modifier =
+            Modifier
                 .fillMaxWidth()
                 .menuAnchor(
                     ExposedDropdownMenuAnchorType.PrimaryEditable,
-                    enabled = true
+                    enabled = true,
                 ),
         )
 
         RoundDropdownMenu(
             expanded = expanded,
-            onDismissRequest = { expanded = false }
+            onDismissRequest = { expanded = false },
         ) {
             bookTypes.forEach { (type, label) ->
                 RoundDropdownMenuItem(
@@ -323,7 +329,7 @@ fun BookTypeDropdown(
                     onClick = {
                         onTypeSelected(type)
                         expanded = false
-                    }
+                    },
                 )
             }
         }
@@ -336,47 +342,53 @@ fun KindEditor(
     kindList: List<String>,
     onKindListChange: (List<String>) -> Unit,
     onReset: () -> Unit,
-    backgroundColor: Color
+    backgroundColor: Color,
 ) {
     var editingIndex by remember { mutableStateOf<Int?>(null) }
     var editText by remember { mutableStateOf("") }
     val hapticFeedback = LocalHapticFeedback.current
 
     val listState = rememberLazyListState()
-    fun moveKind(from: Int, to: Int) {
+
+    fun moveKind(
+        from: Int,
+        to: Int,
+    ) {
         val mutable = kindList.toMutableList()
         mutable.add(to, mutable.removeAt(from))
         onKindListChange(mutable)
     }
-    val reorderableState = rememberReorderableLazyListState(listState) { from, to ->
-        moveKind(from.index, to.index)
-    }
+    val reorderableState =
+        rememberReorderableLazyListState(listState) { from, to ->
+            moveKind(from.index, to.index)
+        }
 
     Column(
         modifier = Modifier.padding(vertical = 8.dp),
-        verticalArrangement = Arrangement.spacedBy(4.dp)
+        verticalArrangement = Arrangement.spacedBy(4.dp),
     ) {
         AppText(
-            text = stringResource(R.string.my_tags)
+            text = stringResource(R.string.my_tags),
         )
         Row(
             modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             LazyRow(
                 state = listState,
-                modifier = Modifier
+                modifier =
+                Modifier
                     .weight(1f)
                     .fadingEdge(listState),
                 contentPadding = PaddingValues(vertical = 4.dp),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically,
             ) {
                 items(kindList.size, key = { kindList[it] }) { index ->
                     val kind = kindList[index]
                     ReorderableItem(
                         state = reorderableState,
-                        key = kind
+                        key = kind,
                     ) { isDragging ->
                         KindChip(
                             text = kind,
@@ -385,21 +397,20 @@ fun KindEditor(
                                 editingIndex = index
                                 editText = kind
                             },
-                            modifier = Modifier
+                            modifier =
+                            Modifier
                                 .reorderAccessibility(
                                     index = index,
                                     itemCount = kindList.size,
                                     onMove = ::moveKind,
-                                )
-                                .longPressDraggableHandle(
+                                ).longPressDraggableHandle(
                                     onDragStarted = {
                                         hapticFeedback.performHapticFeedback(HapticFeedbackType.GestureThresholdActivate)
                                     },
                                     onDragStopped = {
                                         hapticFeedback.performHapticFeedback(HapticFeedbackType.GestureEnd)
-                                    }
-                                )
-                                .animateItem()
+                                    },
+                                ).animateItem(),
                         )
                     }
                 }
@@ -410,7 +421,7 @@ fun KindEditor(
                     onReset()
                 },
                 icon = Icons.Default.Replay,
-                contentDescription = stringResource(R.string.reset)
+                contentDescription = stringResource(R.string.reset),
             )
             Spacer(modifier = Modifier.width(8.dp))
             MediumOutlinedButton(
@@ -419,18 +430,18 @@ fun KindEditor(
                     editText = ""
                 },
                 icon = Icons.Default.Add,
-                contentDescription = stringResource(R.string.add)
+                contentDescription = stringResource(R.string.add),
             )
         }
     }
-
 
     if (editingIndex != null) {
         val isAdding = editingIndex == -1
         AppAlertDialog(
             show = editingIndex != null,
             onDismissRequest = { editingIndex = null },
-            title = if (isAdding) {
+            title =
+            if (isAdding) {
                 stringResource(R.string.add_tag)
             } else {
                 stringResource(R.string.edit_tag)
@@ -441,7 +452,7 @@ fun KindEditor(
                     onValueChange = { editText = it },
                     label = stringResource(R.string.tag),
                     backgroundColor = backgroundColor,
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
                 )
             },
             confirmText = stringResource(android.R.string.ok),
@@ -458,17 +469,23 @@ fun KindEditor(
                 }
                 editingIndex = null
             },
-            dismissText = if (isAdding) stringResource(android.R.string.cancel) else stringResource(
-                R.string.delete
-            ),
-            onDismiss = if (isAdding) {
+            dismissText =
+            if (isAdding) {
+                stringResource(android.R.string.cancel)
+            } else {
+                stringResource(
+                    R.string.delete,
+                )
+            },
+            onDismiss =
+            if (isAdding) {
                 { editingIndex = null }
             } else {
                 {
                     onKindListChange(kindList.toMutableList().apply { removeAt(editingIndex!!) })
                     editingIndex = null
                 }
-            }
+            },
         )
     }
 }
@@ -479,17 +496,18 @@ private fun KindChip(
     text: String,
     isDragging: Boolean,
     onClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     NormalCard(
         cornerRadius = 8.dp,
         containerColor = LegadoTheme.colorScheme.surfaceContainer,
         contentColor = LegadoTheme.colorScheme.onSurface,
         elevation = if (isDragging) 2.dp else 0.dp,
-        modifier = modifier
+        modifier =
+        modifier
             .padding(2.dp)
             .zIndex(if (isDragging) 1f else 0f)
-            .clickable(onClick = onClick)
+            .clickable(onClick = onClick),
     ) {
         AnimatedTextLine(
             text = text,
@@ -497,7 +515,7 @@ private fun KindChip(
             color = LegadoTheme.colorScheme.onSurface,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
-            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
         )
     }
 }

@@ -6,5 +6,6 @@ import kotlinx.coroutines.flow.Flow
 interface OtherSettingsGateway {
     val currentSettings: OtherSettings
     val settings: Flow<OtherSettings>
+
     suspend fun update(transform: (OtherSettings) -> OtherSettings)
 }

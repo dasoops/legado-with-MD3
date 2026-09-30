@@ -14,7 +14,6 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface ReadRecordDao {
-
     @get:Query("select * from readRecord")
     val all: List<ReadRecord>
 
@@ -34,7 +33,7 @@ interface ReadRecordDao {
             FROM readRecord
             GROUP BY bookName, bookAuthor
         )
-        """
+        """,
     )
     fun observeTotalReadBookCount(): Flow<Int>
 
@@ -73,7 +72,7 @@ interface ReadRecordDao {
             LIMIT 1
         )
         ORDER BY recent.lastRead DESC
-        """
+        """,
     )
     fun observeRecentHomeBooks(limit: Int): Flow<List<HomeRecentBookRow>>
 
@@ -81,10 +80,18 @@ interface ReadRecordDao {
     fun getReadTime(bookName: String): Long?
 
     @Query("select readTime from readRecord where deviceId = :deviceId and bookName = :bookName and bookAuthor = :bookAuthor")
-    fun getReadTime(deviceId: String, bookName: String, bookAuthor: String): Long?
+    fun getReadTime(
+        deviceId: String,
+        bookName: String,
+        bookAuthor: String,
+    ): Long?
 
     @Query("SELECT * FROM readRecord WHERE deviceId = :deviceId AND bookName = :bookName AND bookAuthor = :bookAuthor")
-    suspend fun getReadRecord(deviceId: String, bookName: String, bookAuthor: String): ReadRecord?
+    suspend fun getReadRecord(
+        deviceId: String,
+        bookName: String,
+        bookAuthor: String,
+    ): ReadRecord?
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(vararg readRecord: ReadRecord)
@@ -99,7 +106,10 @@ interface ReadRecordDao {
     fun clear()
 
     @Query("delete from readRecord where bookName = :bookName and bookAuthor = :bookAuthor")
-    fun deleteByName(bookName: String, bookAuthor: String)
+    fun deleteByName(
+        bookName: String,
+        bookAuthor: String,
+    )
 
     /**
      * 插入或更新每日聚合统计记录。
@@ -111,8 +121,15 @@ interface ReadRecordDao {
      * 获取某一本书某一天的详细统计
      * @param date 日期, 推荐格式: YYYY-MM-DD
      */
-    @Query("SELECT * FROM readRecordDetail WHERE deviceId = :deviceId AND bookName = :bookName AND bookAuthor = :bookAuthor AND date = :date")
-    suspend fun getDetail(deviceId: String, bookName: String, bookAuthor: String, date: String): ReadRecordDetail?
+    @Query(
+        "SELECT * FROM readRecordDetail WHERE deviceId = :deviceId AND bookName = :bookName AND bookAuthor = :bookAuthor AND date = :date",
+    )
+    suspend fun getDetail(
+        deviceId: String,
+        bookName: String,
+        bookAuthor: String,
+        date: String,
+    ): ReadRecordDetail?
 
     /**
      * 查询所有发生过阅读的日期（用于日历标记）
@@ -124,22 +141,35 @@ interface ReadRecordDao {
      * 获取某一天所有书籍的详细统计 (用于日历页面总览)
      */
     @Query("SELECT * FROM readRecordDetail WHERE deviceId = :deviceId AND date = :date")
-    suspend fun getDetailsByDate(deviceId: String, date: String): List<ReadRecordDetail>
+    suspend fun getDetailsByDate(
+        deviceId: String,
+        date: String,
+    ): List<ReadRecordDetail>
 
     // 清除每天的统计记录
     @Query("DELETE FROM readRecordDetail WHERE bookName = :bookName AND bookAuthor = :bookAuthor")
-    fun deleteDetailByName(bookName: String, bookAuthor: String)
+    fun deleteDetailByName(
+        bookName: String,
+        bookAuthor: String,
+    )
 
     /** 删除指定书籍指定日期的统计详情。 */
     @Query("DELETE FROM readRecordDetail WHERE bookName = :bookName AND bookAuthor = :bookAuthor AND date = :date")
-    suspend fun deleteDetailByNameAndDate(bookName: String, bookAuthor: String, date: String)
+    suspend fun deleteDetailByNameAndDate(
+        bookName: String,
+        bookAuthor: String,
+        date: String,
+    )
 
     /**
      * 获取指定书籍的最后一条阅读时段记录
      * 用于判断是否可以合并
      */
     @Query("SELECT * FROM readRecordSession WHERE bookName = :bookName AND bookAuthor = :bookAuthor ORDER BY endTime DESC LIMIT 1")
-    suspend fun getLatestSessionByBook(bookName: String, bookAuthor: String): ReadRecordSession?
+    suspend fun getLatestSessionByBook(
+        bookName: String,
+        bookAuthor: String,
+    ): ReadRecordSession?
 
     /**
      * 更新现有的阅读时段记录
@@ -158,14 +188,18 @@ interface ReadRecordDao {
     fun getAllReadRecordsSortedByLastRead(): Flow<List<ReadRecord>>
 
     /** 搜索 ReadRecord，按最后阅读时间倒序排列 */
-    @Query("SELECT * FROM readRecord WHERE bookName LIKE '%' || :query || '%' OR bookAuthor LIKE '%' || :query || '%' ORDER BY lastRead DESC")
+    @Query(
+        "SELECT * FROM readRecord WHERE bookName LIKE '%' || :query || '%' OR bookAuthor LIKE '%' || :query || '%' ORDER BY lastRead DESC",
+    )
     fun searchReadRecordsByLastRead(query: String): Flow<List<ReadRecord>>
 
-    @Query("SELECT * FROM readRecord WHERE deviceId = :deviceId AND bookName = :bookName AND bookAuthor != :excludeAuthor ORDER BY lastRead DESC")
+    @Query(
+        "SELECT * FROM readRecord WHERE deviceId = :deviceId AND bookName = :bookName AND bookAuthor != :excludeAuthor ORDER BY lastRead DESC",
+    )
     suspend fun getReadRecordsByNameExcludingAuthor(
         deviceId: String,
         bookName: String,
-        excludeAuthor: String
+        excludeAuthor: String,
     ): List<ReadRecord>
 
     @Query(
@@ -176,12 +210,12 @@ interface ReadRecordDao {
         ORDER BY
             CASE WHEN bookName = :bookName THEN 0 ELSE 1 END,
             lastRead DESC
-        """
+        """,
     )
     suspend fun getMergeCandidates(
         deviceId: String,
         bookName: String,
-        bookAuthor: String
+        bookAuthor: String,
     ): List<ReadRecord>
 
     /** 聚合列表项没有真实设备 ID，跨设备查询可供合并的其他记录。 */
@@ -190,7 +224,7 @@ interface ReadRecordDao {
         SELECT * FROM readRecord
         WHERE NOT (bookName = :bookName AND bookAuthor = :bookAuthor)
         ORDER BY CASE WHEN bookName = :bookName THEN 0 ELSE 1 END, lastRead DESC
-        """
+        """,
     )
     suspend fun getMergeCandidatesAcrossDevices(
         bookName: String,
@@ -200,41 +234,59 @@ interface ReadRecordDao {
     /**
      * 获取某一天某一本书的所有阅读时段记录
      */
-    @Query("""
+    @Query(
+        """
         SELECT * FROM readRecordSession 
         WHERE deviceId = :deviceId 
         AND bookName = :bookName 
         AND bookAuthor = :bookAuthor 
         AND STRFTIME('%Y-%m-%d', datetime(startTime/1000, 'unixepoch', 'localtime')) = :date 
         ORDER BY startTime ASC
-    """)
+    """,
+    )
     suspend fun getSessionsByBookAndDate(
         deviceId: String,
         bookName: String,
         bookAuthor: String,
-        date: String
+        date: String,
     ): List<ReadRecordSession>
 
     /**
      * 获取某一天所有书籍的阅读时段记录
      */
-    @Query("""
+    @Query(
+        """
     SELECT * FROM readRecordSession 
     WHERE deviceId = :deviceId 
     AND STRFTIME('%Y-%m-%d', datetime(startTime/1000, 'unixepoch', 'localtime')) = :date 
     ORDER BY startTime ASC
-    """)
-    suspend fun getSessionsByDate(deviceId: String, date: String): List<ReadRecordSession>
+    """,
+    )
+    suspend fun getSessionsByDate(
+        deviceId: String,
+        date: String,
+    ): List<ReadRecordSession>
 
-    @Query("SELECT * FROM readRecordDetail WHERE deviceId = :deviceId AND date = :date AND (bookName LIKE '%' || :query || '%' OR bookAuthor LIKE '%' || :query || '%')")
-    suspend fun searchDetailsByDate(deviceId: String, date: String, query: String): List<ReadRecordDetail>
+    @Query(
+        "SELECT * FROM readRecordDetail WHERE deviceId = :deviceId AND date = :date AND (bookName LIKE '%' || :query || '%' OR bookAuthor LIKE '%' || :query || '%')",
+    )
+    suspend fun searchDetailsByDate(
+        deviceId: String,
+        date: String,
+        query: String,
+    ): List<ReadRecordDetail>
 
     // 清除阅读时段记录
     @Query("DELETE FROM readRecordSession WHERE bookName = :bookName AND bookAuthor = :bookAuthor")
-    fun deleteSessionByName(bookName: String, bookAuthor: String)
+    fun deleteSessionByName(
+        bookName: String,
+        bookAuthor: String,
+    )
 
     /** 按阅读时段内容删除记录，用于跨设备删除同一阅读时段的同步副本。 */
-    @Query("DELETE FROM readRecordSession WHERE bookName = :bookName AND bookAuthor = :bookAuthor AND startTime = :startTime AND endTime = :endTime AND words = :words")
+    @Query(
+        "DELETE FROM readRecordSession WHERE bookName = :bookName AND bookAuthor = :bookAuthor AND startTime = :startTime AND endTime = :endTime AND words = :words",
+    )
     suspend fun deleteSessionByIdentity(
         bookName: String,
         bookAuthor: String,
@@ -245,7 +297,10 @@ interface ReadRecordDao {
 
     /** 获取所有设备中指定书名和作者的汇总记录。 */
     @Query("SELECT * FROM readRecord WHERE bookName = :bookName AND bookAuthor = :bookAuthor")
-    suspend fun getReadRecordsByName(bookName: String, bookAuthor: String): List<ReadRecord>
+    suspend fun getReadRecordsByName(
+        bookName: String,
+        bookAuthor: String,
+    ): List<ReadRecord>
 
     /** 获取所有设备中指定书名但作者为空的旧记录。 */
     @Query("SELECT * FROM readRecord WHERE bookName = :bookName AND bookAuthor = ''")
@@ -254,7 +309,9 @@ interface ReadRecordDao {
     @Query("SELECT * FROM readRecordDetail ORDER BY date DESC, lastReadTime DESC")
     fun getAllDetails(): Flow<List<ReadRecordDetail>>
 
-    @Query("SELECT * FROM readRecordDetail WHERE bookName LIKE '%' || :query || '%' OR bookAuthor LIKE '%' || :query || '%' ORDER BY date DESC, lastReadTime DESC")
+    @Query(
+        "SELECT * FROM readRecordDetail WHERE bookName LIKE '%' || :query || '%' OR bookAuthor LIKE '%' || :query || '%' ORDER BY date DESC, lastReadTime DESC",
+    )
     fun searchDetails(query: String): Flow<List<ReadRecordDetail>>
 
     @Query("SELECT * FROM readRecordSession WHERE deviceId = :deviceId ORDER BY startTime ASC")
@@ -265,7 +322,11 @@ interface ReadRecordDao {
     fun getAllSessions(): Flow<List<ReadRecordSession>>
 
     @Query("SELECT * FROM readRecordSession WHERE deviceId = :deviceId AND bookName = :bookName AND bookAuthor = :bookAuthor")
-    suspend fun getSessionsByBook(deviceId: String, bookName: String, bookAuthor: String): List<ReadRecordSession>
+    suspend fun getSessionsByBook(
+        deviceId: String,
+        bookName: String,
+        bookAuthor: String,
+    ): List<ReadRecordSession>
 
     /** 清理跨设备同步产生的重复阅读时段（忽略 deviceId），只保留最早写入的一行。 */
     @Query(
@@ -275,7 +336,7 @@ interface ReadRecordDao {
             SELECT MIN(id) FROM readRecordSession
             GROUP BY bookName, bookAuthor, startTime, endTime, words
         )
-        """
+        """,
     )
     suspend fun deleteDuplicateSessions()
 
@@ -289,9 +350,13 @@ interface ReadRecordDao {
             GROUP BY bookName, bookAuthor, startTime, endTime, words
         )
         AND deviceId = :deviceId AND bookName = :bookName AND bookAuthor = :bookAuthor
-        """
+        """,
     )
-    suspend fun deleteDuplicateSessionsByBook(deviceId: String, bookName: String, bookAuthor: String)
+    suspend fun deleteDuplicateSessionsByBook(
+        deviceId: String,
+        bookName: String,
+        bookAuthor: String,
+    )
 
     @Query(
         """
@@ -303,7 +368,7 @@ interface ReadRecordDao {
         AND endTime = :endTime
         AND words = :words
         LIMIT 1
-        """
+        """,
     )
     suspend fun getSession(
         deviceId: String,
@@ -311,14 +376,23 @@ interface ReadRecordDao {
         bookAuthor: String,
         startTime: Long,
         endTime: Long,
-        words: Long
+        words: Long,
     ): ReadRecordSession?
 
-    @Query("SELECT * FROM readRecordSession WHERE deviceId = :deviceId AND bookName = :bookName AND bookAuthor = :bookAuthor ORDER BY startTime DESC")
-    fun getSessionsByBookFlow(deviceId: String, bookName: String, bookAuthor: String): Flow<List<ReadRecordSession>>
+    @Query(
+        "SELECT * FROM readRecordSession WHERE deviceId = :deviceId AND bookName = :bookName AND bookAuthor = :bookAuthor ORDER BY startTime DESC",
+    )
+    fun getSessionsByBookFlow(
+        deviceId: String,
+        bookName: String,
+        bookAuthor: String,
+    ): Flow<List<ReadRecordSession>>
 
     @Query("SELECT SUM(readTime) FROM readRecord WHERE bookName = :bookName AND bookAuthor = :bookAuthor")
-    fun getReadTimeFlow(bookName: String, bookAuthor: String): Flow<Long?>
+    fun getReadTimeFlow(
+        bookName: String,
+        bookAuthor: String,
+    ): Flow<Long?>
 
     @Delete
     suspend fun deleteDetail(detail: ReadRecordDetail)
@@ -330,13 +404,13 @@ interface ReadRecordDao {
         AND bookName = :bookName 
         AND bookAuthor = :bookAuthor 
         AND STRFTIME('%Y-%m-%d', datetime(startTime/1000, 'unixepoch', 'localtime')) = :date
-    """
+    """,
     )
     suspend fun deleteSessionsByBookAndDate(
         deviceId: String,
         bookName: String,
         bookAuthor: String,
-        date: String
+        date: String,
     )
 
     /** 删除与本地日期有交集的阅读时段, 包括跨午夜的时段。 */
@@ -348,7 +422,7 @@ interface ReadRecordDao {
         AND bookAuthor = :bookAuthor
         AND startTime < :endTime
         AND endTime > :startTime
-        """
+        """,
     )
     suspend fun deleteSessionsByBookAndTimeRange(
         deviceId: String,
@@ -374,12 +448,23 @@ interface ReadRecordDao {
     suspend fun clearReadRecordSessions()
 
     @Query("DELETE FROM readRecordDetail WHERE deviceId = :deviceId AND bookName = :bookName AND bookAuthor = :bookAuthor")
-    suspend fun deleteDetailsByBook(deviceId: String, bookName: String, bookAuthor: String)
+    suspend fun deleteDetailsByBook(
+        deviceId: String,
+        bookName: String,
+        bookAuthor: String,
+    )
 
     @Query("DELETE FROM readRecordSession WHERE deviceId = :deviceId AND bookName = :bookName AND bookAuthor = :bookAuthor")
-    suspend fun deleteSessionsByBook(deviceId: String, bookName: String, bookAuthor: String)
+    suspend fun deleteSessionsByBook(
+        deviceId: String,
+        bookName: String,
+        bookAuthor: String,
+    )
 
     @Query("SELECT * FROM readRecordDetail WHERE deviceId = :deviceId AND bookName = :bookName AND bookAuthor = :bookAuthor")
-    suspend fun getDetailsByBook(deviceId: String, bookName: String, bookAuthor: String): List<ReadRecordDetail>
-
+    suspend fun getDetailsByBook(
+        deviceId: String,
+        bookName: String,
+        bookAuthor: String,
+    ): List<ReadRecordDetail>
 }

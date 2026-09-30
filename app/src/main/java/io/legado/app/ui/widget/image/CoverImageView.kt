@@ -37,13 +37,16 @@ import org.koin.core.context.GlobalContext
  * 封面
  */
 @Suppress("unused")
-class CoverImageView @JvmOverloads constructor(
+class CoverImageView
+@JvmOverloads
+constructor(
     context: Context,
-    attrs: AttributeSet? = null
+    attrs: AttributeSet? = null,
 ) : AppCompatImageView(context, attrs) {
     init {
         setBackgroundColor(Color.TRANSPARENT)
     }
+
     private var filletPath = Path()
     private var viewWidth: Float = 0f
     private var viewHeight: Float = 0f
@@ -60,11 +63,12 @@ class CoverImageView @JvmOverloads constructor(
     private val appShellSettingsGateway
         get() = GlobalContext.get().get<AppShellSettingsGateway>()
     private val isNightTheme: Boolean
-        get() = when (appShellSettingsGateway.currentSettings.themeMode) {
-            "1" -> false
-            "2" -> true
-            else -> sysConfiguration.isNightMode
-        }
+        get() =
+            when (appShellSettingsGateway.currentSettings.themeMode) {
+                "1" -> false
+                "2" -> true
+                else -> sysConfiguration.isNightMode
+            }
     private val colorKey get() = if (isNightTheme) coverSettings.textColorDark else coverSettings.textColor
     private val shadowKey get() = if (isNightTheme) coverSettings.shadowColorDark else coverSettings.shadowColor
     private val namePaint by lazy {
@@ -94,18 +98,27 @@ class CoverImageView @JvmOverloads constructor(
         super.setLayoutParams(params)
     }
 
-    override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
+    override fun onMeasure(
+        widthMeasureSpec: Int,
+        heightMeasureSpec: Int,
+    ) {
         val measuredWidth = MeasureSpec.getSize(widthMeasureSpec)
         val measuredHeight = measuredWidth * 7 / 5
         super.onMeasure(
             widthMeasureSpec,
-            MeasureSpec.makeMeasureSpec(measuredHeight, MeasureSpec.EXACTLY)
+            MeasureSpec.makeMeasureSpec(measuredHeight, MeasureSpec.EXACTLY),
         )
     }
 
     private val cornerRadius = 24f
 
-    override fun onLayout(changed: Boolean, left: Int, top: Int, right: Int, bottom: Int) {
+    override fun onLayout(
+        changed: Boolean,
+        left: Int,
+        top: Int,
+        right: Int,
+        bottom: Int,
+    ) {
         super.onLayout(changed, left, top, right, bottom)
         viewWidth = width.toFloat()
         viewHeight = height.toFloat()
@@ -142,12 +155,11 @@ class CoverImageView @JvmOverloads constructor(
 
     private val glideListener by lazy {
         object : RequestListener<Drawable> {
-
             override fun onLoadFailed(
                 e: GlideException?,
                 model: Any?,
                 target: Target<Drawable>,
-                isFirstResource: Boolean
+                isFirstResource: Boolean,
             ): Boolean {
                 defaultCover = true
                 return false
@@ -158,12 +170,11 @@ class CoverImageView @JvmOverloads constructor(
                 model: Any,
                 target: Target<Drawable>?,
                 dataSource: DataSource,
-                isFirstResource: Boolean
+                isFirstResource: Boolean,
             ): Boolean {
                 defaultCover = false
                 return false
             }
-
         }
     }
 
@@ -175,7 +186,7 @@ class CoverImageView @JvmOverloads constructor(
         sourceOrigin: String? = null,
         fragment: Fragment? = null,
         lifecycle: Lifecycle? = null,
-        onLoadFinish: (() -> Unit)? = null
+        onLoadFinish: (() -> Unit)? = null,
     ) {
         this.bitmapPath = path
         this.name = name?.replace(AppPattern.bdRegex, "")?.trim()
@@ -183,51 +194,54 @@ class CoverImageView @JvmOverloads constructor(
         defaultCover = true
         invalidate()
         if (coverSettings.useDefaultCover) {
-            ImageLoader.load(context, BookCover.defaultDrawable)
+            ImageLoader
+                .load(context, BookCover.defaultDrawable)
                 .centerCrop()
                 .into(this)
         } else {
             var options = RequestOptions().set(OkHttpModelLoader.loadOnlyWifiOption, loadOnlyWifi)
-            if (sourceOrigin != null) {
-                options = options.set(OkHttpModelLoader.sourceOriginOption, sourceOrigin)
-            }
-            var builder = if (fragment != null && lifecycle != null) {
-                ImageLoader.load(fragment, lifecycle, path)
-            } else {
-                ImageLoader.load(context, path)//Glide自动识别http://,content://和file://
-            }
-            builder = builder.apply(options)
-                .placeholder(BookCover.defaultDrawable)
-                .error(BookCover.defaultDrawable)
-                .listener(glideListener)
+            var builder =
+                if (fragment != null && lifecycle != null) {
+                    ImageLoader.load(fragment, lifecycle, path)
+                } else {
+                    ImageLoader.load(context, path) // Glide自动识别http://,content://和file://
+                }
+            builder =
+                builder
+                    .apply(options)
+                    .placeholder(BookCover.defaultDrawable)
+                    .error(BookCover.defaultDrawable)
+                    .listener(glideListener)
             if (onLoadFinish != null) {
-                builder = builder.addListener(object : RequestListener<Drawable> {
-                    override fun onLoadFailed(
-                        e: GlideException?,
-                        model: Any?,
-                        target: Target<Drawable?>,
-                        isFirstResource: Boolean
-                    ): Boolean {
-                        onLoadFinish.invoke()
-                        return false
-                    }
+                builder =
+                    builder.addListener(
+                        object : RequestListener<Drawable> {
+                            override fun onLoadFailed(
+                                e: GlideException?,
+                                model: Any?,
+                                target: Target<Drawable?>,
+                                isFirstResource: Boolean,
+                            ): Boolean {
+                                onLoadFinish.invoke()
+                                return false
+                            }
 
-                    override fun onResourceReady(
-                        resource: Drawable,
-                        model: Any,
-                        target: Target<Drawable?>?,
-                        dataSource: DataSource,
-                        isFirstResource: Boolean
-                    ): Boolean {
-                        onLoadFinish.invoke()
-                        return false
-                    }
-                })
+                            override fun onResourceReady(
+                                resource: Drawable,
+                                model: Any,
+                                target: Target<Drawable?>?,
+                                dataSource: DataSource,
+                                isFirstResource: Boolean,
+                            ): Boolean {
+                                onLoadFinish.invoke()
+                                return false
+                            }
+                        },
+                    )
             }
             builder
                 .centerCrop()
                 .into(this)
         }
     }
-
 }

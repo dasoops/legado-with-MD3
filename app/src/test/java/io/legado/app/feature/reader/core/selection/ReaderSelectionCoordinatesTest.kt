@@ -5,10 +5,11 @@ import org.junit.Assert.assertNull
 import org.junit.Test
 
 class ReaderSelectionCoordinatesTest {
-    private val lines = listOf(
-        ReaderSelectionLine(10, listOf(1, 2, 1)),
-        ReaderSelectionLine(15, listOf(1, 1)),
-    )
+    private val lines =
+        listOf(
+            ReaderSelectionLine(10, listOf(1, 2, 1)),
+            ReaderSelectionLine(15, listOf(1, 1)),
+        )
 
     @Test
     fun mapsChapterOffsetsToLayoutColumns() {

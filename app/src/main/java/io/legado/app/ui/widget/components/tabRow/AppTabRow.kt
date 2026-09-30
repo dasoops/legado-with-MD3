@@ -21,7 +21,7 @@ fun AppTabRow(
     selectedTabIndex: Int,
     onTabSelected: (Int) -> Unit,
     modifier: Modifier = Modifier,
-    isScrollable: Boolean = true
+    isScrollable: Boolean = true,
 ) {
     val composeEngine = LegadoTheme.composeEngine
 
@@ -30,11 +30,13 @@ fun AppTabRow(
             tabs = tabTitles,
             selectedTabIndex = selectedTabIndex,
             onTabSelected = onTabSelected,
-            modifier = modifier
+            modifier =
+            modifier
                 .padding(vertical = 4.dp),
-            colors = TabRowDefaults.tabRowColors(
-                backgroundColor = Color.Transparent
-            )
+            colors =
+            TabRowDefaults.tabRowColors(
+                backgroundColor = Color.Transparent,
+            ),
         )
     } else {
         if (isScrollable) {
@@ -44,13 +46,13 @@ fun AppTabRow(
                 divider = { },
                 containerColor = Color.Transparent,
                 minTabWidth = 0.dp,
-                modifier = modifier
+                modifier = modifier,
             ) {
                 tabTitles.forEachIndexed { index, title ->
                     AppTab(
                         selected = selectedTabIndex == index,
                         onClick = { onTabSelected(index) },
-                        title = title
+                        title = title,
                     )
                 }
             }
@@ -59,13 +61,13 @@ fun AppTabRow(
                 selectedTabIndex = selectedTabIndex,
                 divider = { },
                 containerColor = Color.Transparent,
-                modifier = modifier
+                modifier = modifier,
             ) {
                 tabTitles.forEachIndexed { index, title ->
                     AppTab(
                         selected = selectedTabIndex == index,
                         onClick = { onTabSelected(index) },
-                        title = title
+                        title = title,
                     )
                 }
             }
@@ -77,7 +79,7 @@ fun AppTabRow(
 private fun AppTab(
     selected: Boolean,
     onClick: () -> Unit,
-    title: String
+    title: String,
 ) {
     Tab(
         selected = selected,
@@ -89,8 +91,8 @@ private fun AppTab(
                 overflow = TextOverflow.Ellipsis,
                 style = LegadoTheme.typography.labelLargeEmphasized,
                 modifier = Modifier.padding(horizontal = 8.dp),
-                color = if (selected) LegadoTheme.colorScheme.primary else LegadoTheme.colorScheme.onSurfaceVariant
+                color = if (selected) LegadoTheme.colorScheme.primary else LegadoTheme.colorScheme.onSurfaceVariant,
             )
-        }
+        },
     )
 }

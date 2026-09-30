@@ -28,7 +28,7 @@ data class ReplaceRuleItemUi(
     val excludeScope: String?,
     val isRegex: Boolean,
     val timeoutMillisecond: Long,
-    val order: Int
+    val order: Int,
 ) : SelectableItem<Long> {
     fun toEntity() = ReplaceRule(
         id = id,
@@ -43,7 +43,7 @@ data class ReplaceRuleItemUi(
         isEnabled = isEnabled,
         isRegex = isRegex,
         timeoutMillisecond = timeoutMillisecond,
-        order = order
+        order = order,
     )
 }
 
@@ -70,54 +70,157 @@ data class ReplaceRuleUiState(
 }
 
 sealed interface ReplaceRuleIntent {
-    data class SetSearchMode(val active: Boolean) : ReplaceRuleIntent
-    data class UpdateSearchQuery(val query: String) : ReplaceRuleIntent
+    data class SetSearchMode(
+        val active: Boolean,
+    ) : ReplaceRuleIntent
+
+    data class UpdateSearchQuery(
+        val query: String,
+    ) : ReplaceRuleIntent
+
     data object ClearSelection : ReplaceRuleIntent
+
     data object SelectAll : ReplaceRuleIntent
+
     data object InvertSelection : ReplaceRuleIntent
-    data class SetSelection(val ids: Set<Long>) : ReplaceRuleIntent
-    data class ToggleSelection(val id: Long) : ReplaceRuleIntent
+
+    data class SetSelection(
+        val ids: Set<Long>,
+    ) : ReplaceRuleIntent
+
+    data class ToggleSelection(
+        val id: Long,
+    ) : ReplaceRuleIntent
+
     data object EnableSelection : ReplaceRuleIntent
+
     data object DisableSelection : ReplaceRuleIntent
+
     data object DeleteSelection : ReplaceRuleIntent
-    data class ExportSelection(val uri: Uri) : ReplaceRuleIntent
-    data class MoveItem(val from: Int, val to: Int) : ReplaceRuleIntent
+
+    data class ExportSelection(
+        val uri: Uri,
+    ) : ReplaceRuleIntent
+
+    data class MoveItem(
+        val from: Int,
+        val to: Int,
+    ) : ReplaceRuleIntent
+
     data object SaveSortOrder : ReplaceRuleIntent
-    data class DeleteRule(val rule: ReplaceRule) : ReplaceRuleIntent
-    data class SetRuleEnabled(val id: Long, val enabled: Boolean) : ReplaceRuleIntent
-    data class CopyRule(val rule: ReplaceRule) : ReplaceRuleIntent
-    data class ImportSource(val text: String) : ReplaceRuleIntent
+
+    data class DeleteRule(
+        val rule: ReplaceRule,
+    ) : ReplaceRuleIntent
+
+    data class SetRuleEnabled(
+        val id: Long,
+        val enabled: Boolean,
+    ) : ReplaceRuleIntent
+
+    data class CopyRule(
+        val rule: ReplaceRule,
+    ) : ReplaceRuleIntent
+
+    data class ImportSource(
+        val text: String,
+    ) : ReplaceRuleIntent
+
     data object CancelImport : ReplaceRuleIntent
-    data class ToggleImportSelection(val index: Int) : ReplaceRuleIntent
-    data class ToggleImportAll(val isSelected: Boolean) : ReplaceRuleIntent
-    data class UpdateImportItem(val index: Int, val rule: ReplaceRule) : ReplaceRuleIntent
+
+    data class ToggleImportSelection(
+        val index: Int,
+    ) : ReplaceRuleIntent
+
+    data class ToggleImportAll(
+        val isSelected: Boolean,
+    ) : ReplaceRuleIntent
+
+    data class UpdateImportItem(
+        val index: Int,
+        val rule: ReplaceRule,
+    ) : ReplaceRuleIntent
+
     data object SaveImportedRules : ReplaceRuleIntent
+
     // ReplaceRule-specific
-    data class SetGroup(val groupName: String?) : ReplaceRuleIntent
-    data class SetSortMode(val mode: String) : ReplaceRuleIntent
-    data class ToTop(val rule: ReplaceRule) : ReplaceRuleIntent
-    data class ToBottom(val rule: ReplaceRule) : ReplaceRuleIntent
-    data class TopSelectByIds(val ids: Set<Long>) : ReplaceRuleIntent
-    data class BottomSelectByIds(val ids: Set<Long>) : ReplaceRuleIntent
-    data class AddGroup(val group: String) : ReplaceRuleIntent
-    data class DeleteGroup(val group: String) : ReplaceRuleIntent
-    data class UpGroup(val oldGroup: String, val newGroup: String?) : ReplaceRuleIntent
+    data class SetGroup(
+        val groupName: String?,
+    ) : ReplaceRuleIntent
+
+    data class SetSortMode(
+        val mode: String,
+    ) : ReplaceRuleIntent
+
+    data class ToTop(
+        val rule: ReplaceRule,
+    ) : ReplaceRuleIntent
+
+    data class ToBottom(
+        val rule: ReplaceRule,
+    ) : ReplaceRuleIntent
+
+    data class TopSelectByIds(
+        val ids: Set<Long>,
+    ) : ReplaceRuleIntent
+
+    data class BottomSelectByIds(
+        val ids: Set<Long>,
+    ) : ReplaceRuleIntent
+
+    data class AddGroup(
+        val group: String,
+    ) : ReplaceRuleIntent
+
+    data class DeleteGroup(
+        val group: String,
+    ) : ReplaceRuleIntent
+
+    data class UpGroup(
+        val oldGroup: String,
+        val newGroup: String?,
+    ) : ReplaceRuleIntent
+
     // Book-specific intents (only when bookUrl is provided)
-    data class InitBookData(val bookUrl: String) : ReplaceRuleIntent
+    data class InitBookData(
+        val bookUrl: String,
+    ) : ReplaceRuleIntent
+
     data object ToggleReplaceEnable : ReplaceRuleIntent
+
     data object ShowEffectiveReplaces : ReplaceRuleIntent
+
     data object ShowContentProcesses : ReplaceRuleIntent
+
     data object DismissEffectiveReplaces : ReplaceRuleIntent
+
     data object DismissContentProcesses : ReplaceRuleIntent
-    data class DisableEffectiveRule(val rule: ReplaceRule) : ReplaceRuleIntent
+
+    data class DisableEffectiveRule(
+        val rule: ReplaceRule,
+    ) : ReplaceRuleIntent
+
     data object DisableChineseConverter : ReplaceRuleIntent
+
     data object DisableReSegment : ReplaceRuleIntent
-    data class ToggleContentProcess(val id: String, val enabled: Boolean) : ReplaceRuleIntent
-    data class RequestDeleteContentProcess(val item: ContentProcessItemUi) : ReplaceRuleIntent
+
+    data class ToggleContentProcess(
+        val id: String,
+        val enabled: Boolean,
+    ) : ReplaceRuleIntent
+
+    data class RequestDeleteContentProcess(
+        val item: ContentProcessItemUi,
+    ) : ReplaceRuleIntent
+
     data object ConfirmDeleteContentProcess : ReplaceRuleIntent
+
     data object DismissDeleteContentProcess : ReplaceRuleIntent
 }
 
 sealed interface ReplaceRuleEffect {
-    data class OpenReplaceEditor(val id: Long, val pattern: String?) : ReplaceRuleEffect
+    data class OpenReplaceEditor(
+        val id: Long,
+        val pattern: String?,
+    ) : ReplaceRuleEffect
 }

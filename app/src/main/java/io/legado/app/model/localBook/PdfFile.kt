@@ -14,14 +14,15 @@ import io.legado.app.utils.FileUtils
 import io.legado.app.utils.SystemUtils
 import io.legado.app.utils.isContentScheme
 import io.legado.app.utils.printOnDebug
-import splitties.init.appCtx
 import java.io.File
 import java.io.FileOutputStream
 import java.io.InputStream
 import kotlin.math.ceil
+import splitties.init.appCtx
 
-
-class PdfFile(var book: Book) {
+class PdfFile(
+    var book: Book,
+) {
     companion object : BaseLocalBookParse {
         private var pFile: PdfFile? = null
 
@@ -46,20 +47,19 @@ class PdfFile(var book: Book) {
         }
 
         @Synchronized
-        override fun getChapterList(book: Book): ArrayList<BookChapter> {
-            return getPFile(book).getChapterList()
-        }
+        override fun getChapterList(book: Book): ArrayList<BookChapter> = getPFile(book).getChapterList()
 
         @Synchronized
-        override fun getContent(book: Book, chapter: BookChapter): String? {
-            return getPFile(book).getContent(chapter)
-        }
+        override fun getContent(
+            book: Book,
+            chapter: BookChapter,
+        ): String? = getPFile(book).getContent(chapter)
 
         @Synchronized
-        override fun getImage(book: Book, href: String): InputStream? {
-            return getPFile(book).getImage(href)
-        }
-
+        override fun getImage(
+            book: Book,
+            href: String,
+        ): InputStream? = getPFile(book).getImage(href)
     }
 
     /**
@@ -87,12 +87,14 @@ class PdfFile(var book: Book) {
     private fun readPdf(): PdfRenderer? {
         val uri = book.getLocalUri()
         if (uri.isContentScheme()) {
-            fileDescriptor = appCtx.contentResolver.openFileDescriptor(uri, "r")?.also {
-                pdfRenderer = PdfRenderer(it)
-            }
+            fileDescriptor =
+                appCtx.contentResolver.openFileDescriptor(uri, "r")?.also {
+                    pdfRenderer = PdfRenderer(it)
+                }
         } else {
             fileDescriptor =
-                ParcelFileDescriptor.open(File(uri.path!!), ParcelFileDescriptor.MODE_READ_ONLY)
+                ParcelFileDescriptor
+                    .open(File(uri.path!!), ParcelFileDescriptor.MODE_READ_ONLY)
                     ?.also {
                         pdfRenderer = PdfRenderer(it)
                     }
@@ -109,7 +111,6 @@ class PdfFile(var book: Book) {
         fileDescriptor?.close()
     }
 
-
     /**
      * 渲染PDF页面
      * 根据index打开pdf页面,并渲染到Bitmap
@@ -118,14 +119,17 @@ class PdfFile(var book: Book) {
      * @param index
      * @return
      */
-    private fun openPdfPage(renderer: PdfRenderer, index: Int): Bitmap? {
+    private fun openPdfPage(
+        renderer: PdfRenderer,
+        index: Int,
+    ): Bitmap? {
         if (index >= renderer.pageCount) {
             return null
         }
         return renderer.openPage(index).use { page ->
             createBitmap(
                 SystemUtils.screenWidthPx,
-                (SystemUtils.screenWidthPx.toDouble() * page.height / page.width).toInt()
+                (SystemUtils.screenWidthPx.toDouble() * page.height / page.width).toInt(),
             ).apply {
                 this.eraseColor(Color.WHITE)
                 page.render(this, null, null, PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY)
@@ -133,25 +137,25 @@ class PdfFile(var book: Book) {
         }
     }
 
-    private fun getContent(chapter: BookChapter): String? =
-        if (pdfRenderer == null) {
-            null
-        } else {
-            pdfRenderer?.let { renderer ->
+    private fun getContent(chapter: BookChapter): String? = if (pdfRenderer == null) {
+        null
+    } else {
+        pdfRenderer?.let { renderer ->
 
-                buildString {
-                    val start = chapter.index * PAGE_SIZE
-                    val end = ((chapter.index + 1) * PAGE_SIZE).coerceAtMost(renderer.pageCount)
-                    (start until end).forEach {
-                        append("<img src=").append('"').append(it).append('"').append(" >")
-                            .append('\n')
-                    }
-
+            buildString {
+                val start = chapter.index * PAGE_SIZE
+                val end = ((chapter.index + 1) * PAGE_SIZE).coerceAtMost(renderer.pageCount)
+                (start until end).forEach {
+                    append("<img src=")
+                        .append('"')
+                        .append(it)
+                        .append('"')
+                        .append(" >")
+                        .append('\n')
                 }
-
             }
         }
-
+    }
 
     private fun getImage(href: String): InputStream? {
         if (pdfRenderer == null) {
@@ -165,7 +169,6 @@ class PdfFile(var book: Book) {
             } else {
                 null
             }
-
         } catch (_: Exception) {
             return null
         }
@@ -181,8 +184,8 @@ class PdfFile(var book: Book) {
                     val chapter = BookChapter()
                     chapter.index = it
                     chapter.bookUrl = book.bookUrl
-                    chapter.title = "分段_${it}"
-                    chapter.url = "pdf_${it}"
+                    chapter.title = "分段_$it"
+                    chapter.url = "pdf_$it"
                     chapterList.add(chapter)
                 }
             }
@@ -220,7 +223,6 @@ class PdfFile(var book: Book) {
                 book.name = book.originName.replace(".pdf", "")
             }
         }
-
     }
 
     protected fun finalize() {

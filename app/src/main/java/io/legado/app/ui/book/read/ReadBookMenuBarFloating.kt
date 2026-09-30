@@ -14,12 +14,12 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Toc
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.CleanHands
 import androidx.compose.material.icons.filled.Extension
 import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.Sync
-import androidx.compose.material.icons.automirrored.filled.Toc
 import androidx.compose.material.icons.filled.Translate
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
@@ -59,29 +59,32 @@ internal fun FloatingIconRow(
     backdrop: Backdrop?,
 ) {
     val context = LocalContext.current
-    val floatingIcons = remember(
-        state.menuConfig.titleBarButtons,
-        state.isAutoPage,
-        state.useReplaceRule,
-        eyeProtectionActive,
-    ) {
-        loadFloatingIcons(
-            context = context,
-            state = state,
-            preferences = preferences,
-            eyeProtectionActive = eyeProtectionActive,
-            onIntent = onIntent,
-        )
-    }
+    val floatingIcons =
+        remember(
+            state.menuConfig.titleBarButtons,
+            state.isAutoPage,
+            state.useReplaceRule,
+            eyeProtectionActive,
+        ) {
+            loadFloatingIcons(
+                context = context,
+                state = state,
+                preferences = preferences,
+                eyeProtectionActive = eyeProtectionActive,
+                onIntent = onIntent,
+            )
+        }
 
     if (floatingIcons.isEmpty()) return
 
     Row(
-        modifier = Modifier
+        modifier =
+        Modifier
             .fillMaxWidth()
             .windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Horizontal))
             .padding(all = 16.dp),
-        horizontalArrangement = when (alignment) {
+        horizontalArrangement =
+        when (alignment) {
             Alignment.Start -> Arrangement.Start
             Alignment.End -> Arrangement.End
             else -> Arrangement.Center
@@ -89,11 +92,14 @@ internal fun FloatingIconRow(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         floatingIcons.forEach { iconDef ->
-            val customPath = remember(state.menuConfig.titleBarCustomIcons, iconDef.id) {
-                state.menuConfig.titleBarCustomIcons[iconDef.id]
-            }
+            val customPath =
+                remember(state.menuConfig.titleBarCustomIcons, iconDef.id) {
+                    state.menuConfig.titleBarCustomIcons[iconDef.id]
+                }
             val isCustom = !customPath.isNullOrBlank()
-            val glassEnabled = !isCustom && state.menuConfig.readMenuFloatingIconLiquidGlass &&
+            val glassEnabled =
+                !isCustom &&
+                    state.menuConfig.readMenuFloatingIconLiquidGlass &&
                     readerMenuLiquidGlassAvailable(backdrop)
             ReadMenuGlassButtonSurface(
                 onClick = iconDef.onClick,
@@ -112,7 +118,8 @@ internal fun FloatingIconRow(
                         model = customPath,
                         contentDescription = null,
                         contentScale = ContentScale.Crop,
-                        modifier = Modifier
+                        modifier =
+                        Modifier
                             .size(36.dp)
                             .clip(CircleShape),
                     )
@@ -155,13 +162,19 @@ internal fun OverflowDropdownMenu(
             RoundDropdownMenuItem(
                 text = stringResource(R.string.set_charset),
                 leadingIcon = menuIcon(Icons.Default.Translate),
-                onClick = { dismiss(); onIntent(ReadBookIntent.ShowSheet(ReadBookSheet.Charset)) },
+                onClick = {
+                    dismiss()
+                    onIntent(ReadBookIntent.ShowSheet(ReadBookSheet.Charset))
+                },
             )
         }
         RoundDropdownMenuItem(
             text = stringResource(R.string.bookmark_add),
             leadingIcon = menuIcon(Icons.Default.Bookmark),
-            onClick = { dismiss(); onIntent(ReadBookIntent.AddBookmark) },
+            onClick = {
+                dismiss()
+                onIntent(ReadBookIntent.AddBookmark)
+            },
         )
 
         // 图片样式需要紧跟书签，保持常用的阅读操作集中在第一组。
@@ -213,12 +226,18 @@ internal fun OverflowDropdownMenu(
             RoundDropdownMenuItem(
                 text = stringResource(R.string.get_book_progress),
                 leadingIcon = menuIcon(Icons.Default.Sync),
-                onClick = { dismiss(); onIntent(ReadBookIntent.MenuGetProgress) },
+                onClick = {
+                    dismiss()
+                    onIntent(ReadBookIntent.MenuGetProgress)
+                },
             )
             RoundDropdownMenuItem(
                 text = stringResource(R.string.cover_book_progress),
                 leadingIcon = menuIcon(Icons.Default.Sync),
-                onClick = { dismiss(); onIntent(ReadBookIntent.MenuCoverProgress) },
+                onClick = {
+                    dismiss()
+                    onIntent(ReadBookIntent.MenuCoverProgress)
+                },
             )
             PillDivider()
         }
@@ -254,33 +273,35 @@ private fun loadFloatingIcons(
 ): List<FloatingIconDef> {
     val infoMap = readMenuButtonInfos(context).associateBy { it.id }
 
-    val actionMap: Map<String, () -> Unit> = mapOf(
-        "search" to { onIntent(ReadBookIntent.OpenSearch(null)) },
-        "catalog" to { onIntent(ReadBookIntent.OpenChapterList) },
-        "setting" to { onIntent(ReadBookIntent.OpenReadMenuRoute(ReadBookMenuRoute.ReadStyle)) },
-        "addBookmark" to { onIntent(ReadBookIntent.AddBookmark) },
-        "theme" to { onIntent(ReadBookIntent.ToggleDayNight) },
-        "eye_protection" to { onIntent(ReadBookIntent.ToggleEyeProtection) },
-        "prev_chapter" to { onIntent(ReadBookIntent.PrevChapter) },
-        "next_chapter" to { onIntent(ReadBookIntent.NextChapter) },
-        "replace" to { onIntent(ReadBookIntent.ShowSheet(ReadBookSheet.TextProcessing)) },
-        "replace_badge" to { onIntent(ReadBookIntent.ShowSheet(ReadBookSheet.TextProcessing)) },
-        "auto_page" to {
-            if (state.isAutoPage) {
-                onIntent(ReadBookIntent.OpenReadMenuRoute(ReadBookMenuRoute.AutoRead))
-            } else {
-                onIntent(ReadBookIntent.ToggleAutoPage)
-                onIntent(ReadBookIntent.HideMenu)
-            }
-        },
-        "refresh_current" to { onIntent(ReadBookIntent.RefreshCurrentChapter) },
-        "more_actions" to { onIntent(ReadBookIntent.ShowSheet(ReadBookSheet.MoreActions)) },
-    )
+    val actionMap: Map<String, () -> Unit> =
+        mapOf(
+            "search" to { onIntent(ReadBookIntent.OpenSearch(null)) },
+            "catalog" to { onIntent(ReadBookIntent.OpenChapterList) },
+            "setting" to { onIntent(ReadBookIntent.OpenReadMenuRoute(ReadBookMenuRoute.ReadStyle)) },
+            "addBookmark" to { onIntent(ReadBookIntent.AddBookmark) },
+            "theme" to { onIntent(ReadBookIntent.ToggleDayNight) },
+            "eye_protection" to { onIntent(ReadBookIntent.ToggleEyeProtection) },
+            "prev_chapter" to { onIntent(ReadBookIntent.PrevChapter) },
+            "next_chapter" to { onIntent(ReadBookIntent.NextChapter) },
+            "replace" to { onIntent(ReadBookIntent.ShowSheet(ReadBookSheet.TextProcessing)) },
+            "replace_badge" to { onIntent(ReadBookIntent.ShowSheet(ReadBookSheet.TextProcessing)) },
+            "auto_page" to {
+                if (state.isAutoPage) {
+                    onIntent(ReadBookIntent.OpenReadMenuRoute(ReadBookMenuRoute.AutoRead))
+                } else {
+                    onIntent(ReadBookIntent.ToggleAutoPage)
+                    onIntent(ReadBookIntent.HideMenu)
+                }
+            },
+            "refresh_current" to { onIntent(ReadBookIntent.RefreshCurrentChapter) },
+            "more_actions" to { onIntent(ReadBookIntent.ShowSheet(ReadBookSheet.MoreActions)) },
+        )
 
-    val activeIds = buildSet {
-        if (state.isAutoPage) add("auto_page")
-        if (eyeProtectionActive) add("eye_protection")
-    }
+    val activeIds =
+        buildSet {
+            if (state.isAutoPage) add("auto_page")
+            if (eyeProtectionActive) add("eye_protection")
+        }
 
     return state.menuConfig.titleBarButtons
         .asSequence()
@@ -296,6 +317,5 @@ private fun loadFloatingIcons(
                 onClick = actionMap[id] ?: {},
                 onLongClick = null,
             )
-        }
-        .toList()
+        }.toList()
 }

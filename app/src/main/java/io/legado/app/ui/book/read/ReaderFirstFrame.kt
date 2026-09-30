@@ -8,7 +8,9 @@ import java.util.concurrent.atomic.AtomicBoolean
 internal const val EXTRA_FIRST_FRAME_STARTED_AT_NANOS = "readerFirstFrameStartedAtNanos"
 internal const val READER_RENDERER_NAME = "compose-canvas"
 
-internal enum class ReaderStartupFramePhase(val logValue: String) {
+internal enum class ReaderStartupFramePhase(
+    val logValue: String,
+) {
     LOADING("loading"),
     CONTENT("content"),
 }

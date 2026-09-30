@@ -8,7 +8,6 @@ import io.legado.app.constant.AppConst
 import java.util.Date
 
 object ImageSaveUtils {
-
     /**
      * 使用 MediaStore 保存图片到系统相册
      * @param context Context
@@ -20,24 +19,26 @@ object ImageSaveUtils {
         context: Context,
         byteArray: ByteArray,
         prefix: String = "IMG_",
-        folderName: String = "Legado"
+        folderName: String = "Legado",
     ): Boolean {
         return try {
             val fileName = prefix + AppConst.fileNameFormat.format(Date()) + ".jpg"
 
-            val contentValues = ContentValues().apply {
-                put(MediaStore.Images.Media.DISPLAY_NAME, fileName)
-                put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg")
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                    // Android10以上指定相对路径
-                    put(MediaStore.Images.Media.RELATIVE_PATH, "Pictures/$folderName")
-                    put(MediaStore.Images.Media.IS_PENDING, 1)
+            val contentValues =
+                ContentValues().apply {
+                    put(MediaStore.Images.Media.DISPLAY_NAME, fileName)
+                    put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg")
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                        // Android10以上指定相对路径
+                        put(MediaStore.Images.Media.RELATIVE_PATH, "Pictures/$folderName")
+                        put(MediaStore.Images.Media.IS_PENDING, 1)
+                    }
                 }
-            }
 
             val resolver = context.contentResolver
-            val uri = resolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues)
-                ?: return false
+            val uri =
+                resolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues)
+                    ?: return false
 
             resolver.openOutputStream(uri)?.use { outputStream ->
                 outputStream.write(byteArray)

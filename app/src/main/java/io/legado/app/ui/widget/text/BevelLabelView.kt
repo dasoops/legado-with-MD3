@@ -11,17 +11,18 @@ import android.view.View
 import androidx.annotation.ColorInt
 import androidx.annotation.IntDef
 import io.legado.app.R
-//import io.legado.app.lib.theme.accentColor
+// import io.legado.app.lib.theme.accentColor
 
 /**
  * 斜角标签
  */
 @Suppress("unused")
-class BevelLabelView @JvmOverloads constructor(
+class BevelLabelView
+@JvmOverloads
+constructor(
     context: Context,
-    attrs: AttributeSet? = null
+    attrs: AttributeSet? = null,
 ) : View(context, attrs) {
-
     companion object {
         const val MODE_LEFT_TOP = 0
         const val MODE_RIGHT_TOP = 1
@@ -33,7 +34,7 @@ class BevelLabelView @JvmOverloads constructor(
         const val MODE_RIGHT_BOTTOM_FILL = 7
     }
 
-    //private var mBgColor: Int
+    // private var mBgColor: Int
     private var mText: String
     private var mTextSize: Int
     private var mTextColor: Int
@@ -44,7 +45,7 @@ class BevelLabelView @JvmOverloads constructor(
     private var path: Path = Path()
     private var mWidth = 0
     private var mHeight: Int = 0
-    private var mRotate = 45 //因为默认模式是1，所以这时是45度
+    private var mRotate = 45 // 因为默认模式是1，所以这时是45度
 
     private var mX: Int = 0
     private var mY: Int = 0
@@ -59,7 +60,7 @@ class BevelLabelView @JvmOverloads constructor(
         mTextSize =
             typedArray.getDimensionPixelOffset(
                 R.styleable.BevelLabelView_label_text_size,
-                sp2px(11)
+                sp2px(11),
             )
         mTextColor = typedArray.getColor(R.styleable.BevelLabelView_label_text_color, Color.WHITE)
         mLength =
@@ -70,39 +71,48 @@ class BevelLabelView @JvmOverloads constructor(
         typedArray.recycle()
     }
 
-    override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
+    override fun onMeasure(
+        widthMeasureSpec: Int,
+        heightMeasureSpec: Int,
+    ) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec)
         mWidth = MeasureSpec.getSize(widthMeasureSpec)
         mHeight = mWidth
     }
 
     override fun onDraw(canvas: Canvas) {
-        //mPaint.color = mBgColor
+        // mPaint.color = mBgColor
         drawBackgroundText(canvas)
     }
 
-    fun setMode(@BevelLabelMode mode: Int) {
+    fun setMode(
+        @BevelLabelMode mode: Int,
+    ) {
         mMode = mode
         invalidate()
     }
 
-    fun setTextColor(@ColorInt color: Int) {
+    fun setTextColor(
+        @ColorInt color: Int,
+    ) {
         mTextColor = color
         invalidate()
     }
 
-    fun setBgColor(@ColorInt color: Int) {
-        //mBgColor = color
+    fun setBgColor(
+        @ColorInt color: Int,
+    ) {
+        // mBgColor = color
         invalidate()
     }
 
     private fun drawBackgroundText(canvas: Canvas) {
         check(mWidth == mHeight) {
-            "width must equal to height" //标签view 是一个正方形，
+            "width must equal to height" // 标签view 是一个正方形，
         }
         when (mMode) {
             MODE_LEFT_TOP -> {
-                mCorner = 0 //没有铺满的时候mCorner要归零；
+                mCorner = 0 // 没有铺满的时候mCorner要归零；
                 leftTopMeasure()
                 getLeftTop()
             }
@@ -161,7 +171,7 @@ class BevelLabelView @JvmOverloads constructor(
         mPaint.color = mTextColor
         canvas.translate(mX.toFloat(), mY.toFloat())
         canvas.rotate(mRotate.toFloat())
-        val baseLineY = (-(mPaint.descent() + mPaint.ascent())).toInt() / 2 //基线中间点的y轴计算公式
+        val baseLineY = (-(mPaint.descent() + mPaint.ascent())).toInt() / 2 // 基线中间点的y轴计算公式
         canvas.drawText(mText, 0f, baseLineY.toFloat(), mPaint)
     }
 
@@ -189,7 +199,7 @@ class BevelLabelView @JvmOverloads constructor(
         mY = mX
     }
 
-    //左上角铺满
+    // 左上角铺满
     private fun getLeftTopFill() {
         if (mCorner != 0) {
             path.addRoundRect(
@@ -198,7 +208,7 @@ class BevelLabelView @JvmOverloads constructor(
                 (mWidth / 2).toFloat(),
                 (mHeight / 2).toFloat(),
                 floatArrayOf(mCorner.toFloat(), mCorner.toFloat(), 0f, 0f, 0f, 0f, 0f, 0f),
-                Path.Direction.CW
+                Path.Direction.CW,
             )
         } else {
             path.moveTo(0f, 0f)
@@ -208,7 +218,7 @@ class BevelLabelView @JvmOverloads constructor(
         }
     }
 
-    //左上角不铺满
+    // 左上角不铺满
     private fun getLeftTop() {
         path.moveTo(if (mCorner != 0) mCorner.toFloat() else (mWidth - mLength).toFloat(), 0f)
         path.lineTo(mWidth.toFloat(), 0f)
@@ -217,7 +227,7 @@ class BevelLabelView @JvmOverloads constructor(
         path.close()
     }
 
-    //左下角铺满
+    // 左下角铺满
     private fun getLeftBottomFill() {
         if (mCorner != 0) {
             path.addRoundRect(
@@ -226,7 +236,7 @@ class BevelLabelView @JvmOverloads constructor(
                 (mWidth / 2).toFloat(),
                 mHeight.toFloat(),
                 floatArrayOf(0f, 0f, 0f, 0f, 0f, 0f, mCorner.toFloat(), mCorner.toFloat()),
-                Path.Direction.CW
+                Path.Direction.CW,
             )
         } else {
             path.moveTo(0f, 0f)
@@ -236,20 +246,19 @@ class BevelLabelView @JvmOverloads constructor(
         }
     }
 
-
-    //左下角不铺满
+    // 左下角不铺满
     private fun getLeftBottom() {
         path.moveTo(0f, 0f)
         path.lineTo(mWidth.toFloat(), mHeight.toFloat())
         path.lineTo(
             if (mCorner != 0) mCorner.toFloat() else (mWidth - mLength).toFloat(),
-            mHeight.toFloat()
+            mHeight.toFloat(),
         )
         path.lineTo(0f, if (mCorner != 0) (mHeight - mCorner).toFloat() else mLength.toFloat())
         path.close()
     }
 
-    //右上角铺满
+    // 右上角铺满
     private fun getRightTopFill() {
         if (mCorner != 0) {
             path.addRoundRect(
@@ -258,7 +267,7 @@ class BevelLabelView @JvmOverloads constructor(
                 mWidth.toFloat(),
                 (mHeight / 2).toFloat(),
                 floatArrayOf(0f, 0f, mCorner.toFloat(), mCorner.toFloat(), 0f, 0f, 0f, 0f),
-                Path.Direction.CW
+                Path.Direction.CW,
             )
         } else {
             path.moveTo(0f, 0f)
@@ -268,19 +277,19 @@ class BevelLabelView @JvmOverloads constructor(
         }
     }
 
-    //右上角不铺满
+    // 右上角不铺满
     private fun getRightTop() {
         path.moveTo(0f, 0f)
         path.lineTo(if (mCorner != 0) (mWidth - mCorner).toFloat() else mLength.toFloat(), 0f)
         path.lineTo(
             mWidth.toFloat(),
-            if (mCorner != 0) mCorner.toFloat() else (mHeight - mLength).toFloat()
+            if (mCorner != 0) mCorner.toFloat() else (mHeight - mLength).toFloat(),
         )
         path.lineTo(mWidth.toFloat(), mHeight.toFloat())
         path.close()
     }
 
-    //右下角铺满
+    // 右下角铺满
     private fun getRightBottomFill() {
         if (mCorner != 0) {
             path.addRoundRect(
@@ -289,7 +298,7 @@ class BevelLabelView @JvmOverloads constructor(
                 mWidth.toFloat(),
                 mHeight.toFloat(),
                 floatArrayOf(0f, 0f, 0f, 0f, mCorner.toFloat(), mCorner.toFloat(), 0f, 0f),
-                Path.Direction.CW
+                Path.Direction.CW,
             )
         } else {
             path.moveTo(mWidth.toFloat(), 0f)
@@ -299,54 +308,54 @@ class BevelLabelView @JvmOverloads constructor(
         }
     }
 
-    //右下角不铺满
+    // 右下角不铺满
     private fun getRightBottom() {
         path.moveTo(mWidth.toFloat(), 0f)
         path.lineTo(
             mWidth.toFloat(),
-            if (mCorner != 0) (mHeight - mCorner).toFloat() else mLength.toFloat()
+            if (mCorner != 0) (mHeight - mCorner).toFloat() else mLength.toFloat(),
         )
         path.lineTo(
             if (mCorner != 0) (mWidth - mCorner).toFloat() else mLength.toFloat(),
-            mHeight.toFloat()
+            mHeight.toFloat(),
         )
         path.lineTo(0f, mHeight.toFloat())
         path.close()
     }
 
-
     /**
      * @param sp 转换大小
      */
     @Suppress("SameParameterValue")
-    private fun sp2px(sp: Int): Int {
-        return TypedValue.applyDimension(
+    private fun sp2px(sp: Int): Int = TypedValue
+        .applyDimension(
             TypedValue.COMPLEX_UNIT_SP,
             sp.toFloat(),
-            resources.displayMetrics
-        )
-            .toInt()
-    }
+            resources.displayMetrics,
+        ).toInt()
 
     /**
      * @param dip 转换大小
      */
     @Suppress("SameParameterValue")
-    private fun dip2px(dip: Int): Int {
-        return TypedValue.applyDimension(
+    private fun dip2px(dip: Int): Int = TypedValue
+        .applyDimension(
             TypedValue.COMPLEX_UNIT_DIP,
             dip.toFloat(),
-            resources.displayMetrics
-        )
-            .toInt()
-    }
+            resources.displayMetrics,
+        ).toInt()
 
     @Target(AnnotationTarget.VALUE_PARAMETER)
     @Retention(AnnotationRetention.SOURCE)
     @IntDef(
-        MODE_LEFT_BOTTOM, MODE_LEFT_BOTTOM_FILL, MODE_LEFT_TOP, MODE_LEFT_TOP_FILL,
-        MODE_RIGHT_BOTTOM, MODE_RIGHT_BOTTOM_FILL, MODE_RIGHT_TOP, MODE_RIGHT_TOP_FILL
+        MODE_LEFT_BOTTOM,
+        MODE_LEFT_BOTTOM_FILL,
+        MODE_LEFT_TOP,
+        MODE_LEFT_TOP_FILL,
+        MODE_RIGHT_BOTTOM,
+        MODE_RIGHT_BOTTOM_FILL,
+        MODE_RIGHT_TOP,
+        MODE_RIGHT_TOP_FILL,
     )
     annotation class BevelLabelMode
-
 }

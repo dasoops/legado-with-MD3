@@ -7,7 +7,6 @@ import org.junit.Before
 import org.junit.Test
 
 class PageEstimateMetricsTest {
-
     @Before
     fun clearMetrics() {
         LocalPageEstimateMetrics.clear()
@@ -30,7 +29,7 @@ class PageEstimateMetricsTest {
                     relativeError = 1f / 6f,
                     calibrationBefore = PageEstimateCalibration(),
                     calibrationAfter = PageEstimateCalibration(),
-                )
+                ),
             )
         }
 

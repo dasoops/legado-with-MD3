@@ -27,6 +27,4 @@ fun enableCustomExport(): Boolean {
  * @param text 输入的范围 字符串
  * @return 是否正确
  */
-fun verificationField(text: String): Boolean {
-    return text.matches(regexEpisode)
-}
+fun verificationField(text: String): Boolean = text.matches(regexEpisode)

@@ -1,5 +1,8 @@
 package io.legado.app.help.http
 
+import java.util.zip.GZIPInputStream
+import java.util.zip.Inflater
+import java.util.zip.InflaterInputStream
 import okhttp3.Interceptor
 import okhttp3.Response
 import okhttp3.ResponseBody
@@ -7,9 +10,6 @@ import okhttp3.ResponseBody.Companion.asResponseBody
 import okhttp3.internal.http.promisesBody
 import okio.buffer
 import okio.source
-import java.util.zip.GZIPInputStream
-import java.util.zip.Inflater
-import java.util.zip.InflaterInputStream
 
 object DecompressInterceptor : Interceptor {
     override fun intercept(chain: Interceptor.Chain): Response {
@@ -30,13 +30,15 @@ object DecompressInterceptor : Interceptor {
         }
 
         val encoding = response.header("Content-Encoding")?.lowercase()
-        val source = when (encoding) {
-            "gzip" -> GZIPInputStream(body.byteStream()).source().buffer()
-            "deflate" -> InflaterInputStream(body.byteStream(), Inflater(true)).source().buffer()
-            else -> return response
-        }
+        val source =
+            when (encoding) {
+                "gzip" -> GZIPInputStream(body.byteStream()).source().buffer()
+                "deflate" -> InflaterInputStream(body.byteStream(), Inflater(true)).source().buffer()
+                else -> return response
+            }
 
-        return response.newBuilder()
+        return response
+            .newBuilder()
             .removeHeader("Content-Encoding")
             .removeHeader("Content-Length")
             .body(source.asResponseBody(body.contentType(), -1))

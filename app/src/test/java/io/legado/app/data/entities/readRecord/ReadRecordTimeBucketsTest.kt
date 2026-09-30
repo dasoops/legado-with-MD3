@@ -1,12 +1,11 @@
 package io.legado.app.data.entities.readRecord
 
-import org.junit.Assert.assertEquals
-import org.junit.Test
 import java.time.Instant
 import java.time.ZoneId
+import org.junit.Assert.assertEquals
+import org.junit.Test
 
 class ReadRecordTimeBucketsTest {
-
     private val utc = ZoneId.of("UTC")
 
     @Test

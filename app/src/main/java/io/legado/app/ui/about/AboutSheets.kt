@@ -45,9 +45,10 @@ fun MarkdownSheet(
     ) {
         SelectionContainer {
             Column(
-                modifier = Modifier
+                modifier =
+                Modifier
                     .fillMaxWidth()
-                    .verticalScroll(rememberScrollState())
+                    .verticalScroll(rememberScrollState()),
             ) {
                 MarkdownBlock(
                     content = content,
@@ -69,10 +70,11 @@ fun UpdateSheet(
     onDismissRequest: () -> Unit,
     onStartDownload: () -> Unit,
 ) {
-    val title = when (mode) {
-        UpdateMode.UPDATE -> stringResource(R.string.check_update)
-        UpdateMode.VIEW_LOG -> stringResource(R.string.about_installed_version_title)
-    }
+    val title =
+        when (mode) {
+            UpdateMode.UPDATE -> stringResource(R.string.check_update)
+            UpdateMode.VIEW_LOG -> stringResource(R.string.about_installed_version_title)
+        }
 
     AppModalBottomSheet(
         show = show,
@@ -80,14 +82,15 @@ fun UpdateSheet(
         title = title,
     ) {
         Column(
-            modifier = Modifier
+            modifier =
+            Modifier
                 .fillMaxWidth()
-                .verticalScroll(rememberScrollState())
+                .verticalScroll(rememberScrollState()),
         ) {
             if (mode == UpdateMode.UPDATE) {
                 Row(
                     modifier = Modifier.padding(bottom = 4.dp),
-                    verticalAlignment = Alignment.CenterVertically
+                    verticalAlignment = Alignment.CenterVertically,
                 ) {
                     AppText(
                         text = stringResource(R.string.about_current_version),
@@ -102,7 +105,7 @@ fun UpdateSheet(
                 }
                 Row(
                     modifier = Modifier.padding(bottom = 4.dp),
-                    verticalAlignment = Alignment.CenterVertically
+                    verticalAlignment = Alignment.CenterVertically,
                 ) {
                     AppText(
                         text = stringResource(R.string.about_new_version),
@@ -117,7 +120,7 @@ fun UpdateSheet(
                 }
                 Row(
                     modifier = Modifier.padding(bottom = 4.dp),
-                    verticalAlignment = Alignment.CenterVertically
+                    verticalAlignment = Alignment.CenterVertically,
                 ) {
                     AppText(
                         text = "ABI",
@@ -132,7 +135,7 @@ fun UpdateSheet(
                 }
                 Row(
                     modifier = Modifier.padding(bottom = 8.dp),
-                    verticalAlignment = Alignment.CenterVertically
+                    verticalAlignment = Alignment.CenterVertically,
                 ) {
                     AppText(
                         text = stringResource(R.string.about_update_channel),
@@ -166,7 +169,7 @@ fun UpdateSheet(
                 PrimaryButton(
                     onClick = onStartDownload,
                     text = stringResource(R.string.about_update_action),
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
                 )
             }
 

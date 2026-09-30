@@ -55,7 +55,7 @@ fun BookshelfConfigSheet(
     themeColor: Int,
     onCustomTagColorsEnabledChange: (Boolean) -> Unit,
     onCustomTagColorsChange: (List<TagColorPair>) -> Unit,
-    onDismissRequest: () -> Unit
+    onDismissRequest: () -> Unit,
 ) {
     val configuration = LocalConfiguration.current
     val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
@@ -66,10 +66,11 @@ fun BookshelfConfigSheet(
     AppModalBottomSheet(
         title = stringResource(R.string.bookshelf_layout),
         show = show,
-        onDismissRequest = onDismissRequest
+        onDismissRequest = onDismissRequest,
     ) {
         Column(
-            modifier = Modifier
+            modifier =
+            Modifier
                 .fillMaxWidth()
                 .verticalScroll(rememberScrollState())
                 .animateContentSize(),
@@ -84,7 +85,7 @@ fun BookshelfConfigSheet(
                 entryValues = Array(stringArrayResource(R.array.group_style).size) { it.toString() },
                 onValueChange = { value ->
                     onUpdate { it.copy(bookGroupStyle = value.toInt()) }
-                }
+                },
             )
 
             PillHeaderDivider(title = stringResource(R.string.sort))
@@ -96,37 +97,43 @@ fun BookshelfConfigSheet(
                 entryValues = Array(stringArrayResource(R.array.bookshelf_px_array).size) { it.toString() },
                 onValueChange = { value ->
                     onUpdate { it.copy(bookshelfSort = value.toInt()) }
-                }
+                },
             )
 
             // Sort Order
             CompactDropdownSettingItem(
                 title = stringResource(R.string.sort_order),
                 selectedValue = settings.bookshelfSortOrder.toString(),
-                displayEntries = arrayOf(
+                displayEntries =
+                arrayOf(
                     stringResource(R.string.ascending_order),
-                    stringResource(R.string.descending_order)
+                    stringResource(R.string.descending_order),
                 ),
                 entryValues = arrayOf("0", "1"),
                 onValueChange = { value ->
                     onUpdate { it.copy(bookshelfSortOrder = value.toInt()) }
-                }
+                },
             )
 
             PillHeaderDivider(title = stringResource(R.string.bookshelf_section_layout))
 
             // Layout Mode (non-folder)
             val layoutMode =
-                if (isLandscape) settings.bookshelfLayoutModeLandscape
-                else settings.bookshelfLayoutModePortrait
+                if (isLandscape) {
+                    settings.bookshelfLayoutModeLandscape
+                } else {
+                    settings.bookshelfLayoutModePortrait
+                }
             val folderLayoutMode =
-                if (isLandscape) settings.bookshelfFolderLayoutModeLandscape
-                else settings.bookshelfFolderLayoutModePortrait
+                if (isLandscape) {
+                    settings.bookshelfFolderLayoutModeLandscape
+                } else {
+                    settings.bookshelfFolderLayoutModePortrait
+                }
 
             // Folder Layout Mode
             AnimatedVisibility(visible = settings.bookGroupStyle == 2) {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-
                     CompactDropdownSettingItem(
                         title = stringResource(R.string.folder_layout_mode),
                         description = stringResource(if (isLandscape) R.string.screen_landscape else R.string.screen_portrait),
@@ -141,13 +148,16 @@ fun BookshelfConfigSheet(
                                     it.copy(bookshelfFolderLayoutModePortrait = value.toInt())
                                 }
                             }
-                        }
+                        },
                     )
 
                     AnimatedVisibility(visible = folderLayoutMode == 1) {
                         val folderGridCount =
-                            if (isLandscape) settings.bookshelfFolderLayoutGridLandscape
-                            else settings.bookshelfFolderLayoutGridPortrait
+                            if (isLandscape) {
+                                settings.bookshelfFolderLayoutGridLandscape
+                            } else {
+                                settings.bookshelfFolderLayoutGridPortrait
+                            }
                         CompactSliderSettingItem(
                             title = stringResource(R.string.number_rows_columns),
                             value = folderGridCount.toFloat(),
@@ -161,14 +171,17 @@ fun BookshelfConfigSheet(
                                         it.copy(bookshelfFolderLayoutGridPortrait = value.toInt())
                                     }
                                 }
-                            }
+                            },
                         )
                     }
 
                     AnimatedVisibility(visible = folderLayoutMode != 1) {
                         val folderListCount =
-                            if (isLandscape) settings.bookshelfFolderLayoutListLandscape
-                            else settings.bookshelfFolderLayoutListPortrait
+                            if (isLandscape) {
+                                settings.bookshelfFolderLayoutListLandscape
+                            } else {
+                                settings.bookshelfFolderLayoutListPortrait
+                            }
                         Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                             CompactSliderSettingItem(
                                 title = stringResource(R.string.number_rows_columns),
@@ -183,7 +196,7 @@ fun BookshelfConfigSheet(
                                             it.copy(bookshelfFolderLayoutListPortrait = value.toInt())
                                         }
                                     }
-                                }
+                                },
                             )
 
                             CompactSliderSettingItem(
@@ -193,25 +206,30 @@ fun BookshelfConfigSheet(
                                 steps = 80,
                                 onValueChange = { value ->
                                     onUpdate { it.copy(bookshelfListCoverWidth = value.toInt()) }
-                                }
+                                },
                             )
                         }
                     }
 
                     AnimatedVisibility(
-                        visible = settings.bookGroupStyle == 2 && folderLayoutMode == 0
+                        visible = settings.bookGroupStyle == 2 && folderLayoutMode == 0,
                     ) {
                         Column(
-                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                            verticalArrangement = Arrangement.spacedBy(8.dp),
                         ) {
                             CompactDropdownSettingItem(
                                 title = stringResource(R.string.folder_list_style),
                                 selectedValue = settings.bookshelfGroupListStyle.toString(),
-                                displayEntries = arrayOf(stringResource(R.string.group), stringResource(R.string.compact_list), stringResource(R.string.horizontal_cover_count)),
+                                displayEntries =
+                                arrayOf(
+                                    stringResource(R.string.group),
+                                    stringResource(R.string.compact_list),
+                                    stringResource(R.string.horizontal_cover_count),
+                                ),
                                 entryValues = arrayOf("0", "1", "2"),
                                 onValueChange = { value ->
                                     onUpdate { it.copy(bookshelfGroupListStyle = value.toInt()) }
-                                }
+                                },
                             )
                             AnimatedVisibility(visible = settings.bookshelfGroupListStyle == 2) {
                                 CompactSliderSettingItem(
@@ -221,7 +239,7 @@ fun BookshelfConfigSheet(
                                     steps = 9,
                                     onValueChange = { value ->
                                         onUpdate { it.copy(bookshelfGroupCoverCount = value.toInt()) }
-                                    }
+                                    },
                                 )
                             }
                         }
@@ -235,9 +253,10 @@ fun BookshelfConfigSheet(
                 title = stringResource(R.string.layout_mode),
                 description = stringResource(if (isLandscape) R.string.screen_landscape else R.string.screen_portrait),
                 selectedValue = layoutMode.toString(),
-                displayEntries = arrayOf(
+                displayEntries =
+                arrayOf(
                     stringResource(R.string.layout_mode_list),
-                    stringResource(R.string.layout_mode_grid)
+                    stringResource(R.string.layout_mode_grid),
                 ),
                 entryValues = arrayOf("0", "1"),
                 onValueChange = { value ->
@@ -248,14 +267,14 @@ fun BookshelfConfigSheet(
                             it.copy(bookshelfLayoutModePortrait = value.toInt())
                         }
                     }
-                }
+                },
             )
 
             AnimatedVisibility(
-                visible = layoutMode == 1
+                visible = layoutMode == 1,
             ) {
                 Column(
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
                     CompactDropdownSettingItem(
                         title = stringResource(R.string.grid_style),
@@ -264,7 +283,7 @@ fun BookshelfConfigSheet(
                         entryValues = Array(stringArrayResource(R.array.bookshelf_grid_layout).size) { it.toString() },
                         onValueChange = { value ->
                             onUpdate { it.copy(bookshelfGridLayout = value.toInt()) }
-                        }
+                        },
                     )
 
                     val gridCount =
@@ -282,7 +301,7 @@ fun BookshelfConfigSheet(
                                     it.copy(bookshelfLayoutGridPortrait = value.toInt())
                                 }
                             }
-                        }
+                        },
                     )
 
                     CompactSwitchSettingItem(
@@ -291,7 +310,7 @@ fun BookshelfConfigSheet(
                         color = LegadoTheme.colorScheme.surface,
                         onCheckedChange = { value ->
                             onUpdate { it.copy(bookshelfTitleSmallFont = value) }
-                        }
+                        },
                     )
 
                     CompactSwitchSettingItem(
@@ -300,7 +319,7 @@ fun BookshelfConfigSheet(
                         color = LegadoTheme.colorScheme.surface,
                         onCheckedChange = { value ->
                             onUpdate { it.copy(bookshelfTitleCenter = value) }
-                        }
+                        },
                     )
 
                     CompactSliderSettingItem(
@@ -310,16 +329,16 @@ fun BookshelfConfigSheet(
                         steps = 110,
                         onValueChange = { value ->
                             onUpdate { it.copy(bookshelfGridCoverWidth = value.toInt()) }
-                        }
+                        },
                     )
                 }
             }
 
             AnimatedVisibility(
-                visible = layoutMode != 1
+                visible = layoutMode != 1,
             ) {
                 Column(
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
                     CompactSwitchSettingItem(
                         title = stringResource(R.string.show_divider_line),
@@ -327,7 +346,7 @@ fun BookshelfConfigSheet(
                         color = LegadoTheme.colorScheme.surface,
                         onCheckedChange = { value ->
                             onUpdate { it.copy(bookshelfShowDivider = value) }
-                        }
+                        },
                     )
 
                     CompactClickableSettingItem(
@@ -337,18 +356,19 @@ fun BookshelfConfigSheet(
                         trailingContent = {
                             if (settings.bookshelfCardColor != 0) {
                                 Box(
-                                    modifier = Modifier
+                                    modifier =
+                                    Modifier
                                         .size(20.dp)
                                         .clip(CircleShape)
                                         .background(Color(settings.bookshelfCardColor))
                                         .border(
                                             1.dp,
                                             MaterialTheme.colorScheme.outlineVariant,
-                                            CircleShape
-                                        )
+                                            CircleShape,
+                                        ),
                                 )
                             }
-                        }
+                        },
                     )
 
                     CompactClickableSettingItem(
@@ -358,18 +378,19 @@ fun BookshelfConfigSheet(
                         trailingContent = {
                             if (settings.bookshelfCardColorDark != 0) {
                                 Box(
-                                    modifier = Modifier
+                                    modifier =
+                                    Modifier
                                         .size(20.dp)
                                         .clip(CircleShape)
                                         .background(Color(settings.bookshelfCardColorDark))
                                         .border(
                                             1.dp,
                                             MaterialTheme.colorScheme.outlineVariant,
-                                            CircleShape
-                                        )
+                                            CircleShape,
+                                        ),
                                 )
                             }
-                        }
+                        },
                     )
 
                     CompactSwitchSettingItem(
@@ -378,7 +399,7 @@ fun BookshelfConfigSheet(
                         color = LegadoTheme.colorScheme.surface,
                         onCheckedChange = { value ->
                             onUpdate { it.copy(bookshelfLayoutCompact = value) }
-                        }
+                        },
                     )
 
                     val listColCount =
@@ -390,7 +411,7 @@ fun BookshelfConfigSheet(
                         steps = 80,
                         onValueChange = { value ->
                             onUpdate { it.copy(bookshelfListCoverWidth = value.toInt()) }
-                        }
+                        },
                     )
 
                     CompactSliderSettingItem(
@@ -406,7 +427,7 @@ fun BookshelfConfigSheet(
                                     it.copy(bookshelfLayoutListPortrait = value.toInt())
                                 }
                             }
-                        }
+                        },
                     )
 
                     CompactSwitchSettingItem(
@@ -415,12 +436,12 @@ fun BookshelfConfigSheet(
                         color = LegadoTheme.colorScheme.surface,
                         onCheckedChange = { value ->
                             onUpdate { it.copy(showBookIntro = value) }
-                        }
+                        },
                     )
 
                     AnimatedVisibility(visible = settings.showBookIntro) {
                         Column(
-                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                            verticalArrangement = Arrangement.spacedBy(8.dp),
                         ) {
                             CompactSwitchSettingItem(
                                 title = stringResource(R.string.center_cover_vertically),
@@ -429,7 +450,7 @@ fun BookshelfConfigSheet(
                                 color = LegadoTheme.colorScheme.surface,
                                 onCheckedChange = { value ->
                                     onUpdate { it.copy(bookshelfListCoverCenter = value) }
-                                }
+                                },
                             )
                             CompactSwitchSettingItem(
                                 title = stringResource(R.string.show_latest_chapter),
@@ -437,7 +458,7 @@ fun BookshelfConfigSheet(
                                 color = LegadoTheme.colorScheme.surface,
                                 onCheckedChange = { value ->
                                     onUpdate { it.copy(bookshelfShowLatestChapter = value) }
-                                }
+                                },
                             )
 
                             CompactSwitchSettingItem(
@@ -446,7 +467,7 @@ fun BookshelfConfigSheet(
                                 color = LegadoTheme.colorScheme.surface,
                                 onCheckedChange = { value ->
                                     onUpdate { it.copy(bookshelfShowIntro = value) }
-                                }
+                                },
                             )
                             AnimatedVisibility(visible = settings.bookshelfShowIntro && layoutMode == 0) {
                                 CompactSwitchSettingItem(
@@ -455,21 +476,28 @@ fun BookshelfConfigSheet(
                                     color = LegadoTheme.colorScheme.surface,
                                     onCheckedChange = { value ->
                                         onUpdate { it.copy(bookshelfListIntroBelowContent = value) }
-                                    }
+                                    },
                                 )
                             }
                             AnimatedVisibility(
-                                visible = settings.bookshelfShowIntro
+                                visible = settings.bookshelfShowIntro,
                             ) {
                                 CompactSliderSettingItem(
                                     title = stringResource(R.string.synopsis_lines),
-                                    description = if (settings.bookshelfIntroMaxLines == 0) stringResource(R.string.show_all_synopsis) else stringResource(R.string.show_lines_synopsis, settings.bookshelfIntroMaxLines),
+                                    description =
+                                    if (settings.bookshelfIntroMaxLines ==
+                                        0
+                                    ) {
+                                        stringResource(R.string.show_all_synopsis)
+                                    } else {
+                                        stringResource(R.string.show_lines_synopsis, settings.bookshelfIntroMaxLines)
+                                    },
                                     value = settings.bookshelfIntroMaxLines.toFloat(),
                                     valueRange = 0f..10f,
                                     steps = 10,
                                     onValueChange = { value ->
                                         onUpdate { it.copy(bookshelfIntroMaxLines = value.toInt()) }
-                                    }
+                                    },
                                 )
                             }
                             CompactSwitchSettingItem(
@@ -478,25 +506,25 @@ fun BookshelfConfigSheet(
                                 color = LegadoTheme.colorScheme.surface,
                                 onCheckedChange = { value ->
                                     onUpdate { it.copy(bookshelfShowTag = value) }
-                                }
+                                },
                             )
                             AnimatedVisibility(
-                                visible = settings.bookshelfShowTag
+                                visible = settings.bookshelfShowTag,
                             ) {
                                 Column(
-                                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                                    verticalArrangement = Arrangement.spacedBy(8.dp),
                                 ) {
                                     CompactSwitchSettingItem(
                                         title = stringResource(R.string.custom_tag_colors),
                                         checked = enableCustomTagColors,
                                         color = LegadoTheme.colorScheme.surface,
-                                        onCheckedChange = onCustomTagColorsEnabledChange
+                                        onCheckedChange = onCustomTagColorsEnabledChange,
                                     )
                                     AnimatedVisibility(visible = enableCustomTagColors) {
                                         CompactClickableSettingItem(
                                             title = stringResource(R.string.manage_tag_colors),
                                             color = LegadoTheme.colorScheme.surface,
-                                            onClick = { showLabelColorManage = true }
+                                            onClick = { showLabelColorManage = true },
                                         )
                                     }
                                 }
@@ -506,8 +534,6 @@ fun BookshelfConfigSheet(
                 }
             }
 
-
-
             CompactSliderSettingItem(
                 title = stringResource(R.string.max_title_lines),
                 value = settings.bookshelfTitleMaxLines.toFloat(),
@@ -515,7 +541,7 @@ fun BookshelfConfigSheet(
                 steps = 4,
                 onValueChange = { value ->
                     onUpdate { it.copy(bookshelfTitleMaxLines = value.toInt()) }
-                }
+                },
             )
 
             CompactSwitchSettingItem(
@@ -524,7 +550,7 @@ fun BookshelfConfigSheet(
                 color = LegadoTheme.colorScheme.surface,
                 onCheckedChange = { value ->
                     onUpdate { it.copy(bookshelfCoverShadow = value) }
-                }
+                },
             )
 
             PillHeaderDivider(title = stringResource(R.string.bookshelf_section_badge))
@@ -535,7 +561,7 @@ fun BookshelfConfigSheet(
                 color = LegadoTheme.colorScheme.surface,
                 onCheckedChange = { value ->
                     onUpdate { it.copy(showUnread = value) }
-                }
+                },
             )
 
             CompactSwitchSettingItem(
@@ -544,7 +570,7 @@ fun BookshelfConfigSheet(
                 color = LegadoTheme.colorScheme.surface,
                 onCheckedChange = { value ->
                     onUpdate { it.copy(showUnreadNew = value) }
-                }
+                },
             )
 
             CompactSwitchSettingItem(
@@ -553,7 +579,7 @@ fun BookshelfConfigSheet(
                 color = LegadoTheme.colorScheme.surface,
                 onCheckedChange = { value ->
                     onUpdate { it.copy(showWaitUpCount = value) }
-                }
+                },
             )
 
             CompactSwitchSettingItem(
@@ -562,7 +588,7 @@ fun BookshelfConfigSheet(
                 color = LegadoTheme.colorScheme.surface,
                 onCheckedChange = { value ->
                     onUpdate { it.copy(showBookCount = value) }
-                }
+                },
             )
 
             CompactSwitchSettingItem(
@@ -571,7 +597,7 @@ fun BookshelfConfigSheet(
                 color = LegadoTheme.colorScheme.surface,
                 onCheckedChange = { value ->
                     onUpdate { it.copy(showLastUpdateTime = value) }
-                }
+                },
             )
 
             CompactSwitchSettingItem(
@@ -580,7 +606,7 @@ fun BookshelfConfigSheet(
                 color = LegadoTheme.colorScheme.surface,
                 onCheckedChange = { value ->
                     onUpdate { it.copy(showTip = value) }
-                }
+                },
             )
 
             PillHeaderDivider(title = stringResource(R.string.other))
@@ -591,7 +617,7 @@ fun BookshelfConfigSheet(
                 color = LegadoTheme.colorScheme.surface,
                 onCheckedChange = { value ->
                     onUpdate { it.copy(showBookshelfFastScroller = value) }
-                }
+                },
             )
 
             CompactSwitchSettingItem(
@@ -600,22 +626,28 @@ fun BookshelfConfigSheet(
                 color = LegadoTheme.colorScheme.surface,
                 onCheckedChange = { value ->
                     onUpdate { it.copy(shouldShowExpandButton = value) }
-                }
+                },
             )
 
             CompactSliderSettingItem(
                 title = stringResource(R.string.bookshelf_update_limit),
-                description = if (settings.bookshelfRefreshingLimit <= 0) stringResource(R.string.refresh_limit_unlimited) else stringResource(R.string.refresh_limit_books, settings.bookshelfRefreshingLimit),
+                description =
+                if (settings.bookshelfRefreshingLimit <=
+                    0
+                ) {
+                    stringResource(R.string.refresh_limit_unlimited)
+                } else {
+                    stringResource(R.string.refresh_limit_books, settings.bookshelfRefreshingLimit)
+                },
                 value = settings.bookshelfRefreshingLimit.toFloat(),
                 valueRange = 0f..100f,
                 steps = 100,
                 onValueChange = { value ->
                     onUpdate { it.copy(bookshelfRefreshingLimit = value.toInt()) }
-                }
+                },
             )
 
             Spacer(modifier = Modifier.height(32.dp))
-
         }
 
         LabelColorManageSheet(
@@ -623,25 +655,39 @@ fun BookshelfConfigSheet(
             themeColor = themeColor,
             colors = customTagColors,
             onColorsChange = onCustomTagColorsChange,
-            onDismissRequest = { showLabelColorManage = false }
+            onDismissRequest = { showLabelColorManage = false },
         )
 
         ColorPickerSheet(
             show = showColorPicker,
-            initialColor = if (settings.bookshelfCardColor != 0) settings.bookshelfCardColor else LegadoTheme.colorScheme.surfaceVariant.toArgb(),
+            initialColor =
+            if (settings.bookshelfCardColor !=
+                0
+            ) {
+                settings.bookshelfCardColor
+            } else {
+                LegadoTheme.colorScheme.surfaceVariant.toArgb()
+            },
             onDismissRequest = { showColorPicker = false },
             onColorSelected = { value ->
                 onUpdate { it.copy(bookshelfCardColor = value) }
-            }
+            },
         )
 
         ColorPickerSheet(
             show = showColorPickerDark,
-            initialColor = if (settings.bookshelfCardColorDark != 0) settings.bookshelfCardColorDark else LegadoTheme.colorScheme.surfaceVariant.toArgb(),
+            initialColor =
+            if (settings.bookshelfCardColorDark !=
+                0
+            ) {
+                settings.bookshelfCardColorDark
+            } else {
+                LegadoTheme.colorScheme.surfaceVariant.toArgb()
+            },
             onDismissRequest = { showColorPickerDark = false },
             onColorSelected = { value ->
                 onUpdate { it.copy(bookshelfCardColorDark = value) }
-            }
+            },
         )
     }
 }

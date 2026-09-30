@@ -47,7 +47,8 @@ fun VariableEditorSheet(
         },
     ) {
         Column(
-            modifier = Modifier
+            modifier =
+            Modifier
                 .fillMaxWidth()
                 .verticalScroll(rememberScrollState()),
         ) {
@@ -67,7 +68,8 @@ fun VariableEditorSheet(
                 AppText(
                     text = state?.comment.orEmpty(),
                     style = LegadoTheme.typography.bodyMedium,
-                    modifier = Modifier
+                    modifier =
+                    Modifier
                         .fillMaxWidth()
                         .padding(bottom = 24.dp),
                 )

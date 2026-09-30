@@ -15,14 +15,15 @@ fun PageAnimConfigSheet(
     onDismissRequest: () -> Unit,
     onAnimChanged: () -> Unit,
 ) {
-    val items = listOf(
-        R.string.btn_default_s,
-        R.string.page_anim_cover,
-        R.string.page_anim_slide,
-        R.string.page_anim_simulation,
-        R.string.page_anim_scroll,
-        R.string.page_anim_none,
-    )
+    val items =
+        listOf(
+            R.string.btn_default_s,
+            R.string.page_anim_cover,
+            R.string.page_anim_slide,
+            R.string.page_anim_simulation,
+            R.string.page_anim_scroll,
+            R.string.page_anim_none,
+        )
 
     AlertDialog(
         onDismissRequest = onDismissRequest,
