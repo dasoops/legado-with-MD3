@@ -556,6 +556,7 @@
     <string name="group_type_builtin">內建</string>
     <string name="group_type_directory">目錄</string>
     <string name="group_type_tag">標籤</string>
+    <string name="group_type_advanced">進階</string>
     <string name="group_select">分組選擇</string>
     <string name="group_edit">編輯分組</string>
     <string name="move_to_group">移入分組</string>

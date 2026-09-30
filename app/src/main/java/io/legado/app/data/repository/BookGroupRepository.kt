@@ -2,15 +2,12 @@ package io.legado.app.data.repository
 
 import io.legado.app.data.dao.BookGroupDao
 import io.legado.app.data.entities.BookGroup
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.Flow
 
 class BookGroupRepository(
     private val bookGroupDao: BookGroupDao,
 ) {
 
-    // 分组由用户(或本地目录/高级分组创建流程)显式落库, 不再从书籍标签实时生成,
-    // 否则本地目录路径等标签会凭空变成一堆不可维护的标签分组.
     fun flowAll(): Flow<List<BookGroup>> {
         return bookGroupDao.flowAll()
     }
@@ -20,7 +17,7 @@ class BookGroupRepository(
     }
 
     fun flowShow(): Flow<List<BookGroup>> {
-        return flowAll().map { groups -> groups.filter { it.show } }
+        return bookGroupDao.flowShow()
     }
 
     suspend fun upsert(vararg bookGroup: BookGroup) {

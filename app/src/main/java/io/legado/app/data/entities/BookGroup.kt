@@ -13,7 +13,7 @@ import kotlinx.parcelize.Parcelize
 @Entity(tableName = "book_groups")
 data class BookGroup(
     @PrimaryKey
-    val groupId: Long = 0b1,
+    val groupId: Long = -1L,
     var groupName: String = "",
     var cover: String? = null,
     var order: Int = 0,

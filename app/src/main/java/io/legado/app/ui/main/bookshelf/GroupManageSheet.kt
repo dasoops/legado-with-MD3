@@ -109,7 +109,7 @@ fun GroupManageSheet(
         onDismissRequest = onDismissRequest,
         title = if (!isEditing) stringResource(R.string.group_manage) else stringResource(R.string.group_edit),
         startAction = editingGroup?.takeIf {
-            isEditing && (it.groupId > 0 || it.groupId == Long.MIN_VALUE || it.isTag)
+            isEditing && (it.isLocalDirectory || it.isAdvanced || it.groupId == Long.MIN_VALUE || it.isTag)
         }?.let { group ->
             {
                 GroupDeleteAction(
@@ -233,6 +233,7 @@ fun GroupManageSheet(
                         val typeLabel = when {
                             group.isLocalDirectory -> R.string.group_type_directory
                             group.isTag -> R.string.group_type_tag
+                            group.isAdvanced -> R.string.group_type_advanced
                             else -> R.string.group_type_builtin
                         }
                         ReorderableSelectionItem(
@@ -252,7 +253,7 @@ fun GroupManageSheet(
                             onEnabledChange = { isChecked ->
                                 persistGroups(mapOf(group.groupId to isChecked))
                             },
-                            onClickEdit = if (group.isLocalDirectory || group.groupId > 0 || group.isTag) {
+                            onClickEdit = if (group.isLocalDirectory || group.isAdvanced || group.isTag || group.groupId == Long.MIN_VALUE) {
                                 {
                                     editingGroup = group
                                     coverPath = group.cover

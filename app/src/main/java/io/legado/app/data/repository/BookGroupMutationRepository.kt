@@ -13,6 +13,7 @@ class BookGroupMutationRepository(
 ) : BookGroupMutationGateway {
 
     override suspend fun addGroup(group: NewBookGroup) {
+        group.requireSupportedType()
         // 非法正则在写入前拦截, 避免落库后动态分组静默失效.
         group.pattern?.takeIf(String::isNotBlank)?.let(::Regex)
         database.withTransaction {
@@ -37,6 +38,7 @@ class BookGroupMutationRepository(
     }
 
     override suspend fun saveGroup(bookGroup: BookGroupUpdate) {
+        bookGroup.requireSupportedType()
         // 非法正则在写入前拦截, 避免落库后动态分组静默失效.
         bookGroup.pattern?.takeIf(String::isNotBlank)?.let(::Regex)
         database.withTransaction {
@@ -63,4 +65,28 @@ class BookGroupMutationRepository(
         localDirectoryUri = localDirectoryUri,
         pattern = pattern,
     )
+
+    private fun NewBookGroup.requireSupportedType() {
+        val isLocalDirectory = !localDirectoryUri.isNullOrBlank()
+        val isAdvanced = !pattern.isNullOrBlank()
+        require(if (isTag) {
+            !isLocalDirectory && !isAdvanced
+        } else {
+            isLocalDirectory.xor(isAdvanced)
+        }) {
+            "分组必须是标签、本地目录或高级分组"
+        }
+    }
+
+    private fun BookGroupUpdate.requireSupportedType() {
+        val isLocalDirectory = !localDirectoryUri.isNullOrBlank()
+        val isAdvanced = !pattern.isNullOrBlank()
+        require(groupId != 0L && if (groupId < 0) {
+            !isLocalDirectory && !isAdvanced
+        } else {
+            isLocalDirectory.xor(isAdvanced)
+        }) {
+            "分组必须是标签、本地目录或高级分组"
+        }
+    }
 }

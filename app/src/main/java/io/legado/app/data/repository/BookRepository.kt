@@ -96,8 +96,11 @@ class BookRepository(
             groupId > 0 -> flow {
                 val group = appDb.bookGroupDao.getByID(groupId)
                 emitAll(
-                    if (group?.isAdvanced == true) flowBookShelfByGroup(group)
-                    else bookDao.flowBookShelfByGroup(groupId)
+                    when {
+                        group?.isAdvanced == true -> flowBookShelfByGroup(group)
+                        group?.isLocalDirectory == true -> bookDao.flowBookShelfByGroup(groupId)
+                        else -> flowOf(emptyList())
+                    }
                 )
             }
             else -> bookDao.flowBookShelfByGroup(groupId)
@@ -137,7 +140,8 @@ class BookRepository(
                     )
                 }
             }
-            else -> bookDao.flowBookShelfByGroup(group.groupId)
+            group.isLocalDirectory || group.groupId <= 0 -> bookDao.flowBookShelfByGroup(group.groupId)
+            else -> flowOf(emptyList())
         }
 
     private fun BookShelfItem.advancedGroupText(localGroupNames: Map<Long, String> = emptyMap()) = AdvancedGroup.serialize(

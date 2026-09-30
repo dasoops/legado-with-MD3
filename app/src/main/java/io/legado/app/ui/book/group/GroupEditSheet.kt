@@ -65,7 +65,7 @@ fun GroupEditSheet(
     AppModalBottomSheet(
         show = show,
         onDismissRequest = onDismissRequest,
-        startAction = if (group != null && (group.groupId > 0 || group.groupId == Long.MIN_VALUE || group.isTag)) {
+        startAction = if (group != null && (group.isLocalDirectory || group.isAdvanced || group.groupId == Long.MIN_VALUE || group.isTag)) {
             {
                 GroupDeleteAction(
                     group = group,
@@ -124,8 +124,8 @@ fun GroupEditContent(
         }
     }
 
-// 动态分组没有固定的私有语义, 不提供私有开关.
-    val canSetPrivate = !advanced && (group == null || group.groupId > 0)
+    // 动态分组没有固定的私有语义, 不提供私有开关.
+    val canSetPrivate = group?.isLocalDirectory == true
 
     val selectImage = rememberLauncherForActivityResult(SelectImageContract()) { result ->
         result.uri?.let { uri ->

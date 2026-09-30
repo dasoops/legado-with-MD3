@@ -22,10 +22,10 @@ data class GroupBookCount(
 )
 
 private const val PRIVATE_GROUP_MASK =
-    "(SELECT COALESCE(SUM(groupId), 0) FROM book_groups WHERE groupId > 0 AND isPrivate = 1)"
+    "(SELECT COALESCE(SUM(groupId), 0) FROM book_groups WHERE groupId > 0 AND NULLIF(TRIM(COALESCE(localDirectoryUri, '')), '') IS NOT NULL AND isPrivate = 1)"
 
 private const val PUBLIC_GROUP_MASK =
-    "(SELECT COALESCE(SUM(groupId), 0) FROM book_groups WHERE groupId > 0 AND isPrivate = 0)"
+    "(SELECT COALESCE(SUM(groupId), 0) FROM book_groups WHERE groupId > 0 AND NULLIF(TRIM(COALESCE(localDirectoryUri, '')), '') IS NOT NULL AND isPrivate = 0)"
 
 private const val PUBLIC_BOOK_FILTER =
     "(`group` = 0 OR (`group` & $PRIVATE_GROUP_MASK) = 0)"
@@ -196,7 +196,7 @@ interface BookDao {
     @Query(
         """
         select * from books where type & ${BookType.local} > 0
-        and ((SELECT sum(groupId) FROM book_groups where groupId > 0) & `group`) = 0
+        and ((SELECT sum(groupId) FROM book_groups where groupId > 0 AND NULLIF(TRIM(COALESCE(localDirectoryUri, '')), '') IS NOT NULL) & `group`) = 0
         """
     )
     fun flowLocalNoGroup(): Flow<List<Book>>
@@ -235,7 +235,7 @@ interface BookDao {
     )
     fun flowBookShelfLocalNoGroup(): Flow<List<BookShelfItem>>
 
-    @Query("SELECT * FROM books WHERE (`group` & :group) > 0")
+    @Query("SELECT * FROM books WHERE (`group` & :group) > 0 AND (:group <= 0 OR EXISTS (SELECT 1 FROM book_groups WHERE groupId = :group AND NULLIF(TRIM(COALESCE(localDirectoryUri, '')), '') IS NOT NULL))")
     fun flowByUserGroup(group: Long): Flow<List<Book>>
 
     @Query(
@@ -266,6 +266,10 @@ interface BookDao {
             wordCount
         FROM books 
         WHERE (`group` & :group) > 0
+        AND EXISTS (
+            SELECT 1 FROM book_groups
+            WHERE groupId = :group AND NULLIF(TRIM(COALESCE(localDirectoryUri, '')), '') IS NOT NULL
+        )
         AND ((SELECT isPrivate FROM book_groups WHERE groupId = :group) = 1 OR $PUBLIC_BOOK_FILTER)
         """
     )
@@ -683,6 +687,10 @@ interface BookDao {
         """
         SELECT COUNT(*) FROM books
         WHERE (`group` & :groupId) > 0
+        AND (:groupId <= 0 OR EXISTS (
+            SELECT 1 FROM book_groups
+            WHERE groupId = :groupId AND NULLIF(TRIM(COALESCE(localDirectoryUri, '')), '') IS NOT NULL
+        ))
         AND ((SELECT isPrivate FROM book_groups WHERE groupId = :groupId) = 1 OR $PUBLIC_BOOK_FILTER)
         """
     )
@@ -887,6 +895,10 @@ interface BookDao {
             ifnull(customIntro, ifnull(listIntro, intro)) as intro, kind, customTag, wordCount
         FROM books
         WHERE (`group` & :groupId) > 0
+            AND (:groupId <= 0 OR EXISTS (
+                SELECT 1 FROM book_groups
+                WHERE groupId = :groupId AND NULLIF(TRIM(COALESCE(localDirectoryUri, '')), '') IS NOT NULL
+            ))
             AND ((SELECT isPrivate FROM book_groups WHERE groupId = :groupId) = 1 OR $PUBLIC_BOOK_FILTER)
         ORDER BY durChapterTime DESC
         LIMIT 10

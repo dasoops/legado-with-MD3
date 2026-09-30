@@ -648,6 +648,7 @@
     <string name="group_type_builtin">Built-in</string>
     <string name="group_type_directory">Directory</string>
     <string name="group_type_tag">Tag</string>
+    <string name="group_type_advanced">Advanced</string>
     <string name="group_add">New Group</string>
     <string name="group_select">Group selection</string>
     <string name="group_edit">Group editing</string>

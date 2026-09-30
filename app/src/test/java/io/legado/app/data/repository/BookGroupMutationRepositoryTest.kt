@@ -41,19 +41,37 @@ class BookGroupMutationRepositoryTest {
     }
 
     @Test
-    fun `新增分组后分组落库`() = runBlocking {
+    fun `新增本地目录分组后分组落库`() = runBlocking {
         repository.addGroup(
             NewBookGroup(
                 groupName = "Fantasy",
                 enableRefresh = true,
                 isPrivate = false,
                 cover = null,
+                localDirectoryUri = "content://books",
             )
         )
 
         val group = database.bookGroupDao.all.single()
         assertEquals("Fantasy", group.groupName)
         assertEquals(1L, group.groupId)
+    }
+
+    @Test
+    fun `不再创建普通手动分组`() = runBlocking {
+        val result = runCatching {
+            repository.addGroup(
+                NewBookGroup(
+                    groupName = "Fantasy",
+                    enableRefresh = true,
+                    isPrivate = false,
+                    cover = null,
+                )
+            )
+        }
+
+        assertTrue(result.isFailure)
+        assertTrue(database.bookGroupDao.all.isEmpty())
     }
 
     @Test
@@ -108,7 +126,13 @@ class BookGroupMutationRepositoryTest {
 
     @Test
     fun `保存分组更新分组信息`() = runBlocking {
-        database.bookGroupDao.insert(BookGroup(groupId = 1L, groupName = "Fantasy"))
+        database.bookGroupDao.insert(
+            BookGroup(
+                groupId = 1L,
+                groupName = "Fantasy",
+                localDirectoryUri = "content://books",
+            )
+        )
 
         repository.saveGroup(
             BookGroupUpdate(
@@ -119,6 +143,7 @@ class BookGroupMutationRepositoryTest {
                 enableRefresh = false,
                 show = false,
                 isPrivate = true,
+                localDirectoryUri = "content://books",
             )
         )
 
@@ -132,8 +157,34 @@ class BookGroupMutationRepositoryTest {
     }
 
     @Test
+    fun `保存时拒绝普通手动分组`() = runBlocking {
+        database.bookGroupDao.insert(BookGroup(groupId = 1L, groupName = "旧普通"))
+
+        val result = runCatching {
+            repository.saveGroup(
+                BookGroupUpdate(
+                    groupId = 1L,
+                    groupName = "旧普通",
+                    cover = null,
+                    order = 0,
+                    enableRefresh = true,
+                    show = true,
+                    isPrivate = false,
+                )
+            )
+        }
+
+        assertTrue(result.isFailure)
+        assertEquals("旧普通", database.bookGroupDao.getByID(1L)?.groupName)
+    }
+
+    @Test
     fun `删除分组时清除书籍分组位`() = runBlocking {
-        val group = BookGroup(groupId = 1L, groupName = "Fantasy")
+        val group = BookGroup(
+            groupId = 1L,
+            groupName = "Fantasy",
+            localDirectoryUri = "content://books",
+        )
         val book = Book(
             bookUrl = "book-1",
             name = "Book",
@@ -168,6 +219,7 @@ class BookGroupMutationRepositoryTest {
                     enableRefresh = true,
                     isPrivate = false,
                     cover = null,
+                    localDirectoryUri = "content://books",
                 )
             )
         }

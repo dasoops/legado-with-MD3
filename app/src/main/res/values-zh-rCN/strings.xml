@@ -616,6 +616,7 @@
     <string name="group_type_builtin">内置</string>
     <string name="group_type_directory">目录</string>
     <string name="group_type_tag">标签</string>
+    <string name="group_type_advanced">高级</string>
     <string name="group_add">新建分组</string>
     <string name="group_select">分组选择</string>
     <string name="group_edit">编辑分组</string>

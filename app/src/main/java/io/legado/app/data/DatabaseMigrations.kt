@@ -24,6 +24,7 @@ object DatabaseMigrations {
             migration_82_83, migration_98_99, migration_99_100,
             migration_102_103, migration_105_106,
             migration_110_111,
+            Migration_111_112(),
         )
     }
 
@@ -521,43 +522,7 @@ object DatabaseMigrations {
     class Migration_106_107 : AutoMigrationSpec {
 
         override fun onPostMigrate(db: SupportSQLiteDatabase) {
-            db.execSQL(
-                """
-                UPDATE books
-                SET `group` = `group` & ~(
-                    SELECT COALESCE(SUM(groupId), 0)
-                    FROM book_groups AS user_group
-                    WHERE groupId > 0
-                        AND localDirectoryUri IS NULL
-                        AND NOT EXISTS (
-                            SELECT 1 FROM tag_group_rules
-                            WHERE tag_group_rules.groupName = user_group.groupName
-                        )
-                )
-                """.trimIndent()
-            )
-            db.execSQL(
-                """
-                UPDATE books
-                SET `group` = `group` & 9223372036854775807
-                WHERE EXISTS (
-                    SELECT 1 FROM book_groups
-                    WHERE groupId = -9223372036854775808
-                        AND localDirectoryUri IS NULL
-                )
-                """.trimIndent()
-            )
-            db.execSQL(
-                """
-                DELETE FROM book_groups
-                WHERE (groupId > 0 OR groupId = -9223372036854775808)
-                    AND localDirectoryUri IS NULL
-                    AND NOT EXISTS (
-                        SELECT 1 FROM tag_group_rules
-                        WHERE tag_group_rules.groupName = book_groups.groupName
-                    )
-                """.trimIndent()
-            )
+            cleanupOrdinaryGroups(db, hasPatternColumn = false)
         }
     }
 
@@ -573,20 +538,62 @@ object DatabaseMigrations {
     @Suppress("ClassName")
     class Migration_107_108 : AutoMigrationSpec {
         override fun onPostMigrate(db: SupportSQLiteDatabase) {
-            db.execSQL("DELETE FROM tag_group_rules")
-            db.execSQL("DELETE FROM book_groups WHERE localDirectoryUri IS NULL AND groupId != -1")
-            db.execSQL("""
-                UPDATE books SET `group` = `group` & (
-                    SELECT COALESCE(SUM(groupId), 0) FROM book_groups
-                    WHERE localDirectoryUri IS NOT NULL
-                )
-            """.trimIndent())
+            cleanupOrdinaryGroups(db, hasPatternColumn = false)
         }
     }
 
     @DeleteTable.Entries(DeleteTable("tag_group_rules"))
     @Suppress("ClassName")
     class Migration_108_109 : AutoMigrationSpec
+
+    @Suppress("ClassName")
+    class Migration_111_112 : Migration(111, 112) {
+        override fun migrate(db: SupportSQLiteDatabase) {
+            cleanupOrdinaryGroups(db, hasPatternColumn = true)
+        }
+    }
+
+    private fun cleanupOrdinaryGroups(
+        db: SupportSQLiteDatabase,
+        hasPatternColumn: Boolean,
+    ) {
+        val ordinaryWhere = buildString {
+            append("groupId > 0")
+            append(" AND NULLIF(TRIM(COALESCE(localDirectoryUri, '')), '') IS NULL")
+            if (hasPatternColumn) {
+                append(" AND NULLIF(TRIM(COALESCE(pattern, '')), '') IS NULL")
+            }
+        }
+        val ordinaryMask = groupMask(db, ordinaryWhere)
+        if (ordinaryMask == 0L) return
+
+        val localDirectoryMask = groupMask(
+            db,
+            "groupId > 0 AND NULLIF(TRIM(COALESCE(localDirectoryUri, '')), '') IS NOT NULL",
+        )
+
+        // 仅删除仍依赖旧普通分组的书; 同时属于合法本地目录分组的书必须保留.
+        db.execSQL(
+            "DELETE FROM books " +
+                    "WHERE (`group` & $ordinaryMask) != 0 " +
+                    "AND (`group` & $localDirectoryMask) = 0"
+        )
+        db.execSQL(
+            "UPDATE books SET `group` = `group` & ~($ordinaryMask) " +
+                    "WHERE (`group` & $ordinaryMask) != 0"
+        )
+        db.execSQL("DELETE FROM book_groups WHERE $ordinaryWhere")
+    }
+
+    private fun groupMask(db: SupportSQLiteDatabase, where: String): Long {
+        var mask = 0L
+        db.query("SELECT groupId FROM book_groups WHERE $where").use { cursor ->
+            while (cursor.moveToNext()) {
+                mask = mask or cursor.getLong(0)
+            }
+        }
+        return mask
+    }
 
     private val migration_98_99 = object : Migration(98, 99) {
         override fun migrate(db: SupportSQLiteDatabase) {

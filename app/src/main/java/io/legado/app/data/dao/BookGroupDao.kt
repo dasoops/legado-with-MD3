@@ -25,31 +25,27 @@ interface BookGroupDao {
     @Query("SELECT * FROM book_groups WHERE show > 0 ORDER BY `order`")
     fun flowShow(): Flow<List<BookGroup>>
 
-    @Query("SELECT * FROM book_groups where groupId >= 0 ORDER BY `order`")
+    @Query("SELECT * FROM book_groups where groupId > 0 and NULLIF(TRIM(COALESCE(localDirectoryUri, '')), '') IS NOT NULL ORDER BY `order`")
     fun flowSelect(): Flow<List<BookGroup>>
 
-    @get:Query("SELECT sum(groupId) FROM book_groups where groupId >= 0")
+    @get:Query("SELECT sum(groupId) FROM book_groups where groupId > 0")
     val idsSum: Long
 
-    @get:Query("SELECT MAX(`order`) FROM book_groups where groupId >= 0")
+    @get:Query("SELECT MAX(`order`) FROM book_groups where groupId > 0")
     val maxOrder: Int
 
     @get:Query("SELECT * FROM book_groups ORDER BY `order`")
     val all: List<BookGroup>
 
-    @get:Query("select count(*) < 64 from book_groups where groupId >= 0 or groupId == ${Long.MIN_VALUE}")
-    val canAddGroup: Boolean
-
     @Query("update book_groups set show = 1 where groupId = :groupId")
     fun enableGroup(groupId: Long)
 
-    @Query("select groupName from book_groups where groupId > 0 and (groupId & :id) > 0")
+    @Query("select groupName from book_groups where groupId > 0 and NULLIF(TRIM(COALESCE(localDirectoryUri, '')), '') IS NOT NULL and (groupId & :id) > 0")
     fun getGroupNames(id: Long): List<String>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insert(vararg bookGroup: BookGroup)
 
-    // 标签分组与普通分组一样按需落库
     @Upsert
     fun upsert(vararg bookGroup: BookGroup)
 
@@ -72,13 +68,6 @@ interface BookGroupDao {
 
     @Query("UPDATE book_groups SET cover = NULL WHERE groupId = :groupId")
     fun clearCover(groupId: Long)
-
-    fun isInRules(id: Long): Boolean {
-        if (id < 0) {
-            return true
-        }
-        return id and (id - 1) == 0L
-    }
 
     fun getUnusedId(): Long {
         var id = 1L
