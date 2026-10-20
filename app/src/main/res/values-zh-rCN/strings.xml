@@ -181,6 +181,7 @@
     <string name="book_add_failed">添加书籍失败</string>
     <string name="text_return">返回</string>
     <string name="refresh">刷新</string>
+    <string name="refresh_book_and_toc">刷新书籍及目录</string>
     <string name="pull_to_refresh">下拉刷新</string>
     <string name="release_to_refresh">松开刷新</string>
     <string name="refreshing">正在刷新</string>
@@ -408,7 +409,6 @@
     <string name="faq">常见问题</string>
     <string name="pt_show_all_find">显示所有发现</string>
     <string name="ps_show_all_find">关闭则只显示勾选源的发现</string>
-    <string name="update_toc">更新目录</string>
     <string name="txt_toc_rule">TXT 目录规则</string>
     <string name="set_charset">设置编码</string>
     <string name="swap_sort">倒序-顺序</string>

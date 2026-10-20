@@ -442,10 +442,10 @@ fun TocScreen(
                                 },
                             )
                             RoundDropdownMenuItem(
-                                text = stringResource(R.string.update_toc),
+                                text = stringResource(R.string.refresh_book_and_toc),
                                 onClick = {
                                     dismiss()
-                                    onIntent(TocIntent.UpdateToc)
+                                    onIntent(TocIntent.RefreshBookAndToc)
                                 },
                             )
                             PillDivider()

@@ -302,6 +302,16 @@ object LocalBook {
         }
     }
 
+    fun clearChapterParseCache(book: Book) {
+        if (book.isEpub) {
+            BookHelp.clearCache(book)
+            EpubFile.clear()
+        }
+        if (book.isMobi) {
+            MobiFile.clear()
+        }
+    }
+
     // 导入压缩包内的书籍
     fun importArchiveFile(
         archiveFileUri: Uri,

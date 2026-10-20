@@ -656,9 +656,6 @@ sealed interface ReadBookIntent {
 
     data object ReverseRemoveSameTitle : ReadBookIntent
 
-    // Menu actions (moved from Activity)
-    data object MenuUpdateToc : ReadBookIntent
-
     data object MenuCoverProgress : ReadBookIntent
 
     data object MenuSameTitleRemoved : ReadBookIntent

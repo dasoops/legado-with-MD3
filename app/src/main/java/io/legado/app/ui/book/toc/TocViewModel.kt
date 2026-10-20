@@ -20,16 +20,11 @@ import io.legado.app.data.repository.ReadSettingsRepository
 import io.legado.app.domain.gateway.BookMarkingGateway
 import io.legado.app.domain.gateway.OtherSettingsGateway
 import io.legado.app.domain.model.TextProcessAnchor
-import io.legado.app.help.book.BookHelp
 import io.legado.app.help.book.ContentProcessor
-import io.legado.app.help.book.isEpub
 import io.legado.app.help.book.isLocal
-import io.legado.app.help.book.isMobi
 import io.legado.app.help.bookmark.BookmarkExporter
 import io.legado.app.model.ReadBook
-import io.legado.app.model.localBook.EpubFile
 import io.legado.app.model.localBook.LocalBook
-import io.legado.app.model.localBook.MobiFile
 import io.legado.app.ui.widget.components.importComponents.BaseImportUiState
 import io.legado.app.ui.widget.components.list.ListUiState
 import io.legado.app.ui.widget.components.list.SelectableItem
@@ -148,7 +143,7 @@ sealed interface TocIntent {
     data object ReverseToc : TocIntent
     data object ExpandAllVolumes : TocIntent
     data object CollapseAllVolumes : TocIntent
-    data object UpdateToc : TocIntent
+    data object RefreshBookAndToc : TocIntent
 }
 
 sealed interface TocEffect {
@@ -540,7 +535,7 @@ class TocViewModel(
             TocIntent.ReverseToc -> reverseToc()
             TocIntent.ExpandAllVolumes -> expandAllVolumes()
             TocIntent.CollapseAllVolumes -> collapseAllVolumes()
-            TocIntent.UpdateToc -> updateToc()
+            TocIntent.RefreshBookAndToc -> refreshBookAndToc()
         }
     }
 
@@ -553,25 +548,20 @@ class TocViewModel(
         // bookState.value = newBook
     }
 
-    fun updateToc() = execute {
-        val book = bookState.value ?: return@execute
-        if (book.isLocal) {
-            if (book.isEpub) {
-                BookHelp.clearCache(book)
-                EpubFile.clear()
+    fun refreshBookAndToc() {
+        if (isTocUpdating.value) return
+        isTocUpdating.value = true
+        execute {
+            val book = bookState.value ?: return@execute
+            if (book.isLocal) {
+                bookRepository.refreshLocalBook(book)
+                ReadBook.onChapterListUpdated(book)
             }
-            if (book.isMobi) {
-                MobiFile.clear()
-            }
-            kotlin.runCatching {
-                LocalBook.getChapterList(book).let {
-                    bookRepository.replaceChaptersAndUpdateBook(book, it)
-                    ReadBook.onChapterListUpdated(book)
-                }
-            }.onFailure {
-                AppLog.put("LoadTocError:${it.localizedMessage}", it)
-                _effects.tryEmit(TocEffect.ShowMessage(it.localizedMessage ?: "Error"))
-            }
+        }.onError {
+            AppLog.put("LoadTocError:${it.localizedMessage}", it)
+            _effects.tryEmit(TocEffect.ShowMessage(it.localizedMessage ?: "Error"))
+        }.onFinally {
+            isTocUpdating.value = false
         }
     }
 

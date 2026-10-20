@@ -211,6 +211,7 @@
     <string name="book_add_failed">Failed to add book</string>
     <string name="text_return">Back</string>
     <string name="refresh">Refresh</string>
+    <string name="refresh_book_and_toc">Refresh Book and Chapters</string>
     <string name="pull_to_refresh">Pull to refresh</string>
     <string name="release_to_refresh">Release to refresh</string>
     <string name="refreshing">Refreshing</string>
@@ -438,7 +439,6 @@
     <string name="faq">FAQ</string>
     <string name="pt_show_all_find">Display all Discovery</string>
     <string name="ps_show_all_find">Display the selected origin\'s Discovery if closed</string>
-    <string name="update_toc">Update Chapters</string>
     <string name="txt_toc_rule">Text Catalog Rules</string>
     <string name="set_charset">Text encoding</string>
     <string name="swap_sort">Ascending/Descending order</string>

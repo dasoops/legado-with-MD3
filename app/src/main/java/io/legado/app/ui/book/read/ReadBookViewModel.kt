@@ -852,19 +852,6 @@ class ReadBookViewModel(
             is ReadBookIntent.SaveImage -> saveImage(intent.src)
             is ReadBookIntent.ReverseContent -> reverseContent()
             is ReadBookIntent.ReverseRemoveSameTitle -> reverseRemoveSameTitle()
-            // Menu actions
-            is ReadBookIntent.MenuUpdateToc -> {
-                ReadBook.book?.let { book ->
-                    if (book.isEpub) {
-                        io.legado.app.help.book.BookHelp.clearCache(book)
-                        io.legado.app.model.localBook.EpubFile.clear()
-                    }
-                    if (book.isMobi) {
-                        io.legado.app.model.localBook.MobiFile.clear()
-                    }
-                    loadChapterList(book)
-                }
-            }
             is ReadBookIntent.MenuCoverProgress -> {
                 ReadBook.book?.let { book ->
                     loadDelegate.uploadBookProgress(book) {

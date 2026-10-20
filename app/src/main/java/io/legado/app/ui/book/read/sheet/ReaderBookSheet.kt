@@ -1005,8 +1005,8 @@ private fun ReaderBookTocMenu(
         )
     }
     RoundDropdownMenuItem(
-        text = stringResource(R.string.update_toc),
-        onClick = { dispatch(TocIntent.UpdateToc) },
+        text = stringResource(R.string.refresh_book_and_toc),
+        onClick = { dispatch(TocIntent.RefreshBookAndToc) },
     )
     if (book?.isLocal == true) {
         if (book.isLocalTxt) {

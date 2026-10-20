@@ -139,6 +139,7 @@
     <string name="book_add_failed">添加書籍失敗</string>
     <string name="text_return">返回</string>
     <string name="refresh">重新整理</string>
+    <string name="refresh_book_and_toc">重新整理書籍及目錄</string>
     <string name="start">開始</string>
     <string name="stop">停止</string>
     <string name="pause">暫停</string>
@@ -353,7 +354,6 @@
     <string name="faq">常見問題</string>
     <string name="pt_show_all_find">顯示所有發現</string>
     <string name="ps_show_all_find">關閉則只顯示勾選源的發現</string>
-    <string name="update_toc">更新目錄</string>
     <string name="txt_toc_rule">TXT 目錄規則</string>
     <string name="set_charset">設定編碼</string>
     <string name="swap_sort">倒序-順序</string>

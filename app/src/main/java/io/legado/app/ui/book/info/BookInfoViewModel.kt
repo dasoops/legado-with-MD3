@@ -110,7 +110,7 @@ class BookInfoViewModel(
         viewModelScope.launch {
             eventFlow<Boolean>(EventBus.REFRESH_BOOK_TOC).collect {
                 currentBook?.let { book ->
-                    loadChapter(book)
+                    refreshBook(book)
                 }
             }
         }
@@ -413,9 +413,19 @@ class BookInfoViewModel(
 
     fun refreshBook(book: Book) {
         syncUiState(isTocLoading = true)
+        if (!book.isLocal) {
+            loadBookInfo(book)
+            return
+        }
         execute {
-            LocalBook.upBookInfo(book)
-            book
+            bookRepository.refreshLocalBook(book)
+        }.onSuccess { chapters ->
+            currentBook = book
+            currentChapterList = chapters
+            tocLoadFailed = false
+            syncUiState(isTocLoading = false)
+            refreshMeta(book)
+            ReadBook.onChapterListUpdated(book)
         }.onError {
             when (it) {
                 is ObjectNotFoundException -> {
@@ -423,8 +433,9 @@ class BookInfoViewModel(
                 }
                 else -> AppLog.put("刷新书籍失败", it)
             }
-        }.onFinally {
-            loadBookInfo(book)
+            currentChapterList = emptyList()
+            tocLoadFailed = true
+            syncUiState(isTocLoading = false)
         }
     }
 

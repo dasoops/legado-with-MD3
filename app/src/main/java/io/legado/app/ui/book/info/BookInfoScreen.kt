@@ -725,7 +725,7 @@ private fun BookInfoOverflowMenu(
             )
         }
         RoundDropdownMenuItem(
-            text = stringResource(R.string.refresh),
+            text = stringResource(R.string.refresh_book_and_toc),
             onClick = { onMenuAction(BookInfoMenuAction.Refresh) },
         )
         RoundDropdownMenuItem(

@@ -306,4 +306,12 @@ class BookRepository(
             }
         }
     }
+
+    suspend fun refreshLocalBook(book: Book): List<BookChapter> = withContext(Dispatchers.IO) {
+        LocalBook.clearChapterParseCache(book)
+        LocalBook.upBookInfo(book)
+        LocalBook.getChapterList(book).also { chapters ->
+            replaceChaptersAndUpdateBook(book, chapters)
+        }
+    }
 }
