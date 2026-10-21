@@ -131,7 +131,6 @@ class ReadBookLoadDelegate(
         } else {
             ReadBook.resetData(book)
         }
-        host.setInitFinish()
         if (book.isLocal && !checkLocalBookFileExist(book)) {
             return@suspendSection
         }
@@ -142,10 +141,20 @@ class ReadBookLoadDelegate(
         host.checkReadRecordAlias(book)
 
         if (!isSameBook) {
-            ReadBook.loadInitialContent(resetPageOffset = true)
+            // 首章完成前禁止阅读面分页, 否则全局阅读会话中的旧页面可能先被发布.
+            ReadBook.loadContentAwait(ReadBook.durChapterIndex, resetPageOffset = true)
+            if (ReadBook.readerChapterInputWindow.current == null) {
+                // 首章加载失败时不能把旧书页面当成新书内容留下.
+                ReadBook.clearTextChapter()
+                ReadBook.upMsg(context.getString(R.string.load_error_retry))
+                return@suspendSection
+            }
+            ReadBook.loadContent(ReadBook.durChapterIndex + 1, resetPageOffset = true)
+            ReadBook.loadContent(ReadBook.durChapterIndex - 1, resetPageOffset = true)
         } else {
             ReadBook.loadOrUpContent()
         }
+        host.setInitFinish()
         if (ReadBook.chapterChanged) {
             ReadBook.chapterChanged = false
         } else if (backupSettingsGateway.currentSettings.syncBookProgress) {
