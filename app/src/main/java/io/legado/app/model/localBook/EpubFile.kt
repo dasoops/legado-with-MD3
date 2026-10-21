@@ -2,7 +2,6 @@ package io.legado.app.model.localBook
 
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.os.ParcelFileDescriptor
 import android.text.TextUtils
 import io.legado.app.constant.AppLog
 import io.legado.app.data.entities.Book
@@ -20,11 +19,11 @@ import java.io.InputStream
 import java.net.URI
 import java.net.URLDecoder
 import java.nio.charset.Charset
+import java.util.zip.ZipFile
 import me.ag2s.epublib.domain.EpubBook
 import me.ag2s.epublib.domain.Resource
 import me.ag2s.epublib.domain.TOCReference
 import me.ag2s.epublib.epub.EpubReader
-import me.ag2s.epublib.util.zip.AndroidZipFile
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Element
 import org.jsoup.parser.Parser
@@ -69,20 +68,18 @@ class EpubFile(var book: Book) {
 
     private var mCharset: Charset = Charset.defaultCharset()
 
-    /**
-     *持有引用，避免被回收
-     */
-    private var fileDescriptor: ParcelFileDescriptor? = null
+    /** 持有引用, 直到所有 LazyResource 都不再需要底层 ZIP 文件. */
+    private var zipFile: ZipFile? = null
     private var epubBook: EpubBook? = null
         get() {
-            if (field == null || fileDescriptor == null) {
+            if (field == null || zipFile == null) {
                 field = readEpub()
             }
             return field
         }
     private var epubBookContents: List<Resource>? = null
         get() {
-            if (field == null || fileDescriptor == null) {
+            if (field == null || zipFile == null) {
                 field = epubBook?.contents
             }
             return field
@@ -96,15 +93,13 @@ class EpubFile(var book: Book) {
      * 重写epub文件解析代码，直接读出压缩包文件生成Resources给epublib，这样的好处是可以逐一修改某些文件的格式错误
      */
     private fun readEpub(): EpubBook? = kotlin.runCatching {
-        // ContentScheme拷贝到私有文件夹采用懒加载防止OOM
-        // val zipFile = BookHelp.getEpubFile(book)
-        BookHelp.getBookPFD(book)?.let {
-            fileDescriptor = it
-            val zipFile = AndroidZipFile(it, book.originName)
-            EpubReader().readEpubLazy(zipFile, "utf-8")
-        }
+        // SAF 提供的 PFD 不保证高效随机读取; 先落到应用缓存, 再交给 JDK ZipFile 解析.
+        zipFile?.close()
+        zipFile = null
+        BookHelp.getEpubFile(book).also { zipFile = it }
+            .let { EpubReader().readEpubLazy(it, "utf-8") }
     }.onFailure {
-        AppLog.put("读取Epub文件失败\n${it.localizedMessage}", it)
+        AppLog.put("读取Epub文件失败\n${book.bookUrl}\n${it.localizedMessage}", it)
         it.printOnDebug()
     }.getOrThrow()
 
@@ -434,6 +429,6 @@ class EpubFile(var book: Book) {
     }
 
     protected fun finalize() {
-        fileDescriptor?.close()
+        zipFile?.close()
     }
 }

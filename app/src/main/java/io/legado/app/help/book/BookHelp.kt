@@ -37,6 +37,7 @@ import java.io.FileOutputStream
 import java.io.IOException
 import java.io.InputStream
 import java.util.concurrent.ConcurrentHashMap
+import java.util.zip.ZipException
 import java.util.zip.ZipFile
 import kotlin.math.abs
 import kotlin.math.max
@@ -429,22 +430,56 @@ object BookHelp {
     @Throws(IOException::class, FileNotFoundException::class)
     fun getEpubFile(book: Book): ZipFile {
         val uri = book.getLocalUri()
-        if (uri.isContentScheme()) {
-            FileUtils.createFolderIfNotExist(downloadDir, cacheEpubFolderName)
-            val path = FileUtils.getPath(downloadDir, cacheEpubFolderName, book.originName)
-            val file = File(path)
-            val doc = DocumentFile.fromSingleUri(appCtx, uri)
-                ?: throw IOException("文件不存在")
-            if (!file.exists() || doc.lastModified() > book.latestChapterTime) {
-                LocalBook.getBookInputStream(book).use { inputStream ->
-                    FileOutputStream(file).use { outputStream ->
-                        inputStream.copyTo(outputStream)
-                    }
-                }
-            }
-            return ZipFile(file)
+        if (!uri.isContentScheme()) return ZipFile(uri.path)
+        FileUtils.createFolderIfNotExist(downloadDir, cacheEpubFolderName)
+        val file = File(FileUtils.getPath(downloadDir, cacheEpubFolderName, book.originName))
+        val doc = DocumentFile.fromSingleUri(appCtx, uri) ?: throw IOException("文件不存在")
+        val sourceStamp = "${doc.length()}:${doc.lastModified()}"
+        val invalidMarker = File("${file.absolutePath}.invalid")
+        if (!file.exists() && invalidMarker.takeIf { it.exists() }?.readText() == sourceStamp) {
+            throw IOException("EPUB 文件损坏或本地同步未完成: ${book.name}")
         }
-        return ZipFile(uri.path)
+        // 本地同步可能改写文件但不更新 lastModified; 尺寸变化同样必须重新拷贝.
+        val copied =
+            !file.exists() ||
+                doc.lastModified() > file.lastModified() ||
+                doc.length() != file.length()
+        if (copied) copyEpubToCache(book, file)
+        try {
+            return ZipFile(file).also { invalidMarker.delete() }
+        } catch (e: ZipException) {
+            file.delete()
+            // 旧版本直接写缓存, 中断会留下截断文件; 已有缓存损坏时从源文件重建一次.
+            if (copied) {
+                invalidMarker.writeText(sourceStamp)
+                throw IOException("EPUB 文件损坏或本地同步未完成: ${book.name}", e)
+            }
+            copyEpubToCache(book, file)
+            try {
+                return ZipFile(file).also { invalidMarker.delete() }
+            } catch (retry: ZipException) {
+                file.delete()
+                invalidMarker.writeText(sourceStamp)
+                throw IOException("EPUB 文件损坏或本地同步未完成: ${book.name}", retry)
+            }
+        }
+    }
+
+    private fun copyEpubToCache(book: Book, file: File) {
+        LocalBook.getBookInputStream(book).use { inputStream ->
+            val temp = File("${file.absolutePath}.tmp")
+            FileOutputStream(temp).use { outputStream ->
+                inputStream.copyTo(outputStream)
+            }
+            if (temp.length() == 0L) {
+                temp.delete()
+                throw IOException("书籍文件为空")
+            }
+            if (!temp.renameTo(file)) {
+                temp.copyTo(file, overwrite = true)
+                temp.delete()
+            }
+        }
     }
 
     /**
