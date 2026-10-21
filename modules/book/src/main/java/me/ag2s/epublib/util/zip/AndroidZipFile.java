@@ -267,12 +267,8 @@ public class AndroidZipFile implements ZipConstants {
   }
 
   /** Returns an enumeration of all Zip entries in this Zip file. */
-  public Enumeration<AndroidZipEntry> entries() {
-    try {
-      return new ZipEntryEnumeration(getEntries().values().iterator());
-    } catch (IOException ioe) {
-      return null;
-    }
+  public Enumeration<AndroidZipEntry> entries() throws IOException {
+    return new ZipEntryEnumeration(getEntries().values().iterator());
   }
 
   /**
@@ -432,7 +428,7 @@ public class AndroidZipFile implements ZipConstants {
       synchronized (pfd) {
         seek(pfd, filepos);
         int count = PfdHelper.read(pfd, b, off, len);
-        if (count > 0) filepos += len;
+        if (count > 0) filepos += count;
         return count;
       }
     }
