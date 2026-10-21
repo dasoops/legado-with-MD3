@@ -2219,6 +2219,7 @@
     <string name="advanced_group_pattern_hint">匹配书名、作者、标签三个字段（依次为 name=、author=、tags=，字段之间以制表符分隔）。示例：author=刘慈欣 / name=.*三体.* / author=猫腻.*tags=.*历史</string>
     <string name="reselect_directory">重新选择目录</string>
     <string name="local_directory">本地目录</string>
+    <string name="local_directory_import_partial">%1$d 本书导入失败, 请查看日志或在同步完成后下拉刷新</string>
     <string name="directory_unavailable">目录不可用, 请重新选择</string>
     <string name="open_in_other_app">在其他应用中打开</string>
     <string name="add_book_tags">添加标签</string>

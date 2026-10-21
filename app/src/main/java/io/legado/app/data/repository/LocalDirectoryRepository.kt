@@ -9,6 +9,7 @@ import io.legado.app.constant.AppLog
 import io.legado.app.constant.AppPattern
 import io.legado.app.data.entities.Book
 import io.legado.app.domain.gateway.LocalDirectoryGateway
+import io.legado.app.domain.gateway.LocalDirectoryImportResult
 import io.legado.app.domain.model.BookTags
 import io.legado.app.help.book.isLocal
 import io.legado.app.model.localBook.LocalBook
@@ -42,12 +43,15 @@ class LocalDirectoryRepository(
     override suspend fun importDirectoryToGroup(
         groupId: Long,
         rootUri: String,
-    ): Int = withContext(Dispatchers.IO) {
-        val root = rootDirDoc(rootUri) ?: return@withContext 0
+    ): LocalDirectoryImportResult = withContext(Dispatchers.IO) {
+        val root = rootDirDoc(rootUri) ?: return@withContext LocalDirectoryImportResult(0, 0)
         val files = scanBookFiles(root)
         val rootName = directoryName(rootUri)
         var count = 0
+        var failed = 0
+        val startedAt = System.currentTimeMillis()
         files.forEach { file ->
+            val fileStartedAt = System.currentTimeMillis()
             runCatching {
                 val bookUrl = file.toString()
                 val directoryTags = directoryTagsOf(rootUri, rootName, bookUrl)
@@ -71,10 +75,24 @@ class LocalDirectoryRepository(
                 }
                 count++
             }.onFailure {
+                failed++
                 AppLog.put("导入目录书籍失败\n${file.uri}", it)
             }
+            val duration = System.currentTimeMillis() - fileStartedAt
+            if (duration > SLOW_IMPORT_THRESHOLD_MS) {
+                AppLog.putDebug("导入目录书籍耗时 ${duration}ms: ${file.name}")
+            }
         }
-        count
+        AppLog.putDebug(
+            "本地目录扫描结束: total=${files.size} imported=$count failed=$failed " +
+                "durationMs=${System.currentTimeMillis() - startedAt}",
+        )
+        LocalDirectoryImportResult(imported = count, failed = failed)
+    }
+
+    private companion object {
+        /** 单本解析超过该阈值即记录, 用于定位慢书而不对每本刷日志. */
+        const val SLOW_IMPORT_THRESHOLD_MS = 1_000L
     }
 
     /**

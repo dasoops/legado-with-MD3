@@ -2225,6 +2225,7 @@
     <string name="advanced_group_pattern_hint">Matches the Name, Author and Tags fields in order (name=, author=, tags=, separated by tabs). Examples: author=刘慈欣 / name=.*三体.* / author=猫腻.*tags=.*历史</string>
     <string name="reselect_directory">Reselect directory</string>
     <string name="local_directory">Local directory</string>
+    <string name="local_directory_import_partial">%1$d books could not be imported. Check the logs or pull to refresh after syncing finishes.</string>
     <string name="open_in_other_app">Open in another app</string>
     <string name="add_book_tags">添加标签</string>
     <string name="new_book_tags">新标签, 多个标签用逗号分隔</string>

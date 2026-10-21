@@ -14,6 +14,7 @@ import io.legado.app.utils.AlphanumComparator
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -59,6 +60,7 @@ class LocalDirectoryViewModel(
         .distinctUntilChanged()
 
     private var initialized = false
+    private var scanJob: Job? = null
 
     val uiState = combine(state, sortConfigFlow) { state, sortConfig ->
         val bookComparator = bookshelfRepository.bookComparator(sortConfig.sort, sortConfig.sortOrder)
@@ -139,9 +141,24 @@ class LocalDirectoryViewModel(
     }
 
     private fun rescan() {
-        viewModelScope.launch(Dispatchers.IO) {
+        if (scanJob?.isActive == true) return
+        scanJob = viewModelScope.launch(Dispatchers.IO) {
+            val startedAt = System.currentTimeMillis()
             state.update { it.copy(isLoading = true) }
             runCatching { gateway.importDirectoryToGroup(groupId, rootUri) }
+                .onSuccess { result ->
+                    AppLog.putDebug(
+                        "本地目录扫描完成: group=$groupId imported=${result.imported} " +
+                            "failed=${result.failed} durationMs=${System.currentTimeMillis() - startedAt}",
+                    )
+                    if (result.failed > 0) {
+                        _effects.tryEmit(
+                            LocalDirectoryEffect.ShowToast(
+                                appContext.getString(R.string.local_directory_import_partial, result.failed),
+                            ),
+                        )
+                    }
+                }
                 .onFailure {
                     AppLog.put("扫描本地目录失败\n${it.localizedMessage}", it)
                     val message = it.localizedMessage?.takeIf { it.isNotBlank() }
