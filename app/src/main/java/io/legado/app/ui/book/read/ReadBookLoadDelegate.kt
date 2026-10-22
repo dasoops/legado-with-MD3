@@ -134,7 +134,11 @@ class ReadBookLoadDelegate(
         if (book.isLocal && !checkLocalBookFileExist(book)) {
             return@suspendSection
         }
-        if ((ReadBook.chapterSize == 0 || book.isLocalModified()) && !loadChapterListAwait(book)) {
+        // 首次开书的正文由下面的 loadContentAwait 统一加载, 目录更新路径不能再
+        // 异步抢占同一章, 否则 await 会因 addLoading 短路而误判加载失败.
+        if ((ReadBook.chapterSize == 0 || book.isLocalModified()) &&
+            !loadChapterListAwait(book, reloadContent = false)
+        ) {
             return@suspendSection
         }
         ReadBook.upMsg(null)
@@ -268,12 +272,15 @@ class ReadBookLoadDelegate(
         }
     }
 
-    private suspend fun loadChapterListAwait(book: Book): Boolean {
+    private suspend fun loadChapterListAwait(
+        book: Book,
+        reloadContent: Boolean = true,
+    ): Boolean {
         kotlin
             .runCatching {
                 LocalBook.getChapterList(book).let {
                     bookRepository.replaceChaptersAndUpdateBook(book, it)
-                    ReadBook.onChapterListUpdated(book)
+                    ReadBook.onChapterListUpdated(book, reloadContent)
                 }
                 return true
             }.onFailure {

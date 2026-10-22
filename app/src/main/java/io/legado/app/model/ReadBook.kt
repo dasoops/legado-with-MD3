@@ -1494,7 +1494,13 @@ object ReadBook : CoroutineScope by MainScope(), KoinComponent {
         }
     }
 
-    fun onChapterListUpdated(newBook: Book) {
+    /**
+     * [reloadContent] 为 false 时只更新目录状态, 正文由调用方负责加载.
+     * 首次开书走 [io.legado.app.ui.book.read.ReadBookLoadDelegate.initBook] 的
+     * `loadContentAwait`, 若这里再异步加载同一章, 会让 await 因 addLoading 短路
+     * 而误判首章加载失败.
+     */
+    fun onChapterListUpdated(newBook: Book, reloadContent: Boolean = true) {
         if (newBook.isSameNameAuthor(book)) {
             // 本地 TXT 改目录规则后，旧目录中的章节序号已经不再能表示同一段正文。
             // 在替换目录前保留当前章节的文件偏移，随后在新目录中重新定位，避免目录
@@ -1529,7 +1535,7 @@ object ReadBook : CoroutineScope by MainScope(), KoinComponent {
             }
             requestWholeBookPageEstimate()
             publishSnapshot()
-            if (callBack == null) {
+            if (callBack == null || !reloadContent) {
                 return
             } else {
                 loadContent(true)
