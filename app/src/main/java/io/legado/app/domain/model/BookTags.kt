@@ -31,6 +31,11 @@ object BookTags {
             }
         ).distinct()
 
+    // grouping 在书架流程里按书调用, 正则必须提前编译: 每本现编译两个 Pattern,
+    // 千本书的一次数据发射在主线程要几百毫秒.
+    private val sizeTagRegex = Regex("""^\d[\d,.]*\s*(b|kb|mb|gb|tb|m|g|t)$""", RegexOption.IGNORE_CASE)
+    private val wordCountTagRegex = Regex(""".*?\d.*字$""")
+
     fun grouping(
         custom: String?,
         source: String?,
@@ -38,11 +43,9 @@ object BookTags {
         position: Int,
         total: Int,
     ): List<String> {
-        val metadata = Regex("""^\d[\d,.]*\s*(b|kb|mb|gb|tb|m|g|t)$""", RegexOption.IGNORE_CASE)
-        val wordCount = Regex(""".*?\d.*字$""")
         val sourceTags =
             parse(source).filterNot {
-                metadata.matches(it) || wordCount.matches(it)
+                sizeTagRegex.matches(it) || wordCountTagRegex.matches(it)
             }
         return display(custom, sourceTags.joinToString(","), index, position, total)
     }
