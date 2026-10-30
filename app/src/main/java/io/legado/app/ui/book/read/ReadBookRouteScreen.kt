@@ -200,6 +200,14 @@ fun ReadBookRouteScreen(
                 !state.menuConfig.readMenuFloatingBottomBar &&
                     state.menuConfig.readMenuBottomBarBlurMode == ReadMenuBlurMode.LIQUID_GLASS
                 )
+    // 只有菜单真的用到液态玻璃时才把正文录进 Backdrop 图层: layerBackdrop 会在每次重绘时
+    // 重新录制整块正文 Canvas, 阅读器进出转场时单帧可达数百毫秒.
+    val useMenuBackdrop =
+        state.menuConfig.readMenuTopBarBlurMode == ReadMenuBlurMode.LIQUID_GLASS ||
+            state.menuConfig.readMenuTopBarLiquidGlassButtons ||
+            state.menuConfig.readMenuBottomBarBlurMode == ReadMenuBlurMode.LIQUID_GLASS ||
+            state.menuConfig.readMenuBottomBarLiquidGlassButtons ||
+            state.menuConfig.readMenuFloatingIconLiquidGlass
     BackHandler {
         when {
             state.activeSheet != null -> viewModel.onIntent(ReadBookIntent.DismissSheet)
@@ -694,7 +702,7 @@ fun ReadBookRouteScreen(
                             } else {
                                 Modifier
                             },
-                        ).layerBackdrop(menuBackdrop),
+                        ).then(if (useMenuBackdrop) Modifier.layerBackdrop(menuBackdrop) else Modifier),
                     onPreviousPage = { controller.completeComposePageTurn(PageDirection.PREV) },
                     onNextPage = { controller.completeComposePageTurn(PageDirection.NEXT) },
                     onPageBoundaryReached = controller::showComposePageBoundary,
@@ -795,7 +803,7 @@ fun ReadBookRouteScreen(
                     }
                 },
                 onBrightnessPreview = host::previewBrightness,
-                backdrop = menuBackdrop,
+                backdrop = menuBackdrop.takeIf { useMenuBackdrop },
                 hazeState = if (useMenuHazeSource) menuHazeState else null,
             )
             ReadBookSearchBar(state = state, onIntent = viewModel::onIntent)

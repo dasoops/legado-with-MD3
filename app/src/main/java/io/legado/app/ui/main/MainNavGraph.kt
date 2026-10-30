@@ -213,18 +213,20 @@ fun MainActivity.mainEntryProvider(
     entry<MainRouteReadBook>(
         metadata =
         metadata {
+            // 阅读路由首帧本身很重 (配色生成 + 阅读器首期组合), 600ms 的整屏交叉淡入
+            // 会把这段时间放大成连续的掉帧, 缩短到一屏以内即可保持过渡感.
             put(NavDisplay.TransitionKey) {
-                fadeIn(animationSpec = tween(600)) togetherWith
-                    fadeOut(animationSpec = tween(600))
+                fadeIn(animationSpec = tween(READER_TRANSITION_MILLIS)) togetherWith
+                    fadeOut(animationSpec = tween(READER_TRANSITION_MILLIS))
             }
             put(NavDisplay.PopTransitionKey) {
-                fadeIn(animationSpec = tween(600)) togetherWith
-                    fadeOut(animationSpec = tween(600))
+                fadeIn(animationSpec = tween(READER_TRANSITION_MILLIS)) togetherWith
+                    fadeOut(animationSpec = tween(READER_TRANSITION_MILLIS))
             }
             if (configuration.appShell.predictiveBackEnabled) {
                 put(NavDisplay.PredictivePopTransitionKey) { _ ->
-                    fadeIn(animationSpec = tween(600)) togetherWith
-                        fadeOut(animationSpec = tween(600))
+                    fadeIn(animationSpec = tween(READER_TRANSITION_MILLIS)) togetherWith
+                        fadeOut(animationSpec = tween(READER_TRANSITION_MILLIS))
                 }
             }
         },
@@ -479,3 +481,6 @@ fun MainActivity.mainEntryProvider(
         )
     }
 }
+
+/** 阅读器进出转场时长: 缩短整屏交叉淡入, 避免放大阅读器首帧的组装开销. */
+private const val READER_TRANSITION_MILLIS = 240

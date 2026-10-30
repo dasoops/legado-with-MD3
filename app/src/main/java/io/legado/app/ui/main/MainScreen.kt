@@ -497,7 +497,9 @@ fun MainScreen(
                                 },
                             ),
                         userScrollEnabled = true,
-                        beyondViewportPageCount = 4,
+                        // 常驻组合会拖累每次路由转场: 阅读器进出时首页/我的页会一起重组
+                        // (实测我的页的整列设置项重组占一帧 600ms), 只保当前页在组合中.
+                        beyondViewportPageCount = 0,
                     ) { page ->
                         val destination = destinations.getOrNull(page) ?: return@HorizontalPager
                         val pageLifecycleOwner =
