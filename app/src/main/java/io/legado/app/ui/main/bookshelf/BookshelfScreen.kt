@@ -132,6 +132,7 @@ import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 import sh.calvin.reorderable.ReorderableItem
@@ -156,7 +157,17 @@ fun BookshelfRouteScreen(
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val allGroups by viewModel.allGroupsFlow.collectAsStateWithLifecycle()
-    val allTags by viewModel.tagNamesFlow.collectAsStateWithLifecycle()
+    // 书架标签只在标签选择弹层里用得到; 常驻订阅会为全库每本书解析一次标签,
+    // 大书库下每次书籍数据变化 (含打开书籍写进度) 都会触发上万次标签计算.
+    val tagNamesFlow =
+        remember(state.activeOverlay) {
+            if (state.activeOverlay == BookshelfOverlay.GroupSelectSheet) {
+                viewModel.tagNamesFlow
+            } else {
+                flowOf(emptyList())
+            }
+        }
+    val allTags by tagNamesFlow.collectAsStateWithLifecycle(initialValue = emptyList())
     BookshelfScreen(
         uiState = state,
         onIntent = viewModel::onIntent,

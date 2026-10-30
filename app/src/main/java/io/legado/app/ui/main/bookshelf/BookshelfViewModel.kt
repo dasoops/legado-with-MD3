@@ -23,8 +23,10 @@ import kotlinx.collections.immutable.persistentMapOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toImmutableMap
 import kotlinx.collections.immutable.toImmutableSet
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -68,7 +70,15 @@ class BookshelfViewModel(
     private val draggingBooksFlow = MutableStateFlow<List<BookUiItem>?>(null)
     private val pendingSavedBooksFlow = MutableStateFlow<List<BookUiItem>?>(null)
     private val isInitialLoadingFlow = MutableStateFlow(true)
-    private val localBookCoverBackfills = ConcurrentHashMap.newKeySet<String>()
+
+    // 封面回填是一次性的文件解析, 用固定并发的工作队列限流: 队列元素只是 bookUrl,
+    // 不会再为每本书创建协程, 也不会在每次数据发射时重复排队.
+    private val coverBackfillQueue = Channel<String>(Channel.UNLIMITED)
+    private val coverBackfillAttempted = ConcurrentHashMap.newKeySet<String>()
+
+    // 一次阅读进度写入就会让书架 flow 重新发射全部书籍; 只改了当前这本, 其余书复用上次的
+    // UI 项, 避免每次发射都为全库重做标签解析 (实测大书架单次可达数万次标签计算).
+    private val bookUiItemCache = ConcurrentHashMap<String, BookUiItem>()
 
     private data class BookshelfSortConfig(
         val sort: Int,
@@ -167,7 +177,7 @@ class BookshelfViewModel(
                     books =
                     bookshelfRepository
                         .sortBooks(list, sortConfig.sort, sortConfig.sortOrder)
-                        .map { it.toUiItem() },
+                        .map { it.toCachedUiItem() },
                     sortConfig = sortConfig,
                 )
             }
@@ -198,7 +208,7 @@ class BookshelfViewModel(
                                         books,
                                         sortConfig.sort,
                                         sortConfig.sortOrder,
-                                    ).map { it.toUiItem() }
+                                    ).map { it.toCachedUiItem() }
                                     .toImmutableList()
                         }
                     }
@@ -487,6 +497,19 @@ class BookshelfViewModel(
     }
 
     init {
+        repeat(COVER_BACKFILL_WORKERS) {
+            viewModelScope.launch {
+                for (bookUrl in coverBackfillQueue) {
+                    try {
+                        bookRepository.backfillLocalBookCoverIfMissing(bookUrl)
+                    } catch (e: CancellationException) {
+                        throw e
+                    } catch (_: Exception) {
+                        // 单本书回填失败不影响后续队列
+                    }
+                }
+            }
+        }
         viewModelScope.launch {
             groupsFlow.collect { groups ->
                 if (groups.isNotEmpty() && groups.none { it.groupId == groupIdFlow.value }) {
@@ -650,21 +673,30 @@ class BookshelfViewModel(
         }
     }
 
+    private fun BookShelfItem.toCachedUiItem(): BookUiItem {
+        val cached = bookUiItemCache[bookUrl]
+        if (cached != null && cached.book == this) return cached
+        return toUiItem().also { bookUiItemCache[bookUrl] = it }
+    }
+
+    /**
+     * TXT 等格式没有可用封面, 回填只会空跑; 不按格式过滤时, 每次数据发射都会把全库书重新排一次队,
+     * 大书架下会持续堆协程并压垮堆内存.
+     */
+    private fun BookShelfItem.canBackfillLocalCover(): Boolean {
+        if (!isLocal || !coverUrl.isNullOrBlank()) return false
+        val name = originName.lowercase()
+        return COVER_BACKFILL_EXTENSIONS.any(name::endsWith)
+    }
+
     private fun scheduleMissingLocalBookCoverBackfills(books: List<BookShelfItem>) {
-        books
-            .asSequence()
-            .filter { it.isLocal && it.coverUrl.isNullOrBlank() }
-            .forEach { book ->
-                if (localBookCoverBackfills.add(book.bookUrl)) {
-                    viewModelScope.launch {
-                        try {
-                            bookRepository.backfillLocalBookCoverIfMissing(book.bookUrl)
-                        } finally {
-                            localBookCoverBackfills.remove(book.bookUrl)
-                        }
-                    }
-                }
+        books.forEach { book ->
+            if (!book.canBackfillLocalCover()) return@forEach
+            // 每本书单进程只尝试一次: 解析失败或本来无封面的书不再参与后续发射.
+            if (coverBackfillAttempted.add(book.bookUrl)) {
+                coverBackfillQueue.trySend(book.bookUrl)
             }
+        }
     }
 
     fun setSearchKey(key: String) {
@@ -838,5 +870,11 @@ class BookshelfViewModel(
 
     private fun showMessage(message: String) {
         _effects.tryEmit(BookshelfEffect.ShowSnackbar(message))
+    }
+
+    private companion object {
+        /** 只有这些格式的本地书能从文件里解析出封面. */
+        val COVER_BACKFILL_EXTENSIONS = listOf(".epub", ".pdf", ".mobi", ".azw3", ".azw", ".umd")
+        const val COVER_BACKFILL_WORKERS = 2
     }
 }

@@ -18,6 +18,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 
@@ -128,7 +129,7 @@ class BookRepository(
                 )
             }.distinct()
             .sorted()
-    }
+    }.flowOn(Dispatchers.Default)
 
     fun flowBookShelfByGroup(group: BookGroup): Flow<List<BookShelfItem>> = when {
         group.isAdvanced -> {
