@@ -363,7 +363,11 @@ class ReadBookController(
         _textMenuState.value = null
         viewModel.onIntent(ReadBookIntent.DismissQuickMarking)
     }
-    private val popupAction by lazy { PopupAction(activity) }
+
+    // 退出阅读器时若从未弹出过菜单, 不能为了 dismiss 而构造 PopupAction:
+    // 它的构造会 inflate 整个 XML 菜单布局, 实测在退出转场中占 50~100ms.
+    private val popupActionDelegate = lazy { PopupAction(activity) }
+    private val popupAction get() = popupActionDelegate.value
     private var screenTimeOut: Long = 0
     private var appliedDarkTheme: Boolean? = null
     private val originalRequestedOrientation = activity.requestedOrientation
@@ -384,7 +388,9 @@ class ReadBookController(
         readerImageLoads.clear()
         readerImageCache.evictAll()
         dismissTextActionMenu()
-        popupAction.dismiss()
+        if (popupActionDelegate.isInitialized()) {
+            popupAction.dismiss()
+        }
         networkChangedListener.unRegister()
         unregisterTimeBatteryReceiver()
         restoreActivityWindowState()
