@@ -13,6 +13,25 @@ data class ThemeOverrideState(
     val isDark: Boolean = false,
 )
 
+private data class ThemeOverrideKey(
+    val seedColor: Color,
+    val isDark: Boolean,
+    val paletteStyle: PaletteStyle,
+    val colorSpec: ThemeColorSpec,
+    val usePureBlack: Boolean,
+    val contrastLevel: Double,
+)
+
+// dynamicColorScheme 是纯函数, 但要跑整套 HCT/CAM16 配色生成, 实测单次可达上百毫秒.
+// 阅读器每次打开书籍都会按背景色重建覆盖主题, 用一个小 LRU 复用以避免转场首帧被卡住.
+private const val THEME_OVERRIDE_CACHE_SIZE = 8
+private val themeOverrideCache =
+    object : LinkedHashMap<ThemeOverrideKey, ThemeOverrideState>(THEME_OVERRIDE_CACHE_SIZE, 0.75f, true) {
+        override fun removeEldestEntry(
+            eldest: MutableMap.MutableEntry<ThemeOverrideKey, ThemeOverrideState>?,
+        ): Boolean = size > THEME_OVERRIDE_CACHE_SIZE
+    }
+
 fun buildThemeOverrideState(
     seedColor: Color,
     isDark: Boolean,
@@ -21,6 +40,10 @@ fun buildThemeOverrideState(
     usePureBlack: Boolean,
     contrastLevel: Double = ThemeResolver.resolveContrastLevel(),
 ): ThemeOverrideState {
+    val key = ThemeOverrideKey(seedColor, isDark, paletteStyle, colorSpec, usePureBlack, contrastLevel)
+    synchronized(themeOverrideCache) {
+        themeOverrideCache[key]?.let { return it }
+    }
     var colorScheme =
         dynamicColorScheme(
             seedColor = seedColor,
@@ -45,7 +68,9 @@ fun buildThemeOverrideState(
         seedColor = seedColor,
         colorScheme = colorScheme,
         isDark = isDark,
-    )
+    ).also { state ->
+        synchronized(themeOverrideCache) { themeOverrideCache[key] = state }
+    }
 }
 
 @Composable

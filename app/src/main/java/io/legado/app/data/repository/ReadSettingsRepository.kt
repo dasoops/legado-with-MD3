@@ -12,6 +12,7 @@ import io.legado.app.domain.gateway.ReadSettingsGateway
 import io.legado.app.domain.model.settings.ReadSettings
 import io.legado.app.help.config.AppConfigStore
 import io.legado.app.help.config.compatDsValue
+import java.util.concurrent.atomic.AtomicReference
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
@@ -22,8 +23,20 @@ class ReadSettingsRepository(
     private val settingsRepository: SettingsRepository,
     private val preferencesFlow: StateFlow<Preferences> = AppConfigStore.preferencesFlow,
 ) : ReadSettingsGateway {
+    // 阅读设置是一个由 DataStore 快照重建的大对象; 阅读界面在组合期会反复读取,
+    // 按快照实例缓存, 避免每次 get 都做几十次偏好查找与对象构造.
+    private val cachedSnapshot = AtomicReference<Pair<Preferences, ReadSettings>?>(null)
+
     override val currentSettings: ReadSettings
-        get() = preferencesFlow.value.toReadSettings()
+        get() {
+            val preferences = preferencesFlow.value
+            cachedSnapshot.get()?.let { (snapshot, settings) ->
+                if (snapshot === preferences) return settings
+            }
+            return preferences.toReadSettings().also { settings ->
+                cachedSnapshot.set(preferences to settings)
+            }
+        }
 
     override val settings: Flow<ReadSettings> =
         preferencesFlow
