@@ -49,13 +49,11 @@ fun AppScaffold(
     contentWindowInsets: WindowInsets = ScaffoldDefaults.contentWindowInsets,
     alwaysDrawBehindBars: Boolean = false,
     /**
-     * 内容不作为模糊 / 液态玻璃的采样源。
+     * 本页不参与模糊 / 液态玻璃：不录制内容图层，也按未开启模糊的样式渲染顶栏。
      *
-     * haze 的 `hazeSource` 与液态玻璃的 `layerBackdrop` 都会把整棵内容录进 GraphicsLayer；
-     * 内容里若有 AndroidView（WebView 等 interop view），Compose 会把它一并画进那张离屏
-     * RenderNode（`AndroidViewHolder.draw` → `AndroidComposeView.drawAndroidView`）。
-     * Chromium 在「把网页画进别人的图层」这条路径上不稳定，部分设备会表现为网页闪烁，
-     * 因此 WebView 类页面必须把两个采样源一起关掉。
+     * haze 的 `hazeSource` 与液态玻璃的 `layerBackdrop` 都会把整棵内容录进 GraphicsLayer，
+     * 内容每帧变化就要重录一次。书架这类长列表滚动时每帧多花约 7ms（60Hz 下直接超预算），
+     * 因此这类页面整体退化为无模糊样式；采样源与模糊效果必须一起关，否则顶栏只剩半透明色。
      */
     disableContentSampling: Boolean = false,
     content: @Composable (PaddingValues) -> Unit,
@@ -96,9 +94,20 @@ fun AppScaffold(
             topBarContentBackdrop,
         )
 
+    val blurEnabled = themeSettings.enableBlur && !disableContentSampling
+    val effectiveConfiguration =
+        remember(configuration, disableContentSampling) {
+            if (configuration.theme.enableBlur && disableContentSampling) {
+                configuration.copy(theme = configuration.theme.copy(enableBlur = false))
+            } else {
+                configuration
+            }
+        }
+
     CompositionLocalProvider(
-        LocalHazeState provides if (themeSettings.enableBlur) hazeState else null,
-        LocalTopBarBackdrop provides if (liquidGlassEnabled) topBarBackdrop else null,
+        LocalAppUiConfiguration provides effectiveConfiguration,
+        LocalHazeState provides if (blurEnabled) hazeState else null,
+        LocalTopBarBackdrop provides if (liquidGlassEnabled && !disableContentSampling) topBarBackdrop else null,
     ) {
         when {
             ThemeResolver.isMiuixEngine(composeEngine) -> {

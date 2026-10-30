@@ -401,6 +401,9 @@ fun BookshelfScreen(
     AppScaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         contentWindowInsets = WindowInsets(0),
+        // 书架内容是可滚动的大列表, 作为模糊采样源时每帧都要重录整屏图层 + 重做模糊,
+        // 开启模糊后下拉/滚动实测每帧多 7ms 左右, 因此这里只保留背景图作为采样源.
+        disableContentSampling = true,
         snackbarHost = {
             SnackbarHost(
                 hostState = snackbarHostState,
