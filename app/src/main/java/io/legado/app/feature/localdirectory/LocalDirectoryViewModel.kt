@@ -21,6 +21,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
@@ -62,6 +63,9 @@ class LocalDirectoryViewModel(
     private var initialized = false
     private var scanJob: Job? = null
 
+    // 仅在 toDirectoryBooks 内读写 (单收集器串行执行), 用于复用未变化的书籍派生数据.
+    private var directoryBookCache: Map<String, DirectoryBook> = emptyMap()
+
     val uiState = combine(state, sortConfigFlow) { state, sortConfig ->
         val bookComparator = bookshelfRepository.bookComparator(sortConfig.sort, sortConfig.sortOrder)
         val searching = state.isSearch && state.searchKey.isNotBlank()
@@ -85,6 +89,8 @@ class LocalDirectoryViewModel(
             isUnavailable = state.isUnavailable,
         )
     }
+        // 节点重建是 O(书数) 的遍历 + 排序, 书架大时放主线程会造成上百毫秒卡顿.
+        .flowOn(Dispatchers.Default)
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
@@ -94,18 +100,39 @@ class LocalDirectoryViewModel(
     init {
         viewModelScope.launch {
             bookRepository.flowBookShelfByGroup(groupId)
-                .map { list ->
-                    list.map { book ->
-                        DirectoryBook(
-                            ui = book.toUiItem(),
-                            dir = gateway.relativeDirectory(rootUri, book.bookUrl).toImmutableList(),
-                        )
-                    }
-                }
+                .map(::toDirectoryBooks)
+                // 每本书都要做标签解析和路径解析, 书多时单次发射在主线程可达 200ms 以上.
+                .flowOn(Dispatchers.Default)
                 .collect { books ->
                     state.update { it.copy(books = books) }
                 }
         }
+    }
+
+    /**
+     * 只为内容变化的书重建 UI 项: 一次导入/刷新常只改动个别书, 全量重算会把大书架的
+     * 派生成本线性叠加到每次发射上. 复用旧项同时保持对象同一性, 减少下游重组.
+     */
+    private fun toDirectoryBooks(books: List<BookShelfItem>): List<DirectoryBook> {
+        val previous = directoryBookCache
+        val next = HashMap<String, DirectoryBook>(books.size * 2)
+        val result = ArrayList<DirectoryBook>(books.size)
+        books.forEach { book ->
+            val cached = previous[book.bookUrl]
+            val item =
+                if (cached != null && cached.ui.book == book) {
+                    cached
+                } else {
+                    DirectoryBook(
+                        ui = book.toUiItem(),
+                        dir = gateway.relativeDirectory(rootUri, book.bookUrl).toImmutableList(),
+                    )
+                }
+            next[book.bookUrl] = item
+            result.add(item)
+        }
+        directoryBookCache = next
+        return result
     }
 
     fun onIntent(intent: LocalDirectoryIntent) {
