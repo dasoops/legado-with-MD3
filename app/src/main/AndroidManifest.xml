@@ -172,11 +172,14 @@
                 android:resource="@xml/spen_remote_actions" />
         </activity>
         <!-- 主界面 -->
+        <!-- singleTop: 栈顶已是本页时把新意图交给 onNewIntent, 而不是让系统按
+             「相同 launch 参数(extras 不参与比较)」复用任务后静默丢弃意图. -->
         <activity
             android:name=".ui.main.MainActivity"
             android:alwaysRetainTaskState="true"
             android:configChanges="locale|layoutDirection|uiMode|screenLayout"
             android:enableOnBackInvokedCallback="true"
+            android:launchMode="singleTop"
             android:windowSoftInputMode="adjustResize"
             android:exported="true">
             <intent-filter>

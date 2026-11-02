@@ -464,7 +464,7 @@ private fun RecentBookCard(
 ) {
     GlassCard(
         modifier = Modifier.fillMaxWidth(),
-        onClick = if (book?.bookUrl != null) onClick else null,
+        onClick = if (book != null) onClick else null,
     ) {
         Box(
             modifier = Modifier.fillMaxWidth(),
@@ -672,7 +672,7 @@ private fun RecentReadingProgress(
 @Composable
 private fun RecentBooksRow(
     books: List<HomeRecentBookUi>,
-    onBookClick: (String) -> Unit,
+    onBookClick: (String?) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     LazyRow(
@@ -682,7 +682,7 @@ private fun RecentBooksRow(
         itemsIndexed(books, key = { index, book -> "${book.bookUrl}_$index" }) { index, book ->
             RecentHistoryBookCard(
                 book = book,
-                onClick = { book.bookUrl?.let(onBookClick) },
+                onClick = { onBookClick(book.bookUrl) },
             )
         }
     }

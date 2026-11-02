@@ -151,14 +151,21 @@ class HomeViewModel(
     }
 
     private fun openRecentBook() {
-        val bookUrl = uiState.value.recentBook?.bookUrl ?: return
-        openBook(bookUrl)
+        // 记录还在但书籍已从书架移除时 bookUrl 为 null，需要给出可见提示而不是静默无响应。
+        openBook(uiState.value.recentBook?.bookUrl)
     }
 
-    private fun openBook(bookUrl: String) {
+    private fun openBook(bookUrl: String?) {
+        if (bookUrl == null) {
+            _effects.tryEmit(HomeEffect.ShowMessage(R.string.book_not_found))
+            return
+        }
         viewModelScope.launch {
-            bookRepository.getBook(bookUrl)?.let {
-                _effects.emit(HomeEffect.OpenBook(it))
+            val book = bookRepository.getBook(bookUrl)
+            if (book == null) {
+                _effects.emit(HomeEffect.ShowMessage(R.string.book_not_found))
+            } else {
+                _effects.emit(HomeEffect.OpenBook(book))
             }
         }
     }

@@ -26,4 +26,15 @@ class MainNavigatorBackStackTest {
 
         assertEquals(listOf(MainRouteBookshelf, bookInfo, reader), backStack)
     }
+
+    @Test
+    fun `reader opened from main screen keeps bookshelf as parent`() {
+        // 首页/阅读记录入口改为应用内导航后, 返回应回到主界面而不是退出应用.
+        val reader = MainRouteReadBook(bookUrl = "book-url", sharedCoverKey = "home_recent_book-url")
+        val backStack = mutableListOf<NavKey>(MainRouteBookshelf)
+
+        MainNavigator.navigateToRoute(backStack, reader)
+
+        assertEquals(listOf(MainRouteBookshelf, reader), backStack)
+    }
 }

@@ -51,7 +51,7 @@ sealed interface HomeIntent {
     data object RecentBookClick : HomeIntent
 
     data class RecentHistoryBookClick(
-        val bookUrl: String,
+        val bookUrl: String?,
     ) : HomeIntent
 
     data class SelectSourceSet(

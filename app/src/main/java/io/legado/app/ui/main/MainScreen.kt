@@ -95,7 +95,6 @@ import io.legado.app.ui.widget.components.navigation.AppNavigationBar
 import io.legado.app.ui.widget.components.navigation.AppNavigationBarItem
 import io.legado.app.ui.widget.components.pager.rememberPagerFlingPassThroughConnection
 import io.legado.app.ui.widget.components.text.AppText
-import io.legado.app.utils.startActivityForBook
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
@@ -120,6 +119,7 @@ fun MainScreen(
     useRail: Boolean,
     onOpenSettings: () -> Unit,
     onOpenBookshelfBook: (BookShelfItem, String?) -> Unit,
+    onOpenReadBook: (bookUrl: String, sharedCoverKey: String?) -> Unit,
     onNavigateToBookInfo: (
         name: String,
         author: String,
@@ -511,7 +511,12 @@ fun MainScreen(
                                 MainDestination.Home -> {
                                     HomeRouteScreen(
                                         onOpenBook = { book ->
-                                            context.startActivityForBook(book)
+                                            // 与应用内其它入口一致：走导航图打开阅读器，
+                                            // 不再用 NEW_TASK 重启 MainActivity。
+                                            // 后者在任务 base intent 与本意图相同(extras 不参与
+                                            // filterEquals)时会被系统判定为 START_DELIVERED_TO_TOP，
+                                            // 既不新建实例也不回调 onNewIntent，表现为点击无效。
+                                            onOpenReadBook(book.bookUrl, "home_recent_${book.bookUrl}")
                                         },
                                         onOpenBackupSettings = onNavigateToBackupSettings,
                                         onNavigateToReadRecord = onNavigateToReadRecord,

@@ -114,6 +114,14 @@ fun MainActivity.mainEntryProvider(
                     )
                 }
             },
+            onOpenReadBook = { bookUrl, sharedCoverKey ->
+                onNavigateToRoute(
+                    MainRouteReadBook(
+                        bookUrl = bookUrl,
+                        sharedCoverKey = sharedCoverKey,
+                    ),
+                )
+            },
             onNavigateToBookInfo = { name, author, bookUrl, origin, coverPath, sharedCoverKey ->
                 onNavigateToRoute(
                     MainRouteBookInfo(
@@ -376,7 +384,11 @@ fun MainActivity.mainEntryProvider(
                             io.legado.app.data.appDb.bookDao
                                 .getBook(name, author)
                         }
-                    if (book != null) this@mainEntryProvider.startActivityForBook(book)
+                    // 与应用内其它入口一致：走导航图打开阅读器，避免 NEW_TASK 重启
+                    // MainActivity 时被系统判定为「已投递到栈顶」而静默丢弃。
+                    if (book != null) {
+                        onNavigateToRoute(MainRouteReadBook(bookUrl = book.bookUrl))
+                    }
                 }
             },
             onSummaryClick = {
@@ -395,7 +407,10 @@ fun MainActivity.mainEntryProvider(
                             io.legado.app.data.appDb.bookDao
                                 .getBook(name, author)
                         }
-                    if (book != null) this@mainEntryProvider.startActivityForBook(book)
+                    // 同 MainRouteReadRecord：统一走应用内导航。
+                    if (book != null) {
+                        onNavigateToRoute(MainRouteReadBook(bookUrl = book.bookUrl))
+                    }
                 }
             },
         )
