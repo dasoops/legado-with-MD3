@@ -59,9 +59,15 @@ class LocalDirectoryRepository(
                 // 已归入本组时避免重导入重置目录, 只补取旧条目缺少的封面.
                 if (existing != null && (existing.group and groupId) != 0L) {
                     if (existing.isLocal && existing.coverUrl.isNullOrBlank()) {
+                        val previousName = existing.name
+                        val previousAuthor = existing.author
                         LocalBook.upBookInfo(existing)
                         if (!existing.coverUrl.isNullOrBlank()) {
-                            bookRepository.update(existing)
+                            bookRepository.updateBookMetadata(
+                                book = existing,
+                                previousName = previousName,
+                                previousAuthor = previousAuthor,
+                            )
                         }
                     }
                     syncDirectoryTags(existing, directoryTags)

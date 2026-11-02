@@ -18,9 +18,11 @@ import java.time.LocalDate
 import java.time.ZoneId
 import kotlin.math.max
 import kotlin.math.min
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.withContext
 import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
@@ -502,6 +504,37 @@ class ReadRecordRepository(
         sourceRecords: List<ReadRecord>,
     ): Boolean = database.withTransaction {
         mergeIndependentReadRecords(targetRecord, sourceRecords)
+    }
+
+    /**
+     * 书籍书名/作者变更后，把旧身份下的阅读记录迁移到新身份。
+     *
+     * 旧身份按归一化后的书名+作者匹配（记录落库时会折叠空白，不能只用原始字符串查询）；
+     * 迁移复用合并逻辑：新身份已有记录时累加时长并搬移时段/明细，避免丢统计。
+     */
+    suspend fun migrateReadRecordIdentity(
+        oldName: String,
+        oldAuthor: String,
+        newName: String,
+        newAuthor: String,
+    ) = withContext(Dispatchers.IO) {
+        val normalizedOldName = ReadRecordIdentity.bookName(oldName)
+        val normalizedOldAuthor = ReadRecordIdentity.author(oldAuthor)
+        val targetName = ReadRecordIdentity.bookName(newName)
+        val targetAuthor = ReadRecordIdentity.author(newAuthor)
+        if (normalizedOldName == targetName && normalizedOldAuthor == targetAuthor) return@withContext
+        val sources =
+            dao.all.filter {
+                ReadRecordIdentity.bookName(it.bookName) == normalizedOldName &&
+                    ReadRecordIdentity.author(it.bookAuthor) == normalizedOldAuthor
+            }
+        if (sources.isEmpty()) return@withContext
+        sources.groupBy { it.deviceId }.forEach { (deviceId, records) ->
+            mergeIndependentReadRecordsInto(
+                targetRecord = ReadRecord(deviceId, targetName, targetAuthor),
+                sourceRecords = records,
+            )
+        }
     }
 
     private suspend fun mergeSingleReadRecordInto(

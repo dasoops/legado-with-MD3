@@ -160,7 +160,7 @@ val appModule = module {
     single { get<AppDatabase>().searchContentHistoryDao }
 
     singleOf(::ReadRecordRepository)
-    single<HomeDashboardGateway> { HomeDashboardRepository(get(), get()) }
+    single<HomeDashboardGateway> { HomeDashboardRepository(get(), get(), get()) }
     singleOf(::BookRepository)
     singleOf(::BookImportRepository)
     singleOf(::BookGroupRepository)

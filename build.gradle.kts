@@ -286,7 +286,8 @@ val verifyConfigArchitecture = tasks.register<VerifyConfigArchitectureTask>(
             "io/legado/app/ui/association/ImportReplaceRuleDialog.kt" to 1,
             // 护栏缺席期间 main 新增（整书页码估算），随合并冻结
             "io/legado/app/ui/book/read/pageestimate/ExactChapterPageCountStore.kt" to 3,
-            "io/legado/app/ui/main/MainNavGraph.kt" to 2,
+            // 开书统一走 BookRepository 解析后，本文件 DAO 直连已清零
+            "io/legado/app/ui/main/MainNavGraph.kt" to 0,
         ),
     )
 }

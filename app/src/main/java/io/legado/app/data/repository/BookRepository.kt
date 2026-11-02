@@ -26,6 +26,7 @@ class BookRepository(
     private val bookDao: BookDao,
     private val bookChapterDao: BookChapterDao,
     private val appDb: AppDatabase,
+    private val readRecordRepository: ReadRecordRepository,
 ) {
     fun flowBook(bookUrl: String): Flow<Book?> = bookDao.flowGetBook(bookUrl)
 
@@ -58,13 +59,39 @@ class BookRepository(
         bookDao.getBook(bookUrl)
     }
 
+    /**
+     * 阅读记录（书名/作者）→ 书籍。
+     *
+     * 记录身份写入时会折叠空白，books 表保留原始书名/作者，因此精确匹配失败后按归一化身份回退；
+     * 作者为空的记录不做书名唯一性回退（未知作者归属能力已废弃）。
+     */
+    suspend fun resolveBookForReadRecord(
+        bookName: String,
+        bookAuthor: String,
+    ): Book? = withContext(Dispatchers.IO) {
+        bookDao.getBook(bookName, bookAuthor)
+            ?: ReadRecordBookMatcher.resolve(
+                recordName = bookName,
+                recordAuthor = bookAuthor,
+                books = bookDao.getBookIdentityRefs(),
+            )?.let { bookDao.getBook(it.bookUrl) }
+    }
+
     suspend fun backfillLocalBookCoverIfMissing(bookUrl: String) {
         withContext(Dispatchers.IO) {
             val book = bookDao.getBook(bookUrl) ?: return@withContext
             if (!book.isLocal || !book.coverUrl.isNullOrBlank()) return@withContext
+            val previousName = book.name
+            val previousAuthor = book.author
             LocalBook.upBookInfo(book)
             if (!book.coverUrl.isNullOrBlank()) {
                 bookDao.update(book)
+                readRecordRepository.migrateReadRecordIdentity(
+                    oldName = previousName,
+                    oldAuthor = previousAuthor,
+                    newName = book.name,
+                    newAuthor = book.author,
+                )
             }
         }
     }
@@ -246,6 +273,26 @@ class BookRepository(
         }
     }
 
+    /**
+     * 更新书籍元数据；书名/作者变化时把旧身份下的阅读记录迁移到新身份，
+     * 否则改名后的书在首页/阅读记录里会再也对应不到书籍。
+     */
+    suspend fun updateBookMetadata(
+        book: Book,
+        previousName: String,
+        previousAuthor: String,
+    ) {
+        withContext(Dispatchers.IO) {
+            bookDao.update(book)
+            readRecordRepository.migrateReadRecordIdentity(
+                oldName = previousName,
+                oldAuthor = previousAuthor,
+                newName = book.name,
+                newAuthor = book.author,
+            )
+        }
+    }
+
     suspend fun getMinOrder(): Int = withContext(Dispatchers.IO) {
         bookDao.minOrder
     }
@@ -309,10 +356,18 @@ class BookRepository(
     }
 
     suspend fun refreshLocalBook(book: Book): List<BookChapter> = withContext(Dispatchers.IO) {
+        val previousName = book.name
+        val previousAuthor = book.author
         LocalBook.clearChapterParseCache(book)
         LocalBook.upBookInfo(book)
-        LocalBook.getChapterList(book).also { chapters ->
-            replaceChaptersAndUpdateBook(book, chapters)
-        }
+        val chapters = LocalBook.getChapterList(book)
+        replaceChaptersAndUpdateBook(book, chapters)
+        readRecordRepository.migrateReadRecordIdentity(
+            oldName = previousName,
+            oldAuthor = previousAuthor,
+            newName = book.name,
+            newAuthor = book.author,
+        )
+        chapters
     }
 }

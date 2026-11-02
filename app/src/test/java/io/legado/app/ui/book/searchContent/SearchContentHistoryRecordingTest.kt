@@ -7,9 +7,12 @@ import io.legado.app.data.AppDatabase
 import io.legado.app.data.entities.Book
 import io.legado.app.data.entities.SearchContentHistory
 import io.legado.app.data.repository.BookRepository
+import io.legado.app.data.repository.ReadRecordRepository
 import io.legado.app.data.repository.SearchContentRepository
+import io.legado.app.data.repository.SettingsRepository
 import io.legado.app.domain.gateway.ThemeSettingsGateway
 import io.legado.app.domain.model.settings.ThemeSettings
+import io.legado.app.help.config.AppConfigStore
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
@@ -37,6 +40,8 @@ class SearchContentHistoryRecordingTest {
 
     @Before
     fun setUp() {
+        // BookRepository 依赖 ReadRecordRepository，其构造即求值 readRecordEnabled，会访问 AppConfigStore。
+        AppConfigStore.init(RuntimeEnvironment.getApplication())
         db =
             Room
                 .inMemoryDatabaseBuilder(
@@ -91,7 +96,12 @@ class SearchContentHistoryRecordingTest {
             bookUrl = BOOK_URL,
             initialSearchWord = initialSearchWord,
             searchResultIndex = 0,
-            bookRepository = BookRepository(db.bookDao, db.bookChapterDao, db),
+            bookRepository = BookRepository(
+                db.bookDao,
+                db.bookChapterDao,
+                db,
+                ReadRecordRepository(db.readRecordDao, db, SettingsRepository()),
+            ),
             searchContentRepository = SearchContentRepository(historyDao = db.searchContentHistoryDao),
             themeSettingsGateway = FakeThemeSettingsGateway(),
         )

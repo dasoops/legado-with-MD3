@@ -8,6 +8,7 @@ import io.legado.app.data.DatabaseMigrations
 import io.legado.app.data.entities.Book
 import io.legado.app.data.entities.BookGroup
 import io.legado.app.domain.model.BookTags
+import io.legado.app.help.config.AppConfigStore
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.junit.After
@@ -32,9 +33,16 @@ class BookTagsRepositoryTest {
 
     @Before
     fun setUp() {
+        // BookRepository 依赖 ReadRecordRepository，其构造即求值 readRecordEnabled，会访问 AppConfigStore。
+        AppConfigStore.init(RuntimeEnvironment.getApplication())
         db = Room.inMemoryDatabaseBuilder(RuntimeEnvironment.getApplication(), AppDatabase::class.java)
             .allowMainThreadQueries().build()
-        books = BookRepository(db.bookDao, db.bookChapterDao, db)
+        books = BookRepository(
+            db.bookDao,
+            db.bookChapterDao,
+            db,
+            ReadRecordRepository(db.readRecordDao, db, SettingsRepository()),
+        )
         groups = BookGroupRepository(db.bookGroupDao)
     }
 

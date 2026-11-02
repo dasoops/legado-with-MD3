@@ -161,7 +161,12 @@ class BookInfoEditViewModel(
                 if (ReadBook.isCurrentBook(book.bookUrl)) {
                     ReadBook.replaceCurrentBook(book)
                 }
-                bookRepository.update(book)
+                // 书名/作者变化时同步迁移阅读记录，保证首页与阅读记录仍能对应到本书。
+                bookRepository.updateBookMetadata(
+                    book = book,
+                    previousName = oldBook.name,
+                    previousAuthor = oldBook.author,
+                )
             }
         }.onSuccess {
             onSuccess.invoke()

@@ -5,6 +5,7 @@ import androidx.room.Room
 import io.legado.app.data.AppDatabase
 import io.legado.app.data.entities.readRecord.ReadRecord
 import io.legado.app.data.entities.readRecord.ReadRecordDetail
+import io.legado.app.data.entities.readRecord.ReadRecordIdentity
 import io.legado.app.data.entities.readRecord.ReadRecordSession
 import io.legado.app.help.config.AppConfigStore
 import kotlinx.coroutines.runBlocking
@@ -203,6 +204,53 @@ class ReadRecordRepositoryTest {
         assertEquals(100L, database.readRecordDao.getReadRecord(DEVICE_ID, TARGET_NAME, AUTHOR)?.readTime)
         assertNull(database.readRecordDao.getDetail(DEVICE_ID, TARGET_NAME, AUTHOR, date))
         assertEquals(0, database.readRecordDao.getSessionsByBook(DEVICE_ID, TARGET_NAME, AUTHOR).size)
+    }
+
+    @Test
+    fun `migrating identity after rename keeps time and moves sessions`() = runBlocking {
+        val oldName = "旧书名"
+        val newName = "新书名"
+        val session =
+            ReadRecordSession(
+                deviceId = DEVICE_ID,
+                bookName = oldName,
+                bookAuthor = AUTHOR,
+                startTime = 1_000,
+                endTime = 1_100,
+                words = 10,
+            )
+        database.readRecordDao.insert(ReadRecord(DEVICE_ID, oldName, AUTHOR, 200, 1_000))
+        database.readRecordDao.insertSession(session)
+
+        repository.migrateReadRecordIdentity(oldName, AUTHOR, newName, AUTHOR)
+
+        assertNull(database.readRecordDao.getReadRecord(DEVICE_ID, oldName, AUTHOR))
+        assertEquals(200L, database.readRecordDao.getReadRecord(DEVICE_ID, newName, AUTHOR)?.readTime)
+        assertEquals(1, database.readRecordDao.getSessionsByBook(DEVICE_ID, newName, AUTHOR).size)
+    }
+
+    @Test
+    fun `migration finds normalized legacy record by raw old name`() = runBlocking {
+        // 记录落库时已折叠空白，书名原始值带首尾空格；按原始旧书名也要能迁移。
+        val rawOldName = " 旧书名 "
+        val normalizedOldName = ReadRecordIdentity.bookName(rawOldName)
+        database.readRecordDao.insert(ReadRecord(DEVICE_ID, normalizedOldName, AUTHOR, 200, 1_000))
+
+        repository.migrateReadRecordIdentity(rawOldName, AUTHOR, "新书名", AUTHOR)
+
+        assertNull(database.readRecordDao.getReadRecord(DEVICE_ID, normalizedOldName, AUTHOR))
+        assertEquals(200L, database.readRecordDao.getReadRecord(DEVICE_ID, "新书名", AUTHOR)?.readTime)
+    }
+
+    @Test
+    fun `migrating identity accumulates into existing target record`() = runBlocking {
+        database.readRecordDao.insert(ReadRecord(DEVICE_ID, "旧名", AUTHOR, 200, 1_000))
+        database.readRecordDao.insert(ReadRecord(DEVICE_ID, "新名", AUTHOR, 50, 2_000))
+
+        repository.migrateReadRecordIdentity(" 旧名 ", AUTHOR, " 新名 ", AUTHOR)
+
+        assertNull(database.readRecordDao.getReadRecord(DEVICE_ID, "旧名", AUTHOR))
+        assertEquals(250L, database.readRecordDao.getReadRecord(DEVICE_ID, "新名", AUTHOR)?.readTime)
     }
 
     private suspend fun mergeAndAssert(targetSessionDuration: Long = 0, sourceSessionDuration: Long = 0, targetLegacyTime: Long = 0, sourceLegacyTime: Long = 0) {

@@ -10,6 +10,7 @@ import androidx.room.Update
 import io.legado.app.constant.BookType
 import io.legado.app.data.entities.Book
 import io.legado.app.data.entities.BookGroup
+import io.legado.app.data.entities.BookIdentityRef
 import io.legado.app.help.book.isNotShelf
 import io.legado.app.ui.main.bookshelf.BookShelfItem
 import kotlinx.coroutines.flow.Flow
@@ -116,6 +117,44 @@ interface BookDao {
 
     @Query("SELECT * FROM books order by durChapterTime desc")
     fun flowAll(): Flow<List<Book>>
+
+    /** 书籍身份轻量投影：供阅读记录反查书籍与首页展示使用。 */
+    @Query(
+        """
+        SELECT
+            bookUrl,
+            name,
+            author,
+            durChapterTime,
+            origin,
+            coverUrl,
+            customCoverUrl,
+            durChapterTitle,
+            totalChapterNum,
+            durChapterIndex
+        FROM books
+        """,
+    )
+    fun flowBookIdentityRefs(): Flow<List<BookIdentityRef>>
+
+    /** 书籍身份轻量投影（一次性读取）。 */
+    @Query(
+        """
+        SELECT
+            bookUrl,
+            name,
+            author,
+            durChapterTime,
+            origin,
+            coverUrl,
+            customCoverUrl,
+            durChapterTitle,
+            totalChapterNum,
+            durChapterIndex
+        FROM books
+        """,
+    )
+    suspend fun getBookIdentityRefs(): List<BookIdentityRef>
 
     @Query("SELECT * FROM books")
     suspend fun getAll(): List<Book>

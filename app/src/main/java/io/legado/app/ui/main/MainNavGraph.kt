@@ -35,6 +35,7 @@ import androidx.navigation3.ui.LocalNavAnimatedContentScope
 import androidx.navigation3.ui.NavDisplay
 import coil3.ImageLoader
 import io.legado.app.R
+import io.legado.app.data.repository.BookRepository
 import io.legado.app.domain.model.settings.AppUiConfiguration
 import io.legado.app.help.coil.CoverExtras
 import io.legado.app.model.Download
@@ -74,10 +75,8 @@ import io.legado.app.utils.startActivityForBook
 import io.legado.app.utils.toastOnUi
 import io.legado.app.utils.toggleSystemBar
 import kotlinx.coroutines.CompletableDeferred
-import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import org.koin.androidx.compose.koinViewModel
 import org.koin.compose.koinInject
 import org.koin.core.parameter.parametersOf
@@ -375,19 +374,20 @@ fun MainActivity.mainEntryProvider(
     }
 
     entry<MainRouteReadRecord> {
+        val bookRepository = koinInject<BookRepository>()
         ReadRecordRouteScreen(
             onBackClick = { onNavigateBack() },
             onBookClick = { name, author ->
                 lifecycleScope.launch {
-                    val book =
-                        withContext(IO) {
-                            io.legado.app.data.appDb.bookDao
-                                .getBook(name, author)
-                        }
+                    // 记录身份经过空白归一化，可能与 books 表原始书名/作者不一致，
+                    // 统一用 resolveBookForReadRecord 解析（含未知作者回退）。
+                    val book = bookRepository.resolveBookForReadRecord(name, author)
                     // 与应用内其它入口一致：走导航图打开阅读器，避免 NEW_TASK 重启
                     // MainActivity 时被系统判定为「已投递到栈顶」而静默丢弃。
                     if (book != null) {
                         onNavigateToRoute(MainRouteReadBook(bookUrl = book.bookUrl))
+                    } else {
+                        this@mainEntryProvider.toastOnUi(getString(R.string.book_not_found))
                     }
                 }
             },
@@ -398,18 +398,17 @@ fun MainActivity.mainEntryProvider(
     }
 
     entry<MainRouteReadRecordOverview> {
+        val bookRepository = koinInject<BookRepository>()
         ReadRecordOverviewRouteScreen(
             onBackClick = { onNavigateBack() },
             onBookClick = { name, author ->
                 lifecycleScope.launch {
-                    val book =
-                        withContext(IO) {
-                            io.legado.app.data.appDb.bookDao
-                                .getBook(name, author)
-                        }
+                    val book = bookRepository.resolveBookForReadRecord(name, author)
                     // 同 MainRouteReadRecord：统一走应用内导航。
                     if (book != null) {
                         onNavigateToRoute(MainRouteReadBook(bookUrl = book.bookUrl))
+                    } else {
+                        this@mainEntryProvider.toastOnUi(getString(R.string.book_not_found))
                     }
                 }
             },
