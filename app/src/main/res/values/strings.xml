@@ -1225,6 +1225,7 @@
     <string name="sure_upload">Remote WebDAV URL exists, Continue?</string>
     <string name="unsupport_archivefile_entry">Cannot find supported files in archive</string>
     <string name="no_books_dir">There is no book save location set!</string>
+    <string name="local_book_permission_lost">Cannot access the book folder. Please reselect the books location.</string>
     <string name="no_book_found_bookshelf">No book found in bookshelf, import again ?</string>
     <string name="archive_not_found">Can not find archive selected, continue to download ?</string>
     <string name="privacy_policy">User Privacy and Agreement</string>

@@ -250,9 +250,15 @@ class ReadBookLoadDelegate(
         try {
             LocalBook.getBookInputStream(book)
             return true
+        } catch (e: SecurityException) {
+            // 卸载/重装或系统回收授权后, 已保存的目录 URI 仍在但 persistable 权限已丢失.
+            // 这不是文件缺失, 不能按缺失删除书籍; 重新选择目录以恢复授权.
+            ReadBook.upMsg(context.getString(R.string.local_book_permission_lost))
+            host.requestBooksDirPicker(reloadChapterList = false)
+            return false
         } catch (e: Throwable) {
             ReadBook.upMsg("打开本地书籍出错: ${e.localizedMessage}")
-            if (e is SecurityException || e is FileNotFoundException) {
+            if (e is FileNotFoundException) {
                 host.emitEffect(ReadBookEffect.ShowToast("本地书籍文件不存在, 已从书架移除"))
                 scope.launch(Dispatchers.IO) {
                     bookRepository.deleteChaptersByBook(book.bookUrl)
