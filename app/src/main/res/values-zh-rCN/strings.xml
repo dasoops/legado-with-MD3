@@ -2220,6 +2220,9 @@
     <string name="reselect_directory">重新选择目录</string>
     <string name="local_directory">本地目录</string>
     <string name="local_directory_import_partial">%1$d 本书导入失败, 请查看日志或在同步完成后下拉刷新</string>
+    <string name="local_directory_import_skipped_summary">已跳过 %1$s</string>
+    <string name="local_directory_import_skipped_empty">%1$d 个空文件</string>
+    <string name="local_directory_import_skipped_encrypted_pdf">%1$d 个加密 PDF</string>
     <string name="directory_unavailable">目录不可用, 请重新选择</string>
     <string name="open_in_other_app">在其他应用中打开</string>
     <string name="add_book_tags">添加标签</string>

@@ -11,6 +11,7 @@ import io.legado.app.data.entities.Book
 import io.legado.app.domain.gateway.LocalDirectoryGateway
 import io.legado.app.domain.gateway.LocalDirectoryImportResult
 import io.legado.app.domain.model.BookTags
+import io.legado.app.exception.EmptyFileException
 import io.legado.app.help.book.isLocal
 import io.legado.app.model.localBook.LocalBook
 import io.legado.app.utils.FileDoc
@@ -49,6 +50,8 @@ class LocalDirectoryRepository(
         val rootName = directoryName(rootUri)
         var count = 0
         var failed = 0
+        var skippedEmpty = 0
+        var skippedEncryptedPdf = 0
         val startedAt = System.currentTimeMillis()
         files.forEach { file ->
             val fileStartedAt = System.currentTimeMillis()
@@ -80,9 +83,22 @@ class LocalDirectoryRepository(
                     book.save()
                 }
                 count++
-            }.onFailure {
-                failed++
-                AppLog.put("导入目录书籍失败\n${file.uri}", it)
+            }.onFailure { error ->
+                // 空文件和加密 PDF 无法靠刷新恢复, 单独计数以免被误报成导入失败.
+                when (classifyDirectoryImportFailure(file.name, error)) {
+                    DirectoryImportFailureKind.EMPTY_FILE -> {
+                        skippedEmpty++
+                        AppLog.put("本地目录跳过空文件\n${file.uri}")
+                    }
+                    DirectoryImportFailureKind.ENCRYPTED_PDF -> {
+                        skippedEncryptedPdf++
+                        AppLog.put("本地目录跳过加密 PDF\n${file.uri}")
+                    }
+                    DirectoryImportFailureKind.UNEXPECTED -> {
+                        failed++
+                        AppLog.put("导入目录书籍失败\n${file.uri}", error)
+                    }
+                }
             }
             val duration = System.currentTimeMillis() - fileStartedAt
             if (duration > SLOW_IMPORT_THRESHOLD_MS) {
@@ -91,9 +107,15 @@ class LocalDirectoryRepository(
         }
         AppLog.putDebug(
             "本地目录扫描结束: total=${files.size} imported=$count failed=$failed " +
+                "skippedEmpty=$skippedEmpty skippedEncryptedPdf=$skippedEncryptedPdf " +
                 "durationMs=${System.currentTimeMillis() - startedAt}",
         )
-        LocalDirectoryImportResult(imported = count, failed = failed)
+        LocalDirectoryImportResult(
+            imported = count,
+            failed = failed,
+            skippedEmpty = skippedEmpty,
+            skippedEncryptedPdf = skippedEncryptedPdf,
+        )
     }
 
     private companion object {
@@ -222,3 +244,25 @@ internal fun directoryTagsOf(
 ): List<String> = BookTags.editable(
     listOfNotNull(rootName) + relativeDirectoryOf(rootUri, bookUrl),
 )
+
+internal enum class DirectoryImportFailureKind {
+    EMPTY_FILE,
+    ENCRYPTED_PDF,
+    UNEXPECTED,
+}
+
+/**
+ * 区分可预期跳过与真正的导入失败: 空文件没有内容可读; PdfRenderer 对加密 PDF
+ * 统一抛 SecurityException, 消息为 "Password required to access document".
+ */
+internal fun classifyDirectoryImportFailure(
+    fileName: String,
+    throwable: Throwable,
+): DirectoryImportFailureKind = when {
+    throwable is EmptyFileException -> DirectoryImportFailureKind.EMPTY_FILE
+    fileName.endsWith(".pdf", ignoreCase = true) &&
+        throwable is SecurityException &&
+        throwable.message?.contains("password", ignoreCase = true) == true ->
+        DirectoryImportFailureKind.ENCRYPTED_PDF
+    else -> DirectoryImportFailureKind.UNEXPECTED
+}

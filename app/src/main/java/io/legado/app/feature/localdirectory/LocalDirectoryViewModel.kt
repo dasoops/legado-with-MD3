@@ -9,6 +9,7 @@ import io.legado.app.data.repository.BookRepository
 import io.legado.app.data.repository.BookshelfRepository
 import io.legado.app.domain.gateway.BookshelfSettingsGateway
 import io.legado.app.domain.gateway.LocalDirectoryGateway
+import io.legado.app.domain.gateway.LocalDirectoryImportResult
 import io.legado.app.ui.main.bookshelf.BookShelfItem
 import io.legado.app.utils.AlphanumComparator
 import kotlinx.collections.immutable.persistentListOf
@@ -176,14 +177,12 @@ class LocalDirectoryViewModel(
                 .onSuccess { result ->
                     AppLog.putDebug(
                         "本地目录扫描完成: group=$groupId imported=${result.imported} " +
-                            "failed=${result.failed} durationMs=${System.currentTimeMillis() - startedAt}",
+                            "failed=${result.failed} skippedEmpty=${result.skippedEmpty} " +
+                            "skippedEncryptedPdf=${result.skippedEncryptedPdf} " +
+                            "durationMs=${System.currentTimeMillis() - startedAt}",
                     )
-                    if (result.failed > 0) {
-                        _effects.tryEmit(
-                            LocalDirectoryEffect.ShowToast(
-                                appContext.getString(R.string.local_directory_import_partial, result.failed),
-                            ),
-                        )
+                    buildImportMessage(result)?.let { message ->
+                        _effects.tryEmit(LocalDirectoryEffect.ShowToast(message))
                     }
                 }
                 .onFailure {
@@ -196,6 +195,48 @@ class LocalDirectoryViewModel(
                 state.update { it.copy(isLoading = false) }
             }
         }
+    }
+
+    private fun buildImportMessage(result: LocalDirectoryImportResult): String? {
+        val skippedParts =
+            buildList {
+                if (result.skippedEmpty > 0) {
+                    add(
+                        appContext.getString(
+                            R.string.local_directory_import_skipped_empty,
+                            result.skippedEmpty,
+                        ),
+                    )
+                }
+                if (result.skippedEncryptedPdf > 0) {
+                    add(
+                        appContext.getString(
+                            R.string.local_directory_import_skipped_encrypted_pdf,
+                            result.skippedEncryptedPdf,
+                        ),
+                    )
+                }
+            }
+        val parts =
+            buildList {
+                if (result.failed > 0) {
+                    add(
+                        appContext.getString(
+                            R.string.local_directory_import_partial,
+                            result.failed,
+                        ),
+                    )
+                }
+                if (skippedParts.isNotEmpty()) {
+                    add(
+                        appContext.getString(
+                            R.string.local_directory_import_skipped_summary,
+                            skippedParts.joinToString(", "),
+                        ),
+                    )
+                }
+            }
+        return parts.takeIf { it.isNotEmpty() }?.joinToString(", ")
     }
 
     private fun buildNodes(
