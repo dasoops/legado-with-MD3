@@ -90,7 +90,11 @@ internal fun MenuBottomBar(
         )
 
     fun commitSliderValue(value: Float) {
-        val target = value.roundToInt().coerceIn(0, seekMax)
+        val target = if (progressBarBehavior == "page") {
+            snapPageSeekTarget(value, seekMax)
+        } else {
+            value.roundToInt().coerceIn(0, seekMax)
+        }
         sliderDragging = false
         sliderValue = target.toFloat()
         previewPageIndex = target
@@ -106,7 +110,7 @@ internal fun MenuBottomBar(
         sliderDragging = true
         sliderValue = coercedValue
         if (progressBarBehavior == "page") {
-            val target = coercedValue.roundToInt().coerceIn(0, seekMax)
+            val target = snapPageSeekTarget(coercedValue, seekMax)
             if (target != previewPageIndex) {
                 previewPageIndex = target
                 onIntent(ReadBookIntent.SkipToPage(target))
@@ -115,11 +119,12 @@ internal fun MenuBottomBar(
     }
 
     LaunchedEffect(state.seekProgress, seekMax, progressBarBehavior) {
+        // 拖动期间不能被异步回传的页码覆盖. 长章节每跨一页都会刷新 seekProgress,
+        // 回写会把滑块和预览页拉回落后于手指的位置, 释放时提交的也是旧页.
+        if (sliderDragging) return@LaunchedEffect
         val progress = state.seekProgress.coerceIn(0, seekMax)
         previewPageIndex = progress
-        if (progressBarBehavior == "page" || !sliderDragging) {
-            sliderValue = progress.toFloat()
-        }
+        sliderValue = progress.toFloat()
     }
 
     Column(
@@ -443,3 +448,20 @@ internal fun BrightnessBar(
         }
     }
 }
+
+/**
+ * 把进度条浮点值换算成章内页下标.
+ *
+ * 拖动距离会先被 touch slop 吃掉一段, 章内页数越多这段距离折合的页数越多.
+ * 指尖停在轨道末端时仍可能差 1~N 页, 因此按页数比例放宽末端吸附, 保证末页可达.
+ */
+internal fun snapPageSeekTarget(value: Float, max: Int): Int {
+    if (max <= 0) return 0
+    val rounded = value.roundToInt().coerceIn(0, max)
+    // +1 页吸收进度条自身的 step 吸附: 传入值可能已在库内部被取整到前一页.
+    val endSnap = max * SEEK_END_SNAP_RATIO + 1f
+    return if (value >= max - endSnap) max else rounded
+}
+
+/** touch slop 约占进度条可拖动宽度的 3.5%, 折算为当页章节的末段吸附比例. */
+private const val SEEK_END_SNAP_RATIO = 0.035f
