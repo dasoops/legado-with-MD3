@@ -2,6 +2,8 @@ package io.legado.app.ui.book.read
 
 import android.content.Context
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -10,6 +12,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentWidth
@@ -77,37 +80,91 @@ internal fun ReadMenuSlider(
     accessibilityLabel: String? = null,
     accessibilityValue: String? = null,
 ) {
-    if (glassThumbEnabled && backdrop != null) {
-        ReadMenuLiquidSlider(
-            value = value,
-            onValueChange = onValueChange,
-            valueRange = valueRange,
-            steps = steps,
-            visibilityThreshold = 0.001f,
-            backdrop = backdrop,
-            modifier = modifier,
-            enabled = enabled,
-            onValueChangeFinished = onValueChangeFinished,
-            onValueCommit = onValueCommit,
-            accessibilityLabel = accessibilityLabel,
-            accessibilityValue = accessibilityValue,
-        )
-        return
-    }
-
     val commitAction = onValueChangeFinished ?: onValueCommit?.let { commit -> { commit(value) } }
+    val commitValue: (Float) -> Unit = { finalValue ->
+        onValueCommit?.invoke(finalValue) ?: onValueChangeFinished?.invoke()
+    }
+    val isLtr = LocalLayoutDirection.current == LayoutDirection.Ltr
 
-    BaseReaderMenuSlider(
-        value = value,
-        onValueChange = onValueChange,
+    Box(
         modifier = modifier.padding(horizontal = 5.dp),
-        enabled = enabled,
-        valueRange = valueRange,
-        steps = steps,
-        onValueChangeFinished = commitAction,
-        accessibilityLabel = accessibilityLabel,
-        accessibilityValue = accessibilityValue,
-    )
+        contentAlignment = Alignment.Center,
+    ) {
+        Box(
+            modifier =
+            Modifier
+                .fillMaxWidth()
+                // 触摸热区比视觉轨道更高: 手指落在胶囊边缘时也能开始拖动.
+                .heightIn(min = 48.dp),
+            contentAlignment = Alignment.Center,
+        ) {
+            if (glassThumbEnabled && backdrop != null) {
+                ReadMenuLiquidSlider(
+                    value = value,
+                    onValueChange = onValueChange,
+                    valueRange = valueRange,
+                    steps = steps,
+                    visibilityThreshold = 0.001f,
+                    backdrop = backdrop,
+                    modifier = Modifier.fillMaxWidth(),
+                    enabled = enabled,
+                    onValueChangeFinished = onValueChangeFinished,
+                    onValueCommit = onValueCommit,
+                    accessibilityLabel = accessibilityLabel,
+                    accessibilityValue = accessibilityValue,
+                )
+            } else {
+                BaseReaderMenuSlider(
+                    value = value,
+                    onValueChange = onValueChange,
+                    modifier = Modifier.fillMaxWidth(),
+                    enabled = enabled,
+                    valueRange = valueRange,
+                    steps = steps,
+                    onValueChangeFinished = commitAction,
+                    accessibilityLabel = accessibilityLabel,
+                    accessibilityValue = accessibilityValue,
+                )
+            }
+
+            if (enabled) {
+                // 滑块实际可拖动区域可能小于视觉胶囊轨道, 手指落在轨道边缘时
+                // 原生手势不会启动. 用整条轨道高度的透明层接管拖动/点击, 按 x 换算进度.
+                Box(
+                    modifier =
+                    Modifier
+                        .matchParentSize()
+                        .pointerInput(valueRange, isLtr) {
+                            val trackWidth = size.width.toFloat().coerceAtLeast(1f)
+                            fun valueAt(x: Float): Float {
+                                val fraction = (x / trackWidth).coerceIn(0f, 1f)
+                                val normalized = if (isLtr) fraction else 1f - fraction
+                                return valueRange.start +
+                                    (valueRange.endInclusive - valueRange.start) * normalized
+                            }
+                            awaitEachGesture {
+                                val down = awaitFirstDown(requireUnconsumed = false)
+                                down.consume()
+                                var lastValue = valueAt(down.position.x)
+                                onValueChange(lastValue)
+                                while (true) {
+                                    val event = awaitPointerEvent()
+                                    val change = event.changes.firstOrNull { it.id == down.id } ?: break
+                                    if (!change.pressed) {
+                                        change.consume()
+                                        break
+                                    }
+                                    lastValue = valueAt(change.position.x)
+                                    onValueChange(lastValue)
+                                    change.consume()
+                                }
+                                commitValue(lastValue)
+                            }
+                        },
+                )
+            }
+        }
+    }
 }
 
 @Composable
