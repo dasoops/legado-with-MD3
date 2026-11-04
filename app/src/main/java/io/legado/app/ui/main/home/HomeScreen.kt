@@ -8,6 +8,7 @@ import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.background
 import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -58,6 +59,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -67,6 +70,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.ProgressBarRangeInfo
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.progressBarRangeInfo
 import androidx.compose.ui.semantics.role
@@ -697,7 +701,7 @@ private fun RecentHistoryBookCard(
     Box(
         modifier =
         modifier
-            .width(60.dp)
+            .width(72.dp)
             .aspectRatio(5f / 7f)
             .clip(RoundedCornerShape(12.dp))
             .clickable(
@@ -716,6 +720,38 @@ private fun RecentHistoryBookCard(
             modifier = Modifier.fillMaxSize(),
             coverModifier = Modifier.fillMaxSize(),
         )
+        Box(
+            modifier =
+            Modifier
+                .align(Alignment.BottomCenter)
+                .fillMaxWidth()
+                .background(
+                    Brush.verticalGradient(
+                        0f to Color.Transparent,
+                        0.45f to Color.Black.copy(alpha = 0.55f),
+                        1f to Color.Black.copy(alpha = 0.84f),
+                    ),
+                )
+                .padding(start = 6.dp, end = 6.dp, top = 18.dp, bottom = 6.dp)
+                // 书名已经包含在父节点 contentDescription 中, 避免读屏重复朗读.
+                .clearAndSetSemantics {},
+        ) {
+            AppText(
+                text = book.name,
+                color = Color.White,
+                style =
+                LegadoTheme.typography.labelSmallEmphasized.copy(
+                    shadow =
+                    Shadow(
+                        color = Color.Black.copy(alpha = 0.55f),
+                        offset = Offset(0f, 1f),
+                        blurRadius = 2f,
+                    ),
+                ),
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
+            )
+        }
     }
 }
 
