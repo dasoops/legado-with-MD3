@@ -20,6 +20,8 @@ import io.legado.app.model.localBook.PdfFile
 import io.legado.app.utils.BitmapUtils
 import io.legado.app.utils.FileUtils
 import io.legado.app.utils.SvgUtils
+import io.legado.app.utils.isAbsUrl
+import io.legado.app.utils.isDataUrl
 import io.legado.app.utils.toastOnUi
 import java.io.File
 import java.io.FileOutputStream
@@ -149,15 +151,20 @@ object ImageProvider {
                             MobiFile.getImage(book, src)
                         }
                         else -> {
-                            BookHelp.saveImage(book, src)
                             null
                         }
                     }
-                inputStream?.use { input ->
-                    val newFile = FileUtils.createFileIfNotExist(vFile.absolutePath)
-                    FileOutputStream(newFile).use { output ->
-                        input.copyTo(output)
+                if (inputStream != null) {
+                    inputStream.use { input ->
+                        val newFile = FileUtils.createFileIfNotExist(vFile.absolutePath)
+                        FileOutputStream(newFile).use { output ->
+                            input.copyTo(output)
+                        }
                     }
+                } else if (src.isAbsUrl() || src.isDataUrl()) {
+                    // 本地书籍正文也可能引用归档外的图片（EPUB 里的 http/data: 链接），
+                    // 归档查找失败后交给通用保存路径，否则阅读页只会拿到错误占位图
+                    BookHelp.saveImage(book, src)
                 }
             }
             return@withContext vFile
