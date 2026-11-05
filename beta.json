@@ -1,49 +1,49 @@
 {
-  "tag_name": "3.27.0-beta.30",
-  "name": "Pre-release 3.27.0-beta.30",
-  "body": "**此版本为测试版，会存在不稳定问题。**\n\n### 更新内容\n\n* fix(localBook): 目录授权丢失时不再删除书籍\n* fix(reader): 进度条支持从轨道任意位置拖动",
+  "tag_name": "3.27.0-beta.31",
+  "name": "Pre-release 3.27.0-beta.31",
+  "body": "**此版本为测试版，会存在不稳定问题。**\n\n### 更新内容\n\n* fix(reader): 修复 EPUB 正文外部图片无法显示",
   "prerelease": true,
-  "created_at": "2026-11-04T07:50:44Z",
+  "created_at": "2026-11-05T05:50:35Z",
   "assets": [
     {
-      "browser_download_url": "https://github.com/dasoops/legado-with-MD3/releases/download/3.27.0-beta.30/legado-3.27.0-beta.30-arm64-v8a.apk",
+      "browser_download_url": "https://github.com/dasoops/legado-with-MD3/releases/download/3.27.0-beta.31/legado-3.27.0-beta.31-arm64-v8a.apk",
       "content_type": "application/vnd.android.package-archive",
-      "created_at": "2026-11-04T08:04:33Z",
+      "created_at": "2026-11-05T05:57:53Z",
       "download_count": 0,
-      "id": 708743525,
-      "name": "legado-3.27.0-beta.30-arm64-v8a.apk",
+      "id": 712262147,
+      "name": "legado-3.27.0-beta.31-arm64-v8a.apk",
       "state": "uploaded",
-      "url": "https://api.github.com/repos/dasoops/legado-with-MD3/releases/assets/708743525"
+      "url": "https://api.github.com/repos/dasoops/legado-with-MD3/releases/assets/712262147"
     },
     {
-      "browser_download_url": "https://github.com/dasoops/legado-with-MD3/releases/download/3.27.0-beta.30/legado-3.27.0-beta.30-armeabi-v7a.apk",
+      "browser_download_url": "https://github.com/dasoops/legado-with-MD3/releases/download/3.27.0-beta.31/legado-3.27.0-beta.31-armeabi-v7a.apk",
       "content_type": "application/vnd.android.package-archive",
-      "created_at": "2026-11-04T08:04:33Z",
+      "created_at": "2026-11-05T05:57:53Z",
       "download_count": 0,
-      "id": 708743522,
-      "name": "legado-3.27.0-beta.30-armeabi-v7a.apk",
+      "id": 712262146,
+      "name": "legado-3.27.0-beta.31-armeabi-v7a.apk",
       "state": "uploaded",
-      "url": "https://api.github.com/repos/dasoops/legado-with-MD3/releases/assets/708743522"
+      "url": "https://api.github.com/repos/dasoops/legado-with-MD3/releases/assets/712262146"
     },
     {
-      "browser_download_url": "https://github.com/dasoops/legado-with-MD3/releases/download/3.27.0-beta.30/legado-3.27.0-beta.30.apk",
+      "browser_download_url": "https://github.com/dasoops/legado-with-MD3/releases/download/3.27.0-beta.31/legado-3.27.0-beta.31.apk",
       "content_type": "application/vnd.android.package-archive",
-      "created_at": "2026-11-04T08:04:33Z",
+      "created_at": "2026-11-05T05:57:53Z",
       "download_count": 0,
-      "id": 708743519,
-      "name": "legado-3.27.0-beta.30.apk",
+      "id": 712262144,
+      "name": "legado-3.27.0-beta.31.apk",
       "state": "uploaded",
-      "url": "https://api.github.com/repos/dasoops/legado-with-MD3/releases/assets/708743519"
+      "url": "https://api.github.com/repos/dasoops/legado-with-MD3/releases/assets/712262144"
     },
     {
-      "browser_download_url": "https://github.com/dasoops/legado-with-MD3/releases/download/3.27.0-beta.30/mapping.txt",
+      "browser_download_url": "https://github.com/dasoops/legado-with-MD3/releases/download/3.27.0-beta.31/mapping.txt",
       "content_type": "text/plain",
-      "created_at": "2026-11-04T08:04:33Z",
+      "created_at": "2026-11-05T05:57:53Z",
       "download_count": 0,
-      "id": 708743520,
+      "id": 712262143,
       "name": "mapping.txt",
       "state": "uploaded",
-      "url": "https://api.github.com/repos/dasoops/legado-with-MD3/releases/assets/708743520"
+      "url": "https://api.github.com/repos/dasoops/legado-with-MD3/releases/assets/712262143"
     }
   ]
 }
