@@ -942,6 +942,7 @@
     <string name="image_style_full">全屏</string>
     <string name="image_style_text">文字嵌入</string>
     <string name="image_style_single">单页</string>
+    <string name="image_style_none">无</string>
     <string name="checkAuthor">校验作者</string>
     <string name="search_src">搜索源码</string>
     <string name="boo_src">书籍源码</string>

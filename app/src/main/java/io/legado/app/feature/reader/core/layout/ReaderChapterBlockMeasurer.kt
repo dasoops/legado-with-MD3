@@ -43,7 +43,7 @@ data class ReaderImageDimensions(
     val heightPx: Float,
 )
 
-enum class ReaderImageLayoutMode { AUTO, INLINE, STANDALONE, FULL_WIDTH, SINGLE_PAGE }
+enum class ReaderImageLayoutMode { AUTO, INLINE, STANDALONE, FULL_WIDTH, SINGLE_PAGE, NONE }
 
 data class ReaderImageOptions(
     val layoutMode: ReaderImageLayoutMode? = null,
@@ -178,6 +178,7 @@ class ReaderChapterBlockMeasurer(
                     }?.let { it.chapterPosition + bodyIndentText.length }
             var emittedContent = false
             var hasStandaloneImage = false
+            var hasHiddenImage = false
             val inline = mutableListOf<ReaderMeasuredInlineItem>()
 
             fun flushInline(skipBlank: Boolean = false) {
@@ -287,6 +288,11 @@ class ReaderChapterBlockMeasurer(
                         }
                     }
                     is ReaderChapterInlineSource.Image -> {
+                        // 图片样式为“无”：连行内占位一起跳过，避免留下空白或分隔
+                        if (style.imageLayoutMode == ReaderImageLayoutMode.NONE) {
+                            hasHiddenImage = true
+                            return@forEach
+                        }
                         // A broken image must not make the entire chapter disappear. The bitmap
                         // loader already supplies an error image; reserve stable line geometry
                         // until real dimensions are available.
@@ -353,7 +359,8 @@ class ReaderChapterBlockMeasurer(
                     }
                 }
             }
-            flushInline(skipBlank = hasStandaloneImage)
+            // 只剩缩进/空白的图片段落不再生成空行，避免隐藏图片后每张图留一道空白
+            flushInline(skipBlank = hasStandaloneImage || hasHiddenImage)
             return null
         }
         source.blocks.forEachIndexed { index, block ->
@@ -376,6 +383,8 @@ class ReaderChapterBlockMeasurer(
                     }
                 }
                 is ReaderChapterSourceBlock.Image -> {
+                    // 图片样式为“无”：整个图片块不参与排版，也不保留分页占位
+                    if (style.imageLayoutMode == ReaderImageLayoutMode.NONE) return@forEachIndexed
                     val placeholderExtent =
                         (style.bodyLineHeightPx ?: style.bodyStyle.fontSizePx)
                             .coerceAtLeast(1f)

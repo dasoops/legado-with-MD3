@@ -1476,6 +1476,7 @@
     <string name="image_style_full">全屏</string>
     <string name="image_style_single">單頁</string>
     <string name="image_style_text">文字貼合</string>
+    <string name="image_style_none">無</string>
     <string name="import_action">匯入</string>
     <string name="import_from_network">從網路匯入</string>
     <string name="import_highlight_tag_rule">匯入標籤規則</string>

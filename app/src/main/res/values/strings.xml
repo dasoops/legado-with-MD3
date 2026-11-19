@@ -979,6 +979,7 @@
     <string name="image_style_full">Full screen</string>
     <string name="image_style_text">Text adhesion</string>
     <string name="image_style_single">Single page</string>
+    <string name="image_style_none">None</string>
     <string name="checkAuthor">Check by author</string>
     <string name="url_already">This URL has subscribed</string>
     <string name="high_brush_title">High screen refresh rate</string>

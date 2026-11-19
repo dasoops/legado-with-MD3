@@ -1370,6 +1370,7 @@
     <string name="image_style_full">全螢幕</string>
     <string name="image_style_text">文字吸附</string>
     <string name="image_style_single">單頁</string>
+    <string name="image_style_none">無</string>
     <string name="color">顏色</string>
     <string name="reset_to_body_color">重置為正文顏色</string>
     <string name="clipboard_empty">剪貼簿為空</string>

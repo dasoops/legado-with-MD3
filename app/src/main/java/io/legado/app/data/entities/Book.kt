@@ -400,6 +400,7 @@ data class Book(
         const val imgStyleFull = "FULL"
         const val imgStyleText = "TEXT"
         const val imgStyleSingle = "SINGLE"
+        const val imgStyleNone = "NONE"
     }
 
     @Parcelize

@@ -32,6 +32,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import io.legado.app.R
 import io.legado.app.data.entities.Book
+import io.legado.app.help.book.isImage
+import io.legado.app.help.book.isPdf
 import io.legado.app.model.ReadBook
 import io.legado.app.ui.book.read.MoreActionIds
 import io.legado.app.ui.book.read.ReadBookButtonConfigItem
@@ -200,6 +202,7 @@ private fun ActionSquareHost(
                 ImageStyleDropdown(
                     expanded = expanded,
                     currentStyle = state.book?.getImageStyle() ?: Book.imgStyleDefault,
+                    allowHideImages = state.book?.let { !it.isImage && !it.isPdf } ?: true,
                     onDismissRequest = { expanded = false },
                     onIntent = onIntent,
                 )
@@ -318,16 +321,18 @@ private fun moreActionSpecs(
 private fun ImageStyleDropdown(
     expanded: Boolean,
     currentStyle: String,
+    allowHideImages: Boolean,
     onDismissRequest: () -> Unit,
     onIntent: (ReadBookIntent) -> Unit,
 ) {
     RoundDropdownMenu(expanded = expanded, onDismissRequest = onDismissRequest) { dismiss ->
-        listOf(
-            R.string.btn_default_s to Book.imgStyleDefault,
-            R.string.image_style_full to Book.imgStyleFull,
-            R.string.image_style_text to Book.imgStyleText,
-            R.string.image_style_single to Book.imgStyleSingle,
-        ).forEach { (label, style) ->
+        buildList {
+            add(R.string.btn_default_s to Book.imgStyleDefault)
+            add(R.string.image_style_full to Book.imgStyleFull)
+            add(R.string.image_style_text to Book.imgStyleText)
+            add(R.string.image_style_single to Book.imgStyleSingle)
+            if (allowHideImages) add(R.string.image_style_none to Book.imgStyleNone)
+        }.forEach { (label, style) ->
             RoundDropdownMenuItem(
                 text = stringResource(label),
                 isSelected = currentStyle == style,

@@ -128,6 +128,7 @@ object LegacyReaderChapterPaginator {
                 Book.imgStyleText -> ReaderImageLayoutMode.INLINE
                 Book.imgStyleFull -> ReaderImageLayoutMode.FULL_WIDTH
                 Book.imgStyleSingle -> ReaderImageLayoutMode.SINGLE_PAGE
+                Book.imgStyleNone -> ReaderImageLayoutMode.NONE
                 else -> ReaderImageLayoutMode.AUTO
             }
         val singleImage = imageLayoutMode == ReaderImageLayoutMode.SINGLE_PAGE

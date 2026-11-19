@@ -40,6 +40,8 @@ import com.kyant.backdrop.Backdrop
 import io.legado.app.R
 import io.legado.app.data.entities.Book
 import io.legado.app.data.repository.ReadPreferences
+import io.legado.app.help.book.isImage
+import io.legado.app.help.book.isPdf
 import io.legado.app.ui.book.read.sheet.readMenuButtonInfos
 import io.legado.app.ui.theme.LegadoTheme
 import io.legado.app.ui.widget.components.divider.PillDivider
@@ -188,12 +190,16 @@ internal fun OverflowDropdownMenu(
                 expanded = imageStyleExpanded,
                 onDismissRequest = { imageStyleExpanded = false },
             ) { subDismiss ->
-                listOf(
-                    R.string.btn_default_s to Book.imgStyleDefault,
-                    R.string.image_style_full to Book.imgStyleFull,
-                    R.string.image_style_text to Book.imgStyleText,
-                    R.string.image_style_single to Book.imgStyleSingle,
-                ).forEach { (label, style) ->
+                buildList {
+                    add(R.string.btn_default_s to Book.imgStyleDefault)
+                    add(R.string.image_style_full to Book.imgStyleFull)
+                    add(R.string.image_style_text to Book.imgStyleText)
+                    add(R.string.image_style_single to Book.imgStyleSingle)
+                    // 图片/PDF 书籍的图片就是正文, 隐藏后整章空白, 因此不提供该选项
+                    if (state.book?.let { !it.isImage && !it.isPdf } ?: true) {
+                        add(R.string.image_style_none to Book.imgStyleNone)
+                    }
+                }.forEach { (label, style) ->
                     RoundDropdownMenuItem(
                         text = stringResource(label),
                         onClick = {
