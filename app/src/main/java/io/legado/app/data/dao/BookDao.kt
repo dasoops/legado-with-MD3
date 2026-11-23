@@ -726,12 +726,15 @@ interface BookDao {
 
     @Query(
         """
-        SELECT * FROM books
+        SELECT bookUrl FROM books
         WHERE type & ${BookType.local} > 0
         AND (`group` & :groupId) > 0
         """,
     )
-    fun getLocalBooksByGroup(groupId: Long): List<Book>
+    fun getLocalBookUrlsByGroup(groupId: Long): List<String>
+
+    @Query("delete from books where bookUrl in (:bookUrls)")
+    fun deleteByUrls(bookUrls: List<String>)
 
     @Query("delete from books where type & ${BookType.notShelf} > 0")
     fun deleteNotShelfBook()

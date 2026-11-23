@@ -142,13 +142,10 @@ class LocalDirectoryRepository(
     ): Int {
         if (!scanComplete) return 0
         val missing =
-            bookRepository.getLocalBooksByGroup(groupId).filter { book ->
-                isUnderDirectoryRoot(rootUri, book.bookUrl) && book.bookUrl !in scannedBookUrls
+            bookRepository.getLocalBookUrlsByGroup(groupId).filter { bookUrl ->
+                isUnderDirectoryRoot(rootUri, bookUrl) && bookUrl !in scannedBookUrls
             }
-        missing.forEach { book ->
-            bookRepository.deleteChaptersByBook(book.bookUrl)
-            bookRepository.delete(book)
-        }
+        bookRepository.deleteBooksByUrls(missing.toSet())
         return missing.size
     }
 

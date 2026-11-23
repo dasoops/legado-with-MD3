@@ -90,6 +90,35 @@ class LocalDirectoryMissingBooksTest {
     }
 
     @Test
+    fun `大书库刷新时不读取完整书籍避免 CursorWindow 溢出`() = runBlocking {
+        // 300 本 x 8KB 简介(约 2.4MB)超过默认 CursorWindow; 刷新只应读取 bookUrl.
+        val bigIntro = "x".repeat(8 * 1024)
+        val books =
+            (0 until 300).map { index ->
+                Book(
+                    bookUrl = "/Books/big-$index.txt",
+                    name = "big-$index",
+                    group = GROUP_ID,
+                    type = BookType.text or BookType.local,
+                    intro = bigIntro,
+                )
+            }
+        database.bookDao.insert(*books.toTypedArray())
+        val missingUrl = books.first().bookUrl
+
+        val count =
+            repository.removeMissingDirectoryBooks(
+                groupId = GROUP_ID,
+                rootUri = ROOT_URI,
+                scannedBookUrls = books.drop(1).mapTo(HashSet()) { it.bookUrl },
+                scanComplete = true,
+            )
+
+        assertEquals(1, count)
+        assertNull(database.bookDao.getBook(missingUrl))
+    }
+
+    @Test
     fun `目录范围判断不把其他路径视为当前目录`() {
         assertTrue(isUnderDirectoryRoot(ROOT_URI, "/Books/a.txt"))
         assertTrue(isUnderDirectoryRoot(ROOT_URI, "/Books/sub/a.txt"))

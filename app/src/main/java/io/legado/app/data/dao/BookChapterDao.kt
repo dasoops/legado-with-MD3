@@ -66,6 +66,9 @@ interface BookChapterDao {
     @Query("delete from chapters where bookUrl = :bookUrl")
     fun delByBook(bookUrl: String)
 
+    @Query("delete from chapters where bookUrl in (:bookUrls)")
+    fun delByBooks(bookUrls: List<String>)
+
     @Query("update chapters set wordCount = :wordCount where bookUrl = :bookUrl and url = :url")
     fun upWordCount(
         bookUrl: String,

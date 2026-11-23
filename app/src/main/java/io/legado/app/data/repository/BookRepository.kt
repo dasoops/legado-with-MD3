@@ -59,8 +59,24 @@ class BookRepository(
         bookDao.getBook(bookUrl)
     }
 
-    suspend fun getLocalBooksByGroup(groupId: Long): List<Book> = withContext(Dispatchers.IO) {
-        bookDao.getLocalBooksByGroup(groupId)
+    suspend fun getLocalBookUrlsByGroup(groupId: Long): List<String> = withContext(Dispatchers.IO) {
+        bookDao.getLocalBookUrlsByGroup(groupId)
+    }
+
+    /**
+     * 按 URL 批量删除书籍. 不逐本读取完整实体, 避免大简介书籍撑爆 CursorWindow;
+     * SQLite 的绑定变量数量有限, 分块执行.
+     */
+    suspend fun deleteBooksByUrls(bookUrls: Set<String>) {
+        if (bookUrls.isEmpty()) return
+        withContext(Dispatchers.IO) {
+            appDb.runInTransaction {
+                bookUrls.chunked(BOOK_DELETE_CHUNK_SIZE).forEach { chunk ->
+                    bookChapterDao.delByBooks(chunk)
+                    bookDao.deleteByUrls(chunk)
+                }
+            }
+        }
     }
 
     /**
@@ -373,5 +389,10 @@ class BookRepository(
             newAuthor = book.author,
         )
         chapters
+    }
+
+    private companion object {
+        /** 保守小于旧版 SQLite 的 999 个绑定变量上限. */
+        const val BOOK_DELETE_CHUNK_SIZE = 500
     }
 }
