@@ -724,6 +724,15 @@ interface BookDao {
         remainingLocalDirectoryMask: Long,
     ): List<Book>
 
+    @Query(
+        """
+        SELECT * FROM books
+        WHERE type & ${BookType.local} > 0
+        AND (`group` & :groupId) > 0
+        """,
+    )
+    fun getLocalBooksByGroup(groupId: Long): List<Book>
+
     @Query("delete from books where type & ${BookType.notShelf} > 0")
     fun deleteNotShelfBook()
 

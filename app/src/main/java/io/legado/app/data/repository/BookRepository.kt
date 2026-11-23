@@ -59,6 +59,10 @@ class BookRepository(
         bookDao.getBook(bookUrl)
     }
 
+    suspend fun getLocalBooksByGroup(groupId: Long): List<Book> = withContext(Dispatchers.IO) {
+        bookDao.getLocalBooksByGroup(groupId)
+    }
+
     /**
      * 阅读记录（书名/作者）→ 书籍。
      *

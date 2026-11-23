@@ -15,6 +15,7 @@ import io.legado.app.exception.EmptyFileException
 import io.legado.app.help.book.isLocal
 import io.legado.app.model.localBook.LocalBook
 import io.legado.app.utils.FileDoc
+import io.legado.app.utils.canRead
 import io.legado.app.utils.isContentScheme
 import io.legado.app.utils.list
 import java.io.File
@@ -46,7 +47,8 @@ class LocalDirectoryRepository(
         rootUri: String,
     ): LocalDirectoryImportResult = withContext(Dispatchers.IO) {
         val root = rootDirDoc(rootUri) ?: return@withContext LocalDirectoryImportResult(0, 0)
-        val files = scanBookFiles(root)
+        val scan = scanBookFiles(root, rootUri)
+        val files = scan.files
         val rootName = directoryName(rootUri)
         var count = 0
         var failed = 0
@@ -105,10 +107,17 @@ class LocalDirectoryRepository(
                 AppLog.putDebug("导入目录书籍耗时 ${duration}ms: ${file.name}")
             }
         }
+        val removed =
+            removeMissingDirectoryBooks(
+                groupId = groupId,
+                rootUri = rootUri,
+                scannedBookUrls = files.mapTo(HashSet(files.size)) { it.toString() },
+                scanComplete = scan.isComplete,
+            )
         AppLog.putDebug(
             "本地目录扫描结束: total=${files.size} imported=$count failed=$failed " +
                 "skippedEmpty=$skippedEmpty skippedEncryptedPdf=$skippedEncryptedPdf " +
-                "durationMs=${System.currentTimeMillis() - startedAt}",
+                "removed=$removed durationMs=${System.currentTimeMillis() - startedAt}",
         )
         LocalDirectoryImportResult(
             imported = count,
@@ -116,6 +125,31 @@ class LocalDirectoryRepository(
             skippedEmpty = skippedEmpty,
             skippedEncryptedPdf = skippedEncryptedPdf,
         )
+    }
+
+    /**
+     * 书架下拉刷新只重扫目录, 不打开文件, 因此这里主动对齐真实存储:
+     * 目录内已不存在的文件同样要从书架移除, 否则要等用户点开才提示并删除.
+     *
+     * 只有整棵树都扫描成功时才删除. 子目录读取失败(如 SAF 授权被回收)会得到不完整列表,
+     * 此时删除会把仍然存在的书误删.
+     */
+    internal suspend fun removeMissingDirectoryBooks(
+        groupId: Long,
+        rootUri: String,
+        scannedBookUrls: Set<String>,
+        scanComplete: Boolean,
+    ): Int {
+        if (!scanComplete) return 0
+        val missing =
+            bookRepository.getLocalBooksByGroup(groupId).filter { book ->
+                isUnderDirectoryRoot(rootUri, book.bookUrl) && book.bookUrl !in scannedBookUrls
+            }
+        missing.forEach { book ->
+            bookRepository.deleteChaptersByBook(book.bookUrl)
+            bookRepository.delete(book)
+        }
+        return missing.size
     }
 
     private companion object {
@@ -174,16 +208,42 @@ class LocalDirectoryRepository(
         return FileDoc(name = name, isDir = true, size = 0, lastModified = 0, uri = documentUri)
     }
 
-    private fun scanBookFiles(root: FileDoc): List<FileDoc> {
+    private data class DirectoryScan(
+        val files: List<FileDoc>,
+        val isComplete: Boolean,
+    )
+
+    private fun scanBookFiles(
+        root: FileDoc,
+        rootUri: String,
+    ): DirectoryScan {
+        val rootAccessible =
+            runCatching {
+                val uri = rootUri.toUri()
+                if (uri.isContentScheme()) {
+                    uri.canRead()
+                } else {
+                    uri.path?.let { File(it).isDirectory } == true
+                }
+            }.getOrDefault(false)
+        // 授权回收时列表可能只返回空结果而不是抛异常; 先探测根目录可读性, 避免把不可读当成
+        // 空目录并把分组内的书全部删掉.
+        if (!rootAccessible) {
+            AppLog.put("本地目录不可读取, 跳过本次扫描\n$rootUri")
+            return DirectoryScan(emptyList(), isComplete = false)
+        }
         val result = arrayListOf<FileDoc>()
         val queue = ArrayDeque<FileDoc>()
+        var isComplete = true
         queue.add(root)
         while (queue.isNotEmpty()) {
             val dir = queue.removeFirst()
             val children =
                 runCatching { dir.list() }
-                    .onFailure { AppLog.put("读取目录失败\n${dir.uri}", it) }
-                    .getOrNull() ?: continue
+                    .onFailure {
+                        isComplete = false
+                        AppLog.put("读取目录失败\n${dir.uri}", it)
+                    }.getOrNull() ?: continue
             children.forEach { child ->
                 when {
                     child.name.startsWith(".") -> Unit
@@ -192,9 +252,30 @@ class LocalDirectoryRepository(
                 }
             }
         }
-        return result
+        return DirectoryScan(result, isComplete)
     }
 }
+
+/**
+ * 判断 bookUrl 是否位于所选目录树下. 刷新目录时据此限定清理范围: 只处理当前目录导入的书,
+ * 不误删分组中来自其他目录或手动调整过 URI 的书籍.
+ */
+internal fun isUnderDirectoryRoot(
+    rootUri: String,
+    bookUrl: String,
+): Boolean = runCatching {
+    val root = rootUri.toUri()
+    if (root.isContentScheme()) {
+        val rootId = getTreeDocumentId(root)
+        val bookId = getDocumentId(bookUrl.toUri())
+        bookId == rootId || bookId.startsWith("$rootId/")
+    } else {
+        val rootPath = root.path ?: return@runCatching false
+        val bookPath = bookUrl.toUri().path ?: return@runCatching false
+        val rootFile = File(rootPath).toPath().normalize()
+        File(bookPath).toPath().normalize().startsWith(rootFile)
+    }
+}.getOrDefault(false)
 
 /**
  * 计算 bookUrl 相对 rootUri 的目录层级 (不含文件名). 本地目录分组据此生成相对标签,
